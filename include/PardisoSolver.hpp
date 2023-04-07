@@ -105,6 +105,8 @@ public:
         const OCP_USI& maxDim,
         const USI& blockDim) override;
 
+    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
+
     /// Assemble coefficient matrix.
     void AssembleMat(const vector<vector<USI>>& colId,
         const vector<vector<OCP_DBL>>& val,

@@ -177,13 +177,13 @@ void LinearSystem::SetupLinearSolver(const USI&    i,
     switch (i) {
         case PARDISOSOLVER:
             // Pardiso
-            if (blockDim > 1) {
-                LS = new VectorPardisoSolver;
-            }
-            else {
-                LS = new PardisoSolver;
-            }           
+            if (blockDim > 1)    LS = new VectorPardisoSolver;
+            else                 LS = new PardisoSolver;          
             break;
+        case SAMGSOLVER:
+            // SAMG
+            if (blockDim > 1)    LS = new VectorSamgSolver;
+            else                 LS = new SamgSolver;
         default:
             OCP_ABORT("Wrong Linear Solver type!");
             break;

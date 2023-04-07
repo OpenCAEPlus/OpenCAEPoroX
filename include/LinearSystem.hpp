@@ -23,6 +23,7 @@
 #include "Domain.hpp"
 #include "DenseMat.hpp"
 #include "PardisoSolver.hpp"
+#include "SamgSolver.hpp"
 #include "OCPConst.hpp"
 
 using namespace std;

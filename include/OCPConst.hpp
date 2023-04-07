@@ -88,6 +88,7 @@ const USI FIMn  = 4; ///< Solution method = FIM
 const USI SCALARFASP     = 1; ///< Use scalar linear solver in Fasp
 const USI VECTORFASP     = 2; ///< Use vector linear solver in Fasp
 const USI PARDISOSOLVER  = 3; ///< Use linear solver in Pardiso
+const USI SAMGSOLVER     = 4; ///< Use linear solver in SAMG
 
 // Fluid types
 const USI OIL     = 0; ///< Fluid type = oil
