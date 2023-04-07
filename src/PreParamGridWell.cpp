@@ -137,7 +137,7 @@ void PreParamGridWell::InputMODEL(ifstream& ifs)
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     if (vbuf[0] == "THERMAL") {
-        model = THERMAL;
+        model = THERMALMODEL;
     }
     else if (vbuf[0] == "ISOTHERMAL")
     {

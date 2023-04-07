@@ -777,9 +777,15 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
 
 void CriticalInfo::PrintFastReview(const string& dir, const OCP_INT& rank) const
 {
-    string    FileOut = dir + "proc_" + to_string(rank) + "_FastReview.out";
-    const USI ns      = 12;
+    string   FileOut;
+    if (rank >= 0) {
+        FileOut = dir + "proc_" + to_string(rank) + "_FastReview.out";
+    }
+    else {
+        FileOut = dir + "FastReview.out";
+    }
 
+    const USI ns      = 12;
     ofstream outF(FileOut);
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + FileOut);
@@ -1256,11 +1262,11 @@ void OCPOutput::PrintInfo() const
     GetWallTime timer;
     timer.Start();
 
-    summary.PrintInfo(workDir, fileName, myrank);
-    crtInfo.PrintFastReview(workDir, myrank);
+    summary.PrintInfo(workDir, fileName, (numproc > 1 ? myrank : -1));
+    crtInfo.PrintFastReview(workDir, (numproc > 1 ? myrank : -1));
 
     MPI_Barrier(myComm);
-    if (myrank == MASTER_PROCESS) {
+    if (myrank == MASTER_PROCESS && numproc > 1) {
         // post process
         summary.PostProcess(workDir, fileName, numproc);
     }

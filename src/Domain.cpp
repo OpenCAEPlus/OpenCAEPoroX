@@ -13,7 +13,7 @@
 
 
 
-void Domain::Setup(const Partition& part)
+void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 {
 	myComm  = part.myComm;	
 	numproc = part.numproc;
@@ -21,13 +21,21 @@ void Domain::Setup(const Partition& part)
 
 	if (numproc == 1) {
 		numElementTotal = part.numElementTotal;
+		numElementLocal = numElementTotal;
 		numWellTotal    = part.numWellTotal;
 		numGridInterior = numElementTotal - numWellTotal;
 		numGridGhost    = 0;
+		numGridLocal    = numGridInterior;
 		grid.resize(numGridInterior);
-		for (OCP_USI n = 0; n < numGridInterior; n++) grid[n] = n;
+		for (OCP_USI n = 0; n < numGridInterior; n++) {
+			grid[n] = n;
+			init_global_to_local.insert(make_pair(n, n));
+		}
 		well.resize(numWellTotal);
-		for (OCP_USI w = 0; w < numWellTotal; w++)    well[w] = w;
+		for (OCP_USI w = 0; w < numWellTotal; w++) {
+			well[w] = w;
+			well2Bulk.push_back(gridwell.connWellGrid[w]);
+		}
 		return;
 	}
 

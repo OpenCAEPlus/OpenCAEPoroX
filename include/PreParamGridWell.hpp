@@ -117,6 +117,7 @@ class PreParamGridWell
 {
 
     friend class Partition;
+    friend class Domain;
     friend class Reservoir;
 
     /////////////////////////////////////////////////////////////////////

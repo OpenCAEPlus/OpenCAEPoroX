@@ -41,7 +41,7 @@ class Domain
 	friend class T_FIM;
 
 public:
-	void Setup(const Partition& part);
+	void Setup(const Partition& part, const PreParamGridWell& gridwell);
 	vector<OCP_USI> GetWell() const { return well; }
 	OCP_USI GetNumGridInterior()const { return numGridInterior; }
 
