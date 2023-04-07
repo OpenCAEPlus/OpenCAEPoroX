@@ -4,7 +4,7 @@
  *  \date    Feb/15/2023
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -15,7 +15,7 @@
 #include <string>
 #include <mpi.h>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "OCP.hpp"
 #include "PreProcess.hpp"
 
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &commSize);
 
-    OpenCAEPoro simulator;
+    OpenCAEPoroX simulator;
 
     // Step 0. Print simulator version information.   
     if (myRank == MASTER_PROCESS) {

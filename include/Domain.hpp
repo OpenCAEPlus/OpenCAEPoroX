@@ -3,11 +3,11 @@
  *  \author  Shizhe Li
  *  \date    Feb/28/2023
  *
- *  \note    The params used in OpenCAEPoro is mostly compatible with Eclipse by SLB,
+ *  \note    The params used in OpenCAEPoroX is mostly compatible with Eclipse by SLB,
  *           but it has some own rules for easy to use. It is extensible and friendly.
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */

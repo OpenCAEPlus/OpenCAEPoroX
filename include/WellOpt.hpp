@@ -4,7 +4,7 @@
  *  \date    Nov/22/2022
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -15,7 +15,7 @@
 // Standard header files
 #include <cmath>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "ParamWell.hpp"
 
 using namespace std;

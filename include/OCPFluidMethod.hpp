@@ -1,10 +1,10 @@
 /*! \file    OCPFluidMethod.hpp
- *  \brief   Declaration of solution methods for fluid part in OpenCAEPoro
+ *  \brief   Declaration of solution methods for fluid part in OpenCAEPoroX
  *  \author  Shizhe Li
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -12,7 +12,7 @@
 #ifndef __OCPFLUIDMETHOD_HEADER__
 #define __OCPFLUIDMETHOD_HEADER__
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "LinearSystem.hpp"
 #include "OCPControl.hpp"
 #include "Reservoir.hpp"

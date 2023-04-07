@@ -4,7 +4,7 @@
  *  \date    Nov/01/2019
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2019--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2019--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */

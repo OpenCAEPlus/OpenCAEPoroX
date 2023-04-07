@@ -4,7 +4,7 @@
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -16,13 +16,13 @@
 #include <iostream>
 #include <vector>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "OCPConst.hpp"
 
 using namespace std;
 
 /// OCPTable is a Table class, which used to deal with everything about table
-/// in OpenCAEPoro such as PVT table, saturation table.
+/// in OpenCAEPoroX such as PVT table, saturation table.
 class OCPTable
 {
 public:

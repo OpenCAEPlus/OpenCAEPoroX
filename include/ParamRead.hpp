@@ -3,11 +3,11 @@
  *  \author  Shizhe Li
  *  \date    Oct/01/2021
  *
- *  \note    The params used in OpenCAEPoro is mostly compatible with Eclipse by SLB,
+ *  \note    The params used in OpenCAEPoroX is mostly compatible with Eclipse by SLB,
  *           but it has some own rules for easy to use. It is extensible and friendly.
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -20,7 +20,7 @@
 #include <iostream>
 #include <string>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "ParamControl.hpp"
 #include "ParamOutput.hpp"
 #include "ParamReservoir.hpp"
@@ -28,7 +28,7 @@
 
 using namespace std;
 
-/// Pre-processing unit for OpenCAEPoro for reading params from input files.
+/// Pre-processing unit for OpenCAEPoroX for reading params from input files.
 class ParamRead
 {
 public:

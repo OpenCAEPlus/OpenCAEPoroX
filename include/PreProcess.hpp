@@ -1,10 +1,10 @@
 /*! \file    PreProcess.hpp
- *  \brief   PreProcess for OpenCAEPoro simulator
+ *  \brief   PreProcess for OpenCAEPoroX simulator
  *  \author  Shizhe Li
  *  \date    Feb/15/2023
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -23,7 +23,7 @@ using namespace std;
 /// Input grid param -> grid partion -> domain
 class PreProcess
 {
-	friend class OpenCAEPoro;
+	friend class OpenCAEPoroX;
 	friend class Reservoir;
 	
 

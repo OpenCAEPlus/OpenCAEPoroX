@@ -1,10 +1,10 @@
 /*! \file    OCP.hpp
- *  \brief   Main header file for OpenCAEPoro simulator
+ *  \brief   Main header file for OpenCAEPoroX simulator
  *  \author  Shizhe Li
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -12,7 +12,7 @@
 #ifndef __OCP_HEADER__
 #define __OCP_HEADER__
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "OCPControl.hpp"
 #include "OCPOutput.hpp"
 #include "PreProcess.hpp"
@@ -27,16 +27,16 @@
 
 using namespace std;
 
-/// Top-level data structure for the OpenCAEPoro simulator.
-class OpenCAEPoro
+/// Top-level data structure for the OpenCAEPoroX simulator.
+class OpenCAEPoroX
 {
 public:
 
-    /// Output OpenCAEPoro version information.
+    /// Output OpenCAEPoroX version information.
     void PrintVersion() const
     {
         cout << "=========================================" << endl
-             << "OpenCAEPoro Version-" << OCPVersion << endl
+             << "OpenCAEPoroX Version-" << OCPVersion << endl
              << "=========================================" << endl;
     };
 

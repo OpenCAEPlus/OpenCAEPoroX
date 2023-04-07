@@ -4,7 +4,7 @@
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -12,7 +12,7 @@
 #ifndef __WELLGROUP_HEADER__
 #define __WELLGROUP_HEADER__
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "ParamWell.hpp"
 #include "Well.hpp"
 

@@ -1,10 +1,10 @@
 /*! \file    OCP.cpp
- *  \brief   OpenCAEPoro class definition
+ *  \brief   OpenCAEPoroX class definition
  *  \author  Shizhe Li
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -12,7 +12,7 @@
 #include "OCP.hpp"
 
 /// Read Param from input file
-void OpenCAEPoro::InputDistParam(const string& filename, PreProcess& prepro, const OCP_INT& myRank)
+void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, const OCP_INT& myRank)
 {
     OCP_BOOL disable_grid = OCP_FALSE;
     if (myRank != MASTER_PROCESS)
@@ -30,7 +30,7 @@ void OpenCAEPoro::InputDistParam(const string& filename, PreProcess& prepro, con
 
 
 /// Call setup procedures for reservoir, output, and linear solver.
-void OpenCAEPoro::SetupSimulator(const USI& argc, const char* options[])
+void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 {
     const Domain& domain = reservoir.GetDomain();
     myComm  = domain.myComm;
@@ -77,7 +77,7 @@ void OpenCAEPoro::SetupSimulator(const USI& argc, const char* options[])
 
 
 /// Initialize the reservoir class.
-void OpenCAEPoro::InitReservoir()
+void OpenCAEPoroX::InitReservoir()
 {
     GetWallTime timer;
     timer.Start();
@@ -95,7 +95,7 @@ void OpenCAEPoro::InitReservoir()
 }
 
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
-void OpenCAEPoro::RunSimulation()
+void OpenCAEPoroX::RunSimulation()
 {
     if (myrank == MASTER_PROCESS) {
         switch (control.GetMethod()) {
@@ -128,7 +128,7 @@ void OpenCAEPoro::RunSimulation()
 }
 
 /// Print summary information on screen and SUMMARY.out file.
-void OpenCAEPoro::OutputResults() const
+void OpenCAEPoroX::OutputResults() const
 {
     if (myrank == MASTER_PROCESS) {
         // find an appropriate size for printing times

@@ -4,7 +4,7 @@
  *  \date    Nov/30/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -17,7 +17,7 @@
 #include <math.h>
 #include <vector>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "DenseMat.hpp"
 #include "Mixture.hpp"
 #include "OCPTable.hpp"

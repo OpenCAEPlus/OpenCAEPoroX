@@ -4,7 +4,7 @@
  *  \date    Nov/22/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -48,7 +48,7 @@ extern "C" {
 #include "fasp4cuda_functs.h"
 #endif
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "LinearSolver.hpp"
 
 using namespace std;

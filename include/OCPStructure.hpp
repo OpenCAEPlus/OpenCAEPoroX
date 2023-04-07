@@ -1,10 +1,10 @@
 /*! \file    OCPStructure.hpp
- *  \brief   Some Structure in OpenCAEPoro
+ *  \brief   Some Structure in OpenCAEPoroX
  *  \author  Shizhe Li
  *  \date    Oct/30/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -15,7 +15,7 @@
 // Standard header files
 #include <vector>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "OCPConst.hpp"
 
 using namespace std;

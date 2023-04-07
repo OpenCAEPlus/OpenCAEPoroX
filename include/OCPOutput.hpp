@@ -4,7 +4,7 @@
  *  \date    Oct/01/2021
  *
  *-----------------------------------------------------------------------------------
- *  Copyright (C) 2021--present by the OpenCAEPoro team. All rights reserved.
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
@@ -16,7 +16,7 @@
 #include <iomanip>
 #include <iostream>
 
-// OpenCAEPoro header files
+// OpenCAEPoroX header files
 #include "OCPControl.hpp"
 // #include "Output4Vtk.hpp"
 #include "ParamOutput.hpp"
@@ -27,7 +27,7 @@
 
 using namespace std;
 
-/// 3D coordinate representation in OpenCAEPoro
+/// 3D coordinate representation in OpenCAEPoroX
 class OCPIJK
 {
 public:
@@ -321,7 +321,7 @@ private:
 //  at the critical dates to make sure the program is at the right way.
 class OCPOutput
 {
-    friend class OpenCAEPoro;
+    friend class OpenCAEPoroX;
 
 public:
     void     InputParam(const ParamOutput& paramOutput);
