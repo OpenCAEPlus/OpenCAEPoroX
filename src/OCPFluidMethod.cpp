@@ -2870,8 +2870,6 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     const USI       row    = np * (nc + 1);
     const USI       col    = nc + 1;
 
-    cout << scientific << setprecision(3);
-
     // Well first
     USI wId = bk.numBulkInterior * col;
     for (auto& wl : rs.allWells.wells) {
@@ -3228,12 +3226,20 @@ OCP_BOOL IsoT_FIMn::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_DBL NRdPmax = rs.GetNRdPmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
+    OCP_INT conflag_loc = -1;
     if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-         rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
+        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
-         fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+            fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+        conflag_loc = 0;
+    }
+    OCP_INT conflag;
+    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+
+    if (conflag == 0) {
 
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
@@ -4012,7 +4018,7 @@ void IsoT_FIMn::AssembleMatProdWellsNew(LinearSystem&  ls,
 
 /// Update P, Ni, BHP after linear system is solved
 void IsoT_FIMn::GetSolution(Reservoir&             rs,
-                            const vector<OCP_DBL>& u,
+                            vector<OCP_DBL>& u,
                             const OCPControl&      ctrl) const
 {
     // For saturations changes:
@@ -4021,16 +4027,50 @@ void IsoT_FIMn::GetSolution(Reservoir&             rs,
     // 3. After saturations are determined, then scale the nij to conserve Volume
     // equations.
 
+
+    const Domain&   domain = rs.domain;
+    Bulk&           bk     = rs.bulk;
+    const OCP_USI   nb     = bk.numBulk;
+    const USI       np     = bk.numPhase;
+    const USI       nc     = bk.numCom;
+    const USI       row    = np * (nc + 1);
+    const USI       col    = nc + 1;
+
+    // Well first
+    USI wId = bk.numBulkInterior * col;
+    for (auto& wl : rs.allWells.wells) {
+        if (wl.IsOpen()) {
+            wl.SetBHP(wl.BHP() + u[wId]);
+            wId += col;
+        }
+    }
+
+    // Exchange Solution for ghost grid
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
+    for (USI i = 0; i < send_buffer.size(); i++) {
+        const vector<OCP_USI>& s = domain.send_element_loc[i];
+        send_buffer[i].resize(1 + (s.size() - 1) * col);
+        send_buffer[i][0] = s[0];
+        for (USI j = 1; j < s.size(); j++) {
+            const OCP_DBL* bId = u.data() + s[j] * col;
+            copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
+        }
+    }
+
+    MPI_Request request;
+    MPI_Status  status;
+    for (auto& s : send_buffer) {
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
+    }
+    for (auto& r : domain.recv_element_loc) {
+        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
+    }
+
+
     // Bulk
     const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
     // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
 
-    Bulk&           bk  = rs.bulk;
-    const OCP_USI   nb  = bk.numBulk;
-    const USI       np  = bk.numPhase;
-    const USI       nc  = bk.numCom;
-    const USI       row = np * (nc + 1);
-    const USI       col = nc + 1;
     vector<OCP_DBL> dtmp(row, 0);
     vector<OCP_DBL> tmpNij(np * nc, 0);
     OCP_USI         n_np_j;
@@ -4153,14 +4193,6 @@ void IsoT_FIMn::GetSolution(Reservoir&             rs,
         }
     }
 
-    // Well
-    OCP_USI wId = nb * col;
-    for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.SetBHP(wl.BHP() + u[wId]);
-            wId += col;
-        }
-    }
 }
 
 void IsoT_FIMn::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -4262,7 +4294,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
-    //GetSolution(rs, ls.GetSolution(), ctrl);
+    GetSolution(rs, ls.GetSolution(), ctrl);
     ls.ClearData();
 }
 
@@ -4304,12 +4336,19 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
     //      << resAIMc.maxRelRes_N << "  " << NRdPmax << "  " << NRdSmax << endl;
 #endif
 
+    OCP_INT conflag_loc = -1;
     if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-         rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
+        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
-         fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+            fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+        conflag_loc = 0;
+    }
+    OCP_INT conflag;
+    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+    if (conflag == 0) {
 
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
@@ -5026,19 +5065,52 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 }
 
 void IsoT_AIMc::GetSolution(Reservoir&             rs,
-                            const vector<OCP_DBL>& u,
+                            vector<OCP_DBL>& u,
                             const OCPControl&      ctrl) const
 {
+    const Domain&   domain = rs.domain;
+    Bulk&           bk     = rs.bulk;
+    const OCP_USI   nb     = bk.numBulk;
+    const USI       np     = bk.numPhase;
+    const USI       nc     = bk.numCom;
+    const USI       row    = np * (nc + 1);
+    const USI       col    = nc + 1;
+
+    // Well first
+    USI wId = bk.numBulkInterior * col;
+    for (auto& wl : rs.allWells.wells) {
+        if (wl.IsOpen()) {
+            wl.SetBHP(wl.BHP() + u[wId]);
+            wId += col;
+        }
+    }
+
+    // Exchange Solution for ghost grid
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
+    for (USI i = 0; i < send_buffer.size(); i++) {
+        const vector<OCP_USI>& s = domain.send_element_loc[i];
+        send_buffer[i].resize(1 + (s.size() - 1) * col);
+        send_buffer[i][0] = s[0];
+        for (USI j = 1; j < s.size(); j++) {
+            const OCP_DBL* bId = u.data() + s[j] * col;
+            copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
+        }
+    }
+
+    MPI_Request request;
+    MPI_Status  status;
+    for (auto& s : send_buffer) {
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
+    }
+    for (auto& r : domain.recv_element_loc) {
+        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
+    }
+
+
     // Bulk
     const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
     // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
 
-    Bulk&           bk  = rs.bulk;
-    const OCP_USI   nb  = bk.numBulk;
-    const USI       np  = bk.numPhase;
-    const USI       nc  = bk.numCom;
-    const USI       row = np * (nc + 1);
-    const USI       col = nc + 1;
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
@@ -5145,15 +5217,6 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
             //     bk.Ni[n * nc + i] = 1E-20;
             // }
-        }
-    }
-
-    // Well
-    OCP_USI wId = nb * col;
-    for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.SetBHP(wl.BHP() + u[wId]);
-            wId += col;
         }
     }
 }

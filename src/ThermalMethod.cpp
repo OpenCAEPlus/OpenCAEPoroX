@@ -125,13 +125,20 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
          << rs.bulk.res.maxWellRelRes_mol << setw(12) << rs.bulk.res.maxRelRes_E
          << setw(12) << fabs(NRdPmax) << setw(12) << fabs(NRdSmax) << endl;
 
+    OCP_INT conflag_loc = -1;
     if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-          rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-         rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol &&
-         rs.bulk.res.maxRelRes_E <= ctrl.ctrlNR.NRtol) ||
+        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
-         fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+            fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+        conflag_loc = 0;
+    }
+    OCP_INT conflag;
+    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+
+    if (conflag == 0) {
 
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
@@ -952,7 +959,11 @@ void T_FIM::CalRes(Reservoir&      rs,
     }
 
     Dscalar(Res.resAbs.size(), -1.0, Res.resAbs.data());
-    if (resetRes0) Res.SetInitRes();
+    if (resetRes0) {
+        Res.SetInitRes();
+        OCP_DBL tmploc = Res.maxRelRes0_V;
+        MPI_Allreduce(&tmploc, &Res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
+    }
 }
 
 void T_FIM::AssembleMatBulks(LinearSystem&    ls,
@@ -1647,20 +1658,53 @@ void T_FIM::AssembleMatProdWells(LinearSystem&  ls,
 }
 
 void T_FIM::GetSolution(Reservoir&             rs,
-                        const vector<OCP_DBL>& u,
+                        vector<OCP_DBL>& u,
                         const OCPControl&      ctrl) const
 {
+
+    const Domain&   domain = rs.domain;
+    Bulk&           bk     = rs.bulk;
+    const OCP_USI   nb     = bk.numBulk;
+    const USI       np     = bk.numPhase;
+    const USI       nc     = bk.numCom;
+    const USI       row    = np * (nc + 1);
+    const USI       col    = nc + 2;
+
+    // Well first
+    USI wId = bk.numBulkInterior * col;
+    for (auto& wl : rs.allWells.wells) {
+        if (wl.IsOpen()) {
+            wl.SetBHP(wl.BHP() + u[wId]);
+            wId += col;
+        }
+    }
+
+    // Exchange Solution for ghost grid
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
+    for (USI i = 0; i < send_buffer.size(); i++) {
+        const vector<OCP_USI>& s = domain.send_element_loc[i];
+        send_buffer[i].resize(1 + (s.size() - 1) * col);
+        send_buffer[i][0] = s[0];
+        for (USI j = 1; j < s.size(); j++) {
+            const OCP_DBL* bId = u.data() + s[j] * col;
+            copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
+        }
+    }
+
+    MPI_Request request;
+    MPI_Status  status;
+    for (auto& s : send_buffer) {
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
+    }
+    for (auto& r : domain.recv_element_loc) {
+        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
+    }
+
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
     // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
 
-    Bulk&           bk  = rs.bulk;
-    const OCP_USI   nb  = bk.numBulk;
-    const USI       np  = bk.numPhase;
-    const USI       nc  = bk.numCom;
-    const USI       row = np * (nc + 1);
-    const USI       col = nc + 2;
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
@@ -1721,15 +1765,6 @@ void T_FIM::GetSolution(Reservoir&             rs,
         if (fabs(bk.NRdTmax) < fabs(dT)) bk.NRdTmax = dT;
         bk.T[n] += dT;
         bk.dTNR[n] = dT;
-    }
-
-    // Well
-    OCP_USI wId = nb * col;
-    for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.SetBHP(wl.BHP() + u[wId]);
-            wId += col;
-        }
     }
 }
 

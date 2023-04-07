@@ -65,7 +65,7 @@ protected:
                               const Well&    wl,
                               const OCP_DBL& dt) const;
     void
-    GetSolution(Reservoir& rs, const vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 };
 

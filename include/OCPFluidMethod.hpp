@@ -222,7 +222,7 @@ protected:
                                  const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
-    GetSolution(Reservoir& rs, const vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for FIMn
@@ -271,7 +271,7 @@ protected:
     AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
-    GetSolution(Reservoir& rs, const vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for AIMc.
