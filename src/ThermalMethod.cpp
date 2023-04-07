@@ -65,7 +65,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
         status = ls.GetNumIters();
     }
     // Record time, iterations
-    ctrl.RecordTimeLS(Timer.Stop() / 1000);
+    OCPTIME_LSOLVER += Timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 

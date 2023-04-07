@@ -17,6 +17,7 @@
 #include "Reservoir.hpp"
 #include "UtilOutput.hpp"
 #include "UtilTiming.hpp"
+#include "OCPTimeRecord.hpp"
 
 class T_FIM
 {

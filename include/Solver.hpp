@@ -11,8 +11,8 @@
 
 // OpenCAEPoroX header files
 #include "IsothermalSolver.hpp"
-#include "OCPOutput.hpp"
 #include "ThermalSolver.hpp"
+#include "OCPOutput.hpp"
 
 #ifndef __SOLVER_HEADER__
 #define __SOLVER_HEADER__

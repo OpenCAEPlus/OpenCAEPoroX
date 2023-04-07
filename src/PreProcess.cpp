@@ -14,6 +14,9 @@
 
 PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm)
 {  
+    GetWallTime timer;
+    timer.Start();
+
     if (myRank == MASTER_PROCESS) {   
         GetFile(myFile);
         preParamGridWell.InputFile(filename, workdir);
@@ -24,6 +27,9 @@ PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm com
     partition.SetPartition(preParamGridWell);
     partition.SetDistribution();
     domain.Setup(partition);
+
+    OCPTIME_PARTITION = timer.Stop() / 1000;
+    OCPTIME_TOTAL     += OCPTIME_PARTITION;
 }
 
 

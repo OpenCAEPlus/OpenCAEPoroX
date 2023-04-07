@@ -17,6 +17,8 @@
 #include "PreParamGridWell.hpp"
 #include "Partition.hpp"
 #include "Domain.hpp"
+#include "UtilTiming.hpp"
+#include "OCPTimeRecord.hpp"
 
 using namespace std;
 

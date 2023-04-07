@@ -14,6 +14,10 @@
 /// Read Param from input file
 void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, const OCP_INT& myRank)
 {
+
+    GetWallTime timer;
+    timer.Start();
+
     OCP_BOOL disable_grid = OCP_FALSE;
     if (myRank != MASTER_PROCESS)
         disable_grid = OCP_TRUE;
@@ -26,6 +30,9 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
     reservoir.InputParam(prepro, rp);
     control.InputParam(rp.paramControl);
     output.InputParam(rp.paramOutput);
+
+    OCPTIME_READPARAM = timer.Stop() / 1000;
+    OCPTIME_TOTAL     += OCPTIME_READPARAM;
 }
 
 
@@ -72,7 +79,8 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
              << finalTime << " Sec" << endl;
     }
 
-    control.RecordTotalTime(finalTime);
+    OCPTIME_SETUP_SIM = finalTime;
+    OCPTIME_TOTAL     += OCPTIME_SETUP_SIM;
 }
 
 
@@ -90,8 +98,9 @@ void OpenCAEPoroX::InitReservoir()
              << "Initialization done. Wall time : " << fixed << setprecision(3)
              << finalTime << " Sec" << endl;
     }
-    control.RecordTotalTime(finalTime);
-    control.initTime = finalTime;
+
+    OCPTIME_TOTAL            = finalTime;
+    OCPTIME_INIT_RESERVOIR  += OCPTIME_TOTAL;
 }
 
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
@@ -133,7 +142,7 @@ void OpenCAEPoroX::OutputResults() const
     if (myrank == MASTER_PROCESS) {
         // find an appropriate size for printing times
         int fixWidth =
-            MAX(log10(control.current_time), log10(MAX(control.totalSimTime, 1.0))) + 6;
+            MAX(log10(control.current_time), log10(MAX(OCPTIME_TOTAL, 1.0))) + 6;
 
         cout << "==================================================" << endl;
 
@@ -153,23 +162,32 @@ void OpenCAEPoroX::OutputResults() const
             << " wasted)" << endl;
 
         // print time usages
-        cout << "Simulation time:             " << setw(fixWidth) << control.totalSimTime
+        cout << "Simulation time:             " << setw(fixWidth) << OCPTIME_TOTAL
             << " (Seconds)" << endl;
+        cout << " - % Partition .............." << setw(fixWidth)
+            << 100.0 * OCPTIME_PARTITION / OCPTIME_TOTAL << " (" << OCPTIME_PARTITION
+            << "s)" << endl;
+        cout << " - % Input Reservoir ........" << setw(fixWidth)
+            << 100.0 * OCPTIME_READPARAM / OCPTIME_TOTAL << " (" << OCPTIME_READPARAM
+            << "s)" << endl;
+        cout << " - % Setup Simulator ........" << setw(fixWidth)
+            << 100.0 * OCPTIME_SETUP_SIM / OCPTIME_TOTAL << " (" << OCPTIME_SETUP_SIM
+            << "s)" << endl;
         cout << " - % Initialization ........." << setw(fixWidth)
-            << 100.0 * control.initTime / control.totalSimTime << " (" << control.initTime
+            << 100.0 * OCPTIME_INIT_RESERVOIR / OCPTIME_TOTAL << " (" << OCPTIME_INIT_RESERVOIR
             << "s)" << endl;
         cout << " - % Assembling ............." << setw(fixWidth)
-            << 100.0 * control.totalAssembleMatTime / control.totalSimTime << " ("
-            << control.totalAssembleMatTime << "s)" << endl;
+            << 100.0 * OCPTIME_ASSEMBLE_MAT / OCPTIME_TOTAL << " ("
+            << OCPTIME_ASSEMBLE_MAT << "s)" << endl;
         cout << " - % Linear solver .........." << setw(fixWidth)
-            << 100.0 * control.totalLStime / control.totalSimTime << " ("
-            << control.totalLStime << "s)" << endl;
+            << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
+            << OCPTIME_LSOLVER << "s)" << endl;
         cout << " - % Updating properties ...." << setw(fixWidth)
-            << 100.0 * control.totalUpdatePropertyTime / control.totalSimTime << " ("
-            << control.totalUpdatePropertyTime << "s)" << endl;
+            << 100.0 * OCPTIME_UPDATEGRID / OCPTIME_TOTAL << " ("
+            << OCPTIME_UPDATEGRID << "s)" << endl;
         cout << " - % Scheduled output ......." << setw(fixWidth)
-            << 100.0 * output.outputTime / control.totalSimTime << " ("
-            << output.outputTime << "s)" << endl;
+            << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
+            << OCPTIME_OUTPUT << "s)" << endl;
 
         cout << "==================================================" << endl;
     }

@@ -169,18 +169,6 @@ public:
     /// Reset the number of iterations.
     void ResetIterNRLS();
 
-    /// Record time used for linear solver.
-    void RecordTimeLS(const OCP_DBL& t) { totalLStime += t; }
-
-    /// Record time used for assemble matrix
-    void RecordTimeAssembleMat(const OCP_DBL& t) { totalAssembleMatTime += t; }
-
-    /// Record time used for update property.
-    void RecordTimeUpdateProperty(const OCP_DBL& t) { totalUpdatePropertyTime += t; }
-
-    /// Record the total time of simulation.
-    void RecordTotalTime(const OCP_DBL& t) { totalSimTime += t; }
-
     /// Determine whether the critical time point has been reached.
     OCP_BOOL IsCriticalTime(const USI& d)
     {
@@ -221,12 +209,6 @@ protected:
     OCP_DBL last_dt;         ///< last time step
     OCP_DBL current_time{0}; ///< Current time
     OCP_DBL end_time;        ///< Next Critical time
-
-    OCP_DBL totalSimTime{0};            ///< Total simulation time
-    OCP_DBL initTime{0};                ///< Initialize time
-    OCP_DBL totalUpdatePropertyTime{0}; ///< Total UpdateProperty Time
-    OCP_DBL totalAssembleMatTime{0};    ///< Total AssembleMat time
-    OCP_DBL totalLStime{0};             ///< Total linear solver time
 
     // Record iteration information
     USI numTstep{0};     ///< Number of time step

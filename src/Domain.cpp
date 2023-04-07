@@ -115,10 +115,6 @@ void Domain::Setup(const Partition& part)
 	}
 	numGridLocal = numGridInterior + numGridGhost;
 
-
-	MPI_Barrier(myComm);
-	cout << myrank << " begin output" << endl;
-
 	//////////////////////////////////////////////////////////////
 	if (true) {
 		ofstream myFile;

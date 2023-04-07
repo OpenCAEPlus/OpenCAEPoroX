@@ -101,7 +101,7 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
    
-    ctrl.RecordTimeAssembleMat(timer.Stop() / 1000);
+    OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
 }
 
 /// Solve linear systems for IMPEC and FIM.
@@ -151,7 +151,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 
-    ctrl.RecordTimeUpdateProperty(timer.Stop() / 1000);
+    OCPTIME_UPDATEGRID += timer.Stop() / 1000;
 
     return flag;
 }

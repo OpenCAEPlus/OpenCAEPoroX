@@ -33,7 +33,7 @@ void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 
     fim.AssembleMat(LSolver, rs, ctrl.GetCurTime() + dt, dt);
 
-    ctrl.RecordTimeAssembleMat(timer.Stop() / 1000);
+    OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
 }
 
 void ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
@@ -45,7 +45,12 @@ void ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 /// Update properties of fluid.
 OCP_BOOL ThermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-    return fim.UpdateProperty(rs, ctrl);
+    GetWallTime timer;
+    timer.Start();
+    OCP_BOOL flag = fim.UpdateProperty(rs, ctrl);
+
+    OCPTIME_UPDATEGRID += timer.Stop() / 1000;
+    return flag;
 }
 
 /// Finish the Newton-Raphson iteration.

@@ -1242,12 +1242,20 @@ void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const 
 
 void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl)
 {
+    GetWallTime timer;
+    timer.Start();
+
     summary.SetVal(reservoir, ctrl);
     crtInfo.SetVal(reservoir, ctrl);
+
+    OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
 void OCPOutput::PrintInfo() const
 {
+    GetWallTime timer;
+    timer.Start();
+
     summary.PrintInfo(workDir, fileName, myrank);
     crtInfo.PrintFastReview(workDir, myrank);
 
@@ -1256,6 +1264,8 @@ void OCPOutput::PrintInfo() const
         // post process
         summary.PostProcess(workDir, fileName, numproc);
     }
+
+    OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
 void OCPOutput::PrintInfoSched(const Reservoir&  rs,
@@ -1277,7 +1287,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     timer.Start();
     //out4RPT.PrintRPT(workDir, rs, days);
     //out4VTK.PrintVTK(workDir, rs, days);
-    outputTime += timer.Stop() / 1000;
+    OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -129,9 +129,6 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 	delete[] options;
 	// Free Memory
 	//////////////////////////////////////////////////////
-
-
-	cout << myrank << " Partition  done!" << endl;
 }
 
 
@@ -365,8 +362,6 @@ void Partition::SetDistribution()
 		cout << "Second stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
 		MPI_Recv(r.data() + 1, r.size() - 1, IDX_T, r[0], 0, myComm, &status);
 	}
-
-	cout << myrank << "  done! " << endl;
 
 	MPI_Barrier(myComm);
 }
