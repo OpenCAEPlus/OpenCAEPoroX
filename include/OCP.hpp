@@ -90,10 +90,6 @@ public:
     void OutputResults() const;
 
 protected:
-    MPI_Comm  myComm;
-    OCP_INT   numproc, myrank;
-
-protected:
     /// The core properties of a reservoir.
     Reservoir reservoir;
 

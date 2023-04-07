@@ -236,9 +236,10 @@ void ParamWell::InputWELTARG(ifstream& ifs)
 {
     assert(criticalTime.size() > 0);
 
-    cout << "\n---------------------" << endl
-         << "WELTARG"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "WELTARG"
+            << "\n---------------------" << endl;
 
     const USI      d   = criticalTime.size() - 1;
     const USI      num = well.size();
@@ -246,10 +247,12 @@ void ParamWell::InputWELTARG(ifstream& ifs)
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
-        for (const auto& s : vbuf) {
-            cout << s << "   ";
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            for (const auto& s : vbuf) {
+                cout << s << "   ";
+            }
+            cout << endl;
         }
-        cout << endl;
 
         string            src        = vbuf[0];
         string::size_type pos        = src.find("*");
@@ -291,9 +294,10 @@ void ParamWell::InputWTEMP(ifstream& ifs)
 {
     assert(criticalTime.size() > 0);
 
-    cout << "\n---------------------" << endl
-         << "WTEMP"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "WTEMP"
+            << "\n---------------------" << endl;
 
     const USI      d       = criticalTime.size() - 1;
     const USI      numWell = well.size();
@@ -301,10 +305,12 @@ void ParamWell::InputWTEMP(ifstream& ifs)
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
-        for (const auto& s : vbuf) {
-            cout << s << "   ";
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            for (const auto& s : vbuf) {
+                cout << s << "   ";
+            }
+            cout << endl;
         }
-        cout << endl;
 
         string            src        = vbuf[0];
         string::size_type pos        = src.find("*");
@@ -387,10 +393,12 @@ void ParamWell::InputPSURF(ifstream& ifs)
 
     Psurf = stod(vbuf[0]);
 
-    cout << "\n---------------------" << endl
-         << "PSURF"
-         << "\n---------------------" << endl;
-    cout << Psurf << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "PSURF"
+            << "\n---------------------" << endl;
+        cout << Psurf << endl;
+    }
 }
 
 void ParamWell::InputTSURF(ifstream& ifs)
@@ -400,10 +408,13 @@ void ParamWell::InputTSURF(ifstream& ifs)
 
     Tsurf = stod(vbuf[0]);
 
-    cout << "\n---------------------" << endl
-         << "TSURF"
-         << "\n---------------------" << endl;
-    cout << Tsurf << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "TSURF"
+            << "\n---------------------" << endl;
+        cout << Tsurf << endl;
+    }
 }
 
 // check

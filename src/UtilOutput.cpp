@@ -11,6 +11,8 @@
 
 #include "UtilOutput.hpp"
 
+OCP_INT CURRENT_RANK = 0;
+
 string GetIJKformat(const string& i, const string& j, const string& k, const USI& s)
 {
     std::ostringstream IJKinfo;

@@ -1266,6 +1266,7 @@ void OCPOutput::PrintInfo() const
     }
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
+    OCPTIME_TOTAL  += timer.Stop() / 1000;
 }
 
 void OCPOutput::PrintInfoSched(const Reservoir&  rs,

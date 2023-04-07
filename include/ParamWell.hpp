@@ -20,6 +20,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "UtilInput.hpp"
+#include "UtilOutput.hpp"
 
 using namespace std;
 

@@ -24,6 +24,8 @@
 
 using namespace std;
 
+extern OCP_INT CURRENT_RANK;
+
 template <typename T>
 constexpr auto OCP_SEP01(T n)
 {

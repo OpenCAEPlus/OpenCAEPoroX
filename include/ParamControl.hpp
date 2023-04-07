@@ -20,6 +20,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "UtilInput.hpp"
+#include "UtilOutput.hpp"
 
 /// Tuning is a set of param of control, which contains three main parts
 /// 1. Time stepping controls.

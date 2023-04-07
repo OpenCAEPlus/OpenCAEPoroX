@@ -14,9 +14,7 @@
 
 void Solver::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
-    myComm  = rs.domain.myComm;
-    myrank  = rs.domain.myrank;
-    numproc = rs.domain.numproc;
+
     OCPModel = ctrl.GetModel();
     switch (OCPModel) {
         case ISOTHERMALMODEL:
@@ -89,7 +87,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
 void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 {
 
-    if (ctrl.printLevel >= PRINT_SOME && myrank == MASTER_PROCESS) {
+    if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
         cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.GetCurTime()
              << " Days";
         cout << ",  NR: " << ctrl.GetNRiterT() << ",  LS: " << ctrl.GetLSiterT()

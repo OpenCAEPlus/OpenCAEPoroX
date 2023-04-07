@@ -112,10 +112,12 @@ void ParamControl::InputMETHOD(ifstream& ifs)
 
     if (vbuf.size() > 1) linearSolve = vbuf[1];
 
-    cout << "\n---------------------" << endl
-         << "METHOD"
-         << "\n---------------------" << endl;
-    cout << "   " << method << "  " << linearSolve << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "METHOD"
+            << "\n---------------------" << endl;
+        cout << "   " << method << "  " << linearSolve << endl;
+    }
 }
 
 /// Read TUNING parameters.
@@ -144,7 +146,9 @@ void ParamControl::InputTUNING(ifstream& ifs)
     }
 
     tuning_T.push_back(TuningPair(d, tmp));
-    DisplayTuning();
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        DisplayTuning();
 }
 
 /// Print TUNING parameters.

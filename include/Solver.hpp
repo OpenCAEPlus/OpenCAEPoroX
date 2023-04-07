@@ -43,10 +43,6 @@ private:
     void GoOneStepT(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    MPI_Comm  myComm;
-    OCP_INT   numproc, myrank;
-
-protected:
     /// Model
     USI OCPModel{ISOTHERMALMODEL};
     /// Solver for isothermal models with fixed T

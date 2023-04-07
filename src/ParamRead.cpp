@@ -366,10 +366,13 @@ void ParamRead::PostPrecess()
 /// Check parameters in paramRs and paramWell.
 void ParamRead::CheckParam()
 {
-    cout << endl
-         << "=========================================" << endl
-         << "Check reading parameters from input data!" << endl
-         << "=========================================" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << endl
+            << "=========================================" << endl
+            << "Check reading parameters from input data!" << endl
+            << "=========================================" << endl;
+    }
+
     paramRs.CheckParam();
     paramWell.CheckParam(paramRs.blackOil);
 }

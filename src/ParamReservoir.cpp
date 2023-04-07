@@ -291,8 +291,10 @@ void ParamReservoir::InputCOMPS(ifstream& ifs)
     comsParam.numCom = numCom;
     comsParam.Init();
 
-    cout << endl << "COMPS" << endl;
-    cout << numCom << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << endl << "COMPS" << endl;
+        cout << numCom << endl;
+    }
 }
 
 /// TODO: Add Doxygen
@@ -305,7 +307,8 @@ void ParamReservoir::InputDIMENS(ifstream& ifs)
     dimens.nz = stoi(vbuf[2]);
     numGrid   = dimens.nx * dimens.ny * dimens.nz;
 
-    DisplayDIMENS();
+    if (CURRENT_RANK == MASTER_PROCESS)
+        DisplayDIMENS();
 }
 
 /// TODO: Add Doxygen
@@ -323,17 +326,19 @@ void ParamReservoir::InputRTEMP(ifstream& ifs)
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     if (vbuf[0] == "/") return;
-
     rsTemp = stod(vbuf[0]);
-    cout << "RTEMP\n" << rsTemp << endl << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "RTEMP\n" << rsTemp << endl << endl;
 }
 
 /// TODO: Add Doxygen
 void ParamReservoir::InputEQUALS(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-         << "EQUALS"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "EQUALS"
+            << "\n---------------------" << endl;
 
     vector<USI>    index(6, 0);
     vector<string> vbuf;
@@ -341,10 +346,12 @@ void ParamReservoir::InputEQUALS(ifstream& ifs)
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
-        for (auto v : vbuf) {
-            if (v != "/") cout << setw(10) << v;
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            for (auto v : vbuf) {
+                if (v != "/") cout << setw(10) << v;
+            }
+            cout << "\n";
         }
-        cout << "\n";
 
         index[0] = 0, index[1] = dimens.nx - 1;
         index[2] = 0, index[3] = dimens.ny - 1;
@@ -413,9 +420,10 @@ void ParamReservoir::InputGRID(ifstream& ifs, string& keyword)
 /// TODO: Add Doxygen
 void ParamReservoir::InputCOPY(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-         << "COPY"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "COPY"
+            << "\n---------------------" << endl;
 
     vector<string> vbuf;
     vector<USI>    index(6, 0);
@@ -423,11 +431,13 @@ void ParamReservoir::InputCOPY(ifstream& ifs)
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
-        for (auto v : vbuf) {
-            if (v != "/") cout << setw(10) << v;
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            for (auto v : vbuf) {
+                if (v != "/") cout << setw(10) << v;
+            }
+            cout << "\n";
         }
-        cout << "\n";
-
+        
         index[0] = 0, index[1] = dimens.nx - 1;
         index[2] = 0, index[3] = dimens.ny - 1;
         index[4] = 0, index[5] = dimens.nz - 1;
@@ -517,15 +527,17 @@ void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
     }
     if (!tmpTab[0].empty()) obj->data.push_back(tmpTab);
 
-    obj->DisplayTable();
+    if (CURRENT_RANK == MASTER_PROCESS)
+        obj->DisplayTable();
 }
 
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCK(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-         << "ROCK"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "ROCK"
+            << "\n---------------------" << endl;
 
     vector<string> vbuf;
     while (true) {
@@ -546,17 +558,19 @@ void ParamReservoir::InputROCK(ifstream& ifs)
         }
         rockSet.push_back(rock);
 
-        cout << "   " << rock.type << "   " << rock.Pref << "   " << rock.cp1 << "   "
-             << rock.cp2 << endl;
+        if (CURRENT_RANK == MASTER_PROCESS)
+            cout << "   " << rock.type << "   " << rock.Pref << "   " << rock.cp1 << "   "
+                << rock.cp2 << endl;
     }
 }
 
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCKT(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-         << "ROCKT"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "ROCKT"
+            << "\n---------------------" << endl;
 
     RockParam      rock;
     vector<string> vbuf;
@@ -591,22 +605,25 @@ void ParamReservoir::InputROCKT(ifstream& ifs)
     }
     rockSet.push_back(rock);
 
-    cout << "*PORFORM   " << rock.type << endl;
-    cout << "*PRPOR     " << rock.Pref << endl;
-    cout << "*TRPOR     " << rock.Tref << endl;
-    cout << "*CPOR      " << rock.cp1 << endl;
-    cout << "*CTPOR     " << rock.ct << endl;
-    cout << "*CPTPOR    " << rock.cpt << endl;
-    cout << "*VOLCONST  " << (rock.ConstRock ? "ROCK" : "BULK") << endl;
-    cout << "*CP1       " << rock.HCP1 << endl;
-    cout << "*CP2       " << rock.HCP2 << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "*PORFORM   " << rock.type << endl;
+        cout << "*PRPOR     " << rock.Pref << endl;
+        cout << "*TRPOR     " << rock.Tref << endl;
+        cout << "*CPOR      " << rock.cp1 << endl;
+        cout << "*CTPOR     " << rock.ct << endl;
+        cout << "*CPTPOR    " << rock.cpt << endl;
+        cout << "*VOLCONST  " << (rock.ConstRock ? "ROCK" : "BULK") << endl;
+        cout << "*CP1       " << rock.HCP1 << endl;
+        cout << "*CP2       " << rock.HCP2 << endl;
+    }
 }
 
 void ParamReservoir::InputHLOSS(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-         << "HLOSSPROR"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "\n---------------------" << endl
+            << "HLOSSPROR"
+            << "\n---------------------" << endl;
 
     hLoss.ifHLoss = OCP_TRUE;
 
@@ -628,8 +645,10 @@ void ParamReservoir::InputHLOSS(ifstream& ifs)
             index += 3;
         }
     }
-    cout << "*OVERBUR   " << hLoss.obC << "   " << hLoss.obK << endl;
-    cout << "*UNDERBUR  " << hLoss.ubC << "   " << hLoss.ubK << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "*OVERBUR   " << hLoss.obC << "   " << hLoss.obK << endl;
+        cout << "*UNDERBUR  " << hLoss.ubC << "   " << hLoss.ubK << endl;
+    }
 }
 
 /// Read data from the MISCSTR keyword.
@@ -648,11 +667,14 @@ void ParamReservoir::InputMISCSTR(ifstream& ifs)
             miscstr.surTenRef.push_back(stod(vbuf[i]));
         }
     }
-    cout << "\n---------------------" << endl
-         << "MISCSTR"
-         << "\n---------------------" << endl;
-    for (auto& v : miscstr.surTenRef) cout << v << "   ";
-    cout << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "MISCSTR"
+            << "\n---------------------" << endl;
+        for (auto& v : miscstr.surTenRef) cout << v << "   ";
+        cout << endl;
+    }
 }
 
 /// Read data from the GRAVITY keyword.
@@ -670,11 +692,13 @@ void ParamReservoir::InputGRAVITY(ifstream& ifs)
         }
     }
 
-    cout << "\n---------------------" << endl
-         << "GRAVITY"
-         << "\n---------------------" << endl;
-    cout << "   " << gravity.data[0] << "  " << gravity.data[1] << "  "
-         << gravity.data[2] << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "GRAVITY"
+            << "\n---------------------" << endl;
+        cout << "   " << gravity.data[0] << "  " << gravity.data[1] << "  "
+            << gravity.data[2] << endl;
+    }
 }
 
 /// Read data from the DENSITY keyword.
@@ -693,11 +717,13 @@ void ParamReservoir::InputDENSITY(ifstream& ifs)
         }
     }
 
-    cout << "\n---------------------" << endl
-         << "DENSITY"
-         << "\n---------------------" << endl;
-    cout << density.data[0] << "  " << density.data[1] << "  " << density.data[2]
-         << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "DENSITY"
+            << "\n---------------------" << endl;
+        cout << density.data[0] << "  " << density.data[1] << "  " << density.data[2]
+            << endl;
+    }
 }
 
 /// Read data from the THCONO, THCONG, THCONW
@@ -713,9 +739,11 @@ void ParamReservoir::InputTHCON(ifstream& ifs, const string& keyword)
         thconw = stod(vbuf[0]);
     }
 
-    cout << "THCONO\n" << thcono << endl << endl;
-    cout << "THCONG\n" << thcong << endl << endl;
-    cout << "THCONW\n" << thconw << endl << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "THCONO\n" << thcono << endl << endl;
+        cout << "THCONG\n" << thcong << endl << endl;
+        cout << "THCONW\n" << thconw << endl << endl;
+    }
 }
 
 /// Read data from the EQUIL keyword.
@@ -731,12 +759,14 @@ void ParamReservoir::InputEQUIL(ifstream& ifs)
         if (vbuf[i] != "DEFAULT") EQUIL[i] = stod(vbuf[i]);
     }
 
-    cout << "\n---------------------" << endl
-         << "EQUIL"
-         << "\n---------------------" << endl;
-    cout << "   ";
-    for (USI i = 0; i < 6; i++) cout << EQUIL[i] << "  ";
-    cout << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "EQUIL"
+            << "\n---------------------" << endl;
+        cout << "   ";
+        for (USI i = 0; i < 6; i++) cout << EQUIL[i] << "  ";
+        cout << endl;
+    }
 }
 
 /// Read data from the TABDIMS keyword.
@@ -754,10 +784,12 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
     NTPVT  = stoi(vbuf[1]);
     NTROOC = stoi(vbuf[2]);
 
-    cout << "\n---------------------" << endl
-         << "TABDIMS"
-         << "\n---------------------" << endl;
-    cout << "   " << NTSFUN << "   " << NTPVT << "   " << NTROOC << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "\n---------------------" << endl
+            << "TABDIMS"
+            << "\n---------------------" << endl;
+        cout << "   " << NTSFUN << "   " << NTPVT << "   " << NTROOC << endl;
+    }
 }
 
 
@@ -1097,11 +1129,14 @@ void ComponentParam::InputRefPR(ifstream& ifs, const string& keyword)
         }
         if (objPtr->size() >= NTPVT) break;
     }
-    cout << keyword << endl;
-    for (USI i = 0; i < NTPVT; i++) {
-        cout << objPtr->at(i) << "   ";
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << keyword << endl;
+        for (USI i = 0; i < NTPVT; i++) {
+            cout << objPtr->at(i) << "   ";
+        }
+        cout << "\n/" << endl << endl;
     }
-    cout << "\n/" << endl << endl;
 }
 
 vector<OCP_DBL>* ComponentParam::FindPtr02(const string& varName)
@@ -1184,12 +1219,13 @@ void ComponentParam::InputCNAMES(ifstream& ifs)
         if (vbuf.back() == "/") break;
     }
 
-    OCP_FUNCNAME;
-    cout << "CNAMES" << endl;
-    for (USI i = 0; i < numCom; i++) {
-        cout << Cname[i] << "   ";
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "CNAMES" << endl;
+        for (USI i = 0; i < numCom; i++) {
+            cout << Cname[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 void ComponentParam::InputLBCCOEF(ifstream& ifs)
@@ -1201,12 +1237,14 @@ void ComponentParam::InputLBCCOEF(ifstream& ifs)
         if (vbuf[i] != "DEFAULT") LBCcoef[i] = stod(vbuf[i]);
     }
 
-    OCP_FUNCNAME;
-    cout << "LBCCOEF" << endl;
-    for (USI i = 0; i < 5; i++) {
-        cout << LBCcoef[i] << "   ";
-    }
-    cout << endl << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "LBCCOEF" << endl;
+        for (USI i = 0; i < 5; i++) {
+            cout << LBCcoef[i] << "   ";
+        }
+        cout << endl << endl;
+    }  
 }
 
 /// Input Binary Interaction Coefficients Matrix
@@ -1277,10 +1315,12 @@ void ComponentParam::InputVISCTAB(ifstream& ifs)
     }
     viscTab.name   = "VISCTAB";
     viscTab.colNum = ncol;
-    // output
-    viscTab.DisplayTable();
 
-    cout << "/" << endl;
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        viscTab.DisplayTable();
+        cout << "/" << endl;
+    }
 }
 
 /// TODO: Add Doxygen
@@ -1292,11 +1332,13 @@ void ComponentParam::InputSSMSTA(ifstream& ifs)
     for (int i = 0; i < len; i++) {
         SSMparamSTA.push_back(vbuf[i]);
     }
-    OCP_FUNCNAME;
-    for (int i = 0; i < len; i++) {
-        cout << SSMparamSTA[i] << "   ";
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        for (int i = 0; i < len; i++) {
+            cout << SSMparamSTA[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 /// TODO: Add Doxygen
@@ -1307,11 +1349,13 @@ void ComponentParam::InputNRSTA(ifstream& ifs)
     for (int i = 0; i < 2; i++) {
         NRparamSTA.push_back(vbuf[i]);
     }
-    OCP_FUNCNAME;
-    for (int i = 0; i < 2; i++) {
-        cout << NRparamSTA[i] << "   ";
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        for (int i = 0; i < 2; i++) {
+            cout << NRparamSTA[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 /// TODO: Add Doxygen
@@ -1322,11 +1366,13 @@ void ComponentParam::InputSSMSP(ifstream& ifs)
     for (USI i = 0; i < 2; i++) {
         SSMparamSP.push_back(vbuf[i]);
     }
-    OCP_FUNCNAME;
-    for (USI i = 0; i < 2; i++) {
-        cout << SSMparamSP[i] << "   ";
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        for (USI i = 0; i < 2; i++) {
+            cout << SSMparamSP[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 /// TODO: Add Doxygen
@@ -1337,11 +1383,13 @@ void ComponentParam::InputNRSP(ifstream& ifs)
     for (USI i = 0; i < 2; i++) {
         NRparamSP.push_back(vbuf[i]);
     }
-    OCP_FUNCNAME;
-    for (USI i = 0; i < 2; i++) {
-        cout << NRparamSP[i] << "   ";
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        for (USI i = 0; i < 2; i++) {
+            cout << NRparamSP[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 /// TODO: Add Doxygen
@@ -1352,11 +1400,13 @@ void ComponentParam::InputRR(ifstream& ifs)
     for (USI i = 0; i < 2; i++) {
         RRparam.push_back(vbuf[i]);
     }
-    OCP_FUNCNAME;
-    for (USI i = 0; i < 2; i++) {
-        cout << RRparam[i] << "   ";
+    
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        for (USI i = 0; i < 2; i++) {
+            cout << RRparam[i] << "   ";
+        }
+        cout << endl << endl;
     }
-    cout << endl << endl;
 }
 
 

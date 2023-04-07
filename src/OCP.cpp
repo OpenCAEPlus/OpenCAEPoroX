@@ -22,10 +22,8 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
     if (myRank != MASTER_PROCESS)
         disable_grid = OCP_TRUE;
 
-
     ParamRead rp(disable_grid);
     rp.ReadInputFile(filename);
-
 
     reservoir.InputParam(prepro, rp);
     control.InputParam(rp.paramControl);
@@ -40,16 +38,13 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
 void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 {
     const Domain& domain = reservoir.GetDomain();
-    myComm  = domain.myComm;
-    numproc = domain.numproc;
-    myrank  = domain.myrank;
 
     GetWallTime timer;
     timer.Start();
 
     control.SetupFastControl(argc, options); // Read Fast control
 
-    if (myrank == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS) {
         switch (control.GetModel()) {
         case ISOTHERMALMODEL:
             if (control.printLevel >= PRINT_MIN) {
@@ -73,7 +68,7 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
     control.Setup(domain);
 
     double finalTime = timer.Stop() / 1000;
-    if (control.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
+    if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
         cout << endl
              << "Setup simulation done. Wall time : " << fixed << setprecision(3)
              << finalTime << " Sec" << endl;
@@ -93,7 +88,7 @@ void OpenCAEPoroX::InitReservoir()
     solver.InitReservoir(reservoir);
 
     double finalTime = timer.Stop() / 1000;
-    if (control.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
+    if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
         cout << endl
              << "Initialization done. Wall time : " << fixed << setprecision(3)
              << finalTime << " Sec" << endl;
@@ -106,7 +101,7 @@ void OpenCAEPoroX::InitReservoir()
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
 void OpenCAEPoroX::RunSimulation()
 {
-    if (myrank == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS) {
         switch (control.GetMethod()) {
         case IMPEC:
             if (control.printLevel >= PRINT_MIN) {
@@ -139,11 +134,11 @@ void OpenCAEPoroX::RunSimulation()
 /// Print summary information on screen and SUMMARY.out file.
 void OpenCAEPoroX::OutputResults() const
 {
-    if (myrank == MASTER_PROCESS) {
-        // find an appropriate size for printing times
-        int fixWidth =
-            MAX(log10(control.current_time), log10(MAX(OCPTIME_TOTAL, 1.0))) + 6;
-
+    output.PrintInfo();
+    // find an appropriate size for printing times
+    int fixWidth = MAX(log10(control.current_time), log10(MAX(OCPTIME_TOTAL, 1.0))) + 6;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        
         cout << "==================================================" << endl;
 
         // print numbers of steps
@@ -185,13 +180,15 @@ void OpenCAEPoroX::OutputResults() const
         cout << " - % Updating properties ...." << setw(fixWidth)
             << 100.0 * OCPTIME_UPDATEGRID / OCPTIME_TOTAL << " ("
             << OCPTIME_UPDATEGRID << "s)" << endl;
-        cout << " - % Scheduled output ......." << setw(fixWidth)
+        cout << " - % Output ................." << setw(fixWidth)
             << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
 
         cout << "==================================================" << endl;
     }
-    output.PrintInfo();
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << fixed << setprecision(3) 
+        << "Rank " << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATEGRID << "s" << endl;
 }
 
 /*----------------------------------------------------------------------------*/

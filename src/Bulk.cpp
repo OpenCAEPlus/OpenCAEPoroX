@@ -228,7 +228,9 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
     }
 
     InputRockFunc(rs_param);
-    cout << endl << "BLACKOIL model is selected" << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << endl << "BLACKOIL model is selected" << endl;
 }
 
 void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
@@ -288,7 +290,9 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
     phase2Index[WATER] = 2;
 
     InputRockFunc(rs_param);
-    cout << endl << "COMPOSITIONAL model is selected" << endl;
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << endl << "COMPOSITIONAL model is selected" << endl;
 }
 
 void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
@@ -346,6 +350,9 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
     phase2Index[WATER] = 1;
 
     InputRockFuncT(rs_param);
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << endl << "THERMAL model is selected" << endl;
 }
 
 void Bulk::InputSatFunc(const ParamReservoir& rs_param)
@@ -994,7 +1001,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         }
     }
 
-    if (myrank == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS)
         DepthP.Display();
 
     // calculate Pc from DepthP to calculate Sj
