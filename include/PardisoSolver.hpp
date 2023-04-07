@@ -38,8 +38,6 @@ using namespace std;
 class PardisoSolver : public LinearSolver
 {
 
-    friend class LinearSystem;
-
 public:
     /// Set parameters.
     void SetupParam(const string& dir, const string& file) override;
@@ -100,17 +98,12 @@ protected:
 // For unknown reasons, pardiso's BSR version doesn't work, so convert a BSR mat to CSR first
 class VectorPardisoSolver : public PardisoSolver
 {
-    friend class LinearSystem;
-
 public:
 
     /// Allocate memoery for pardiso solver
     void Allocate(const OCP_USI& max_nnz,
         const OCP_USI& maxDim,
         const USI& blockDim) override;
-
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
     /// Assemble coefficient matrix.
     void AssembleMat(const vector<vector<USI>>& colId,

@@ -86,6 +86,9 @@ public:
     AMG_param   amgParam;  ///< Parameters for AMG method
     ILU_param   iluParam;  ///< Parameters for ILU method
     SWZ_param   swzParam;  ///< Parameters for Schwarz method
+
+protected:
+    USI         blockdim;
 };
 
 /// Scalar solvers in CSR format from FASP.
@@ -95,7 +98,7 @@ class ScalarFaspSolver : public FaspSolver
 
 private:
     /// Allocate memory for the linear system.
-    void Allocate(const vector<USI>& rowCapacity,
+    void Allocate(const OCP_USI&     max_nnz,
                   const OCP_USI&     maxDim,
                   const USI&         blockDim) override;
 
@@ -106,7 +109,6 @@ private:
     void AssembleMat(const vector<vector<USI>>&     colId,
                      const vector<vector<OCP_DBL>>& val,
                      const OCP_USI&                 dim,
-                     const USI&                     blockDim,
                      vector<OCP_DBL>&               rhs,
                      vector<OCP_DBL>&               u) override;
 
@@ -126,7 +128,7 @@ class VectorFaspSolver : public FaspSolver
 
 private:
     /// Allocate memory for the linear system.
-    void Allocate(const vector<USI>& rowCapacity,
+    void Allocate(const OCP_USI&     max_nnz,
                   const OCP_USI&     maxDim,
                   const USI&         blockDim) override;
 
@@ -137,7 +139,6 @@ private:
     void AssembleMat(const vector<vector<USI>>&     colId,
                      const vector<vector<OCP_DBL>>& val,
                      const OCP_USI&                 dim,
-                     const USI&                     blockDim,
                      vector<OCP_DBL>&               rhs,
                      vector<OCP_DBL>&               u) override;
 

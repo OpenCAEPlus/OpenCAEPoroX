@@ -60,11 +60,11 @@ void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
     const OCP_USI numElementLoc   = actWellNum + numGridInterior;
     const OCP_USI global_end      = global_index->at(numElementLoc - 1);
 
-    iparm[40] = global_end - numElementLoc + 1;  // global begin (included)
-    iparm[41] = global_end;                      // global end   (included)
+    iparm[40] = (global_end - numElementLoc + 1) * blockdim;  // global begin (included)
+    iparm[41] = (global_end + 1) * blockdim - 1;              // global end   (included)
 
     // Get Dimension
-    N = global_end + 1;
+    N = (global_end + 1) * blockdim;
     MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
 }
 
@@ -166,24 +166,6 @@ void VectorPardisoSolver::Allocate(const OCP_USI& max_nnz,
     iA.resize(maxDim * blockdim + 1);
     jA.resize(max_nnz * blockdim * blockdim);
     A.resize(max_nnz * blockdim * blockdim);
-}
-
-
-/// Calculate terms used in communication
-void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
-{
-    global_index = domain->CalGlobalIndex(actWellNum);
-
-    const OCP_USI numGridInterior = domain->GetNumGridInterior();
-    const OCP_USI numElementLoc = actWellNum + numGridInterior;
-    const OCP_USI global_end = global_index->at(numElementLoc - 1);
-
-    iparm[40] = (global_end - numElementLoc + 1) * blockdim;  // global begin (included)
-    iparm[41] = (global_end + 1) * blockdim - 1;              // global end   (included)
-
-    // Get Dimension
-    N = (global_end + 1) * blockdim;
-    MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
 }
 
 
