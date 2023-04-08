@@ -18,6 +18,7 @@
 
 using namespace std;
 
+// API for SAMG Solver
 class SamgSolver : public LinearSolver
 {
 
@@ -36,13 +37,6 @@ public:
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
-    /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-        const vector<vector<OCP_DBL>>& val,
-        const OCP_USI& dim,
-        vector<OCP_DBL>& rhs,
-        vector<OCP_DBL>& u) override;
-
     /// Solve the linear system.
     OCP_INT Solve() override;
 
@@ -51,14 +45,33 @@ public:
 
 protected:
 
-    
+    int            blockdim;
+    vector<int>    iA;
+    vector<int>    jA;
+    vector<double> A;
+
+    double*        b = nullptr;
+    double*        x = nullptr;
+
+    int            myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
 };
 
+// Convert Internal mat(csr-like) to CSR mat 
+class ScalarSamgSolver : public SamgSolver
+{
+public:
+    /// Assemble coefficient matrix.
+    void AssembleMat(const vector<vector<USI>>& colId,
+        const vector<vector<OCP_DBL>>& val,
+        const OCP_USI& dim,
+        vector<OCP_DBL>& rhs,
+        vector<OCP_DBL>& u) override;
+};
 
+// Convert Internal mat(bsr-like) to CSR mat 
 class VectorSamgSolver : public SamgSolver
 {
 public:
-
     /// Assemble coefficient matrix.
     void AssembleMat(const vector<vector<USI>>& colId,
         const vector<vector<OCP_DBL>>& val,

@@ -35,9 +35,9 @@
 
 using namespace std;
 
+// A unify API for csr and bsr matrix(bsr doesn't work now)
 class PardisoSolver : public LinearSolver
 {
-
 public:
     /// Set parameters.
     void SetupParam(const string& dir, const string& file) override;
@@ -88,11 +88,10 @@ protected:
     vector<MKL_INT>  iA;
     vector<MKL_INT>  jA;
     vector<double>   A;
-    double*          b = NULL;
-    double*          x = NULL;
+    double*          b = nullptr;
+    double*          x = nullptr;
 
-    int       mycomm = MPI_Comm_c2f(MPI_COMM_WORLD);
-    int       myrank;
+    int              myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
 };
 
 // For unknown reasons, pardiso's BSR version doesn't work, so convert a BSR mat to CSR first

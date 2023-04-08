@@ -14,7 +14,6 @@
 
 void PardisoSolver::SetupParam(const string& dir, const string& file)
 {
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     InitParam();
 }
 
@@ -54,6 +53,7 @@ void PardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim, cons
 /// Calculate terms used in communication
 void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 {
+    
     global_index = domain->CalGlobalIndex(actWellNum);
 
     const OCP_USI numGridInterior = domain->GetNumGridInterior();
@@ -118,7 +118,7 @@ OCP_INT PardisoSolver::Solve()
 
     phase = 11;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
-        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &mycomm, &error);
+        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &myComm, &error);
 
     if (error != 0)
         OCP_ABORT("ERROR during symbolic factorization: " + to_string((long long int)error));
@@ -128,7 +128,7 @@ OCP_INT PardisoSolver::Solve()
     /* -------------------------------------------------------------------- */
     phase = 22;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
-        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &mycomm, &error);
+        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &myComm, &error);
 
     if (error != 0)
         OCP_ABORT("ERROR during numerical factorization: " + to_string((long long int)error));
@@ -138,7 +138,7 @@ OCP_INT PardisoSolver::Solve()
     /* -------------------------------------------------------------------- */
     phase = 33;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
-        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, b, x, &mycomm, &error);
+        &N, A.data(), iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, b, x, &myComm, &error);
 
     if (error != 0)
         OCP_ABORT("ERROR during numerical solution: " + to_string((long long int)error));
@@ -148,7 +148,7 @@ OCP_INT PardisoSolver::Solve()
     /* -------------------------------------------------------------------- */
     phase = -1; /* Release internal memory. */
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
-        &N, &ddum, iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &mycomm, &error);
+        &N, &ddum, iA.data(), jA.data(), &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &myComm, &error);
 
     if (error != 0)
         OCP_ABORT("ERROR during release memory: " + to_string((long long int)error));
@@ -230,30 +230,6 @@ void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
             }
         }
     }
-
-    //if (myrank == -1) {
-    //    ofstream myFile;
-    //    myFile.open("test/test" + to_string(myrank) + ".out");
-    //    ios::sync_with_stdio(false);
-    //    myFile.tie(0);
-
-    //    myFile << dim * blockdim << endl;
-    //    for (OCP_USI i = 0; i <= dim * blockdim; i++) {
-    //        myFile << iA[i] << endl;
-    //    }
-    //    for (OCP_USI i = 0; i < dim * blockdim; i++) {
-    //        for (OCP_USI j = iA[i]; j < iA[i + 1]; j++) {
-    //            myFile << jA[j] << endl;
-    //        }
-    //    }
-    //    for (OCP_USI i = 0; i < dim * blockdim; i++) {
-    //        for (OCP_USI j = iA[i]; j < iA[i + 1]; j++) {
-    //            myFile << A[j] << endl;
-    //        }
-    //    }
-
-    //    myFile.close();
-    //}
 
     b = rhs.data();
     x = u.data();

@@ -101,7 +101,8 @@ void LinearSystem::OutputLinearSystem(const string& fileA, const string& fileb) 
     for (OCP_USI i = 0; i < dim; i++) {
         rowSize = colId[i].size();
         for (USI j = 0; j < rowSize; j++) {
-            outA << domain->global_index[colId[i][j]] << "\n";
+            // outA << domain->global_index[colId[i][j]] << "\n";
+            outA << colId[i][j] << "\n";
         }
     }
     // val
@@ -183,7 +184,8 @@ void LinearSystem::SetupLinearSolver(const USI&    i,
         case SAMGSOLVER:
             // SAMG
             if (blockDim > 1)    LS = new VectorSamgSolver;
-            else                 LS = new SamgSolver;
+            else                 LS = new ScalarSamgSolver;
+            break;
         default:
             OCP_ABORT("Wrong Linear Solver type!");
             break;
