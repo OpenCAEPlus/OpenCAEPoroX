@@ -210,16 +210,13 @@ void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
         for (auto& t : tmp)    t = global_index->at(t);
         sort(tmp.begin(), tmp.end());
         for (USI j0 = 0; j0 < nnzR; j0++) {
-
-            for (USI c = 0; c < blockdim; c++)
-                for (USI c1 = 0; c1 < blockdim; c1++)
-                    jA[iA[bId + c] + j0 * blockdim + c1] = tmp[j0] * blockdim + c1;
-
-
             for (USI j1 = 0; j1 < nnzR; j1++) {
                 if (global_index->at(colId[i - 1][j1]) == tmp[j0]) {
 
                     for (USI c = 0; c < blockdim; c++) {
+                        for (USI c1 = 0; c1 < blockdim; c1++)
+                            jA[iA[bId + c] + j0 * blockdim + c1] = tmp[j0] * blockdim + c1;
+
                         const OCP_DBL* begin = &val[i - 1][0] + j1 * blockSize + c * blockdim;
                         const OCP_DBL* end = begin + blockdim;
                         copy(begin, end, &A[iA[bId + c] + j0 * blockdim]);

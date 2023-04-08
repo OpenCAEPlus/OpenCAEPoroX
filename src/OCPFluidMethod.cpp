@@ -85,12 +85,12 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     }
 
 #ifdef DEBUG
-    OCP_INT myrank = rs.domain.myrank;
-    ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_IMPEC.out", 
-                          "proc" + to_string(myrank) + "_testb_IMPEC.out");
-    ls.OutputSolution("proc" + to_string(myrank) + "_testx_IMPEC.out");
-    MPI_Barrier(rs.domain.myComm);
-    OCP_ABORT("Stop");
+    //OCP_INT myrank = rs.domain.myrank;
+    //ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_IMPEC.out", 
+    //                      "proc" + to_string(myrank) + "_testb_IMPEC.out");
+    //ls.OutputSolution("proc" + to_string(myrank) + "_testx_IMPEC.out");
+    //MPI_Barrier(rs.domain.myComm);
+    //OCP_ABORT("Stop");
 #endif // DEBUG
 
     OCPTIME_LSOLVER += Timer.Stop() / 1000;
@@ -243,7 +243,7 @@ void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(1);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(SAMGSOLVER, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    ls.SetupLinearSolver(PARDISOSOLVER, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
