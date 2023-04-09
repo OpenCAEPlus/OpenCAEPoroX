@@ -579,12 +579,9 @@ void Summary::PrintInfo(const string& dir, const string& filename, const OCP_INT
             }
             outF << "\n";
         }
-
         ID += (col - 1);
-
         outF << "\n";
     }
-
     outF.close();
 }
 
