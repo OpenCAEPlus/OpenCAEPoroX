@@ -41,10 +41,8 @@ void FaspSolver::SetupParam(const string& dir, const string& file)
 }
 
 void ScalarFaspSolver::Allocate(const OCP_USI&     max_nnz,
-                                const OCP_USI&     maxDim,
-                                const USI&         blockDim)
+                                const OCP_USI&     maxDim)
 {
-    blockdim = 1;
     A = fasp_dcsr_create(maxDim, maxDim, max_nnz);
 }
 
@@ -272,10 +270,8 @@ OCP_INT ScalarFaspSolver::Solve()
 }
 
 void VectorFaspSolver::Allocate(const OCP_USI&     max_nnz,
-                                const OCP_USI&     maxDim,
-                                const USI&         blockDim)
+                                const OCP_USI&     maxDim)
 {
-    blockdim = blockDim;
     A     = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockDim, 0);
     Asc   = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockDim, 0);
     fsc   = fasp_dvec_create(maxDim * blockDim);

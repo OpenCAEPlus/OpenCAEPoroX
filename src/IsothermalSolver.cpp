@@ -151,7 +151,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 
-    OCPTIME_UPDATEGRID += timer.Stop() / 1000;
+    OCPTIME_UPDATE_GRID += timer.Stop() / 1000;
 
     return flag;
 }

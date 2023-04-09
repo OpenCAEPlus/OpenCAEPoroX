@@ -24,7 +24,8 @@ extern OCP_DBL OCPTIME_SETUP_SIM;       ///< Time for Setuping Simulator
 extern OCP_DBL OCPTIME_INIT_RESERVOIR;  ///< Time for Reservoir Initializing
 extern OCP_DBL OCPTIME_ASSEMBLE_MAT;    ///< Time for Matrix Assembling
 extern OCP_DBL OCPTIME_LSOLVER;         ///< Time for Linear Solver
-extern OCP_DBL OCPTIME_UPDATEGRID;      ///< Time for Grid Updating
+extern OCP_DBL OCPTIME_NRSTEP;          ///< Time for NR step
+extern OCP_DBL OCPTIME_UPDATE_GRID;     ///< Time for Grid Updating
 extern OCP_DBL OCPTIME_OUTPUT;          ///< Time for Outputing Files
 
 

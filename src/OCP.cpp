@@ -94,8 +94,8 @@ void OpenCAEPoroX::InitReservoir()
              << finalTime << " Sec" << endl;
     }
 
-    OCPTIME_TOTAL            = finalTime;
-    OCPTIME_INIT_RESERVOIR  += OCPTIME_TOTAL;
+    OCPTIME_INIT_RESERVOIR = finalTime;
+    OCPTIME_TOTAL          += OCPTIME_INIT_RESERVOIR;
 }
 
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
@@ -134,7 +134,10 @@ void OpenCAEPoroX::RunSimulation()
 /// Print summary information on screen and SUMMARY.out file.
 void OpenCAEPoroX::OutputResults() const
 {
+    GetWallTime timer;
+    timer.Start();
     output.PrintInfo();
+    OCPTIME_TOTAL += timer.Stop() / 1000;
     // find an appropriate size for printing times
     int fixWidth = MAX(log10(control.current_time), log10(MAX(OCPTIME_TOTAL, 1.0))) + 6;
     if (CURRENT_RANK == MASTER_PROCESS) {
@@ -177,9 +180,12 @@ void OpenCAEPoroX::OutputResults() const
         cout << " - % Linear solver .........." << setw(fixWidth)
             << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
             << OCPTIME_LSOLVER << "s)" << endl;
+        cout << " - % Newton step ............" << setw(fixWidth)
+            << 100.0 * OCPTIME_NRSTEP / OCPTIME_TOTAL << " ("
+            << OCPTIME_NRSTEP << "s)" << endl;
         cout << " - % Updating properties ...." << setw(fixWidth)
-            << 100.0 * OCPTIME_UPDATEGRID / OCPTIME_TOTAL << " ("
-            << OCPTIME_UPDATEGRID << "s)" << endl;
+            << 100.0 * OCPTIME_UPDATE_GRID / OCPTIME_TOTAL << " ("
+            << OCPTIME_UPDATE_GRID << "s)" << endl;
         cout << " - % Output ................." << setw(fixWidth)
             << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
@@ -188,7 +194,7 @@ void OpenCAEPoroX::OutputResults() const
     }
     MPI_Barrier(MPI_COMM_WORLD);
     cout << fixed << setprecision(3) 
-        << "Rank " << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATEGRID << "s" << endl;
+        << "Rank " << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATE_GRID << "s" << endl;
 }
 
 /*----------------------------------------------------------------------------*/

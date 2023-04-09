@@ -201,8 +201,8 @@ void LinearSystem::SetupLinearSolver(const USI& model,
 
     else if (lsMethod == "fasp") {
         if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
-        //if (blockDim > 1)    LS = new VectorFaspSolver;
-        //else                 LS = new ScalarFaspSolver;
+        //if (blockDim > 1)    LS = new VectorFaspSolver(blockDim);
+        //else                 LS = new ScalarFaspSolver(blockDim);
     }
     else {
         OCP_ABORT("Wrong Linear Solver type!");

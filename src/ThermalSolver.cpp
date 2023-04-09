@@ -49,7 +49,7 @@ OCP_BOOL ThermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     timer.Start();
     OCP_BOOL flag = fim.UpdateProperty(rs, ctrl);
 
-    OCPTIME_UPDATEGRID += timer.Stop() / 1000;
+    OCPTIME_UPDATE_GRID += timer.Stop() / 1000;
     return flag;
 }
 

@@ -77,8 +77,8 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 
     ls.AssembleMatLinearSolver();
 
-    GetWallTime Timer;
-    Timer.Start();
+    GetWallTime timer;
+    timer.Start();
     int status = ls.Solve();
     if (status < 0) {
         status = ls.GetNumIters();
@@ -93,7 +93,7 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     //OCP_ABORT("Stop");
 #endif // DEBUG
 
-    OCPTIME_LSOLVER += Timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
@@ -101,7 +101,9 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     // ls.OutputSolution("testx_IMPEC.out");
 #endif // DEBUG
 
+    timer.Start();
     GetSolution(rs, ls.GetSolution());
+    OCPTIME_NRSTEP += timer.Stop() / 1000;
     ls.ClearData();
 }
 
@@ -942,14 +944,14 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     ls.AssembleMatLinearSolver();
 
     // Solve linear system
-    GetWallTime Timer;
-    Timer.Start();
+    GetWallTime timer;
+    timer.Start();
     int status = ls.Solve();
     if (status < 0) {
         status = ls.GetNumIters();
     }
     // Record time, iterations
-    OCPTIME_LSOLVER += Timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
@@ -969,7 +971,9 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 #endif // DEBUG
 
     // Get solution from linear system to Reservoir
+    timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl);
+    OCPTIME_NRSTEP += timer.Stop() / 1000;   
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }
@@ -3163,8 +3167,8 @@ void IsoT_FIMn::SolveLinearSystem(LinearSystem& ls,
 
     ls.AssembleMatLinearSolver();
 
-    GetWallTime Timer;
-    Timer.Start();
+    GetWallTime timer;
+    timer.Start();
     int status = ls.Solve();
     if (status < 0) {
         status = ls.GetNumIters();
@@ -3182,11 +3186,13 @@ void IsoT_FIMn::SolveLinearSystem(LinearSystem& ls,
     // ls.CheckSolution();
 #endif // DEBUG
 
-    OCPTIME_LSOLVER += Timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
-    //GetSolution(rs, ls.GetSolution(), ctrl);
+    timer.Start();
+    GetSolution(rs, ls.GetSolution(), ctrl);
+    OCPTIME_NRSTEP += timer.Stop() / 1000;
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }
@@ -4272,8 +4278,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 
     ls.AssembleMatLinearSolver();
 
-    GetWallTime Timer;
-    Timer.Start();
+    GetWallTime timer;
+    timer.Start();
     int status = ls.Solve();
     if (status < 0) {
         status = ls.GetNumIters();
@@ -4290,11 +4296,13 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     // ls.CheckSolution();
 #endif // DEBUG
 
-    OCPTIME_LSOLVER += Timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
+    timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl);
+    OCPTIME_NRSTEP += timer.Stop() / 1000;
     ls.ClearData();
 }
 

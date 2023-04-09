@@ -58,14 +58,14 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     // Assemble external linear solver with internal A and b
     ls.AssembleMatLinearSolver();
     // Solve linear system
-    GetWallTime Timer;
-    Timer.Start();
+    GetWallTime timer;
+    timer.Start();
     int status = ls.Solve();
     if (status < 0) {
         status = ls.GetNumIters();
     }
     // Record time, iterations
-    OCPTIME_LSOLVER += Timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / 1000;
     ctrl.UpdateIterLS(status);
     ctrl.UpdateIterNR();
 
@@ -76,9 +76,10 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     // Check if inf or nan occurs in solution
     ls.CheckSolution();
 #endif // DEBUG
-
+    
+    timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl);
-    // rs.GetSolution01FIM(ls.GetSolution());
+    OCPTIME_NRSTEP += timer.Stop() / 1000;
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }

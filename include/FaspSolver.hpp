@@ -12,6 +12,7 @@
 #ifndef __FASPSOLVER_HEADER__
 #define __FASPSOLVER_HEADER__
 
+
 // Standard header files
 #include <fstream>
 #include <iostream>
@@ -75,6 +76,9 @@ public:
     /// Set FASP parameters.
     void SetupParam(const string& dir, const string& file) override;
 
+    /// Calculate terms used in communication
+    void CalCommTerm(const USI& actWellNum, const Domain* domain) override {}
+
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return itParam.maxit; }
 
@@ -94,13 +98,13 @@ protected:
 /// Scalar solvers in CSR format from FASP.
 class ScalarFaspSolver : public FaspSolver
 {
-    friend class LinearSystem;
+public:
+    ScalarFaspSolver(const USI& blockDim) { blockdim = blockDim; }
 
 private:
     /// Allocate memory for the linear system.
     void Allocate(const OCP_USI&     max_nnz,
-                  const OCP_USI&     maxDim,
-                  const USI&         blockDim) override;
+                  const OCP_USI&     maxDim) override;
 
     /// Initialize the Params for linear solver.
     void InitParam() override;
@@ -124,13 +128,13 @@ private:
 /// Vector solvers in BSR format from FASP.
 class VectorFaspSolver : public FaspSolver
 {
-    friend class LinearSystem;
+public:
+    VectorFaspSolver(const USI& blockDim) { blockdim = blockDim; }
 
 private:
     /// Allocate memory for the linear system.
     void Allocate(const OCP_USI&     max_nnz,
-                  const OCP_USI&     maxDim,
-                  const USI&         blockDim) override;
+                  const OCP_USI&     maxDim) override;
 
     /// Initialize the Params for linear solver.
     void InitParam() override;
