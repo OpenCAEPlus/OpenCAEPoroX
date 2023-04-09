@@ -47,7 +47,7 @@ constexpr inline long long Map_Str2Int(const char* mystr, const USI& len)
 /// rid of some useless characters such as space, commas. Finally, the segments of rest
 /// string will be stored in result. And if return OCP_FALSE, it indicates we have reach
 /// the end of file.
-OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result);
+OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slash = OCP_TRUE);
 
 /// DealDefault is used to deal with the expression with asterisk, for example
 /// m*n  -> <n,...,n> size m ,  m* -> <DEFAULT,..., DEFAULT> size m.

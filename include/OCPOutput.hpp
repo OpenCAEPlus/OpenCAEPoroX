@@ -123,11 +123,6 @@ public:
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
-
-protected:
-    /// Read a line of summary file
-    OCP_BOOL ReadSummaryLine(ifstream& ifs, vector<string>& result) const;
-
 protected:
     vector<SumItem> Sumdata; ///< Contains all information to be printed.
 

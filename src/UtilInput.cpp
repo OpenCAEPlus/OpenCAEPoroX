@@ -11,7 +11,7 @@
 
 #include "UtilInput.hpp"
 
-OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result)
+OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slash)
 {
     result.resize(0);
     string buf;
@@ -29,11 +29,14 @@ OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result)
     // file ends
     if (buf.empty()) return OCP_FALSE;
 
+
     // remove the string behind the '/'
-    auto pos = buf.find_first_of('/');
-    if (pos != string::npos) {
-        buf.erase(pos);
-        buf.push_back('/');
+    if (no_slash) {
+        auto pos = buf.find_first_of('/');
+        if (pos != string::npos) {
+            buf.erase(pos);
+            buf.push_back('/');
+        }
     }
 
     // get rid of  '  and  ,

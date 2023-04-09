@@ -613,7 +613,7 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
         }
 
         // Get file name and time steps
-        ReadSummaryLine(ifs, buffer);
+        ReadLine(ifs, buffer, OCP_FALSE);
         for (USI i = 0; i < buffer.size(); i++) {
             if (buffer[i] == "--") {
                 file = buffer[i - 1];
@@ -631,18 +631,18 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
                 for (const auto& v : buffer) {
                     mySum.push_back(SumItem(v, rowNum));
                 }
-                ReadSummaryLine(ifs, buffer);
+                ReadLine(ifs, buffer, OCP_FALSE);
                 OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
                 for (USI i = 0; i < varlen; i++) {
                     mySum[bId + i].Unit = buffer[i];
                 }
-                ReadSummaryLine(ifs, buffer);
+                ReadLine(ifs, buffer, OCP_FALSE);
                 OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
                 for (USI i = 0; i < varlen; i++) {
                     mySum[bId + i].Obj = buffer[i];
                 }
             }
-            ReadSummaryLine(ifs, buffer);
+            ReadLine(ifs, buffer, OCP_FALSE);
             if (flag && buffer.size() == varlen && buffer[0] != "Row") {
                 // begin to input value of data               
                 for (USI i = 0; i < varlen; i++) {
@@ -716,36 +716,6 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
     }
 
     PrintInfo(dir, filename, -1);
-}
-
-
-OCP_BOOL Summary::ReadSummaryLine(ifstream& ifs, vector<string>& result) const
-{
-    result.resize(0);
-    string buf;
-
-    while (!ifs.eof()) {
-        getline(ifs, buf);
-        if (buf.empty()) continue;
-        while (buf[0] == ' ' || buf[0] == '\t' || buf[0] == '\r') buf.erase(0, 1);
-        if (buf.empty() || buf[0] == '#') continue;
-        if (buf.size() > 1 && (buf[0] == '-' && buf[1] == '-')) continue;
-
-        break;
-    }
-
-    // file ends
-    if (buf.empty()) return OCP_FALSE;
-
-    // get rid of  '  and  ,
-    for (auto& s : buf) {
-        if (s == '\'' || s == ',') s = ' ';
-    }
-
-    istringstream tmp(buf);
-    while (tmp >> buf) result.push_back(buf);
-
-    return OCP_TRUE;
 }
 
 

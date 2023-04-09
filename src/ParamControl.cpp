@@ -102,7 +102,7 @@ void ParamControl::InitTuning()
 void ParamControl::InputMETHOD(ifstream& ifs)
 {
     vector<string> vbuf;
-    ReadLine(ifs, vbuf);
+    ReadLine(ifs, vbuf, OCP_FALSE);
     if (vbuf[0] == "/") return;
 
     if (vbuf[0] == "FIM") {
