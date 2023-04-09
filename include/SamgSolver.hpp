@@ -18,7 +18,8 @@
 
 using namespace std;
 
-// API for SAMG Solver
+/// API for SAMG Solver
+// Note: the index is 1-baesd
 class SamgSolver : public LinearSolver
 {
 
@@ -53,7 +54,19 @@ protected:
     double*        b = nullptr;
     double*        x = nullptr;
 
+    // comunication
     int            myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
+    int*           npsnd;       ///< Total number of neighboring processors to send
+    int*           iranksnd;    ///< Rank of neighboring processors to send
+    int            nshalo;      ///< Total number of variables to send
+    int*           ipts;        ///< Range of variables to send in isndlist
+    int*           isndlist;    ///< Index of variables to send
+    int*           nprec;       ///< Total number of neighboring processors to receive
+    int*           irankrec;    ///< Rank of neighboring processors to receive
+    int            nrhalo;      ///< Total number of variables to receive
+    int*           iptr;        ///< Range of variables to receive in isndlist
+    int*           ireclist;    ///< Index of variables to recv
+
 };
 
 // Convert Internal mat(csr-like) to CSR mat 

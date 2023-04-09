@@ -81,8 +81,6 @@ protected:
     double    ddum;               ///< Double dummy
     MKL_INT   idum;               ///< Integer dummy
 
-    const vector<OCP_USI>* global_index;
-
     // CSR/BSR Matrix
     MKL_INT          blockdim;
     vector<MKL_INT>  iA;
@@ -91,7 +89,9 @@ protected:
     double*          b = nullptr;
     double*          x = nullptr;
 
+    // conmunication
     int              myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
+    const vector<OCP_USI>* global_index;
 };
 
 // For unknown reasons, pardiso's BSR version doesn't work, so convert a BSR mat to CSR first
