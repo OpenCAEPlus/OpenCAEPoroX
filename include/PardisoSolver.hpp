@@ -12,6 +12,9 @@
  *-----------------------------------------------------------------------------------
  */
 
+#ifdef WITH_PARDISO
+
+
 #ifndef __PARDISOSOLVER_HEADER__
 #define __PARDISOSOLVER_HEADER__
 
@@ -39,6 +42,9 @@ using namespace std;
 class PardisoSolver : public LinearSolver
 {
 public:
+    PardisoSolver() = default;
+    PardisoSolver(const USI& blockDim) { blockdim = blockDim; }
+
     /// Set parameters.
     void SetupParam(const string& dir, const string& file) override;
 
@@ -46,9 +52,7 @@ public:
     void InitParam() override;
 
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz,
-        const OCP_USI& maxDim,
-        const USI& blockDim) override;
+    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
@@ -99,10 +103,10 @@ class VectorPardisoSolver : public PardisoSolver
 {
 public:
 
+    VectorPardisoSolver(const USI& blockDim) { blockdim = blockDim; }
+
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz,
-        const OCP_USI& maxDim,
-        const USI& blockDim) override;
+    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
 
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
@@ -118,6 +122,8 @@ public:
 
 #endif
 
+
+#endif // WITH_PARDISO
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

@@ -215,7 +215,7 @@ TUNING
 
 
 METHOD
-FIM  samg
+FIM  pardiso
 /
 
 TSTEP

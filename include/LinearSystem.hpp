@@ -33,8 +33,6 @@ using namespace std;
 class LinearSystem
 {
 
-    friend class IsoT_FIM;
-
 public:
     /// Allocate memory for linear system with max possible number of rows.
     void AllocateRowMem(const USI& nb);
@@ -56,7 +54,7 @@ public:
 
     // Linear Solver
     /// Setup LinearSolver.
-    void SetupLinearSolver(const string& dir, const string& file);
+    void SetupLinearSolver(const USI& model, const string& dir, const string& file);
     /// Assemble Mat for Linear Solver.
     void AssembleMatLinearSolver() { LS->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.

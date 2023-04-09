@@ -9,6 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
+#ifdef WITH_PARDISO
+
 #include "PardisoSolver.hpp"
 
 
@@ -37,9 +39,8 @@ void PardisoSolver::InitParam()
 }
 
 
-void PardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim, const USI& blockDim)
+void PardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
 {
-    blockdim = blockDim;
     if (blockdim > 1) {
         iparm[37] = blockdim * blockdim;
     }
@@ -53,7 +54,7 @@ void PardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim, cons
 /// Calculate terms used in communication
 void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 {
-    
+
     global_index = domain->CalGlobalIndex(actWellNum);
 
     const OCP_USI numGridInterior = domain->GetNumGridInterior();
@@ -158,11 +159,8 @@ OCP_INT PardisoSolver::Solve()
 
 
 /// Allocate memoery for pardiso solver
-void VectorPardisoSolver::Allocate(const OCP_USI& max_nnz,
-    const OCP_USI& maxDim,
-    const USI& blockDim)
+void VectorPardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
 {
-    blockdim = blockDim;
     iA.resize(maxDim * blockdim + 1);
     jA.resize(max_nnz * blockdim * blockdim);
     A.resize(max_nnz * blockdim * blockdim);
@@ -232,7 +230,7 @@ void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
     x = u.data();
 }
 
-
+#endif // WITH_PARDISO
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

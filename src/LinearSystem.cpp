@@ -170,7 +170,8 @@ void LinearSystem::CheckSolution() const
 }
 
 /// Setup LinearSolver
-void LinearSystem::SetupLinearSolver(const string& dir,
+void LinearSystem::SetupLinearSolver(const USI& model,
+                                     const string& dir,
                                      const string& file)
 {
     solveDir = dir;
@@ -182,14 +183,22 @@ void LinearSystem::SetupLinearSolver(const string& dir,
     }
     transform(lsMethod.begin(), lsMethod.end(), lsMethod.begin(), ::tolower);
 
-    if (lsMethod == "pardiso") {
-        if (blockDim > 1)    LS = new VectorPardisoSolver;
-        else                 LS = new PardisoSolver;
+    if (false) {}
+
+#ifdef WITH_PARDISO
+    else if (lsMethod == "pardiso") {
+        if (blockDim > 1)    LS = new VectorPardisoSolver(blockDim);
+        else                 LS = new PardisoSolver(blockDim);
     }
+#endif // WITH_PARDISO
+
+#ifdef WITH_SAMG
     else if (lsMethod == "samg") {
-        if (blockDim > 1)    LS = new VectorSamgSolver;
-        else                 LS = new ScalarSamgSolver;
+        if (blockDim > 1)    LS = new VectorSamgSolver(blockDim, model);
+        else                 LS = new ScalarSamgSolver(blockDim, model);
     }
+#endif // WITH_SAMG
+
     else if (lsMethod == "fasp") {
         if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
         //if (blockDim > 1)    LS = new VectorFaspSolver;
@@ -200,7 +209,7 @@ void LinearSystem::SetupLinearSolver(const string& dir,
     }
 
     LS->SetupParam(dir, file);
-    LS->Allocate(max_nnz, maxDim, blockDim);
+    LS->Allocate(max_nnz, maxDim);
 }
 
 /*----------------------------------------------------------------------------*/

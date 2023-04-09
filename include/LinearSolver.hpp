@@ -34,8 +34,7 @@ public:
 
     /// Allocate maximum memory for linear solvers.
     virtual void Allocate(const OCP_USI&     max_nnz,
-                          const OCP_USI&     maxDim,
-                          const USI&         blockDim) = 0;
+                          const OCP_USI&     maxDim) = 0;
 
     /// Calculate terms used in communication
     virtual void CalCommTerm(const USI& actWellNum, const Domain* domain) = 0;

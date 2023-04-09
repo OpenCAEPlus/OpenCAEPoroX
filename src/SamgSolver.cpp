@@ -11,13 +11,15 @@
  *-----------------------------------------------------------------------------------
  */
 
+#ifdef WITH_SAMG
+
 #include "SamgSolver.hpp"
 
 
 /// Set parameters.
 void SamgSolver::SetupParam(const string& dir, const string& file)
 {
-
+    InitParam();
 }
 
 
@@ -29,14 +31,20 @@ void SamgSolver::InitParam()
 
 
 /// Allocate memoery for pardiso solver
-void SamgSolver::Allocate(const OCP_USI& max_nnz,
-    const OCP_USI& maxDim,
-    const USI& blockDim)
+void SamgSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
 {
-    blockdim = blockDim;
     iA.resize(maxDim * blockdim + 1);
     jA.resize(max_nnz * blockdim * blockdim);
     A.resize(max_nnz * blockdim * blockdim);
+
+    if (nsys > 1) {
+        iu.resize(maxDim * blockdim);
+        ip.resize(maxDim * blockdim);
+        for (OCP_INT n = 0; n < maxDim; n++) {
+            copy(iu_tmp.begin(), iu_tmp.end(), &iu[n * blockdim]);
+            fill(ip.data() + n * blockdim, ip.data() + n * blockdim + blockdim, n + 1);
+        }
+    }
 }
 
 
@@ -50,7 +58,7 @@ void SamgSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
     ipts.resize(npsnd + 1, 1);
     nshalo = 0;
     for (USI s = 0; s < npsnd; s++) {
-        iranksnd[s] = sel[s][0];
+        iranksnd[s] = sel[s][0]; 
         nshalo += (sel[s].size() - 1) * blockdim;
         ipts[s + 1] = nshalo + 1;
     }
@@ -124,9 +132,9 @@ void ScalarSamgSolver::AssembleMat(const vector<vector<USI>>& colId,
     vector<OCP_DBL>& rhs,
     vector<OCP_DBL>& u)
 {
-
-    b = rhs.data();
-    x = u.data();
+    nnu = dim;
+    b   = rhs.data();
+    x   = u.data();
 
     iA[0] = 1; // 1-baesd index
     for (OCP_USI i = 1; i < dim + 1; i++) {
@@ -149,6 +157,8 @@ void ScalarSamgSolver::AssembleMat(const vector<vector<USI>>& colId,
             b[i - 1] = -b[i - 1];
         }
     }
+
+    nna = iA[nnu] - 1;
 
     if (false) {
         int myrank;
@@ -181,7 +191,22 @@ void ScalarSamgSolver::AssembleMat(const vector<vector<USI>>& colId,
 /// Solve the linear system.
 OCP_INT SamgSolver::Solve()
 {
+    //exemplary demonstration of how to set secondary control parameters of SAMG:
+    // int levelx = 25; 
+    // SAMG_SET_LEVELX(&levelx);
 
+    //SAMGP_OIL(&nnu, &nna, &nsys,
+    //    &iA[0], &jA[0], &A[0], &b[0], &x[0], &iu[0], &ndiu, &ip[0], &ndip, &samg_matrix,
+    //    &res_in, &res_out, &ncyc_done, &ierr,
+    //    &ifirst, &eps, &ncyc, &iswtch,
+    //    &a_cmplx, &g_cmplx, &p_cmplx, &w_avrge,
+    //    &chktol, &idump, &iout,
+    //    &nunknown_description[0], &noil_approach,
+    //    &noil_cyc, &noil_preparation,
+    //    &nshalo, &npsnd, &iranksnd[0], &ipts[0], &isndlist[0],
+    //    &nrhalo, &nprec, &irankrec[0], &iptr[0], &ireclist[0], &myComm);
+
+    return ierr;
 }
 
 
@@ -192,9 +217,11 @@ void VectorSamgSolver::AssembleMat(const vector<vector<USI>>& colId,
     vector<OCP_DBL>& rhs,
     vector<OCP_DBL>& u)
 {
-
-    b = rhs.data();
-    x = u.data();
+    nnu  = dim * blockdim;
+    ndiu = nnu;
+    ndip = nnu;
+    b   = rhs.data();
+    x   = u.data();
 
     const USI blockSize = blockdim * blockdim;
     // Assemble iA, jA, A
@@ -233,9 +260,11 @@ void VectorSamgSolver::AssembleMat(const vector<vector<USI>>& colId,
             }
         }
     }
+
+    nna = iA[nnu] - 1;
 }
 
-
+#endif // WITH_SAMG
 
 
  /*----------------------------------------------------------------------------*/
