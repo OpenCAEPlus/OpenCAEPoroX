@@ -25,7 +25,7 @@
 #include "DenseMat.hpp"
 #include "PardisoSolver.hpp"
 #include "SamgSolver.hpp"
-//#include "FaspSolver.hpp"
+#include "FaspSolver.hpp"
 
 using namespace std;
 

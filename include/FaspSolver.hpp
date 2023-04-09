@@ -21,9 +21,19 @@
 
 // faspsolver header files
 extern "C" {
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   double
+
 #include "fasp.h"
 #include "fasp_block.h"
 #include "fasp_functs.h"
+
+#undef SHORT
+#undef INT 
+#undef LONG
+#undef REAL
 }
 
 // faspcpr header files
@@ -37,8 +47,18 @@ extern "C" {
 // fasp4blkoil header files
 #if WITH_FASP4BLKOIL
 extern "C" {
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   double
+
 #include "fasp4blkoil.h"
 #include "fasp4blkoil_functs.h"
+
+#undef SHORT
+#undef INT 
+#undef LONG
+#undef REAL
 }
 #endif
 

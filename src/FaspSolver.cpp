@@ -136,17 +136,13 @@ void ScalarFaspSolver::AssembleMat(const vector<vector<USI>>&     colId,
     A.nnz = nnz;
 
     // IA
-    OCP_USI count = 0;
     A.IA[0]       = 0;
     for (OCP_USI i = 1; i < dim + 1; i++) {
         USI nnz_Row = colId[i - 1].size();
         A.IA[i]     = A.IA[i - 1] + nnz_Row;
 
-        for (USI j = 0; j < nnz_Row; j++) {
-            A.JA[count]  = colId[i - 1][j];
-            A.val[count] = val[i - 1][j];
-            count++;
-        }
+        copy(colId[i - 1].begin(), colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
+        copy(val[i - 1].begin(), val[i - 1].end(), &A.val[A.IA[i - 1]]);
     }
 
 #ifdef DEBUG
@@ -272,11 +268,11 @@ OCP_INT ScalarFaspSolver::Solve()
 void VectorFaspSolver::Allocate(const OCP_USI&     max_nnz,
                                 const OCP_USI&     maxDim)
 {
-    A     = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockDim, 0);
-    Asc   = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockDim, 0);
-    fsc   = fasp_dvec_create(maxDim * blockDim);
+    A     = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockdim, 0);
+    Asc   = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockdim, 0);
+    fsc   = fasp_dvec_create(maxDim * blockdim);
     order = fasp_ivec_create(maxDim);
-    Dmat.resize(maxDim * blockDim * blockDim);
+    Dmat.resize(maxDim * blockdim * blockdim);
 }
 
 void VectorFaspSolver::InitParam()
@@ -383,23 +379,14 @@ void VectorFaspSolver::AssembleMat(const vector<vector<USI>>&     colId,
     A.nb  = blockdim;
     A.NNZ = nnz;
 
-    OCP_USI count1 = 0;
-    OCP_USI count2 = 0;
-    OCP_USI size_row;
+    const USI block_size = blockdim * blockdim;
     A.IA[0] = 0;
     for (OCP_USI i = 1; i < dim + 1; i++) {
         USI nnb_Row = colId[i - 1].size();
         A.IA[i]     = A.IA[i - 1] + nnb_Row;
 
-        for (USI j = 0; j < nnb_Row; j++) {
-            A.JA[count1] = colId[i - 1][j];
-            count1++;
-        }
-        size_row = nnb_Row * blockdim * blockdim;
-        for (USI k = 0; k < size_row; k++) {
-            A.val[count2] = val[i - 1][k];
-            count2++;
-        }
+        copy(colId[i - 1].begin(), colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
+        copy(val[i - 1].begin(), val[i - 1].end(), &A.val[A.IA[i - 1] * block_size]);
     }
 
 #ifdef DEBUG

@@ -12,6 +12,11 @@
 #include "DenseMat.hpp"
 #include "FaspSolver.hpp"
 
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   double
+
 // ABF decoupling method
 static void decouple_abf(dBSRmat* A, REAL* diaginv, dBSRmat* B)
 {
