@@ -330,7 +330,7 @@ void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 2);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(PARDISOSOLVER, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    ls.SetupLinearSolver(ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void T_FIM::InitRock(Bulk& bk) const

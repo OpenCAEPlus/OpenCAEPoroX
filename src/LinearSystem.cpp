@@ -170,26 +170,35 @@ void LinearSystem::CheckSolution() const
 }
 
 /// Setup LinearSolver
-void LinearSystem::SetupLinearSolver(const USI&    i,
-                                     const string& dir,
+void LinearSystem::SetupLinearSolver(const string& dir,
                                      const string& file)
 {
     solveDir = dir;
-    switch (i) {
-        case PARDISOSOLVER:
-            // Pardiso
-            if (blockDim > 1)    LS = new VectorPardisoSolver;
-            else                 LS = new PardisoSolver;          
-            break;
-        case SAMGSOLVER:
-            // SAMG
-            if (blockDim > 1)    LS = new VectorSamgSolver;
-            else                 LS = new ScalarSamgSolver;
-            break;
-        default:
-            OCP_ABORT("Wrong Linear Solver type!");
-            break;
+    string lsMethod = file;
+    auto pos = lsMethod.find_last_of('.');
+    if (pos != string::npos) {
+        // given params
+        lsMethod = lsMethod.substr(pos + 1, lsMethod.size());
     }
+    transform(lsMethod.begin(), lsMethod.end(), lsMethod.begin(), ::tolower);
+
+    if (lsMethod == "pardiso") {
+        if (blockDim > 1)    LS = new VectorPardisoSolver;
+        else                 LS = new PardisoSolver;
+    }
+    else if (lsMethod == "samg") {
+        if (blockDim > 1)    LS = new VectorSamgSolver;
+        else                 LS = new ScalarSamgSolver;
+    }
+    else if (lsMethod == "fasp") {
+        if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
+        //if (blockDim > 1)    LS = new VectorFaspSolver;
+        //else                 LS = new ScalarFaspSolver;
+    }
+    else {
+        OCP_ABORT("Wrong Linear Solver type!");
+    }
+
     LS->SetupParam(dir, file);
     LS->Allocate(max_nnz, maxDim, blockDim);
 }
