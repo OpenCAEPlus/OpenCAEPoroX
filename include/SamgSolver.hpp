@@ -56,16 +56,16 @@ protected:
 
     // comunication
     int            myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
-    int*           npsnd;       ///< Total number of neighboring processors to send
-    int*           iranksnd;    ///< Rank of neighboring processors to send
+    int            npsnd;       ///< Total number of neighboring processors to send
+    vector<int>    iranksnd;    ///< Rank of neighboring processors to send
     int            nshalo;      ///< Total number of variables to send
-    int*           ipts;        ///< Range of variables to send in isndlist
-    int*           isndlist;    ///< Index of variables to send
-    int*           nprec;       ///< Total number of neighboring processors to receive
-    int*           irankrec;    ///< Rank of neighboring processors to receive
+    vector<int>    ipts;        ///< Range of variables to send in isndlist
+    vector<int>    isndlist;    ///< Index of variables to send
+    int            nprec;       ///< Total number of neighboring processors to receive
+    vector<int>    irankrec;    ///< Rank of neighboring processors to receive
     int            nrhalo;      ///< Total number of variables to receive
-    int*           iptr;        ///< Range of variables to receive in isndlist
-    int*           ireclist;    ///< Index of variables to recv
+    vector<int>    iptr;        ///< Range of variables to receive in isndlist
+    vector<int>    ireclist;    ///< Index of variables to recv
 
 };
 

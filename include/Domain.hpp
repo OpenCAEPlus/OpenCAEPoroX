@@ -33,12 +33,15 @@ class Domain
 	friend class Well;
 	friend class LinearSystem;
 
-	// tmp 
+	// Method(tmp)
 	friend class IsoT_IMPEC;
 	friend class IsoT_FIM;
 	friend class IsoT_FIMn;
 	friend class IsoT_AIMc;
 	friend class T_FIM;
+
+	// Linear Solver (tmp)
+	friend class SamgSolver;
 
 public:
 	void Setup(const Partition& part, const PreParamGridWell& gridwell);
@@ -116,8 +119,6 @@ protected:
 public:
 	OCP_INT GetPerfLocation(const OCP_USI& wId, const OCP_USI& tmpI, const OCP_USI& tmpJ, const OCP_USI& tmpK) const;
 };
-
-
 
 
 #endif
