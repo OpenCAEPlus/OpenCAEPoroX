@@ -94,7 +94,6 @@ void SamgSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
         }
     }
 
-
     if (domain->myrank == 2 && OCP_FALSE) {
         cout << npsnd << endl;
         for (const auto& s : iranksnd)

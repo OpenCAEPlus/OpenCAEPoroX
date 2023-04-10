@@ -215,7 +215,7 @@ TUNING
 
 
 METHOD
-FIM  fasp
+FIM  pardiso
 /
 
 TSTEP

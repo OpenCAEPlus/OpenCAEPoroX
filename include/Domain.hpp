@@ -48,6 +48,7 @@ public:
 	vector<OCP_USI> GetWell() const { return well; }
 	OCP_USI GetNumGridInterior()const { return numGridInterior; }
 
+public:
 	MPI_Comm      myComm;
 	OCP_INT       numproc, myrank;
 
@@ -70,7 +71,6 @@ protected:
 	vector<USI>             neighborNum; ///< num of neighbor of grids: well-included, self-included
 
 	map<OCP_USI, OCP_USI>   init_global_to_local; ///< interior grid & ghost grid
-
 
 	////////////////////////////////////////
 	// Communication

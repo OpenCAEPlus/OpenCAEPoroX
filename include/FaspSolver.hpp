@@ -47,10 +47,10 @@ extern "C" {
 // fasp4blkoil header files
 #if WITH_FASP4BLKOIL
 extern "C" {
-#define SHORT  short
-#define INT    int   
-#define LONG   long  
-#define REAL   double
+#define SHORT  short    // conflict with mpi
+#define INT    int      // conflict with mpi
+#define LONG   long     // conflict with mpi
+#define REAL   double   // conflict with mpi
 
 #include "fasp4blkoil.h"
 #include "fasp4blkoil_functs.h"

@@ -20,7 +20,9 @@
 #include "PreParamGridWell.hpp"
 
 // ParMetis
+#define rabs fabsf     // conflict with fasp
 #include <parmetis.h>
+#undef  rabs
 
 // standard
 #include <algorithm>
