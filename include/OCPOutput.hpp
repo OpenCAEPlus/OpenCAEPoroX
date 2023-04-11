@@ -176,13 +176,7 @@ public:
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
 private:
-    vector<OCP_DBL> time;  ///< current time
-    vector<OCP_DBL> dt;    ///< last time step
-    vector<OCP_DBL> dPmax; ///< maximum pressure change
-    vector<OCP_DBL> dVmax; ///< maximum relative error of between fluid volume and porosity volume
-    vector<OCP_DBL> dSmax; ///< maximum saturation change
-    vector<OCP_DBL> dNmax; ///< maximum components moles relative change
-    vector<OCP_DBL> cfl;   ///< maximum cfl number
+    vector<SumItem> Sumdata;
 };
 
 /// Basic grid properties for output

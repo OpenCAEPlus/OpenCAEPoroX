@@ -593,7 +593,6 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
 
     OCP_INT         bId = 0;
     USI             varlen = 0;
-    string          file;
     OCP_USI         rowNum;
 
     vector<SumItem> mySum;
@@ -609,11 +608,10 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
             OCP_ABORT("Failed to open the input file!");
         }
 
-        // Get file name and time steps
+        // Get time steps
         ReadLine(ifs, buffer, OCP_FALSE);
         for (USI i = 0; i < buffer.size(); i++) {
             if (buffer[i] == "--") {
-                file = buffer[i - 1];
                 rowNum = stoi(buffer[i + 1]);
                 break;
             }
@@ -722,27 +720,37 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
 void CriticalInfo::Setup(const OCP_DBL& totalTime)
 {
     // Allocate memory
-    const USI rc = totalTime / 0.5;
-    time.reserve(rc);
-    dt.reserve(rc);
-    dPmax.reserve(rc);
-    dVmax.reserve(rc);
-    dSmax.reserve(rc);
-    dNmax.reserve(rc);
-    cfl.reserve(rc);
+    const USI maxRowNum = totalTime;
+
+    Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
+    Sumdata.push_back(SumItem("dt", "-", "DAY", "fixed", maxRowNum));
+    Sumdata.push_back(SumItem("dPmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dVmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dSmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dNmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("CFL", "-", "-", "float", maxRowNum));
+
 }
 
 void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
 {
     const Bulk& bulk = rs.bulk;
 
-    time.push_back(ctrl.GetCurTime());
-    dt.push_back(ctrl.GetLastDt());
-    dPmax.push_back(bulk.GetdPmax());
-    dVmax.push_back(bulk.GeteVmax());
-    dSmax.push_back(bulk.GetdSmax());
-    dNmax.push_back(bulk.GetdNmax());
-    cfl.push_back(bulk.GetMaxCFL());
+    USI n = 0;
+    // Time
+    Sumdata[n++].val.push_back(ctrl.GetCurTime());
+    // Time step
+    Sumdata[n++].val.push_back(ctrl.GetLastDt());
+    // dPmax
+    Sumdata[n++].val.push_back(bulk.GetdPmax());
+    // dVmax
+    Sumdata[n++].val.push_back(bulk.GeteVmax());
+    // dSmax
+    Sumdata[n++].val.push_back(bulk.GetdSmax());
+    // dNmax
+    Sumdata[n++].val.push_back(bulk.GetdNmax());
+    // CFL
+    Sumdata[n++].val.push_back(bulk.GetMaxCFL());
 }
 
 void CriticalInfo::PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const
@@ -761,37 +769,32 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
         OCP_ABORT("Can not open " + FileOut);
     }
 
-    outF << "FastReview OF RUN " + dir + filename << " -- " << time.size() << " time step\n";
+    outF << "FastReview OF RUN " + dir + filename << " -- " << Sumdata[0].val.size() << " time step\n";
 
     // Item
-    outF << setw(ns) << "Time";
-    outF << setw(ns) << "dt";
-    outF << setw(ns) << "dPmax";
-    outF << setw(ns) << "dVmax";
-    outF << setw(ns) << "dSmax";
-    outF << setw(ns) << "dNmax";
-    outF << setw(ns) << "CFL" << endl;
+    for (const auto& v : Sumdata) {
+        outF << setw(ns) << v.Item;
+    }
+    outF << "\n";
     // Unit
-    outF << setw(ns) << "Days";
-    outF << setw(ns) << "Days";
-    outF << setw(ns) << "Psia";
-    outF << setw(ns) << "    ";
-    outF << setw(ns) << "    ";
-    outF << setw(ns) << "    ";
-    outF << setw(ns) << "    " << endl;
-
-    USI n = time.size();
-    for (USI i = 0; i < n; i++) {
-        outF << setw(ns) << fixed << setprecision(3) << time[i];
-        outF << setw(ns) << fixed << setprecision(3) << dt[i];
-        outF << setw(ns) << scientific << setprecision(3) << dPmax[i];
-        outF << setw(ns) << scientific << setprecision(3) << dVmax[i];
-        outF << setw(ns) << scientific << setprecision(3) << dSmax[i];
-        outF << setw(ns) << scientific << setprecision(3) << dNmax[i];
-        outF << setw(ns) << scientific << setprecision(3) << cfl[i];
+    for (const auto& v : Sumdata) {
+        outF << setw(ns) << v.Unit;
+    }
+    outF << "\n";
+    // Value
+    const OCP_USI num = Sumdata[0].val.size();
+    for (OCP_USI n = 0; n < num; n++) {
+        for (const auto& v : Sumdata) {
+            if (v.Type == "fixed") {
+                outF << fixed << setprecision(3);
+            }
+            else if (v.Type == "float") {
+                outF << scientific << setprecision(3);
+            }
+            outF << setw(ns) << v.val[n];
+        }
         outF << "\n";
     }
-
     outF.close();
 }
 
@@ -799,7 +802,10 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
 /// Combine all files into 1 by Master process
 void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
-    string          file;
+
+    vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
+    sumdata->clear();
+
     OCP_USI         rowNum;
     vector<string>  buffer;
 
@@ -812,17 +818,60 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
             OCP_ABORT("Failed to open the input file!");
         }
 
-        // Get file name and time steps
-        ReadLine(ifs, buffer, OCP_FALSE);
-        for (USI i = 0; i < buffer.size(); i++) {
-            if (buffer[i] == "--") {
-                file   = buffer[i - 1];
-                rowNum = stoi(buffer[i + 1]);
-                break;
+        if (p == 0) {
+            // Get time steps
+            ReadLine(ifs, buffer, OCP_FALSE);
+            for (USI i = 0; i < buffer.size(); i++) {
+                if (buffer[i] == "--") {
+                    rowNum = stoi(buffer[i + 1]);
+                    break;
+                }
+            }
+            // Get Item
+            ReadLine(ifs, buffer, OCP_FALSE);
+            for (USI i = 0; i < buffer.size(); i++) {
+                sumdata->push_back(SumItem(buffer[i], rowNum));
+            }
+            // Get Unit
+            ReadLine(ifs, buffer, OCP_FALSE);
+            for (USI i = 0; i < buffer.size(); i++) {
+                sumdata->at(i).Unit = buffer[i];
+            }
+            // Get val
+            for (OCP_USI n = 0; n < rowNum; n++) {
+                ReadLine(ifs, buffer, OCP_FALSE);
+                for (USI i = 0; i < buffer.size(); i++) {
+                    sumdata->at(i).val.push_back(stod(buffer[i]));
+                }
             }
         }
-
+        else {
+            // skip first three lines
+            ReadLine(ifs, buffer, OCP_FALSE);
+            ReadLine(ifs, buffer, OCP_FALSE);
+            ReadLine(ifs, buffer, OCP_FALSE);
+            // Get val
+            for (OCP_USI n = 0; n < rowNum; n++) {
+                ReadLine(ifs, buffer, OCP_FALSE);
+                for (USI i = 2; i < buffer.size(); i++) {
+                    sumdata->at(i).val[n] = max(sumdata->at(i).val[n], stod(buffer[i]));
+                }
+            }
+        }
+        ifs.close();
+        if (remove(myFile.c_str()) != 0) {
+            OCP_WARNING("Failed to delete " + myFile);
+        }
     }
+    for (auto& v : *sumdata) {
+        if (v.Item == "TIME" || v.Item == "dt") {
+            v.Type = "fixed";
+        }
+        else {
+            v.Type = "float";
+        }
+    }
+    PrintFastReview(dir, filename, -1);
 }
 
 
@@ -1272,6 +1321,7 @@ void OCPOutput::PrintInfo() const
     if (myrank == MASTER_PROCESS && numproc > 1) {
         // post process
         summary.PostProcess(workDir, fileName, numproc);
+        crtInfo.PostProcess(workDir, fileName, numproc);
     }
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
