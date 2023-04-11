@@ -15,6 +15,7 @@
 // Standard header files
 #include <iomanip>
 #include <iostream>
+#include <cstdio>
 
 // OpenCAEPoroX header files
 #include "OCPControl.hpp"
@@ -108,13 +109,13 @@ public:
 class Summary
 {
 public:
-    /// TODO: Add Doxygen
+    /// Input var names those will be printed
     void InputParam(const OutputSummary& summary_param);
 
-    /// TODO: Add Doxygen
+    /// Setup outputting structure
     void Setup(const Reservoir& reservoir, const OCP_DBL& totalTime);
 
-    /// TODO: Add Doxygen
+    /// Set value for vars
     void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
 
     /// Write output information to a file.
@@ -162,23 +163,26 @@ protected:
 class CriticalInfo
 {
 public:
-    /// TODO: Add Doxygen
+    /// Setup vars to print and reserve memory
     void Setup(const OCP_DBL& totalTime);
 
-    /// TODO: Add Doxygen
+    /// Set values for vars
     void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
 
-    /// TODO: Add Doxygen
-    void PrintFastReview(const string& dir, const OCP_INT& rank) const;
+    /// Print to file
+    void PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const;
+
+    /// Combine all files into 1 by Master process
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
 private:
-    vector<OCP_DBL> time;  ///< TODO: Add Doxygen
-    vector<OCP_DBL> dt;    ///< TODO: Add Doxygen
-    vector<OCP_DBL> dPmax; ///< TODO: Add Doxygen
-    vector<OCP_DBL> dVmax; ///< TODO: Add Doxygen
-    vector<OCP_DBL> dSmax; ///< TODO: Add Doxygen
-    vector<OCP_DBL> dNmax; ///< TODO: Add Doxygen
-    vector<OCP_DBL> cfl;   ///< TODO: Add Doxygen
+    vector<OCP_DBL> time;  ///< current time
+    vector<OCP_DBL> dt;    ///< last time step
+    vector<OCP_DBL> dPmax; ///< maximum pressure change
+    vector<OCP_DBL> dVmax; ///< maximum relative error of between fluid volume and porosity volume
+    vector<OCP_DBL> dSmax; ///< maximum saturation change
+    vector<OCP_DBL> dNmax; ///< maximum components moles relative change
+    vector<OCP_DBL> cfl;   ///< maximum cfl number
 };
 
 /// Basic grid properties for output

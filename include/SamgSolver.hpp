@@ -18,6 +18,7 @@
 #define __SAMGSOLVER_HEADER__
 
 #include "LinearSolver.hpp"
+#include "samg.h"
 
 using namespace std;
 

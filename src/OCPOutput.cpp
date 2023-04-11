@@ -652,6 +652,9 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
         }
 
         ifs.close();
+        if (remove(myFile.c_str()) != 0) {
+            OCP_WARNING("Failed to delete " + myFile);
+        }
     }
 
     // post process
@@ -719,7 +722,7 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
 void CriticalInfo::Setup(const OCP_DBL& totalTime)
 {
     // Allocate memory
-    USI rc = totalTime / 0.1;
+    const USI rc = totalTime / 0.5;
     time.reserve(rc);
     dt.reserve(rc);
     dPmax.reserve(rc);
@@ -742,7 +745,7 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     cfl.push_back(bulk.GetMaxCFL());
 }
 
-void CriticalInfo::PrintFastReview(const string& dir, const OCP_INT& rank) const
+void CriticalInfo::PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const
 {
     string   FileOut;
     if (rank >= 0) {
@@ -757,6 +760,8 @@ void CriticalInfo::PrintFastReview(const string& dir, const OCP_INT& rank) const
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + FileOut);
     }
+
+    outF << "FastReview OF RUN " + dir + filename << " -- " << time.size() << " time step\n";
 
     // Item
     outF << setw(ns) << "Time";
@@ -789,6 +794,37 @@ void CriticalInfo::PrintFastReview(const string& dir, const OCP_INT& rank) const
 
     outF.close();
 }
+
+
+/// Combine all files into 1 by Master process
+void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+{
+    string          file;
+    OCP_USI         rowNum;
+    vector<string>  buffer;
+
+    for (USI p = 0; p < numproc; p++) {
+        const string myFile = dir + "proc_" + to_string(p) + "_FastReview.out";
+        ifstream ifs(myFile, ios::in);
+
+        if (!ifs) {
+            OCP_MESSAGE("Trying to open file: " << (myFile));
+            OCP_ABORT("Failed to open the input file!");
+        }
+
+        // Get file name and time steps
+        ReadLine(ifs, buffer, OCP_FALSE);
+        for (USI i = 0; i < buffer.size(); i++) {
+            if (buffer[i] == "--") {
+                file   = buffer[i - 1];
+                rowNum = stoi(buffer[i + 1]);
+                break;
+            }
+        }
+
+    }
+}
+
 
 void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param)
 {
@@ -1230,7 +1266,7 @@ void OCPOutput::PrintInfo() const
     timer.Start();
 
     summary.PrintInfo(workDir, fileName, (numproc > 1 ? myrank : -1));
-    crtInfo.PrintFastReview(workDir, (numproc > 1 ? myrank : -1));
+    crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1));
 
     MPI_Barrier(myComm);
     if (myrank == MASTER_PROCESS && numproc > 1) {
