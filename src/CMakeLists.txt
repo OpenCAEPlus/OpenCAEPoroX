@@ -1,9 +1,9 @@
 target_sources(
   OpenCAEPoroX
-  PRIVATE AllWells.cpp
+  PRIVATE AcceleratePVT.cpp
+		  AllWells.cpp
 		  BulkConn.cpp
 		  Bulk.cpp
-		  CMakeLists.txt
 		  CornerGrid.cpp
 		  Decoupling.cpp
 		  DenseMat.cpp
