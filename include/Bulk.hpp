@@ -467,8 +467,8 @@ protected:
     OCP_DBL eVmax; ///< Max relative diff between fluid and pore volume during the
                    ///< current time step.
 
-    mutable vector<OCP_DBL> cfl;    ///< CFL number for each bulk
-    mutable OCP_DBL         maxCFL{ 0 }; ///< max CFL number
+    mutable vector<OCP_DBL> cfl;             ///< CFL number for each bulk
+    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number
     mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
 
     /////////////////////////////////////////////////////////////////////

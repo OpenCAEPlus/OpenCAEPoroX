@@ -204,8 +204,7 @@ protected:
     void CalDepthVOrthogonalGrid();
     /// Setup the neighboring info for an orthogonal grid.
     void SetupActiveConnOrthogonalGrid();
-    /// Output grid points for orthogonal grid.
-    void OutputPointsOrthogonalGrid();
+    
 
     /// Setup corner-point grid.
     void SetupCornerGrid();
@@ -213,8 +212,7 @@ protected:
     void SetupBasicCornerGrid(const OCP_COORD& CoTmp);
     /// Setup the neighboring info for a corner-point grid.
     void SetupActiveConnCornerGrid(const OCP_COORD& CoTmp);
-    /// Output grid points for corner-point grid.
-    void OutputPointsCornerGrid(const OCP_COORD& mycord);
+    
 
     /// Calculate the activity of grid cells
     void CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2);
@@ -271,7 +269,13 @@ protected:
 
 public:
     void OutputBaiscInfo() const;   ///< Calculate and return basic informations for grid
+    /// Output grid points for orthogonal grid.
+    void OutputPointsOrthogonalGrid();
+    /// Output grid points for corner-point grid.
+    void OutputPointsCornerGrid(const OCP_COORD& mycord);
 
+protected:
+    OCP_BOOL ifUseVtk{ OCP_FALSE };
 
 public:
     void FreeMemory();

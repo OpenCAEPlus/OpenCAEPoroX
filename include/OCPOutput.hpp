@@ -320,14 +320,20 @@ class OCPOutput
     friend class OpenCAEPoroX;
 
 public:
-    void     InputParam(const ParamOutput& paramOutput);
-    void     Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
-    void     SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
-    void     PrintInfo(const OCP_BOOL& postprocess = OCP_FALSE) const;
-    void     PrintInfoSched(const Reservoir&  rs,
+    /// Input Params about output
+    void InputParam(const ParamOutput& paramOutput);
+    /// Setup all kinds of output
+    void Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
+    /// Assign values to be output in PrintInfo()
+    void  SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
+    /// Output info which is each time step based
+    void PrintInfo() const;
+    /// Output info which is Keyword TSTEP based
+    void PrintInfoSched(const Reservoir&  rs,
                             const OCPControl& ctrl,
                             const OCP_DBL&    time) const;
-    OCP_BOOL IfOutputVTK() const { return out4VTK.IfOutputVTK(); }
+    /// Post-process the output file
+    void PostProcess() const;
 
 protected:
     MPI_Comm  myComm;

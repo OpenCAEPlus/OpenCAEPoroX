@@ -1257,20 +1257,13 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl)
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
-void OCPOutput::PrintInfo(const OCP_BOOL& postprocess) const
+void OCPOutput::PrintInfo() const
 {
     GetWallTime timer;
     timer.Start();
 
     summary.PrintInfo(workDir, fileName, (numproc > 1 ? myrank : -1));
     crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1));
-
-    MPI_Barrier(myComm);
-    if (myrank == MASTER_PROCESS && numproc > 1 && postprocess) {
-        // post process
-        summary.PostProcess(workDir, fileName, numproc);
-        crtInfo.PostProcess(workDir, fileName, numproc);
-    }
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
@@ -1295,6 +1288,23 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     //out4RPT.PrintRPT(workDir, rs, days);
     out4VTK.PrintVTK(rs);
     OCPTIME_OUTPUT += timer.Stop() / 1000;
+}
+
+
+void OCPOutput::PostProcess() const
+{
+    MPI_Barrier(myComm);
+    if (numproc > 1 && myrank == MASTER_PROCESS) {
+
+        GetWallTime timer;
+        timer.Start();
+
+        // post process
+        summary.PostProcess(workDir, fileName, numproc);
+        crtInfo.PostProcess(workDir, fileName, numproc);
+
+        OCPTIME_OUTPUT += timer.Stop() / 1000;
+    }
 }
 
 /*----------------------------------------------------------------------------*/

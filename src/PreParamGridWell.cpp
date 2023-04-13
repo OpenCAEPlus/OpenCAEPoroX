@@ -622,8 +622,8 @@ void PreParamGridWell::SetupOrthogonalGrid()
     CalDepthVOrthogonalGrid();
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnOrthogonalGrid();
-    if (OCP_FALSE)
-        OutputPointsOrthogonalGrid();
+
+    OutputPointsOrthogonalGrid();
 }
 
 void PreParamGridWell::CalDepthVOrthogonalGrid()
@@ -724,6 +724,8 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
 
 void PreParamGridWell::OutputPointsOrthogonalGrid()
 {
+    if (!ifUseVtk)  return;
+
     vector<OCP_DBL> points_xyz;
     points_xyz.reserve(activeGridNum * 8 * 3);
     OCP_DBL         tmpX, tmpY;
@@ -793,8 +795,7 @@ void PreParamGridWell::SetupCornerGrid()
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnCornerGrid(coordTmp);
 
-    if (OCP_FALSE)
-        OutputPointsCornerGrid(coordTmp);
+    OutputPointsCornerGrid(coordTmp);
 }
 
 void PreParamGridWell::SetupBasicCornerGrid(const OCP_COORD& CoTmp)
@@ -839,6 +840,8 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 
 void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 {
+    if (!ifUseVtk)  return;
+
     vector<OCP_DBL> points_xyz;
     points_xyz.reserve(activeGridNum * 8 * 3);
     OCP_USI id;

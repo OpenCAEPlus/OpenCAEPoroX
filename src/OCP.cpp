@@ -136,7 +136,8 @@ void OpenCAEPoroX::OutputResults() const
 {
     GetWallTime timer;
     timer.Start();
-    output.PrintInfo(OCP_TRUE);
+    output.PrintInfo();
+    output.PostProcess();
     OCPTIME_TOTAL += timer.Stop() / 1000;
     // find an appropriate size for printing times
     int fixWidth = MAX(log10(control.current_time), log10(MAX(OCPTIME_TOTAL, 1.0))) + 6;
