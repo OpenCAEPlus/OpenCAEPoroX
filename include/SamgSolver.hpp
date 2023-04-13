@@ -49,62 +49,63 @@ public:
 protected:
 
     // CSR Mat
-    int            blockdim;
-    vector<int>    iA;
-    vector<int>    jA;
-    vector<double> A;
+    SAMG_INT            blockdim;
+    vector<SAMG_INT>    iA;
+    vector<SAMG_INT>    jA;
+    vector<SAMG_REAL>   A;
 
-    double*        b = nullptr;
-    double*        x = nullptr;
+    SAMG_REAL*          b = nullptr;
+    SAMG_REAL*          x = nullptr;
 
     // Physical Info
-    int           nsys;         ///< num of systems(physical variable type)
-    int           nnu;          ///< number of (local) variables
-    int           nna;          ///< number of matrix entries stored in the (local) vector a(local nnz)
-    int           ndiu;         ///< size of iu
-    int           ndip;         ///< size of ip
-    vector<int>   iu;           ///< variable-to-unknown pointer: dim
-    vector<int>   ip;           ///< variable-to-point pointer: dim
-    vector<int>   iu_tmp;       ///< template of iu: blockdim
-    vector<int>   nunknown_description;
+    SAMG_INT           nsys;         ///< Number of unknowns(physical variable type)
+    SAMG_INT           nnu;          ///< number of (local) variables
+    SAMG_INT           nna;          ///< number of matrix entries stored in the (local) vector a(local nnz)
+    SAMG_INT           ndiu;         ///< size of iu
+    SAMG_INT           ndip;         ///< size of ip
+    vector<SAMG_INT>   iu;           ///< variable-to-unknown pointer: nnu
+    vector<SAMG_INT>   ip;           ///< variable-to-point pointer: nnu
+    vector<SAMG_INT>   iu_tmp;       ///< template of iu: blockdim
+    vector<SAMG_INT>   nunknown_description;
     
-
     // comunication
-    int            myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
-    int            npsnd;       ///< Total number of neighboring processors to send
-    vector<int>    iranksnd;    ///< Rank of neighboring processors to send
-    int            nshalo;      ///< Total number of variables to send
-    vector<int>    ipts;        ///< Range of variables to send in isndlist
-    vector<int>    isndlist;    ///< Index of variables to send
-    int            nprec;       ///< Total number of neighboring processors to receive
-    vector<int>    irankrec;    ///< Rank of neighboring processors to receive
-    int            nrhalo;      ///< Total number of variables to receive
-    vector<int>    iptr;        ///< Range of variables to receive in isndlist
-    vector<int>    ireclist;    ///< Index of variables to recv
+    SAMG_INT            myComm = (SAMG_INT)MPI_Comm_c2f(MPI_COMM_WORLD);
+    SAMG_INT            npsnd;       ///< Total number of neighboring processors to send
+    vector<SAMG_INT>    iranksnd;    ///< Rank of neighboring processors to send
+    SAMG_INT            nshalo;      ///< Total number of variables to send
+    vector<SAMG_INT>    ipts;        ///< Range of variables to send in isndlist
+    vector<SAMG_INT>    isndlist;    ///< Index of variables to send
+    SAMG_INT            nprec;       ///< Total number of neighboring processors to receive
+    vector<SAMG_INT>    irankrec;    ///< Rank of neighboring processors to receive
+    SAMG_INT            nrhalo;      ///< Total number of variables to receive
+    vector<SAMG_INT>    iptr;        ///< Range of variables to receive in isndlist
+    vector<SAMG_INT>    ireclist;    ///< Index of variables to recv
+
+    const vector<OCP_USI>* global_index;
 
 protected:
     // Samg params
-    int            noil_approach            = 12;
-    int            noil_cyc                 = 19;
-    double         noil_preparation         = 19.4;   
-    int            ierr                     = 0;
-    int            samg_matrix              = 220;
-    int            ncyc_done                = 0;
-    double         res_in                   = 0;
-    double         res_out                  = 0;
+    SAMG_INT          noil_approach            = 12;
+    SAMG_INT          noil_cyc                 = 19;
+    SAMG_REAL         noil_preparation         = 19.4;
+    SAMG_INT          ierr                     = 0;      ///< Code number indicating errors or warnings.
+    SAMG_INT          samg_matrix              = 220;    ///< Type of the matrix A
+    SAMG_INT          ncyc_done                = 0;      ///< Total number of cycles (iterations) performed.
+    SAMG_REAL         res_in                   = 0;      ///< Residual of first guess.
+    SAMG_REAL         res_out                  = 0;      ///< Residual of final approximation.
     
-    int            nsolve                   = 2;      ///< AMG approach
-    int            ncyc                     = 11030;  ///< type of cycling. Here: CG/V-Cycle, maixmally 30 iterations
-    int            ifirst                   = 1;      ///< which first guess (0=input vector u; 1=zero)
-    int            iswtch                   = 51;     ///< various controls; see manual
-    int            iout                     = 2;      ///< amount of screen output
-    int            idump                    = 0;      ///< dumping of matrices/operators
-    double         eps                      = 1.0e-4; ///< <solution tolerance
-    double         chktol                   = -1.0e0; ///< switch off internal sanity checks
-    double         a_cmplx                  = 2.2e0;  ///< dimension estimate
-    double         g_cmplx                  = 1.7e0;  ///< dimension estimate
-    double         p_cmplx                  = 0.0e0;  ///< dimension estimate; irrelevant in the nsys=1 case
-    double         w_avrge                  = 2.4e0;  ///< dimension estimate
+    SAMG_INT          nsolve                   = 2;      ///< Specifies SAMG¡¯s solution strategy. Suggested choice.
+    SAMG_INT          ncyc                     = 13050;  ///< Cycling and acceleration strategy. Suggested choice.
+    SAMG_INT          ifirst                   = 1;      ///< Selects first approximation for guess
+    SAMG_INT          iswtch                   = 51;     ///< Memory extension switch
+    SAMG_INT          iout                     = 2;      ///< Print output during the solution phase
+    SAMG_INT          idump                    = 0;      ///< Print output during the setup phase
+    SAMG_REAL         eps                      = 1.0e-4; ///< Standard stopping criterion for the AMG iteration
+    SAMG_REAL         chktol                   = -1.0;   ///< Checking of input matrix
+    SAMG_REAL         a_cmplx                  = 2.5;    ///< used to allocate SAMG¡¯s initial memory
+    SAMG_REAL         g_cmplx                  = 1.8;    ///< used to allocate SAMG¡¯s initial memory
+    SAMG_REAL         p_cmplx                  = 2.0;    ///< used to allocate SAMG¡¯s initial memory
+    SAMG_REAL         w_avrge                  = 2.5;    ///< used to allocate SAMG¡¯s initial memory
 
 };
 
@@ -113,10 +114,12 @@ class ScalarSamgSolver : public SamgSolver
 {
 public:
     ScalarSamgSolver(const USI& blockDim, const USI& model) {
+        OCP_ASSERT(blockDim == 1, "Wrong Block Dimension!");
         blockdim = blockDim;
         nsys     = 1;
         ndiu     = 1;
         ndip     = 1;
+        ifirst   = 0;   // last solution as initial guess
     }
 
     /// Assemble coefficient matrix.
@@ -132,24 +135,19 @@ class VectorSamgSolver : public SamgSolver
 {
 public:
     VectorSamgSolver(const USI& blockDim, const USI& model) {
-        blockdim = blockDim;        
+        blockdim = blockDim;
+        nsys     = blockdim;
+        iu_tmp.resize(blockdim);
+        ifirst   = 1;   // zero solution as initial guess
+        for (USI i = 0; i < blockdim; i++)  iu_tmp[i] = i + 1;
         if (model == ISOTHERMALMODEL) {
-            nsys = 2; 
-            nunknown_description.resize(nsys);
-            nunknown_description[0] = 0;   // Pressure
-            nunknown_description[1] = 2;   // Concentration(init)
-            iu_tmp.resize(blockdim, 2);    // point to Concentration(init)
-            iu_tmp[0] = 1;                 // point to Pressure
+            nunknown_description.resize(nsys, 2);
+            nunknown_description[0] = 0;          // Pressure
         }
         else if (model == THERMALMODEL) {
-            nsys = 3;
-            nunknown_description.resize(nsys);
-            nunknown_description[0] = 0;     // Pressure
-            nunknown_description[1] = 2;     // Concentration(init)
-            nunknown_description[2] = 100;   // Temperature
-            iu_tmp.resize(blockdim, 2);       // point to Concentration(init)
-            iu_tmp[0] = 1;                   // point to Pressure
-            iu_tmp.front() = 3;              // point to Temperature
+            nunknown_description.resize(nsys, 2); // Concentration(init)
+            nunknown_description.front() = 0;     // Pressure
+            nunknown_description.back()  = 100;   // Temperature           
         }
         else                            OCP_ABORT("Wrong Model for SAMG Solver!");              
     }

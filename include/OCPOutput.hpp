@@ -19,7 +19,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPControl.hpp"
-// #include "Output4Vtk.hpp"
+#include "Output4Vtk.hpp"
 #include "ParamOutput.hpp"
 #include "Reservoir.hpp"
 #include "UtilOutput.hpp"
@@ -294,15 +294,18 @@ class Out4VTK
 {
 public:
     void InputParam(const OutputVTKParam& VTKParam);
-    //void Setup(const string& dir, const Reservoir& rs, const USI& ndates);
-    //void PrintVTK(const string& dir, const Reservoir& rs, const OCP_DBL& days) const;
+    void Setup(const string& dir, const Reservoir& rs);
+    void PrintVTK(const Reservoir& rs) const;
+    /// Combine all files into 1 by Master process
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
     OCP_BOOL IfOutputVTK() const { return useVTK; }
 
 private:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk
     mutable USI       index{0};          ///< Index of output file
     BasicGridProperty bgp;               ///< Basic grid information
-    // Output4Vtk        out4vtk;           ///< Output for vtk
+    Output4Vtk        out4vtk;           ///< Output for vtk
+    string            myFile;            ///< output file name
 
 };
 
@@ -320,7 +323,7 @@ public:
     void     InputParam(const ParamOutput& paramOutput);
     void     Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
     void     SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
-    void     PrintInfo() const;
+    void     PrintInfo(const OCP_BOOL& postprocess = OCP_FALSE) const;
     void     PrintInfoSched(const Reservoir&  rs,
                             const OCPControl& ctrl,
                             const OCP_DBL&    time) const;

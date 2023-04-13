@@ -622,6 +622,8 @@ void PreParamGridWell::SetupOrthogonalGrid()
     CalDepthVOrthogonalGrid();
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnOrthogonalGrid();
+    if (OCP_FALSE)
+        OutputPointsOrthogonalGrid();
 }
 
 void PreParamGridWell::CalDepthVOrthogonalGrid()
@@ -719,6 +721,68 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
     }
 }
 
+
+void PreParamGridWell::OutputPointsOrthogonalGrid()
+{
+    vector<OCP_DBL> points_xyz;
+    points_xyz.reserve(activeGridNum * 8 * 3);
+    OCP_DBL         tmpX, tmpY;
+    OCP_USI         id;
+    for (USI k = 0; k < nz; k++) {
+        tmpY = 0;
+        for (USI j = 0; j < ny; j++) {
+            tmpX = 0;
+            for (USI i = 0; i < nx; i++) {
+                id = k * nx * ny + j * nx + i;
+                if (map_All2Act[id].IsAct()) {
+                    points_xyz.push_back(tmpX);
+                    points_xyz.push_back(tmpY);
+                    points_xyz.push_back(depth[id] + dz[id] / 2);
+
+                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(tmpY);
+                    points_xyz.push_back(depth[id] + dz[id] / 2);
+
+                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(tmpY + dy[id]);
+                    points_xyz.push_back(depth[id] + dz[id] / 2);
+
+                    points_xyz.push_back(tmpX);
+                    points_xyz.push_back(tmpY + dy[id]);
+                    points_xyz.push_back(depth[id] + dz[id] / 2);
+
+                    points_xyz.push_back(tmpX);
+                    points_xyz.push_back(tmpY);
+                    points_xyz.push_back(depth[id] - dz[id] / 2);
+
+                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(tmpY);
+                    points_xyz.push_back(depth[id] - dz[id] / 2);
+
+                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(tmpY + dy[id]);
+                    points_xyz.push_back(depth[id] - dz[id] / 2);
+
+                    points_xyz.push_back(tmpX);
+                    points_xyz.push_back(tmpY + dy[id]);
+                    points_xyz.push_back(depth[id] - dz[id] / 2);
+                }
+                tmpX += dx[id];
+            }
+            tmpY += dy[id];
+        }
+    }
+    const string myFile = workdir + "points.out";
+    ofstream outF(myFile, ios::out | ios::binary);
+    if (!outF.is_open()) {
+        OCP_ABORT("Can not open " + myFile);
+    }
+    outF.write((const char*)&activeGridNum, sizeof(activeGridNum));
+    outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
+    outF.close();
+}
+
+
 void PreParamGridWell::SetupCornerGrid()
 {
     OCP_COORD coordTmp;
@@ -728,6 +792,9 @@ void PreParamGridWell::SetupCornerGrid()
     SetupBasicCornerGrid(coordTmp);
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnCornerGrid(coordTmp);
+
+    if (OCP_FALSE)
+        OutputPointsCornerGrid(coordTmp);
 }
 
 void PreParamGridWell::SetupBasicCornerGrid(const OCP_COORD& CoTmp)
@@ -767,6 +834,63 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
             gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
         }
     }
+}
+
+
+void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
+{
+    vector<OCP_DBL> points_xyz;
+    points_xyz.reserve(activeGridNum * 8 * 3);
+    OCP_USI id;
+
+    for (USI k = 0; k < nz; k++) {
+        for (USI j = 0; j < ny; j++) {
+            for (USI i = 0; i < nx; i++) {
+                id = k * nx * ny + j * nx + i;
+                if (map_All2Act[id].IsAct()) {
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.z);
+
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.x);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.y);
+                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.z);
+                }
+            }
+        }
+    }
+    const string myFile = workdir + "points.out";
+    ofstream outF(myFile, ios::out | ios::binary);
+    if (!outF.is_open()) {
+        OCP_ABORT("Can not open " + myFile);
+    }
+    outF.write((const char*)&activeGridNum, sizeof(activeGridNum));
+    outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
+    outF.close();
 }
 
 

@@ -78,7 +78,6 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 /// Assemble linear systems for IMPEC and FIM.
 void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 {
-
     // Assemble
     const OCP_DBL dt = ctrl.GetCurDt();
     GetWallTime timer;

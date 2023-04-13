@@ -1,0 +1,47 @@
+target_sources(
+  OpenCAEPoroX
+  PRIVATE AllWells.cpp
+		  BulkConn.cpp
+		  Bulk.cpp
+		  CMakeLists.txt
+		  CornerGrid.cpp
+		  Decoupling.cpp
+		  DenseMat.cpp
+		  Domain.cpp
+		  FaspSolver.cpp
+		  FlowUnit.cpp
+		  IsothermalSolver.cpp
+		  LinearSystem.cpp
+		  MixtureBO2_OW.cpp
+		  MixtureBO3_ODGW.cpp
+		  MixtureBO.cpp
+		  MixtureComp.cpp
+		  MixtureThermal_k.cpp
+		  OCPControl.cpp
+		  OCP.cpp
+		  OCPFluidMethod.cpp
+		  OCPOutput.cpp
+		  OCPTable.cpp
+		  OCPTimeRecord.cpp
+		  ParamControl.cpp
+		  ParamOutput.cpp
+		  ParamRead.cpp
+		  ParamReservoir.cpp
+		  ParamWell.cpp
+		  PardisoSolver.cpp
+		  Partition.cpp
+		  PhasePermeability.cpp
+		  PreParamGridWell.cpp
+		  PreProcess.cpp
+		  Reservoir.cpp
+		  Rock.cpp
+		  SamgSolver.cpp
+		  Solver.cpp
+		  ThermalMethod.cpp
+		  ThermalSolver.cpp
+		  UtilInput.cpp
+		  UtilOutput.cpp
+		  UtilTiming.cpp
+		  Well.cpp
+		  WellOpt.cpp)
+		 

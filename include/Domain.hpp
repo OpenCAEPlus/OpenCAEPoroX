@@ -47,6 +47,7 @@ public:
 	void Setup(const Partition& part, const PreParamGridWell& gridwell);
 	vector<OCP_USI> GetWell() const { return well; }
 	OCP_USI GetNumGridInterior()const { return numGridInterior; }
+	const vector<OCP_USI>& GetGrid()const { return grid; }
 
 public:
 	MPI_Comm      myComm;
@@ -96,7 +97,7 @@ protected:
 	// Global Index Communication
 	////////////////////////////////////////
 
-	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid
+	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid in equations
 
 
 	// If all grids are active, if not, record their global index(include inactive grid)

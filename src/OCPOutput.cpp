@@ -1186,96 +1186,44 @@ void Out4VTK::InputParam(const OutputVTKParam& VTKParam)
     bgp.SetBasicGridProperty(VTKParam.bgp);
 }
 
-//void Out4VTK::Setup(const string& dir, const Reservoir& rs, const USI& ndates)
-//{
-//    if (!useVTK) return;
-//
-//    string file = dir + "grid" + to_string(index) + ".vtk";
-//    string newfile;
-//    string title = "test";
-//
-//    const Grid& initGrid = rs.grid;
-//
-//    out4vtk.Init(file, title, VTK_ASCII, VTK_UNSTRUCTURED_GRID,
-//                 initGrid.polyhedronGrid.size(), rs.allWells.polyhedronWell.size());
-//    out4vtk.OutputPOINTS(file, initGrid.polyhedronGrid, rs.allWells.polyhedronWell,
-//                         VTK_FLOAT);
-//    out4vtk.OutputCELLS(file, initGrid.polyhedronGrid, rs.allWells.polyhedronWell);
-//    out4vtk.OutputCELL_TYPES(file, initGrid.polyhedronGrid, rs.allWells.polyhedronWell);
-//    out4vtk.BeginCellData();
-//    // output dead grid, live grid, well
-//    vector<USI> tmpW(rs.allWells.numWell, 10);
-//    out4vtk.OutputCELL_DATA_SCALARS(file, "CellType", VTK_UNSIGNED_INT,
-//                                    &initGrid.gridTag[0], 1, initGrid.map_All2Act,
-//                                    OCP_FALSE, &tmpW[0]);
-//
-//    for (USI i = 1; i < ndates; i++) {
-//        index++;
-//        newfile = dir + "grid" + to_string(index) + ".vtk";
-//        ;
-//        ifstream source(file, ios::binary);
-//        ofstream dest(newfile, ios::binary);
-//        dest << source.rdbuf();
-//        source.close();
-//        dest.close();
-//    }
-//    index = 0;
-//
-//#ifdef USE_METIS
-//    metisTest.Setup(rs);
-//#endif // USE_METIS
-//}
+void Out4VTK::Setup(const string& dir, const Reservoir& rs)
+{
+    if (!useVTK) return;
 
-//void Out4VTK::PrintVTK(const string&    dir,
-//                       const Reservoir& rs,
-//                       const OCP_DBL&   days) const
-//{
-//    if (!useVTK) return;
-//
-//    string file = dir + "grid" + to_string(index) + ".vtk";
-//    // Calulcate Well val for output
-//    rs.allWells.SetWellVal();
-//
-//    const Grid&            initGrid = rs.grid;
-//    const Bulk&            bulk     = rs.bulk;
-//    const vector<GB_Pair>& g2bp     = initGrid.map_All2Act;
-//    const vector<OCP_DBL>& well     = rs.allWells.wellVal;
-//    const vector<OCP_DBL>  well0(well.size(), 0);
-//    const USI              np       = bulk.numPhase;
-//    const USI              OIndex   = bulk.phase2Index[OIL];
-//    const USI              GIndex   = bulk.phase2Index[GAS];
-//    const USI              WIndex   = bulk.phase2Index[WATER];
-//
-//    // output
-//    if (bgp.PRE)
-//        out4vtk.OutputCELL_DATA_SCALARS(file, "PRESSURE", VTK_FLOAT, &bulk.P[0], 1,
-//                                        g2bp, OCP_TRUE, &well[0]);
-//    if (bgp.SOIL)
-//        out4vtk.OutputCELL_DATA_SCALARS(file, "SOIL", VTK_FLOAT, &bulk.S[OIndex], np,
-//                                        g2bp, OCP_TRUE, &well0[0]);
-//    if (bgp.SGAS)
-//        out4vtk.OutputCELL_DATA_SCALARS(file, "SGAS", VTK_FLOAT, &bulk.S[GIndex], np,
-//                                        g2bp, OCP_TRUE, &well0[0]);
-//    if (bgp.SWAT)
-//        out4vtk.OutputCELL_DATA_SCALARS(file, "SWAT", VTK_FLOAT, &bulk.S[WIndex], np,
-//                                        g2bp, OCP_TRUE, &well0[0]);
-//
-//#ifdef USE_METIS
-//    if (metisTest.useMetis) {
-//        // partition and print
-//        // vertex weights set to 1 now
-//        metisTest.vwgt.resize(metisTest.nvtxs, 1);
-//        // metisTest.MyPartitionFunc(METIS_PartGraphRecursive);
-//        metisTest.MyPartitionFunc(METIS_PartGraphKway);
-//        metisTest.SetPartitions(initGrid.map_Act2All);
-//        out4vtk.OutputCELL_DATA_SCALARS(file, "PARTIONS", VTK_UNSIGNED_INT,
-//                                        &metisTest.partitions[0], 1, g2bp, OCP_FALSE,
-//                                        &metisTest.partitions[metisTest.ng]);
-//    }
-//#endif // USE_METIS
-//
-//    index++;
-//}
+    // output the gloabl index of grids belonging to current domain
+    const Domain& doman = rs.domain;
+
+    if (doman.numproc > 1) {
+        myFile = dir + "proc" + to_string(doman.myrank) + ".vtktmp.out";
+    }
+    else {
+        myFile = dir + "main.vtktmp.out";
+    }
+      
+    ofstream outF(myFile, ios::out | ios::binary);
+    if (!outF.is_open()) {
+        OCP_ABORT("Can not open " + myFile);
+    }
+    if (doman.numproc > 1) {
+        const OCP_USI numInteriorGrid = doman.GetNumGridInterior();
+        outF.write((const char*)&numInteriorGrid, sizeof(numInteriorGrid));
+        outF.write((const char*)&doman.GetGrid()[0], doman.GetNumGridInterior() * sizeof(doman.GetGrid()[0]));
+    }
+    outF.close();
+}
+
+void Out4VTK::PrintVTK(const Reservoir& rs) const
+{
+    if (!useVTK) return;
+
+    ofstream outF(myFile, ios::app | ios::binary);
+    // output
+    const OCP_USI nb = rs.bulk.numBulkInterior;
+    if (bgp.PRE)
+        outF.write((const char*)&rs.bulk.P[0], nb * sizeof(rs.bulk.P[0]));
+              
+    outF.close();
+}
 
 void OCPOutput::InputParam(const ParamOutput& paramOutput)
 {
@@ -1295,7 +1243,7 @@ void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const 
     summary.Setup(reservoir, ctrl.criticalTime.back());
     crtInfo.Setup(ctrl.criticalTime.back());
     // out4RPT.Setup(workDir, reservoir);
-    // out4VTK.Setup(workDir, reservoir, ctrl.criticalTime.size());
+    out4VTK.Setup(workDir, reservoir);
 }
 
 void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl)
@@ -1309,7 +1257,7 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl)
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
-void OCPOutput::PrintInfo() const
+void OCPOutput::PrintInfo(const OCP_BOOL& postprocess) const
 {
     GetWallTime timer;
     timer.Start();
@@ -1318,7 +1266,7 @@ void OCPOutput::PrintInfo() const
     crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1));
 
     MPI_Barrier(myComm);
-    if (myrank == MASTER_PROCESS && numproc > 1) {
+    if (myrank == MASTER_PROCESS && numproc > 1 && postprocess) {
         // post process
         summary.PostProcess(workDir, fileName, numproc);
         crtInfo.PostProcess(workDir, fileName, numproc);
@@ -1345,7 +1293,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     GetWallTime timer;
     timer.Start();
     //out4RPT.PrintRPT(workDir, rs, days);
-    //out4VTK.PrintVTK(workDir, rs, days);
+    out4VTK.PrintVTK(rs);
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 

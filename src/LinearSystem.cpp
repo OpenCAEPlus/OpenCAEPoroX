@@ -18,7 +18,7 @@ void LinearSystem::AllocateRowMem(const USI& nb)
     dim       = 0;
     colId.resize(maxDim);
     val.resize(maxDim);
-    b.resize(maxDim * blockDim);
+    b.resize((maxDim + domain->numGridGhost) * blockDim);
     u.resize((maxDim + domain->numGridGhost) * blockDim);  // ghost is included
 }
 
