@@ -468,8 +468,8 @@ protected:
                    ///< current time step.
 
     mutable vector<OCP_DBL> cfl;    ///< CFL number for each bulk
-    mutable OCP_DBL         maxCFL; ///< max CFL number
-    mutable OCP_DBL         maxCFL_loc; ///< local maxCFL
+    mutable OCP_DBL         maxCFL{ 0 }; ///< max CFL number
+    mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
 
     /////////////////////////////////////////////////////////////////////
     // Error
