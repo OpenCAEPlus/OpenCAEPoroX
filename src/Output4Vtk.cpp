@@ -14,9 +14,7 @@
 void Output4Vtk::Init(const string&  myFile,
                       const string&  shortInfo,
                       const string&  myCodeWay,
-                      const string&  girdType,
-                      const VTK_USI& nG,
-                      const VTK_USI& nW)
+                      const string&  girdType)
 {
     ofstream myVtk(myFile);
     if (!myVtk.is_open()) {
@@ -45,11 +43,6 @@ void Output4Vtk::Init(const string&  myFile,
 
     myVtk << "\n";
     myVtk.close();
-
-    // Init numGrid and numGrid
-    numGrid = nG;
-    numWell = nW;
-    numCell = numGrid + numWell;
 }
 
 //void Output4Vtk::OutputPOINTS(const string&                myFile,

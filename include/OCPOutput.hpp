@@ -293,12 +293,14 @@ void Out4RPT::PrintRPT_Scalar(ofstream&              myRPT,
 class Out4VTK
 {
 public:
+    /// Input Params about vtk output
     void InputParam(const OutputVTKParam& VTKParam);
+    /// Setup up vtk output
     void Setup(const string& dir, const Reservoir& rs);
+    /// Output info with the vtk format
     void PrintVTK(const Reservoir& rs) const;
     /// Combine all files into 1 by Master process
-    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
-    OCP_BOOL IfOutputVTK() const { return useVTK; }
+    void PostProcess(const string& dir, const OCP_INT& numproc) const;
 
 private:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk

@@ -84,6 +84,10 @@ void PreParamGridWell::Input(const string& myFilename)
                 InputCOMPDAT(ifs);
                 break;
 
+            case Map_Str2Int("VTKSCHED", 8):
+                ifUseVtk = OCP_TRUE;
+                break;
+
             default: // skip non-keywords
                 break;
         }

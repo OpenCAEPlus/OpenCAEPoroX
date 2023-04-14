@@ -56,9 +56,7 @@ public:
     void Init(const string&  myFile,
               const string&  shortInfo,
               const string&  myCodeWay,
-              const string&  girdType,
-              const VTK_USI& nG,
-              const VTK_USI& nW); ///< create a new file and write basic information
+              const string&  girdType); ///< create a new file and write basic information
     //void OutputPOINTS(const string&                myFile,
     //                  const vector<OCPpolyhedron>& myHexGrid,
     //                  const vector<OCPpolyhedron>& myHexWell,
@@ -78,13 +76,6 @@ public:
     //                             const vector<GB_Pair>& gbPair,
     //                             const bool&            useActive,
     //                             const T*               wellVal) const;
-    void BeginCellData() const { cellData = true; };
-
-private:
-    mutable bool cellData{false};
-    VTK_USI      numGrid;
-    VTK_USI      numWell;
-    VTK_USI      numCell;
 };
 
 //template <typename T>

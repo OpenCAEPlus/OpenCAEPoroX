@@ -163,7 +163,7 @@ void OpenCAEPoroX::OutputResults() const
         // print time usages
         cout << "Simulation time:             " << setw(fixWidth) << OCPTIME_TOTAL
             << " (Seconds)" << endl;
-        cout << " - % Partition .............." << setw(fixWidth)
+        cout << " - % Input & Partition ......" << setw(fixWidth)
             << 100.0 * OCPTIME_PARTITION / OCPTIME_TOTAL << " (" << OCPTIME_PARTITION
             << "s)" << endl;
         cout << " - % Input Reservoir ........" << setw(fixWidth)

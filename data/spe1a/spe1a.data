@@ -178,8 +178,8 @@ SCHEDULE  =======================================
 --RPTSCHED
 'VWAT=1' /
 
---VTKSCHED
---PRES
+VTKSCHED
+PRES
 --DENO DENG DENW
 --SOIL SGAS SWAT
 --VOIL VGAS VWAT

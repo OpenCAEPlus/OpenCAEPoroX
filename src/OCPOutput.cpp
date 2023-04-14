@@ -1194,21 +1194,23 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
     const Domain& doman = rs.domain;
 
     if (doman.numproc > 1) {
-        myFile = dir + "proc" + to_string(doman.myrank) + ".vtktmp.out";
+        myFile = dir + "proc" + to_string(doman.myrank) + "_vtktmp.out";
     }
     else {
-        myFile = dir + "main.vtktmp.out";
+        myFile = dir + "main_vtktmp.out";
     }
       
     ofstream outF(myFile, ios::out | ios::binary);
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
+    
     if (doman.numproc > 1) {
         const OCP_USI numInteriorGrid = doman.GetNumGridInterior();
-        outF.write((const char*)&numInteriorGrid, sizeof(numInteriorGrid));
-        outF.write((const char*)&doman.GetGrid()[0], doman.GetNumGridInterior() * sizeof(doman.GetGrid()[0]));
+        outF.write((const OCP_CHAR*)&numInteriorGrid, sizeof(numInteriorGrid));
+        outF.write((const OCP_CHAR*)&doman.GetGrid()[0], numInteriorGrid * sizeof(doman.GetGrid()[0]));
     }
+
     outF.close();
 }
 
@@ -1220,10 +1222,25 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     // output
     const OCP_USI nb = rs.bulk.numBulkInterior;
     if (bgp.PRE)
-        outF.write((const char*)&rs.bulk.P[0], nb * sizeof(rs.bulk.P[0]));
+        outF.write((const OCP_CHAR*)&rs.bulk.P[0], nb * sizeof(rs.bulk.P[0]));
               
     outF.close();
 }
+
+
+void Out4VTK::PostProcess(const string& dir, const OCP_INT& numproc) const
+{
+    OCP_USI numGrid = 0;
+    ifstream inF(myFile, ios::in | ios::binary);
+    if (!inF.is_open()) {
+        OCP_ABORT("Can not open " + myFile);
+    }
+
+    inF.read((OCP_CHAR*)(&numGrid), sizeof(numGrid));
+
+    inF.close();
+}
+
 
 void OCPOutput::InputParam(const ParamOutput& paramOutput)
 {
@@ -1294,17 +1311,15 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 void OCPOutput::PostProcess() const
 {
     MPI_Barrier(myComm);
+    GetWallTime timer;
+    timer.Start();
     if (numproc > 1 && myrank == MASTER_PROCESS) {
-
-        GetWallTime timer;
-        timer.Start();
-
-        // post process
         summary.PostProcess(workDir, fileName, numproc);
-        crtInfo.PostProcess(workDir, fileName, numproc);
-
-        OCPTIME_OUTPUT += timer.Stop() / 1000;
+        crtInfo.PostProcess(workDir, fileName, numproc);           
     }
+    
+    
+    OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
 
 /*----------------------------------------------------------------------------*/
