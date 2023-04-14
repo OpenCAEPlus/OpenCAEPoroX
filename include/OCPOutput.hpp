@@ -301,6 +301,8 @@ public:
     void PrintVTK(const Reservoir& rs) const;
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const OCP_INT& numproc) const;
+    void PostProcessP(const string& dir, const OCP_INT& numproc) const;
+    void PostProcessS(const string& dir) const;
 
 private:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk

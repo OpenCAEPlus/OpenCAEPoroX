@@ -178,13 +178,13 @@ void OpenCAEPoroX::OutputResults() const
         cout << " - % Assembling ............." << setw(fixWidth)
             << 100.0 * OCPTIME_ASSEMBLE_MAT / OCPTIME_TOTAL << " ("
             << OCPTIME_ASSEMBLE_MAT << "s)" << endl;
-        cout << " - % Linear solver .........." << setw(fixWidth)
+        cout << " - % Linear Solver .........." << setw(fixWidth)
             << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
             << OCPTIME_LSOLVER << "s)" << endl;
-        cout << " - % Newton step ............" << setw(fixWidth)
+        cout << " - % Newton Step ............" << setw(fixWidth)
             << 100.0 * OCPTIME_NRSTEP / OCPTIME_TOTAL << " ("
             << OCPTIME_NRSTEP << "s)" << endl;
-        cout << " - % Updating properties ...." << setw(fixWidth)
+        cout << " - % Updating Properties ...." << setw(fixWidth)
             << 100.0 * OCPTIME_UPDATE_GRID / OCPTIME_TOTAL << " ("
             << OCPTIME_UPDATE_GRID << "s)" << endl;
         cout << " - % Output ................." << setw(fixWidth)
@@ -195,7 +195,9 @@ void OpenCAEPoroX::OutputResults() const
     }
     MPI_Barrier(MPI_COMM_WORLD);
     cout << fixed << setprecision(3) 
-        << "Rank " << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATE_GRID << "s" << endl;
+        << "Rank " << setw(4) << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATE_GRID << "s" << endl;
+    cout << fixed << setprecision(3)
+        << "Rank " << setw(4) << CURRENT_RANK << ": Assembling                " << OCPTIME_ASSEMBLE_MAT << "s" << endl;
 }
 
 /*----------------------------------------------------------------------------*/

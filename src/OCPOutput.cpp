@@ -1230,6 +1230,19 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
 
 void Out4VTK::PostProcess(const string& dir, const OCP_INT& numproc) const
 {
+    if (numproc > 1)  PostProcessP(dir, numproc);
+    else              PostProcessS(dir);
+}
+
+
+void Out4VTK::PostProcessP(const string& dir, const OCP_INT& numproc) const
+{
+
+}
+
+
+void Out4VTK::PostProcessS(const string& dir) const
+{
     OCP_USI numGrid = 0;
     ifstream inF(myFile, ios::in | ios::binary);
     if (!inF.is_open()) {
@@ -1316,6 +1329,9 @@ void OCPOutput::PostProcess() const
     if (numproc > 1 && myrank == MASTER_PROCESS) {
         summary.PostProcess(workDir, fileName, numproc);
         crtInfo.PostProcess(workDir, fileName, numproc);           
+    }
+    if (myrank == MASTER_PROCESS) {
+        // out4VTK.PostProcess(workDir, numproc);
     }
     
     
