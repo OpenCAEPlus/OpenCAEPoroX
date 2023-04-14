@@ -194,10 +194,11 @@ void OpenCAEPoroX::OutputResults() const
         cout << "==================================================" << endl;
     }
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << fixed << setprecision(3) 
-        << "Rank " << setw(4) << CURRENT_RANK << ": Updating properties costs " << OCPTIME_UPDATE_GRID << "s" << endl;
     cout << fixed << setprecision(3)
-        << "Rank " << setw(4) << CURRENT_RANK << ": Assembling                " << OCPTIME_ASSEMBLE_MAT << "s" << endl;
+        << "Rank " << setw(4) << CURRENT_RANK 
+        << ": Updating properties : " << OCPTIME_UPDATE_GRID << "s   "
+        << "Assembling : " << OCPTIME_ASSEMBLE_MAT << "s   " 
+        << "NumGrid =  " << reservoir.GetInteriorBulkNum() << endl;
 }
 
 /*----------------------------------------------------------------------------*/
