@@ -23,6 +23,7 @@ target_sources(
 		  OCPOutput.cpp
 		  OCPTable.cpp
 		  OCPTimeRecord.cpp
+		  Output4Vtk.cpp
 		  ParamControl.cpp
 		  ParamOutput.cpp
 		  ParamRead.cpp

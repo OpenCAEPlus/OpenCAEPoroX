@@ -898,29 +898,6 @@ void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param
     XMF  = param.XMF;
     YMF  = param.YMF;
     PCW  = param.PCW;
-
-	bgpnum = 0;
-	if (PRE)      bgpnum++;
-	if (PGAS)     bgpnum++;
-	if (PWAT)     bgpnum++;
-	if (SOIL)     bgpnum++;
-	if (SGAS)     bgpnum++;
-	if (SWAT)     bgpnum++;
-	if (DENO)     bgpnum++;
-	if (DENG)     bgpnum++;
-	if (DENW)     bgpnum++;
-	if (KRO)      bgpnum++;
-	if (KRG)      bgpnum++;
-	if (KRW)      bgpnum++;
-	if (BOIL)     bgpnum++;
-	if (BGAS)     bgpnum++;
-	if (BWAT)     bgpnum++;
-	if (VOIL)     bgpnum++;
-	if (VGAS)     bgpnum++;
-	if (VWAT)     bgpnum++;
-	if (XMF)      bgpnum++;
-	if (YMF)      bgpnum++;
-	if (PCW)      bgpnum++;
 }
 
 
@@ -950,6 +927,29 @@ void BasicGridProperty::Check(const Reservoir& rs)
         KRW  = OCP_FALSE;
         VWAT = OCP_FALSE;
     }
+
+    bgpnum = 0;
+    if (PRE)      bgpnum++;
+    if (PGAS)     bgpnum++;
+    if (PWAT)     bgpnum++;
+    if (SOIL)     bgpnum++;
+    if (SGAS)     bgpnum++;
+    if (SWAT)     bgpnum++;
+    if (DENO)     bgpnum++;
+    if (DENG)     bgpnum++;
+    if (DENW)     bgpnum++;
+    if (KRO)      bgpnum++;
+    if (KRG)      bgpnum++;
+    if (KRW)      bgpnum++;
+    if (BOIL)     bgpnum++;
+    if (BGAS)     bgpnum++;
+    if (BWAT)     bgpnum++;
+    if (VOIL)     bgpnum++;
+    if (VGAS)     bgpnum++;
+    if (VWAT)     bgpnum++;
+    if (XMF)      bgpnum++;
+    if (YMF)      bgpnum++;
+    if (PCW)      bgpnum++;
 }
 
 
@@ -1257,7 +1257,6 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
         const OCP_USI numInteriorGrid = doman.GetNumGridInterior();
         outF.write((const OCP_CHAR*)&numInteriorGrid, sizeof(numInteriorGrid));
         outF.write((const OCP_CHAR*)&doman.GetGrid()[0], numInteriorGrid * sizeof(doman.GetGrid()[0]));
-
         outF.close();
     }
     else {
@@ -1329,16 +1328,76 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
     out4vtk.InitASCII(srcFile, "RUN of " + dir + filename, points_xyz);
     vector<OCP_DBL>().swap(points_xyz);
 
-    // Input cell values
-    vector<vector<OCP_USI>> global_index(numproc);
+    // Input cell values    
+    vector<vector<OCP_DBL>> gridVal;        // each row is on a node of TSTEP in turn
+    vector<OCP_USI>         global_index;
+    vector<OCP_USI>         mypart(numGrid);
+    OCP_DBL*                workPtr;
+    vector<OCP_DBL>         tmpVal;
+    
+
     for (USI p = 0; p < numproc; p++) {
         const string myfile = dir + "proc" + to_string(p) + "_vtktmp.out";
-        ifstream inV(myFile, ios::in | ios::binary);
+        ifstream inV(myfile, ios::in | ios::binary);
         if (!inV.is_open()) {
-            OCP_WARNING("Can not open " + myFile);
+            OCP_WARNING("Can not open " + myfile);
         }
+        
+        OCP_USI numGridLoc = 0;
+        inV.read((OCP_CHAR*)(&numGridLoc), sizeof(numGridLoc));
+        global_index.resize(numGridLoc);
+        inV.read((OCP_CHAR*)(&global_index[0]), sizeof(global_index[0]) * numGridLoc);
 
+        for (OCP_USI n = 0; n < numGridLoc; n++)
+            mypart[global_index[n]] = p;
 
+        tmpVal.resize(numGridLoc);
+        USI index = 0;
+        while (OCP_TRUE) {
+            if (index >= gridVal.size()) {
+                gridVal.push_back(vector<OCP_DBL>(bgp.bgpnum * numGrid));
+                
+            }
+            workPtr = &gridVal[index][0];
+
+            if (bgp.PRE) {
+                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal[n];
+                }
+                workPtr += numGrid;
+            }
+            if (bgp.SOIL) {
+                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal[n];
+                }
+                workPtr += numGrid;
+            }
+            if (bgp.SGAS) {
+                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal[n];
+                }
+                workPtr += numGrid;
+            }
+            if (bgp.SWAT) {
+                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal[n];
+                }
+                workPtr += numGrid;
+            }
+
+            index++;
+            if (inV.eof()) {               
+                inV.close();
+                if (!remove(myfile.c_str())) {
+                    OCP_WARNING("Failed to delete " + myfile);
+                }
+                break;
+            }           
+        }              
     }
 }
 
@@ -1356,7 +1415,7 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
  
     // Input cell values
     if (bgp.bgpnum == 0) return;
-    vector<OCP_DBL> tmpV(bgp.bgpnum * numGrid);
+    vector<OCP_DBL> tmpVal(bgp.bgpnum * numGrid);
     ifstream inV(myFile, ios::in | ios::binary);
     if (!inV.is_open()) {
         OCP_WARNING("Can not open " + myFile);
@@ -1364,7 +1423,7 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
     USI index = 0;
     while (OCP_TRUE) {
 
-        inV.read((OCP_CHAR*)(&tmpV[0]), sizeof(tmpV[0]) * tmpV.size());
+        inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
 
         const string dstFile = dir + "TSTEP" + to_string(index++) + ".vtk";
         ifstream source(srcFile, ios::binary);
@@ -1375,16 +1434,16 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         dest << "\n" << VTK_CELL_DATA << " " << numGrid;
         OCP_USI iter = 0;
         if (bgp.PRE) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpV, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, iter, numGrid, 3);
         }
         if (bgp.SOIL) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpV, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, iter, numGrid, 3);
         }
         if (bgp.SGAS) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpV, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpVal, iter, numGrid, 3);
         }
         if (bgp.SWAT) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpV, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, iter, numGrid, 3);
         }
 
         dest.close();

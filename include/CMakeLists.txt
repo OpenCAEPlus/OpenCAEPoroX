@@ -25,6 +25,7 @@ target_sources(
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
 		 OptionalFeatures.hpp
+		 Output4Vtk.hpp
 		 ParamControl.hpp
 		 ParamOutput.hpp
 		 ParamRead.hpp
