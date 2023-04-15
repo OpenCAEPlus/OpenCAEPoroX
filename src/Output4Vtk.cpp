@@ -11,160 +11,40 @@
 
 #include "Output4Vtk.hpp"
 
-void Output4Vtk::Init(const string&  myFile,
-                      const string&  shortInfo,
-                      const string&  myCodeWay,
-                      const string&  girdType)
+void Output4Vtk::InitASCII(const string&          myFile,
+                           const string&          shortInfo,
+                           const vector<OCP_DBL>& points_xyz) const
 {
-    ofstream myVtk(myFile);
-    if (!myVtk.is_open()) {
-        OCP_ABORT("Can not open file: " + myFile);
+    ofstream outVtk(myFile);
+    outVtk << VTK_HEADER << "\n";
+    outVtk << shortInfo  << "\n";
+    outVtk << VTK_ASCII  << "\n";
+    outVtk << VTK_DATASET << " " << VTK_UNSTRUCTURED_GRID << "\n\n";
+    // Output points
+    const OCP_USI numGrid = points_xyz.size() / (3 * 8);
+    outVtk << VTK_POINTS << " " << numGrid * 8 << " " << VTK_FLOAT << "\n";
+    OCP_USI iterP = 0;
+    for (OCP_USI n = 0; n < numGrid * 8; n++) {
+        outVtk << setw(6) << points_xyz[iterP++]
+            << setw(10) << points_xyz[iterP++]
+            << setw(10) << points_xyz[iterP++] << "\n";
     }
-
-    ios::sync_with_stdio(false);
-    myVtk.tie(0);
-
-    // Header
-    myVtk << VTK_HEADER << "\n";
-
-    // Title
-    if (shortInfo.size() > VTK_MAX_TITLE_LENGTH) {
-        OCP_WARNING("Length of title is beyond the limit: 256");
-        myVtk << "Invalid short info, Too many characters\n";
-    } else {
-        myVtk << shortInfo << "\n";
+    
+    // Output cells
+    outVtk << "\n" << VTK_CELLS << " " << numGrid << " " << numGrid * 9 << "\n";
+    OCP_USI iterC = 0;
+    for (OCP_USI n = 0; n < numGrid; n++) {
+        outVtk << 8;
+        for (OCP_USI i = 0; i < 8; i++)
+            outVtk << setw(8) << iterC++;
+        outVtk << "\n";
     }
-
-    // Code
-    myVtk << myCodeWay << "\n";
-
-    // Grid Type
-    myVtk << VTK_DATASET << " " << girdType << "\n";
-
-    myVtk << "\n";
-    myVtk.close();
+    // OutPut cell types
+    outVtk << "\n" << VTK_CELL_TYPES << " " << numGrid << "\n";
+    for (OCP_USI n = 0; n < numGrid; n++)
+        outVtk << VTK_HEXAHEDRON << "\n";
+    outVtk.close();
 }
-
-//void Output4Vtk::OutputPOINTS(const string&                myFile,
-//                              const vector<OCPpolyhedron>& myHexGrid,
-//                              const vector<OCPpolyhedron>& myHexWell,
-//                              const string&                dataType) const
-//{
-//    ofstream myVtk;
-//    myVtk.open(myFile, ios::app);
-//    if (!myVtk.is_open()) {
-//        OCP_ABORT("Can not open file: " + myFile);
-//    }
-//
-//    ios::sync_with_stdio(false);
-//    myVtk.tie(0);
-//
-//    // Grid Points
-//    VTK_USI numWellPoints = numGrid * 8;
-//    for (auto& w : myHexWell) {
-//        numWellPoints += w.numPoints;
-//    }
-//    myVtk << VTK_POINTS << " " << numWellPoints << " " << VTK_FLOAT << "\n";
-//
-//    for (VTK_USI i = 0; i < numGrid; i++) {
-//        for (USI j = 0; j < myHexGrid[i].numPoints; j++) {
-//            myVtk << setw(6) << myHexGrid[i].Points[j].x << "   " << setw(6)
-//                  << myHexGrid[i].Points[j].y << "   " << setw(6)
-//                  << myHexGrid[i].Points[j].z << "\n";
-//        }
-//    }
-//
-//    // Well Points
-//    for (VTK_USI w = 0; w < numWell; w++) {
-//        for (USI j = 0; j < myHexWell[w].numPoints; j++) {
-//            myVtk << setw(6) << myHexWell[w].Points[j].x << "   " << setw(6)
-//                  << myHexWell[w].Points[j].y << "   " << setw(6)
-//                  << myHexWell[w].Points[j].z << "\n";
-//        }
-//    }
-//
-//    myVtk << "\n";
-//    myVtk.close();
-//}
-//
-//void Output4Vtk::OutputCELLS(const string&                myFile,
-//                             const vector<OCPpolyhedron>& myHexGrid,
-//                             const vector<OCPpolyhedron>& myHexWell) const
-//{
-//    ofstream myVtk;
-//    myVtk.open(myFile, ios::app);
-//    if (!myVtk.is_open()) {
-//        OCP_ABORT("Can not open file: " + myFile);
-//    }
-//
-//    ios::sync_with_stdio(false);
-//    myVtk.tie(0);
-//
-//    USI numSize = numCell;
-//    for (VTK_USI n = 0; n < numGrid; n++) {
-//        numSize += myHexGrid[n].numPoints;
-//    }
-//    for (USI w = 0; w < numWell; w++) {
-//        numSize += myHexWell[w].numPoints;
-//    }
-//
-//    myVtk << VTK_CELLS << " " << numCell << " " << numSize << "\n";
-//
-//    // EASY output!
-//    // Grid Cell
-//    VTK_USI tmp = 0;
-//    for (VTK_USI n = 0; n < numGrid; n++) {
-//        myVtk << 8 << "  ";
-//        for (VTK_USI j = 0; j < 8; j++) {
-//            myVtk << j + tmp << "   ";
-//        }
-//        myVtk << "\n";
-//        tmp += 8;
-//    }
-//
-//    // Well Cell
-//    for (USI w = 0; w < numWell; w++) {
-//        myVtk << myHexWell[w].numPoints << "  ";
-//        for (VTK_USI j = 0; j < myHexWell[w].numPoints; j++) {
-//            myVtk << j + tmp << "   ";
-//        }
-//        myVtk << "\n";
-//        tmp += myHexWell[w].numPoints;
-//    }
-//
-//    myVtk << "\n";
-//    myVtk.close();
-//}
-//
-//void Output4Vtk::OutputCELL_TYPES(const string&                myFile,
-//                                  const vector<OCPpolyhedron>& myHexGrid,
-//                                  const vector<OCPpolyhedron>& myHexWell) const
-//{
-//    ofstream myVtk;
-//    myVtk.open(myFile, ios::app);
-//    if (!myVtk.is_open()) {
-//        OCP_ABORT("Can not open file: " + myFile);
-//    }
-//
-//    ios::sync_with_stdio(false);
-//    myVtk.tie(0);
-//
-//    myVtk << VTK_CELL_TYPES << " " << numCell << "\n";
-//
-//    // EASY output!
-//    // Grid Cell
-//    for (VTK_USI n = 0; n < numGrid; n++) {
-//        myVtk << VTK_HEXAHEDRON << "\n";
-//    }
-//
-//    // Well Cell
-//    for (USI w = 0; w < numWell; w++) {
-//        myVtk << VTK_POLY_LINE << "\n";
-//    }
-//
-//    myVtk << "\n";
-//    myVtk.close();
-//}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

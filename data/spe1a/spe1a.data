@@ -179,7 +179,7 @@ SCHEDULE  =======================================
 'VWAT=1' /
 
 VTKSCHED
-PRES
+--PRES
 --DENO DENG DENW
 --SOIL SGAS SWAT
 --VOIL VGAS VWAT

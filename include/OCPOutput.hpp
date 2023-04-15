@@ -187,6 +187,7 @@ class BasicGridProperty
 
 public:
     void SetBasicGridProperty(const BasicGridPropertyParam& param);
+    void Check(const Reservoir& rs);
 
 private:
     OCP_BOOL PRE{OCP_FALSE};  ///< Pressure of grids.
@@ -210,6 +211,8 @@ private:
     OCP_BOOL XMF{OCP_FALSE};  ///< liquid component mole fractions.
     OCP_BOOL YMF{OCP_FALSE};  ///< gas component mole fractions.
     OCP_BOOL PCW{OCP_FALSE};  ///< capillary pressure: Po - Pw.
+
+    USI             bgpnum;   ///< num of Basic grid information to be printed
 };
 
 /// Collect more detailed information of each time step.
@@ -306,7 +309,6 @@ public:
 
 private:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk
-    mutable USI       index{0};          ///< Index of output file
     BasicGridProperty bgp;               ///< Basic grid information
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name

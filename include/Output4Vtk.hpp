@@ -53,81 +53,36 @@ class Output4Vtk
     friend class Out4VTK;
 
 public:
-    void Init(const string&  myFile,
-              const string&  shortInfo,
-              const string&  myCodeWay,
-              const string&  girdType); ///< create a new file and write basic information
-    //void OutputPOINTS(const string&                myFile,
-    //                  const vector<OCPpolyhedron>& myHexGrid,
-    //                  const vector<OCPpolyhedron>& myHexWell,
-    //                  const string&                dataType) const;
-    //void OutputCELLS(const string&                myFile,
-    //                 const vector<OCPpolyhedron>& myHexGrid,
-    //                 const vector<OCPpolyhedron>& myHexWell) const;
-    //void OutputCELL_TYPES(const string&                myFile,
-    //                      const vector<OCPpolyhedron>& myHex,
-    //                      const vector<OCPpolyhedron>& myHexWell) const;
-    //template <typename T>
-    //void OutputCELL_DATA_SCALARS(const string&          myFile,
-    //                             const string&          dataName,
-    //                             const string&          dataType,
-    //                             const T*               gridVal,
-    //                             const USI&             gap,
-    //                             const vector<GB_Pair>& gbPair,
-    //                             const bool&            useActive,
-    //                             const T*               wellVal) const;
+    /// create a new file and write common information
+    void InitASCII(const string&          myFile,
+                   const string&          shortInfo,
+                   const vector<OCP_DBL>& point_xyz) const;
+    template <typename T>
+    void OutputCELL_DATA_SCALARS(ofstream&        outVtk,
+                                 const string&    dataName,
+                                 const string&    dataType,
+                                 const vector<T>  tmpV,
+                                 OCP_USI&         bId,
+                                 const OCP_USI&   nb,
+                                 const USI&       digits) const;
 };
 
-//template <typename T>
-//void Output4Vtk::OutputCELL_DATA_SCALARS(const string&          myFile,
-//                                         const string&          dataName,
-//                                         const string&          dataType,
-//                                         const T*               gridVal,
-//                                         const USI&             gap,
-//                                         const vector<GB_Pair>& gbPair,
-//                                         const bool&            useActive,
-//                                         const T*               wellVal) const
-//{
-//    ofstream myVtk;
-//    myVtk.open(myFile, ios::app);
-//    if (!myVtk.is_open()) {
-//        OCP_ABORT("Can not open file: " + myFile);
-//    }
-//
-//    ios::sync_with_stdio(false);
-//    myVtk.tie(0);
-//
-//    if (cellData) {
-//        myVtk << VTK_CELL_DATA << " " << numCell << "\n";
-//        cellData = false;
-//    }
-//
-//    myVtk << VTK_SCALARS << " " << dataName << " " << dataType << " " << 1 << "\n";
-//    myVtk << VTK_LOOKUP_TABLE << " " << VTK_DEFAULT << "\n";
-//
-//    // Grid
-//    if (useActive) {
-//        for (VTK_USI n = 0; n < numGrid; n++) {
-//            if (gbPair[n].IsAct()) {
-//                myVtk << gridVal[gbPair[n].GetId() * gap] << "\n";
-//            } else {
-//                myVtk << 0 << "\n";
-//            }
-//        }
-//    } else {
-//        for (VTK_USI n = 0; n < numGrid; n++) {
-//            myVtk << gridVal[n * gap] << "\n";
-//        }
-//    }
-//
-//    // Well
-//    for (USI w = 0; w < numWell; w++) {
-//        myVtk << wellVal[w] << "\n";
-//    }
-//
-//    myVtk << "\n";
-//    myVtk.close();
-//}
+template <typename T>
+void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
+                                         const string&    dataName,
+                                         const string&    dataType,
+                                         const vector<T>  tmpV,                        
+                                         OCP_USI&         bId,
+                                         const OCP_USI&   nb, 
+                                         const USI&       digits) const
+{
+    outVtk << "\n" << VTK_SCALARS << " " << dataName << " " << dataType << " " << 1;
+    outVtk << "\n" << VTK_LOOKUP_TABLE << " " << VTK_DEFAULT << "\n";
+    outVtk << fixed << setprecision(digits);
+    for (OCP_USI n = 0; n < nb; n++) {
+        outVtk << tmpV[bId++] << "\n";
+    }
+}
 
 #endif
 
