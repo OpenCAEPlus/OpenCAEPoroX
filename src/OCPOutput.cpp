@@ -1320,7 +1320,26 @@ void Out4VTK::PostProcess(const string& dir, const string& filename, const OCP_I
 
 void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
+    if (!useVTK) return;
 
+    // Input Points
+    vector<OCP_DBL> points_xyz;
+    const OCP_USI numGrid = InputPoints(dir, points_xyz);
+    const string srcFile = dir + "TSTEP.vtk";
+    out4vtk.InitASCII(srcFile, "RUN of " + dir + filename, points_xyz);
+    vector<OCP_DBL>().swap(points_xyz);
+
+    // Input cell values
+    vector<vector<OCP_USI>> global_index(numproc);
+    for (USI p = 0; p < numproc; p++) {
+        const string myfile = dir + "proc" + to_string(p) + "_vtktmp.out";
+        ifstream inV(myFile, ios::in | ios::binary);
+        if (!inV.is_open()) {
+            OCP_WARNING("Can not open " + myFile);
+        }
+
+
+    }
 }
 
 
@@ -1329,26 +1348,14 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
     if (!useVTK) return;
 
     // Input Points
-    OCP_USI numGrid = 0;
-    const string pointsFile = dir + "points.out";
-    ifstream inP(pointsFile, ios::in | ios::binary);
-    if (!inP.is_open()) {
-        OCP_WARNING("Can not open " + pointsFile);
-    }
-    inP.read((OCP_CHAR*)(&numGrid), sizeof(numGrid));
-    vector<OCP_DBL> points_xyz(numGrid * 8 * 3);
-    inP.read((OCP_CHAR*)(&points_xyz[0]), sizeof(points_xyz[0]) * points_xyz.size());
-    inP.close();
-    if (remove(pointsFile.c_str()) != 0) {
-        OCP_WARNING("Failed to delete " + pointsFile);
-    }
-
+    vector<OCP_DBL> points_xyz;
+    const OCP_USI numGrid = InputPoints(dir, points_xyz);
     const string srcFile = dir + "TSTEP.vtk";
     out4vtk.InitASCII(srcFile, "RUN of " + dir + filename, points_xyz);
     vector<OCP_DBL>().swap(points_xyz);
-
-    if (bgp.bgpnum == 0) return;
+ 
     // Input cell values
+    if (bgp.bgpnum == 0) return;
     vector<OCP_DBL> tmpV(bgp.bgpnum * numGrid);
     ifstream inV(myFile, ios::in | ios::binary);
     if (!inV.is_open()) {
@@ -1394,6 +1401,26 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
     if (remove(myFile.c_str()) != 0) {
         OCP_WARNING("Failed to delete " + myFile);
     }
+}
+
+
+OCP_USI Out4VTK::InputPoints(const string& dir, vector<OCP_DBL>& points_xyz) const
+{
+    OCP_USI numGrid = 0;
+    const string pointsFile = dir + "points.out";
+    ifstream inP(pointsFile, ios::in | ios::binary);
+    if (!inP.is_open()) {
+        OCP_WARNING("Can not open " + pointsFile);
+    }
+    inP.read((OCP_CHAR*)(&numGrid), sizeof(numGrid));
+    points_xyz.resize(numGrid * 8 * 3);
+    inP.read((OCP_CHAR*)(&points_xyz[0]), sizeof(points_xyz[0]) * points_xyz.size());
+    inP.close();
+    if (remove(pointsFile.c_str()) != 0) {
+        OCP_WARNING("Failed to delete " + pointsFile);
+    }
+
+    return numGrid;
 }
 
 
@@ -1473,7 +1500,7 @@ void OCPOutput::PostProcess() const
         crtInfo.PostProcess(workDir, fileName, numproc);           
     }
     if (myrank == MASTER_PROCESS) {
-        out4VTK.PostProcess(workDir, fileName, numproc);
+        // out4VTK.PostProcess(workDir, fileName, numproc);
     }
     
     

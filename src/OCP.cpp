@@ -178,6 +178,9 @@ void OpenCAEPoroX::OutputResults() const
         cout << " - % Assembling ............." << setw(fixWidth)
             << 100.0 * OCPTIME_ASSEMBLE_MAT / OCPTIME_TOTAL << " ("
             << OCPTIME_ASSEMBLE_MAT << "s)" << endl;
+        cout << " - % Assembling for LS ......" << setw(fixWidth)
+            << 100.0 * OCPTIME_ASSEMBLE_MAT_FOR_LS / OCPTIME_TOTAL << " ("
+            << OCPTIME_ASSEMBLE_MAT_FOR_LS << "s)" << endl;
         cout << " - % Linear Solver .........." << setw(fixWidth)
             << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
             << OCPTIME_LSOLVER << "s)" << endl;

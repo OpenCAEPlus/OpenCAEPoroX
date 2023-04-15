@@ -38,7 +38,6 @@ void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 
 void ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 {
-    LSolver.CalCommTerm(rs.GetNumOpenWell());
     fim.SolveLinearSystem(LSolver, rs, ctrl);
 }
 

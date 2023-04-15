@@ -75,9 +75,13 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     ls.CheckEquation();
 #endif // DEBUG
 
-    ls.AssembleMatLinearSolver();
-
     GetWallTime timer;
+
+    timer.Start();
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
+    
     timer.Start();
     int status = ls.Solve();
     if (status < 0) {
@@ -940,11 +944,15 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     ls.CheckEquation();
 #endif // DEBUG
 
-    // Assemble external linear solver with internal A and b
+    GetWallTime timer;
+
+    timer.Start();
+    ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
 
     // Solve linear system
-    GetWallTime timer;
+    
     timer.Start();
     int status = ls.Solve();
     if (status < 0) {
@@ -3165,9 +3173,13 @@ void IsoT_FIMn::SolveLinearSystem(LinearSystem& ls,
     ls.CheckEquation();
 #endif // DEBUG
 
-    ls.AssembleMatLinearSolver();
-
     GetWallTime timer;
+
+    timer.Start();
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
+    
     timer.Start();
     int status = ls.Solve();
     if (status < 0) {
@@ -4276,9 +4288,13 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     ls.CheckEquation();
 #endif // DEBUG
 
-    ls.AssembleMatLinearSolver();
-
     GetWallTime timer;
+
+    timer.Start();
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
+
     timer.Start();
     int status = ls.Solve();
     if (status < 0) {

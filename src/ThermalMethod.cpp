@@ -55,10 +55,15 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     ls.CheckEquation();
 #endif // DEBUG
 
-    // Assemble external linear solver with internal A and b
-    ls.AssembleMatLinearSolver();
-    // Solve linear system
     GetWallTime timer;
+
+    // Assemble external linear solver with internal A and b
+    timer.Start();
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
+
+    // Solve linear system  
     timer.Start();
     int status = ls.Solve();
     if (status < 0) {
