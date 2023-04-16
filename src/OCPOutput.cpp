@@ -1267,7 +1267,7 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
         }
         outF.close();
         if (bgp.bgpnum == 0) {
-            if (!remove(myFile.c_str())) {
+            if (remove(myFile.c_str()) != 0) {
                 OCP_WARNING("Fail to delete " + myFile);
             }
         }
@@ -1351,53 +1351,95 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
         for (OCP_USI n = 0; n < numGridLoc; n++)
             mypart[global_index[n]] = p;
 
-        tmpVal.resize(numGridLoc);
-        USI index = 0;
-        while (OCP_TRUE) {
-            if (index >= gridVal.size()) {
-                gridVal.push_back(vector<OCP_DBL>(bgp.bgpnum * numGrid));
-                
-            }
-            workPtr = &gridVal[index][0];
+        if (bgp.bgpnum > 0) {
+            tmpVal.resize(numGridLoc * bgp.bgpnum);
+            USI index = 0;
+            while (OCP_TRUE) {
+                if (index >= gridVal.size()) {
+                    gridVal.push_back(vector<OCP_DBL>(bgp.bgpnum * numGrid));
 
-            if (bgp.PRE) {
-                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
-                for (OCP_USI n = 0; n < numGridLoc; n++) {
-                    workPtr[global_index[n]] = tmpVal[n];
                 }
-                workPtr += numGrid;
-            }
-            if (bgp.SOIL) {
-                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
-                for (OCP_USI n = 0; n < numGridLoc; n++) {
-                    workPtr[global_index[n]] = tmpVal[n];
-                }
-                workPtr += numGrid;
-            }
-            if (bgp.SGAS) {
-                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
-                for (OCP_USI n = 0; n < numGridLoc; n++) {
-                    workPtr[global_index[n]] = tmpVal[n];
-                }
-                workPtr += numGrid;
-            }
-            if (bgp.SWAT) {
-                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * numGridLoc);
-                for (OCP_USI n = 0; n < numGridLoc; n++) {
-                    workPtr[global_index[n]] = tmpVal[n];
-                }
-                workPtr += numGrid;
-            }
+                workPtr = &gridVal[index][0];
+                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
+                const OCP_DBL* tamVap_ptr = &tmpVal[0];
 
-            index++;
-            if (inV.eof()) {               
-                inV.close();
-                if (!remove(myfile.c_str())) {
-                    OCP_WARNING("Failed to delete " + myfile);
+                if (bgp.PRE) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr    += numGrid;
+                    tamVap_ptr += numGridLoc;
                 }
-                break;
-            }           
-        }              
+                if (bgp.SOIL) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr    += numGrid;
+                    tamVap_ptr += numGridLoc;
+                }
+                if (bgp.SGAS) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr    += numGrid;
+                    tamVap_ptr += numGridLoc;
+                }
+                if (bgp.SWAT) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr    += numGrid;
+                    tamVap_ptr += numGridLoc;
+                }
+
+                index++;
+                if (inV.eof()) {
+                    inV.close();
+                    break;
+                }
+            }
+        }
+		if (remove(myfile.c_str()) != 0) {
+			OCP_WARNING("Failed to delete " + myfile);
+		}
+    }
+
+    // OutPut
+    USI numTstep = gridVal.size();
+    for (USI i = 0; i < numTstep; i++) {
+        const string dstFile = dir + "TSTEP" + to_string(i) + ".vtk";
+        ifstream source(srcFile, ios::binary);
+        ofstream dest(dstFile, ios::binary);
+        dest << source.rdbuf();
+        source.close();
+
+        dest << "\n" << VTK_CELL_DATA << " " << numGrid;
+        // Ouput partition
+        out4vtk.OutputCELL_DATA_SCALARS(dest, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
+
+        OCP_USI bId = 0;
+        if (bgp.PRE) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+            bId += numGrid;
+        }
+        if (bgp.SOIL) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+            bId += numGrid;
+        }
+        if (bgp.SGAS) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+            bId += numGrid;
+        }
+        if (bgp.SWAT) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+            bId += numGrid;
+        }
+
+        dest.close();
+    }
+
+    if (remove(srcFile.c_str()) != 0) {
+        OCP_WARNING("Failed to delete " + srcFile);
     }
 }
 
@@ -1432,22 +1474,25 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         source.close();
 
         dest << "\n" << VTK_CELL_DATA << " " << numGrid;
-        OCP_USI iter = 0;
+        OCP_USI bId = 0;
         if (bgp.PRE) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
         }
         if (bgp.SOIL) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
         }
         if (bgp.SGAS) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpVal, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
         }
         if (bgp.SWAT) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, iter, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
         }
 
         dest.close();
-
         if (inV.eof()) {
             inV.close();
             break;
@@ -1559,7 +1604,7 @@ void OCPOutput::PostProcess() const
         crtInfo.PostProcess(workDir, fileName, numproc);           
     }
     if (myrank == MASTER_PROCESS) {
-        // out4VTK.PostProcess(workDir, fileName, numproc);
+        out4VTK.PostProcess(workDir, fileName, numproc);
     }
     
     

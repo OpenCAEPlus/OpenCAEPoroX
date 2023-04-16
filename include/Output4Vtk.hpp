@@ -62,7 +62,7 @@ public:
                                  const string&    dataName,
                                  const string&    dataType,
                                  const vector<T>  tmpV,
-                                 OCP_USI&         bId,
+                                 const OCP_USI&   bId,
                                  const OCP_USI&   nb,
                                  const USI&       digits) const;
 };
@@ -72,7 +72,7 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                          const string&    dataName,
                                          const string&    dataType,
                                          const vector<T>  tmpV,                        
-                                         OCP_USI&         bId,
+                                         const OCP_USI&   bId,
                                          const OCP_USI&   nb, 
                                          const USI&       digits) const
 {
@@ -80,7 +80,7 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
     outVtk << "\n" << VTK_LOOKUP_TABLE << " " << VTK_DEFAULT << "\n";
     outVtk << fixed << setprecision(digits);
     for (OCP_USI n = 0; n < nb; n++) {
-        outVtk << tmpV[bId++] << "\n";
+        outVtk << tmpV[bId + n] << "\n";
     }
 }
 
