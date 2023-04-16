@@ -1394,11 +1394,11 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 
                 index++;
                 if (inV.eof()) {
-                    inV.close();
                     break;
                 }
             }
         }
+        inV.close();
 		if (remove(myfile.c_str()) != 0) {
 			OCP_WARNING("Failed to delete " + myfile);
 		}
@@ -1406,40 +1406,48 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 
     // OutPut
     USI numTstep = gridVal.size();
-    for (USI i = 0; i < numTstep; i++) {
-        const string dstFile = dir + "TSTEP" + to_string(i) + ".vtk";
-        ifstream source(srcFile, ios::binary);
-        ofstream dest(dstFile, ios::binary);
-        dest << source.rdbuf();
-        source.close();
-
-        dest << "\n" << VTK_CELL_DATA << " " << numGrid;
+    if (numTstep == 0) {
+        ofstream source(srcFile, ios::app);
+        source << "\n" << VTK_CELL_DATA << " " << numGrid;
         // Ouput partition
-        out4vtk.OutputCELL_DATA_SCALARS(dest, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
-
-        OCP_USI bId = 0;
-        if (bgp.PRE) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
-            bId += numGrid;
-        }
-        if (bgp.SOIL) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
-            bId += numGrid;
-        }
-        if (bgp.SGAS) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
-            bId += numGrid;
-        }
-        if (bgp.SWAT) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
-            bId += numGrid;
-        }
-
-        dest.close();
+        out4vtk.OutputCELL_DATA_SCALARS(source, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
+        source.close();
     }
+    else {
+        for (USI i = 0; i < numTstep; i++) {
+            const string dstFile = dir + "TSTEP" + to_string(i) + ".vtk";
+            ifstream source(srcFile, ios::binary);
+            ofstream dest(dstFile, ios::binary);
+            dest << source.rdbuf();
+            source.close();
 
-    if (remove(srcFile.c_str()) != 0) {
-        OCP_WARNING("Failed to delete " + srcFile);
+            dest << "\n" << VTK_CELL_DATA << " " << numGrid;
+            // Ouput partition
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
+
+            OCP_USI bId = 0;
+            if (bgp.PRE) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                bId += numGrid;
+            }
+            if (bgp.SOIL) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                bId += numGrid;
+            }
+            if (bgp.SGAS) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                bId += numGrid;
+            }
+            if (bgp.SWAT) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                bId += numGrid;
+            }
+
+            dest.close();
+        }
+        if (remove(srcFile.c_str()) != 0) {
+            OCP_WARNING("Failed to delete " + srcFile);
+        }
     }
 }
 
