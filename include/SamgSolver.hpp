@@ -98,9 +98,9 @@ protected:
     SAMG_INT          ncyc                     = 13050;  ///< Cycling and acceleration strategy. Suggested choice.
     SAMG_INT          ifirst                   = 1;      ///< Selects first approximation for guess
     SAMG_INT          iswtch                   = 51;     ///< Memory extension switch
-    SAMG_INT          iout                     = 2;      ///< Print output during the solution phase
-    SAMG_INT          idump                    = 0;      ///< Print output during the setup phase
-    SAMG_REAL         eps                      = 1.0e-4; ///< Standard stopping criterion for the AMG iteration
+    SAMG_INT          iout                     = -1;      ///< Print output during the solution phase
+    SAMG_INT          idump                    = -1;      ///< Print output during the setup phase
+    SAMG_REAL         eps                      = 1.0e-3; ///< Standard stopping criterion for the AMG iteration
     SAMG_REAL         chktol                   = -1.0;   ///< Checking of input matrix
     SAMG_REAL         a_cmplx                  = 2.5;    ///< used to allocate SAMG¡¯s initial memory
     SAMG_REAL         g_cmplx                  = 1.8;    ///< used to allocate SAMG¡¯s initial memory

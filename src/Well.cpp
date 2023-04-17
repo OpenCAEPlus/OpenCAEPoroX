@@ -85,7 +85,6 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
     if (depth < 0) depth = perf[0].depth;
 
-    cout << endl;
     CalWI_Peaceman(bk);
     // test
     // ShowPerfStatus(bk);
