@@ -44,3 +44,5 @@ x86/
 *.zip
 /test
 *.vtk
+*.log
+*.sh
