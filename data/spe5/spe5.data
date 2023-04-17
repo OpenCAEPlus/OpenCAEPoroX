@@ -182,7 +182,7 @@ TUNING
 
 
 METHOD
-IMPEC 
+FIM  pardiso 
 /
 
 

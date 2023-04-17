@@ -196,8 +196,8 @@ TUNING
 /
 
 METHOD
-IMPEC
+IMPEC  samg
 /
 
 TSTEP
-1.01
+2
