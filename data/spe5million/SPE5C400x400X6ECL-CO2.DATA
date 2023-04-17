@@ -95,8 +95,8 @@ NCNP
 7 2
 /
 
-ZI
-0.05  0.45 0.03 0.07 0.2 0.15 0.05
+ZMFVD
+1000.0  0.05  0.45 0.03 0.07 0.2 0.15 0.05
 /
 
 CNAMES
@@ -246,7 +246,7 @@ SOF3
 
 ROCK
 --  Pref  Cf
- 3990.30  5E-6  
+LINEAR01   3990.30  5E-6  
 /
     
 
@@ -260,7 +260,8 @@ PVTW
 --Surface densities : only the water value is used
 
 DENSITY
-1* 62.4 1* /
+1* 62.4 1* 
+/
 
 SOLUTION   =============================================================
 
@@ -317,7 +318,7 @@ TUNING
 
 
 METHOD
-FIM  samg
+FIM  bsr.fasp
 /
 
 
