@@ -353,7 +353,12 @@ void ParamRead::ReadINCLUDE(ifstream& ifs)
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     DealDefault(vbuf);
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "begin to read " + workDir + vbuf[0] << endl;
     ReadFile(workDir + vbuf[0]);
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "finish reading " + workDir + vbuf[0] << endl;
 }
 
 

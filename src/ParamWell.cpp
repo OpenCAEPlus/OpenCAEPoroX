@@ -18,7 +18,7 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
         fluidType = vbuf[1];
         state     = vbuf[2];
         optMode   = vbuf[3];
-        if (vbuf[4] == "1*") {
+        if (vbuf[4] == "DEFAULT") {
             if (optMode == "BHP")
                 maxRate = 1E10;
             else {
@@ -31,7 +31,7 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
     } else if (type == "PROD") {
         state   = vbuf[1];
         optMode = vbuf[2];
-        if (vbuf[3] == "1*") {
+        if (vbuf[3] == "DEFAULT") {
             if (optMode == "BHP")
                 maxRate = 1E10;
             else {

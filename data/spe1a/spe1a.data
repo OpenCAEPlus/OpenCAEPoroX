@@ -197,7 +197,8 @@ COMPDAT
 /
 
 WCONINJE
-'INJE*'   'GAS'   'OPEN'   'RATE'   100000.0      10000    /
+-- 'INJE*'   'GAS'   'OPEN'   'RATE'   100000.0      10000    /
+'INJE*'   'GAS'   'OPEN'   BHP   1*      10000    /
 /
 
 WCONPROD

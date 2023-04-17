@@ -7,6 +7,8 @@ TITLE
 DIMENS
  384  320  64  / 
  
+MODEL
+ISOTHERMAL
 
 BLACKOIL
 
@@ -19,7 +21,7 @@ DISGAS
 FIELD
 
 TABDIMS
-1   1   40   20   1   20  /
+1   1   1  /
 
 WELLDIMS
 10   10    2   30 /
@@ -113,7 +115,8 @@ PMAX
 10000    11000       0       1*  /
 
 ROCK
-4014.7      0.3000E-05    /
+LINEAR01  4014.7  0.3000E-05    
+/
 
 GRAVITY
 59.53       1.000987           0.792   /

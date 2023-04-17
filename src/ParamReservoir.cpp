@@ -854,10 +854,14 @@ void ParamReservoir::CheckGrid()
         if (zcorn.size() != numGrid * 8) OCP_ABORT("Wrong ZCORN size!");
     }
 
-    if (poro.size() != numGrid) OCP_ABORT("Wrong PORO size!");
-    if (permX.size() != numGrid) OCP_ABORT("Wrong PERMX size!");
-    if (permY.size() != numGrid) OCP_ABORT("Wrong PERMY size!");
-    if (permZ.size() != numGrid) OCP_ABORT("Wrong PERMZ size!");
+    if (poro.size() < numGrid) OCP_ABORT("PORO size is too small!");
+    else if (poro.size() > numGrid) OCP_WARNING("too many entries in PORO! Ignored redundant entries!");
+    if (permX.size() < numGrid) OCP_ABORT("PERMX size is too small!");
+    else if (permX.size() > numGrid) OCP_WARNING("too many entries in PERMX! Ignored redundant entries!");
+    if (permY.size() < numGrid) OCP_ABORT("PERMY size is too small!");
+    else if (permY.size() > numGrid) OCP_WARNING("too many entries in PERMY! Ignored redundant entries!");
+    if (permZ.size() < numGrid) OCP_ABORT("PERMZ size is too small!");
+    else if (permZ.size() > numGrid) OCP_WARNING("too many entries in PERMZ! Ignored redundant entries!");
 
     if (ntg.size() != numGrid) {
         ntg.resize(numGrid, 1);

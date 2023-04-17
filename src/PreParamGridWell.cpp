@@ -22,8 +22,6 @@ void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
 
 void PreParamGridWell::Input(const string& myFilename)
 {
-    cout << workdir + myFilename << endl;
-
     ifstream ifs(workdir + myFilename, ios::in);
     if (!ifs) {
         OCP_MESSAGE("Trying to open file: " << (workdir + myFilename));
