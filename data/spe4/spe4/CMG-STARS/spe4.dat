@@ -1,0 +1,371 @@
+﻿
+*****************************************************************************
+** Template (stspe001.dat): Fourth SPE Comparative Solution Project 1a     **
+*****************************************************************************
+************************************************************************************
+**                                                                                **
+** FILE :  STSPE001.DAT                                                           **
+**                                                                                **
+** MODEL:  SINGLE WELL CYCLIC STEAM    FIELD UNITS   13X1X4 RADIAL GRID           **
+**                                                                                **
+** USAGE:  SPE COMPARATIVE SOLUTION PROJECT FOR CYCLIC STEAM STIMULATION          **
+**                                                                                **
+************************************************************************************
+************************************************************************************
+**                                                                                **
+**    This is the STARS data set for problem 1A in "Fourth SPE                    **
+**  Comparative Solution Project - A Comparison of Steam Injection                **
+**  Simulators", paper SPE 13510, presented at the eighth SPE symposium           **
+**  on reservoir simulation at Dallas, Texas, Feb 10-13, 1985.                    **
+**  Also published in J. Pet. Tech. (Dec, 1987), pp 1576-1584                     **
+**                                                                                **
+**    The problem is three cycles of steam stimulation, with water and            **
+**  a dead oil.  A two-dimensional cross-sectional study is required.             **
+**                                                                                **
+**  Features:                                                                     **
+**                                                                                **
+**  1)  Two-dimensional cross-sectional r-z coordinates.                         **
+**                                                                                **
+**  2)  Distinct permeability layering.                                     **
+**                                                                                **
+**  3)  Black-oil type treatment of fluids.                                      **
+**                                                                                **
+**  4)  Sharp changes in oil viscosity occur at the steam front   油                **
+**      (487 cp at 125 F to 2.5 cp at 450 F).                                     **
+**                                                                                **
+**  5)  Automatic initial vertical equilibrium calculation.                       **
+**                                                                                **
+**  6)  Multi-layer well with additional injection and production                 **
+**      operating constraints.                                                    **
+**                                                                                **
+************************************************************************************
+
+
+**  ==============  INPUT/OUTPUT CONTROL  ======================
+
+
+
+RESULTS SIMULATOR STARS
+
+
+*INTERRUPT *STOP  
+
+*TITLE1 'STARS Test Bed No. 6'
+*TITLE2 'Fourth SPE Comparative Solution Project'
+*TITLE3 'Problem 1A:  2-D CYCLIC STEAM INJECTION'
+
+*INUNIT *FIELD   ** output same as input
+
+*OUTPRN *GRID *ALL 
+*OUTPRN *WELL *ALL
+*OUTPRN *RES *ALL
+*WRST 200    
+*WPRN *GRID 200   **
+*WPRN *ITER 200   **
+
+
+
+outsrf special blockvar pres 2,1,2
+               blockvar so 2,1,2
+               blockvar sg 2,1,2
+               blockvar temp 2,1,2
+               blockvar cchloss 1,1,4
+               blockvar cchloss 7,1,4
+               matbal well 'OIL'    ** cumulative oil production
+               matbal well 'Water'  ** cumulative water production
+			   AVGVAR   pres
+			   AVGVAR   temp
+               obhlosscum           ** cumulative heat loss, all boundaries
+               drhlosscum           ** cumulative heat loss, separate boundaries
+               obhlossrate          ** heat loss rate, all boundaries
+               drhlossrate          ** heat loss rate, separate boundaries
+
+
+*OUTSRF *GRID *PRES *SO *SG *TEMP
+*OUTSRF *WELL   *DOWNHOLE
+ *OUTSRF *WELL  *COMPONENT  *ALL 
+ *OUTSRF *WELL  *LAYER *ALL
+ *OUTSRF *WELL  *PHWELL  
+
+
+
+**  ==============  GRID AND RESERVOIR DEFINITION  =================
+
+
+*GRID *CART 13 1 4      **RADIAL表示径向角圆柱形网格的关键字  Zero inner radius matches previous treatment
+
+**  Radial blocks:  small near well;  outer block is large   
+*DI *IVAR  3 10*10 40 120
+
+*DJ *CON 360  **  Full circle
+
+*DK *KVAR 25 25 20 10
+
+*POR *CON 0.3
+*PERMI *KVAR 2000 1000 500 2000
+*PERMJ *EQUALSI
+*PERMK *EQUALSI  / 2
+
+*END-GRID
+
+*CPOR 5e-4
+*PRPOR 75
+*ROCKCP 35
+*THCONR 24
+*THCONW 24
+*THCONO 24
+*THCONG 24
+*HLOSSPROP  *OVERBUR 35 24  *UNDERBUR 35 24
+
+
+
+**  ==============  FLUID DEFINITIONS  ======================
+
+
+*MODEL 2 2 2   ** Components are water and dead oil.  Most water
+               ** properties are defaulted (=0).  Dead oil K values
+               ** are zero, and no gas properties are needed.
+
+*COMPNAME       'Water'    'OIL'
+**               -----    -------
+     *CMM        18.015      600
+     *PCRIT      3206.2      0        ** These four properties
+     *TCRIT      705.4       0        ** are for the gas phase.
+     *AVG        1.13e-5     0        ** The dead oil component does
+     *BVG        1.075       0        ** not appear in the gas phase.
+
+     *MOLDEN     3.458        0.10113
+     *CP         3.151E-06        5.e-6
+     *CT1        1.093E-04        3.8e-4
+
+     *CPL1       18.015        300
+
+*VISCTABLE
+**      Temp
+          75     0        5780
+         100     0        1380
+         150     0         187
+         200     0          47
+         250     0          17.4
+         300     0           8.5
+         350     0           5.2
+         500     0           2.5
+         700     0           2.5
+		 
+
+
+*PRSR 14.7
+*TEMR 60
+*PSURF 14.7
+*TSURF 60
+
+
+
+**  ==============  ROCK-FLUID PROPERTIES  ======================
+
+
+*ROCKFLUID
+
+*SWT   **  Water-oil relative permeabilities
+
+**   Sw        Krw        Krow
+**  ----     --------    -------
+    0.45     0.0         0.4
+    0.47     0.000056    0.361
+    0.50     0.000552    0.30625
+    0.55     0.00312     0.225
+    0.60     0.00861     0.15625
+    0.65     0.01768     0.1
+    0.70     0.03088     0.05625
+    0.75     0.04871     0.025
+    0.77     0.05724     0.016
+    0.80     0.07162     0.00625
+    0.82     0.08229     0.00225
+    0.85     0.1         0.0
+
+*SLT   **  Liquid-gas relative permeabilities
+
+**   Sl        Krg         Krog
+**  ----     -------     -------
+    0.45     0.2         0.0
+    0.55     0.14202     0.0
+    0.57     0.13123     0.00079
+    0.60     0.11560     0.00494
+    0.62     0.10555     0.00968
+    0.65     0.09106     0.01975
+    0.67     0.08181     0.02844
+    0.70     0.06856     0.04444
+    0.72     0.06017     0.05709
+    0.75     0.04829     0.07901
+    0.77     0.04087     0.09560
+    0.80     0.03054     0.12346
+    0.83     0.02127     0.15486
+    0.85     0.01574     0.17778
+    0.87     0.01080     0.20227
+    0.90     0.00467     0.24198
+    0.92     0.00165     0.27042
+    0.94     0.0         0.30044
+    1.       0.0         0.4
+
+
+
+**  ==============  INITIAL CONDITIONS  ======================
+
+
+*INITIAL
+
+** Automatic static vertical equilibrium  自动静态垂直平衡？
+*VERTICAL *DEPTH_AVE
+*REFPRES 75
+*REFBLOCK 1 1 4
+
+*TEMP *CON 125
+
+
+
+**  ==============  NUMERICAL CONTROL  ======================
+
+
+*NUMERICAL   ** All these can be defaulted.  The definitions
+             ** here match the previous data.
+
+*SDEGREE GAUSS
+*DTMAX 10
+
+*NORM     *PRESS 200  *SATUR 0.2   *TEMP 180  *Y 0.2   *X 0.2
+
+
+*RUN
+
+
+
+**  ==============  RECURRENT DATA  ======================
+
+
+**    The injection and production phases of the single cycling well
+**  will be treated as two distinct wells which are in the same
+**  location but are never active at the same time.  In the well data
+**  below, both wells are defined immediately, but the producer is
+**  shut in, to be activated for the drawdown.生产井和注入井在 同一个位置，不同时打开
+
+
+*DATE 1973 9 25.5
+
+   *DTWELL .02
+
+   ** INJECTOR:  Constant pressure steam injection type 恒压
+
+   *WELL 1 'Injector 1' *VERT 1 1     **VERT 
+   *INJECTOR *UNWEIGHT 'Injector 1'
+   *INCOMP WATER  1.0  0.0    
+   *TINJW 450
+   *OPERATE      *BHP   1000     ** Starting BHP is 1000 psi
+   *OPERATE *MAX *STW   1000     ** Maximum water rate is 1000 BPD
+   *PERFV 'Injector 1'  **  k   wi   wi = 0.007082 *k * h / ln(0.5 * re / rw)
+                4   78075.37 ** 88
+                3   39037.68 ** 44
+                2   97594.21 **110
+                1  195188.43 **220
+
+   ** PRODUCER:  Constant liquid rate type
+
+   *WELL 2 'Producer 1' *VERT 1 1
+   *PRODUCER 'Producer 1'
+   *OPERATE      *STL    1000    ** Starting liquid rate is 1000 BPD
+   *OPERATE *MIN *BHP    17      ** Minumum BHP of 1 atm
+   *GEOMETRY K  .3 .5 1 0
+   *PERFV *GEO 'Producer 1'  ** k
+                    4   1.0
+                    3   1.0
+                    2   1.0
+                    1   1.0
+
+
+   ** Cycle No. 1  -  Injection
+
+   *SHUTIN 'Producer 1'   ** Shut in producer
+
+   *OUTSRF *GRID *REMOVE *SO
+
+*TIME 10
+
+   *DTWELL 1
+
+   ** Cycle No. 1  -  Soak
+
+   *SHUTIN 'Injector 1'   ** Shut in injector
+
+   *OUTSRF *GRID *REMOVE *PRES
+
+*TIME 17
+   *DTWELL 10
+
+   ** Cycle No. 1  -  Production
+
+   *OPEN 'Producer 1'   ** Turn on producer
+
+   *OUTSRF *GRID *PRES
+
+*TIME 365
+ 
+
+   ** Cycle No. 2  -  Injection
+
+   *SHUTIN 'Producer 1'   ** Shut in producer
+   *OPEN 'Injector 1'   ** Open  in injector
+
+
+   *OUTSRF *GRID *REMOVE *SO
+
+*TIME 375
+
+   *DTWELL 1
+
+   ** Cycle No. 1  -  Soak
+
+   *SHUTIN 'Injector 1'   ** Shut in injector
+
+   *OUTSRF *GRID *REMOVE *PRES
+
+*TIME 382
+
+   *DTWELL 10
+
+   ** Cycle No. 1  -  Production
+
+   *OPEN 'Producer 1'   ** Turn on producer
+
+   *OUTSRF *GRID *PRES
+
+*TIME 730
+
+   ** Cycle No. 3  -  Injection
+
+
+   *SHUTIN 'Producer 1'   ** Shut in producer
+   *OPEN 'Injector 1'   ** Open  in injector
+
+   *OUTSRF *GRID *REMOVE *SO
+
+*TIME 740
+
+   *DTWELL 1
+
+   ** Cycle No. 1  -  Soak
+
+   *SHUTIN 'Injector 1'   ** Shut in injector
+
+   *OUTSRF *GRID *REMOVE *PRES
+
+*TIME 747
+   *DTWELL 10
+
+   ** Cycle No. 1  -  Production
+
+   *OPEN 'Producer 1'   ** Turn on producer
+
+   *OUTSRF *GRID *PRES
+
+*TIME 1095
+
+STOP

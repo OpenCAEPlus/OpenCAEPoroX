@@ -95,8 +95,10 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     if (!ctrl.Check(rs, {"BulkNi", "BulkP", "BulkT"})) {
         ResetToLastTimeStep(rs, ctrl);
-        cout << "Cut time step size and repeat! current dt = " << fixed
-             << setprecision(3) << dt << " days\n";
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            cout << "Cut time step size and repeat! current dt = " << fixed
+                << setprecision(3) << dt << " days\n";
+        }      
         return OCP_FALSE;
     }
 
@@ -124,12 +126,6 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_DBL NRdSmax = rs.GetNRdSmax(dSn);
     const OCP_DBL NRdPmax = rs.GetNRdPmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
-
-    cout << "### NR : " + to_string(ctrl.iterNR) + "    Res:    " << setprecision(2)
-         << scientific << rs.bulk.res.maxRelRes0_V << setw(12)
-         << rs.bulk.res.maxRelRes_V << setw(12) << rs.bulk.res.maxRelRes_N << setw(12)
-         << rs.bulk.res.maxWellRelRes_mol << setw(12) << rs.bulk.res.maxRelRes_E
-         << setw(12) << fabs(NRdPmax) << setw(12) << fabs(NRdSmax) << endl;
 
     OCP_INT conflag_loc = -1;
     if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||

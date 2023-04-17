@@ -166,7 +166,9 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
     ctrlPreTime = ctrlPreTimeSet[i];
     ctrlNR      = ctrlNRSet[i];
     end_time    = criticalTime[i + 1];
-    wellChange  = rs.allWells.GetWellChange();
+    const OCP_BOOL wellChange_loc  = rs.allWells.GetWellChange();
+    MPI_Allreduce(&wellChange_loc, &wellChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
+
     InitTime(i);
 }
 
@@ -360,7 +362,7 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
     init_dt = current_dt;
 
     const OCP_DBL dt = end_time - current_time;
-    if (current_dt > dt) current_dt = dt;
+    if (current_dt > dt) current_dt = dt;   
 }
 
 /*----------------------------------------------------------------------------*/
