@@ -1272,15 +1272,15 @@ void ComponentParam::InputBIC(ifstream& ifs)
         for (auto& v : vbuf) {
             if (v != "/") {
                 BIC[nReg].push_back(stod(v));
-                cout << setw(10) << BIC[nReg].back();
+                if (CURRENT_RANK == MASTER_PROCESS)
+                    cout << setw(10) << BIC[nReg].back();
             }
         }
-        if (CURRENT_RANK == MASTER_PROCESS) {
+        if (CURRENT_RANK == MASTER_PROCESS)
             cout << endl;
-            if (vbuf.back() == "/") {
-                nReg++;
-                if (nReg >= NTPVT) break;
-            }
+        if (vbuf.back() == "/") {
+            nReg++;
+            if (nReg >= NTPVT) break;
         }
     }
 }

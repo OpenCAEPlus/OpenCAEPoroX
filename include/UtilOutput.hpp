@@ -24,7 +24,9 @@
 
 using namespace std;
 
-extern OCP_INT CURRENT_RANK;
+
+extern OCP_INT  CURRENT_RANK;
+extern const OCP_BOOL ALLPROC_OUTPUT;
 
 template <typename T>
 constexpr auto OCP_SEP01(T n)

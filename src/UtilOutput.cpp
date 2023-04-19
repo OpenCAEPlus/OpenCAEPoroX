@@ -11,7 +11,14 @@
 
 #include "UtilOutput.hpp"
 
-OCP_INT CURRENT_RANK = 0;
+OCP_INT CURRENT_RANK   = 0;
+
+#ifdef AP_OUTPUT
+const OCP_BOOL ALLPROC_OUTPUT = 1;
+#else
+const OCP_BOOL ALLPROC_OUTPUT = 0;
+#endif // AP_OUTPUT
+
 
 string GetIJKformat(const string& i, const string& j, const string& k, const USI& s)
 {
