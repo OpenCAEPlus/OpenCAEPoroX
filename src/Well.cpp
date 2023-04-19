@@ -25,8 +25,9 @@ void Well::InputPerfo(const WellParam& well, const Domain& domain, const USI& wI
         const OCP_USI tmpJ = well.J_perf[p] - 1;
         const OCP_USI tmpK = well.K_perf[p] - 1;
         const OCP_INT loc = domain.GetPerfLocation(wId, tmpI, tmpJ, tmpK);
-        if (loc < 0) continue;
-
+        if (loc < 0) {
+            continue;
+        }
         perf[pp].location   = loc;
         perf[pp].I          = tmpI;
         perf[pp].J          = tmpJ;
@@ -46,7 +47,7 @@ void Well::InputPerfo(const WellParam& well, const Domain& domain, const USI& wI
         }
         pp++;
     }
-
+    OCP_ASSERT(pp = numPerf, "Wrong Perf!");
 }
 
 

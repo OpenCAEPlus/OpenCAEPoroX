@@ -265,7 +265,7 @@ TUNING
 /
 
 METHOD
-FIM
+FIM  bsr.fasp
 /
 
 

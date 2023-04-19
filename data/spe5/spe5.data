@@ -75,7 +75,6 @@ EGOIL.in
 
 ZMFVD
 1000.0  0.5 0.03 0.07 0.2 0.15 0.05
-10000.0 0.5 0.03 0.07 0.2 0.15 0.05 
 /
 
 RTEMP
@@ -162,18 +161,18 @@ WBHP
 WPI 
 /
 
-RPTSCHED
-PRESSURE
-DENO  DENG  DENW
-SOIL  SGAS  SWAT
-/
+--RPTSCHED
+--PRESSURE
+--DENO  DENG  DENW
+--SOIL  SGAS  SWAT
+--/
 
 
 SCHEDULE    ==========================================================
 
 TUNING
 -- Init     max    min   incre   chop    cut
-   1       10     0.1      5    0.3    0.3                    /
+   1       50    0.1      5    0.3    0.3                    /
 --  dPlim  dSlim   dNlim   dVerrlim
      300     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
@@ -182,7 +181,7 @@ TUNING
 
 
 METHOD
-FIM  pardiso 
+FIM  bsr.fasp 
 /
 
 

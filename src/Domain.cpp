@@ -35,6 +35,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		for (OCP_USI w = 0; w < numWellTotal; w++) {
 			well[w] = w;
 			well2Bulk.push_back(gridwell.connWellGrid[w]);
+			sort(well2Bulk[w].begin(), well2Bulk[w].end());
 		}
 		return;
 	}
@@ -67,6 +68,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 						// well
 						well.push_back(my_vtx[i] - (numElementTotal - numWellTotal));
 						well2Bulk.push_back(vector<OCP_USI>(my_edge + my_xadj[i], my_edge + my_xadj[i + 1]));
+						sort(well2Bulk.back().begin(), well2Bulk.back().end());
 						continue;
 					}
 					grid.push_back(my_vtx[i]);
@@ -237,7 +239,7 @@ OCP_INT Domain::GetPerfLocation(const OCP_USI& wId, const OCP_USI& tmpI, const O
 		return -1;
 	}
 	else {
-		// determine if this perf is active
+		// determine if this perf is in fluid bulk
 		pId = grid[loc]; // active idex
 		OCP_USI tmploc = myFind(pId, well2Bulk[wId].data(), 0, well2Bulk[wId].size());
 		if (pId != well2Bulk[wId][tmploc]) {

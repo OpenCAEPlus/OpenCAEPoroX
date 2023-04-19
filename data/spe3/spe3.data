@@ -198,7 +198,7 @@ SCHEDULE    ==========================================================
 
 TUNING
 -- Init     max    min   incre   chop    cut
-   0.1       1    0.1      5    0.3    0.3                    /
+   1       100    0.1      5    0.3    0.3                    /
 --  dPlim  dSlim   dNlim   dVerrlim
      300     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
@@ -206,7 +206,7 @@ TUNING
 /
 
 METHOD
-IMPEC
+FIM bsr.fasp
 /
 
 -- Scenario One  ------------------------------------------------

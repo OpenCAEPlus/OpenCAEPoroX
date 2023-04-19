@@ -46,3 +46,12 @@ x86/
 *.vtk
 *.log
 *.sh
+
+/data/ZBCO2
+/data/spe5/refine/tNavgator
+/data/spe5/E300
+/data/spe5/CMG
+/data/spe3/CMG
+/data/spe3/E300
+/data/spe1a/E100
+/data/spe9/E100

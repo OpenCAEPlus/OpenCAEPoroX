@@ -68,7 +68,7 @@ protected:
 	vector<vector<idx_t>>   elementCSR;  ///< elements received from other process in CSR
 	vector<OCP_USI>         grid;        ///< interior grid & ghost grid
 	vector<OCP_USI>         well;        ///< well's index(index starts from zero)
-	vector<vector<OCP_USI>> well2Bulk;   ///< wells' bulk neighbor, init global index
+	vector<vector<OCP_USI>> well2Bulk;   ///< wells' bulk neighbor, init global active index, ascending order
 	vector<USI>             neighborNum; ///< num of neighbor of grids: well-included, self-included
 
 	map<OCP_USI, OCP_USI>   init_global_to_local; ///< interior grid & ghost grid
