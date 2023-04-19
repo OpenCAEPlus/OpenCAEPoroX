@@ -103,8 +103,9 @@ SWOF
   0.8222     0.7709  0            0.01
   0.9111     1       0               0
   1          1       0               0
-/                                    0
-                                     0
+/                                    
+
+
 SGOF
 --SG         KRG     KROg    PCOG
        0.0       0.0   1.00000             0
@@ -119,7 +120,7 @@ SGOF
  0.6500000 0.3900000       0.0             3
  0.7111000 0.5600000       0.0             4
  0.8000000   1.00000       0.0             8
-/                                         30
+/                                         
 
 PVTW
 14.7   1.00    3.3E-06      0.7     0.00E-01
@@ -140,6 +141,11 @@ SOLUTION   =============================================================
 
 EQUIL
 8400 1000 9000 0 7000 0 1 1 0  /
+
+PBVD
+5000    4014.7    
+9000    4014.7
+/
 
 
 SUMMARY
@@ -182,9 +188,7 @@ FIM samg
 
 -- Scenario One  ------------------------------------------------
 
-WELLSTRE
-Solvent 0.77 0.20 0.03 0.0 0.0 /
-/
+
 
 WELSPECS
 --name  group   I   J  depth_ref phase_ref -- I J -(x,y), start 1
@@ -195,10 +199,14 @@ WELSPECS
 'PROD4'   'G'   1291     1291     1*    'OIL'   /
 /
 
+WELLSTRE
+Solvent 0.77 0.20 0.03 0.0 0.0 /
+/
+
 COMPDAT
 --name   I J   K1  K2 
-'INJ*'    2*   1   2         1*   0.5   3*
-'PROD*'   2*   5   6         1*   0.5   3*   /
+'INJE*'    2*   1   2         1*   0.5   3*
+'PROD*'   2*    5   6          1*   0.5   3*   /
 /
 
 
@@ -208,7 +216,7 @@ WCONPROD
 
 WCONINJE
 --name type   openflag  mode  surface_rate       BHP
-'INJ*'     Solvent   OPEN    RATE  12000           12000 /
+'INJE*'     Solvent   OPEN    RATE    12000      12000 /
 /
 
 --Start production only ----------------------------------------------
