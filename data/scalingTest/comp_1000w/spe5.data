@@ -14,8 +14,15 @@
 
 RUNSPEC   ==============================================================
 
+
+
 TITLE
    SPE Fifth Comparison Test Problem - Scenario One
+   
+   
+MODEL
+ISOTHERMAL
+   
    
 FIELD
 
