@@ -1197,14 +1197,16 @@ void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
         }
     }
 
-    cout << keyword << endl;
-    for (USI i = 0; i < NTPVT; i++) {
-        for (auto& v : objPtr->data[i]) {
-            cout << v << endl;
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << keyword << endl;
+        for (USI i = 0; i < NTPVT; i++) {
+            for (auto& v : objPtr->data[i]) {
+                cout << v << endl;
+            }
+            cout << "/" << endl;
         }
-        cout << "/" << endl;
+        cout << endl;
     }
-    cout << endl;
 }
 
 void ComponentParam::InputCNAMES(ifstream& ifs)
@@ -1273,10 +1275,12 @@ void ComponentParam::InputBIC(ifstream& ifs)
                 cout << setw(10) << BIC[nReg].back();
             }
         }
-        cout << endl;
-        if (vbuf.back() == "/") {
-            nReg++;
-            if (nReg >= NTPVT) break;
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            cout << endl;
+            if (vbuf.back() == "/") {
+                nReg++;
+                if (nReg >= NTPVT) break;
+            }
         }
     }
 }
