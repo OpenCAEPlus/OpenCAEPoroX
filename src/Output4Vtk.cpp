@@ -25,9 +25,10 @@ void Output4Vtk::InitASCII(const string&          myFile,
     outVtk << VTK_POINTS << " " << numGrid * 8 << " " << VTK_FLOAT << "\n";
     OCP_USI iterP = 0;
     for (OCP_USI n = 0; n < numGrid * 8; n++) {
-        outVtk << setw(6) << points_xyz[iterP++]
-            << setw(10) << points_xyz[iterP++]
-            << setw(10) << points_xyz[iterP++] << "\n";
+        outVtk << setw(6) << points_xyz[iterP]
+            << setw(10) << points_xyz[iterP + 1]
+            << setw(10) << points_xyz[iterP + 2] << "\n";
+        iterP += 3;
     }
     
     // Output cells

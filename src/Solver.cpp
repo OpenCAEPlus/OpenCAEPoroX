@@ -144,7 +144,6 @@ void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
         // Solve linear system
         TSolver.SolveLinearSystem(rs, ctrl);
         if (!TSolver.UpdateProperty(rs, ctrl)) {
-            ctrl.ResetIterNRLS();
             continue;
         }
         if (TSolver.FinishNR(rs, ctrl)) break;

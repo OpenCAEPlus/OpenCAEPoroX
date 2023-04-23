@@ -45,9 +45,6 @@ class Well
     friend class AllWells;
     friend class Out4RPT;
 
-    // temp
-    friend class MyMetisTest;
-
 public:
     Well() = default;
 
