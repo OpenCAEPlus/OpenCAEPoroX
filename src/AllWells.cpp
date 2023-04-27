@@ -372,10 +372,12 @@ USI AllWells::GetIndex(const string& name) const
             return w;    
         }
     }
-    if (numproc > 1) {
+    if (numproc == 1) {
         OCP_ABORT("Well " + name + " not found!");
     }
-    
+    else {
+        return -1;
+    }   
 }
 
 USI AllWells::GetWellPerfNum() const

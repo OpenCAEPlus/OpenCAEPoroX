@@ -89,8 +89,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WOPR.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WOPR.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WOPR", WOPR.obj[w], "STB/DAY", "float", maxRowNum));
-                WOPR.index.push_back(wells.GetIndex(WOPR.obj[w]));
+                WOPR.index.push_back(tmpW);
             }
         }
     }
@@ -107,8 +109,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WOPT.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WOPT.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WOPT", WOPT.obj[w], "STB", "float", maxRowNum));
-                WOPT.index.push_back(wells.GetIndex(WOPT.obj[w]));
+                WOPT.index.push_back(tmpW);
             }
         }
     }
@@ -125,8 +129,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WGPR.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WGPR.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WGPR", WGPR.obj[w], "MSCF/DAY", "float", maxRowNum));
-                WGPR.index.push_back(wells.GetIndex(WGPR.obj[w]));
+                WGPR.index.push_back(tmpW);
             }
         }
     }
@@ -143,8 +149,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WGPT.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WGPT.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WGPT", WGPT.obj[w], "MSCF", "float", maxRowNum));
-                WGPT.index.push_back(wells.GetIndex(WGPT.obj[w]));
+                WGPT.index.push_back(tmpW);
             }
         }
     }
@@ -161,8 +169,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WWPR.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WWPR.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WWPR", WWPR.obj[w], "STB/DAY", "float", maxRowNum));
-                WWPR.index.push_back(wells.GetIndex(WWPR.obj[w]));
+                WWPR.index.push_back(tmpW);
             }
         }
     }
@@ -179,8 +189,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WWPT.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WWPT.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WWPT", WWPT.obj[w], "STB", "float", maxRowNum));
-                WWPT.index.push_back(wells.GetIndex(WWPT.obj[w]));
+                WWPT.index.push_back(tmpW);
             }
         }
     }
@@ -197,8 +209,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WGIR.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WGIR.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WGIR", WGIR.obj[w], "MSCF/DAY", "float", maxRowNum));
-                WGIR.index.push_back(wells.GetIndex(WGIR.obj[w]));
+                WGIR.index.push_back(tmpW);
             }
         }
     }
@@ -215,8 +229,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WGIT.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WGIT.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WGIT", WGIT.obj[w], "MSCF", "float", maxRowNum));
-                WGIT.index.push_back(wells.GetIndex(WGIT.obj[w]));
+                WGIT.index.push_back(tmpW);
             }
         }
     }
@@ -233,8 +249,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WWIR.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WWIR.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WWIR", WWIR.obj[w], "STB/DAY", "float", maxRowNum));
-                WWIR.index.push_back(wells.GetIndex(WWIR.obj[w]));
+                WWIR.index.push_back(tmpW);
             }
         }
     }
@@ -251,8 +269,10 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WWIT.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WWIT.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WWIT", WWIT.obj[w], "STB", "float", maxRowNum));
-                WWIT.index.push_back(wells.GetIndex(WWIT.obj[w]));
+                WWIT.index.push_back(tmpW);
             }
         }
     }
@@ -269,38 +289,40 @@ void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
         } else {
             num = WBHP.obj.size();
             for (USI w = 0; w < num; w++) {
+                const OCP_INT tmpW = wells.GetIndex(WBHP.obj[w]);
+                if (tmpW < 0) continue;
                 Sumdata.push_back(SumItem("WBHP", WBHP.obj[w], "PSIA", "float", maxRowNum));
-                WBHP.index.push_back(wells.GetIndex(WBHP.obj[w]));
+                WBHP.index.push_back(tmpW);
             }
         }
     }
 
-    if (DG.activity) {
-        if (DG.obj[0] == "All") {
-            DG.obj.clear();
-            for (USI w = 0; w < wellnum; w++) {
-                string wellname = wells.GetWellName(w);
-                DG.obj.push_back(wellname);
-                USI perfnum = wells.GetWellPerfNum(w);
-                for (USI p = 0; p < perfnum; p++) {
-                    Sumdata.push_back(SumItem("DG", wellname + " Perf" + to_string(p),
-                                              "PSIA", "float", maxRowNum));
-                    DG.index.push_back(w);
-                }
-            }
-        } else {
-            num = DG.obj.size();
-            for (USI w = 0; w < num; w++) {
-                USI wId     = wells.GetIndex(DG.obj[w]);
-                USI perfnum = wells.GetWellPerfNum(wId);
-                for (USI p = 0; p < perfnum; p++) {
-                    Sumdata.push_back(SumItem("DG", DG.obj[w] + " P" + to_string(p),
-                                              "PSIA", "float", maxRowNum));
-                    DG.index.push_back(wId);
-                }
-            }
-        }
-    }
+    //if (DG.activity) {
+    //    if (DG.obj[0] == "All") {
+    //        DG.obj.clear();
+    //        for (USI w = 0; w < wellnum; w++) {
+    //            string wellname = wells.GetWellName(w);
+    //            DG.obj.push_back(wellname);
+    //            USI perfnum = wells.GetWellPerfNum(w);
+    //            for (USI p = 0; p < perfnum; p++) {
+    //                Sumdata.push_back(SumItem("DG", wellname + " Perf" + to_string(p),
+    //                                          "PSIA", "float", maxRowNum));
+    //                DG.index.push_back(w);
+    //            }
+    //        }
+    //    } else {
+    //        num = DG.obj.size();
+    //        for (USI w = 0; w < num; w++) {
+    //            USI wId     = wells.GetIndex(DG.obj[w]);
+    //            USI perfnum = wells.GetWellPerfNum(wId);
+    //            for (USI p = 0; p < perfnum; p++) {
+    //                Sumdata.push_back(SumItem("DG", DG.obj[w] + " P" + to_string(p),
+    //                                          "PSIA", "float", maxRowNum));
+    //                DG.index.push_back(wId);
+    //            }
+    //        }
+    //    }
+    //}
 
     //if (BPR.activity) {
     //    num = BPR.obj.size();
