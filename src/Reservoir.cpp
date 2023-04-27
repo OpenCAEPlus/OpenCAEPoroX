@@ -114,7 +114,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             send_var_info += pow(2, sizeof(OCP_INT) * 8 - 2);
             domain.allActive = OCP_FALSE;
         }
-                  
+                
         MPI_Bcast(&send_var_info, 1, MPI_INT, MASTER_PROCESS, myComm);
 
         // Master proc is excluded
@@ -150,7 +150,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         vector<OCP_BOOL>        work_state{ OCP_FALSE };
         OCP_CHAR*               work_buffer;
         vector<OCP_USI>         proc_buffer_l;
-        vector<OCP_USI>         proc_buffer_c;
+        vector<OCP_USI>         proc_buffer_c; // which process use which buffer
 
         MPI_Request* request = new MPI_Request[numproc - 1];
         MPI_Status*  status  = new MPI_Status[numproc - 1];
@@ -224,6 +224,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
            
             // send
             MPI_Isend((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm, &request[p - 1]);
+            // MPI_Send((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm);
             cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
 
             // update work_state(request)
@@ -244,8 +245,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         delete[] iGridproc;       
         delete[] dislps;
         delete[] numGridInterior_proc;
-        delete[] request;
-        delete[] status;
+
         vector<OCP_BOOL>().swap(work_state);
         vector<OCP_USI>().swap(proc_buffer_c);
         vector<OCP_USI>().swap(proc_buffer_l);
@@ -313,6 +313,13 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         // Free grid Memory
         mygrid.FreeMemory();
         rsparam.FreeGridMemory();
+
+        // wait 
+        while (MPI_Testall(numproc - 1, request, &send_flag, MPI_STATUS_IGNORE) == MPI_SUCCESS && send_flag == 0) {
+        }       
+        delete[] request;
+        delete[] status;
+
     }
     else {
         // Get num of kind of vars
@@ -362,7 +369,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         MPI_Recv((void*)recv_buffer, recv_size, MPI_BYTE, MASTER_PROCESS, 0, myComm, &status);       
         cout << "Third stage : " << myrank <<  " receives " << recv_size << "b from 0" << endl;
-       
+             
         // dbl
         OCP_DBL* dbl_ptr = (OCP_DBL*)recv_buffer;
         for (USI r = 0; r < recv_var.numvar_dbl; r++) {
@@ -435,12 +442,14 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         delete[] recv_buffer;
 
         if (myrank == 0) {
-            for (OCP_USI n = 0; n < bulk.numBulk; n++) {
-                cout << domain.grid[n] << "  " << bulk.poroInit[n] - 1 << endl;
-            }
+            //cout << bulk.numBulk << endl;
+            //for (OCP_USI n = 0; n < bulk.numBulk; n++) {
+            //    cout << domain.grid[n] << "  " << bulk.dx[n] << endl;
+            //}
             //for (const auto& c : conn.iteratorConn) {
-            //    cout << domain.grid[c.BId()] << "   " << domain.grid[c.EId()] << "   " << c.Direction() << "   "
+            //    cout << c.BId() << "   " << c.EId() << "   " << c.Direction() << "   "
             //        << c.AreaB() << "   " << c.AreaE() << endl;
+            //    
             //}
             //cout << conn.numConn << endl;
         }

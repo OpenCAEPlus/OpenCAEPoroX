@@ -318,7 +318,7 @@ TUNING
 
 
 METHOD
-FIM  samg
+FIM  bsr.fasp
 /
 
 
@@ -496,5 +496,21 @@ I1  Solvent  OPEN  RATE  10000  10000000000/
 TSTEP
 0.8  
 /
+
+
+TUNING
+-- Init           max    min   incre   chop    cut
+     0.01       0.01     0.02      5    0.3    0.3                    /
+--  dPlim  dSlim   dNlim   dVerrlim
+     300     0.3    0.3    0.001                               /
+-- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
+       10    1E-3   2000    2    1      0.01    0.01          /
+/
+
+
+TSTEP
+1  
+/
+
 
 END

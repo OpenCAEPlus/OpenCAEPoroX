@@ -118,10 +118,6 @@ EQUALS
 /
 
 
---EQUALS
---'PERMX'   100    1  24  1  25  1  15  /
---/
-
 PERMX
 -- LAYER  1
 -- ROW    1
@@ -2394,6 +2390,7 @@ COPY
  'PERMX' 'PERMY'  1 24 1 25 1 15 /
  'PERMX' 'PERMZ'  1 24 1 25 1 15 /
 /
+
 MULTIPLY
  'PERMZ' 0.01  1 24 1 25 1 15 /
 /
@@ -2540,36 +2537,14 @@ WWPR
 WWPT
 /
 WGIR
-INJE1
 /
 WGIT
-INJE1
 /
 WWIR
-INJE1
 /
 WWIT
-INJE1
 /
 WBHP
-/
-BPR
-15 16 2 /
-15 16 3 /
-15 16 4 /
-/
-DG
-PROD17
-/
-SGAS
-15 16 2 /
-15 16 3 /
-15 16 4 /
-/
-SWAT
-15 16 2 /
-15 16 3 /
-15 16 4 /
 /
 /
 
@@ -2661,7 +2636,7 @@ TUNING
 /
 
 METHOD
-FIM
+FIM  pardiso
 /
 
 

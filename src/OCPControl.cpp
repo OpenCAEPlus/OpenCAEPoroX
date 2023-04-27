@@ -98,7 +98,7 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
                 break;
 
             case Map_Str2Int("verbose", 7):
-                printLevel = MIN(MAX(stoi(value), PRINT_NONE), PRINT_ALL);
+                printLevel = OCP_MIN(OCP_MAX(stoi(value), PRINT_NONE), PRINT_ALL);
                 break;
 
             default:

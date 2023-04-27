@@ -159,9 +159,9 @@ const USI MASTER_PROCESS = 0; ///< master process
 /**
  * \brief Definition of max, min, abs
  */
-#define MAX(a,b) (((a)>(b))?(a):(b))     /**< bigger one in a and b */
-#define MIN(a,b) (((a)<(b))?(a):(b))     /**< smaller one in a and b */
-#define ABS(a)   (((a)>=0.0)?(a):-(a))   /**< absolute value of a */
+#define OCP_MAX(a,b) (((a)>(b))?(a):(b))     /**< bigger one in a and b */
+#define OCP_MIN(a,b) (((a)<(b))?(a):(b))     /**< smaller one in a and b */
+#define OCP_ABS(a)   (((a)>=0.0)?(a):-(a))   /**< absolute value of a */
 
 #endif // __OPENCAEPORO_CONSTS_HEADER__
 

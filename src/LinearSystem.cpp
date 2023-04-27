@@ -27,7 +27,7 @@ void LinearSystem::AllocateColMem()
  
     USI maxPerfNum = 0;
     for (const auto& w : domain->well2Bulk) {
-        maxPerfNum = MAX(maxPerfNum, w.size());
+        maxPerfNum = OCP_MAX(maxPerfNum, w.size());
     }
     maxPerfNum++; // add well self
 

@@ -77,6 +77,7 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 void AllWells::Setup(const Bulk& myBulk)
 {
     OCP_FUNCNAME;
+    numproc = myBulk.numproc;
     SetupWell(myBulk);
     SetupMixture(myBulk);
 }
@@ -368,10 +369,13 @@ USI AllWells::GetIndex(const string& name) const
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].name == name) {
-            return w;
+            return w;    
         }
     }
-    OCP_ABORT("Well name not found!");
+    if (numproc > 1) {
+        OCP_ABORT("Well " + name + " not found!");
+    }
+    
 }
 
 USI AllWells::GetWellPerfNum() const

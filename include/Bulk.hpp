@@ -152,7 +152,7 @@ public:
     /// Return the number of components.
     USI GetComNum() const { return numCom; }
 
-protected:
+public:
     MPI_Comm  myComm;
     OCP_INT   numproc, myrank;
 
