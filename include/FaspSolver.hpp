@@ -119,7 +119,7 @@ protected:
 class ScalarFaspSolver : public FaspSolver
 {
 public:
-    ScalarFaspSolver(const USI& blockDim) { blockdim = blockDim; }
+    ScalarFaspSolver() { blockdim = 1; }
 
 private:
     /// Allocate memory for the linear system.

@@ -33,6 +33,7 @@ target_sources(
 		 ParamWell.hpp
 		 PardisoSolver.hpp
 		 Partition.hpp
+		 PetscSolver.hpp
 		 PhasePermeability.hpp
 		 PreParamGridWell.hpp
 		 PreProcess.hpp

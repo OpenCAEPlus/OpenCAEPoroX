@@ -113,9 +113,8 @@ protected:
 class ScalarSamgSolver : public SamgSolver
 {
 public:
-    ScalarSamgSolver(const USI& blockDim, const USI& model) {
-        OCP_ASSERT(blockDim == 1, "Wrong Block Dimension!");
-        blockdim = blockDim;
+    ScalarSamgSolver(const USI& model) {
+        blockdim = 1;
         nsys     = 1;
         ndiu     = 1;
         ndip     = 1;
@@ -159,9 +158,9 @@ public:
         vector<OCP_DBL>& u) override;
 };
 
-#endif // WITH_SAMG
+#endif 
 
-#endif
+#endif // WITH_SAMG
 
 
  /*----------------------------------------------------------------------------*/

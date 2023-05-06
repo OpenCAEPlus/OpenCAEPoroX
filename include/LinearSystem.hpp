@@ -26,6 +26,7 @@
 #include "PardisoSolver.hpp"
 #include "SamgSolver.hpp"
 #include "FaspSolver.hpp"
+#include "PetscSolver.hpp"
 
 using namespace std;
 

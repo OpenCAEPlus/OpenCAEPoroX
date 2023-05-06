@@ -193,14 +193,20 @@ void LinearSystem::SetupLinearSolver(const USI& model,
 #ifdef WITH_SAMG
     else if (lsMethod == "samg") {
         if (blockDim > 1)    LS = new VectorSamgSolver(blockDim, model);
-        else                 LS = new ScalarSamgSolver(blockDim, model);
+        else                 LS = new ScalarSamgSolver(model);
     }
 #endif // WITH_SAMG
     else if (lsMethod == "fasp") {
         if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
         if (blockDim > 1)    LS = new VectorFaspSolver(blockDim);
-        else                 LS = new ScalarFaspSolver(blockDim);
+        else                 LS = new ScalarFaspSolver();
     }
+#ifdef WITH_PETSC
+    else if (lsMethod == "petsc") {
+        if (blockDim > 1)    LS = new VectorPetscSolver(blockDim);
+        else                 LS = new ScalarPetscSolver();
+    }
+#endif // WITH_PETSC
     else {
         OCP_ABORT("Wrong Linear Solver type!");
     }

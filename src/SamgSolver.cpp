@@ -1,4 +1,4 @@
-/*! \file    SamgSolver.hpp
+/*! \file    SamgSolver.cpp
  *  \brief   API of SANG Solver
  *  \author  Shizhe Li
  *  \date    Apr/07/2023

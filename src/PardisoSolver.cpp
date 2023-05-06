@@ -57,9 +57,9 @@ void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
     global_index = domain->CalGlobalIndex(actWellNum);
 
-    const OCP_USI numGridInterior = domain->GetNumGridInterior();
-    const OCP_USI numElementLoc   = actWellNum + numGridInterior;
-    const OCP_USI global_end      = global_index->at(numElementLoc - 1);
+    const OCP_INT numGridInterior = domain->GetNumGridInterior();
+    const OCP_INT numElementLoc   = actWellNum + numGridInterior;
+    const OCP_INT global_end      = global_index->at(numElementLoc - 1);
 
     iparm[40] = global_end - numElementLoc + 1;  // global begin (included)
     iparm[41] = global_end;                      // global end   (included)
@@ -172,9 +172,9 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
 {
     global_index = domain->CalGlobalIndex(actWellNum);
 
-    const OCP_USI numGridInterior = domain->GetNumGridInterior();
-    const OCP_USI numElementLoc = actWellNum + numGridInterior;
-    const OCP_USI global_end = global_index->at(numElementLoc - 1);
+    const OCP_INT numGridInterior = domain->GetNumGridInterior();
+    const OCP_INT numElementLoc   = actWellNum + numGridInterior;
+    const OCP_INT global_end      = global_index->at(numElementLoc - 1);
 
     iparm[40] = (global_end - numElementLoc + 1) * blockdim;  // global begin (included)
     iparm[41] = (global_end + 1) * blockdim - 1;              // global end   (included)

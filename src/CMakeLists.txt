@@ -31,6 +31,7 @@ target_sources(
 		  ParamWell.cpp
 		  PardisoSolver.cpp
 		  Partition.cpp
+		  PetscSolver.cpp
 		  PhasePermeability.cpp
 		  PreParamGridWell.cpp
 		  PreProcess.cpp

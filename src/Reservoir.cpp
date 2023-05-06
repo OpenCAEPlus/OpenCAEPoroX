@@ -154,7 +154,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         MPI_Request* request = new MPI_Request[numproc - 1];
         MPI_Status*  status  = new MPI_Status[numproc - 1];
-        int          send_flag;   
+        int          send_flag = 1;
 
         for (OCP_USI p = 1; p < numproc; p++) {
             // get non-working buffer
