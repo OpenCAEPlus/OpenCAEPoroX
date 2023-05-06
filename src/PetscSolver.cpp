@@ -28,17 +28,17 @@ void PetscSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
 /// Calculate terms used in communication
 void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 {
-    global_index = domain->CalGlobalIndex(actWellNum);
+    global_index  = domain->CalGlobalIndex(actWellNum);
+    const OCP_INT numElementloc = actWellNum + domain->GetNumGridInterior();
 
-    const OCP_INT numElementLoc = actWellNum + domain->GetNumGridInterior();
-    const OCP_INT global_end = global_index->at(numElementLoc - 1);
-
-    // Get global row start
-    row_begin = global_end - numElementLoc + 1;
-
-    // Get global Dimension
-    dim_global = global_end + 1;
-    MPI_Bcast(&dim_global, 1, MPI_INT, domain->numproc - 1, domain->myComm);
+    MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, MPI_INT, myComm);
+    
+    allBegin[0] = 0;
+    allEnd[0]   = allEle[0] - 1;
+    for (OCP_USI p = 1; p < numproc; p++) {
+        allBegin[p] = allEnd[p - 1] + 1;
+        allEnd[p]   = allBegin[p] + allEle[p] - 1;
+    }
 }
 
 
@@ -49,7 +49,7 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
     vector<OCP_DBL>& rhs,
     vector<OCP_DBL>& u)
 {
-    dim_local           = dim;
+
     const USI blockSize = blockdim * blockdim;
     vector<OCP_USI> tmpJ;
     // Assemble iA, jA, A
@@ -72,6 +72,12 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
 
     b = rhs.data();
     x = u.data();
+}
+
+
+OCP_INT VectorPetscSolver::Solve()
+{
+    return FIM_solver_p(myrank, numproc, blockdim, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
 #endif // WITH_PETSC

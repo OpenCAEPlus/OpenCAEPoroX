@@ -203,7 +203,7 @@ void LinearSystem::SetupLinearSolver(const USI& model,
     }
 #ifdef WITH_PETSC
     else if (lsMethod == "petsc") {
-        if (blockDim > 1)    LS = new VectorPetscSolver(blockDim);
+        if (blockDim > 1)    LS = new VectorPetscSolver(blockDim, domain);
         else                 LS = new ScalarPetscSolver();
     }
 #endif // WITH_PETSC

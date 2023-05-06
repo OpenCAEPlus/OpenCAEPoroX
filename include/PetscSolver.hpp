@@ -18,7 +18,7 @@
 #define __PETSCSOLVER_HEADER__
 
 #include "LinearSolver.hpp"
-
+#include "PetscBsolverPS.h"
 #include <vector>
 
 using namespace std;
@@ -54,8 +54,7 @@ public:
 protected:
 
     // CSR/BSR   
-    int                     blockdim;   ///< block dim
-    int                     dim_local;  ///< local dim               
+    int                     blockdim;   ///< block dim              
     vector<double>          A;          ///< value
     vector<int>             iA;         ///< row ptr
     vector<int>             jA;         ///< col index  
@@ -63,9 +62,13 @@ protected:
     double*                 x;          ///< solution
 
     // Communication
-    int                     dim_global;  ///< total dim
-    int                     row_begin;  ///< global row begin
+    MPI_Comm                myComm;       ///< Communicator
+    int                     numproc;      ///< num of process
+    int                     myrank;       ///< current rank
     const vector<OCP_USI>*  global_index; ///< global index
+    vector<int>             allBegin;     ///< begin for all process(self-include) 
+    vector<int>             allEnd;       ///< end for all process(self-include)
+    vector<int>             allEle;       ///< num of elements for each proc
 };
 
 
@@ -81,9 +84,17 @@ public:
 class VectorPetscSolver : public PetscSolver
 {
 public:
-    VectorPetscSolver(const USI& blockDim) { blockdim = blockDim; }
+    VectorPetscSolver(const USI& blockDim, const Domain* domain) { 
+        blockdim = blockDim; 
+        myComm  = domain->myComm;
+        numproc = domain->numproc;
+        myrank  = domain->myrank;
+        allBegin.resize(numproc);
+        allEnd.resize(numproc);
+        allEle.resize(numproc);
+    }
     /// Solve the linear system.
-    OCP_INT Solve() override {};
+    OCP_INT Solve() override;
 
 };
 
