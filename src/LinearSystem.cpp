@@ -201,12 +201,12 @@ void LinearSystem::SetupLinearSolver(const USI& model,
         if (blockDim > 1)    LS = new VectorFaspSolver(blockDim);
         else                 LS = new ScalarFaspSolver();
     }
-#ifdef WITH_PETSC
+#ifdef WITH_PETSCSOLVER
     else if (lsMethod == "petsc") {
         if (blockDim > 1)    LS = new VectorPetscSolver(blockDim, domain);
         else                 LS = new ScalarPetscSolver();
     }
-#endif // WITH_PETSC
+#endif // WITH_PETSCSOLVER
     else {
         OCP_ABORT("Wrong Linear Solver type!");
     }

@@ -11,7 +11,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifdef WITH_PETSC
+#ifdef WITH_PETSCSOLVER
 
 #include "PetscSolver.hpp"
 
@@ -51,7 +51,7 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
 {
 
     const USI blockSize = blockdim * blockdim;
-    vector<OCP_USI> tmpJ;
+    vector<OCP_INT> tmpJ;
     // Assemble iA, jA, A
     iA[0] = 0;
     for (OCP_USI i = 1; i < dim + 1; i++) {
@@ -63,7 +63,7 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
         }
 
         iA[i] = iA[i - 1] + nnzR;
-        copy(&jA[iA[i - 1]], &jA[iA[i - 1]] + nnzR, tmpJ.data());
+        copy(tmpJ.begin(), tmpJ.end(), &jA[iA[i - 1]]);
         const OCP_DBL* begin = &val[i - 1][0];
         const OCP_DBL* end = begin + nnzR * blockSize;
         copy(begin, end, &A[(iA[i - 1]) * blockSize]);
@@ -80,7 +80,7 @@ OCP_INT VectorPetscSolver::Solve()
     return FIM_solver_p(myrank, numproc, blockdim, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
-#endif // WITH_PETSC
+#endif // WITH_PETSCSOLVER
 
 
 

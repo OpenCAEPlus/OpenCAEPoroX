@@ -12,13 +12,13 @@
  */
 
 
-#ifdef WITH_PETSC
+#ifdef WITH_PETSCSOLVER
 
 #ifndef __PETSCSOLVER_HEADER__
 #define __PETSCSOLVER_HEADER__
 
 #include "LinearSolver.hpp"
-#include "PetscBsolverPS.h"
+#include "PETScBSolverPS.h"
 #include <vector>
 
 using namespace std;
@@ -100,7 +100,7 @@ public:
 
 #endif 
 
-#endif // WITH_PETSC
+#endif // WITH_PETSCSOLVER
 
 
 /*----------------------------------------------------------------------------*/
