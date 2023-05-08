@@ -491,33 +491,33 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     for (USI w = 0; w < len; w++)
         Sumdata[n++].val.push_back(wells.GetWBHP(WBHP.index[w]));
 
-    // DG
-    len = DG.obj.size();
-    for (USI w = 0; w < len; w++) {
-        USI numperf = rs.allWells.GetWellPerfNum(DG.index[w]);
-        for (USI p = 0; p < numperf; p++) {
-            Sumdata[n++].val.push_back(wells.GetWellDG(DG.index[w], p));
-        }
-    }
+    //// DG
+    //len = DG.obj.size();
+    //for (USI w = 0; w < len; w++) {
+    //    USI numperf = rs.allWells.GetWellPerfNum(DG.index[w]);
+    //    for (USI p = 0; p < numperf; p++) {
+    //        Sumdata[n++].val.push_back(wells.GetWellDG(DG.index[w], p));
+    //    }
+    //}
 
-    // BPR
-    len = BPR.index.size();
-    for (USI i = 0; i < len; i++) Sumdata[n++].val.push_back(bulk.GetP(BPR.index[i]));
+    //// BPR
+    //len = BPR.index.size();
+    //for (USI i = 0; i < len; i++) Sumdata[n++].val.push_back(bulk.GetP(BPR.index[i]));
 
-    // SOIL
-    len = SOIL.index.size();
-    for (USI i = 0; i < len; i++)
-        Sumdata[n++].val.push_back(bulk.GetSOIL(SOIL.index[i]));
+    //// SOIL
+    //len = SOIL.index.size();
+    //for (USI i = 0; i < len; i++)
+    //    Sumdata[n++].val.push_back(bulk.GetSOIL(SOIL.index[i]));
 
-    // SGAS
-    len = SGAS.index.size();
-    for (USI i = 0; i < len; i++)
-        Sumdata[n++].val.push_back(bulk.GetSGAS(SGAS.index[i]));
+    //// SGAS
+    //len = SGAS.index.size();
+    //for (USI i = 0; i < len; i++)
+    //    Sumdata[n++].val.push_back(bulk.GetSGAS(SGAS.index[i]));
 
-    // SWAT
-    len = SWAT.index.size();
-    for (USI i = 0; i < len; i++)
-        Sumdata[n++].val.push_back(bulk.GetSWAT(SWAT.index[i]));
+    //// SWAT
+    //len = SWAT.index.size();
+    //for (USI i = 0; i < len; i++)
+    //    Sumdata[n++].val.push_back(bulk.GetSWAT(SWAT.index[i]));
 }
 
 /// Write output information in the dir/SUMMARY.out file.
