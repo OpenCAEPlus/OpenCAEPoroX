@@ -71,7 +71,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
         while (!ctrl.IsCriticalTime(d + 1)) {
             GoOneStep(rs, ctrl);
             output.SetVal(rs, ctrl);
-            if (ctrl.printLevel >= PRINT_ALL && OCP_TRUE) {
+            if (ctrl.printLevel >= PRINT_ALL) {
                 // Print Summary and critical information at every time step
                 output.PrintInfo();
             }

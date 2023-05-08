@@ -77,7 +77,7 @@ class ScalarPetscSolver : public PetscSolver
 public:
     ScalarPetscSolver() { blockdim = 1; }
     /// Solve the linear system.
-    OCP_INT Solve() override {};
+    OCP_INT Solve() override;
 
 };
 

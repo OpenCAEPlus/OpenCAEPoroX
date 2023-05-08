@@ -64,14 +64,18 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
 
         iA[i] = iA[i - 1] + nnzR;
         copy(tmpJ.begin(), tmpJ.end(), &jA[iA[i - 1]]);
-        const OCP_DBL* begin = &val[i - 1][0];
-        const OCP_DBL* end = begin + nnzR * blockSize;
-        copy(begin, end, &A[(iA[i - 1]) * blockSize]);
+        copy(val[i - 1].begin(), val[i - 1].end(), &A[(iA[i - 1]) * blockSize]);
     }
 
 
     b = rhs.data();
     x = u.data();
+}
+
+
+OCP_INT ScalarPetscSolver::Solve()
+{
+    return IMPEC_solver_p(myrank, numproc, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
 
