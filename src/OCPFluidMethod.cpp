@@ -19,8 +19,9 @@
 void IsothermalMethod::CalRock(Bulk& bk) const
 {
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
-        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.poroInit[n], bk.poro[n],
-                                        bk.poroP[n]);
+        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.poroInit[n]);
+        bk.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
+        bk.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
         bk.rockVp[n] = bk.v[n] * bk.poro[n];
     }
 }

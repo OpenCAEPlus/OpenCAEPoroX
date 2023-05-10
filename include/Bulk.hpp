@@ -29,7 +29,7 @@
 #include "ParamReservoir.hpp"
 #include "Domain.hpp"
 #include "PreParamGridWell.hpp"
-#include "Rock.hpp"
+#include "OCPRock.hpp"
 
 using namespace std;
 
@@ -205,7 +205,7 @@ protected:
 
     USI           NTROCC;  ///< num of Rock regions
     vector<USI>   ROCKNUM; ///< index of Rock table for each bulk
-    vector<Rock*> rock;    ///< rock model
+    vector<OCPRock*> rock;    ///< rock model
 
     vector<USI> bType;     ///< Indicate bulk type, 0: rock, 1: rock and fluid
     vector<USI> bLocation; ///< Location of bulk: top, bottom, side
@@ -252,7 +252,7 @@ protected:
     vector<OCP_DBL> rockKx;   ///< current rock permeability along the x direction.
     vector<OCP_DBL> rockKy;   ///< current rock permeability along the y direction.
     vector<OCP_DBL> rockKz;   ///< current rock permeability along the z direction.
-    vector<OCP_DBL> thconr;   ///< Rock ifThermal conductivity: activeGridNum.
+    vector<OCP_DBL> thconr;   ///< Rock thermal conductivity: activeGridNum.
     vector<OCP_DBL> vr;       ///< Volume of rock: activeGridNum.
     vector<OCP_DBL> Hr;       ///< Enthalpy of rock: activeGridNum.
 

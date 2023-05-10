@@ -19,8 +19,10 @@ target_sources(
 		 OCPConst.hpp
 		 OCPControl.hpp
 		 OCPFluidMethod.hpp
+		 OCPFlux.hpp
 		 OCP.hpp
 		 OCPOutput.hpp
+		 OCPRock.hpp
 		 OCPStructure.hpp
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
@@ -38,7 +40,6 @@ target_sources(
 		 PreParamGridWell.hpp
 		 PreProcess.hpp
 		 Reservoir.hpp
-		 Rock.hpp
 		 SamgSolver.hpp
 		 Solver.hpp
 		 ThermalMethod.hpp

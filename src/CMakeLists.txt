@@ -20,7 +20,9 @@ target_sources(
 		  OCPControl.cpp
 		  OCP.cpp
 		  OCPFluidMethod.cpp
+		  OCPFlux.cpp
 		  OCPOutput.cpp
+		  OCPRock.cpp
 		  OCPTable.cpp
 		  OCPTimeRecord.cpp
 		  Output4Vtk.cpp
@@ -35,8 +37,7 @@ target_sources(
 		  PhasePermeability.cpp
 		  PreParamGridWell.cpp
 		  PreProcess.cpp
-		  Reservoir.cpp
-		  Rock.cpp
+		  Reservoir.cpp		  
 		  SamgSolver.cpp
 		  Solver.cpp
 		  ThermalMethod.cpp

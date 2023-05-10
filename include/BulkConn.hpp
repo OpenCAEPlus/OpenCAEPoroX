@@ -70,8 +70,6 @@ class BulkConn
 {
     friend class Reservoir;
     // temp
-    friend class MyMetisTest;
-    friend class Out4VTK;
     friend class IsoT_FIM;
     friend class IsoT_IMPEC;
     friend class IsoT_AIMc;
