@@ -254,8 +254,8 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bk.muP.resize(nb * np);
     bk.muT.resize(nb * np);
     bk.mux.resize(nb * nc * np);
-    bk.dPcj_dS.resize(nb * np * np);
-    bk.dKr_dS.resize(nb * np * np);
+    bk.dPcdS.resize(nb * np * np);
+    bk.dKrdS.resize(nb * np * np);
     bk.UfP.resize(nb);
     bk.UfT.resize(nb);
     bk.Ufi.resize(nb * nc);
@@ -277,8 +277,8 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bk.lmuP.resize(nb * np);
     bk.lmuT.resize(nb * np);
     bk.lmux.resize(nb * nc * np);
-    bk.ldPcj_dS.resize(nb * np * np);
-    bk.ldKr_dS.resize(nb * np * np);
+    bk.ldPcdS.resize(nb * np * np);
+    bk.ldKrdS.resize(nb * np * np);
     bk.UfP.resize(nb);
     bk.UfT.resize(nb);
     bk.Ufi.resize(nb * nc);
@@ -476,11 +476,12 @@ void T_FIM::CalKrPc(Bulk& bk) const
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
         if (bk.bType[n] > 0) {
             OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcDeriv(&bk.S[bId], &bk.kr[bId], &bk.Pc[bId],
-                                                &bk.dKr_dS[bId * np],
-                                                &bk.dPcj_dS[bId * np], n);
-            for (USI j = 0; j < np; j++)
-                bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
+            for (USI j = 0; j < np; j++) bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
         }
     }
 }
@@ -590,8 +591,8 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bk.muP       = bk.lmuP;
     bk.muT       = bk.lmuT;
     bk.mux       = bk.lmux;
-    bk.dPcj_dS   = bk.ldPcj_dS;
-    bk.dKr_dS    = bk.ldKr_dS;
+    bk.dPcdS   = bk.ldPcdS;
+    bk.dKrdS    = bk.ldKrdS;
     bk.UfP       = bk.lUfP;
     bk.UfT       = bk.lUfT;
     bk.Ufi       = bk.lUfi;
@@ -674,8 +675,8 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bk.lmuP       = bk.muP;
     bk.lmuT       = bk.muT;
     bk.lmux       = bk.mux;
-    bk.ldPcj_dS   = bk.dPcj_dS;
-    bk.ldKr_dS    = bk.dKr_dS;
+    bk.ldPcdS   = bk.dPcdS;
+    bk.ldKrdS    = bk.dKrdS;
     bk.lUfP       = bk.UfP;
     bk.lUfT       = bk.UfT;
     bk.lUfi       = bk.Ufi;
@@ -1163,11 +1164,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                     // dS
                     for (USI k = 0; k < np; k++) {
                         dFdXsB[(i + 1) * ncol2 + k] +=
-                            transIJ * bk.dPcj_dS[bId_np_j * np + k];
+                            transIJ * bk.dPcdS[bId_np_j * np + k];
                         dFdXsE[(i + 1) * ncol2 + k] -=
-                            transIJ * bk.dPcj_dS[eId_np_j * np + k];
+                            transIJ * bk.dPcdS[eId_np_j * np + k];
                         dFdXsU[(i + 1) * ncol2 + k] +=
-                            Akd * bk.dKr_dS[uId_np_j * np + k] / mu * xi * xij * dP;
+                            Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * xij * dP;
                     }
                     // dxij
                     for (USI k = 0; k < nc; k++) {
@@ -1209,11 +1210,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                 // dS
                 for (USI k = 0; k < np; k++) {
                     dFdXsB[(nc + 1) * ncol2 + k] +=
-                        transH * bk.dPcj_dS[bId_np_j * np + k];
+                        transH * bk.dPcdS[bId_np_j * np + k];
                     dFdXsE[(nc + 1) * ncol2 + k] -=
-                        transH * bk.dPcj_dS[eId_np_j * np + k];
+                        transH * bk.dPcdS[eId_np_j * np + k];
                     dFdXsU[(nc + 1) * ncol2 + k] +=
-                        Akd * bk.dKr_dS[uId_np_j * np + k] / mu * xi * H * dP;
+                        Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * H * dP;
                 }
                 // dxij
                 for (USI k = 0; k < nc; k++) {
@@ -1382,7 +1383,7 @@ void T_FIM::AssembleMatInjWells(LinearSystem&  ls,
                     for (USI k = 0; k < np; k++) {
                         dQdXsB[(i + 1) * ncol2 + k] +=
                             CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * wl.PerfXi(p) *
-                            wl.InjZi(i) * bk.dKr_dS[n_np_j * np + k] * dP / mu;
+                            wl.InjZi(i) * bk.dKrdS[n_np_j * np + k] * dP / mu;
                     }
                     // dQ / dxij
                     for (USI k = 0; k < nc; k++) {
@@ -1407,7 +1408,7 @@ void T_FIM::AssembleMatInjWells(LinearSystem&  ls,
                 for (USI k = 0; k < np; k++) {
                     dQdXsB[(nc + 1) * ncol2 + k] +=
                         CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * wl.PerfXi(p) *
-                        bk.dKr_dS[n_np_j * np + k] * dP / mu * Hw;
+                        bk.dKrdS[n_np_j * np + k] * dP / mu * Hw;
                 }
                 // dQ / dxij
                 for (USI k = 0; k < nc; k++) {
@@ -1550,9 +1551,9 @@ void T_FIM::AssembleMatProdWells(LinearSystem&  ls,
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
                     tmp = CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * dP / mu * xi *
-                          xij * bk.dKr_dS[n_np_j * np + k];
+                          xij * bk.dKrdS[n_np_j * np + k];
                     // capillary pressure
-                    tmp += transIJ * bk.dPcj_dS[n_np_j * np + k];
+                    tmp += transIJ * bk.dPcdS[n_np_j * np + k];
                     dQdXsB[(i + 1) * ncol2 + k] += tmp;
                 }
                 // dQ / dxij
@@ -1581,9 +1582,9 @@ void T_FIM::AssembleMatProdWells(LinearSystem&  ls,
             // dQ / dS
             for (USI k = 0; k < np; k++) {
                 tmp = CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * dP / mu * xi *
-                      bk.dKr_dS[n_np_j * np + k] * H;
+                      bk.dKrdS[n_np_j * np + k] * H;
                 // capillary pressure
-                tmp += transJ * bk.dPcj_dS[n_np_j * np + k] * H;
+                tmp += transJ * bk.dPcdS[n_np_j * np + k] * H;
                 dQdXsB[(nc + 1) * ncol2 + k] += tmp;
             }
 

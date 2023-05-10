@@ -316,7 +316,9 @@ void IsoT_IMPEC::CalKrPc(Bulk& bk) const
 {
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
         OCP_USI bId = n * bk.numPhase;
-        bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], &bk.kr[bId], &bk.Pc[bId], n);
+        bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], n);
+        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
         for (USI j = 0; j < bk.numPhase; j++)
             bk.Pj[n * bk.numPhase + j] = bk.P[n] + bk.Pc[n * bk.numPhase + j];
     }
@@ -1121,8 +1123,8 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bk.xix.resize(nb * nc * np);
     bk.muP.resize(nb * np);
     bk.mux.resize(nb * nc * np);
-    bk.dPcj_dS.resize(nb * np * np);
-    bk.dKr_dS.resize(nb * np * np);
+    bk.dPcdS.resize(nb * np * np);
+    bk.dKrdS.resize(nb * np * np);
 
     bk.lvfP.resize(nb);
     bk.lvfi.resize(nb * nc);
@@ -1132,8 +1134,8 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bk.lxix.resize(nb * nc * np);
     bk.lmuP.resize(nb * np);
     bk.lmux.resize(nb * nc * np);
-    bk.ldPcj_dS.resize(nb * np * np);
-    bk.ldKr_dS.resize(nb * np * np);
+    bk.ldPcdS.resize(nb * np * np);
+    bk.ldKrdS.resize(nb * np * np);
 
     // FIM-Specified
     bk.maxLendSdP = (nc + 1) * (nc + 1) * np;
@@ -1275,9 +1277,11 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     const USI& np = bk.numPhase;
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
         const OCP_USI bId = n * np;
-        bk.flow[bk.SATNUM[n]]->CalKrPcDeriv(&bk.S[bId], &bk.kr[bId], &bk.Pc[bId],
-                                            &bk.dKr_dS[bId * np], &bk.dPcj_dS[bId * np],
-                                            n);
+        bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
+        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
+        copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
         for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
     }
 }
@@ -1607,11 +1611,11 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
                 // dS
                 for (USI k = 0; k < np; k++) {
                     dFdXsB[(i + 1) * ncol2 + k] +=
-                        transIJ * bk.dPcj_dS[bId_np_j * np + k];
+                        transIJ * bk.dPcdS[bId_np_j * np + k];
                     dFdXsE[(i + 1) * ncol2 + k] -=
-                        transIJ * bk.dPcj_dS[eId_np_j * np + k];
+                        transIJ * bk.dPcdS[eId_np_j * np + k];
                     dFdXsU[(i + 1) * ncol2 + k] +=
-                        Akd * bk.dKr_dS[uId_np_j * np + k] / mu * xi * xij * dP;
+                        Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * xij * dP;
                 }
                 // dxij
                 for (USI k = 0; k < nc; k++) {
@@ -1820,15 +1824,15 @@ void IsoT_FIM::AssembleMatBulksNew(LinearSystem&    ls,
                     for (USI j1 = 0; j1 < np; j1++) {
                         if (phasedS_B[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * bk.dPcj_dS[bId_np_j * np + j1];
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * bk.dPcdS[bId_np_j * np + j1];
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsB[(i + 1) * ncolB + j1SB] += tmp;
                             j1SB++;
                         }
                         if (phasedS_E[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * bk.dPcj_dS[eId_np_j * np + j1];
+                                transIJ * bk.dPcdS[eId_np_j * np + j1];
                             j1SE++;
                         }
                     }
@@ -1867,13 +1871,13 @@ void IsoT_FIM::AssembleMatBulksNew(LinearSystem&    ls,
                     for (USI j1 = 0; j1 < np; j1++) {
                         if (phasedS_B[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * bk.dPcj_dS[bId_np_j * np + j1];
+                                transIJ * bk.dPcdS[bId_np_j * np + j1];
                             j1SB++;
                         }
                         if (phasedS_E[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * bk.dPcj_dS[eId_np_j * np + j1];
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * bk.dPcdS[eId_np_j * np + j1];
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsE[(i + 1) * ncolE + j1SE] += tmp;
                             j1SE++;
@@ -2113,15 +2117,15 @@ void IsoT_FIM::AssembleMatBulksNewS(LinearSystem&    ls,
 
                         if (phaseExistB[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * (bk.dPcj_dS[bId_np_j * np + j1] + wghtb);
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * (bk.dPcdS[bId_np_j * np + j1] + wghtb);
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsB[(i + 1) * ncolB + j1SB] += tmp;
                             j1SB++;
                         }
                         if (phaseExistE[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * (bk.dPcj_dS[eId_np_j * np + j1] + wghte);
+                                transIJ * (bk.dPcdS[eId_np_j * np + j1] + wghte);
                             j1SE++;
                         }
                     }
@@ -2172,13 +2176,13 @@ void IsoT_FIM::AssembleMatBulksNewS(LinearSystem&    ls,
 
                         if (phaseExistB[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * (bk.dPcj_dS[bId_np_j * np + j1] + wghtb);
+                                transIJ * (bk.dPcdS[bId_np_j * np + j1] + wghtb);
                             j1SB++;
                         }
                         if (phaseExistE[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * (bk.dPcj_dS[eId_np_j * np + j1] + wghte);
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * (bk.dPcdS[eId_np_j * np + j1] + wghte);
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsE[(i + 1) * ncolE + j1SE] += tmp;
                             j1SE++;
@@ -2353,7 +2357,7 @@ void IsoT_FIM::AssembleMatInjWells(LinearSystem&  ls,
                 for (USI k = 0; k < np; k++) {
                     dQdXsB[(i + 1) * ncol2 + k] +=
                         CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * wl.PerfXi(p) *
-                        wl.InjZi(i) * bk.dKr_dS[n_np_j * np + k] * dP / mu;
+                        wl.InjZi(i) * bk.dKrdS[n_np_j * np + k] * dP / mu;
                 }
                 // dQ / dxij
                 for (USI k = 0; k < nc; k++) {
@@ -2476,9 +2480,9 @@ void IsoT_FIM::AssembleMatProdWells(LinearSystem&  ls,
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
                     tmp = CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * dP / mu * xi *
-                          xij * bk.dKr_dS[n_np_j * np + k];
+                          xij * bk.dKrdS[n_np_j * np + k];
                     // capillary pressure
-                    tmp += transIJ * bk.dPcj_dS[n_np_j * np + k];
+                    tmp += transIJ * bk.dPcdS[n_np_j * np + k];
                     dQdXsB[(i + 1) * ncol2 + k] += tmp;
                 }
                 // dQ / dCij
@@ -2645,7 +2649,7 @@ void IsoT_FIM::AssembleMatInjWellsNew(LinearSystem&  ls,
                     if (phasedS_B[j1]) {
                         dQdXsB[(i + 1) * ncolB + j1B] +=
                             CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * wl.PerfXi(p) *
-                            wl.InjZi(i) * bk.dKr_dS[n_np_j * np + j1] * dP / mu;
+                            wl.InjZi(i) * bk.dKrdS[n_np_j * np + j1] * dP / mu;
                         j1B++;
                     }
                 }
@@ -2793,9 +2797,9 @@ void IsoT_FIM::AssembleMatProdWellsNew(LinearSystem&  ls,
                 for (USI j1 = 0; j1 < np; j1++) {
                     if (phasedS_B[j1]) {
                         tmp = CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * dP / mu *
-                              xi * xij * bk.dKr_dS[n_np_j * np + j1];
+                              xi * xij * bk.dKrdS[n_np_j * np + j1];
                         // capillary pressure
-                        tmp += transIJ * bk.dPcj_dS[n_np_j * np + j1];
+                        tmp += transIJ * bk.dPcdS[n_np_j * np + j1];
                         dQdXsB[(i + 1) * ncolB + j1B] += tmp;
                         j1B++;
                     }
@@ -3049,8 +3053,8 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bk.xix     = bk.lxix;
     bk.muP     = bk.lmuP;
     bk.mux     = bk.lmux;
-    bk.dPcj_dS = bk.ldPcj_dS;
-    bk.dKr_dS  = bk.ldKr_dS;
+    bk.dPcdS = bk.ldPcdS;
+    bk.dKrdS  = bk.ldKrdS;
     // FIM-Specified
     bk.bRowSizedSdP = bk.lbRowSizedSdP;
     bk.dSec_dPri    = bk.ldSec_dPri;
@@ -3107,8 +3111,8 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bk.lxix     = bk.xix;
     bk.lmuP     = bk.muP;
     bk.lmux     = bk.mux;
-    bk.ldPcj_dS = bk.dPcj_dS;
-    bk.ldKr_dS  = bk.dKr_dS;
+    bk.ldPcdS = bk.dPcdS;
+    bk.ldKrdS  = bk.dKrdS;
 
     // FIM-Specified
     bk.lbRowSizedSdP = bk.bRowSizedSdP;
@@ -3523,15 +3527,15 @@ void IsoT_FIMn::AssembleMatBulksNew(LinearSystem&    ls,
                     for (USI j1 = 0; j1 < np; j1++) {
                         if (phasedS_B[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * bk.dPcj_dS[bId_np_j * np + j1];
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * bk.dPcdS[bId_np_j * np + j1];
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsB[(i + 1) * ncolB + j1SB] += tmp;
                             j1SB++;
                         }
                         if (phasedS_E[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * bk.dPcj_dS[eId_np_j * np + j1];
+                                transIJ * bk.dPcdS[eId_np_j * np + j1];
                             j1SE++;
                         }
                     }
@@ -3574,13 +3578,13 @@ void IsoT_FIMn::AssembleMatBulksNew(LinearSystem&    ls,
                     for (USI j1 = 0; j1 < np; j1++) {
                         if (phasedS_B[j1]) {
                             dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                transIJ * bk.dPcj_dS[bId_np_j * np + j1];
+                                transIJ * bk.dPcdS[bId_np_j * np + j1];
                             j1SB++;
                         }
                         if (phasedS_E[j1]) {
                             dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                transIJ * bk.dPcj_dS[eId_np_j * np + j1];
-                            tmp = Akd * xij * xi / mu * bk.dKr_dS[uId_np_j * np + j1] *
+                                transIJ * bk.dPcdS[eId_np_j * np + j1];
+                            tmp = Akd * xij * xi / mu * bk.dKrdS[uId_np_j * np + j1] *
                                   dP;
                             dFdXsE[(i + 1) * ncolE + j1SE] += tmp;
                             j1SE++;
@@ -3786,7 +3790,7 @@ void IsoT_FIMn::AssembleMatInjWellsNew(LinearSystem&  ls,
                     if (phasedS_B[j1]) {
                         dQdXsB[(i + 1) * ncolB + j1B] +=
                             CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * wl.PerfXi(p) *
-                            wl.InjZi(i) * bk.dKr_dS[n_np_j * np + j1] * dP / mu;
+                            wl.InjZi(i) * bk.dKrdS[n_np_j * np + j1] * dP / mu;
                         j1B++;
                     }
                 }
@@ -3945,9 +3949,9 @@ void IsoT_FIMn::AssembleMatProdWellsNew(LinearSystem&  ls,
                 for (USI j1 = 0; j1 < np; j1++) {
                     if (phasedS_B[j1]) {
                         tmp = CONV1 * wl.PerfWI(p) * wl.PerfMultiplier(p) * dP / mu *
-                              xi * xij * bk.dKr_dS[n_np_j * np + j1];
+                              xi * xij * bk.dKrdS[n_np_j * np + j1];
                         // capillary pressure
-                        tmp += transIJ * bk.dPcj_dS[n_np_j * np + j1];
+                        tmp += transIJ * bk.dPcdS[n_np_j * np + j1];
                         dQdXsB[(i + 1) * ncolB + j1B] += tmp;
                         j1B++;
                     }
@@ -4588,7 +4592,9 @@ void IsoT_AIMc::CalKrPcE(Bulk& bk)
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], &bk.kr[bId], &bk.Pc[bId], n);
+            bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
             for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
         }
     }
@@ -4603,9 +4609,11 @@ void IsoT_AIMc::CalKrPcI(Bulk& bk)
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcDeriv(&bk.S[bId], &bk.kr[bId], &bk.Pc[bId],
-                                                &bk.dKr_dS[bId * np],
-                                                &bk.dPcj_dS[bId * np], n);
+            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
             for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
         }
     }
@@ -4791,9 +4799,9 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
                         for (USI j1 = 0; j1 < np; j1++) {
                             if (phasedS_I[j1]) {
                                 dFdXsI[(i + 1) * ncolI + j1S] +=
-                                    transIJ * bk.dPcj_dS[ibId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[ibId_np_j * np + j1];
                                 tmp = Akd * xij * xi / mu *
-                                      bk.dKr_dS[ibId_np_j * np + j1] * dP;
+                                      bk.dKrdS[ibId_np_j * np + j1] * dP;
                                 dFdXsI[(i + 1) * ncolI + j1S] += tmp;
                                 j1S++;
                             }
@@ -4835,7 +4843,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
                         for (USI j1 = 0; j1 < np; j1++) {
                             if (phasedS_I[j1]) {
                                 dFdXsI[(i + 1) * ncolI + j1S] +=
-                                    transIJ * bk.dPcj_dS[ibId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[ibId_np_j * np + j1];
                                 j1S++;
                             }
                         }
@@ -4935,15 +4943,15 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
                         for (USI j1 = 0; j1 < np; j1++) {
                             if (phasedS_B[j1]) {
                                 dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                    transIJ * bk.dPcj_dS[bId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[bId_np_j * np + j1];
                                 tmp = Akd * xij * xi / mu *
-                                      bk.dKr_dS[uId_np_j * np + j1] * dP;
+                                      bk.dKrdS[uId_np_j * np + j1] * dP;
                                 dFdXsB[(i + 1) * ncolB + j1SB] += tmp;
                                 j1SB++;
                             }
                             if (phasedS_E[j1]) {
                                 dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                    transIJ * bk.dPcj_dS[eId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[eId_np_j * np + j1];
                                 j1SE++;
                             }
                         }
@@ -4982,14 +4990,14 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
                         for (USI j1 = 0; j1 < np; j1++) {
                             if (phasedS_B[j1]) {
                                 dFdXsB[(i + 1) * ncolB + j1SB] +=
-                                    transIJ * bk.dPcj_dS[bId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[bId_np_j * np + j1];
                                 j1SB++;
                             }
                             if (phasedS_E[j1]) {
                                 dFdXsE[(i + 1) * ncolE + j1SE] -=
-                                    transIJ * bk.dPcj_dS[eId_np_j * np + j1];
+                                    transIJ * bk.dPcdS[eId_np_j * np + j1];
                                 tmp = Akd * xij * xi / mu *
-                                      bk.dKr_dS[uId_np_j * np + j1] * dP;
+                                      bk.dKrdS[uId_np_j * np + j1] * dP;
                                 dFdXsE[(i + 1) * ncolE + j1SE] += tmp;
                                 j1SE++;
                             }

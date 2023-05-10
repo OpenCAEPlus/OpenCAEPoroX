@@ -27,6 +27,12 @@ class FlowUnit
 public:
     /// Default constructor.
     FlowUnit()                                                        = default;
+    void Allocate(const USI& np) {
+        kr.resize(np, 0);
+        pc.resize(np, 0);
+        dKrdS.resize(np * np, 0);
+        dPcdS.resize(np * np, 0);
+    }
     virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     virtual void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) = 0;
@@ -42,23 +48,26 @@ public:
     virtual const vector<OCP_DBL>& GetScm() const = 0;
 
     /// Calculate relative permeability and capillary pressure.
-    virtual void CalKrPc(const OCP_DBL* S_in,
-                         OCP_DBL*       kr_out,
-                         OCP_DBL*       pc_out,
-                         const OCP_USI& bId) = 0;
+    virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) = 0;
 
     /// Calculate derivatives of relative permeability and capillary pressure.
-    virtual void CalKrPcDeriv(const OCP_DBL* S_in,
-                              OCP_DBL*       kr_out,
-                              OCP_DBL*       pc_out,
-                              OCP_DBL*       dkrdS,
-                              OCP_DBL*       dPcjdS,
-                              const OCP_USI& bId) = 0;
+    virtual void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) = 0;
 
     OCP_DBL GetSwco() const { return Swco; };
+    const vector<OCP_DBL>& GetKr()const { return kr; }
+    const vector<OCP_DBL>& GetPc()const { return pc; }
+    const vector<OCP_DBL>& GetdKrdS()const { return dKrdS; }
+    const vector<OCP_DBL>& GetdPcdS()const { return dPcdS; }
 
 protected:
-    OCP_DBL         Swco;
+    OCP_USI         bId;   ///< index of bulk being calculated
+    OCP_DBL         Swco;  ///< saturaion of connate water
+
+    vector<OCP_DBL> kr;    ///< relative permeability of phase
+    vector<OCP_DBL> pc;    ///< capillary pressure
+    vector<OCP_DBL> dKrdS; ///< dKr / dPc
+    vector<OCP_DBL> dPcdS; ///< dKr / dS
+
     vector<OCP_DBL> data;  ///< container to store the values of interpolation.
     vector<OCP_DBL> cdata; ///< container to store the slopes of interpolation.
 };
@@ -71,20 +80,18 @@ class FlowUnit_W : public FlowUnit
 {
 public:
     FlowUnit_W() = default;
-    FlowUnit_W(const ParamReservoir& rs_param, const USI& i){};
+    FlowUnit_W(const ParamReservoir& rs_param, const USI& i){ 
+        Allocate(1);
+        kr[0]    = 1;
+        pc[0]    = 0;
+        dKrdS[0] = 0;
+        dPcdS[0] = 0;
+    };
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
-    void CalKrPc(const OCP_DBL* S_in,
-                 OCP_DBL*       kr_out,
-                 OCP_DBL*       pc_out,
-                 const OCP_USI& bId) override;
-    void CalKrPcDeriv(const OCP_DBL* S_in,
-                      OCP_DBL*       kr_out,
-                      OCP_DBL*       pc_out,
-                      OCP_DBL*       dkrdS,
-                      OCP_DBL*       dPcjdS,
-                      const OCP_USI& bId) override;
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
     OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return 0; }
     OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override { return 0; }
@@ -110,16 +117,8 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
-    void CalKrPc(const OCP_DBL* S_in,
-                 OCP_DBL*       kr_out,
-                 OCP_DBL*       pc_out,
-                 const OCP_USI& bId) override;
-    void CalKrPcDeriv(const OCP_DBL* S_in,
-                      OCP_DBL*       kr_out,
-                      OCP_DBL*       pc_out,
-                      OCP_DBL*       dkrdS,
-                      OCP_DBL*       dPcjdS,
-                      const OCP_USI& bId) override;
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
     OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWOF.Eval(0, sw, 3); }
     OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override
@@ -153,16 +152,8 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
-    void    CalKrPc(const OCP_DBL* S_in,
-                    OCP_DBL*       kr_out,
-                    OCP_DBL*       pc_out,
-                    const OCP_USI& bId) override;
-    void    CalKrPcDeriv(const OCP_DBL* S_in,
-                         OCP_DBL*       kr_out,
-                         OCP_DBL*       pc_out,
-                         OCP_DBL*       dkrdS,
-                         OCP_DBL*       dPcjdS,
-                         const OCP_USI& bId) override;
+    void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGOF.Eval(0, sg, 3); }
     OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGOF.Eval(3, pcgo, 0); }
 
@@ -218,16 +209,8 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
-    virtual void CalKrPc(const OCP_DBL* S_in,
-                         OCP_DBL*       kr_out,
-                         OCP_DBL*       pc_out,
-                         const OCP_USI& bId) override;
-    virtual void CalKrPcDeriv(const OCP_DBL* S_in,
-                              OCP_DBL*       kr_out,
-                              OCP_DBL*       pc_out,
-                              OCP_DBL*       dkrdS,
-                              OCP_DBL*       dPcjdS,
-                              const OCP_USI& bId) override;
+    virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    virtual void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
     OCP_DBL CalKro_Stone2Der(OCP_DBL  krow,
                              OCP_DBL  krog,
@@ -292,16 +275,8 @@ public:
         scaleTerm->Setup();
     };
     void SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override;
-    void CalKrPc(const OCP_DBL* S_in,
-                 OCP_DBL*       kr_out,
-                 OCP_DBL*       pc_out,
-                 const OCP_USI& bId) override;
-    void CalKrPcDeriv(const OCP_DBL* S_in,
-                      OCP_DBL*       kr_out,
-                      OCP_DBL*       pc_out,
-                      OCP_DBL*       dkrdS,
-                      OCP_DBL*       dPcjdS,
-                      const OCP_USI& bId) override;
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
 protected:
     ScalePcow* scaleTerm;
@@ -335,16 +310,8 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
-    void    CalKrPc(const OCP_DBL* S_in,
-                    OCP_DBL*       kr_out,
-                    OCP_DBL*       pc_out,
-                    const OCP_USI& bId) override;
-    void    CalKrPcDeriv(const OCP_DBL* S_in,
-                         OCP_DBL*       kr_out,
-                         OCP_DBL*       pc_out,
-                         OCP_DBL*       dkrdS,
-                         OCP_DBL*       dPcjdS,
-                         const OCP_USI& bId) override;
+    void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL CalKro_Stone2Der(OCP_DBL  krow,
                              OCP_DBL  krog,
                              OCP_DBL  krw,

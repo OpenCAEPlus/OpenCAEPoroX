@@ -1205,9 +1205,9 @@ void Well::AssembleMatReinjection_FIM(const Bulk&         myBulk,
                     // dQ / dS
                     for (USI k = 0; k < numPhase; k++) {
                         tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
-                              xij * myBulk.dKr_dS[n_np_j * numPhase + k];
+                              xij * myBulk.dKrdS[n_np_j * numPhase + k];
                         // capillary pressure
-                        tmp += transIJ * myBulk.dPcj_dS[n_np_j * numPhase + k];
+                        tmp += transIJ * myBulk.dPcdS[n_np_j * numPhase + k];
                         dQdXsB[(i + 1) * ncol2 + k] += tmp;
                     }
                     // dQ / dCij

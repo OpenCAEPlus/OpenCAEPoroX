@@ -544,7 +544,7 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt) const
     bulk.maxCFL_loc       = 0;
     const OCP_USI len = bulk.numBulk * np;
     for (OCP_USI n = 0; n < len; n++) {
-        if (bulk.phaseExist[n]) {
+        if (bulk.phaseExist[n] && bulk.vj[n] > TINY) {
             bulk.cfl[n] /= bulk.vj[n];
 #ifdef DEBUG
             if (!isfinite(bulk.cfl[n])) {

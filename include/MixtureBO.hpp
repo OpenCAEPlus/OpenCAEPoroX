@@ -74,6 +74,11 @@ protected:
     OCP_DBL std_RhoO; ///< The density of oil at surface conditions : lb/ft3
     OCP_DBL std_RhoG; ///< The density of gas at surface conditions : lb/ft3
     OCP_DBL std_RhoW; ///< The density of water at surface conditions : lb/ft3
+
+    vector<OCP_DBL> data;  ///< container used to store the results of values of
+                       ///< interpolation of PVT tables.
+    vector<OCP_DBL> cdata; ///< container used to store the results of slopes of
+                           ///< interpolation of PVT tables.
 };
 
 ///////////////////////////////////////////////
@@ -242,10 +247,6 @@ public:
 private:
     OCPTable        PVDO;  ///< PVT table for dead oil
     OCPTable        PVTW;  ///< PVT table for water.
-    vector<OCP_DBL> data;  ///< container used to store the results of values of
-                           ///< interpolation of PVT tables.
-    vector<OCP_DBL> cdata; ///< container used to store the results of slopes of
-                           ///< interpolation of PVT tables.
 };
 
 ///////////////////////////////////////////////
@@ -318,10 +319,6 @@ private:
     OCPTable        PVCO;  ///< PVT table for live oil (with dissolved gas).
     OCPTable        PVDG;  ///< PVT table for dry gas.
     OCPTable        PVTW;  ///< PVT table for water.
-    vector<OCP_DBL> data;  ///< container used to store the results of values of
-                           ///< interpolation of PVT tables.
-    vector<OCP_DBL> cdata; ///< container used to store the results of slopes of
-                           ///< interpolation of PVT tables.
 };
 
 #endif /* end if __MIXTUREBO_HEADER__ */

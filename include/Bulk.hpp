@@ -363,8 +363,8 @@ protected:
     vector<OCP_DBL> muP;     ///< d Mu   / d P: numPhase*numBulk.
     vector<OCP_DBL> muT;     ///< d muj  / d T: numPhase * numbulk
     vector<OCP_DBL> mux;     ///< d Muj  / d xij: numPhase*numCom*numBulk.
-    vector<OCP_DBL> dPcj_dS; ///< d Pcj  / d Sk: numPhase * numPhase * bulk.
-    vector<OCP_DBL> dKr_dS;  ///< d Krj  / d Sk: numPhase * numPhase * bulk.
+    vector<OCP_DBL> dPcdS;   ///< d Pcj  / d Sk: numPhase * numPhase * bulk.
+    vector<OCP_DBL> dKrdS;   ///< d Krj  / d Sk: numPhase * numPhase * bulk.
     vector<OCP_DBL> UfP;     ///< d Uf   / d P: numbulk
     vector<OCP_DBL> UfT;     ///< d Uf   / d T: numbulk
     vector<OCP_DBL> Ufi;     ///< d Uf   / d Ni: numCom * numBulk
@@ -387,8 +387,8 @@ protected:
     vector<OCP_DBL> lmuP;     ///< last muP
     vector<OCP_DBL> lmuT;     ///< last muT
     vector<OCP_DBL> lmux;     ///< last mux
-    vector<OCP_DBL> ldPcj_dS; ///< last Pcj_dS
-    vector<OCP_DBL> ldKr_dS;  ///< last dKr_dS
+    vector<OCP_DBL> ldPcdS;   ///< last Pcj_dS
+    vector<OCP_DBL> ldKrdS;   ///< last dKrdS
     vector<OCP_DBL> lUfP;     ///< last UfP
     vector<OCP_DBL> lUfT;     ///< last UfT
     vector<OCP_DBL> lUfi;     ///< last Ufi
