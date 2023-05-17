@@ -25,13 +25,7 @@ public:
     OCPRock() = default;
 
     // Calculate porosity and d porosity / d P for isothermal model
-    virtual void CalPoro(const OCP_DBL& P, const OCP_DBL& poroInit) = 0;
-
-    // Calculate porosity and d porosity / d P for ifThermal model
-    virtual void CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit) = 0;
-
-    // Calculate enthalpy of unit volume of rock
-    virtual void CalRockHT(const OCP_DBL& T) = 0;
+    virtual void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) = 0;
 
     OCP_DBL GetPoro() const { return poro; }
     OCP_DBL GetdPorodP() const { return dPorodP; }
@@ -58,34 +52,30 @@ class OCPRockIsoT : public OCPRock
 {
 public:
     OCPRockIsoT() = default;
-    void CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit) override
-    {
-        OCP_ABORT("Not Used!");
-    };
-    void CalRockHT(const OCP_DBL& T) override
-    {
-        OCP_ABORT("Not Used!");
-    };
+    void Assign(const RockParam& param) {
+        Pref = param.Pref;
+        cp1 = param.cp1;
+        cp2 = param.cp2;
+    }
+
+protected:
+
+    OCP_DBL Pref;   ///< reference pressure
+    OCP_DBL cp1;    ///< the first coefficient
+    OCP_DBL cp2;    ///< the second coefficient
 };
 
-class OCPRock_Linear : public OCPRockIsoT
+
+
+class OCPRockIsoT_Linear : public OCPRockIsoT
 {
     // poro = poroInit * (1 + phi)
     // poro = poroInit * (1 + cp1 * (P - Pref) + cp2 / 2 * (P - Pref) * (P - Pref))
 public:
-    OCPRock_Linear() = default;
-    OCPRock_Linear(const RockParam& param)
-    {
-        Pref = param.Pref;
-        cp1  = param.cp1;
-        cp2  = param.cp2;
-    };
-    void CalPoro(const OCP_DBL& P, const OCP_DBL& poroInit) override;
+    OCPRockIsoT_Linear() = default;
+    OCPRockIsoT_Linear(const RockParam& param) { Assign(param); };
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
 
-protected:
-    OCP_DBL Pref;
-    OCP_DBL cp1;
-    OCP_DBL cp2;
 };
 
 class OCPRockT : public OCPRock
@@ -103,11 +93,7 @@ public:
         hcp1      = param.HCP1;
         hcp2      = param.HCP2;
     }
-    void CalPoro(const OCP_DBL& P, const OCP_DBL& poroInit) override
-    {
-        OCP_ABORT("Not Used!");
-    };
-    void CalRockHT(const OCP_DBL& T) override;
+    void CalRockHT(const OCP_DBL& T);
 
 protected:
     OCP_DBL  Pref;      ///< Reference pressure at initial porosity.
@@ -128,7 +114,7 @@ class OCPRockT_Linear : public OCPRockT
 public:
     OCPRockT_Linear() = default;
     OCPRockT_Linear(const RockParam& param) { Assign(param); };
-    void CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit) override;
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
 };
 
 class OCPRockT_Exp : public OCPRockT
@@ -138,7 +124,7 @@ class OCPRockT_Exp : public OCPRockT
 public:
     OCPRockT_Exp() = default;
     OCPRockT_Exp(const RockParam& param) { Assign(param); };
-    void CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit) override;
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
 };
 
 #endif /* end if __ROCK_HEADER__ */

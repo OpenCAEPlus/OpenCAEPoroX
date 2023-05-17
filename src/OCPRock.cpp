@@ -16,7 +16,7 @@
 // OCPRock_Linear
 ///////////////////////////////////////////////
 
-void OCPRock_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& poroInit)
+void OCPRockIsoT_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
 {
     const OCP_DBL dP = (P - Pref);
     poro             = poroInit * (1 + (cp1 + cp2 / 2 * dP) * dP);
@@ -27,7 +27,7 @@ void OCPRock_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& poroInit)
 // OCPRockT
 ///////////////////////////////////////////////
 
-void OCPRockT::CalRockHT(const OCP_DBL& T)
+inline void OCPRockT::CalRockHT(const OCP_DBL& T)
 {
     const OCP_DBL Ta  = T + CONV5;
     const OCP_DBL Tra = Tref + CONV5;
@@ -39,47 +39,61 @@ void OCPRockT::CalRockHT(const OCP_DBL& T)
 // OCPRockT_Linear
 ///////////////////////////////////////////////
 
-void OCPRockT_Linear ::CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit)
+void OCPRockT_Linear ::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
 {
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    poro             = poroInit * (1 + (cp * dP - ct * dT + cpt * dP * dT));
-    dPorodP          = poroInit * (cp + cpt * dT);
-    dPorodT          = poroInit * (-ct + cpt * dP);
+    if (bulkType > 0) {
+        // with fluid
+        // calculate porosity
+        const OCP_DBL dP = P - Pref;
+        const OCP_DBL dT = T - Tref;
+        poro = poroInit * (1 + (cp * dP - ct * dT + cpt * dP * dT));
+        dPorodP = poroInit * (cp + cpt * dT);
+        dPorodT = poroInit * (-ct + cpt * dP);
 
-    if (ConstRock) {
-        _poro    = 1 - poroInit;
-        _dPorodP = 0.0;
-        _dPorodT = 0.0;
-    } else {
-        _poro    = 1 - poro;
-        _dPorodP = -dPorodP;
-        _dPorodT = -dPorodT;
+        if (ConstRock) {
+            _poro = 1 - poroInit;
+            _dPorodP = 0.0;
+            _dPorodT = 0.0;
+        }
+        else {
+            _poro = 1 - poro;
+            _dPorodP = -dPorodP;
+            _dPorodT = -dPorodT;
+        }
     }
+
+    // Calculate enthalpy of rock
+    CalRockHT(T);
 }
 
 ///////////////////////////////////////////////
 // OCPRockT_Exp
 ///////////////////////////////////////////////
 
-void OCPRockT_Exp::CalPoroT(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit)
+void OCPRockT_Exp::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
 {
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    poro             = poroInit * exp(cp * dP - ct * dT + cpt * dP * dT);
 
-    dPorodP = poro * (cp + cpt * dT);
-    dPorodT = poro * (-ct + cpt * dP);
-    if (ConstRock) {
-        _poro    = 1 - poroInit;
-        _dPorodP = 0.0;
-        _dPorodT = 0.0;
+    if (bulkType > 0) {
+        // with fluid
+        const OCP_DBL dP = P - Pref;
+        const OCP_DBL dT = T - Tref;
+        poro = poroInit * exp(cp * dP - ct * dT + cpt * dP * dT);
+
+        dPorodP = poro * (cp + cpt * dT);
+        dPorodT = poro * (-ct + cpt * dP);
+        if (ConstRock) {
+            _poro = 1 - poroInit;
+            _dPorodP = 0.0;
+            _dPorodT = 0.0;
+        }
+        else {
+            _poro = 1 - poro;
+            _dPorodP = -dPorodP;
+            _dPorodT = -dPorodT;
+        }
     }
-    else {
-        _poro    = 1 - poro;
-        _dPorodP = -dPorodP;
-        _dPorodT = -dPorodT;
-    }
+
+    CalRockHT(T);
 }
 
 /*----------------------------------------------------------------------------*/

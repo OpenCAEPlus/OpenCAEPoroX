@@ -207,7 +207,7 @@ protected:
     vector<USI>   ROCKNUM; ///< index of Rock table for each bulk
     vector<OCPRock*> rock;    ///< rock model
 
-    vector<USI> bType;     ///< Indicate bulk type, 0: rock, 1: rock and fluid
+    vector<USI> bType;     ///< Indicate bulk type, 0: rock;  1: rock and fluid
     vector<USI> bLocation; ///< Location of bulk: top, bottom, side
     HeatLoss    hLoss;     ///< Heat loss iterm
 

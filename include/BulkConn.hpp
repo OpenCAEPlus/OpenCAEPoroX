@@ -17,49 +17,13 @@
 
 // OpenCAEPoroX header files
 #include "Bulk.hpp"
+#include "OCPFlux.hpp"
 #include "DenseMat.hpp"
 #include "LinearSystem.hpp"
 #include "OCPStructure.hpp"
 
 using namespace std;
 
-/// Connection between two bulks (bId, eId); usually, indices bId > eId.
-//  Note: Bulks are the active grid cells.
-class BulkPair
-{
-    friend class BulkConn;
-
-public:
-    /// Default constructor.
-    BulkPair() = default;
-
-    /// Setup BulkPair with bId and eId.
-    BulkPair(const OCP_USI& BId,
-             const OCP_USI& EId,
-             const USI&     direct,
-             const OCP_DBL& AreaB,
-             const OCP_DBL& AreaE)
-        : bId(BId)
-        , eId(EId)
-        , direction(direct)
-        , areaB(AreaB)
-        , areaE(AreaE){};
-
-    OCP_USI BId() const { return bId; }   ///< Return beginning index.
-    OCP_USI EId() const { return eId; }   ///< Return ending index.
-    OCP_DBL Area() const { return area; } ///< Return effective area
-    OCP_DBL AreaB() const { return areaB; }
-    OCP_DBL AreaE() const { return areaE; }
-    USI     Direction() const { return direction; }
-
-protected:
-    OCP_USI bId;       ///< Beginning index of a pair.
-    OCP_USI eId;       ///< Ending index of a pair.
-    OCP_DBL area;      ///< Effective area
-    USI     direction; ///< 1-x, 2-y, 3-z
-    OCP_DBL areaB;     ///< Area of intersecting faces from Begin grid
-    OCP_DBL areaE;     ///< Area of intersecting faces from End grid
-};
 
 /// Properties and operations on connections between bulks (active grids).
 //  Note: BulkConn is a core component of reservoir, it contains all properties and
@@ -91,18 +55,15 @@ public:
 protected:
     OCP_USI numConn; ///< Number of connections between bulks.
 
-    /// Neighboring information of each bulk: activeGridNum.
-    //  Note: The i-th entry stores the i-th bulk's neighbors, which is sorted in an
-    //  increasing order.
-    vector<vector<OCP_USI>> neighbor;
-
-    /// Self-pointer, the indices of the i-th bulk in neighbor[i]: numBulk
-    vector<USI> selfPtr;
-
     /// All connections (pair of indices) between bulks: numConn.
     //  Note: In each pair, the index of first bulk is greater than the second. The data
     //  in iteratorConn is generated from neighbor.
     vector<BulkPair> iteratorConn;
+
+    /// Neighboring information of each bulk: activeGridNum.
+    //  Note: The i-th entry stores the i-th bulk's neighbors, which is sorted in an
+    //  increasing order.
+    vector<vector<OCP_USI>> neighbor;
 
     /////////////////////////////////////////////////////////////////////
     // Physical Variables

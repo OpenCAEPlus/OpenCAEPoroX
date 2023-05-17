@@ -353,18 +353,17 @@ void T_FIM::CalRock(Bulk& bk) const
     const OCP_USI nb = bk.numBulk;
 
     for (OCP_USI n = 0; n < nb; n++) {
+        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.T[n], bk.poroInit[n], bk.bType[n]);
         if (bk.bType[n] > 0) {
-            // fluid exists
-            bk.rock[bk.ROCKNUM[n]]->CalPoroT(bk.P[n], bk.T[n], bk.poroInit[n]);
+            // with fluid           
             bk.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
             bk.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
-            bk.poroT[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodT();
-            bk.rockVp[n] = bk.v[n] * bk.poro[n];
+            bk.poroT[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodT();           
             bk.vr[n]     = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_Poro();
             bk.vrP[n]    = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodP();
             bk.vrT[n]    = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodT();
+            bk.rockVp[n] = bk.v[n] * bk.poro[n];
         }
-        bk.rock[bk.ROCKNUM[n]]->CalRockHT(bk.T[n]);
         bk.Hr[n]  = bk.rock[bk.ROCKNUM[n]]->GetHr();
         bk.HrT[n] = bk.rock[bk.ROCKNUM[n]]->GetdHrdT();
     }

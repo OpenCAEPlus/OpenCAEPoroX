@@ -19,7 +19,7 @@
 void IsothermalMethod::CalRock(Bulk& bk) const
 {
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
-        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.poroInit[n]);
+        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.T[n], bk.poroInit[n], 0);
         bk.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
         bk.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
         bk.rockVp[n] = bk.v[n] * bk.poro[n];
@@ -1363,6 +1363,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                 dt * Akd * bk.xi[uId_np_j] * bk.kr[uId_np_j] / bk.mu[uId_np_j] * dP;
 
             if (eId < nb) {
+                // Interior grid
                 for (USI i = 0; i < nc; i++) {
                     dNi = tmp * bk.xij[uId_np_j * nc + i];
                     Res.resAbs[bId * len + 1 + i] += dNi;
@@ -1370,6 +1371,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                 }
             }
             else {
+                // Ghost grid
                 for (USI i = 0; i < nc; i++) {
                     dNi = tmp * bk.xij[uId_np_j * nc + i];
                     Res.resAbs[bId * len + 1 + i] += dNi;

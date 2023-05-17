@@ -393,7 +393,7 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param)
 void Bulk::InputRockFunc(const ParamReservoir& rs_param)
 {
     for (USI i = 0; i < NTROCC; i++) {
-        rock.push_back(new OCPRock_Linear(rs_param.rockSet[i]));
+        rock.push_back(new OCPRockIsoT_Linear(rs_param.rockSet[i]));
     }
 }
 
