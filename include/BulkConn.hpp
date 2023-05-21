@@ -73,14 +73,12 @@ protected:
 
     BulkConnVal               bcval;   ///< values between connections
 
-    mutable vector<OCPFlux*>  flux;    ///< flux term
+    /////////////////////////////////////////////////////////////////////
+    // Flux
+    /////////////////////////////////////////////////////////////////////
 
-protected:
-    //  Note: Upblock is identified by difference of pressure between phases.
-    vector<OCP_USI> upblock;          ///< Index of upwinding bulk of connections : numConn * numPhase.
-    vector<OCP_DBL> upblock_Rho;      ///< Mass density of phase from upblock: numConn * numPhase.
-    vector<OCP_DBL> upblock_Trans;    ///< Transmissibility of phase from upblock: numConn * numPhase.
-    vector<OCP_DBL> upblock_Velocity; ///< Volume flow rate of phase from upblock: numConn * numsPhase.
+
+    mutable vector<OCPFlux*>  flux;    ///< flux term
 };
 
 #endif

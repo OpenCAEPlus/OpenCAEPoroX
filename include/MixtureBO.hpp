@@ -25,16 +25,6 @@ public:
     BOMixture() = default;
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void BOMixtureInit(const ParamReservoir& rs_param);
-    void InitFlashFIMn(const OCP_DBL& Pin,
-                       const OCP_DBL& Pbbin,
-                       const OCP_DBL& Tin,
-                       const OCP_DBL* Sjin,
-                       const OCP_DBL& Vpore,
-                       const OCP_DBL* Ziin,
-                       const OCP_USI& bId) override
-    {
-        OCP_ABORT("Not Used!");
-    };
 
     // For Well
     void CalProdWeight(const OCP_DBL&         Pin,
@@ -136,18 +126,6 @@ public:
     {
         OCP_ABORT("Not Completed!");
     };
-    void FlashFIMn(const OCP_DBL& Pin,
-                   const OCP_DBL& Tin,
-                   const OCP_DBL* Niin,
-                   const OCP_DBL* Sjin,
-                   const OCP_DBL* xijin,
-                   const OCP_DBL* njin,
-                   const USI*     phaseExistin,
-                   const USI&     lastNP,
-                   const OCP_USI& bId) override
-    {
-        OCP_ABORT("Not Completed!");
-    }
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const OCP_DBL* Ziin,
@@ -216,18 +194,6 @@ public:
                   const USI&     lastNP,
                   const OCP_DBL* xijin,
                   const OCP_USI& bId) override;
-    void FlashFIMn(const OCP_DBL& Pin,
-                   const OCP_DBL& Tin,
-                   const OCP_DBL* Niin,
-                   const OCP_DBL* Sjin,
-                   const OCP_DBL* xijin,
-                   const OCP_DBL* njin,
-                   const USI*     phaseExistin,
-                   const USI&     lastNP,
-                   const OCP_USI& bId) override
-    {
-        OCP_ABORT("Not Completed!");
-    }
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const OCP_DBL* Ziin,
@@ -287,18 +253,6 @@ public:
                   const USI&     lastNP,
                   const OCP_DBL* xijin,
                   const OCP_USI& bId) override;
-    void FlashFIMn(const OCP_DBL& Pin,
-                   const OCP_DBL& Tin,
-                   const OCP_DBL* Niin,
-                   const OCP_DBL* Sjin,
-                   const OCP_DBL* xijin,
-                   const OCP_DBL* njin,
-                   const USI*     phaseExistin,
-                   const USI&     lastNP,
-                   const OCP_USI& bId) override
-    {
-        OCP_ABORT("Not Completed!");
-    }
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const OCP_DBL* Ziin,

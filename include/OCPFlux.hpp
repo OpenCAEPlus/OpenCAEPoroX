@@ -79,24 +79,12 @@ protected:
     vector<OCP_DBL> rho;      ///< Mass density of phase from upblock: numConn * numPhase.
     vector<OCP_DBL> velocity; ///< Volume flow rate of phase from upblock: numConn * numsPhase.
     vector<OCP_DBL> flux_ni;  ///< mole velocity of components 
-    vector<OCP_DBL> Adkt;     ///< Thermal conductivity between neighbors
 
     // Last time step
     vector<OCP_USI> lupblock;  ///< last upblock
     vector<OCP_DBL> lrho;      ///< last upblock_Rho
     vector<OCP_DBL> lvelocity; ///< last upblock_Velocity
     vector<OCP_DBL> lflux_ni;  ///< mole velocity of components
-    vector<OCP_DBL> lAdkt;     ///< last Adkt
-
-    // Derivatives
-    vector<OCP_DBL> AdktP; ///< d Adkt / d P, order: connections -> bId.P -> eId.P
-    vector<OCP_DBL> AdktT; ///< d Adkt / d T, order: connections -> bId.T -> eId.T
-    vector<OCP_DBL> AdktS; ///< d Adkt / d S, order: connections -> bId.phase -> eId.phase
-
-    // Last time step
-    vector<OCP_DBL> lAdktP; ///< last AdktP
-    vector<OCP_DBL> lAdktT; ///< last AdktT
-    vector<OCP_DBL> lAdktS; ///< last AdktS
 };
 
 

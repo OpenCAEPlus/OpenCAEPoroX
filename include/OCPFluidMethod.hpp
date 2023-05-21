@@ -129,8 +129,6 @@ protected:
     /// Assemble linear system for wells
     void
     AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    void
-    AssembleMatWellsNew(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for FIM.
@@ -154,22 +152,6 @@ private:
                               const Bulk&    bk,
                               const Well&    wl,
                               const OCP_DBL& dt) const;
-    /// Assemble linear system for bulks
-    void
-    AssembleMatBulksNew(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    void AssembleMatBulksNewS(LinearSystem&    ls,
-                              const Reservoir& rs,
-                              const OCP_DBL&   dt) const;
-    /// Assemble linear system for injection wells
-    void AssembleMatInjWellsNew(LinearSystem&  ls,
-                                const Bulk&    bk,
-                                const Well&    wl,
-                                const OCP_DBL& dt) const;
-    /// Assemble linear system for production wells
-    void AssembleMatProdWellsNew(LinearSystem&  ls,
-                                 const Bulk&    bk,
-                                 const Well&    wl,
-                                 const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
     GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;

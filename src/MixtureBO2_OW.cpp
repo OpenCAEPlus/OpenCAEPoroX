@@ -167,8 +167,6 @@ void BOMixture_OW::FlashFIM(const OCP_DBL& Pin,
                             const OCP_USI& bId)
 {
     fill(dXsdXp.begin(), dXsdXp.end(), 0.0);
-    fill(pSderExist.begin(), pSderExist.end(), OCP_TRUE);
-    fill(pVnumCom.begin(), pVnumCom.end(), 0);
 
     P     = Pin;
     Ni[0] = Niin[0];

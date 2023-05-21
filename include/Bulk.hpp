@@ -490,20 +490,10 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
     USI              maxLendSdP;   ///< length of dSec_dPri.
-    vector<USI>      bRowSizedSdP; ///< length of dSec_dPri in each bulk
     vector<OCP_DBL>  dSec_dPri;    ///< d Secondary variable / d Primary variable.
-    vector<OCP_BOOL> pSderExist;   ///< Existence of derivative of phase saturation
-    vector<USI>      pVnumCom;     ///< num of variable components in the phase
-    vector<OCP_DBL>  res_n;        ///< residual for FIM_n
-    vector<OCP_DBL>  resPc;        ///< a precalculated value
 
     // Last time step
-    vector<USI>      lbRowSizedSdP; ///< last bRowSizedSdP
     vector<OCP_DBL>  ldSec_dPri;    ///< last dSec_dPri
-    vector<OCP_BOOL> lpSderExist;   ///< last pSderExist
-    vector<USI>      lpVnumCom;     ///< last pVnumCom
-    vector<OCP_DBL>  lres_n;        ///< last res_n
-    vector<OCP_DBL>  lresPc;        ///< last lresPc;
 
 public:
     /// Print Bulk which are implicit

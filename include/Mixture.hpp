@@ -87,13 +87,6 @@ public:
                               const OCP_DBL& Vpore,
                               const OCP_DBL* Ziin,
                               const OCP_USI& bId)                                   = 0;
-    virtual void InitFlashFIMn(const OCP_DBL& Pin,
-                               const OCP_DBL& Pbbin,
-                               const OCP_DBL& Tin,
-                               const OCP_DBL* Sjin,
-                               const OCP_DBL& Vpore,
-                               const OCP_DBL* Ziin,
-                               const OCP_USI& bId)                                  = 0;
     /// Flash calculation with moles of components.
     virtual void FlashIMPEC(const OCP_DBL& Pin,
                             const OCP_DBL& Tin,
@@ -109,15 +102,6 @@ public:
                           const USI&     lastNP,
                           const OCP_DBL* xijin,
                           const OCP_USI& bId)  = 0;
-    virtual void FlashFIMn(const OCP_DBL& Pin,
-                           const OCP_DBL& Tin,
-                           const OCP_DBL* Niin,
-                           const OCP_DBL* Sjin,
-                           const OCP_DBL* xijin,
-                           const OCP_DBL* njin,
-                           const USI*     phaseExistin,
-                           const USI&     lastNP,
-                           const OCP_USI& bId) = 0;
 
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed
@@ -287,7 +271,6 @@ protected:
 
     vector<OCP_DBL> res;    ///< residual of a set of equations
     OCP_DBL         resPc;  ///< a precalculated value
-    vector<OCP_DBL> keyDer; ///< d (xij*xi/mu) / dP or dNk
 };
 
 #endif /* end if __MIXTURE_HEADER__ */

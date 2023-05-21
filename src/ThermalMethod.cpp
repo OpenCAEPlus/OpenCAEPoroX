@@ -291,14 +291,8 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     // FIM-Specified
     bk.maxLendSdP = (nc + 2) * (nc + 1) * np;
     bk.dSec_dPri.resize(nb * bk.maxLendSdP);
-    bk.bRowSizedSdP.resize(nb);
-    bk.pSderExist.resize(nb * np);
-    bk.pVnumCom.resize(nb * np);
 
     bk.ldSec_dPri.resize(nb * bk.maxLendSdP);
-    bk.lbRowSizedSdP.resize(nb);
-    bk.lpSderExist.resize(nb * np);
-    bk.lpVnumCom.resize(nb * np);
 
     // Allocate Residual
     bk.res.SetupT(bk.numBulkInterior, rs.allWells.numWell, nc);
