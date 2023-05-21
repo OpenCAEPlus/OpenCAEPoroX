@@ -175,59 +175,6 @@ private:
     GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
 };
 
-class IsoT_FIMn : protected IsoT_FIM
-{
-public:
-    /// Setup FIM
-    void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
-    /// Init
-    void InitReservoir(Reservoir& rs) const;
-    /// Prepare for Assembling matrix.
-    void Prepare(Reservoir& rs, const OCP_DBL& dt);
-    /// Assemble Matrix
-    void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    /// Solve the linear system.
-    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl) const;
-    /// Update properties of fluids.
-    OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
-    /// Finish a Newton-Raphson iteration.
-    OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
-    /// Finish a time step.
-    void FinishStep(Reservoir& rs, OCPControl& ctrl) const;
-
-protected:
-    /// Allocate memory for reservoir
-    void AllocateReservoir(Reservoir& rs);
-    /// Perform Flash with Sj and calculate values needed for FIMn
-    void InitFlash(Bulk& bk) const;
-    /// Perform Flash with Ni and calculate values needed for FIMn
-    void CalFlash(Bulk& bk);
-    /// Pass value needed for FIMn from flash to bulk
-    void PassFlashValue(Bulk& bk, const OCP_USI& n) const;
-    /// Assemble linear system for bulks
-    void
-    AssembleMatBulksNew(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    /// Assemble linear system for wells
-    void
-    AssembleMatWellsNew(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    /// Assemble linear system for injection wells
-    void AssembleMatInjWellsNew(LinearSystem&  ls,
-                                const Bulk&    bk,
-                                const Well&    wl,
-                                const OCP_DBL& dt) const;
-    /// Assemble linear system for production wells
-    void AssembleMatProdWellsNew(LinearSystem&  ls,
-                                 const Bulk&    bk,
-                                 const Well&    wl,
-                                 const OCP_DBL& dt) const;
-    /// Update P, Ni, BHP after linear system is solved
-    void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
-    /// Reset variables to last time step
-    void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
-    /// Update values of last step for FIMn
-    void UpdateLastTimeStep(Reservoir& rs) const;
-};
 
 class IsoT_AIMc : protected IsoT_IMPEC, protected IsoT_FIM
 {

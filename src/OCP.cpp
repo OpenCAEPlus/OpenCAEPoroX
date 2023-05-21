@@ -113,11 +113,6 @@ void OpenCAEPoroX::RunSimulation()
                 cout << "\nDynamic simulation with FIM\n" << endl;
             }
             break;
-        case FIMn:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << "\nDynamic simulation with FIMn\n" << endl;
-            }
-            break;
         case AIMc:
             if (control.printLevel >= PRINT_MIN) {
                 cout << "\nDynamic simulation with AIMc\n" << endl;

@@ -42,7 +42,6 @@ private:
     LinearSystem auxLSolver;
     IsoT_IMPEC   impec;
     IsoT_FIM     fim;
-    IsoT_FIMn    fim_n;
     IsoT_AIMc    aimc;
 };
 

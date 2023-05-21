@@ -37,7 +37,6 @@ class BulkConn
     friend class IsoT_FIM;
     friend class IsoT_IMPEC;
     friend class IsoT_AIMc;
-    friend class IsoT_FIMn;
     friend class T_FIM;
 
 public:

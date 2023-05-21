@@ -36,7 +36,6 @@ class Domain
 	// Method(tmp)
 	friend class IsoT_IMPEC;
 	friend class IsoT_FIM;
-	friend class IsoT_FIMn;
 	friend class IsoT_AIMc;
 	friend class T_FIM;
 

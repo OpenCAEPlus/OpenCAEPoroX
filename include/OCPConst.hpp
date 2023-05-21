@@ -82,7 +82,6 @@ const USI GENERAL_GRID    = 3; ///< Grid type = general
 const USI IMPEC = 1; ///< Solution method = IMPEC
 const USI FIM   = 2; ///< Solution method = FIM
 const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
-const USI FIMn  = 4; ///< Solution method = FIM
 
 // Linear Solver
 const USI SCALARFASP     = 1; ///< Use scalar linear solver in Fasp

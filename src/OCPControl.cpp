@@ -64,8 +64,6 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
             case Map_Str2Int("method", 6):
                 if (value == "FIM") {
                     method = FIM;
-                } else if (value == "FIMn") {
-                    method = FIMn;
                 } else if (value == "IMPEC") {
                     method = IMPEC;
                 } else if (value == "AIMc") {
@@ -74,7 +72,7 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
                     OCP_ABORT("Wrong method param in command line!");
                 }
                 activity = OCP_TRUE;
-                if (method == FIM || method == FIMn || method == AIMc) {
+                if (method == FIM || method == AIMc) {
                     if (timeInit <= 0) timeInit = 0.1;
                     if (timeMax <= 0) timeMax = 10.0;
                     if (timeMin <= 0) timeMin = 0.1;
@@ -120,8 +118,6 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
         method = IMPEC;
     } else if (CtrlParam.method == "FIM") {
         method = FIM;
-    } else if (CtrlParam.method == "FIMn") {
-        method = FIMn;
     } else if (CtrlParam.method == "AIMc") {
         method = AIMc;
     } else {
@@ -197,7 +193,6 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
                 break;
             case AIMc:
             case FIM:
-            case FIMn:
                 linearSolverFile = "./bsr.fasp";
                 break;
             default:

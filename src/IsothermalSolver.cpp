@@ -23,9 +23,6 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
         case AIMc:
             aimc.Setup(rs, LSolver, ctrl);
             break;
-        case FIMn:
-            fim_n.Setup(rs, LSolver, ctrl);
-            break;
         case FIM:
         default:
             fim.Setup(rs, LSolver, ctrl);
@@ -43,9 +40,6 @@ void IsothermalSolver::InitReservoir(Reservoir& rs) const
         case FIM:
             fim.InitReservoir(rs);
             break;
-        case FIMn:
-            fim_n.InitReservoir(rs);
-            break;
         case AIMc:
             aimc.InitReservoir(rs);
             break;
@@ -60,9 +54,6 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
     switch (method) {
         case IMPEC:
             impec.Prepare(rs, ctrl);
-            break;
-        case FIMn:
-            fim_n.Prepare(rs, ctrl.GetCurDt());
             break;
         case FIM:
             fim.Prepare(rs, ctrl.GetCurDt());
@@ -87,9 +78,6 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
         case IMPEC:
             impec.AssembleMat(LSolver, rs, dt);
             break;
-        case FIMn:
-            fim_n.AssembleMat(LSolver, rs, dt);
-            break;
         case FIM:
             fim.AssembleMat(LSolver, rs, dt);
             break;
@@ -109,9 +97,6 @@ void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
     switch (method) {
         case IMPEC:
             impec.SolveLinearSystem(LSolver, rs, ctrl);
-            break;
-        case FIMn:
-            fim_n.SolveLinearSystem(LSolver, rs, ctrl);
             break;
         case FIM:
             fim.SolveLinearSystem(LSolver, rs, ctrl);
@@ -136,9 +121,6 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
         case IMPEC:
             flag = impec.UpdateProperty(rs, ctrl);
             break;
-        case FIMn:
-            flag = fim_n.UpdateProperty(rs, ctrl);
-            break;
         case FIM:
             flag = fim.UpdateProperty(rs, ctrl);
             break;
@@ -160,8 +142,6 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
     switch (method) {
         case IMPEC:
             return impec.FinishNR(rs);
-        case FIMn:
-            return fim_n.FinishNR(rs, ctrl);
         case FIM:
             return fim.FinishNR(rs, ctrl);
         case AIMc:
@@ -177,9 +157,6 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
     switch (method) {
         case IMPEC:
             impec.FinishStep(rs, ctrl);
-            break;
-        case FIMn:
-            fim_n.FinishStep(rs, ctrl);
             break;
         case FIM:
             fim.FinishStep(rs, ctrl);
