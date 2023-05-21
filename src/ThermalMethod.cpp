@@ -316,13 +316,9 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     BulkConn&      conn    = rs.conn;
     const OCP_USI& numConn = conn.numConn;
 
-    conn.upblock.resize(numConn * np);
-    conn.upblock_Rho.resize(numConn * np);
-    conn.upblock_Velocity.resize(numConn * np);
-    conn.Adkt.resize(numConn);
-    conn.AdktP.resize(numConn * 2);
-    conn.AdktT.resize(numConn * 2);
-    conn.AdktS.resize(numConn * 2 * np);
+    conn.bcval.upblock.resize(numConn* np);
+    conn.bcval.rho.resize(numConn* np);
+    conn.bcval.velocity.resize(numConn* np);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -508,33 +504,33 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
         }
     }
 
-    OCP_USI bId, eId;
-    OCP_DBL areaB, areaE, T1, T2;
-    OCP_DBL tmpB, tmpE;
+    //OCP_USI bId, eId;
+    //OCP_DBL areaB, areaE, T1, T2;
+    //OCP_DBL tmpB, tmpE;
 
-    for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
-        if (bk.bType[bId] > 0 && bk.bType[eId] > 0) {
-            // fluid bulk connections
-            areaB        = conn.iteratorConn[c].AreaB();
-            areaE        = conn.iteratorConn[c].AreaE();
-            T1           = bk.kt[bId] * areaB;
-            T2           = bk.kt[eId] * areaE;
-            conn.Adkt[c] = 1 / (1 / T1 + 1 / T2);
+    //for (OCP_USI c = 0; c < conn.numConn; c++) {
+    //    bId = conn.iteratorConn[c].BId();
+    //    eId = conn.iteratorConn[c].EId();
+    //    if (bk.bType[bId] > 0 && bk.bType[eId] > 0) {
+    //        // fluid bulk connections
+    //        areaB        = conn.iteratorConn[c].AreaB();
+    //        areaE        = conn.iteratorConn[c].AreaE();
+    //        T1           = bk.kt[bId] * areaB;
+    //        T2           = bk.kt[eId] * areaE;
+    //        conn.Adkt[c] = 1 / (1 / T1 + 1 / T2);
 
-            tmpB                  = pow(conn.Adkt[c], 2) / pow(T1, 2) * areaB;
-            tmpE                  = pow(conn.Adkt[c], 2) / pow(T2, 2) * areaE;
-            conn.AdktP[c * 2 + 0] = tmpB * bk.ktP[bId];
-            conn.AdktP[c * 2 + 1] = tmpE * bk.ktP[eId];
-            conn.AdktT[c * 2 + 0] = tmpB * bk.ktT[bId];
-            conn.AdktT[c * 2 + 1] = tmpE * bk.ktT[eId];
-            for (USI j = 0; j < np; j++) {
-                conn.AdktS[c * np * 2 + j]      = tmpB * bk.ktS[bId * np + j];
-                conn.AdktS[c * np * 2 + np + j] = tmpE * bk.ktS[eId * np + j];
-            }
-        }
-    }
+    //        tmpB                  = pow(conn.Adkt[c], 2) / pow(T1, 2) * areaB;
+    //        tmpE                  = pow(conn.Adkt[c], 2) / pow(T2, 2) * areaE;
+    //        conn.AdktP[c * 2 + 0] = tmpB * bk.ktP[bId];
+    //        conn.AdktP[c * 2 + 1] = tmpE * bk.ktP[eId];
+    //        conn.AdktT[c * 2 + 0] = tmpB * bk.ktT[bId];
+    //        conn.AdktT[c * 2 + 1] = tmpE * bk.ktT[eId];
+    //        for (USI j = 0; j < np; j++) {
+    //            conn.AdktS[c * np * 2 + j]      = tmpB * bk.ktS[bId * np + j];
+    //            conn.AdktS[c * np * 2 + np + j] = tmpE * bk.ktS[eId * np + j];
+    //        }
+    //    }
+    //}
 }
 
 void T_FIM::CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const
@@ -604,13 +600,6 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bk.dSec_dPri = bk.ldSec_dPri;
 
     bk.hLoss.ResetToLastTimeStep();
-
-    BulkConn& conn = rs.conn;
-
-    conn.Adkt  = conn.lAdkt;
-    conn.AdktP = conn.lAdktP;
-    conn.AdktT = conn.lAdktT;
-    conn.AdktS = conn.lAdktS;
 
     // Wells
     rs.allWells.ResetBHP();
@@ -689,13 +678,6 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
 
     bk.hLoss.UpdateLastTimeStep();
 
-    BulkConn& conn = rs.conn;
-
-    conn.lAdkt  = conn.Adkt;
-    conn.lAdktP = conn.AdktP;
-    conn.lAdktT = conn.AdktT;
-    conn.lAdktS = conn.AdktS;
-
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();
 }
@@ -711,13 +693,11 @@ void T_FIM::CalRes(Reservoir&      rs,
     const USI   nc   = bk.numCom;
     const USI   len  = nc + 2;
     OCPRes&     Res  = bk.res;
-    BulkConn&   conn = rs.conn;
-
+    
     Res.SetZero();
 
     // Bulk to Bulk
-
-    OCP_USI bId, eId, uId, bIdb;
+    OCP_USI bId, eId, bIdb;
     // Accumalation Term
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
@@ -751,85 +731,58 @@ void T_FIM::CalRes(Reservoir&      rs,
         }
     }
 
-    OCP_USI bId_np_j, eId_np_j, uId_np_j;
-    OCP_DBL rho, dP, dT, dNi, Akd;
+    BulkConn&         conn  = rs.conn;
+    BulkConnVal&      bcval = conn.bcval;
+    vector<OCPFlux*>& flux  = conn.flux;
+
+    OCP_USI uId_np_j;
+    OCP_DBL dT, Akdt;
+    USI     cType;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
+        bId   = conn.iteratorConn[c].BId();
+        eId   = conn.iteratorConn[c].EId();
+        cType = conn.iteratorConn[c].Type();
 
-        // Thermal conductive term all exist
-        dT = bk.T[bId] - bk.T[eId];
-        Res.resAbs[bId * len + 1 + nc] += conn.Adkt[c] * dT * dt;
+        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
+
+        // Thermal conductive term always exists
+        Akdt = flux[cType]->GetAdkt();
+        dT   = bk.T[bId] - bk.T[eId];
+        Res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
         if (eId < nb) {
             // Interior grid
-            Res.resAbs[eId * len + 1 + nc] -= conn.Adkt[c] * dT * dt;
+            Res.resAbs[eId * len + 1 + nc] -= Akdt * dT * dt;
         }
-        
-        if (bk.bType[bId] > 0 && bk.bType[eId] > 0) {
-            // Fluid Bulk Connection
-            Akd = CONV1 * CONV2 * conn.iteratorConn[c].Area();
 
-            for (USI j = 0; j < np; j++) {
-                bId_np_j = bId * np + j;
-                eId_np_j = eId * np + j;
+        if (cType == 0) {
+            // with flow
+            copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
+            copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
+            copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
 
-                const OCP_BOOL exbegin = bk.phaseExist[bId_np_j];
-                const OCP_BOOL exend   = bk.phaseExist[eId_np_j];
-
-                if ((exbegin) && (exend)) {
-                    rho = (bk.rho[bId_np_j] + bk.rho[eId_np_j]) / 2;
-                } else if (exbegin && (!exend)) {
-                    rho = bk.rho[bId_np_j];
-                } else if ((!exbegin) && (exend)) {
-                    rho = bk.rho[eId_np_j];
-                } else {
-                    conn.upblock[c * np + j]     = bId;
-                    conn.upblock_Rho[c * np + j] = 0;
-                    continue;
+			if (eId < nb) {
+				// Interior grid
+				for (USI i = 0; i < nc; i++) {
+					Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+					Res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
+				}
+                for (USI j = 0; j < np; j++) {
+                    uId_np_j = bcval.upblock[c * np + j] * np + j;
+                    Res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    Res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
                 }
-
-                uId = bId;
-                dP  = (bk.Pj[bId_np_j] - GRAVITY_FACTOR * rho * bk.depth[bId]) -
-                     (bk.Pj[eId_np_j] - GRAVITY_FACTOR * rho * bk.depth[eId]);
-                if (dP < 0) {
-                    uId = eId;
-                }
-                conn.upblock_Rho[c * np + j] = rho;
-                conn.upblock[c * np + j]     = uId;
-                uId_np_j                     = uId * np + j;
-
-                if (bk.phaseExist[uId_np_j]) {
-                    conn.upblock_Velocity[c * np + j] =
-                        Akd * bk.kr[uId_np_j] / bk.mu[uId_np_j] * dP;
-                } else {
-                    conn.upblock_Velocity[c * np + j] = 0;
-                    continue;
-                }
-
-                const OCP_DBL tmpV =
-                    dt * conn.upblock_Velocity[c * np + j] * bk.xi[uId_np_j];
-
-                if (eId < nb) {
-                    // Interior grid
-                    for (USI i = 0; i < nc; i++) {
-                        dNi = tmpV * bk.xij[uId_np_j * nc + i];
-                        Res.resAbs[bId * len + 1 + i] += dNi;
-                        Res.resAbs[eId * len + 1 + i] -= dNi;
-                    }
-                    Res.resAbs[bId * len + 1 + nc] += tmpV * bk.H[uId_np_j];
-                    Res.resAbs[eId * len + 1 + nc] -= tmpV * bk.H[uId_np_j];
-                }
-                else {
-                    // Ghost grid
-                    for (USI i = 0; i < nc; i++) {
-                        dNi = tmpV * bk.xij[uId_np_j * nc + i];
-                        Res.resAbs[bId * len + 1 + i] += dNi;
-                    }
-                    Res.resAbs[bId * len + 1 + nc] += tmpV * bk.H[uId_np_j];
-                }
-
-            }
+			}
+			else {
+				// Ghost grid
+				for (USI i = 0; i < nc; i++) {
+					Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+				}
+                for (USI j = 0; j < np; j++) {
+                    uId_np_j = bcval.upblock[c * np + j] * np + j;
+                    Res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                }				
+			}
         }
     }
 
@@ -1057,199 +1010,22 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     }
 
     // flux term
-    OCP_DBL         Akd;
-    OCP_DBL         transJ, transIJ, transH;
-    vector<OCP_DBL> dFdXpB(bsize, 0);  // begin bulk: dF / dXp
-    vector<OCP_DBL> dFdXpE(bsize, 0);  // end   bulk: dF / dXp
-    vector<OCP_DBL> dFdXsB(bsize2, 0); // begin bulk: dF / dXs
-    vector<OCP_DBL> dFdXsE(bsize2, 0); // end   bulk: dF / dXs
-    OCP_DBL*        dFdXpU;            // up    bulk: dF / dXp
-    OCP_DBL*        dFdXpD;            // down  bulk: dF / dXp
-    OCP_DBL*        dFdXsU;            // up    bulk: dF / dXs
-    OCP_DBL*        dFdXsD;            // down  bulk: dF / dXs
+    OCP_USI  bId, eId;
+    USI      cType;
 
-    OCP_USI  bId, eId, uId;
-    OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
-    OCP_BOOL phaseExistBj, phaseExistEj, phaseExistDj;
-    OCP_DBL  xi, xij, kr, mu, rhox, xiP, xiT, xix, muP, muT, mux, H, HT, Hx;
-    OCP_DBL  dP, dT, dGamma;
-    OCP_DBL  rhoWghtU, rhoWghtD;
-    OCP_DBL  tmp;
-
+    vector<OCPFlux*>& flux = conn.flux;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-        fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-        fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
+        bId   = conn.iteratorConn[c].BId();
+        eId   = conn.iteratorConn[c].EId();
+        cType = conn.iteratorConn[c].Type();
 
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
+        flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
 
-        if (bk.bType[bId] > 0 && bk.bType[eId] > 0) {
-            // Fluid Bulk Connection
-            Akd    = CONV1 * CONV2 * conn.iteratorConn[c].Area();
-            dGamma = GRAVITY_FACTOR * (bk.depth[bId] - bk.depth[eId]);
+        bmat = flux[cType]->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2], 1,
+            bmat.data());
 
-            for (USI j = 0; j < np; j++) {
-                uId      = conn.upblock[c * np + j];
-                uId_np_j = uId * np + j;
-                if (!bk.phaseExist[uId_np_j]) continue;
-                bId_np_j     = bId * np + j;
-                eId_np_j     = eId * np + j;
-                phaseExistBj = bk.phaseExist[bId_np_j];
-                phaseExistEj = bk.phaseExist[eId_np_j];
-
-                if (bId == uId) {
-                    dFdXpU       = &dFdXpB[0];
-                    dFdXpD       = &dFdXpE[0];
-                    dFdXsU       = &dFdXsB[0];
-                    dFdXsD       = &dFdXsE[0];
-                    phaseExistDj = phaseExistEj;
-                    dId_np_j     = eId_np_j;
-                } else {
-                    dFdXpU       = &dFdXpE[0];
-                    dFdXpD       = &dFdXpB[0];
-                    dFdXsU       = &dFdXsE[0];
-                    dFdXsD       = &dFdXsB[0];
-                    phaseExistDj = phaseExistBj;
-                    dId_np_j     = bId_np_j;
-                }
-                if (phaseExistDj) {
-                    rhoWghtU = 0.5;
-                    rhoWghtD = 0.5;
-                } else {
-                    rhoWghtU = 1;
-                    rhoWghtD = 0;
-                }
-
-                dP = bk.Pj[bId_np_j] - bk.Pj[eId_np_j] -
-                     conn.upblock_Rho[c * np + j] * dGamma;
-                dT     = bk.T[bId] - bk.T[eId];
-                xi     = bk.xi[uId_np_j];
-                kr     = bk.kr[uId_np_j];
-                mu     = bk.mu[uId_np_j];
-                xiP    = bk.xiP[uId_np_j];
-                xiT    = bk.xiT[uId_np_j];
-                muP    = bk.muP[uId_np_j];
-                muT    = bk.muT[uId_np_j];
-                H      = bk.H[uId_np_j];
-                HT     = bk.HT[uId_np_j];
-                transJ = Akd * kr / mu;
-
-                // Mass Conservation
-                for (USI i = 0; i < nc; i++) {
-                    xij     = bk.xij[uId_np_j * nc + i];
-                    transIJ = transJ * xi * xij;
-
-                    // dP
-                    dFdXpB[(i + 1) * ncol] += transIJ;
-                    dFdXpE[(i + 1) * ncol] -= transIJ;
-
-                    tmp = transJ * xiP * xij * dP;
-                    tmp += -transIJ * muP / mu * dP;
-                    dFdXpU[(i + 1) * ncol] +=
-                        (tmp - transIJ * rhoWghtU * bk.rhoP[uId_np_j] * dGamma);
-                    dFdXpD[(i + 1) * ncol] +=
-                        -transIJ * rhoWghtD * bk.rhoP[dId_np_j] * dGamma;
-
-                    // dT
-                    tmp = transJ * xiT * xij * dP;
-                    tmp += -transIJ * muT / mu * dP;
-                    dFdXpU[(i + 2) * ncol - 1] +=
-                        (tmp - transIJ * rhoWghtU * bk.rhoT[uId_np_j] * dGamma);
-                    dFdXpD[(i + 2) * ncol - 1] +=
-                        -transIJ * rhoWghtD * bk.rhoT[dId_np_j] * dGamma;
-
-                    // dS
-                    for (USI k = 0; k < np; k++) {
-                        dFdXsB[(i + 1) * ncol2 + k] +=
-                            transIJ * bk.dPcdS[bId_np_j * np + k];
-                        dFdXsE[(i + 1) * ncol2 + k] -=
-                            transIJ * bk.dPcdS[eId_np_j * np + k];
-                        dFdXsU[(i + 1) * ncol2 + k] +=
-                            Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * xij * dP;
-                    }
-                    // dxij
-                    for (USI k = 0; k < nc; k++) {
-                        rhox = bk.rhox[uId_np_j * nc + k];
-                        xix  = bk.xix[uId_np_j * nc + k];
-                        mux  = bk.mux[uId_np_j * nc + k];
-                        tmp  = -transIJ * rhoWghtU * rhox * dGamma;
-                        tmp += transJ * xix * xij * dP;
-                        tmp += -transIJ * mux / mu * dP;
-                        dFdXsU[(i + 1) * ncol2 + np + j * nc + k] += tmp;
-                        dFdXsD[(i + 1) * ncol2 + np + j * nc + k] +=
-                            -transIJ * rhoWghtD * bk.rhox[dId_np_j * nc + k] * dGamma;
-                    }
-                    dFdXsU[(i + 1) * ncol2 + np + j * nc + i] += transJ * xi * dP;
-                }
-
-                // Energy Conservation
-                transH = transJ * xi * H;
-                // dP
-                dFdXpB[(ncol - 1) * ncol] += transH;
-                dFdXpE[(ncol - 1) * ncol] -= transH;
-
-                tmp = transJ * xiP * H * dP;
-                tmp += -transJ * xi * muP / mu * dP * H;
-                dFdXpU[(ncol - 1) * ncol] +=
-                    (tmp - transH * rhoWghtU * bk.rhoP[uId_np_j] * dGamma);
-                dFdXpD[(ncol - 1) * ncol] +=
-                    -transH * rhoWghtD * bk.rhoP[dId_np_j] * dGamma;
-
-                // dT
-                tmp = transJ * xiT * H * dP;
-                tmp += transJ * xi * HT * dP;
-                tmp += -transH * muT / mu * dP;
-                dFdXpU[ncol * ncol - 1] +=
-                    (tmp - transH * rhoWghtU * bk.rhoT[uId_np_j] * dGamma);
-                dFdXpD[ncol * ncol - 1] +=
-                    -transH * rhoWghtD * bk.rhoT[dId_np_j] * dGamma;
-
-                // dS
-                for (USI k = 0; k < np; k++) {
-                    dFdXsB[(nc + 1) * ncol2 + k] +=
-                        transH * bk.dPcdS[bId_np_j * np + k];
-                    dFdXsE[(nc + 1) * ncol2 + k] -=
-                        transH * bk.dPcdS[eId_np_j * np + k];
-                    dFdXsU[(nc + 1) * ncol2 + k] +=
-                        Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * H * dP;
-                }
-                // dxij
-                for (USI k = 0; k < nc; k++) {
-                    rhox = bk.rhox[uId_np_j * nc + k];
-                    xix  = bk.xix[uId_np_j * nc + k];
-                    mux  = bk.mux[uId_np_j * nc + k];
-                    Hx   = bk.Hx[uId_np_j * nc + k];
-                    tmp  = -transH * rhoWghtU * rhox * dGamma;
-                    tmp += transJ * xix * H * dP;
-                    tmp += transJ * xi * Hx * dP;
-                    tmp += -transH * mux / mu * dP;
-                    dFdXsU[(nc + 1) * ncol2 + np + j * nc + k] += tmp;
-                    dFdXsD[(nc + 1) * ncol2 + np + j * nc + k] +=
-                        -transH * rhoWghtD * bk.rhox[dId_np_j * nc + k] * dGamma;
-                }
-            }
-        }
-
-        // Thermal Conduction always exist
-        // dP
-        dFdXpB[(ncol - 1) * ncol] += conn.AdktP[c * 2 + 0] * dT;
-        dFdXpE[(ncol - 1) * ncol] += conn.AdktP[c * 2 + 1] * dT;
-        // dT
-        dFdXpB[ncol * ncol - 1] += conn.Adkt[c] + conn.AdktT[c * 2 + 0] * dT;
-        dFdXpE[ncol * ncol - 1] += -conn.Adkt[c] + conn.AdktT[c * 2 + 1] * dT;
-        // dS
-        for (OCP_USI j = 0; j < np; j++) {
-            dFdXsB[(nc + 1) * ncol2 + j] += conn.AdktS[c * np + j] * dT;
-            dFdXsE[(nc + 1) * ncol2 + j] += conn.AdktS[c * np + np + j] * dT;
-        }
-
-        // Assemble
-        bmat = dFdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dFdXsB.data(), &bk.dSec_dPri[bId * bsize2], 1,
-                bmat.data());
         Dscalar(bsize, dt, bmat.data());
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
@@ -1266,10 +1042,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             OCP_ABORT("INF or INF in bmat !");
         }
 #endif
-        // End
-        bmat = dFdXpE;
-        DaABpbC(ncol, ncol, ncol2, 1, dFdXsE.data(), &bk.dSec_dPri[eId * bsize2], 1,
-                bmat.data());
+
+        bmat = flux[cType]->GetdFdXpE();
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bk.dSec_dPri[eId * bsize2], 1,
+            bmat.data());
+
         Dscalar(bsize, dt, bmat.data());
 
         if (eId < nb) {

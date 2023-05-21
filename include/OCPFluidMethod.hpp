@@ -89,7 +89,6 @@ private:
     /// Reset variables to last time step
     void ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl);
     void ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl);
-    void ResetToLastTimeStep03(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for FIM.
     void UpdateLastTimeStep(Reservoir& rs) const;
 };

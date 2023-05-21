@@ -1599,7 +1599,6 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
     OCP_DBL Se    = Dnorm2(NC, &resSTA[0]);
     OCP_DBL alpha = 1;
     USI     iter  = 0;
-    // OCP_DBL Se0   = Se;
 
     while (Se > Stol) {
 
@@ -1608,11 +1607,12 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
         // LUSolve(1, NC, &JmatSTA[0], &resSTA[0], &pivot[0]);
         SYSSolve(1, &uplo, NC, &JmatSTA[0], &resSTA[0], &pivot[0], &JmatWork[0],
                  lJmatWork);
-        Dscalar(NC, Yt, &Y[0]);
-        Daxpy(NC, alpha, &resSTA[0], &Y[0]);
+
+        const OCP_DBL lYt = Yt;
         Yt = 0;
         for (USI i = 0; i < NC; i++) {
-            Yt += Y[i];
+            Y[i] = Y[i] * lYt + alpha * resSTA[i];
+            Yt   += Y[i];
         }
         Dscalar(NC, 1 / Yt, &Y[0]);
 
@@ -2097,33 +2097,21 @@ void MixtureComp::SplitNR()
 
         alpha = CalStepNRsp();
 
-        n[NP - 1] = zi;
+        n[NP - 1] = zi;       
+        nu[NP - 1] = 1;
         for (USI j = 0; j < NP - 1; j++) {
-            Daxpy(NC, alpha, &resSP[j * NC], &n[j][0]);
-            Daxpy(NC, -1, &n[j][0], &n[NP - 1][0]);
-
-            // nu[j] = Dnorm1(NC, &n[j][0]);
             nu[j] = 0;
             for (USI i = 0; i < NC; i++) {
-                nu[j] += n[j][i];
+                n[j][i]         += alpha * resSP[j * NC + i];                
+                n[NP - 1][i]    -= n[j][i];
+                nu[j]           += n[j][i];
             }
+            nu[NP - 1] -= nu[j];
 
             for (USI i = 0; i < NC; i++) {
                 // x[j][i] = n[j][i] / nu[j];
                 x[j][i] = fabs(n[j][i] / nu[j]);
             }
-        }
-
-        // for (USI i = 0; i < NC; i++) {
-        //     n[NP - 1][i] = fabs(n[NP - 1][i]);
-        // }
-        // nu[NP - 1] = Dnorm1(NC, &n[NP - 1][0]);
-        // for (USI i = 0; i < NC; i++) {
-        //     x[NP - 1][i] = n[NP - 1][i] / nu[NP - 1];
-        // }
-        nu[NP - 1] = 0;
-        for (USI i = 0; i < NC; i++) {
-            nu[NP - 1] += n[NP - 1][i];
         }
         for (USI i = 0; i < NC; i++) {
             x[NP - 1][i] = fabs(n[NP - 1][i] / nu[NP - 1]);
@@ -2140,10 +2128,11 @@ void MixtureComp::SplitNR()
         // Maybe it should be execute before "eNR > eNR0 || iter > EoSctrl.NRsp.maxIt"
         en = 0;
         for (USI j = 0; j < NP; j++) {
-            Daxpy(NC, -1, &n[j][0], &ln[j][0]);
-            en += Dnorm2(NC, &ln[j][0]);
+            for (USI i = 0; i < NC; i++) {
+                en += (ln[j][i] - n[j][i]) * (ln[j][i] - n[j][i]);
+            }
         }
-        if (en / (NP * NC) < 1E-8) {
+        if (en < 1E-16 * (NP * NC) * (NP * NC)) {
             EoSctrl.NRsp.conflag = OCP_TRUE;
             break;
         }

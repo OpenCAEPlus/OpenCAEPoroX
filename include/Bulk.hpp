@@ -90,9 +90,9 @@ public:
     vector<OCP_DBL> p;       ///< Auxiliary variable
     vector<OCP_DBL> pT;      ///< dP / dT
 
-    vector<OCP_DBL> lI;  ///< Auxiliary variable
-    vector<OCP_DBL> lp;  ///< Auxiliary variable
-    vector<OCP_DBL> lpT; ///< last pT
+    vector<OCP_DBL> lI;      ///< Auxiliary variable
+    vector<OCP_DBL> lp;      ///< Auxiliary variable
+    vector<OCP_DBL> lpT;     ///< last pT
 };
 
 /// Physical information of each active reservoir bulk.
@@ -107,6 +107,9 @@ class Bulk
     friend class Well;
     friend class Out4RPT;
     friend class Out4VTK;
+    friend class OCPFlux_IsoT;
+    friend class OCPFlux_T;
+    friend class OCPFlux_T_NF;
 
     // temp
     friend class Reservoir;

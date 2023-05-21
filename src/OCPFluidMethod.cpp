@@ -122,21 +122,14 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     }
 
     // Calculate Flux between bulks and between bulks and wells
-    CalFlux(rs);
+    CalFlux(rs);  
+    MassConserve(rs, dt);
 
     // Second check : CFL check
     rs.CalCFL(dt);
-    if (!ctrl.Check(rs, {"CFL"})) {
-        ResetToLastTimeStep01(rs, ctrl);
-        cout << "CFL is too big" << endl;
-        return OCP_FALSE;
-    }
-
-    MassConserve(rs, dt);
-
     // Third check: Ni check
-    if (!ctrl.Check(rs, {"BulkNi"})) {
-        ResetToLastTimeStep02(rs, ctrl);
+    if (!ctrl.Check(rs, { "CFL","BulkNi"})) {
+        ResetToLastTimeStep01(rs, ctrl);
         return OCP_FALSE;
     }
 
@@ -145,7 +138,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     // Fouth check: Volume error check
     if (!ctrl.Check(rs, {"BulkVe"})) {
-        ResetToLastTimeStep03(rs, ctrl);
+        ResetToLastTimeStep02(rs, ctrl);
         return OCP_FALSE;
     }
 
@@ -232,15 +225,15 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 
     BulkConn& conn = rs.conn;
 
-    conn.upblock.resize(conn.numConn * np);
-    conn.upblock_Rho.resize(conn.numConn * np);
-    conn.upblock_Trans.resize(conn.numConn * np);
-    conn.upblock_Velocity.resize(conn.numConn * np);
+    conn.bcval.upblock.resize(conn.numConn * np);
+    conn.bcval.rho.resize(conn.numConn * np);
+    conn.bcval.velocity.resize(conn.numConn * np);
+    conn.bcval.flux_ni.resize(conn.numConn * nc);
 
-    conn.lupblock.resize(conn.numConn * np);
-    conn.lupblock_Rho.resize(conn.numConn * np);
-    conn.lupblock_Trans.resize(conn.numConn * np);
-    conn.lupblock_Velocity.resize(conn.numConn * np);
+    conn.bcval.lupblock.resize(conn.numConn * np);
+    conn.bcval.lrho.resize(conn.numConn * np);
+    conn.bcval.lvelocity.resize(conn.numConn * np);
+    conn.bcval.lflux_ni.resize(conn.numConn * nc);
 }
 
 void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
@@ -336,58 +329,21 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
     const Bulk& bk   = rs.bulk;
     BulkConn&   conn = rs.conn;
     const USI   np   = bk.numPhase;
+    const USI   nc   = bk.numCom;
 
     // calculate a step flux using iteratorConn
-    OCP_USI  bId, eId, uId;
-    OCP_USI  bId_np_j, eId_np_j;
-    OCP_BOOL exbegin, exend, exup;
-    OCP_DBL  rho, dP, Akd;
+
+    vector<OCPFlux*>& flux  = conn.flux;
+    BulkConnVal&      bcval = conn.bcval;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
-        Akd = CONV1 * CONV2 * conn.iteratorConn[c].Area();
 
-        for (USI j = 0; j < np; j++) {
-            bId_np_j = bId * np + j;
-            eId_np_j = eId * np + j;
-
-            exbegin = bk.phaseExist[bId_np_j];
-            exend   = bk.phaseExist[eId_np_j];
-
-            if ((exbegin) && (exend)) {
-                rho = (bk.rho[bId_np_j] + bk.rho[eId_np_j]) / 2;
-            } else if (exbegin && (!exend)) {
-                rho = bk.rho[bId_np_j];
-            } else if ((!exbegin) && (exend)) {
-                rho = bk.rho[eId_np_j];
-            } else {
-                conn.upblock[c * np + j] = bId;
-                continue;
-            }
-
-            dP = (bk.Pj[bId_np_j] - GRAVITY_FACTOR * rho * bk.depth[bId]) -
-                 (bk.Pj[eId_np_j] - GRAVITY_FACTOR * rho * bk.depth[eId]);
-            if (dP < 0) {
-                uId  = eId;
-                exup = exend;
-            } else {
-                uId  = bId;
-                exup = exbegin;
-            }
-
-            conn.upblock_Rho[c * np + j] = rho;
-            conn.upblock[c * np + j]     = uId;
-
-            if (exup) {
-                conn.upblock_Trans[c * np + j] =
-                    Akd * bk.kr[uId * np + j] / bk.mu[uId * np + j];
-                conn.upblock_Velocity[c * np + j] = conn.upblock_Trans[c * np + j] * dP;
-            } else {
-                conn.upblock_Trans[c * np + j]    = 0;
-                conn.upblock_Velocity[c * np + j] = 0;
-            }
-        }
+        const USI cType = conn.iteratorConn[c].Type();
+        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
+        copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
+        copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
+        copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
+        copy(flux[cType]->GetFluxNi().begin(), flux[cType]->GetFluxNi().end(), &bcval.flux_ni[c * nc]);
     }
 }
 
@@ -396,31 +352,18 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
 
     // Bulk to Bulk
     Bulk&           bk   = rs.bulk;
+    const USI       nc   = bk.numCom;
     const BulkConn& conn = rs.conn;
-
-    const USI np = bk.numPhase;
-    const USI nc = bk.numCom;
-
-    OCP_USI bId, eId, uId;
-    OCP_USI uId_np_j;
-    OCP_DBL phaseVelocity, dNi;
+    
+    OCP_USI bId, eId;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         bId = conn.iteratorConn[c].BId();
         eId = conn.iteratorConn[c].EId();
 
-        for (USI j = 0; j < np; j++) {
-            uId      = conn.upblock[c * np + j];
-            uId_np_j = uId * np + j;
-
-            if (!bk.phaseExist[uId_np_j]) continue;
-
-            phaseVelocity = conn.upblock_Velocity[c * np + j];
-            for (USI i = 0; i < nc; i++) {
-                dNi = dt * phaseVelocity * bk.xi[uId_np_j] * bk.xij[uId_np_j * nc + i];
-                bk.Ni[eId * nc + i] += dNi;
-                bk.Ni[bId * nc + i] -= dNi;
-            }
+        for (USI i = 0; i < nc; i++) {
+            bk.Ni[eId * nc + i] += dt * conn.bcval.flux_ni[c * nc + i];
+            bk.Ni[bId * nc + i] -= dt * conn.bcval.flux_ni[c * nc + i];
         }
     }
 
@@ -469,8 +412,6 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
     const Bulk&     bk   = rs.bulk;
     const BulkConn& conn = rs.conn;
     const OCP_USI   nb   = bk.numBulkInterior;
-    const USI       np   = bk.numPhase;
-    const USI       nc   = bk.numCom;
 
     ls.AddDim(nb);
 
@@ -489,57 +430,37 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
 
 
     // flux term
-    OCP_USI bId, eId, uId_np_j;
-    OCP_DBL valupi, valdowni, valup, rhsup, valdown, rhsdown;
-    OCP_DBL dD, tmp;
+    OCP_USI bId, eId;
+    USI     cType;
+    OCP_DBL valbb, rhsb, valee, rhse;
 
     // Be careful when first bulk has no neighbors!
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
-        dD  = GRAVITY_FACTOR * (bk.depth[bId] - bk.depth[eId]);
+        bId   = conn.iteratorConn[c].BId();
+        eId   = conn.iteratorConn[c].EId();
+        cType = conn.iteratorConn[c].Type();
 
-        valup   = 0;
-        rhsup   = 0;
-        valdown = 0;
-        rhsdown = 0;
-
-        for (USI j = 0; j < np; j++) {
-            uId_np_j = conn.upblock[c * np + j] * np + j;
-            if (!bk.phaseExist[uId_np_j]) continue;
-
-            valupi   = 0;
-            valdowni = 0;
-
-            for (USI i = 0; i < nc; i++) {
-                valupi += bk.vfi[bId * nc + i] * bk.xij[uId_np_j * nc + i];
-                valdowni += bk.vfi[eId * nc + i] * bk.xij[uId_np_j * nc + i];
-            }
-
-            tmp = bk.xi[uId_np_j] * conn.upblock_Trans[c * np + j] * dt;
-            valup += tmp * valupi;
-            valdown += tmp * valdowni;
-            tmp *= conn.upblock_Rho[c * np + j] * dD -
-                   (bk.Pc[bId * np + j] - bk.Pc[eId * np + j]);
-            rhsup += tmp * valupi;
-            rhsdown -= tmp * valdowni;
-        }
+        conn.flux[cType]->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.bcval, bk);
+        valbb  = dt * conn.flux[cType]->GetValbb();
+        valee  = dt * conn.flux[cType]->GetValee();
+        rhsb   = dt * conn.flux[cType]->GetRhsb();
+        rhse   = dt * conn.flux[cType]->GetRhse();
 
 
         if (eId < nb) {
             // interior grid
-            ls.AddDiag(bId, valup);
-            ls.AddDiag(eId, valdown);
-            ls.NewOffDiag(bId, eId, -valup);
-            ls.NewOffDiag(eId, bId, -valdown);
-            ls.AddRhs(bId, rhsup);
-            ls.AddRhs(eId, rhsdown);
+            ls.AddDiag(bId, valbb);
+            ls.AddDiag(eId, valee);
+            ls.NewOffDiag(bId, eId, -valbb);
+            ls.NewOffDiag(eId, bId, -valee);
+            ls.AddRhs(bId, rhsb);
+            ls.AddRhs(eId, rhse);
         }
         else {
             // ghost grid
-            ls.AddDiag(bId, valup);
-            ls.NewOffDiag(bId, eId + numWell, -valup);
-            ls.AddRhs(bId, rhsup);
+            ls.AddDiag(bId, valbb);
+            ls.NewOffDiag(bId, eId + numWell, -valbb);
+            ls.AddRhs(bId, rhsb);
         }
     }
 }
@@ -776,36 +697,24 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     MPI_Barrier(domain.myComm);
 }
 
+
 void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
 {
     // Bulk
+    rs.bulk.Ni = rs.bulk.lNi;
     rs.bulk.Pj = rs.bulk.lPj;
     // Bulk Conn
-    rs.conn.upblock          = rs.conn.lupblock;
-    rs.conn.upblock_Rho      = rs.conn.lupblock_Rho;
-    rs.conn.upblock_Trans    = rs.conn.lupblock_Trans;
-    rs.conn.upblock_Velocity = rs.conn.lupblock_Velocity;
+
+    rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
+    rs.conn.bcval.rho          = rs.conn.bcval.lrho;
+    rs.conn.bcval.velocity     = rs.conn.bcval.lvelocity;
+    rs.conn.bcval.flux_ni      = rs.conn.bcval.lflux_ni;
 
     // Iters
     ctrl.ResetIterNRLS();
 }
 
 void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
-{
-    // Bulk
-    rs.bulk.Ni = rs.bulk.lNi;
-    rs.bulk.Pj = rs.bulk.lPj;
-    // Bulk Conn
-    rs.conn.upblock          = rs.conn.lupblock;
-    rs.conn.upblock_Rho      = rs.conn.lupblock_Rho;
-    rs.conn.upblock_Trans    = rs.conn.lupblock_Trans;
-    rs.conn.upblock_Velocity = rs.conn.lupblock_Velocity;
-
-    // Iters
-    ctrl.ResetIterNRLS();
-}
-
-void IsoT_IMPEC::ResetToLastTimeStep03(Reservoir& rs, OCPControl& ctrl)
 {
     Bulk& bk = rs.bulk;
     // Rock
@@ -832,10 +741,10 @@ void IsoT_IMPEC::ResetToLastTimeStep03(Reservoir& rs, OCPControl& ctrl)
     bk.vfi = bk.lvfi;
 
     // Bulk Conn
-    rs.conn.upblock          = rs.conn.lupblock;
-    rs.conn.upblock_Rho      = rs.conn.lupblock_Rho;
-    rs.conn.upblock_Trans    = rs.conn.lupblock_Trans;
-    rs.conn.upblock_Velocity = rs.conn.lupblock_Velocity;
+    rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
+    rs.conn.bcval.rho          = rs.conn.bcval.lrho;
+    rs.conn.bcval.velocity     = rs.conn.bcval.lvelocity;
+    rs.conn.bcval.flux_ni      = rs.conn.bcval.lflux_ni;
 
     // Optional Features
     rs.optFeatures.ResetToLastTimeStep();
@@ -877,10 +786,10 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 
     BulkConn& conn = rs.conn;
 
-    conn.lupblock          = conn.upblock;
-    conn.lupblock_Rho      = conn.upblock_Rho;
-    conn.lupblock_Trans    = conn.upblock_Trans;
-    conn.lupblock_Velocity = conn.upblock_Velocity;
+    conn.bcval.lupblock    = conn.bcval.upblock;
+    conn.bcval.lrho        = conn.bcval.rho;
+    conn.bcval.lvelocity   = conn.bcval.velocity;
+    conn.bcval.lflux_ni    = conn.bcval.flux_ni;
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();
@@ -1021,7 +930,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_DBL NRdSmax = rs.GetNRdSmax(dSn);
     const OCP_DBL NRdPmax = rs.GetNRdPmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
-
+   
     OCP_INT conflag_loc = -1;
     if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
         rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
@@ -1164,9 +1073,9 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     // BulkConn
     BulkConn& conn = rs.conn;
 
-    conn.upblock.resize(conn.numConn * np);
-    conn.upblock_Rho.resize(conn.numConn * np);
-    conn.upblock_Velocity.resize(conn.numConn * np);
+    conn.bcval.upblock.resize(conn.numConn* np);
+    conn.bcval.rho.resize(conn.numConn* np);
+    conn.bcval.velocity.resize(conn.numConn* np);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -1289,19 +1198,17 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
 
 void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0) const
 {
-    const Bulk& bk   = rs.bulk;
-    const USI   nb   = bk.numBulkInterior;
-    const USI   np   = bk.numPhase;
-    const USI   nc   = bk.numCom;
-    const USI   len  = nc + 1;
-    OCPRes&     Res  = bk.res;
-    BulkConn&   conn = rs.conn;
-
+    const Bulk&            bk    = rs.bulk;
+    const USI              nb    = bk.numBulkInterior;
+    const USI              np    = bk.numPhase;
+    const USI              nc    = bk.numCom;
+    const USI              len   = nc + 1;
+    OCPRes&                Res   = bk.res;
+    
     Res.SetZero();
 
     // Bulk to Bulk
-
-    OCP_USI bId, eId, uId, bIdb;
+    OCP_USI bId, eId, bIdb;    
     // Accumalation Term
     for (OCP_USI n = 0; n < nb; n++) {
         bId             = n * len;
@@ -1312,72 +1219,32 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
         }
     }
 
-    OCP_USI bId_np_j, eId_np_j, uId_np_j;
-    OCP_DBL rho, dP, dNi, Akd;
-
     // Flux Term
-    // Calculate the upblock at the same time.
+    BulkConn&              conn  = rs.conn;
+    BulkConnVal&           bcval = conn.bcval;
+    vector<OCPFlux*>&      flux  = conn.flux;
+    USI     cType;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId = conn.iteratorConn[c].BId();
-        eId = conn.iteratorConn[c].EId();
-        Akd = CONV1 * CONV2 * conn.iteratorConn[c].Area();
 
-        for (USI j = 0; j < np; j++) {
-            bId_np_j = bId * np + j;
-            eId_np_j = eId * np + j;
+        bId   = conn.iteratorConn[c].BId();
+        eId   = conn.iteratorConn[c].EId();
+        cType = conn.iteratorConn[c].Type();
 
-            OCP_BOOL exbegin = bk.phaseExist[bId_np_j];
-            OCP_BOOL exend   = bk.phaseExist[eId_np_j];
-
-            if ((exbegin) && (exend)) {
-                rho = (bk.rho[bId_np_j] + bk.rho[eId_np_j]) / 2;
-            } else if (exbegin && (!exend)) {
-                rho = bk.rho[bId_np_j];
-            } else if ((!exbegin) && (exend)) {
-                rho = bk.rho[eId_np_j];
-            } else {
-                conn.upblock[c * np + j]     = bId;
-                conn.upblock_Rho[c * np + j] = 0;
-                continue;
+        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
+        copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
+        copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
+        copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
+               
+        if (eId < nb) {
+            for (USI i = 0; i < nc; i++) {               
+                Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+                Res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
             }
-
-            uId = bId;
-            dP  = (bk.Pj[bId_np_j] - GRAVITY_FACTOR * rho * bk.depth[bId]) -
-                 (bk.Pj[eId_np_j] - GRAVITY_FACTOR * rho * bk.depth[eId]);
-            if (dP < 0) {
-                uId = eId;
+        }
+        else {
+            for (USI i = 0; i < nc; i++) {
+                Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
             }
-            conn.upblock_Rho[c * np + j] = rho;
-            conn.upblock[c * np + j]     = uId;
-            uId_np_j                     = uId * np + j;
-
-            if (bk.phaseExist[uId_np_j]) {
-                conn.upblock_Velocity[c * np + j] =
-                    Akd * bk.kr[uId_np_j] / bk.mu[uId_np_j] * dP;
-            } else {
-                conn.upblock_Velocity[c * np + j] = 0;
-                continue;
-            }
-
-            OCP_DBL tmp =
-                dt * Akd * bk.xi[uId_np_j] * bk.kr[uId_np_j] / bk.mu[uId_np_j] * dP;
-
-            if (eId < nb) {
-                // Interior grid
-                for (USI i = 0; i < nc; i++) {
-                    dNi = tmp * bk.xij[uId_np_j * nc + i];
-                    Res.resAbs[bId * len + 1 + i] += dNi;
-                    Res.resAbs[eId * len + 1 + i] -= dNi;
-                }
-            }
-            else {
-                // Ghost grid
-                for (USI i = 0; i < nc; i++) {
-                    dNi = tmp * bk.xij[uId_np_j * nc + i];
-                    Res.resAbs[bId * len + 1 + i] += dNi;
-                }
-            }
-
         }
     }
 
@@ -1397,8 +1264,6 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                 // Injection
                 switch (wl.OptMode()) {
                     case BHP_MODE:
-                        // bhp = opt.maxBHP;
-                        // Res.resAbs[bId] = bhp - opt.maxBHP;
                         Res.resAbs[wId] = wl.BHP() - wl.MaxBHP();
                         break;
                     case RATE_MODE:
@@ -1417,7 +1282,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                         //             tmp += allWell[w].qi_lbmol[i];
                         //         }
                         //         tmp *= opt.reInjFactor;
-                        //         Res.resAbs[bId] += tmp;
+                        //         Res.resAbs[wId] += tmp;
                         //     }
                         // }
                         Res.maxWellRelRes_mol =
@@ -1432,8 +1297,6 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                 // Production
                 switch (wl.OptMode()) {
                     case BHP_MODE:
-                        // bhp = opt.minBHP;
-                        // Res.resAbs[bId] = bhp - opt.minBHP;
                         Res.resAbs[wId] = wl.BHP() - wl.MinBHP();
                         break;
                     case RATE_MODE:
@@ -1508,6 +1371,8 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
     const USI       bsize  = ncol * ncol;
     const USI       bsize2 = ncol * ncol2;
 
+    
+
     ls.AddDim(nb);
 
     vector<OCP_DBL> bmat(bsize, 0);
@@ -1524,123 +1389,22 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
     }
 
     // flux term
-    OCP_DBL         Akd;
-    OCP_DBL         transJ, transIJ;
-    vector<OCP_DBL> dFdXpB(bsize, 0);  // begin bulk: dF / dXp
-    vector<OCP_DBL> dFdXpE(bsize, 0);  // end   bulk: dF / dXp
-    vector<OCP_DBL> dFdXsB(bsize2, 0); // begin bulk: dF / dXs
-    vector<OCP_DBL> dFdXsE(bsize2, 0); // end   bulk: dF / dXs
-    OCP_DBL*        dFdXpU;            // up    bulk: dF / dXp
-    OCP_DBL*        dFdXpD;            // down  bulk: dF / dXp
-    OCP_DBL*        dFdXsU;            // up    bulk: dF / dXs
-    OCP_DBL*        dFdXsD;            // down  bulk: dF / dXs
-
-    OCP_USI  bId, eId, uId;
-    OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
-    OCP_BOOL phaseExistBj, phaseExistEj, phaseExistDj;
-    OCP_DBL  kr, mu, xi, xij, xiP, muP, rhox, xix, mux;
-    OCP_DBL  dP, dGamma;
-    OCP_DBL  rhoWghtU, rhoWghtD;
-    OCP_DBL  tmp;
-
+    vector<OCPFlux*>& flux = conn.flux;
+    OCP_USI  bId, eId;
+    USI      cType;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-        fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-        fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
+        bId   = conn.iteratorConn[c].BId();
+        eId   = conn.iteratorConn[c].EId();
+        cType = conn.iteratorConn[c].Type();
 
-        bId    = conn.iteratorConn[c].BId();
-        eId    = conn.iteratorConn[c].EId();
-        Akd    = CONV1 * CONV2 * conn.iteratorConn[c].Area();
-        dGamma = GRAVITY_FACTOR * (bk.depth[bId] - bk.depth[eId]);
-
-        for (USI j = 0; j < np; j++) {
-            uId      = conn.upblock[c * np + j];
-            uId_np_j = uId * np + j;
-            if (!bk.phaseExist[uId_np_j]) continue;
-            bId_np_j     = bId * np + j;
-            eId_np_j     = eId * np + j;
-            phaseExistBj = bk.phaseExist[bId_np_j];
-            phaseExistEj = bk.phaseExist[eId_np_j];
-
-            if (bId == uId) {
-                dFdXpU       = &dFdXpB[0];
-                dFdXpD       = &dFdXpE[0];
-                dFdXsU       = &dFdXsB[0];
-                dFdXsD       = &dFdXsE[0];
-                phaseExistDj = phaseExistEj;
-                dId_np_j     = eId_np_j;
-            } else {
-                dFdXpU       = &dFdXpE[0];
-                dFdXpD       = &dFdXpB[0];
-                dFdXsU       = &dFdXsE[0];
-                dFdXsD       = &dFdXsB[0];
-                phaseExistDj = phaseExistBj;
-                dId_np_j     = bId_np_j;
-            }
-            if (phaseExistDj) {
-                rhoWghtU = 0.5;
-                rhoWghtD = 0.5;
-            } else {
-                rhoWghtU = 1;
-                rhoWghtD = 0;
-            }
-
-            dP = bk.Pj[bId_np_j] - bk.Pj[eId_np_j] -
-                 conn.upblock_Rho[c * np + j] * dGamma;
-            xi     = bk.xi[uId_np_j];
-            kr     = bk.kr[uId_np_j];
-            mu     = bk.mu[uId_np_j];
-            muP    = bk.muP[uId_np_j];
-            xiP    = bk.xiP[uId_np_j];
-            transJ = Akd * kr / mu;
-
-            for (USI i = 0; i < nc; i++) {
-                xij     = bk.xij[uId_np_j * nc + i];
-                transIJ = xij * xi * transJ;
-
-                // dP
-                dFdXpB[(i + 1) * ncol] += transIJ;
-                dFdXpE[(i + 1) * ncol] -= transIJ;
-
-                tmp = transJ * xiP * xij * dP;
-                tmp += -transIJ * muP / mu * dP;
-                dFdXpU[(i + 1) * ncol] +=
-                    (tmp - transIJ * rhoWghtU * bk.rhoP[uId_np_j] * dGamma);
-                dFdXpD[(i + 1) * ncol] +=
-                    -transIJ * rhoWghtD * bk.rhoP[dId_np_j] * dGamma;
-
-                // dS
-                for (USI k = 0; k < np; k++) {
-                    dFdXsB[(i + 1) * ncol2 + k] +=
-                        transIJ * bk.dPcdS[bId_np_j * np + k];
-                    dFdXsE[(i + 1) * ncol2 + k] -=
-                        transIJ * bk.dPcdS[eId_np_j * np + k];
-                    dFdXsU[(i + 1) * ncol2 + k] +=
-                        Akd * bk.dKrdS[uId_np_j * np + k] / mu * xi * xij * dP;
-                }
-                // dxij
-                for (USI k = 0; k < nc; k++) {
-                    rhox = bk.rhox[uId_np_j * nc + k];
-                    xix  = bk.xix[uId_np_j * nc + k];
-                    mux  = bk.mux[uId_np_j * nc + k];
-                    tmp  = -transIJ * rhoWghtU * rhox * dGamma;
-                    tmp += transJ * xix * xij * dP;
-                    tmp += -transIJ * mux / mu * dP;
-                    dFdXsU[(i + 1) * ncol2 + np + j * nc + k] += tmp;
-                    dFdXsD[(i + 1) * ncol2 + np + j * nc + k] +=
-                        -transIJ * rhoWghtD * bk.rhox[dId_np_j * nc + k] * dGamma;
-                }
-                dFdXsU[(i + 1) * ncol2 + np + j * nc + i] += transJ * xi * dP;
-            }
-        }
-
-        // Assemble
-        bmat = dFdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dFdXsB.data(), &bk.dSec_dPri[bId * bsize2], 1,
-                bmat.data());
+        flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        
+        bmat = flux[cType]->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2], 1,
+            bmat.data());       
         Dscalar(bsize, dt, bmat.data());
+        // Assemble
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
         // End - Begin -- insert
@@ -1657,9 +1421,9 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 #endif
 
         // End
-        bmat = dFdXpE;
-        DaABpbC(ncol, ncol, ncol2, 1, dFdXsE.data(), &bk.dSec_dPri[eId * bsize2], 1,
-                bmat.data());
+        bmat = flux[cType]->GetdFdXpE();
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bk.dSec_dPri[eId * bsize2], 1,
+            bmat.data());
         Dscalar(bsize, dt, bmat.data());
         
         if (eId < nb) {

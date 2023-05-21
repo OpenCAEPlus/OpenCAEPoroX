@@ -474,7 +474,7 @@ void Reservoir::SetupIsoT()
     OCP_FUNCNAME;
 
     bulk.SetupIsoT(domain);
-    conn.Setup(bulk);
+    conn.SetupIsoT(bulk);
     allWells.Setup(bulk);
     bulk.SetupOptionalFeatures(optFeatures);
 }
@@ -482,7 +482,7 @@ void Reservoir::SetupIsoT()
 void Reservoir::SetupT()
 {
     bulk.SetupT(domain);
-    conn.Setup(bulk);
+    conn.SetupT(bulk);
     allWells.Setup(bulk);
     bulk.SetupOptionalFeatures(optFeatures);
 }
@@ -519,10 +519,10 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt) const
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         for (USI j = 0; j < np; j++) {
-            const OCP_USI uId = conn.upblock[c * np + j];
+            const OCP_USI uId = conn.bcval.upblock[c * np + j];
 
             if (bulk.phaseExist[uId * np + j]) {
-                bulk.cfl[uId * np + j] += fabs(conn.upblock_Velocity[c * np + j]) * dt;
+                bulk.cfl[uId * np + j] += fabs(conn.bcval.velocity[c * np + j]) * dt;
             }
         }
     }
