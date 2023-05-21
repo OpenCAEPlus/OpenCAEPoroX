@@ -356,7 +356,6 @@ private:
     // Phase Variables
     USI             lNP{0};  ///< last num of hydrocarbon phase
     USI             NP;      ///< current num of hydrocarbon phase
-    USI             inputNP; ///< input NP
     OCP_DBL         Nh;      ///< total moles of components exclude water
     vector<OCP_DBL> vC;      ///< vC represents the volume of phase
     vector<OCP_DBL>
@@ -495,9 +494,6 @@ public:
     void CaldXsdXpAPI03();
     void CaldXsdXp03();
     void CalVfiVfp_full03();
-
-    void CalKeyDerx();
-    void CalKeyDern();
 
 private:
     // Phase properties and auxiliary variables

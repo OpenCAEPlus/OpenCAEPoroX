@@ -57,9 +57,6 @@ public:
         xix.resize(numPhase * numCom);
         mux.resize(numPhase * numCom);
         dXsdXp.resize((numCom + 1) * (numPhase + numPhase * numCom));
-        // Auxiliary variable
-        pSderExist.resize(numPhase);
-        pVnumCom.resize(numPhase);
         // Thermal model
 
         // used in FIM_n
@@ -198,8 +195,6 @@ public:
     {
         return mux[j * numCom + i];
     }
-    const OCP_BOOL&        GetPSderExist(const USI& j) const { return pSderExist[j]; }
-    const USI&             GetPVnumCom(const USI& j) const { return pVnumCom[j]; }
     const vector<OCP_DBL>& GetDXsDXp() const { return dXsdXp; }
     const vector<OCP_DBL>& GetRes() const { return res; }
     const OCP_DBL          GetResPc() const { return resPc; }
@@ -265,9 +260,7 @@ protected:
     vector<OCP_DBL> HT;  ///< d Hj / d T
     vector<OCP_DBL> Hx;  ///< d Hj / d xij
 
-    // Auxiliary variable for dSec_dPr
-    vector<OCP_BOOL> pSderExist; ///< Existence of  derivative of phase saturation
-    vector<USI>      pVnumCom;   ///< num of variable components in the phase
+    // Auxiliary variable for dSec_dPri
 
     vector<OCP_DBL> res;    ///< residual of a set of equations
     OCP_DBL         resPc;  ///< a precalculated value

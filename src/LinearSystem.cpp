@@ -69,7 +69,7 @@ void LinearSystem::AssembleRhsAccumulate(const vector<OCP_DBL>& rhs)
 
 void LinearSystem::AssembleRhsCopy(const vector<OCP_DBL>& rhs)
 {
-    Dcopy(dim * blockDim, &b[0], &rhs[0]);
+    copy(rhs.begin(), rhs.end(), b.data());
 }
 
 void LinearSystem::OutputLinearSystem(const string& fileA, const string& fileb) const

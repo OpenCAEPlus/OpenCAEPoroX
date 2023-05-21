@@ -198,7 +198,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
     const OCP_DBL  Akd    = CONV1 * CONV2 * bp.Area();
     const OCP_DBL  dGamma = GRAVITY_FACTOR * (bk.depth[bId] - bk.depth[eId]);
 
-    OCP_USI  uId, bId_np_j, eId_np_j, uId_np_j, dId_np_j;
+    OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
     OCP_BOOL phaseExistDj;
     OCP_DBL  rhoWghtU, rhoWghtD;
     OCP_DBL  dP, transJ, transIJ, kr, mu, xi, xij, rhoP, xiP, muP, rhox, xix, mux, tmp;
@@ -219,8 +219,8 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
         fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
 
         for (USI j = 0; j < np; j++) {
-            uId = bcv.upblock[c * np + j];
-            uId_np_j = uId * np + j;
+            uId_np_j = bcv.upblock[c * np + j] * np + j;
+            if (!bk.phaseExist[uId_np_j]) continue;
             xi = bk.xi[uId_np_j];
             kr = bk.kr[uId_np_j];
             mu = bk.mu[uId_np_j];

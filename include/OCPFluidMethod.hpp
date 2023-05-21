@@ -163,6 +163,8 @@ class IsoT_AIMc : protected IsoT_IMPEC, protected IsoT_FIM
 public:
     /// Setup AIMc
     void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
+    /// Setup neighbor
+    void SetupNeighbor(Reservoir& rs);
     /// Init
     void InitReservoir(Reservoir& rs) const;
     /// Prepare for Assembling matrix.

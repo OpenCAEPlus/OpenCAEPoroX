@@ -73,7 +73,7 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
                 }
                 activity = OCP_TRUE;
                 if (method == FIM || method == AIMc) {
-                    if (timeInit <= 0) timeInit = 0.1;
+                    if (timeInit <= 0) timeInit = 1;
                     if (timeMax <= 0) timeMax = 10.0;
                     if (timeMin <= 0) timeMin = 0.1;
                 } else {

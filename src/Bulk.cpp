@@ -1333,7 +1333,7 @@ void Bulk::AllocateError()
 
 void Bulk::ShowFIMBulk(const OCP_BOOL& flag) const
 {
-
+    cout << fixed << setprecision(2) << bulkTypeAIM.GetNumFIMBulk() * 1.0 / numBulk * 100 << "%" << endl;
     if (flag) {
         USI iter = 0;
         for (USI n = 0; n < numBulk; n++) {

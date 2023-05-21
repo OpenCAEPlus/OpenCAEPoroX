@@ -508,12 +508,22 @@ protected:
     {
     public:
         void Setup(const OCP_USI& nb) { indicator.resize(nb, -1); }
-        void Init() { fill(indicator.begin(), indicator.end(), -1); }
-        void SetBulkType(const OCP_USI& n, const OCP_INT& flag) { indicator[n] = flag; }
+        void Init() {
+            fill(indicator.begin(), indicator.end(), -1); 
+        }
+        void SetFIMBulk(const OCP_USI& n) { indicator[n] = 1;}
         OCP_BOOL IfFIMbulk(const OCP_USI& n) const { return indicator[n] > 0; }
         OCP_BOOL IfIMPECbulk(const OCP_USI& n) const { return indicator[n] < 0; }
+        OCP_USI GetNumFIMBulk() const { 
+            numFIMBulk = 0; 
+            for (const auto& v : indicator) {
+                if (v > 0) numFIMBulk++;
+            }
+            return numFIMBulk;
+        }
 
     protected:
+        mutable OCP_USI numFIMBulk; ///< num of FIM bulk
         vector<OCP_INT> indicator; ///< Stores the index of FIM bulk in equations, FIM
                                    ///< bulk: >=0; IMPEC bulk: <0;
     } bulkTypeAIM;

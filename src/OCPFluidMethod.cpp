@@ -58,7 +58,7 @@ void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
 void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    rs.CalCFL(ctrl.GetCurDt());
+    rs.CalCFL(ctrl.GetCurDt(), OCP_TRUE);
     ctrl.Check(rs, {"CFL"});
 }
 
@@ -126,7 +126,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     MassConserve(rs, dt);
 
     // Second check : CFL check
-    rs.CalCFL(dt);
+    rs.CalCFL(dt, OCP_TRUE);
     // Third check: Ni check
     if (!ctrl.Check(rs, { "CFL","BulkNi"})) {
         ResetToLastTimeStep01(rs, ctrl);
@@ -873,13 +873,12 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 #ifdef DEBUG
     // Output A, b, x
     
-    //OCP_INT myrank = rs.domain.myrank;
     //ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_FIM.out", 
     //                      "proc" + to_string(myrank) + "_testb_FIM.out");
     //MPI_Barrier(rs.domain.myComm);
     //OCP_ABORT("Stop");
     //
-    //ls.OutputSolution("proc" + to_string(myrank) + "_testx_FIM.out");
+    ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
     // Check if inf or nan occurs in solution
     // ls.CheckSolution();
 #endif // DEBUG
@@ -1936,9 +1935,30 @@ void IsoT_AIMc::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 {
     // Allocate Bulk and BulkConn Memory
     AllocateReservoir(rs);
+    // Setup neighbor
+    SetupNeighbor(rs);
     // Allocate memory for internal matrix structure
     IsoT_FIM::AllocateLinearSystem(ls, rs, ctrl);
 }
+
+
+void IsoT_AIMc::SetupNeighbor(Reservoir& rs)
+{
+    const OCP_USI nb   = rs.GetInteriorBulkNum();
+    OCP_USI       bId, eId;
+    BulkConn&     conn = rs.conn;
+    
+
+    conn.neighbor.resize(conn.numConn);
+    for (const auto& c : conn.iteratorConn) {
+        bId = c.BId();
+        eId = c.EId();
+
+        conn.neighbor[bId].push_back(eId);
+        if (eId < nb)  conn.neighbor[eId].push_back(bId);
+    }
+}
+
 
 void IsoT_AIMc::InitReservoir(Reservoir& rs) const
 {
@@ -1960,7 +1980,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalRes(rs, dt, OCP_TRUE);
 
     // Set FIM Bulk
-    rs.CalCFL(dt);
+    rs.CalCFL(dt, OCP_FALSE);
     rs.allWells.SetupWellBulk(rs.bulk);
     SetFIMBulk(rs);
     //  Calculate FIM Bulk properties
@@ -1968,7 +1988,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalKrPcI(rs.bulk);
 
     UpdateLastTimeStep(rs);
-    // rs.bulk.ShowFIMBulk(OCP_FALSE);
+    rs.bulk.ShowFIMBulk(OCP_FALSE);
 }
 
 void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
@@ -2000,13 +2020,11 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     }
 
 #ifdef DEBUG
-    OCP_INT myrank = rs.domain.myrank;
-    ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_AIMc.out",
-                          "proc" + to_string(myrank) + "_testb_AIMc.out");
-    MPI_Barrier(rs.domain.myComm);
-    OCP_ABORT("Stop");
-
-    // ls.OutputSolution("testx_AIMc.out");
+    //OCP_INT myrank = rs.domain.myrank;
+    //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_AIMc.out",
+    //                      "proc" + to_string(CURRENT_RANK) + "_testb_AIMc.out");
+    //MPI_Barrier(rs.domain.myComm);
+    //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_AIMc.out");
     // ls.CheckSolution();
 #endif // DEBUG
 
@@ -2022,7 +2040,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 
 OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-    OCP_DBL& dt = ctrl.current_dt;
+    const OCP_DBL& dt = ctrl.current_dt;
 
     // First check: Ni check and bulk Pressure check
     if (!ctrl.Check(rs, {"BulkNi", "BulkP"})) {
@@ -2122,9 +2140,11 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
 
 void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 {
+    // IMPORTANT: implicity of the same grid in different processes should be consistent
+
     Bulk&           bk   = rs.bulk;
     const BulkConn& conn = rs.conn;
-    const OCP_USI   nb   = bk.numBulk;
+    const OCP_USI   nb   = bk.numBulkInterior;
     const USI       np   = bk.numPhase;
     const USI       nc   = bk.numCom;
 
@@ -2170,18 +2190,19 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
         if (flag) {
             // find it
-            // bk.map_Bulk2FIM[n] = 1;
+            bk.bulkTypeAIM.SetFIMBulk(n);
             for (auto& v : conn.neighbor[n]) {
-                // n is included also
-                bk.bulkTypeAIM.SetBulkType(v, 1);
+                bk.bulkTypeAIM.SetFIMBulk(v);
             }
         }
     }
 
     // add WellBulk's 2-neighbor as Implicit bulk
     for (auto& p : bk.wellBulkId) {
+        bk.bulkTypeAIM.SetFIMBulk(p);
         for (auto& v : conn.neighbor[p]) {
-            for (auto& v1 : conn.neighbor[v]) bk.bulkTypeAIM.SetBulkType(v1, 1);
+            bk.bulkTypeAIM.SetFIMBulk(v);
+            for (auto& v1 : conn.neighbor[v]) bk.bulkTypeAIM.SetFIMBulk(v1);
         }
     }
 }

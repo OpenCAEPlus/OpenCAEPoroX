@@ -109,6 +109,10 @@ void ParamControl::InputMETHOD(ifstream& ifs)
         method      = "FIM";
         linearSolve = "./bsr.fasp";
     }
+    else if (vbuf[0] == "AIMc") {
+        method      = "AIMc";
+        linearSolve = "./bsr.fasp";
+    }
 
     if (vbuf.size() > 1) linearSolve = vbuf[1];
 

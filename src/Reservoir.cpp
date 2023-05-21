@@ -512,7 +512,7 @@ void Reservoir::CalIPRT(const OCP_DBL& dt)
     allWells.CalReInjFluid(bulk);
 }
 
-OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt) const
+OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
 {
     fill(bulk.cfl.begin(), bulk.cfl.end(), 0.0);
     const USI np = bulk.numPhase;
@@ -554,8 +554,12 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt) const
             if (bulk.maxCFL_loc < bulk.cfl[n]) bulk.maxCFL_loc = bulk.cfl[n];
         }
     }
-
-    MPI_Allreduce(&bulk.maxCFL_loc, &bulk.maxCFL, 1, MPI_DOUBLE, MPI_MAX, domain.myComm);
+    if (ifComm) {
+        MPI_Allreduce(&bulk.maxCFL_loc, &bulk.maxCFL, 1, MPI_DOUBLE, MPI_MAX, domain.myComm);
+    }
+    else {
+        bulk.maxCFL = bulk.maxCFL_loc;
+    }
     return bulk.maxCFL;
 }
 

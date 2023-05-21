@@ -2134,7 +2134,7 @@ void MixtureComp::CopyPhase()
     for (USI j = 0; j < NP; j++) {
         const USI j1 = phaseLabel[j];
         vj[j1]       = vC[j];
-        Dcopy(NC, &xij[j1 * numCom], &x[j][0]);
+        copy(x[j].begin(), x[j].end(), &xij[j1 * numCom]);
         mu[j1]  = muC[j];
         xi[j1]  = xiC[j];
         rho[j1] = rhoC[j];
