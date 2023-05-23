@@ -19,6 +19,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	numproc = part.numproc;
 	myrank  = part.myrank;
 
+
 	if (numproc == 1) {
 		numElementTotal = part.numElementTotal;
 		numElementLocal = numElementTotal;
@@ -124,6 +125,11 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		sIter++;
 	}
 	numGridLocal = numGridInterior + numGridGhost;
+	numSendProc  = send_element_loc.size();
+	numRecvProc  = recv_element_loc.size();
+	send_request.resize(numSendProc);
+	recv_request.resize(numRecvProc);
+
 
 	//////////////////////////////////////////////////////////////
 	if (true) {
@@ -267,39 +273,27 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 	for (OCP_USI n = 0; n < numElementLoc; n++)
 		global_index[n] = n + global_begin;
 
-	// Get Ghost grid's global index by communication
-	vector<vector<OCP_INT>> recv_buffer(recv_element_loc.size());
-	vector<vector<OCP_INT>> send_buffer(send_element_loc.size());
-	for (USI i = 0; i < recv_buffer.size(); i++) {
-		const vector<OCP_USI>& r = recv_element_loc[i];
-		recv_buffer[i].resize(r[2] - r[1] + 1);
-		recv_buffer[i][0] = r[0];
+	// Get Ghost grid's global index by communication	
+	for (USI i = 0; i < numRecvProc; i++) {
+		const vector<OCP_USI>& rel = recv_element_loc[i];
+		const OCP_USI bId = rel[1] + numActWell;
+		MPI_Irecv(&global_index[bId], rel[2] - rel[1], MPI_INT, rel[0], 0, myComm, &recv_request[i]);
 	}
-	for (USI i = 0; i < send_buffer.size(); i++) {
-		const vector<OCP_USI>& s = send_element_loc[i];
-		send_buffer[i].resize(s.size());
-		send_buffer[i][0] = s[0];
-		for (USI j = 1; j < s.size(); j++) {
-			send_buffer[i][j] = global_index[s[j]];
+	vector<vector<OCP_INT>> send_buffer(numSendProc);
+	for (USI i = 0; i < numSendProc; i++) {
+		const vector<OCP_USI>& sel = send_element_loc[i];
+		vector<OCP_INT>&       s   = send_buffer[i];
+		s.resize(sel.size());
+		s[0] = sel[0];
+		for (USI j = 1; j < sel.size(); j++) {
+			s[j] = global_index[sel[j]];
 		}
+		MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, myComm, &send_request[i]);
 	}
 
-	MPI_Request request;
-	MPI_Status  status;
-	for (auto& s : send_buffer) {
-		MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, myComm, &request);
-	}
-	for (auto& r : recv_buffer) {
-		MPI_Recv(r.data() + 1, r.size() - 1, MPI_INT, r[0], 0, myComm, &status);
-	}
+	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(numSendProc, send_request.data(), MPI_STATUS_IGNORE);
 
-	// Assemble to global_index
-	for (USI i = 0; i < recv_buffer.size(); i++) {
-		const OCP_USI bId = recv_element_loc[i][1] + numActWell;
-		copy(&recv_buffer[i][1], &recv_buffer[i].back() + 1, &global_index[bId]);
-	}
-
-	MPI_Barrier(myComm);
 	return &global_index;
 }
 

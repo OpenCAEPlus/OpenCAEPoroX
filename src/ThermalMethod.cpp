@@ -1454,26 +1454,23 @@ void T_FIM::GetSolution(Reservoir&             rs,
     }
 
     // Exchange Solution for ghost grid
-    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
-    for (USI i = 0; i < send_buffer.size(); i++) {
-        const vector<OCP_USI>& s = domain.send_element_loc[i];
-        send_buffer[i].resize(1 + (s.size() - 1) * col);
-        send_buffer[i][0] = s[0];
-        for (USI j = 1; j < s.size(); j++) {
-            const OCP_DBL* bId = u.data() + s[j] * col;
-            copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& r = domain.recv_element_loc[i];
+        MPI_Irecv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(1 + (sel.size() - 1) * col);
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            const OCP_DBL* bId = u.data() + sel[j] * col;
+            copy(bId, bId + col, &s[1 + (j - 1) * col]);
         }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
-
-    MPI_Request request;
-    MPI_Status  status;
-    for (auto& s : send_buffer) {
-        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
-    }
-    for (auto& r : domain.recv_element_loc) {
-        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
-    }
-
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
@@ -1489,57 +1486,76 @@ void T_FIM::GetSolution(Reservoir&             rs,
     bk.NRdNmax    = 0;
     bk.NRdTmax    = 0;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+    OCP_USI bId = 0;
+    OCP_USI eId = bk.GetInteriorBulkNum();
 
-        if (bk.bType[n] > 0) {
-            // Fluid Bulk
+    // interior first, ghost second
+    for (USI p = bId; p < eId; p++) {
 
-            chopmin = 1;
-            // compute the chop
-            fill(dtmp.begin(), dtmp.end(), 0.0);
-            DaAxpby(np, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
+        for (OCP_USI n = bId; n < eId; n++) {
+            // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+
+            if (bk.bType[n] > 0) {
+                // Fluid Bulk
+
+                chopmin = 1;
+                // compute the chop
+                fill(dtmp.begin(), dtmp.end(), 0.0);
+                DaAxpby(np, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
                     dtmp.data());
 
-            for (USI j = 0; j < np; j++) {
-                choptmp = 1;
-                if (fabs(dtmp[j]) > dSmaxlim) {
-                    choptmp = dSmaxlim / fabs(dtmp[j]);
-                } else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-                    choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+                for (USI j = 0; j < np; j++) {
+                    choptmp = 1;
+                    if (fabs(dtmp[j]) > dSmaxlim) {
+                        choptmp = dSmaxlim / fabs(dtmp[j]);
+                    }
+                    else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
+                        choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+                    }
+                    chopmin = min(chopmin, choptmp);
                 }
-                chopmin = min(chopmin, choptmp);
+
+                // dS
+                for (USI j = 0; j < np; j++) {
+                    bk.dSNRP[n * np + j] = chopmin * dtmp[j];
+                    bk.S[n * np + j] += bk.dSNRP[n * np + j];
+                }
+
+                // dP
+                OCP_DBL dP = u[n * col];
+                if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
+                bk.P[n] += dP;
+                bk.dPNR[n] = dP;
+
+                // dNi
+                bk.NRstep[n] = chopmin;
+                for (USI i = 0; i < nc; i++) {
+                    bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+                    if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
+                        bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+
+                    bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+                }
             }
 
-            // dS
-            for (USI j = 0; j < np; j++) {
-                bk.dSNRP[n * np + j] = chopmin * dtmp[j];
-                bk.S[n * np + j] += bk.dSNRP[n * np + j];
-            }
-
-            // dP
-            OCP_DBL dP = u[n * col];
-            if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
-            bk.P[n] += dP;
-            bk.dPNR[n] = dP;
-
-            // dNi
-            bk.NRstep[n] = chopmin;
-            for (USI i = 0; i < nc; i++) {
-                bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-                if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-                    bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
-
-                bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
-            }
+            // dT
+            OCP_DBL dT = u[n * col + col - 1];
+            if (fabs(bk.NRdTmax) < fabs(dT)) bk.NRdTmax = dT;
+            bk.T[n] += dT;
+            bk.dTNR[n] = dT;
         }
 
-        // dT
-        OCP_DBL dT = u[n * col + col - 1];
-        if (fabs(bk.NRdTmax) < fabs(dT)) bk.NRdTmax = dT;
-        bk.T[n] += dT;
-        bk.dTNR[n] = dT;
+        if (p == 0) {
+            bId = eId;
+            eId = nb;
+            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+        }
+        else {
+            break;
+        }
     }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 /*----------------------------------------------------------------------------*/

@@ -49,8 +49,8 @@ public:
 	const vector<OCP_USI>& GetGrid()const { return grid; }
 
 public:
-	MPI_Comm      myComm;
-	OCP_INT       numproc, myrank;
+	MPI_Comm                     myComm;
+	OCP_INT                      numproc, myrank;
 
 protected:
 
@@ -87,10 +87,15 @@ protected:
 	// Tacit Communication (Prefered)
 	////////////////////////////////////////
 
+	USI numSendProc, numRecvProc;
+
 	vector<vector<OCP_USI>> send_element_loc;
 	// vector<vector<OCP_CHAR>> send_buffer;
 	vector<vector<OCP_USI>> recv_element_loc;
 	// vector<vector<OCP_CHAR>> recv_buffer;
+
+	mutable vector<MPI_Request>  send_request;
+	mutable vector<MPI_Request>  recv_request;
 
 	////////////////////////////////////////
 	// Global Index Communication

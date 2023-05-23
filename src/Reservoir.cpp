@@ -153,7 +153,6 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         vector<OCP_USI>         proc_buffer_c; // which process use which buffer
 
         MPI_Request* request = new MPI_Request[numproc - 1];
-        MPI_Status*  status  = new MPI_Status[numproc - 1];
         int          send_flag = 1;
 
         for (OCP_USI p = 1; p < numproc; p++) {
@@ -230,7 +229,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             // update work_state(request)
             for (USI i = 0; i < proc_buffer_c.size(); i+=2) {
 
-                MPI_Test(&request[proc_buffer_c[i] - 1], &send_flag, &status[proc_buffer_c[i] - 1]);
+                MPI_Test(&request[proc_buffer_c[i] - 1], &send_flag, MPI_STATUS_IGNORE);
                 if (send_flag) {
                     work_state[proc_buffer_c[i + 1]] = OCP_FALSE;
                 }else{
@@ -314,12 +313,9 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         mygrid.FreeMemory();
         rsparam.FreeGridMemory();
 
-        // wait 
-        while (MPI_Testall(numproc - 1, request, &send_flag, MPI_STATUS_IGNORE) == MPI_SUCCESS && send_flag == 0) {
-        }       
+        // wait   
+        MPI_Waitall(numproc - 1, request, MPI_STATUS_IGNORE);
         delete[] request;
-        delete[] status;
-
     }
     else {
         // Get num of kind of vars

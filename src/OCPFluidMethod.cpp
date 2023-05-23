@@ -381,26 +381,27 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
 
     // Exchange Ghost Ni
     const Domain& domain = rs.domain;
-    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
-    for (USI i = 0; i < send_buffer.size(); i++) {
-        const vector<OCP_USI>& s = domain.send_element_loc[i];
-        send_buffer[i].resize(1 + (s.size() - 1) * nc);
-        send_buffer[i][0] = s[0];
-        for (USI j = 1; j < s.size(); j++) {
-            const OCP_DBL* bId = &bk.Ni[0] + s[j] * nc;
-            copy(bId, bId + nc, &send_buffer[i][1 + (j - 1) * nc]);
-        }
+
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& r = domain.recv_element_loc[i];
+        MPI_Irecv(&bk.Ni[r[1] * nc], (r[2] - r[1]) * nc, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
-    MPI_Request request;
-    MPI_Status  status;
-    for (auto& s : send_buffer) {
-        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(1 + (sel.size() - 1) * nc);
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            const OCP_DBL* bId = &bk.Ni[0] + sel[j] * nc;
+            copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
-    for (auto& r : domain.recv_element_loc) {
-        MPI_Recv(&bk.Ni[r[1] * nc], (r[2] - r[1]) * nc, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
-    }
-    MPI_Barrier(domain.myComm);
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
 void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
@@ -668,33 +669,47 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     }
 
     // Exchange Solution
-    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
-    for (USI i = 0; i < send_buffer.size(); i++) {
-        const vector<OCP_USI>& s = domain.send_element_loc[i];
-        send_buffer[i].resize(s.size());
-        send_buffer[i][0] = s[0];
-        for (USI j = 1; j < s.size(); j++) {
-            send_buffer[i][j] = u[s[j]];
-        }
+
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& r = domain.recv_element_loc[i];
+        MPI_Irecv(&u[r[1]], r[2] - r[1], MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
-    MPI_Request request;
-    MPI_Status  status;
-    for (auto& s : send_buffer) {
-        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
-    }
-    for (auto& r : domain.recv_element_loc) {
-        MPI_Recv(&u[r[1]], r[2] - r[1], MPI_DOUBLE, r[0], 0, domain.myComm, &status);
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(sel.size());
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            s[j] = u[sel[j]];
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
 
     // Bulk
-    for (OCP_USI n = 0; n < nb; n++) {
-        bk.P[n] = u[n];
-        for (USI j = 0; j < np; j++) {
-            bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+    // interior first, ghost second
+    OCP_USI bId = 0;
+    OCP_USI eId = bk.GetInteriorBulkNum();
+    for (USI p = 0; p < 2; p++) {
+
+        for (OCP_USI n = bId; n < eId; n++) {
+            bk.P[n] = u[n];
+            for (USI j = 0; j < np; j++) {
+                bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+            }
+        }
+
+        if (p == 0) {
+            bId = eId;
+            eId = nb;
+            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+        }
+        else {
+            break;
         }
     }
-    MPI_Barrier(domain.myComm);
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 
@@ -1726,24 +1741,22 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     }
 
     // Exchange Solution for ghost grid
-    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
-    for (USI i = 0; i < send_buffer.size(); i++) {
-        const vector<OCP_USI>& s = domain.send_element_loc[i];
-        send_buffer[i].resize(1 + (s.size() - 1) * col);
-        send_buffer[i][0] = s[0];
-        for (USI j = 1; j < s.size(); j++) {
-             const OCP_DBL* bId = u.data() + s[j] * col;
-             copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
-        }     
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& r = domain.recv_element_loc[i];
+        MPI_Irecv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
     }
-
-    MPI_Request request;
-    MPI_Status  status;
-    for (auto& s : send_buffer) {
-        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
-    }
-    for (auto& r : domain.recv_element_loc) {
-        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
+   
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(1 + (sel.size() - 1) * col);
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+             const OCP_DBL* bId = u.data() + sel[j] * col;
+             copy(bId, bId + col, &s[1 + (j - 1) * col]);
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
 
     // Bulk
@@ -1759,75 +1772,94 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     bk.NRdPmax    = 0;
     bk.NRdNmax    = 0;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+    OCP_USI bId = 0;
+    OCP_USI eId = bk.GetInteriorBulkNum();
 
-        chopmin = 1;
-        // compute the chop
-        fill(dtmp.begin(), dtmp.end(), 0.0);
+    // interior first, ghost second
+    for (USI p = 0; p < 2; p++) {
+  
+		for (OCP_USI n = bId; n < eId; n++) {
+			// const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
 
-        DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
-                dtmp.data());
+			chopmin = 1;
+			// compute the chop
+			fill(dtmp.begin(), dtmp.end(), 0.0);
 
-        for (USI j = 0; j < np; j++) {
-            choptmp = 1;
-            if (fabs(dtmp[j]) > dSmaxlim) {
-                choptmp = dSmaxlim / fabs(dtmp[j]);
-            } else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-                choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
-            }
-            // if (fabs(S[n_np_j] - scm[j]) > TINY &&
-            //     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
-            //     choptmp *= min(1.0, -((S[n_np_j] - scm[j]) / (choptmp * dtmp[js])));
-            chopmin = min(chopmin, choptmp);
+			DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
+				dtmp.data());
+
+			for (USI j = 0; j < np; j++) {
+				choptmp = 1;
+				if (fabs(dtmp[j]) > dSmaxlim) {
+					choptmp = dSmaxlim / fabs(dtmp[j]);
+				}
+				else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
+					choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+				}
+				// if (fabs(S[n_np_j] - scm[j]) > TINY &&
+				//     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
+				//     choptmp *= min(1.0, -((S[n_np_j] - scm[j]) / (choptmp * dtmp[js])));
+				chopmin = min(chopmin, choptmp);
+			}
+
+			// dS
+			for (USI j = 0; j < np; j++) {
+				bk.dSNRP[n * np + j] = chopmin * dtmp[j];
+				bk.S[n * np + j] += bk.dSNRP[n * np + j];
+			}
+
+			// dxij   ---- Compositional model only
+
+			if (bk.IfUseEoS()) {
+				USI js = np;
+				if (bk.phaseNum[n] >= 3) {
+					// num of Hydroncarbon phase >= 2
+					OCP_USI bId = 0;
+					for (USI j = 0; j < 2; j++) {
+						bId = n * np * nc + j * nc;
+						for (USI i = 0; i < bk.numComH; i++) {
+							bk.xij[bId + i] += chopmin * dtmp[js];
+							js++;
+						}
+						js++;
+					}
+				}
+			}
+
+			// dP
+			OCP_DBL dP = u[n * col];
+			// choptmp = dPmaxlim / fabs(dP);
+			// chopmin = min(chopmin, choptmp);
+			if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
+			bk.P[n] += dP; // seems better
+			bk.dPNR[n] = dP;
+
+			// dNi
+			bk.NRstep[n] = chopmin;
+			for (USI i = 0; i < nc; i++) {
+				bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+				if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
+					bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+
+				bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+
+				// if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
+				//     bk.Ni[n * nc + i] = 1E-20;
+				// }
+			}
+		}
+
+        if (p == 0) {
+            bId = eId;
+            eId = nb;
+            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
-
-        // dS
-        for (USI j = 0; j < np; j++) {
-            bk.dSNRP[n * np + j] = chopmin * dtmp[j];
-            bk.S[n * np + j] += bk.dSNRP[n * np + j];
-        }
-
-        // dxij   ---- Compositional model only
-
-        if (bk.IfUseEoS()) {
-            USI js = np;
-            if (bk.phaseNum[n] >= 3) {
-                // num of Hydroncarbon phase >= 2
-                OCP_USI bId = 0;
-                for (USI j = 0; j < 2; j++) {
-                    bId = n * np * nc + j * nc;
-                    for (USI i = 0; i < bk.numComH; i++) {
-                        bk.xij[bId + i] += chopmin * dtmp[js];
-                        js++;
-                    }
-                    js++;
-                }
-            }
-        }
-
-        // dP
-        OCP_DBL dP = u[n * col];
-        // choptmp = dPmaxlim / fabs(dP);
-        // chopmin = min(chopmin, choptmp);
-        if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
-        bk.P[n] += dP; // seems better
-        bk.dPNR[n] = dP;
-
-        // dNi
-        bk.NRstep[n] = chopmin;
-        for (USI i = 0; i < nc; i++) {
-            bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-            if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-                bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
-
-            bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
-
-            // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
-            //     bk.Ni[n * nc + i] = 1E-20;
-            // }
-        }
+        else {
+            break;
+        }        
     }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -1944,18 +1976,21 @@ void IsoT_AIMc::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 
 void IsoT_AIMc::SetupNeighbor(Reservoir& rs)
 {
-    const OCP_USI nb   = rs.GetInteriorBulkNum();
+    // Note: 
+    // for interior bulk: neighbor stores their all 1-neighbors
+    // for ghost    bulk: neighbor stores their 1-neighbors belonging to current process
+
+    const OCP_USI nb   = rs.GetBulkNum();
     OCP_USI       bId, eId;
     BulkConn&     conn = rs.conn;
     
-
-    conn.neighbor.resize(conn.numConn);
+    conn.neighbor.resize(nb);
     for (const auto& c : conn.iteratorConn) {
         bId = c.BId();
         eId = c.EId();
 
         conn.neighbor[bId].push_back(eId);
-        if (eId < nb)  conn.neighbor[eId].push_back(bId);
+        conn.neighbor[eId].push_back(bId);
     }
 }
 
@@ -2141,6 +2176,13 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
 void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 {
     // IMPORTANT: implicity of the same grid in different processes should be consistent
+    
+    // BECAREFUL!!!
+    // the more layers of neighbors are affected, 
+    // the more connetions information the current process must has
+    // the more information needs to be passed to the target process
+
+    // We just consider at most 1 layer neighbor now
 
     Bulk&           bk   = rs.bulk;
     const BulkConn& conn = rs.conn;
@@ -2191,20 +2233,55 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         if (flag) {
             // find it
             bk.bulkTypeAIM.SetFIMBulk(n);
+            // include its neighbor as well
             for (auto& v : conn.neighbor[n]) {
                 bk.bulkTypeAIM.SetFIMBulk(v);
             }
         }
     }
 
-    // add WellBulk's 2-neighbor as Implicit bulk
+    // add WellBulk's 1-neighbor as Implicit bulk
     for (auto& p : bk.wellBulkId) {
         bk.bulkTypeAIM.SetFIMBulk(p);
         for (auto& v : conn.neighbor[p]) {
             bk.bulkTypeAIM.SetFIMBulk(v);
-            for (auto& v1 : conn.neighbor[v]) bk.bulkTypeAIM.SetFIMBulk(v1);
+            // for (auto& v1 : conn.neighbor[v])   bk.bulkTypeAIM.SetFIMBulk(v1);
         }
     }
+
+    // exchange information of implicity of grid
+    const Domain& domain = rs.domain;
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(sel.size());
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            s[j] = bk.bulkTypeAIM.GetImplicity(sel[j]);
+        }       
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
+    }
+
+    vector<OCP_INT> tmpI;
+    MPI_Status      status;
+    for (auto& r : domain.recv_element_loc) {
+        tmpI.resize(r[2] - r[1]);
+        MPI_Recv(&tmpI[0], r[2] - r[1], MPI_INT, r[0], 0, domain.myComm, &status);
+
+        // Set 1-neighbors' implicity
+        for (OCP_USI n = 0; n < r[2] - r[1]; n++) {
+            if (tmpI[n] > 0) {
+                // FIM bulk
+                bk.bulkTypeAIM.SetFIMBulk(n + nb);
+                for (auto& v : conn.neighbor[n + nb]) {
+                    bk.bulkTypeAIM.SetFIMBulk(v);
+                }
+            }
+        }
+    }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 void IsoT_AIMc::CalFlashEp(Bulk& bk)
@@ -2459,26 +2536,23 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     }
 
     // Exchange Solution for ghost grid
-    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
-    for (USI i = 0; i < send_buffer.size(); i++) {
-        const vector<OCP_USI>& s = domain.send_element_loc[i];
-        send_buffer[i].resize(1 + (s.size() - 1) * col);
-        send_buffer[i][0] = s[0];
-        for (USI j = 1; j < s.size(); j++) {
-            const OCP_DBL* bId = u.data() + s[j] * col;
-            copy(bId, bId + col, &send_buffer[i][1 + (j - 1) * col]);
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& r = domain.recv_element_loc[i];
+        MPI_Irecv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>&       s   = send_buffer[i];
+        s.resize(1 + (sel.size() - 1) * col);
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            const OCP_DBL* bId = u.data() + sel[j] * col;
+            copy(bId, bId + col, &s[1 + (j - 1) * col]);
         }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
-
-    MPI_Request request;
-    MPI_Status  status;
-    for (auto& s : send_buffer) {
-        MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &request);
-    }
-    for (auto& r : domain.recv_element_loc) {
-        MPI_Recv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &status);
-    }
-
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
@@ -2493,93 +2567,110 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     bk.NRdPmax    = 0;
     bk.NRdNmax    = 0;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
-            // IMPEC Bulk
-            // Pressure
+    OCP_USI bId = 0;
+    OCP_USI eId = bk.GetInteriorBulkNum();
+
+    for (USI p = 0; p < 2; p++) {
+
+        for (OCP_USI n = bId; n < eId; n++) {
+            if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
+                // IMPEC Bulk
+                // Pressure
+                OCP_DBL dP = u[n * col];
+                bk.NRdPmax = max(bk.NRdPmax, fabs(dP));
+                bk.P[n] += dP; // seems better
+                bk.dPNR[n] = dP;
+                bk.NRstep[n] = 1;
+                // Ni
+                for (USI i = 0; i < nc; i++) {
+                    bk.dNNR[n * nc + i] = u[n * col + 1 + i];
+                    bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+
+                    // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
+                    //     bk.Ni[n * nc + i] = 1E-20;
+                    // }
+                }
+                // Pj
+                for (USI j = 0; j < np; j++) {
+                    bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+                }
+                continue;
+            }
+
+            chopmin = 1;
+            // compute the chop
+            fill(dtmp.begin(), dtmp.end(), 0.0);
+            DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP],
+                u.data() + n * col, 1, dtmp.data());
+
+            for (USI j = 0; j < np; j++) {
+                choptmp = 1;
+                if (fabs(dtmp[j]) > dSmaxlim) {
+                    choptmp = dSmaxlim / fabs(dtmp[j]);
+                }
+                else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
+                    choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+                }
+
+                // if (fabs(S[n * np + j] - scm[j]) > TINY &&
+                //     (S[n * np + j] - scm[j]) / (choptmp * dtmp[js]) < 0)
+                //     choptmp *= min(1.0, -((S[n * np + j] - scm[j]) / (choptmp * dtmp[js])));
+
+                chopmin = min(chopmin, choptmp);
+            }
+
+            // dS
+            for (USI j = 0; j < np; j++) {
+                bk.dSNRP[n * np + j] = chopmin * dtmp[j];
+            }
+
+            // dxij   ---- Compositional model only
+            if (bk.IfUseEoS()) {
+                USI js = np;
+                if (bk.phaseNum[n] >= 3) {
+                    OCP_USI bId = 0;
+                    for (USI j = 0; j < 2; j++) {
+                        bId = n * np * nc + j * nc;
+                        for (USI i = 0; i < bk.numComH; i++) {
+                            bk.xij[bId + i] += chopmin * dtmp[js];
+                            js++;
+                        }
+                        js++;
+                    }
+                }
+            }
+
+            // dP
             OCP_DBL dP = u[n * col];
-            bk.NRdPmax = max(bk.NRdPmax, fabs(dP));
+            if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
             bk.P[n] += dP; // seems better
-            bk.dPNR[n]   = dP;
-            bk.NRstep[n] = 1;
-            // Ni
+            bk.dPNR[n] = dP;
+
+            // dNi
+            bk.NRstep[n] = chopmin;
             for (USI i = 0; i < nc; i++) {
-                bk.dNNR[n * nc + i] = u[n * col + 1 + i];
+                bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+                if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
+                    bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+
                 bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
 
                 // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
                 //     bk.Ni[n * nc + i] = 1E-20;
                 // }
             }
-            // Pj
-            for (USI j = 0; j < np; j++) {
-                bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
-            }
-            continue;
         }
-
-        chopmin = 1;
-        // compute the chop
-        fill(dtmp.begin(), dtmp.end(), 0.0);
-        DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP],
-                u.data() + n * col, 1, dtmp.data());
-
-        for (USI j = 0; j < np; j++) {
-            choptmp = 1;
-            if (fabs(dtmp[j]) > dSmaxlim) {
-                choptmp = dSmaxlim / fabs(dtmp[j]);
-            } else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-                choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
-            }
-
-            // if (fabs(S[n * np + j] - scm[j]) > TINY &&
-            //     (S[n * np + j] - scm[j]) / (choptmp * dtmp[js]) < 0)
-            //     choptmp *= min(1.0, -((S[n * np + j] - scm[j]) / (choptmp * dtmp[js])));
-
-            chopmin = min(chopmin, choptmp);
+        if (p == 0) {
+            bId = eId;
+            eId = nb;
+            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
-
-        // dS
-        for (USI j = 0; j < np; j++) {
-            bk.dSNRP[n * np + j] = chopmin * dtmp[j];
-        }
-
-        // dxij   ---- Compositional model only
-        if (bk.IfUseEoS()) {
-            USI js = np;
-            if (bk.phaseNum[n] >= 3) {
-                OCP_USI bId = 0;
-                for (USI j = 0; j < 2; j++) {
-                    bId = n * np * nc + j * nc;
-                    for (USI i = 0; i < bk.numComH; i++) {
-                        bk.xij[bId + i] += chopmin * dtmp[js];
-                        js++;
-                    }
-                    js++;
-                }
-            }
-        }
-
-        // dP
-        OCP_DBL dP = u[n * col];
-        if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
-        bk.P[n] += dP; // seems better
-        bk.dPNR[n] = dP;
-
-        // dNi
-        bk.NRstep[n] = chopmin;
-        for (USI i = 0; i < nc; i++) {
-            bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-            if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-                bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
-
-            bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
-
-            // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
-            //     bk.Ni[n * nc + i] = 1E-20;
-            // }
+        else {
+            break;
         }
     }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 void IsoT_AIMc::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
