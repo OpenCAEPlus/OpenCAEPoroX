@@ -383,8 +383,8 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
     const Domain& domain = rs.domain;
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& r = domain.recv_element_loc[i];
-        MPI_Irecv(&bk.Ni[r[1] * nc], (r[2] - r[1]) * nc, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&bk.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -671,8 +671,8 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     // Exchange Solution
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& r = domain.recv_element_loc[i];
-        MPI_Irecv(&u[r[1]], r[2] - r[1], MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&u[rel[1]], rel[2] - rel[1], MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -1742,8 +1742,8 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& r = domain.recv_element_loc[i];
-        MPI_Irecv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
     }
    
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -2251,27 +2251,34 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
     // exchange information of implicity of grid
     const Domain& domain = rs.domain;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+
+    vector<vector<OCP_INT>> recv_buffer(domain.numRecvProc);
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        vector<OCP_INT>&       r   = recv_buffer[i];
+        r.resize(rel[2] - rel[1]);
+        MPI_Irecv(&r[0], rel[2] - rel[1], MPI_INT, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    vector<vector<OCP_INT>> send_buffer(domain.numSendProc);
     for (USI i = 0; i < domain.numSendProc; i++) {
         const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
+        vector<OCP_INT>&       s   = send_buffer[i];
         s.resize(sel.size());
         s[0] = sel[0];
         for (USI j = 1; j < sel.size(); j++) {
             s[j] = bk.bulkTypeAIM.GetImplicity(sel[j]);
-        }       
+        }
         MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
 
-    vector<OCP_INT> tmpI;
-    MPI_Status      status;
-    for (auto& r : domain.recv_element_loc) {
-        tmpI.resize(r[2] - r[1]);
-        MPI_Recv(&tmpI[0], r[2] - r[1], MPI_INT, r[0], 0, domain.myComm, &status);
+    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_INT>& r = recv_buffer[i];
 
         // Set 1-neighbors' implicity
-        for (OCP_USI n = 0; n < r[2] - r[1]; n++) {
-            if (tmpI[n] > 0) {
+        for (OCP_USI n = 0; n < r.size(); n++) {
+            if (r[n] > 0) {
                 // FIM bulk
                 bk.bulkTypeAIM.SetFIMBulk(n + nb);
                 for (auto& v : conn.neighbor[n + nb]) {
@@ -2537,8 +2544,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& r = domain.recv_element_loc[i];
-        MPI_Irecv(&u[r[1] * col], (r[2] - r[1]) * col, MPI_DOUBLE, r[0], 0, domain.myComm, &domain.recv_request[i]);
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
