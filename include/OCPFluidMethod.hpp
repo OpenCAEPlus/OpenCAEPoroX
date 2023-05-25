@@ -185,6 +185,8 @@ protected:
     void AllocateReservoir(Reservoir& rs);
     /// Determine which bulk are treated Implicit
     void SetFIMBulk(Reservoir& rs);
+    // Set K-neighbors
+    void SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_USI& p, BulkTypeAIM& tar, OCP_INT k);
     /// Perform flash calculation with Ni for Explicit bulk -- Update partial properties
     void CalFlashEp(Bulk& bk);
     /// Perform flash calculation with Ni for Explicit bulk -- Update all properties

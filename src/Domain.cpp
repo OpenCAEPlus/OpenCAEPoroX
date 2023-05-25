@@ -27,6 +27,9 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		numGridInterior = numElementTotal - numWellTotal;
 		numGridGhost    = 0;
 		numGridLocal    = numGridInterior;
+
+		numSendProc     = 0;
+		numRecvProc     = 0;
 		grid.resize(numGridInterior);
 		for (OCP_USI n = 0; n < numGridInterior; n++) {
 			grid[n] = n;

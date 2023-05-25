@@ -866,7 +866,6 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 #endif // DEBUG
 
     GetWallTime timer;
-
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
@@ -2023,7 +2022,6 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalKrPcI(rs.bulk);
 
     UpdateLastTimeStep(rs);
-    rs.bulk.ShowFIMBulk(OCP_FALSE);
 }
 
 void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
@@ -2177,10 +2175,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 {
     // IMPORTANT: implicity of the same grid in different processes should be consistent
     
-    // BECAREFUL!!!
-    // the more layers of neighbors are affected, 
-    // the more connetions information the current process must has
-    // the more information needs to be passed to the target process
+    const OCP_INT nlayers = 2;
 
     // We just consider at most 1 layer neighbor now
 
@@ -2190,7 +2185,8 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     const USI       np   = bk.numPhase;
     const USI       nc   = bk.numCom;
 
-    bk.bulkTypeAIM.Init();
+    // all impec
+    bk.bulkTypeAIM.Init(-1);
 
     OCP_USI  bIdp, bIdc;
     OCP_BOOL flag;
@@ -2231,22 +2227,13 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         }
 
         if (flag) {
-            // find it
-            bk.bulkTypeAIM.SetFIMBulk(n);
-            // include its neighbor as well
-            for (auto& v : conn.neighbor[n]) {
-                bk.bulkTypeAIM.SetFIMBulk(v);
-            }
+            SetKNeighbor(conn.neighbor, n, bk.bulkTypeAIM, nlayers);
         }
     }
 
     // add WellBulk's 1-neighbor as Implicit bulk
     for (auto& p : bk.wellBulkId) {
-        bk.bulkTypeAIM.SetFIMBulk(p);
-        for (auto& v : conn.neighbor[p]) {
-            bk.bulkTypeAIM.SetFIMBulk(v);
-            // for (auto& v1 : conn.neighbor[v])   bk.bulkTypeAIM.SetFIMBulk(v1);
-        }
+        SetKNeighbor(conn.neighbor, p, bk.bulkTypeAIM, nlayers);
     }
 
     // exchange information of implicity of grid
@@ -2267,29 +2254,71 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         s.resize(sel.size());
         s[0] = sel[0];
         for (USI j = 1; j < sel.size(); j++) {
-            s[j] = bk.bulkTypeAIM.GetImplicity(sel[j]);
+            s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
         }
         MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
 
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
     for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_INT>& r = recv_buffer[i];
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        const vector<OCP_INT>& r   = recv_buffer[i];
 
-        // Set 1-neighbors' implicity
-        for (OCP_USI n = 0; n < r.size(); n++) {
-            if (r[n] > 0) {
-                // FIM bulk
-                bk.bulkTypeAIM.SetFIMBulk(n + nb);
-                for (auto& v : conn.neighbor[n + nb]) {
-                    bk.bulkTypeAIM.SetFIMBulk(v);
-                }
-            }
+        for (OCP_USI n = 0; n < rel[2] - rel[1]; n++) {
+            SetKNeighbor(conn.neighbor, n + rel[1], bk.bulkTypeAIM, r[n]);
         }
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+
+    // Check Consistency
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        vector<OCP_INT>&       r   = recv_buffer[i];
+        r.resize(rel[2] - rel[1]);
+        MPI_Irecv(&r[0], rel[2] - rel[1], MPI_INT, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_INT>&       s   = send_buffer[i];
+        s.resize(sel.size());
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
+    }
+
+    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+     
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        vector<OCP_INT>&       r   = recv_buffer[i];
+        for (OCP_USI n = 0; n < rel[2] - rel[1]; n++) {
+            bk.bulkTypeAIM.SetBulkType(n + rel[1], r[n]);     // Maybe not a good idea
+        }
+    }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+
+    if (OCP_TRUE) {
+        cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bk.numBulk * 100 << "% " << endl;
+    }
 }
+
+
+void IsoT_AIMc::SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_USI& p, BulkTypeAIM& tar, OCP_INT k)
+{
+    tar.SetBulkType(p, max(k, tar.GetBulkType(p)));
+    if (k > 0) {
+        k--;
+        for (const auto& v : neighbor[p]) {
+            SetKNeighbor(neighbor, v, tar, k);
+        }
+    }
+}
+
 
 void IsoT_AIMc::CalFlashEp(Bulk& bk)
 {
@@ -2583,10 +2612,10 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
                 // IMPEC Bulk
                 // Pressure
-                OCP_DBL dP = u[n * col];
-                bk.NRdPmax = max(bk.NRdPmax, fabs(dP));
-                bk.P[n] += dP; // seems better
-                bk.dPNR[n] = dP;
+                OCP_DBL dP   = u[n * col];
+                bk.NRdPmax   = max(bk.NRdPmax, fabs(dP));
+                bk.P[n]      += dP; // seems better
+                bk.dPNR[n]   = dP;
                 bk.NRstep[n] = 1;
                 // Ni
                 for (USI i = 0; i < nc; i++) {
@@ -2685,6 +2714,15 @@ void IsoT_AIMc::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.vj    = rs.bulk.lvj;
     rs.bulk.xijNR = rs.bulk.lxij;
     IsoT_FIM::ResetToLastTimeStep(rs, ctrl);
+
+    // all FIM
+    rs.bulk.bulkTypeAIM.Init(0);
+    CalFlashI(rs.bulk);
+    CalKrPcI(rs.bulk);
+
+    //if (OCP_TRUE) {
+    //    cout << "Rank " << CURRENT_RANK << "  " << rs.bulk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / rs.bulk.numBulk * 100 << "% " << endl;
+    //}
 }
 
 void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const

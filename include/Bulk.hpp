@@ -95,6 +95,29 @@ public:
     vector<OCP_DBL> lpT;     ///< last pT
 };
 
+class BulkTypeAIM
+{
+public:
+    void Setup(const OCP_USI& nb) { indicator.resize(nb, -1); }
+    void Init(const OCP_INT& flag) { fill(indicator.begin(), indicator.end(), flag); }
+    void SetBulkType(const OCP_USI& n, const OCP_INT& flag) { indicator[n] = flag; }
+    OCP_BOOL IfFIMbulk(const OCP_USI& n) const { return indicator[n] >= 0; }
+    OCP_BOOL IfIMPECbulk(const OCP_USI& n) const { return indicator[n] < 0; }
+    OCP_INT GetBulkType(const OCP_USI& n) const { return indicator[n]; }
+    OCP_USI GetNumFIMBulk() const {
+        numFIMBulk = 0;
+        for (const auto& v : indicator) {
+            if (v >= 0) numFIMBulk++;
+        }
+        return numFIMBulk;
+    }
+
+protected:
+    mutable OCP_USI numFIMBulk; ///< num of FIM bulk
+    vector<OCP_INT> indicator; ///< Stores the index of FIM bulk in equations, 
+                               ///< FIM bulk: >=0; IMPEC bulk: <0;
+};
+
 /// Physical information of each active reservoir bulk.
 //  Note: Bulk contains main physical infomation of active grids. It describes the
 //  actual geometric domain for simulating. Variables are stored bulk by bulk, and then
@@ -496,36 +519,13 @@ protected:
     vector<OCP_DBL>  ldSec_dPri;    ///< last dSec_dPri
 
 public:
-    /// Print Bulk which are implicit
-    void ShowFIMBulk(const OCP_BOOL& flag = OCP_FALSE) const;
     /// push back an element for wellBulkId
     void AddWellBulkId(const OCP_USI& n) { wellBulkId.push_back(n); }
 
 protected:
     vector<OCP_USI> wellBulkId; ///< Index of bulks which are penetrated by wells and
                                 ///< their K-neighbor
-    class BulkTypeAIM
-    {
-    public:
-        void Setup(const OCP_USI& nb) { indicator.resize(nb, -1); }
-        void Init() { fill(indicator.begin(), indicator.end(), -1); }
-        void SetFIMBulk(const OCP_USI& n) { indicator[n] = 1;}
-        OCP_BOOL IfFIMbulk(const OCP_USI& n) const { return indicator[n] > 0; }
-        OCP_BOOL IfIMPECbulk(const OCP_USI& n) const { return indicator[n] < 0; }
-        OCP_INT GetImplicity(const OCP_USI& n) const { return indicator[n]; }
-        OCP_USI GetNumFIMBulk() const { 
-            numFIMBulk = 0; 
-            for (const auto& v : indicator) {
-                if (v > 0) numFIMBulk++;
-            }
-            return numFIMBulk;
-        }
-
-    protected:
-        mutable OCP_USI numFIMBulk; ///< num of FIM bulk
-        vector<OCP_INT> indicator; ///< Stores the index of FIM bulk in equations, 
-                                   ///< FIM bulk: >0; IMPEC bulk: <0;
-    } bulkTypeAIM;
+    BulkTypeAIM bulkTypeAIM;
     vector<OCP_DBL> xijNR; ///< store the current NR step's xij in AIM
 };
 

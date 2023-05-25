@@ -111,7 +111,7 @@ void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
 {
     // Prepare for time marching
     IsoTSolver.Prepare(rs, ctrl);
-
+    
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
         if (ctrl.GetCurDt() < MIN_TIME_CURSTEP)

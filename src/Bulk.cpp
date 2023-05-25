@@ -1327,30 +1327,6 @@ void Bulk::AllocateError()
     }
 }
 
-/////////////////////////////////////////////////////////////////////
-// For AIMc
-/////////////////////////////////////////////////////////////////////
-
-void Bulk::ShowFIMBulk(const OCP_BOOL& flag) const
-{
-    // cout << fixed << setprecision(2) << bulkTypeAIM.GetNumFIMBulk() * 1.0 / numBulk * 100 << "%" << endl;
-    if (flag) {
-        USI iter = 0;
-        for (USI n = 0; n < numBulk; n++) {
-            if (bulkTypeAIM.IfFIMbulk(n)) {
-                // FIM bulk
-                cout << setw(6) << n << "   ";
-                iter++;
-            }
-
-            if ((iter + 1) % 10 == 0) {
-                cout << endl;
-                iter = 0;
-            }
-        }
-        cout << endl;
-    }
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

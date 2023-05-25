@@ -233,6 +233,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
                 dFdXpE[(i + 1) * ncol] -= transIJ;
 
                 // maybe more derivatives should be considered  -- xiP, rhoP, muP
+                // test
             }
         }
     }
