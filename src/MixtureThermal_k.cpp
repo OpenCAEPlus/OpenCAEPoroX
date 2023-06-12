@@ -586,6 +586,8 @@ void MixtureThermal_K01::SetupWellOpt(WellOpt&                  opt,
     } else if (wellType == PROD) {
         vector<OCP_DBL> tmpWght(numPhase, 0);
         switch (opt.OptMode()) {
+            case BHP_MODE:
+                break;
             case ORATE_MODE:
                 tmpWght[0] = 1;
                 break;

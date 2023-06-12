@@ -141,7 +141,6 @@ private:
     OCP_ULL countsNRSTA{0};
     OCP_ULL countsSSMSP{0};
     OCP_ULL countsNRSP{0};
-    OCP_ULL countsRR{0};
 
     OCP_ULL countsFailed{0};
     // phase equilibrium calculation error

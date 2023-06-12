@@ -1520,7 +1520,6 @@ void MixtureComp::PhaseSplit()
     itersRR += EoSctrl.RR.curIt;
     countsSSMSP++;
     countsNRSP++;
-    countsRR++;
 
     // cout << scientific << setprecision(8);
     // for (USI i = 0; i < NC; i++) {
@@ -4717,7 +4716,7 @@ void MixtureComp::OutMixtureIters() const
     cout << "NRSP:       " << setw(12) << itersNRSP << setw(15)
          << itersNRSP * 1.0 / countsNRSP << endl;
     cout << "NRRR:       " << setw(12) << itersRR << setw(15)
-         << itersRR * 1.0 / countsRR << endl;
+         << itersRR * 1.0 / itersSSMSP << endl;
 }
 
 /////////////////////////////////////////////////////////////////////

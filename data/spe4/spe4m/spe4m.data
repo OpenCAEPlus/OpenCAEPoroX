@@ -9,7 +9,7 @@ TITLE
    Fourth SPE Comparative Solution Project Problem 1A:  2-D CYCLIC STEAM INJECTION
    
 MODEL
-ISOTHERMAL
+THERMAL
 
 
 DIMENS
