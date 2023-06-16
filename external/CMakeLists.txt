@@ -30,7 +30,7 @@ include(OptionalPARMETIS)
 include(OptionalMETIS)
 include(OptionalSAMGPINTERFACE)
 include(OptionalSAMGP)
-
+include(OptionalPETSCSOLVER)
 
 # For future, if we have external source to be included, we can put it under
 # external and add_subdirectory()
