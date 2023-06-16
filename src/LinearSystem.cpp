@@ -208,7 +208,7 @@ void LinearSystem::SetupLinearSolver(const USI& model,
     }
 #endif // WITH_PETSCSOLVER
     else {
-        OCP_ABORT("Wrong Linear Solver type!");
+        OCP_ABORT("Wrong Linear Solver Type " + lsMethod + " !");
     }
 
     LS->SetupParam(dir, file);
