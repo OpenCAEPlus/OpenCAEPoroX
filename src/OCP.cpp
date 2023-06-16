@@ -188,6 +188,12 @@ void OpenCAEPoroX::OutputResults() const
         cout << " - % Output ................." << setw(fixWidth)
             << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
+        cout << " - % Communication(collect) ." << setw(fixWidth)
+            << 100.0 * OCPTIME_COMM_COLLECTIVE / OCPTIME_TOTAL << " ("
+            << OCPTIME_COMM_COLLECTIVE << "s)" << endl;
+        cout << " - % Communication(P2P) ....." << setw(fixWidth)
+            << 100.0 * OCPTIME_COMM_P2P / OCPTIME_TOTAL << " ("
+            << OCPTIME_COMM_P2P << "s)" << endl;
 
         cout << "==================================================" << endl;
     }

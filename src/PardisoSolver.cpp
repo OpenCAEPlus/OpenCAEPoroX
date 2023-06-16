@@ -66,7 +66,13 @@ void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
     // Get Dimension
     N = global_end + 1;
+
+    GetWallTime timer;
+    timer.Start();
+
     MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
 }
 
 
@@ -181,7 +187,13 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
 
     // Get Dimension
     N = (global_end + 1) * blockdim;
+
+    GetWallTime timer;
+    timer.Start();
+
     MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
 }
 
 

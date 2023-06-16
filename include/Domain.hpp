@@ -18,6 +18,8 @@
 
 #include "OCPConst.hpp"
 #include "Partition.hpp"
+#include "UtilTiming.hpp"
+#include "OCPTimeRecord.hpp"
 
 #include <parmetis.h>
 #include <vector>

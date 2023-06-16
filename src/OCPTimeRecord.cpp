@@ -24,6 +24,9 @@ OCP_DBL OCPTIME_LSOLVER				= 0;
 OCP_DBL OCPTIME_NRSTEP				= 0;
 OCP_DBL OCPTIME_UPDATE_GRID			= 0;
 OCP_DBL OCPTIME_OUTPUT				= 0;
+OCP_DBL OCPTIME_COMM_COLLECTIVE     = 0;
+OCP_DBL OCPTIME_COMM_P2P            = 0;
+OCP_DBL OCPTIME_COMM_TOTAL          = 0;
 
 
  /*----------------------------------------------------------------------------*/

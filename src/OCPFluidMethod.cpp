@@ -947,8 +947,14 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
     }
+
+    GetWallTime timer;
+    timer.Start();
+
     OCP_INT conflag;
     MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
 
     if (conflag == 0) {
@@ -1338,8 +1344,14 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     Dscalar(Res.resAbs.size(), -1.0, Res.resAbs.data());
     if (resetRes0) {
         Res.SetInitRes();
+
+        GetWallTime timer;
+        timer.Start();
+
         OCP_DBL tmploc = Res.maxRelRes0_V;
         MPI_Allreduce(&tmploc, &Res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     }
 }
 
@@ -1739,6 +1751,12 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
         }
     }
 
+    GetWallTime timerT;         ///< total timer
+    GetWallTime timerC;         ///< calculation timer
+    OCP_DBL     time_cal = 0;   ///< calculation time
+    timerT.Start();
+    
+
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
@@ -1777,6 +1795,8 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     // interior first, ghost second
     for (USI p = 0; p < 2; p++) {
   
+        timerC.Start();
+
 		for (OCP_USI n = bId; n < eId; n++) {
 			// const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
 
@@ -1848,6 +1868,8 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 			}
 		}
 
+        time_cal += timerC.Stop();
+
         if (p == 0) {
             bId = eId;
             eId = nb;
@@ -1859,6 +1881,8 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+
+    OCPTIME_COMM_P2P += (timerT.Stop() - time_cal) / 1000;
 }
 
 void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -2118,8 +2142,14 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
     }
+
+    GetWallTime timer;
+    timer.Start();
+
     OCP_INT conflag;
     MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
     if (conflag == 0) {
 

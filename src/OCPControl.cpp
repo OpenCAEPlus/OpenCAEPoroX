@@ -162,8 +162,14 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
     ctrlPreTime = ctrlPreTimeSet[i];
     ctrlNR      = ctrlNRSet[i];
     end_time    = criticalTime[i + 1];
+
+    GetWallTime timer;
+    timer.Start();
+
     const OCP_BOOL wellChange_loc  = rs.allWells.GetWellChange();
     MPI_Allreduce(&wellChange_loc, &wellChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
+
+    timer.Stop();
 
     InitTime(i);
 }
@@ -284,7 +290,12 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
             break;
     }
 
+    GetWallTime timer;
+    timer.Start();
+
     MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MIN, myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
     switch (workState)
     {
@@ -352,7 +363,12 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
     if (current_dt_loc > ctrlTime.timeMax) current_dt_loc = ctrlTime.timeMax;
     if (current_dt_loc < ctrlTime.timeMin) current_dt_loc = ctrlTime.timeMin;
 
+    GetWallTime timer;
+    timer.Start();
+
     MPI_Allreduce(&current_dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
     init_dt = current_dt;
 

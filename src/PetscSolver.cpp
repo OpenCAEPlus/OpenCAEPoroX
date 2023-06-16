@@ -31,7 +31,12 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
     global_index  = domain->CalGlobalIndex(actWellNum);
     const OCP_INT numElementloc = actWellNum + domain->GetNumGridInterior();
 
+    GetWallTime timer;
+    timer.Start();
+
     MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, MPI_INT, myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
     
     allBegin[0] = 0;
     allEnd[0]   = allEle[0] - 1;

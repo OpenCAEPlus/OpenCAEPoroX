@@ -135,7 +135,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 
 
 	//////////////////////////////////////////////////////////////
-	if (true) {
+	if (true && false) {
 		ofstream myFile;
 		myFile.open("test/process" + to_string(myrank) + ".txt");
 		ios::sync_with_stdio(false);
@@ -267,7 +267,13 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 	const OCP_INT numElementLoc = numGridInterior + numActWell;
 	OCP_INT       global_begin;
 	OCP_INT       global_end;
+
+	GetWallTime timer;
+	timer.Start();
+
 	MPI_Scan(&numElementLoc, &global_end, 1, MPI_INT, MPI_SUM, myComm);
+
+	OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
 	global_begin = global_end - numElementLoc;
 	global_end   = global_end - 1;
@@ -275,6 +281,8 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 	// Get Interior grid's global index
 	for (OCP_USI n = 0; n < numElementLoc; n++)
 		global_index[n] = n + global_begin;
+
+	timer.Start();
 
 	// Get Ghost grid's global index by communication	
 	for (USI i = 0; i < numRecvProc; i++) {
@@ -296,6 +304,8 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 
 	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);
 	MPI_Waitall(numSendProc, send_request.data(), MPI_STATUS_IGNORE);
+
+	OCPTIME_COMM_P2P += timer.Stop() / 1000;
 
 	return &global_index;
 }

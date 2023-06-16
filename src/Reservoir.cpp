@@ -551,7 +551,13 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
         }
     }
     if (ifComm) {
+
+        GetWallTime timer;
+        timer.Start();
+
         MPI_Allreduce(&bulk.maxCFL_loc, &bulk.maxCFL, 1, MPI_DOUBLE, MPI_MAX, domain.myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     }
     else {
         bulk.maxCFL = bulk.maxCFL_loc;

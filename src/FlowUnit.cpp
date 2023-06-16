@@ -354,14 +354,17 @@ void FlowUnit_ODGW01_Miscible::SetupScale(const OCP_USI& bId,
         const OCP_DBL SwInit = scaleTerm->GetSwInit(bId);
         if (SwInit <= Swco) {
             Swin = Swco;
+
+			const OCP_DBL PcowInit = GetPcowBySw(Swin);
+			scaleTerm->AssignScaleValue(
+				bId, (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
         } else {
             Swin = SwInit;
             if (Pcowin > 0) {
                 const OCP_DBL PcowInit = GetPcowBySw(Swin);
                 if (PcowInit > 0) {
                     scaleTerm->AssignScaleValue(
-                        bId,
-                        (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
+                        bId, (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
                 }
             }
         }

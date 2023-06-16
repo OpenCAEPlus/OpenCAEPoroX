@@ -136,8 +136,14 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
     }
+
+    GetWallTime timer;
+    timer.Start();
+
     OCP_INT conflag;
     MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
 
     if (conflag == 0) {
@@ -911,8 +917,14 @@ void T_FIM::CalRes(Reservoir&      rs,
     Dscalar(Res.resAbs.size(), -1.0, Res.resAbs.data());
     if (resetRes0) {
         Res.SetInitRes();
+
+        GetWallTime timer;
+        timer.Start();
+
         OCP_DBL tmploc = Res.maxRelRes0_V;
         MPI_Allreduce(&tmploc, &Res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     }
 }
 
