@@ -202,6 +202,7 @@ void OpenCAEPoroX::OutputResults() const
         << "Rank " << setw(4) << CURRENT_RANK 
         << ": Updating properties : " << OCPTIME_UPDATE_GRID << "s   "
         << "Assembling : " << OCPTIME_ASSEMBLE_MAT << "s   " 
+        << "Communication P2P : " << OCPTIME_COMM_P2P << "s   "
         << "NumGrid =  " << reservoir.GetInteriorBulkNum() << endl;
 }
 
