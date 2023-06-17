@@ -18,6 +18,8 @@
 
 // OpenCAEPoroX header files
 #include "PreParamGridWell.hpp"
+#include "UtilTiming.hpp"
+#include "OCPTimeRecord.hpp"
 
 // ParMetis
 #define rabs fabsf     // conflict with fasp

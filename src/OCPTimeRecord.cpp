@@ -27,7 +27,7 @@ OCP_DBL OCPTIME_OUTPUT				= 0;
 OCP_DBL OCPTIME_COMM_COLLECTIVE     = 0;
 OCP_DBL OCPTIME_COMM_P2P            = 0;
 OCP_DBL OCPTIME_COMM_TOTAL          = 0;
-
+OCP_DBL OCPTIME_PARMETIS            = 0;
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

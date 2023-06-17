@@ -90,6 +90,10 @@ public:
     void OutputResults() const;
 
 protected:
+    /// Output necessary information for each process
+    void OutputResultsProcess() const;
+
+protected:
     /// The core properties of a reservoir.
     Reservoir reservoir;
 

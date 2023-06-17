@@ -47,6 +47,7 @@ class Domain
 public:
 	void Setup(const Partition& part, const PreParamGridWell& gridwell);
 	vector<OCP_USI> GetWell() const { return well; }
+	OCP_USI GetNumGridTotal() const { return numElementTotal - numWellTotal; }
 	OCP_USI GetNumGridInterior()const { return numGridInterior; }
 	const vector<OCP_USI>& GetGrid()const { return grid; }
 

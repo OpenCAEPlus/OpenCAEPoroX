@@ -156,54 +156,139 @@ void OpenCAEPoroX::OutputResults() const
             << " wasted)" << endl;
 
         // print time usages
-        cout << "Simulation time:             " << setw(fixWidth) << OCPTIME_TOTAL
+        cout << "Simulation time:                " << setw(fixWidth) << OCPTIME_TOTAL
             << " (Seconds)" << endl;
-        cout << " - % Input & Partition ......" << setw(fixWidth)
+        cout << " - % Input & Partition ........." << setw(fixWidth)
             << 100.0 * OCPTIME_PARTITION / OCPTIME_TOTAL << " (" << OCPTIME_PARTITION
             << "s)" << endl;
-        cout << " - % Input Reservoir ........" << setw(fixWidth)
+        cout << " - % Input Reservoir ..........." << setw(fixWidth)
             << 100.0 * OCPTIME_READPARAM / OCPTIME_TOTAL << " (" << OCPTIME_READPARAM
             << "s)" << endl;
-        cout << " - % Setup Simulator ........" << setw(fixWidth)
+        cout << " - % Setup Simulator ..........." << setw(fixWidth)
             << 100.0 * OCPTIME_SETUP_SIM / OCPTIME_TOTAL << " (" << OCPTIME_SETUP_SIM
             << "s)" << endl;
-        cout << " - % Initialization ........." << setw(fixWidth)
+        cout << " - % Initialization ............" << setw(fixWidth)
             << 100.0 * OCPTIME_INIT_RESERVOIR / OCPTIME_TOTAL << " (" << OCPTIME_INIT_RESERVOIR
             << "s)" << endl;
-        cout << " - % Assembling ............." << setw(fixWidth)
+        cout << " - % Assembling ................" << setw(fixWidth)
             << 100.0 * OCPTIME_ASSEMBLE_MAT / OCPTIME_TOTAL << " ("
             << OCPTIME_ASSEMBLE_MAT << "s)" << endl;
-        cout << " - % Assembling for LS ......" << setw(fixWidth)
+        cout << " - % Assembling for LS ........." << setw(fixWidth)
             << 100.0 * OCPTIME_ASSEMBLE_MAT_FOR_LS / OCPTIME_TOTAL << " ("
             << OCPTIME_ASSEMBLE_MAT_FOR_LS << "s)" << endl;
-        cout << " - % Linear Solver .........." << setw(fixWidth)
+        cout << " - % Linear Solver ............." << setw(fixWidth)
             << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
             << OCPTIME_LSOLVER << "s)" << endl;
-        cout << " - % Newton Step ............" << setw(fixWidth)
+        cout << " - % Newton Step ..............." << setw(fixWidth)
             << 100.0 * OCPTIME_NRSTEP / OCPTIME_TOTAL << " ("
             << OCPTIME_NRSTEP << "s)" << endl;
-        cout << " - % Updating Properties ...." << setw(fixWidth)
+        cout << " - % Updating Properties ......." << setw(fixWidth)
             << 100.0 * OCPTIME_UPDATE_GRID / OCPTIME_TOTAL << " ("
             << OCPTIME_UPDATE_GRID << "s)" << endl;
-        cout << " - % Output ................." << setw(fixWidth)
+        cout << " - % Output ...................." << setw(fixWidth)
             << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
-        cout << " - % Communication(collect) ." << setw(fixWidth)
+        cout << " - % Communication(collect) ...." << setw(fixWidth)
             << 100.0 * OCPTIME_COMM_COLLECTIVE / OCPTIME_TOTAL << " ("
             << OCPTIME_COMM_COLLECTIVE << "s)" << endl;
-        cout << " - % Communication(P2P) ....." << setw(fixWidth)
+        cout << " - % Communication(P2P) ........" << setw(fixWidth)
             << 100.0 * OCPTIME_COMM_P2P / OCPTIME_TOTAL << " ("
             << OCPTIME_COMM_P2P << "s)" << endl;
 
         cout << "==================================================" << endl;
     }
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << fixed << setprecision(3)
-        << "Rank " << setw(4) << CURRENT_RANK 
-        << ": Updating properties : " << OCPTIME_UPDATE_GRID << "s   "
-        << "Assembling : " << OCPTIME_ASSEMBLE_MAT << "s   " 
-        << "Communication P2P : " << OCPTIME_COMM_P2P << "s   "
-        << "NumGrid =  " << reservoir.GetInteriorBulkNum() << endl;
+    OutputResultsProcess();
+}
+
+
+void OpenCAEPoroX::OutputResultsProcess() const
+{
+    // Record information of each process
+    const Domain& domain = reservoir.GetDomain();
+    if (domain.numproc > 1) {
+        const OCP_INT record_var_num = 4;
+        vector<OCP_DBL> record_local{ OCPTIME_UPDATE_GRID , OCPTIME_ASSEMBLE_MAT,
+                OCPTIME_COMM_P2P, static_cast<OCP_DBL>(reservoir.GetInteriorBulkNum()) };
+        vector<OCP_DBL> record_total;
+
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            record_total.resize(record_var_num * domain.numproc);
+            MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
+
+            // Calculate averge num
+            const OCP_DBL aveGrid    = 1.0 * domain.GetNumGridTotal() / domain.numproc;
+            OCP_DBL       aveTimeUG  = 0;
+            OCP_DBL       aveTimeAM  = 0;
+            OCP_DBL       aveTimeP2P = 0;
+
+            for (OCP_USI p = 0; p < domain.numproc; p++) {
+                aveTimeUG  += record_total[p * record_var_num + 0];
+                aveTimeAM  += record_total[p * record_var_num + 1];
+                aveTimeP2P += record_total[p * record_var_num + 2];
+            }
+
+            aveTimeUG  /= domain.numproc;
+            aveTimeAM  /= domain.numproc;
+            aveTimeP2P /= domain.numproc;
+
+            // Calculate standard variance
+            OCP_DBL varTimeUG  = 0;
+            OCP_DBL varTimeAM  = 0;
+            OCP_DBL varTimeP2P = 0;
+            OCP_DBL varGrid    = 0;
+            for (OCP_USI p = 0; p < domain.numproc; p++) {
+                varTimeUG  += pow((record_total[p * record_var_num + 0] - aveTimeUG), 2);
+                varTimeAM  += pow((record_total[p * record_var_num + 1] - aveTimeAM), 2);
+                varTimeP2P += pow((record_total[p * record_var_num + 2] - aveTimeP2P), 2);
+                varGrid    += pow((record_total[p * record_var_num + 3] - aveGrid), 2);
+            }
+            varTimeUG  = sqrt(varTimeUG) / domain.numproc;
+            varTimeAM  = sqrt(varTimeAM) / domain.numproc;
+            varTimeP2P = sqrt(varTimeP2P) / domain.numproc;
+            varGrid    = sqrt(varGrid) / domain.numproc;
+
+            // output general information to screen
+            cout << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance " << endl;
+            cout << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << endl;
+            cout << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << endl;
+            cout << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << endl;
+            cout << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << endl;
+            cout << "==================================================" << endl;
+            // output detailed inforamtion to files
+            if (true) {
+                ofstream myFile;
+                myFile.open(control.workDir + "statistics.out");
+
+                myFile << fixed << setprecision(3);
+                myFile << setw(6) << "Rank"
+                    << setw(30) << "Updating Properties (s)"
+                    << setw(30) << "Assembling (s)"
+                    << setw(30) << "Communication(P2P) (s)"
+                    << setw(30) << "Grid Num" << "\n";
+                for (OCP_USI p = 0; p < domain.numproc; p++) {
+                    myFile << setw(6) << p
+                        << setw(30) << record_total[p * record_var_num + 0]
+                        << setw(30) << record_total[p * record_var_num + 1]
+                        << setw(30) << record_total[p * record_var_num + 2]
+                        << setw(30) << record_total[p * record_var_num + 3] << "\n";
+                }
+                myFile << "\n==========================================================\n";
+                myFile << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << " \n";
+                myFile << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s\n";
+                myFile << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s\n";
+                myFile << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s\n";
+                myFile << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " \n";
+
+                ios::sync_with_stdio(false);
+                myFile.tie(0);
+
+                myFile.close();
+            }
+        }
+        else {
+            MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*/

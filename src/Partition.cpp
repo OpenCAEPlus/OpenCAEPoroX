@@ -118,10 +118,15 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 		
 		MPI_Recv(xadj, numElementLocal + 1 + 2 * numEdgesLocal, IDX_T, MASTER_PROCESS, 0, myComm, &status);
 	}
+
+	GetWallTime timer;
+	timer.Start();
 	
 	InitParam();
 	ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt, &wgtflag, &numflag, &ncon,
 		&nparts, tpwgts, &ubvec, options, &edgecut, part, &myComm);
+
+	OCPTIME_PARMETIS += timer.Stop() / 1000;
 
 	//////////////////////////////////////////////////////
 	// Free Memory
@@ -220,11 +225,11 @@ void Partition::SetDistribution()
 	MPI_Status  status;
 	// Communicate to get neighbor elements' process
 	for (auto& s : left_neighbor_proc) {
-		cout << "First stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
+		// cout << "First stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
 		MPI_Isend(s.data() + 1, s.size() - 1, IDX_T, s[0], 0, myComm, &request);
 	}
 	for (auto& r : right_neighbor_proc) {
-		cout << "First stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
+		// cout << "First stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
 		MPI_Recv(r.data() + 1, r.size() - 1, IDX_T, r[0], 0, myComm, &status);
 	}
 
@@ -354,12 +359,12 @@ void Partition::SetDistribution()
 
 	// Communicate for buffer
 	for (auto& s : send_buffer) {
-		cout << "Second stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
+		// cout << "Second stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
 		MPI_Isend(s.data() + 1, s.size() - 1, IDX_T, s[0], 0, myComm, &request);
 	}
 	for (auto& r : recv_buffer) {
 		if (r[0] == myrank)  continue;
-		cout << "Second stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
+		// cout << "Second stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
 		MPI_Recv(r.data() + 1, r.size() - 1, IDX_T, r[0], 0, myComm, &status);
 	}
 

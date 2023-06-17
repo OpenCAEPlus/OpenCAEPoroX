@@ -135,6 +135,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 
 
 	//////////////////////////////////////////////////////////////
+	// Output partition information
 	if (true && false) {
 		ofstream myFile;
 		myFile.open("test/process" + to_string(myrank) + ".txt");

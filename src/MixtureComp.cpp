@@ -130,12 +130,12 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
         BIC = param.BIC[tarId];
     }
 
-    for (USI i = 0; i < NC; i++) {
-        for (USI j = 0; j < NC; j++) {
-            cout << setw(10) << BIC[i * NC + j] << "   ";
-        }
-        cout << endl;
-    }
+    //for (USI i = 0; i < NC; i++) {
+    //    for (USI j = 0; j < NC; j++) {
+    //        cout << setw(10) << BIC[i * NC + j] << "   ";
+    //    }
+    //    cout << endl;
+    //}
 
     EoSctrl.SSMsta.maxIt = stoi(param.SSMparamSTA[0]);
     EoSctrl.SSMsta.tol   = stod(param.SSMparamSTA[1]);

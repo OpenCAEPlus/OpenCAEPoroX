@@ -224,7 +224,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             // send
             MPI_Isend((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm, &request[p - 1]);
             // MPI_Send((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm);
-            cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
+            // cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
 
             // update work_state(request)
             for (USI i = 0; i < proc_buffer_c.size(); i+=2) {
@@ -364,7 +364,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         OCP_CHAR* recv_buffer = new OCP_CHAR[recv_size]();
 
         MPI_Recv((void*)recv_buffer, recv_size, MPI_BYTE, MASTER_PROCESS, 0, myComm, &status);       
-        cout << "Third stage : " << myrank <<  " receives " << recv_size << "b from 0" << endl;
+        // cout << "Third stage : " << myrank <<  " receives " << recv_size << "b from 0" << endl;
              
         // dbl
         OCP_DBL* dbl_ptr = (OCP_DBL*)recv_buffer;
