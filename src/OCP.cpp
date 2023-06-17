@@ -135,9 +135,19 @@ void OpenCAEPoroX::OutputResults() const
     output.PostProcess();
     OCPTIME_TOTAL += timer.Stop() / 1000;
     // find an appropriate size for printing times
-    int fixWidth = OCP_MAX(log10(control.current_time), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
+    
+    OutputTimeMain(cout.rdbuf());
+    OutputTimeProcess();
+}
+
+
+void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
+{
     if (CURRENT_RANK == MASTER_PROCESS) {
-        
+
+        streambuf* oldcout = cout.rdbuf(mysb);
+
+        int fixWidth = OCP_MAX(log10(control.current_time), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
         cout << "==================================================" << endl;
 
         // print numbers of steps
@@ -196,12 +206,13 @@ void OpenCAEPoroX::OutputResults() const
             << OCPTIME_COMM_P2P << "s)" << endl;
 
         cout << "==================================================" << endl;
+
+        cout.rdbuf(oldcout);
     }
-    OutputResultsProcess();
 }
 
 
-void OpenCAEPoroX::OutputResultsProcess() const
+void OpenCAEPoroX::OutputTimeProcess() const
 {
     // Record information of each process
     const Domain& domain = reservoir.GetDomain();
@@ -259,6 +270,9 @@ void OpenCAEPoroX::OutputResultsProcess() const
                 ofstream myFile;
                 myFile.open(control.workDir + "statistics.out");
 
+                ios::sync_with_stdio(false);
+                myFile.tie(0);
+
                 myFile << fixed << setprecision(3);
                 myFile << setw(6) << "Rank"
                     << setw(30) << "Updating Properties (s)"
@@ -267,20 +281,19 @@ void OpenCAEPoroX::OutputResultsProcess() const
                     << setw(30) << "Grid Num" << "\n";
                 for (OCP_USI p = 0; p < domain.numproc; p++) {
                     myFile << setw(6) << p
-                        << setw(30) << record_total[p * record_var_num + 0]
-                        << setw(30) << record_total[p * record_var_num + 1]
-                        << setw(30) << record_total[p * record_var_num + 2]
-                        << setw(30) << record_total[p * record_var_num + 3] << "\n";
+                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 0]
+                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 1]
+                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 2]
+                        << setprecision(0) << setw(30) << record_total[p * record_var_num + 3] << "\n";
                 }
-                myFile << "\n==========================================================\n";
+                myFile << "\n==================================================\n";
                 myFile << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << " \n";
                 myFile << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s\n";
                 myFile << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s\n";
                 myFile << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s\n";
                 myFile << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " \n";
 
-                ios::sync_with_stdio(false);
-                myFile.tie(0);
+                OutputTimeMain(myFile.rdbuf());
 
                 myFile.close();
             }

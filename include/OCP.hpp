@@ -90,8 +90,10 @@ public:
     void OutputResults() const;
 
 protected:
+    /// Output necessary information for Main
+    void OutputTimeMain(streambuf* mysb) const;
     /// Output necessary information for each process
-    void OutputResultsProcess() const;
+    void OutputTimeProcess() const;
 
 protected:
     /// The core properties of a reservoir.
