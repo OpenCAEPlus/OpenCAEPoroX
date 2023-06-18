@@ -90,7 +90,7 @@ public:
     void OutputResults() const;
 
 protected:
-    /// Output necessary information for Main
+    /// Output necessary information for Main process
     void OutputTimeMain(streambuf* mysb) const;
     /// Output necessary information for each process
     void OutputTimeProcess() const;

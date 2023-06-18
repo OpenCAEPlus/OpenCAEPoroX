@@ -134,8 +134,7 @@ void OpenCAEPoroX::OutputResults() const
     output.PrintInfo();
     output.PostProcess();
     OCPTIME_TOTAL += timer.Stop() / 1000;
-    // find an appropriate size for printing times
-    
+      
     OutputTimeMain(cout.rdbuf());
     OutputTimeProcess();
 }
@@ -146,7 +145,7 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
     if (CURRENT_RANK == MASTER_PROCESS) {
 
         streambuf* oldcout = cout.rdbuf(mysb);
-
+        // find an appropriate size for printing times
         int fixWidth = OCP_MAX(log10(control.current_time), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
         cout << "==================================================" << endl;
 
@@ -226,16 +225,34 @@ void OpenCAEPoroX::OutputTimeProcess() const
             record_total.resize(record_var_num * domain.numproc);
             MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
 
-            // Calculate averge num
-            const OCP_DBL aveGrid    = 1.0 * domain.GetNumGridTotal() / domain.numproc;
+            // Calculate averge num           
             OCP_DBL       aveTimeUG  = 0;
             OCP_DBL       aveTimeAM  = 0;
             OCP_DBL       aveTimeP2P = 0;
+            const OCP_DBL aveGrid    = 1.0 * domain.GetNumGridTotal() / domain.numproc;
+            OCP_DBL       minTimeUG{ record_local[0] }, maxTimeUG{ record_local[0] };
+            OCP_DBL       minTimeAM{ record_local[1] }, maxTimeAM{ record_local[1] };
+            OCP_DBL       minTimeP2P{ record_local[2] }, maxTimeP2P{ record_local[2] };
+            OCP_USI       minNG{ record_local[3] }, maxNG{ record_local[3] };
 
             for (OCP_USI p = 0; p < domain.numproc; p++) {
-                aveTimeUG  += record_total[p * record_var_num + 0];
-                aveTimeAM  += record_total[p * record_var_num + 1];
-                aveTimeP2P += record_total[p * record_var_num + 2];
+                OCP_DBL tmpUG  = record_total[p * record_var_num + 0];
+                OCP_DBL tmpAM  = record_total[p * record_var_num + 1];
+                OCP_DBL tmpP2P = record_total[p * record_var_num + 2];
+                OCP_DBL tmpNG  = record_total[p * record_var_num + 3];
+
+                aveTimeUG  += tmpUG;
+                aveTimeAM  += tmpAM;
+                aveTimeP2P += tmpP2P;
+
+                minTimeUG  = minTimeUG < tmpUG ? minTimeUG : tmpUG;
+                maxTimeUG  = maxTimeUG > tmpUG ? maxTimeUG : tmpUG;
+                minTimeAM  = minTimeAM < tmpAM ? minTimeAM : tmpAM;
+                maxTimeAM  = maxTimeAM > tmpAM ? maxTimeAM : tmpAM;
+                minTimeP2P = minTimeP2P < tmpP2P ? minTimeP2P : tmpP2P;
+                maxTimeP2P = maxTimeP2P > tmpP2P ? maxTimeP2P : tmpP2P;
+                minNG      = minNG < tmpNG ? minNG : tmpNG;
+                maxNG      = maxNG > tmpNG ? maxNG : tmpNG;
             }
 
             aveTimeUG  /= domain.numproc;
@@ -259,11 +276,12 @@ void OpenCAEPoroX::OutputTimeProcess() const
             varGrid    = sqrt(varGrid) / domain.numproc;
 
             // output general information to screen
-            cout << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance " << endl;
-            cout << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << endl;
-            cout << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << endl;
-            cout << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << endl;
-            cout << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << endl;
+            cout << fixed << setprecision(3);
+            cout << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << setw(12) << "Max" << setw(12) << "Min" << " \n";
+            cout << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << setw(12) << maxTimeUG << "s" << setw(12) << minTimeUG << "s\n";
+            cout << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << setw(12) << maxTimeAM << "s" << setw(12) << minTimeAM << "s\n";
+            cout << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << setw(12) << maxTimeP2P << "s" << setw(12) << minTimeP2P << "s\n";
+            cout << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << setw(12) << maxNG << " " << setw(12) << minNG << " \n";
             cout << "==================================================" << endl;
             // output detailed inforamtion to files
             if (true) {
@@ -286,12 +304,13 @@ void OpenCAEPoroX::OutputTimeProcess() const
                         << setprecision(3) << setw(30) << record_total[p * record_var_num + 2]
                         << setprecision(0) << setw(30) << record_total[p * record_var_num + 3] << "\n";
                 }
+                myFile << fixed << setprecision(3);
                 myFile << "\n==================================================\n";
-                myFile << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << " \n";
-                myFile << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s\n";
-                myFile << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s\n";
-                myFile << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s\n";
-                myFile << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " \n";
+                myFile << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << setw(12) << "Max" << setw(12) << "Min" << " \n";
+                myFile << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << setw(12) << maxTimeUG << "s" << setw(12) << minTimeUG << "s\n";
+                myFile << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << setw(12) << maxTimeAM << "s" << setw(12) << minTimeAM << "s\n";
+                myFile << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << setw(12) << maxTimeP2P << "s" << setw(12) << minTimeP2P << "s\n";
+                myFile << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << setw(12) << maxNG << " " << setw(12) << minNG<< " \n";
 
                 OutputTimeMain(myFile.rdbuf());
 
