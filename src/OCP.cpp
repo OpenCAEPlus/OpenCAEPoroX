@@ -170,6 +170,9 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << " - % Input & Partition ........." << setw(fixWidth)
             << 100.0 * OCPTIME_PARTITION / OCPTIME_TOTAL << " (" << OCPTIME_PARTITION
             << "s)" << endl;
+        cout << " - % Partition - ParMetis ......" << setw(fixWidth)
+            << 100.0 * OCPTIME_PARMETIS / OCPTIME_TOTAL << " (" << OCPTIME_PARMETIS
+            << "s)" << endl;
         cout << " - % Input Reservoir ..........." << setw(fixWidth)
             << 100.0 * OCPTIME_READPARAM / OCPTIME_TOTAL << " (" << OCPTIME_READPARAM
             << "s)" << endl;
@@ -197,13 +200,6 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << " - % Output ...................." << setw(fixWidth)
             << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
-        cout << " - % Communication(collect) ...." << setw(fixWidth)
-            << 100.0 * OCPTIME_COMM_COLLECTIVE / OCPTIME_TOTAL << " ("
-            << OCPTIME_COMM_COLLECTIVE << "s)" << endl;
-        cout << " - % Communication(P2P) ........" << setw(fixWidth)
-            << 100.0 * OCPTIME_COMM_P2P / OCPTIME_TOTAL << " ("
-            << OCPTIME_COMM_P2P << "s)" << endl;
-
         cout << "==================================================" << endl;
 
         cout.rdbuf(oldcout);
@@ -216,72 +212,97 @@ void OpenCAEPoroX::OutputTimeProcess() const
     // Record information of each process
     const Domain& domain = reservoir.GetDomain();
     if (domain.numproc > 1) {
-        const OCP_INT record_var_num = 4;
-        vector<OCP_DBL> record_local{ OCPTIME_UPDATE_GRID , OCPTIME_ASSEMBLE_MAT,
-                OCPTIME_COMM_P2P, static_cast<OCP_DBL>(reservoir.GetInteriorBulkNum()) };
+     
+        const vector<OCP_DBL> record_local{ 
+            static_cast<OCP_DBL>(reservoir.GetInteriorBulkNum()),
+            OCPTIME_UPDATE_GRID,
+            OCPTIME_ASSEMBLE_MAT,
+            OCPTIME_COMM_COLLECTIVE,
+            OCPTIME_COMM_P2P,
+            OCPTIME_COMM_1ALLREDUCE,
+            OCPTIME_NRSTEP,
+            OCPTIME_NRSTEPC};
         vector<OCP_DBL> record_total;
+        const OCP_INT record_var_num = record_local.size();
 
         if (CURRENT_RANK == MASTER_PROCESS) {
+
+            class statisticsVar
+            {
+            public:
+                statisticsVar(const string& name, const USI& n, const USI& pre) {
+                    itemName = name;
+                    val.resize(n, 0);
+                    precision = pre;
+                    clens = itemName.size() + 5;
+                }
+                string          itemName;  ///< name of item            
+                vector<OCP_DBL> val;       ///< averge, varance, max, min
+                USI             precision; ///< precision for output
+                USI             clens;     ///< length of itemname + 5
+            };
+            const vector<string> myItems{
+                "Item", "Average","Varance","Max","Min"
+            };
+            const USI len = myItems.size() - 1;
+
+            vector<statisticsVar> staVar{
+                statisticsVar("Grid Num", len, 0),
+                statisticsVar("Updating Properties(s)", len, 3),
+                statisticsVar("Assembling(s)", len, 3),
+                statisticsVar("Communication(collect)(s)", len, 3),
+                statisticsVar("Communication(P2P)(s)", len, 3),                
+                statisticsVar("1AllReduce(OCPCheck)(s)", len, 3),
+                statisticsVar("Newton Step(s)", len, 3),
+                statisticsVar("Newton Step(c)(s)", len, 3),
+            };
+
+            OCP_ASSERT(record_var_num == staVar.size(), "wrong staVar");
+
             record_total.resize(record_var_num * domain.numproc);
             MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
 
-            // Calculate averge num           
-            OCP_DBL       aveTimeUG  = 0;
-            OCP_DBL       aveTimeAM  = 0;
-            OCP_DBL       aveTimeP2P = 0;
-            const OCP_DBL aveGrid    = 1.0 * domain.GetNumGridTotal() / domain.numproc;
-            OCP_DBL       minTimeUG{ record_local[0] }, maxTimeUG{ record_local[0] };
-            OCP_DBL       minTimeAM{ record_local[1] }, maxTimeAM{ record_local[1] };
-            OCP_DBL       minTimeP2P{ record_local[2] }, maxTimeP2P{ record_local[2] };
-            OCP_USI       minNG{ record_local[3] }, maxNG{ record_local[3] };
-
-            for (OCP_USI p = 0; p < domain.numproc; p++) {
-                OCP_DBL tmpUG  = record_total[p * record_var_num + 0];
-                OCP_DBL tmpAM  = record_total[p * record_var_num + 1];
-                OCP_DBL tmpP2P = record_total[p * record_var_num + 2];
-                OCP_DBL tmpNG  = record_total[p * record_var_num + 3];
-
-                aveTimeUG  += tmpUG;
-                aveTimeAM  += tmpAM;
-                aveTimeP2P += tmpP2P;
-
-                minTimeUG  = minTimeUG < tmpUG ? minTimeUG : tmpUG;
-                maxTimeUG  = maxTimeUG > tmpUG ? maxTimeUG : tmpUG;
-                minTimeAM  = minTimeAM < tmpAM ? minTimeAM : tmpAM;
-                maxTimeAM  = maxTimeAM > tmpAM ? maxTimeAM : tmpAM;
-                minTimeP2P = minTimeP2P < tmpP2P ? minTimeP2P : tmpP2P;
-                maxTimeP2P = maxTimeP2P > tmpP2P ? maxTimeP2P : tmpP2P;
-                minNG      = minNG < tmpNG ? minNG : tmpNG;
-                maxNG      = maxNG > tmpNG ? maxNG : tmpNG;
+            // Calculate average, max, min
+            for (USI n = 0; n < record_var_num; n++) {
+                staVar[n].val[2] = record_local[n];
+                staVar[n].val[3] = record_local[n];
             }
 
-            aveTimeUG  /= domain.numproc;
-            aveTimeAM  /= domain.numproc;
-            aveTimeP2P /= domain.numproc;
+            for (OCP_USI p = 0; p < domain.numproc; p++) {
+                for (USI n = 0; n < record_var_num; n++) {
+                    const OCP_DBL tmp = record_total[p * record_var_num + n];
+                    staVar[n].val[0] += tmp;
+                    staVar[n].val[2] = staVar[n].val[2] < tmp ? tmp : staVar[n].val[2];
+                    staVar[n].val[3] = staVar[n].val[3] > tmp ? tmp : staVar[n].val[3];
+                }
+            }
+
+            for (USI n = 0; n < record_var_num; n++) {
+                staVar[n].val[0] /= domain.numproc;
+            }
 
             // Calculate standard variance
-            OCP_DBL varTimeUG  = 0;
-            OCP_DBL varTimeAM  = 0;
-            OCP_DBL varTimeP2P = 0;
-            OCP_DBL varGrid    = 0;
             for (OCP_USI p = 0; p < domain.numproc; p++) {
-                varTimeUG  += pow((record_total[p * record_var_num + 0] - aveTimeUG), 2);
-                varTimeAM  += pow((record_total[p * record_var_num + 1] - aveTimeAM), 2);
-                varTimeP2P += pow((record_total[p * record_var_num + 2] - aveTimeP2P), 2);
-                varGrid    += pow((record_total[p * record_var_num + 3] - aveGrid), 2);
+                for (USI n = 0; n < record_var_num; n++) {
+                    staVar[n].val[1] += pow((record_total[p * record_var_num + n] - staVar[n].val[0]), 2);
+                }
             }
-            varTimeUG  = sqrt(varTimeUG) / domain.numproc;
-            varTimeAM  = sqrt(varTimeAM) / domain.numproc;
-            varTimeP2P = sqrt(varTimeP2P) / domain.numproc;
-            varGrid    = sqrt(varGrid) / domain.numproc;
+            for (USI n = 0; n < record_var_num; n++) {
+                staVar[n].val[1] = pow(staVar[n].val[1] / domain.numproc, 0.5);
+            }
 
             // output general information to screen
-            cout << fixed << setprecision(3);
-            cout << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << setw(12) << "Max" << setw(12) << "Min" << " \n";
-            cout << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << setw(12) << maxTimeUG << "s" << setw(12) << minTimeUG << "s\n";
-            cout << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << setw(12) << maxTimeAM << "s" << setw(12) << minTimeAM << "s\n";
-            cout << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << setw(12) << maxTimeP2P << "s" << setw(12) << minTimeP2P << "s\n";
-            cout << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << setw(12) << maxNG << " " << setw(12) << minNG << " \n";
+            cout << std::left << setw(25) << myItems[0];
+            for (USI n = 1; n < myItems.size(); n++) {
+                cout << std::right << setw(12) << myItems[n];
+            }
+            cout << endl;
+            for (USI n = 0; n < record_var_num; n++) {
+                cout << std::left << setw(25) << staVar[n].itemName;
+                for (USI i = 0; i < len; i++)
+                    cout << std::right << setw(12) << setprecision(staVar[n].precision) << staVar[n].val[i];
+                cout << endl;
+            }
             cout << "==================================================" << endl;
             // output detailed inforamtion to files
             if (true) {
@@ -292,25 +313,30 @@ void OpenCAEPoroX::OutputTimeProcess() const
                 myFile.tie(0);
 
                 myFile << fixed << setprecision(3);
-                myFile << setw(6) << "Rank"
-                    << setw(30) << "Updating Properties (s)"
-                    << setw(30) << "Assembling (s)"
-                    << setw(30) << "Communication(P2P) (s)"
-                    << setw(30) << "Grid Num" << "\n";
-                for (OCP_USI p = 0; p < domain.numproc; p++) {
-                    myFile << setw(6) << p
-                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 0]
-                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 1]
-                        << setprecision(3) << setw(30) << record_total[p * record_var_num + 2]
-                        << setprecision(0) << setw(30) << record_total[p * record_var_num + 3] << "\n";
+                myFile << setw(6) << "Rank";
+                for (USI i = 0; i < record_var_num; i++) {
+                    myFile << setw(staVar[i].clens) << staVar[i].itemName;
                 }
-                myFile << fixed << setprecision(3);
+                myFile << "\n";                   
+                for (OCP_USI p = 0; p < domain.numproc; p++) {
+                    myFile << setw(6) << p;
+                    for (USI i = 0; i < record_var_num; i++) {
+                        myFile << setprecision(staVar[i].precision) << setw(staVar[i].clens) << record_total[p * record_var_num + i];
+                    }
+                    myFile << "\n";
+                }
                 myFile << "\n==================================================\n";
-                myFile << "Item                 " << setw(12) << " Average Time " << setw(12) << "Varance" << setw(12) << "Max" << setw(12) << "Min" << " \n";
-                myFile << "Updating Properties  " << setw(12) << aveTimeUG << "s" << setw(12) << varTimeUG << "s" << setw(12) << maxTimeUG << "s" << setw(12) << minTimeUG << "s\n";
-                myFile << "Assembling           " << setw(12) << aveTimeAM << "s" << setw(12) << varTimeAM << "s" << setw(12) << maxTimeAM << "s" << setw(12) << minTimeAM << "s\n";
-                myFile << "Communication(P2P)   " << setw(12) << aveTimeP2P << "s" << setw(12) << varTimeP2P << "s" << setw(12) << maxTimeP2P << "s" << setw(12) << minTimeP2P << "s\n";
-                myFile << "Grid Num             " << setw(12) << aveGrid << " " << setw(12) << varGrid << " " << setw(12) << maxNG << " " << setw(12) << minNG<< " \n";
+                myFile << std::left << setw(25) << myItems[0];
+                for (USI n = 1; n < myItems.size(); n++) {
+                    myFile << std::right << setw(12) << myItems[n];
+                }
+                myFile << endl;
+                for (USI n = 0; n < record_var_num; n++) {
+                    myFile << std::left << setw(25) << staVar[n].itemName;
+                    for (USI i = 0; i < len; i++)
+                        myFile << std::right << setw(12) << setprecision(staVar[n].precision) << staVar[n].val[i];
+                    myFile << endl;
+                }
 
                 OutputTimeMain(myFile.rdbuf());
 

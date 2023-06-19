@@ -15,6 +15,7 @@
 
 OCP_DBL OCPTIME_TOTAL				= 0;
 OCP_DBL OCPTIME_PARTITION			= 0;
+OCP_DBL OCPTIME_PARMETIS            = 0;
 OCP_DBL OCPTIME_READPARAM			= 0;
 OCP_DBL OCPTIME_SETUP_SIM			= 0;
 OCP_DBL OCPTIME_INIT_RESERVOIR		= 0;
@@ -22,12 +23,14 @@ OCP_DBL OCPTIME_ASSEMBLE_MAT		= 0;
 OCP_DBL OCPTIME_ASSEMBLE_MAT_FOR_LS = 0;
 OCP_DBL OCPTIME_LSOLVER				= 0;
 OCP_DBL OCPTIME_NRSTEP				= 0;
+OCP_DBL OCPTIME_NRSTEPC             = 0;
 OCP_DBL OCPTIME_UPDATE_GRID			= 0;
 OCP_DBL OCPTIME_OUTPUT				= 0;
 OCP_DBL OCPTIME_COMM_COLLECTIVE     = 0;
+OCP_DBL OCPTIME_COMM_1ALLREDUCE     = 0;
 OCP_DBL OCPTIME_COMM_P2P            = 0;
 OCP_DBL OCPTIME_COMM_TOTAL          = 0;
-OCP_DBL OCPTIME_PARMETIS            = 0;
+
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

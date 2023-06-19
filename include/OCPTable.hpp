@@ -21,6 +21,14 @@
 
 using namespace std;
 
+class OCPTable_Interpolate
+{
+public:
+    OCPTable_Interpolate() = default;
+    virtual void Interpolate(const vector<vector<OCP_DBL>>& table) = 0;
+};
+
+
 /// OCPTable is a Table class, which used to deal with everything about table
 /// in OpenCAEPoroX such as PVT table, saturation table.
 class OCPTable

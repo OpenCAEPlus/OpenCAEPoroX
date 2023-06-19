@@ -1883,6 +1883,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 
     OCPTIME_COMM_P2P += (timerT.Stop() - time_cal) / 1000;
+    OCPTIME_NRSTEPC  += time_cal / 1000;
 }
 
 void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)

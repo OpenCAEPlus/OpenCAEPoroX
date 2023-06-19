@@ -26,9 +26,11 @@ extern OCP_DBL OCPTIME_ASSEMBLE_MAT;		///< Time for Matrix Assembling
 extern OCP_DBL OCPTIME_ASSEMBLE_MAT_FOR_LS; ///< Time for Matrix Assembling used in external linear solver
 extern OCP_DBL OCPTIME_LSOLVER;				///< Time for Linear Solver
 extern OCP_DBL OCPTIME_NRSTEP;				///< Time for NR step
+extern OCP_DBL OCPTIME_NRSTEPC;             ///< Time for main calculation in NRstep
 extern OCP_DBL OCPTIME_UPDATE_GRID;			///< Time for Grid Updating
 extern OCP_DBL OCPTIME_OUTPUT;				///< Time for Outputing Files
 extern OCP_DBL OCPTIME_COMM_COLLECTIVE;     ///< Time for Collective Communication (Disposable calls will be ignored)
+extern OCP_DBL OCPTIME_COMM_1ALLREDUCE;     ///< Time for Allreduce in OCP check
 extern OCP_DBL OCPTIME_COMM_P2P;            ///< Time for P2P Communication (Disposable calls will be ignored)
 extern OCP_DBL OCPTIME_COMM_TOTAL;          ///< Time for Communication (Disposable calls will be ignored)
 extern OCP_DBL OCPTIME_PARMETIS;            ///< Time for ParMetis

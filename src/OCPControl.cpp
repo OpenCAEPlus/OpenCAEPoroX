@@ -296,6 +296,7 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
     MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MIN, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+    OCPTIME_COMM_1ALLREDUCE += timer.Stop() / 1000;
 
     switch (workState)
     {
