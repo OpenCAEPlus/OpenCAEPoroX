@@ -56,19 +56,8 @@ public:
     /// increasing order.
     OCP_INT GetRowZero(const USI& mycol) const;
 
-    /// push v into the last column of table.
-    void PushCol(const vector<OCP_DBL>& v) { data.push_back(v); }
-
     /// return the jth column in table to modify or use.
     vector<OCP_DBL>& GetCol(const USI& j) { return data[j]; }
-
-    /// Setup row nums and col nums of tables, initialize the bId.
-    void SetRowCol()
-    {
-        nRow = data[0].size();
-        nCol = data.size();
-        bId  = nRow / 2;
-    }
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// all columns and return slope

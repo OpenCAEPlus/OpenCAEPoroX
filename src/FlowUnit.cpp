@@ -337,9 +337,7 @@ void FlowUnit_ODGW01::Generate_SWPCWG()
         Pcow[i] += Pcgo; // Pcgw
     }
 
-    SWPCGW.PushCol(Sw);
-    SWPCGW.PushCol(Pcow);
-    SWPCGW.SetRowCol();
+    SWPCGW.Setup(vector<vector<OCP_DBL>>{Sw, Pcow});
 }
 
 ///////////////////////////////////////////////
@@ -648,9 +646,7 @@ void FlowUnit_ODGW02::Generate_SWPCWG()
         Pcow[i] += Pcgo; // pcgw
     }
 
-    SWPCGW.PushCol(Sw);
-    SWPCGW.PushCol(Pcow);
-    SWPCGW.SetRowCol();
+    SWPCGW.Setup(vector<vector<OCP_DBL>>{Sw, Pcow});
 }
 
 /*----------------------------------------------------------------------------*/
