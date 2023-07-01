@@ -92,8 +92,6 @@ FlowUnit_OG::FlowUnit_OG(const ParamReservoir& rs_param, const USI& i)
 
     SGOF.Setup(rs_param.SGOF_T.data[i]);
 
-    kroMax = SGOF.GetCol(2)[0];
-
     data.resize(4, 0);
     cdata.resize(4, 0);
 }
@@ -132,7 +130,7 @@ OCP_DBL FlowUnit_ODGW::CalKro_Stone2(const OCP_DBL& krow,
     // krow : oil relative permeability for a system with oil and water only
 
     OCP_DBL kro =
-        kroMax * ((krow / kroMax + krw) * (krog / kroMax + krg) - (krw + krg));
+        krocw * ((krow / krocw + krw) * (krog / krocw + krg) - (krw + krg));
     if (kro < 0) kro = 0;
 
     return kro;
@@ -145,7 +143,7 @@ OCP_DBL FlowUnit_ODGW::CalKro_Default(const OCP_DBL& Sg,
 {
     const OCP_DBL tmp = Sg + Sw - Swco;
     if (tmp <= TINY) {
-        return kroMax;
+        return krocw;
     }
     const OCP_DBL kro = (Sg * krog + (Sw - Swco) * krow) / tmp;
     return kro;
@@ -162,7 +160,7 @@ FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
     SWOF.Setup(rs_param.SWOF_T.data[i]);
     SGOF.Setup(rs_param.SGOF_T.data[i]);
 
-    kroMax   = SWOF.GetKrocw();
+    krocw   = SWOF.GetKrocw();
     Swco     = SWOF.GetSwco();
 
     data.resize(4, 0);
@@ -272,12 +270,12 @@ OCP_DBL FlowUnit_ODGW01::CalKro_Stone2Der(OCP_DBL  krow,
                                           OCP_DBL& out_dkrodSg) const
 {
     OCP_DBL kro, dkrodSw, dkrodSg;
-    kro = kroMax * ((krow / kroMax + krw) * (krog / kroMax + krg) - (krw + krg));
+    kro = krocw * ((krow / krocw + krw) * (krog / krocw + krg) - (krw + krg));
 
     dkrodSw =
-        kroMax * ((dkrowdSw / kroMax + dkrwdSw) * (krog / kroMax + krg) - (dkrwdSw));
+        krocw * ((dkrowdSw / krocw + dkrwdSw) * (krog / krocw + krg) - (dkrwdSw));
     dkrodSg =
-        kroMax * ((krow / kroMax + krw) * (dkrogdSg / kroMax + dkrgdSg) - (dkrgdSg));
+        krocw * ((krow / krocw + krw) * (dkrogdSg / krocw + dkrgdSg) - (dkrgdSg));
 
     if (kro < 0) {
         kro     = 0;
@@ -302,7 +300,7 @@ OCP_DBL FlowUnit_ODGW01::CalKro_DefaultDer(const OCP_DBL& Sg,
     if (tmp <= TINY) {
         dkroSg = 0;
         dkroSw = 0;
-        return kroMax;
+        return krocw;
     }
     const OCP_DBL kro = (Sg * krog + (Sw - Swco) * krow) / tmp;
     dkroSg      = (krog + Sg * dkrogSg - kro) / tmp;
@@ -476,7 +474,7 @@ FlowUnit_ODGW02::FlowUnit_ODGW02(const ParamReservoir& rs_param, const USI& i)
     SGFN.Setup(rs_param.SGFN_T.data[i]);
     SOF3.Setup(rs_param.SOF3_T.data[i]);
 
-    kroMax = SOF3.GetCol(1).back();
+    krocw = SOF3.GetCol(1).back();
     Swco   = SWFN.GetCol(0)[0];
 
     data.resize(3, 0);
@@ -583,8 +581,8 @@ OCP_DBL FlowUnit_ODGW02::CalKro_Stone2Der(OCP_DBL  krow,
 {
     OCP_DBL kro, dKrodSo;
 
-    kro     = kroMax * ((krow / kroMax + krw) * (krog / kroMax + krg) - (krw + krg));
-    dKrodSo = dkrowdSo * (krog / kroMax + krg) + dkrogdSo * (krow / kroMax + krw);
+    kro     = krocw * ((krow / krocw + krw) * (krog / krocw + krg) - (krw + krg));
+    dKrodSo = dkrowdSo * (krog / krocw + krg) + dkrogdSo * (krow / krocw + krw);
 
     if (kro < 0) {
         kro     = 0;
@@ -607,7 +605,7 @@ OCP_DBL FlowUnit_ODGW02::CalKro_DefaultDer(const OCP_DBL& Sg,
     out_dkrodSo = (Sg * dkrogdSo + (Sw - Swco) * dkrowdSo) / tmp;
 
     if (tmp <= TINY) {
-        kro         = kroMax;
+        kro         = krocw;
         out_dkrodSo = 0;
     }
     return kro;

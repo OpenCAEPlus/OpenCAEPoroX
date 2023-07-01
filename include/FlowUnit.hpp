@@ -61,7 +61,6 @@ public:
     const vector<OCP_DBL>& GetdPcdS()const { return dPcdS; }
 
 protected:
-    OCP_USI         bId;   ///< index of bulk being calculated
     OCP_DBL         Swco;  ///< saturaion of connate water
 
     vector<OCP_DBL> kr;    ///< relative permeability of phase
@@ -166,7 +165,6 @@ public:
 
 protected:
     OCPTable SGOF; ///< saturation table about gas and oil.
-    OCP_DBL  kroMax;
 };
 
 ///////////////////////////////////////////////
@@ -190,7 +188,7 @@ public:
 
 protected:
     /// oil relative permeability in the presence of connate water only, used in stone2
-    OCP_DBL         kroMax;
+    OCP_DBL         krocw;
     vector<OCP_DBL> Scm; ///< critical saturation when phase becomes mobile / immobile
 };
 

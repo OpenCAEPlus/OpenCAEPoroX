@@ -26,7 +26,7 @@ class OCP_SWOF
 /// 0th column: The water saturation (Sw)
 /// 1th column: The corresponding water relative permeability (Krw)
 /// 2th column: The corresponding oil relative permeability when only oil and water are present (Krow)
-/// 3th column: The corresponding water-oil capillary pressure (Pcow = Po - Pw)
+/// 3th column: The corresponding water-oil capillary pressure (Pcow = Po - Pw) (bars (METRIC), psi (FIELD))
 
 public:
 	/// default constructor
