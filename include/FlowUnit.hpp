@@ -93,11 +93,11 @@ public:
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return 0; }
-    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override { return 0; }
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return 0; }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return 0; }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return 0; }
+    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return 0.0; }
+    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override { return 1.0; }
+    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return 0.0; }
+    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return 0.0; }
+    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return 1.0; }
 
     const vector<OCP_DBL>& GetScm() const override
     {

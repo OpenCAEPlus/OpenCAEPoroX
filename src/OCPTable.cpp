@@ -22,16 +22,6 @@ void OCPTable::Setup(const std::vector<std::vector<OCP_DBL>>& src)
     bId  = nRow / 2;
 }
 
-OCP_INT OCPTable::GetRowZero(const USI& mycol) const
-{
-    if (mycol > nCol) OCP_ABORT("wrong specified column!");
-    for (USI i = 0; i < nRow; i++) {
-        if (data[mycol][i] >= TINY) {
-            return i - 1;
-        }
-    }
-    return nRow - 1;
-}
 
 /// Careful: the memory outdata and slope have not be allocated before
 USI OCPTable::Eval_All(const USI&       j,

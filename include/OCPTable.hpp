@@ -49,10 +49,6 @@ public:
     /// return the column num of table.
     USI GetColNum() const { return nCol; }
 
-    /// return the row index of the last zero of some colnum, which is sorted in
-    /// increasing order.
-    OCP_INT GetRowZero(const USI& mycol) const;
-
     /// return the jth column in table to modify or use.
     vector<OCP_DBL>& GetCol(const USI& j) { return data[j]; }
     const vector<OCP_DBL>& GetCol(const USI& j) const { return data[j]; }
