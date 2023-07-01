@@ -11,16 +11,6 @@
 
 #include "OCPTable.hpp"
 
-OCPTable::OCPTable(const USI& row, const USI& col)
-{
-    nRow = row;
-    nCol = col;
-    bId  = 0;
-    data.resize(nCol);
-    for (USI j = 0; j < nCol; j++) {
-        data[j].resize(nRow);
-    }
-}
 
 OCPTable::OCPTable(const vector<vector<OCP_DBL>>& src) { this->Setup(src); }
 
@@ -85,6 +75,44 @@ USI OCPTable::Eval_All(const USI&       j,
     return bId;
 }
 
+USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata )
+{
+    OCP_DBL slope = 0;
+    if (val >= data[j][bId]) {
+        for (USI i = bId + 1; i < nRow; i++) {
+            if (val < data[j][i]) {
+                bId = i - 1;
+                for (USI k = 0; k < nCol; k++) {
+                    slope = (data[k][bId + 1] - data[k][bId]) /
+                        (data[j][bId + 1] - data[j][bId]);
+                    outdata[k] = data[k][bId] + slope * (val - data[j][bId]);
+                }
+                return bId;
+            }
+        }
+        for (USI k = 0; k < nCol; k++) {
+            outdata[k] = data[k].back();
+        }
+    }
+    else {
+        for (OCP_INT i = bId - 1; i >= 0; i--) {
+            if (val >= data[j][i]) {
+                bId = i;
+                for (USI k = 0; k < nCol; k++) {
+                    slope = (data[k][bId + 1] - data[k][bId]) /
+                        (data[j][bId + 1] - data[j][bId]);
+                    outdata[k] = data[k][bId] + slope * (val - data[j][bId]);
+                }
+                return bId;
+            }
+        }
+        for (USI k = 0; k < nCol; k++) {
+            outdata[k] = data[k].front();
+        }
+    }
+    return bId;
+}
+
 USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata)
 {
     const USI j    = 0;
@@ -123,7 +151,7 @@ USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata)
     return bId;
 }
 
-OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj)
+OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj) const
 {
     if (val >= data[j][bId]) {
         for (USI i = bId + 1; i < nRow; i++) {
@@ -148,7 +176,7 @@ OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj)
     }
 }
 
-OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj, OCP_DBL& myK)
+OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj, OCP_DBL& myK) const
 {
     // becareful when the memory outdata and slope have not be allocated before
 
@@ -175,7 +203,7 @@ OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj, OCP_D
     }
 }
 
-OCP_DBL OCPTable::Eval_Inv(const USI& j, const OCP_DBL& val, const USI& destj)
+OCP_DBL OCPTable::Eval_Inv(const USI& j, const OCP_DBL& val, const USI& destj) const
 {
     // becareful when the memory outdata and slope have not be allocated before
 

@@ -40,7 +40,7 @@ FlowUnit_OW::FlowUnit_OW(const ParamReservoir& rs_param, const USI& i)
     Allocate(2);
 
     SWOF.Setup(rs_param.SWOF_T.data[i]);
-    Swco = SWOF.GetCol(0)[0];
+    Swco = SWOF.GetSwco();
 
     data.resize(4, 0);
     cdata.resize(4, 0);
@@ -51,12 +51,10 @@ void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     const OCP_DBL Sw = S_in[1];
 
     // three phase black oil model using stone 2
-    SWOF.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw  = data[1];
-    const OCP_DBL kro  = data[2];
-    const OCP_DBL Pcwo = -data[3];
+    OCP_DBL krw, krow, Pcwo;
+    SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
 
-    kr[0] = kro;
+    kr[0] = krow;
     kr[1] = krw;
     //pc[0] = 0;
     pc[1] = Pcwo;
@@ -65,13 +63,8 @@ void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL Sw = S_in[1];
-    SWOF.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw      = data[1];
-    const OCP_DBL dKrwdSw  = cdata[1];
-    const OCP_DBL krow     = data[2];
-    const OCP_DBL dKrowdSw = cdata[2];
-    const OCP_DBL Pcwo     = -data[3];
-    const OCP_DBL dPcwdSw  = -cdata[3];
+    OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
+    SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
     kr[0] = krow;
     kr[1] = krw;
@@ -86,7 +79,7 @@ void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     //dPcdS[0] = 0;
     //dPcdS[1] = 0;
     //dPcdS[2] = 0;
-    dPcdS[3] = dPcwdSw;
+    dPcdS[3] = dPcwodSw;
 }
 
 ///////////////////////////////////////////////
@@ -169,8 +162,8 @@ FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
     SWOF.Setup(rs_param.SWOF_T.data[i]);
     SGOF.Setup(rs_param.SGOF_T.data[i]);
 
-    kroMax = SWOF.GetCol(2)[0];
-    Swco   = SWOF.GetCol(0)[0];
+    kroMax   = SWOF.GetKrocw();
+    Swco     = SWOF.GetSwco();
 
     data.resize(4, 0);
     cdata.resize(4, 0);
@@ -182,8 +175,7 @@ FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
     OCP_INT tmprow;
     tmprow = SGOF.GetRowZero(1);
     if (tmprow >= 0) Scm[1] = SGOF.GetCol(0)[tmprow];
-    tmprow = SWOF.GetRowZero(1);
-    if (tmprow >= 0) Scm[2] = SWOF.GetCol(0)[tmprow];
+    Scm[2] = SWOF.GetSwcr();
 }
 
 void FlowUnit_ODGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
@@ -192,10 +184,9 @@ void FlowUnit_ODGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     const OCP_DBL Sw = S_in[2];
 
     // three phase black oil model using stone 2
-    SWOF.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw  = data[1];
-    const OCP_DBL krow = data[2];
-    const OCP_DBL Pcwo = -data[3];
+    OCP_DBL krw, krow, Pcwo;
+    SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
+
 
     SGOF.Eval_All(0, Sg, data, cdata);
     const OCP_DBL krg  = data[1];
@@ -219,13 +210,8 @@ void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     const OCP_DBL Sw = S_in[2];
 
     // three phase black oil model using stone 2
-    SWOF.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw      = data[1];
-    const OCP_DBL dKrwdSw  = cdata[1];
-    const OCP_DBL krow     = data[2];
-    const OCP_DBL dKrowdSw = cdata[2];
-    const OCP_DBL Pcwo     = -data[3];
-    const OCP_DBL dPcwdSw  = -cdata[3];
+    OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
+    SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
     SGOF.Eval_All(0, Sg, data, cdata);
     const OCP_DBL krg      = data[1];
@@ -271,7 +257,7 @@ void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     //dPcdS[5] = 0;
     //dPcdS[6] = 0;
     //dPcdS[7] = 0;
-    dPcdS[8] = dPcwdSw;
+    dPcdS[8] = dPcwodSw;
 }
 
 OCP_DBL FlowUnit_ODGW01::CalKro_Stone2Der(OCP_DBL  krow,
@@ -329,8 +315,9 @@ void FlowUnit_ODGW01::Generate_SWPCWG()
     if (SGOF.IsEmpty()) OCP_ABORT("SGOF is missing!");
     if (SWOF.IsEmpty()) OCP_ABORT("SWOF is missing!");
 
-    const std::vector<OCP_DBL> Sw(SWOF.GetCol(0));
-    std::vector<OCP_DBL>       Pcow(SWOF.GetCol(3));
+    const std::vector<OCP_DBL> Sw(SWOF.GetSw());
+    std::vector<OCP_DBL>       Pcow(SWOF.GetPcow());
+
     USI                  n = Sw.size();
     for (USI i = 0; i < n; i++) {
         OCP_DBL Pcgo = SGOF.Eval(0, 1 - Sw[i], 3);
@@ -378,10 +365,8 @@ void FlowUnit_ODGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
         const OCP_DBL Sg = S_in[1];
         const OCP_DBL Sw = S_in[2];
 
-        SWOF.Eval_All(0, Sw, data, cdata);
-        const OCP_DBL krw  = data[1];
-        const OCP_DBL krow = data[2];
-        const OCP_DBL Pcwo = -data[3];
+        OCP_DBL krw, krow, Pcwo;
+        SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
 
         SGOF.Eval_All(0, Sg, data, cdata);
         OCP_DBL       krg  = data[1];
@@ -419,13 +404,8 @@ void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bI
         const OCP_DBL Sg = S_in[1];
         const OCP_DBL Sw = S_in[2];
 
-        SWOF.Eval_All(0, Sw, data, cdata);
-        const OCP_DBL krw      = data[1];
-        const OCP_DBL dKrwdSw  = cdata[1];
-        const OCP_DBL krow     = data[2];
-        const OCP_DBL dKrowdSw = cdata[2];
-        const OCP_DBL Pcwo     = -data[3];
-        const OCP_DBL dPcwdSw  = -cdata[3];
+        OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
+        SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
         SGOF.Eval_All(0, Sg, data, cdata);
         OCP_DBL       krg      = data[1];
@@ -475,7 +455,7 @@ void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bI
         //dPcdS[5] = 0;
         //dPcdS[6] = 0;
         //dPcdS[7] = 0;
-        dPcdS[8] = dPcwdSw;
+        dPcdS[8] = dPcwodSw;
     }
 
     if (scaleTerm->IfScale()) {

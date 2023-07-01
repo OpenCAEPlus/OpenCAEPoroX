@@ -17,6 +17,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "OCPTable.hpp"
+#include "OCPSATFunc.hpp"
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
 
@@ -119,12 +120,8 @@ public:
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWOF.Eval(0, sw, 3); }
-    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override
-    {
-        return SWOF.Eval_Inv(3, pcow, 0);
-    }
+    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
+    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) override { return SWOF.CalSw(Pcow); }
 
     // useless
     OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return 0; }
@@ -137,7 +134,7 @@ public:
     }
 
 protected:
-    OCPTable SWOF; ///< saturation table about water and oil.
+    OCP_SWOF SWOF; ///< saturation table about water and oil.
 };
 
 ///////////////////////////////////////////////
@@ -231,11 +228,8 @@ public:
                               OCP_DBL&       dkroSg,
                               OCP_DBL&       dkroSw) const;
 
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWOF.Eval(0, sw, 3); }
-    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override
-    {
-        return SWOF.Eval_Inv(3, pcow, 0);
-    }
+    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
+    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) override { return SWOF.CalSw(Pcow); }
 
     OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGOF.Eval(0, sg, 3); }
     OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGOF.Eval(3, pcgo, 0); }
@@ -248,7 +242,7 @@ public:
 
 protected:
     OCPTable SGOF;   ///< saturation table about gas and oil.
-    OCPTable SWOF;   ///< saturation table about water and oil.
+    OCP_SWOF SWOF;   ///< saturation table about water and oil.
     OCPTable SWPCGW; ///< auxiliary table: saturation of water vs. capillary
                      ///< pressure between water and gas.
 };
@@ -265,8 +259,10 @@ public:
     {
         // gas is moveable all the time
         Scm[1]  = 0;
-        maxPcow = SWOF.GetCol(3).front();
-        minPcow = SWOF.GetCol(3).back();
+        /*maxPcow = SWOF.GetCol(3).front();
+        minPcow = SWOF.GetCol(3).back();*/
+        maxPcow = SWOF.GetMaxPc();
+        minPcow = SWOF.GetMinPc();
     }
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override
     {

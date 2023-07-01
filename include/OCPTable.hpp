@@ -37,9 +37,6 @@ public:
     /// Default constructor.
     OCPTable() = default;
 
-    /// Construct a table of fixed size.
-    OCPTable(const USI& row, const USI& col);
-
     /// Construct from existing data
     OCPTable(const vector<vector<OCP_DBL>>& src);
 
@@ -58,6 +55,7 @@ public:
 
     /// return the jth column in table to modify or use.
     vector<OCP_DBL>& GetCol(const USI& j) { return data[j]; }
+    const vector<OCP_DBL>& GetCol(const USI& j) const { return data[j]; }
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// all columns and return slope
@@ -65,6 +63,9 @@ public:
                  const OCP_DBL&   val,
                  vector<OCP_DBL>& outdata,
                  vector<OCP_DBL>& slope);
+    USI Eval_All(const USI& j,
+                 const OCP_DBL& val,
+                 vector<OCP_DBL>& outdata);
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// all columns, j = 0 here and index of returning date begins from 1
@@ -72,16 +73,16 @@ public:
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// the target column.
-    OCP_DBL Eval(const USI& j, const OCP_DBL& val, const USI& destj);
+    OCP_DBL Eval(const USI& j, const OCP_DBL& val, const USI& destj) const;
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// the target column, and return corresponding slope.
-    OCP_DBL Eval(const USI& j, const OCP_DBL& val, const USI& destj, OCP_DBL& myK);
+    OCP_DBL Eval(const USI& j, const OCP_DBL& val, const USI& destj, OCP_DBL& myK) const;
 
     /// interpolate the specified monotonically decreasing column in table to evaluate
     /// the target column.
 
-    OCP_DBL Eval_Inv(const USI& j, const OCP_DBL& val, const USI& destj);
+    OCP_DBL Eval_Inv(const USI& j, const OCP_DBL& val, const USI& destj) const;
 
     /// Display the data of table on screen.
     void Display() const;
@@ -89,7 +90,7 @@ public:
 private:
     USI                     nRow; ///< number of rows of the table
     USI                     nCol; ///< number of columns of the table
-    USI                     bId;  ///< the starting point of rows when interpolating
+    mutable USI             bId;  ///< the starting point of rows when interpolating
     vector<vector<OCP_DBL>> data; ///< data of the table, data[i] is the ith column.
 };
 

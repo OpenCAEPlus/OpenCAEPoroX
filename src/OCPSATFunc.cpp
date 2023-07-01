@@ -1,7 +1,7 @@
-/*! \file    OCPPVTFunc.hpp
- *  \brief   Functions for PVT in OCP
+/*! \file    OCPSATFunc.cpp
+ *  \brief   Functions for Saturation in OCP
  *  \author  Shizhe Li
- *  \date    Jun/18/2023
+ *  \date    Jun/29/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -9,40 +9,41 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPPVTFUNC_HEADER__
-#define __OCPPVTFUNC_HEADER__
 
-// OpenCAEPoroX header files
-#include "OCPTable.hpp"
+ // OpenCAEPoroX header files
+#include "OCPSATFunc.hpp"
 
-using namespace std;
+/////////////////////////////////////////////////////
+// SWOF
+/////////////////////////////////////////////////////
 
-class PVTFunc
+
+void OCP_SWOF::Setup(const vector<vector<OCP_DBL>>& src) 
+{ 
+	table.Setup(src); 
+	data.resize(table.GetColNum()); 
+	cdata.resize(table.GetColNum()); 
+}
+
+
+ OCP_DBL OCP_SWOF::GetSwcr() const
 {
-
-};
-
-class PVTW_Table
-{
-public:
-	PVTW_Table(const vector<vector<OCP_DBL>>& src);
-
-protected:
-	OCPTable table;
-
-};
+	 const vector<OCP_DBL>& sw  = table.GetCol(0);
+	 const vector<OCP_DBL>& krw = table.GetCol(1);
+	 for (USI i = 0; i < krw.size(); i++) {
+		 if (krw[i] >= TINY) {
+			 return sw[i];
+		 }
+	 }	 
+}
 
 
-
-
-
-#endif // __OCPPVTFUNC_HEADER__
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jun/18/2023      Create file                          */
+/*  Shizhe Li           Jun/29/2023      Create file                          */
 /*----------------------------------------------------------------------------*/
 

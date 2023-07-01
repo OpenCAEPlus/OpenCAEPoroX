@@ -1,5 +1,5 @@
-/*! \file    OCPPVTTable.cpp
- *  \brief   Tables for PVT in OCP
+/*! \file    OCPPVTFunc.cpp
+ *  \brief   Functions for PVT in OCP
  *  \author  Shizhe Li
  *  \date    Jun/18/2023
  *

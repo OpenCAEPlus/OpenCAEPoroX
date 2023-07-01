@@ -505,12 +505,10 @@ void Bulk::InitPTSw(const USI& tabrow)
     const OCP_DBL Zmax = -zRange[1];
     OCP_DBL tabdz = (Zmax - Zmin) / (tabrow - 1);
 
-    // create table
-    OCPTable         DepthP(tabrow, 4);
-    vector<OCP_DBL>& Ztmp  = DepthP.GetCol(0);
-    vector<OCP_DBL>& Potmp = DepthP.GetCol(1);
-    vector<OCP_DBL>& Pgtmp = DepthP.GetCol(2);
-    vector<OCP_DBL>& Pwtmp = DepthP.GetCol(3);
+    vector<OCP_DBL> Ztmp(tabrow, 0);
+    vector<OCP_DBL> Potmp(tabrow, 0);
+    vector<OCP_DBL> Pgtmp(tabrow, 0);
+    vector<OCP_DBL> Pwtmp(tabrow, 0);
 
     vector<OCP_DBL> tmpInitZi(numCom, 0);
 
@@ -1001,6 +999,8 @@ void Bulk::InitPTSw(const USI& tabrow)
         }
     }
 
+    OCPTable DepthP(vector<vector<OCP_DBL>>{Ztmp, Potmp, Pgtmp, Pwtmp});
+
     if (CURRENT_RANK == MASTER_PROCESS)
         DepthP.Display();
 
@@ -1040,7 +1040,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Sg = flow[SATNUM[n]]->GetSgByPcgo(Pcgo);
         }
         if (Sw + Sg > 1) {
-            // should me modified
+            // should be modified
             OCP_DBL Pcgw = Pcow + Pcgo;
             Sw           = flow[SATNUM[n]]->GetSwByPcgw(Pcgw);
             Sg           = 1 - Sw;
