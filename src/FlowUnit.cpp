@@ -100,13 +100,10 @@ void FlowUnit_OG::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL Sg = S_in[1];
 
-    // three phase black oil model using stone 2
-    SGOF.Eval_All(0, Sg, data, cdata);
-    const OCP_DBL krg  = data[1];
-    const OCP_DBL kro  = data[2];
-    const OCP_DBL Pcgo = data[3];
+    OCP_DBL krg, krog, Pcgo;
+    SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
 
-    kr[0] = kro;
+    kr[0] = krog;
     kr[1] = krg;
     //pc[0] = 0;
     pc[1] = Pcgo;
@@ -169,10 +166,7 @@ FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
     Generate_SWPCWG();
 
     Scm.resize(3, 0);
-    // oil, set to zero now
-    OCP_INT tmprow;
-    tmprow = SGOF.GetRowZero(1);
-    if (tmprow >= 0) Scm[1] = SGOF.GetCol(0)[tmprow];
+    Scm[1] = SGOF.GetSgcr();
     Scm[2] = SWOF.GetSwcr();
 }
 
@@ -185,11 +179,8 @@ void FlowUnit_ODGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     OCP_DBL krw, krow, Pcwo;
     SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
 
-
-    SGOF.Eval_All(0, Sg, data, cdata);
-    const OCP_DBL krg  = data[1];
-    const OCP_DBL krog = data[2];
-    const OCP_DBL Pcgo = data[3];
+    OCP_DBL krg, krog, Pcgo;
+    SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
 
     const OCP_DBL kro = CalKro_Stone2(krow, krog, krw, krg);
     // OCP_DBL kro = CalKro_Default(Sg, Sw, krog, krow);
@@ -211,13 +202,8 @@ void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
     SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
-    SGOF.Eval_All(0, Sg, data, cdata);
-    const OCP_DBL krg      = data[1];
-    const OCP_DBL dKrgdSg  = cdata[1];
-    const OCP_DBL krog     = data[2];
-    const OCP_DBL dKrogdSg = cdata[2];
-    const OCP_DBL Pcgo     = data[3];
-    const OCP_DBL dPcgdSg  = cdata[3];
+    OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
+    SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
 
     OCP_DBL dKrodSg{0}, dKrodSw{0}, kro{0};
 
@@ -251,7 +237,7 @@ void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     //dPcdS[1] = 0;
     //dPcdS[2] = 0;
     //dPcdS[3] = 0;
-    dPcdS[4] = dPcgdSg;
+    dPcdS[4] = dPcgodSg;
     //dPcdS[5] = 0;
     //dPcdS[6] = 0;
     //dPcdS[7] = 0;
@@ -316,9 +302,8 @@ void FlowUnit_ODGW01::Generate_SWPCWG()
     const std::vector<OCP_DBL> Sw(SWOF.GetSw());
     std::vector<OCP_DBL>       Pcow(SWOF.GetPcow());
 
-    USI                  n = Sw.size();
-    for (USI i = 0; i < n; i++) {
-        OCP_DBL Pcgo = SGOF.Eval(0, 1 - Sw[i], 3);
+    for (USI i = 0; i < Sw.size(); i++) {
+        OCP_DBL Pcgo = SGOF.CalPcgo(1 - Sw[i]);
         Pcow[i] += Pcgo; // Pcgw
     }
 
@@ -366,14 +351,13 @@ void FlowUnit_ODGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
         OCP_DBL krw, krow, Pcwo;
         SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
 
-        SGOF.Eval_All(0, Sg, data, cdata);
-        OCP_DBL       krg  = data[1];
-        const OCP_DBL krog = data[2];
-        const OCP_DBL Pcgo = data[3] * Fp;
+        OCP_DBL krg, krog, Pcgo;
+        SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
+        Pcgo *= Fp;
 
         OCP_DBL kro = CalKro_Stone2(krow, krog, krw, krg);
         // OCP_DBL kro = CalKro_Default(Sg, Sw, krog, krow);
-        const OCP_DBL krgt = SGOF.Eval(0, (1 - Sw), 1);
+        const OCP_DBL krgt = SGOF.CalKrg(1 - Sw);
         const OCP_DBL krh  = 0.5 * (krow + krgt);
 
         // from CMG, see *SIGMA
@@ -405,21 +389,18 @@ void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bI
         OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
         SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
-        SGOF.Eval_All(0, Sg, data, cdata);
-        OCP_DBL       krg      = data[1];
-        const OCP_DBL dKrgdSg  = cdata[1];
-        const OCP_DBL krog     = data[2];
-        const OCP_DBL dKrogdSg = cdata[2];
-        const OCP_DBL Pcgo     = data[3] * Fp;
-        const OCP_DBL dPcgdSg  = cdata[3] * Fp;
+        OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
+        SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
+        Pcgo     *= Fp;
+        dPcgodSg *= Fp;
 
         OCP_DBL dKrodSg{0}, dKrodSw{0}, kro{0};
         kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSw, dKrgdSg,
                                dKrogdSg, dKrodSw, dKrodSg);
 
         OCP_DBL       dkrgd1_Sw = 0;
-        const OCP_DBL krgt      = SGOF.Eval(0, (1 - Sw), 1, dkrgd1_Sw);
-        const OCP_DBL krh       = 0.5 * (krow + krgt);
+        const OCP_DBL krgt = SGOF.CalKrg(1 - Sw, dkrgd1_Sw);
+        const OCP_DBL krh  = 0.5 * (krow + krgt);
 
         // from CMG, see *SIGMA
         kro = Fk * kro + (1 - Fk) * krh * So / (1 - Sw);
@@ -449,7 +430,7 @@ void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bI
         //dPcdS[1] = 0;
         //dPcdS[2] = 0;
         //dPcdS[3] = 0;
-        dPcdS[4] = dPcgdSg;
+        dPcdS[4] = dPcgodSg;
         //dPcdS[5] = 0;
         //dPcdS[6] = 0;
         //dPcdS[7] = 0;

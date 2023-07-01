@@ -37,7 +37,7 @@ OCP_INT OCPTable::GetRowZero(const USI& mycol) const
 USI OCPTable::Eval_All(const USI&       j,
                        const OCP_DBL&   val,
                        vector<OCP_DBL>& outdata,
-                       vector<OCP_DBL>& slope)
+                       vector<OCP_DBL>& slope) const
 {
     if (val >= data[j][bId]) {
         for (USI i = bId + 1; i < nRow; i++) {
@@ -75,7 +75,7 @@ USI OCPTable::Eval_All(const USI&       j,
     return bId;
 }
 
-USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata )
+USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata) const
 {
     OCP_DBL slope = 0;
     if (val >= data[j][bId]) {
@@ -113,7 +113,7 @@ USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdat
     return bId;
 }
 
-USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata)
+USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata) const
 {
     const USI j    = 0;
     OCP_DBL   tmpk = 0;

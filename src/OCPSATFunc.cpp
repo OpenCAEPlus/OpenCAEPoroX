@@ -17,7 +17,6 @@
 // SWOF
 /////////////////////////////////////////////////////
 
-
 void OCP_SWOF::Setup(const vector<vector<OCP_DBL>>& src) 
 { 
 	table.Setup(src); 
@@ -25,19 +24,40 @@ void OCP_SWOF::Setup(const vector<vector<OCP_DBL>>& src)
 	cdata.resize(table.GetColNum()); 
 }
 
-
- OCP_DBL OCP_SWOF::GetSwcr() const
+OCP_DBL OCP_SWOF::GetSwcr() const
 {
-	 const vector<OCP_DBL>& sw  = table.GetCol(0);
+	 const vector<OCP_DBL>& Sw  = table.GetCol(0);
 	 const vector<OCP_DBL>& krw = table.GetCol(1);
 	 for (USI i = 0; i < krw.size(); i++) {
 		 if (krw[i] >= TINY) {
-			 return sw[i];
+			 return Sw[i];
 		 }
 	 }	 
 }
 
 
+/////////////////////////////////////////////////////
+// SGOF
+/////////////////////////////////////////////////////
+
+void OCP_SGOF::Setup(const vector<vector<OCP_DBL>>& src)
+{
+	 table.Setup(src);
+	 data.resize(table.GetColNum());
+	 cdata.resize(table.GetColNum());
+ }
+
+
+OCP_DBL OCP_SGOF::GetSgcr() const
+{
+	const vector<OCP_DBL>& Sg = table.GetCol(0);
+	const vector<OCP_DBL>& krg = table.GetCol(1);
+	for (USI i = 0; i < krg.size(); i++) {
+		if (krg[i] >= TINY) {
+			return Sg[i];
+		}
+	}
+}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

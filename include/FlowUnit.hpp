@@ -150,8 +150,8 @@ public:
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGOF.Eval(0, sg, 3); }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGOF.Eval(3, pcgo, 0); }
+    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg);}
+    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) override { return SGOF.CalSg(Pcgo); }
 
     // useless
     OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return 0; }
@@ -164,7 +164,7 @@ public:
     }
 
 protected:
-    OCPTable SGOF; ///< saturation table about gas and oil.
+    OCP_SGOF SGOF; ///< saturation table about gas and oil.
 };
 
 ///////////////////////////////////////////////
@@ -229,17 +229,14 @@ public:
     OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
     OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) override { return SWOF.CalSw(Pcow); }
 
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGOF.Eval(0, sg, 3); }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGOF.Eval(3, pcgo, 0); }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override
-    {
-        return SWPCGW.Eval_Inv(1, pcgw, 0);
-    }
+    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg); }
+    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) override { return SGOF.CalSg(Pcgo); }
+    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return SWPCGW.Eval_Inv(1, pcgw, 0); }
 
     void Generate_SWPCWG();
 
 protected:
-    OCPTable SGOF;   ///< saturation table about gas and oil.
+    OCP_SGOF SGOF;   ///< saturation table about gas and oil.
     OCP_SWOF SWOF;   ///< saturation table about water and oil.
     OCPTable SWPCGW; ///< auxiliary table: saturation of water vs. capillary
                      ///< pressure between water and gas.

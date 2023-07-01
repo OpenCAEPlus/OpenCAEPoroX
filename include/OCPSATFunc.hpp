@@ -23,10 +23,11 @@ using namespace std;
 
 class OCP_SWOF
 {
-/// 0th column: The water saturation (Sw)
-/// 1th column: The corresponding water relative permeability (Krw)
-/// 2th column: The corresponding oil relative permeability when only oil and water are present (Krow)
-/// 3th column: The corresponding water-oil capillary pressure (Pcow = Po - Pw) (bars (METRIC), psi (FIELD))
+	/// 0th column: The water saturation (Sw)
+	/// 1th column: The corresponding water relative permeability (Krw)
+	/// 2th column: The corresponding oil relative permeability when only oil and water are present (Krow)
+	/// 3th column: The corresponding water-oil capillary pressure (Pcow = Po - Pw) (bars (METRIC), psi (FIELD))
+	///             Values should be level or decreasing down the column.
 
 public:
 	/// default constructor
@@ -81,6 +82,60 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// SGOF
+/////////////////////////////////////////////////////
+
+class OCP_SGOF
+{
+	/// 0th column: The gas saturation (Sg)
+	/// 1th column: The corresponding gas relative permeability (Krg)
+	/// 2th column: The corresponding oil relative permeability when oil, gas and connate water are present. (Krog)
+	/// 3th column: The correspondin oil-gas capillary pressure (Pcgo = Pg - Po) (bars (METRIC), psi (FIELD))
+	///             Values should be level or increasing down the column.
+public:
+	/// default constructor
+	OCP_SGOF() = default;
+	/// Setup internal table with 2D table
+	void     Setup(const vector<vector<OCP_DBL>>& src);
+	/// If table is empty
+	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
+	/// Return the critical saturation
+	OCP_DBL  GetSgcr() const;
+	/// Return corresponding Sg with Pcgo
+	OCP_DBL  CalSg(const OCP_DBL& Pcgo) const { return table.Eval(3, Pcgo, 0); }
+	/// Return corresponding Krg with Sg
+	OCP_DBL  CalKrg(const OCP_DBL& Sg) const { return table.Eval(0, Sg, 1); }
+	/// Return corresponding Krg and derivatives with Sg
+	OCP_DBL  CalKrg(const OCP_DBL& Sg, OCP_DBL dkrgdSg) const { return table.Eval(0, Sg, 1, dkrgdSg); }
+	/// Return corresponding Pcgo with Sg
+	OCP_DBL  CalPcgo(const OCP_DBL& Sg) const { return table.Eval(0, Sg, 3); }
+
+	/// Return corresponding Krw, Krow, Pcwo with Sw
+	void     CalKrgKrogPcgo(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& krog, OCP_DBL& Pcgo) {
+		table.Eval_All(0, Sg, data);
+		krg  = data[1];
+		krog = data[2];
+		Pcgo = data[3];
+	}
+	/// Return corresponding Krw, Krow, Pcwo and derivatives with Sw 
+	void     CalKrgKrogPcgoDer(const OCP_DBL& Sg,
+		OCP_DBL& krg, OCP_DBL& krog, OCP_DBL& Pcgo,
+		OCP_DBL& dkrgdSg, OCP_DBL& dkrogdSg, OCP_DBL& dPcgodSg) {
+		table.Eval_All(0, Sg, data, cdata);
+		krg      = data[1];
+		krog     = data[2];
+		Pcgo     = data[3];
+		dkrgdSg  = cdata[1];
+		dkrogdSg = cdata[2];
+		dPcgodSg = cdata[3];
+	}
+
+protected:
+	OCPTable         table; ///< 2D table of SWOF
+	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
+	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
+};
 
 
 
