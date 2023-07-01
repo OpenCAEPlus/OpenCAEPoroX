@@ -90,7 +90,7 @@ vector<OCP_DBL>* ParamReservoir::FindPtr(const string& varName)
         case Map_Str2Int("SWATINIT", 8):
             Swat.reserve(numGrid);
             myPtr     = &Swat;
-            ScalePcow = OCP_TRUE;
+            scalePcow = OCP_TRUE;
             break;
 
         case Map_Str2Int("SATNUM", 6):

@@ -370,19 +370,19 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param)
             break;
         case PHASE_ODGW01:
             for (USI i = 0; i < NTSFUN; i++) {
-                flow.push_back(new FlowUnit_ODGW01(rs_param, i));
+                flow.push_back(new FlowUnit_OGW01(rs_param, i));
                 satcm[i] = flow[i]->GetScm();
             }
             break;
         case PHASE_ODGW01_MISCIBLE:
             for (USI i = 0; i < NTSFUN; i++) {
-                flow.push_back(new FlowUnit_ODGW01_Miscible(rs_param, i));
+                flow.push_back(new FlowUnit_OGW01_Miscible(rs_param, i));
                 satcm[i] = flow[i]->GetScm();
             }
             break;
         case PHASE_ODGW02:
             for (USI i = 0; i < NTSFUN; i++)
-                flow.push_back(new FlowUnit_ODGW02(rs_param, i));
+                flow.push_back(new FlowUnit_OGW02(rs_param, i));
             break;
         default:
             OCP_ABORT("Wrong Type!");
@@ -468,7 +468,7 @@ void Bulk::SetupOptionalFeatures(OptionalFeatures& optFeatures)
         flashCal[i]->SetupOptionalFeatures(optFeatures);
     }
     for (USI i = 0; i < NTSFUN; i++) {
-        flow[i]->SetupOptionalFeatures(optFeatures);
+        flow[i]->SetupOptionalFeatures(optFeatures, i);
     }
 }
 

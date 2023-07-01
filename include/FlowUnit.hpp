@@ -34,7 +34,7 @@ public:
         dKrdS.resize(np * np, 0);
         dPcdS.resize(np * np, 0);
     }
-    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
+    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) = 0;
     virtual void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) = 0;
     /// Pcow = Po - Pw
@@ -61,6 +61,9 @@ public:
     const vector<OCP_DBL>& GetdPcdS()const { return dPcdS; }
 
 protected:
+
+    vector<OCP_DBL> Scm; ///< critical saturation when phase becomes mobile / immobile
+
     OCP_DBL         Swco;  ///< saturaion of connate water
 
     vector<OCP_DBL> kr;    ///< relative permeability of phase
@@ -87,7 +90,7 @@ public:
         dKrdS[0] = 0;
         dPcdS[0] = 0;
     };
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -114,7 +117,7 @@ class FlowUnit_OW : public FlowUnit
 public:
     FlowUnit_OW() = default;
     FlowUnit_OW(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -145,7 +148,7 @@ class FlowUnit_OG : public FlowUnit
 public:
     FlowUnit_OG() = default;
     FlowUnit_OG(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -168,12 +171,13 @@ protected:
 };
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW
+// FlowUnit_OGW
 ///////////////////////////////////////////////
 
-class FlowUnit_ODGW : public FlowUnit
+class FlowUnit_OGW : public FlowUnit
 {
 public:
+
     OCP_DBL CalKro_Stone2(const OCP_DBL& krow,
                           const OCP_DBL& krog,
                           const OCP_DBL& krw,
@@ -188,20 +192,25 @@ public:
 
 protected:
     /// oil relative permeability in the presence of connate water only, used in stone2
-    OCP_DBL         krocw;
-    vector<OCP_DBL> Scm; ///< critical saturation when phase becomes mobile / immobile
+    OCP_DBL krocw;
+
+
+    // For scaling the water-oil capillary pressure curves
+    ScalePcow* scaleTerm;
+    USI        scalePcowIndex; ///< index of scalePcow
+    
 };
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW01
+// FlowUnit_OGW01
 ///////////////////////////////////////////////
 
-class FlowUnit_ODGW01 : public FlowUnit_ODGW
+class FlowUnit_OGW01 : public FlowUnit_OGW
 {
 public:
-    FlowUnit_ODGW01() = default;
-    FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
+    FlowUnit_OGW01() = default;
+    FlowUnit_OGW01(const ParamReservoir& rs_param, const USI& i);
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -243,23 +252,21 @@ protected:
 };
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW01_Miscible
+// FlowUnit_OGW01_Miscible
 ///////////////////////////////////////////////
 
-class FlowUnit_ODGW01_Miscible : public FlowUnit_ODGW01
+class FlowUnit_OGW01_Miscible : public FlowUnit_OGW01
 {
 public:
-    FlowUnit_ODGW01_Miscible(const ParamReservoir& rs_param, const USI& i)
-        : FlowUnit_ODGW01(rs_param, i)
+    FlowUnit_OGW01_Miscible(const ParamReservoir& rs_param, const USI& i)
+        : FlowUnit_OGW01(rs_param, i)
     {
         // gas is moveable all the time
         Scm[1]  = 0;
-        /*maxPcow = SWOF.GetCol(3).front();
-        minPcow = SWOF.GetCol(3).back();*/
         maxPcow = SWOF.GetMaxPc();
         minPcow = SWOF.GetMinPc();
     }
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override
     {
         misTerm   = &optFeatures.miscible;
         scaleTerm = &optFeatures.scalePcow;
@@ -278,27 +285,18 @@ protected:
 
     OCP_DBL Fk;     ///< The relative permeability interpolation parameter
     OCP_DBL Fp;     ///< The capillary pressure interpolation parameter
-    OCP_DBL surTen; ///< Surface tension
-
-    /*
-    OCP_DBL kroMis{0};  ///< miscible oil relative permeability
-    OCP_DBL krgMis{0};  ///< miscible gas relative permeability
-    OCP_DBL PcogMis{0}; ///< miscible gas capillary pressure
-    OCP_DBL socrMis{0}; ///< oil critical miscible saturations
-    OCP_DBL sgcrMis{0}; ///< gas critical miscible saturations
-    */
 };
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW02
+// FlowUnit_OGW02
 ///////////////////////////////////////////////
 
-class FlowUnit_ODGW02 : public FlowUnit_ODGW
+class FlowUnit_OGW02 : public FlowUnit_OGW
 {
 public:
-    FlowUnit_ODGW02() = default;
-    FlowUnit_ODGW02(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
+    FlowUnit_OGW02() = default;
+    FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i);
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;

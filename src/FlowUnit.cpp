@@ -115,10 +115,10 @@ void FlowUnit_OG::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 }
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW
+// FlowUnit_OGW
 ///////////////////////////////////////////////
 
-OCP_DBL FlowUnit_ODGW::CalKro_Stone2(const OCP_DBL& krow,
+OCP_DBL FlowUnit_OGW::CalKro_Stone2(const OCP_DBL& krow,
                                      const OCP_DBL& krog,
                                      const OCP_DBL& krw,
                                      const OCP_DBL& krg) const
@@ -133,7 +133,7 @@ OCP_DBL FlowUnit_ODGW::CalKro_Stone2(const OCP_DBL& krow,
     return kro;
 }
 
-OCP_DBL FlowUnit_ODGW::CalKro_Default(const OCP_DBL& Sg,
+OCP_DBL FlowUnit_OGW::CalKro_Default(const OCP_DBL& Sg,
                                       const OCP_DBL& Sw,
                                       const OCP_DBL& krog,
                                       const OCP_DBL& krow) const
@@ -147,18 +147,18 @@ OCP_DBL FlowUnit_ODGW::CalKro_Default(const OCP_DBL& Sg,
 }
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW01
+// FlowUnit_OGW01
 ///////////////////////////////////////////////
 
-FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
+FlowUnit_OGW01::FlowUnit_OGW01(const ParamReservoir& rs_param, const USI& i)
 {
     Allocate(3);
 
     SWOF.Setup(rs_param.SWOF_T.data[i]);
     SGOF.Setup(rs_param.SGOF_T.data[i]);
 
-    krocw   = SWOF.GetKrocw();
-    Swco     = SWOF.GetSwco();
+    krocw = SWOF.GetKrocw();
+    Swco  = SWOF.GetSwco();
 
     data.resize(4, 0);
     cdata.resize(4, 0);
@@ -170,7 +170,7 @@ FlowUnit_ODGW01::FlowUnit_ODGW01(const ParamReservoir& rs_param, const USI& i)
     Scm[2] = SWOF.GetSwcr();
 }
 
-void FlowUnit_ODGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL Sg = S_in[1];
     const OCP_DBL Sw = S_in[2];
@@ -193,7 +193,7 @@ void FlowUnit_ODGW01::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     pc[2] = Pcwo;
 }
 
-void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL Sg = S_in[1];
     const OCP_DBL Sw = S_in[2];
@@ -244,7 +244,7 @@ void FlowUnit_ODGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     dPcdS[8] = dPcwodSw;
 }
 
-OCP_DBL FlowUnit_ODGW01::CalKro_Stone2Der(OCP_DBL  krow,
+OCP_DBL FlowUnit_OGW01::CalKro_Stone2Der(OCP_DBL  krow,
                                           OCP_DBL  krog,
                                           OCP_DBL  krw,
                                           OCP_DBL  krg,
@@ -273,7 +273,7 @@ OCP_DBL FlowUnit_ODGW01::CalKro_Stone2Der(OCP_DBL  krow,
     return kro;
 }
 
-OCP_DBL FlowUnit_ODGW01::CalKro_DefaultDer(const OCP_DBL& Sg,
+OCP_DBL FlowUnit_OGW01::CalKro_DefaultDer(const OCP_DBL& Sg,
                                            const OCP_DBL& Sw,
                                            const OCP_DBL& krog,
                                            const OCP_DBL& krow,
@@ -294,7 +294,7 @@ OCP_DBL FlowUnit_ODGW01::CalKro_DefaultDer(const OCP_DBL& Sg,
     return kro;
 }
 
-void FlowUnit_ODGW01::Generate_SWPCWG()
+void FlowUnit_OGW01::Generate_SWPCWG()
 {
     if (SGOF.IsEmpty()) OCP_ABORT("SGOF is missing!");
     if (SWOF.IsEmpty()) OCP_ABORT("SWOF is missing!");
@@ -311,10 +311,10 @@ void FlowUnit_ODGW01::Generate_SWPCWG()
 }
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW01_Miscible
+// FlowUnit_OGW01_Miscible
 ///////////////////////////////////////////////
 
-void FlowUnit_ODGW01_Miscible::SetupScale(const OCP_USI& bId,
+void FlowUnit_OGW01_Miscible::SetupScale(const OCP_USI&  bId,
                                           OCP_DBL&       Swin,
                                           const OCP_DBL& Pcowin)
 {
@@ -322,7 +322,6 @@ void FlowUnit_ODGW01_Miscible::SetupScale(const OCP_USI& bId,
         const OCP_DBL SwInit = scaleTerm->GetSwInit(bId);
         if (SwInit <= Swco) {
             Swin = Swco;
-
 			const OCP_DBL PcowInit = GetPcowBySw(Swin);
 			scaleTerm->AssignScaleValue(
 				bId, (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
@@ -339,10 +338,10 @@ void FlowUnit_ODGW01_Miscible::SetupScale(const OCP_USI& bId,
     }
 };
 
-void FlowUnit_ODGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     if (!misTerm->CalFkFp(bId, Fk, Fp)) {
-        FlowUnit_ODGW01::CalKrPc(S_in, bId);
+        FlowUnit_OGW01::CalKrPc(S_in, bId);
     } else {
         const OCP_DBL So = S_in[0];
         const OCP_DBL Sg = S_in[1];
@@ -377,10 +376,10 @@ void FlowUnit_ODGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     }
 }
 
-void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     if (!misTerm->CalFkFp(bId, Fk, Fp)) {
-        FlowUnit_ODGW01::CalKrPcFIM(S_in, bId);
+        FlowUnit_OGW01::CalKrPcFIM(S_in, bId);
     } else {
         const OCP_DBL So = S_in[0];
         const OCP_DBL Sg = S_in[1];
@@ -438,16 +437,16 @@ void FlowUnit_ODGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bI
     }
 
     if (scaleTerm->IfScale()) {
-        pc[2] = -((-pc[2] - minPcow) * scaleTerm->GetScaleVal(bId) + minPcow);
+        pc[2]     = -((-pc[2] - minPcow) * scaleTerm->GetScaleVal(bId) + minPcow);
         dPcdS[8] *= scaleTerm->GetScaleVal(bId);
     }
 }
 
 ///////////////////////////////////////////////
-// FlowUnit_ODGW02
+// FlowUnit_OGW02
 ///////////////////////////////////////////////
 
-FlowUnit_ODGW02::FlowUnit_ODGW02(const ParamReservoir& rs_param, const USI& i)
+FlowUnit_OGW02::FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i)
 {
     Allocate(3);
 
@@ -464,7 +463,7 @@ FlowUnit_ODGW02::FlowUnit_ODGW02(const ParamReservoir& rs_param, const USI& i)
     Generate_SWPCWG();
 }
 
-void FlowUnit_ODGW02::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW02::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL So = S_in[0];
     const OCP_DBL Sg = S_in[1];
@@ -493,7 +492,7 @@ void FlowUnit_ODGW02::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
     pc[2] = Pcwo;
 }
 
-void FlowUnit_ODGW02::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit_OGW02::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL So = S_in[0];
     const OCP_DBL Sg = S_in[1];
@@ -550,7 +549,7 @@ void FlowUnit_ODGW02::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     dPcdS[8] = dPcwodSw;
 }
 
-OCP_DBL FlowUnit_ODGW02::CalKro_Stone2Der(OCP_DBL  krow,
+OCP_DBL FlowUnit_OGW02::CalKro_Stone2Der(OCP_DBL  krow,
                                           OCP_DBL  krog,
                                           OCP_DBL  krw,
                                           OCP_DBL  krg,
@@ -573,7 +572,7 @@ OCP_DBL FlowUnit_ODGW02::CalKro_Stone2Der(OCP_DBL  krow,
     return kro;
 }
 
-OCP_DBL FlowUnit_ODGW02::CalKro_DefaultDer(const OCP_DBL& Sg,
+OCP_DBL FlowUnit_OGW02::CalKro_DefaultDer(const OCP_DBL& Sg,
                                            const OCP_DBL& Sw,
                                            const OCP_DBL& krog,
                                            const OCP_DBL& krow,
@@ -592,7 +591,7 @@ OCP_DBL FlowUnit_ODGW02::CalKro_DefaultDer(const OCP_DBL& Sg,
     return kro;
 }
 
-void FlowUnit_ODGW02::Generate_SWPCWG()
+void FlowUnit_OGW02::Generate_SWPCWG()
 {
     if (SWFN.IsEmpty()) OCP_ABORT("SWFN is missing!");
     if (SGFN.IsEmpty()) OCP_ABORT("SGFN is missing!");

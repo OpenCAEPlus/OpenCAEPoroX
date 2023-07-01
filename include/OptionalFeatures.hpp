@@ -13,12 +13,13 @@
 #define __OPTIONALFEATURES_HEADER__
 
 #include "AcceleratePVT.hpp"
-#include "PhasePermeability.hpp"
+#include "OCPMiscible.hpp"
+#include "OCPScalePcow.hpp"
 
 class OptionalFeatures
 {
     friend class MixtureComp;
-    friend class FlowUnit_ODGW01_Miscible;
+    friend class FlowUnit_OGW01_Miscible;
     friend class Reservoir;
 
     // For Output
@@ -28,6 +29,7 @@ public:
     void InputParam(const ParamReservoir& param)
     {
         miscible.InputParam(param.miscstr);
+        scalePcow.InputParam(param.scalePcow);
     };
     void ResetToLastTimeStep()
     {

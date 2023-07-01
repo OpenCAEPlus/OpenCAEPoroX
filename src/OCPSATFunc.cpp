@@ -32,7 +32,9 @@ OCP_DBL OCP_SWOF::GetSwcr() const
 		 if (krw[i] >= TINY) {
 			 return Sw[i];
 		 }
-	 }	 
+	 }
+	 OCP_ABORT("WATER is immobilable in SWOF!");
+	 return -1;
 }
 
 
@@ -57,6 +59,8 @@ OCP_DBL OCP_SGOF::GetSgcr() const
 			return Sg[i];
 		}
 	}
+	OCP_ABORT("GAS is immobilable in SGOF!");
+	return -1;
 }
 
 /*----------------------------------------------------------------------------*/

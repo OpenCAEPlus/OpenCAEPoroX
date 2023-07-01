@@ -243,7 +243,7 @@ public:
     vector<OCP_DBL> P;    ///< Initial pressure of components in each grid.
     vector<OCP_DBL> Ni;   ///< Initial moles of components in each grid.
     vector<OCP_DBL> Swat; ///< Initial water saturation in each grid.
-    OCP_BOOL        ScalePcow{OCP_FALSE}; ///< whether Pcow should be scaled.
+    OCP_BOOL        scalePcow{OCP_FALSE}; ///< whether Pcow should be scaled.
 
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
