@@ -22,17 +22,17 @@
 
 
 
-OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swin, const OCP_DBL& Pcowin, function<OCP_DBL(const OCP_DBL&)> CalPcow) const
+OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const
 {
     if (swatInit <= swco) {
-        Swin = swco;
-        const OCP_DBL PcowInit = CalPcow(Swin);
+        Swinout = swco;
+        const OCP_DBL PcowInit = CalPcow(Swinout);
         return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
     }
     else {
-        Swin = swatInit;
+        Swinout = swatInit;
         if (Pcowin > 0) {
-            const OCP_DBL PcowInit = CalPcow(Swin);
+            const OCP_DBL PcowInit = CalPcow(Swinout);
             if (PcowInit > 0) {
                 return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
             }
@@ -60,22 +60,22 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv, OCP_DBL& Pcow) const
 
 
 
-USI ScalePcow::Setup(const OCP_DBL& Swco, const OCP_DBL& Pcmax, const OCP_DBL& Pcmin)
+USI ScalePcow::Setup(const ScalePcowMethodParams& params)
 {
     if (ifScale) {
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");
         scaleVal.resize(swatInit.size(), 1.0);
     }
-    scalePcowMethod.push_back(new ScalePcowMethod01(Swco, Pcmax, Pcmin));
+    scalePcowMethod.push_back(new ScalePcowMethod01(params));
 
     return scalePcowMethod.size() - 1;
 }
 
 
-void ScalePcow::SetScaleVal(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin, function<OCP_DBL(const OCP_DBL&)> CalPcow)
+void ScalePcow::SetScaleVal(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
 {
     if (ifScale) {
-        scaleVal[bId] = scalePcowMethod[mIndex]->SetScaleVal(swatInit[bId], Swin, Pcowin, CalPcow);
+        scaleVal[bId] = scalePcowMethod[mIndex]->SetScaleVal(swatInit[bId], Swinout, Pcowin);
     }  
 }
 

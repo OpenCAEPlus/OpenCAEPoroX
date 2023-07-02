@@ -125,13 +125,17 @@ void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
     miscible       = &optFeatures.miscible;
     // for scalePcow
     scalePcow      = &optFeatures.scalePcow;
-    scalePcowIndex = scalePcow->Setup(Swco, maxPcow, minPcow);
-    CalPcow        = bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1);
+    scalePcowIndex = scalePcow->Setup(
+                     ScalePcowMethodParams(
+                     Swco, 
+                     maxPcow, 
+                     minPcow, 
+                     bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1)));
 }
 
 void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin)
 {
-    scalePcow->SetScaleVal(scalePcowIndex, bId, Swin, Pcowin, CalPcow);
+    scalePcow->SetScaleVal(scalePcowIndex, bId, Swin, Pcowin);
 }
 
 

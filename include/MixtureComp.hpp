@@ -442,7 +442,7 @@ private:
     OCP_INT         lJmatWork; ///< length of JmatWork
     char            uplo{'U'};
 
-public:
+protected:
     // After Phase Equilibrium Calculation finishs, properties and some auxiliary
     // variables will be calculated.
     void AllocateOthers();

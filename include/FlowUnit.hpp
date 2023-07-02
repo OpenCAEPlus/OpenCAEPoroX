@@ -197,12 +197,11 @@ protected:
     OCP_DBL krocw;
 
     // For scaling the water-oil capillary pressure curves
-    ScalePcow* scalePcow;
+    ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
     OCP_BOOL   ifScale;        ///< If scale Pcow
     USI        scalePcowIndex; ///< index of scalePcow
     OCP_DBL    maxPcow;        ///< maximum Pcow
     OCP_DBL    minPcow;        ///< minimum Pcow
-    function<OCP_DBL(OCP_DBL)> CalPcow;
     // For miscible
     Miscible*  miscible;
 };

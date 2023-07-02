@@ -23,9 +23,34 @@ using namespace std;
 // Miscible For Compositional Model
 /////////////////////////////////////////////////////////////////////
 
+class SurfaceTensionMethod
+{
+public:
+    /// Default constructor
+    SurfaceTensionMethod() = default;
+
+};
+
+class SurfaceTensionMethod01 : public SurfaceTensionMethod
+{
+public:
+    /// Default constructor
+    SurfaceTensionMethod01() = default;
+    /// Construct with parachor
+    SurfaceTensionMethod01(const vector<OCP_DBL>& pcs) : parachor(pcs) {}
+    ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
+    vector<OCP_DBL> parachor; 
+};
+
+
+class MiscibleMethod
+{
+public:
+    MiscibleMethod() = default;
+};
+
 class Miscible
 {
-
 public:
     /// Input param from input file
     void InputParam(const Miscstr& misterm);
