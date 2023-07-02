@@ -34,7 +34,7 @@ public:
         dKrdS.resize(np * np, 0);
         dPcdS.resize(np * np, 0);
     }
-    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) = 0;
+    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     virtual void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) = 0;
     /// Pcow = Po - Pw
@@ -90,7 +90,7 @@ public:
         dKrdS[0] = 0;
         dPcdS[0] = 0;
     };
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -117,7 +117,7 @@ class FlowUnit_OW : public FlowUnit
 public:
     FlowUnit_OW() = default;
     FlowUnit_OW(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -148,7 +148,7 @@ class FlowUnit_OG : public FlowUnit
 public:
     FlowUnit_OG() = default;
     FlowUnit_OG(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -177,7 +177,9 @@ protected:
 class FlowUnit_OGW : public FlowUnit
 {
 public:
-
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override final;
+    void SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override final;
+protected:
     OCP_DBL CalKro_Stone2(const OCP_DBL& krow,
                           const OCP_DBL& krog,
                           const OCP_DBL& krw,
@@ -194,11 +196,15 @@ protected:
     /// oil relative permeability in the presence of connate water only, used in stone2
     OCP_DBL krocw;
 
-
     // For scaling the water-oil capillary pressure curves
-    ScalePcow* scaleTerm;
+    ScalePcow* scalePcow;
+    OCP_BOOL   ifScale;        ///< If scale Pcow
     USI        scalePcowIndex; ///< index of scalePcow
-    
+    OCP_DBL    maxPcow;        ///< maximum Pcow
+    OCP_DBL    minPcow;        ///< minimum Pcow
+    function<OCP_DBL(OCP_DBL)> CalPcow;
+    // For miscible
+    Miscible*  miscible;
 };
 
 ///////////////////////////////////////////////
@@ -210,20 +216,17 @@ class FlowUnit_OGW01 : public FlowUnit_OGW
 public:
     FlowUnit_OGW01() = default;
     FlowUnit_OGW01(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
-    void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     virtual void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
-    OCP_DBL CalKro_Stone2Der(OCP_DBL  krow,
-                             OCP_DBL  krog,
-                             OCP_DBL  krw,
-                             OCP_DBL  krg,
-                             OCP_DBL  dkrwdSw,
-                             OCP_DBL  dkrowdSw,
-                             OCP_DBL  dkrgdSg,
-                             OCP_DBL  dkrogdSg,
+    OCP_DBL CalKro_Stone2Der(const OCP_DBL&  krow,
+                             const OCP_DBL&  krog,
+                             const OCP_DBL&  krw,
+                             const OCP_DBL&  krg,
+                             const OCP_DBL&  dkrwdSw,
+                             const OCP_DBL&  dkrowdSw,
+                             const OCP_DBL&  dkrgdSg,
+                             const OCP_DBL&  dkrogdSg,
                              OCP_DBL& out_dkrodSw,
                              OCP_DBL& out_dkrodSg) const;
     OCP_DBL CalKro_DefaultDer(const OCP_DBL& Sg,
@@ -266,22 +269,10 @@ public:
         maxPcow = SWOF.GetMaxPc();
         minPcow = SWOF.GetMinPc();
     }
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override
-    {
-        misTerm   = &optFeatures.miscible;
-        scaleTerm = &optFeatures.scalePcow;
-        scaleTerm->Setup();
-    };
-    void SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override;
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
 protected:
-    ScalePcow* scaleTerm;
-    Miscible*  misTerm;
-
-    OCP_DBL maxPcow;
-    OCP_DBL minPcow;
 
     OCP_DBL Fk;     ///< The relative permeability interpolation parameter
     OCP_DBL Fp;     ///< The capillary pressure interpolation parameter
@@ -296,19 +287,16 @@ class FlowUnit_OGW02 : public FlowUnit_OGW
 public:
     FlowUnit_OGW02() = default;
     FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures, const USI& i) override{};
-    void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL CalKro_Stone2Der(OCP_DBL  krow,
-                             OCP_DBL  krog,
-                             OCP_DBL  krw,
-                             OCP_DBL  krg,
-                             OCP_DBL  dkrwdSw,
-                             OCP_DBL  dkrowdSo,
-                             OCP_DBL  dkrgdSg,
-                             OCP_DBL  dkrogdSo,
+    OCP_DBL CalKro_Stone2Der(const OCP_DBL&  krow,
+                             const OCP_DBL&  krog,
+                             const OCP_DBL&  krw,
+                             const OCP_DBL&  krg,
+                             const OCP_DBL&  dkrwdSw,
+                             const OCP_DBL&  dkrowdSo,
+                             const OCP_DBL&  dkrgdSg,
+                             const OCP_DBL&  dkrogdSo,
                              OCP_DBL& out_dkrodSo) const;
     OCP_DBL CalKro_DefaultDer(const OCP_DBL& Sg,
                               const OCP_DBL& Sw,

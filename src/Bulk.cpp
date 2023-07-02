@@ -468,7 +468,7 @@ void Bulk::SetupOptionalFeatures(OptionalFeatures& optFeatures)
         flashCal[i]->SetupOptionalFeatures(optFeatures);
     }
     for (USI i = 0; i < NTSFUN; i++) {
-        flow[i]->SetupOptionalFeatures(optFeatures, i);
+        flow[i]->SetupOptionalFeatures(optFeatures);
     }
 }
 

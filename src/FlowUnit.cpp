@@ -118,6 +118,23 @@ void FlowUnit_OG::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 // FlowUnit_OGW
 ///////////////////////////////////////////////
 
+
+void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
+{
+    // for miscible
+    miscible       = &optFeatures.miscible;
+    // for scalePcow
+    scalePcow      = &optFeatures.scalePcow;
+    scalePcowIndex = scalePcow->Setup(Swco, maxPcow, minPcow);
+    CalPcow        = bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1);
+}
+
+void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin)
+{
+    scalePcow->SetScaleVal(scalePcowIndex, bId, Swin, Pcowin, CalPcow);
+}
+
+
 OCP_DBL FlowUnit_OGW::CalKro_Stone2(const OCP_DBL& krow,
                                      const OCP_DBL& krog,
                                      const OCP_DBL& krw,
@@ -244,16 +261,16 @@ void FlowUnit_OGW01::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     dPcdS[8] = dPcwodSw;
 }
 
-OCP_DBL FlowUnit_OGW01::CalKro_Stone2Der(OCP_DBL  krow,
-                                          OCP_DBL  krog,
-                                          OCP_DBL  krw,
-                                          OCP_DBL  krg,
-                                          OCP_DBL  dkrwdSw,
-                                          OCP_DBL  dkrowdSw,
-                                          OCP_DBL  dkrgdSg,
-                                          OCP_DBL  dkrogdSg,
-                                          OCP_DBL& out_dkrodSw,
-                                          OCP_DBL& out_dkrodSg) const
+OCP_DBL FlowUnit_OGW01::CalKro_Stone2Der(const OCP_DBL& krow,
+                                         const OCP_DBL& krog,
+                                         const OCP_DBL& krw,
+                                         const OCP_DBL& krg,
+                                         const OCP_DBL& dkrwdSw,
+                                         const OCP_DBL& dkrowdSw,
+                                         const OCP_DBL& dkrgdSg,
+                                         const OCP_DBL& dkrogdSg,
+                                         OCP_DBL& out_dkrodSw,
+                                         OCP_DBL& out_dkrodSg) const
 {
     OCP_DBL kro, dkrodSw, dkrodSg;
     kro = krocw * ((krow / krocw + krw) * (krog / krocw + krg) - (krw + krg));
@@ -274,13 +291,13 @@ OCP_DBL FlowUnit_OGW01::CalKro_Stone2Der(OCP_DBL  krow,
 }
 
 OCP_DBL FlowUnit_OGW01::CalKro_DefaultDer(const OCP_DBL& Sg,
-                                           const OCP_DBL& Sw,
-                                           const OCP_DBL& krog,
-                                           const OCP_DBL& krow,
-                                           const OCP_DBL& dkrogSg,
-                                           const OCP_DBL& dkrowSw,
-                                           OCP_DBL&       dkroSg,
-                                           OCP_DBL&       dkroSw) const
+                                          const OCP_DBL& Sw,
+                                          const OCP_DBL& krog,
+                                          const OCP_DBL& krow,
+                                          const OCP_DBL& dkrogSg,
+                                          const OCP_DBL& dkrowSw,
+                                          OCP_DBL&       dkroSg,
+                                          OCP_DBL&       dkroSw) const
 {
     const OCP_DBL tmp = Sg + Sw - Swco;
     if (tmp <= TINY) {
@@ -314,33 +331,9 @@ void FlowUnit_OGW01::Generate_SWPCWG()
 // FlowUnit_OGW01_Miscible
 ///////////////////////////////////////////////
 
-void FlowUnit_OGW01_Miscible::SetupScale(const OCP_USI&  bId,
-                                          OCP_DBL&       Swin,
-                                          const OCP_DBL& Pcowin)
-{
-    if (scaleTerm->IfScale()) {
-        const OCP_DBL SwInit = scaleTerm->GetSwInit(bId);
-        if (SwInit <= Swco) {
-            Swin = Swco;
-			const OCP_DBL PcowInit = GetPcowBySw(Swin);
-			scaleTerm->AssignScaleValue(
-				bId, (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
-        } else {
-            Swin = SwInit;
-            if (Pcowin > 0) {
-                const OCP_DBL PcowInit = GetPcowBySw(Swin);
-                if (PcowInit > 0) {
-                    scaleTerm->AssignScaleValue(
-                        bId, (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow));
-                }
-            }
-        }
-    }
-};
-
 void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    if (!misTerm->CalFkFp(bId, Fk, Fp)) {
+    if (!miscible->CalFkFp(bId, Fk, Fp)) {
         FlowUnit_OGW01::CalKrPc(S_in, bId);
     } else {
         const OCP_DBL So = S_in[0];
@@ -371,14 +364,12 @@ void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
         pc[2] = Pcwo;
     }
 
-    if (scaleTerm->IfScale()) {
-        pc[2] = -((-pc[2] - minPcow) * scaleTerm->GetScaleVal(bId) + minPcow);
-    }
+    scalePcow->Scale(scalePcowIndex, bId, pc[2]);
 }
 
 void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    if (!misTerm->CalFkFp(bId, Fk, Fp)) {
+    if (!miscible->CalFkFp(bId, Fk, Fp)) {
         FlowUnit_OGW01::CalKrPcFIM(S_in, bId);
     } else {
         const OCP_DBL So = S_in[0];
@@ -436,10 +427,7 @@ void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId
         dPcdS[8] = dPcwodSw;
     }
 
-    if (scaleTerm->IfScale()) {
-        pc[2]     = -((-pc[2] - minPcow) * scaleTerm->GetScaleVal(bId) + minPcow);
-        dPcdS[8] *= scaleTerm->GetScaleVal(bId);
-    }
+    scalePcow->Scale(scalePcowIndex, bId, pc[2], dPcdS[8]);
 }
 
 ///////////////////////////////////////////////
@@ -549,15 +537,15 @@ void FlowUnit_OGW02::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
     dPcdS[8] = dPcwodSw;
 }
 
-OCP_DBL FlowUnit_OGW02::CalKro_Stone2Der(OCP_DBL  krow,
-                                          OCP_DBL  krog,
-                                          OCP_DBL  krw,
-                                          OCP_DBL  krg,
-                                          OCP_DBL  dkrwdSw,
-                                          OCP_DBL  dkrowdSo,
-                                          OCP_DBL  dkrgdSg,
-                                          OCP_DBL  dkrogdSo,
-                                          OCP_DBL& out_dkrodSo) const
+OCP_DBL FlowUnit_OGW02::CalKro_Stone2Der(const OCP_DBL& krow,
+                                         const OCP_DBL&  krog,
+                                         const OCP_DBL&  krw,
+                                         const OCP_DBL&  krg,
+                                         const OCP_DBL&  dkrwdSw,
+                                         const OCP_DBL&  dkrowdSo,
+                                         const OCP_DBL&  dkrgdSg,
+                                         const OCP_DBL&  dkrogdSo,
+                                         OCP_DBL& out_dkrodSo) const
 {
     OCP_DBL kro, dKrodSo;
 
