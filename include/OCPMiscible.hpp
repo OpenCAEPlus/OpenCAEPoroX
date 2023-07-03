@@ -23,23 +23,75 @@ using namespace std;
 // Miscible For Compositional Model
 /////////////////////////////////////////////////////////////////////
 
+class SurfaceTensionMethodParams
+{
+    friend class SurfaceTensionMethod01;
+public:
+    /// Default constructor
+    SurfaceTensionMethodParams() = default;
+    SurfaceTensionMethodParams(
+        const vector<OCP_DBL>& parachorin,
+        const OCP_DBL*         xvin,
+        const OCP_DBL*         xlin,
+        const OCP_DBL*         bvin,
+        const OCP_DBL*         blin,
+        const USI*             NPin
+    ) 
+    {
+        parachor = parachorin;
+        xv       = xvin;
+        xl       = xlin;
+        bv       = bvin;
+        bl       = blin;
+        NP       = NPin;
+    }
+protected:
+    vector<OCP_DBL> parachor;  ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
+    const OCP_DBL*  xv;        ///< molar fractions of vapour phase
+    const OCP_DBL*  xl;        ///< molar fractions of liquid phase
+    const OCP_DBL*  bv;        ///< molar density of vapour phase
+    const OCP_DBL*  bl;        ///< molar density of liquid phase
+    const USI*      NP;        ///< num of present phases
+};
+
+
 class SurfaceTensionMethod
 {
 public:
     /// Default constructor
     SurfaceTensionMethod() = default;
+    /// Calculate surface tensions
+    virtual OCP_DBL CalSurfaceTension() = 0;
 
+protected:
+    const USI* NP;     ///< num of present phases
 };
 
+/// Macleod - Sugden correlation
 class SurfaceTensionMethod01 : public SurfaceTensionMethod
 {
 public:
     /// Default constructor
     SurfaceTensionMethod01() = default;
     /// Construct with parachor
-    SurfaceTensionMethod01(const vector<OCP_DBL>& pcs) : parachor(pcs) {}
-    ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
-    vector<OCP_DBL> parachor; 
+    SurfaceTensionMethod01(const SurfaceTensionMethodParams& params)
+    {
+        parachor = params.parachor;
+        xv       = params.xv;
+        xl       = params.xl;
+        bv       = params.bv;
+        bl       = params.bl;
+        NP       = params.NP;
+
+        NC       = parachor.size();
+    }
+    OCP_DBL CalSurfaceTension();
+    vector<OCP_DBL> parachor; ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
+    const OCP_DBL* xv;        ///< molar fractions of vapour phase
+    const OCP_DBL* xl;        ///< molar fractions of liquid phase
+    const OCP_DBL* bv;        ///< molar density of vapour phase
+    const OCP_DBL* bl;        ///< molar density of liquid phase
+    USI            NC;        ///< num of components
 };
 
 
@@ -55,9 +107,9 @@ public:
     /// Input param from input file
     void InputParam(const Miscstr& misterm);
     /// Allocate memory for Miscible term
-    void Setup(const OCP_USI& numBulk);
-    /// Return ifUseMiscible
-    OCP_BOOL IfUseMiscible() const { return ifUseMiscible; }
+    USI Setup(const OCP_USI& numBulk, const SurfaceTensionMethodParams& params);
+    /// Calculate SurfaceTension
+    void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex);
     /// Assign value to surTen
     void AssignValue(const OCP_USI& n, const OCP_DBL& v) { surTen[n] = v; }
     /// Calculate Fk, Fp and return if miscible
@@ -74,9 +126,8 @@ public:
     OCP_DBL GetFp(const OCP_USI& n) const { return Fp[n]; }
 
 protected:
-    OCP_BOOL ifSetup{OCP_FALSE}; ///< Only one setup is needed.
     /// Miscible treatment of hydrocarbons, only used in compositional Model.
-    OCP_BOOL ifUseMiscible{OCP_FALSE};
+    OCP_BOOL ifMiscible{OCP_FALSE};
     /// The reference surface tension - flow is immiscible when the surface tension
     //  is greater than or equal to this value
     OCP_DBL surTenRef;
@@ -88,6 +139,10 @@ protected:
 
     // Last time step
     vector<OCP_DBL> lsurTen; ///< last surTen.
+
+    /// Method
+protected:
+    vector<SurfaceTensionMethod*> surfaceTensionMethod;
 };
 
 #endif /* end if __PHASEPERMEABILITY_HEADER__ */

@@ -36,7 +36,7 @@ public:
     }
     virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     virtual void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) = 0;
+    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) = 0;
     /// Pcow = Po - Pw
     virtual OCP_DBL GetPcowBySw(const OCP_DBL& sw)   = 0;
     virtual OCP_DBL GetSwByPcow(const OCP_DBL& pcow) = 0;
@@ -92,7 +92,7 @@ public:
     };
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
+    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
 
@@ -119,7 +119,7 @@ public:
     FlowUnit_OW(const ParamReservoir& rs_param, const USI& i);
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
+    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
@@ -150,7 +150,7 @@ public:
     FlowUnit_OG(const ParamReservoir& rs_param, const USI& i);
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override{};
+    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg);}
@@ -178,7 +178,7 @@ class FlowUnit_OGW : public FlowUnit
 {
 public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override final;
-    void SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin) override final;
+    void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override final;
 protected:
     OCP_DBL CalKro_Stone2(const OCP_DBL& krow,
                           const OCP_DBL& krog,
@@ -194,11 +194,10 @@ protected:
 
 protected:
     /// oil relative permeability in the presence of connate water only, used in stone2
-    OCP_DBL krocw;
+    OCP_DBL    krocw;
 
     // For scaling the water-oil capillary pressure curves
     ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
-    OCP_BOOL   ifScale;        ///< If scale Pcow
     USI        scalePcowIndex; ///< index of scalePcow
     OCP_DBL    maxPcow;        ///< maximum Pcow
     OCP_DBL    minPcow;        ///< minimum Pcow

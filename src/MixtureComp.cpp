@@ -4727,16 +4727,18 @@ void MixtureComp::SetupOptionalFeatures(OptionalFeatures& optFeatures)
 {
     skipSta = &optFeatures.skipStaAnaly;
     if (skipSta->IfUseSkip()) {
-        skipSta->Setup(optFeatures.numBulk, numPhase - 1, numCom - 1);
         AllocateSkip();
+        skipSta->Setup(optFeatures.numBulk, numPhase - 1, numCom - 1);       
     }
     misTerm = &optFeatures.miscible;
-    if (misTerm->IfUseMiscible() == ifUseMiscible == OCP_TRUE) {
-        misTerm->Setup(optFeatures.numBulk);
-    } else if (misTerm->IfUseMiscible() != ifUseMiscible) {
-        OCP_ABORT(
-            "Keywords MISCIBLE, PARACHOR, MISCSTR aren't been given simultaneously!");
-    }
+    stMethodIndex =  misTerm->Setup(optFeatures.numBulk, 
+                     SurfaceTensionMethodParams(
+                     parachor,
+                     x[0].data(),
+                     x[1].data(),
+                     &xiC[0],
+                     &xiC[1],
+                     &NP));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -4858,30 +4860,15 @@ void MixtureComp::CalSkipForNextStep()
 
 void MixtureComp::InputMiscibleParam(const ComponentParam& param, const USI& tarId)
 {
-    ifUseMiscible = param.miscible;
     if (param.Parachor.activity) parachor = param.Parachor.data[tarId];
-    if (ifUseMiscible && parachor.empty()) {
-        OCP_ABORT("PARACHOR has not been Input!");
+    if (param.miscible && parachor.size() != NC) {
+        OCP_ABORT("PARACHOR has not been Input Correctly!");
     }
 }
 
 void MixtureComp::CalSurfaceTension()
 {
-    // be careful!
-    // phase molar densities should be converted into gm-M/cc here
-    if (ifUseMiscible) {
-        if (NP == 1)
-            surTen = 100;
-        else {
-            const OCP_DBL b0 = xiC[0] * CONV7;
-            const OCP_DBL b1 = xiC[1] * CONV7;
-            surTen           = 0;
-            for (USI i = 0; i < NC; i++)
-                surTen += parachor[i] * (b0 * x[0][i] - b1 * x[1][i]);
-            surTen = pow(surTen, 4.0);
-        }
-        misTerm->AssignValue(bulkId, surTen);
-    }
+    misTerm->CalSurfaceTension(bulkId, stMethodIndex);
 }
 
 /*----------------------------------------------------------------------------*/

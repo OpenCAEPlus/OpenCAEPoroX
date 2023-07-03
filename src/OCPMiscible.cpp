@@ -11,6 +11,23 @@
 
 #include "OCPMiscible.hpp"
 
+
+
+OCP_DBL SurfaceTensionMethod01::CalSurfaceTension()
+{
+    if (*NP == 1)
+        return 100;
+    else {
+        const OCP_DBL Bv = *bv * CONV7;
+        const OCP_DBL Bl = *bl * CONV7;
+        OCP_DBL surTen = 0;
+        for (USI i = 0; i < NC; i++)
+            surTen += parachor[i] * (Bv * xv[i] - Bl * xl[i]);
+        return pow(surTen, 4.0);
+    }
+}
+
+
 /////////////////////////////////////////////////////////////////////
 // Miscible For Compositional Model
 /////////////////////////////////////////////////////////////////////
@@ -19,7 +36,7 @@ void Miscible::InputParam(const Miscstr& misterm)
 {
     const USI len = misterm.surTenRef.size();
     if (len > 0) {
-        ifUseMiscible = OCP_TRUE;
+        ifMiscible = OCP_TRUE;
         surTenRef     = misterm.surTenRef[0];
         surTenPc      = 1;
         if (len > 2) {
@@ -29,19 +46,31 @@ void Miscible::InputParam(const Miscstr& misterm)
     }
 }
 
-void Miscible::Setup(const OCP_USI& numBulk)
+USI Miscible::Setup(const OCP_USI& numBulk, const SurfaceTensionMethodParams& params)
 {
-    if (!ifSetup) {
-        ifSetup = OCP_TRUE;
-
+    if (ifMiscible) {
         surTen.resize(numBulk);
         Fk.resize(numBulk);
         Fp.resize(numBulk);
 
         // Last time step
         lsurTen.resize(numBulk);
+
+        surfaceTensionMethod.push_back(new SurfaceTensionMethod01(params));
+
+        return surfaceTensionMethod.size() - 1;
+    }
+    return 0;
+}
+
+
+void Miscible::CalSurfaceTension(const OCP_USI& bId, const USI& mIndex)
+{
+    if (ifMiscible) {
+        surTen[bId] = surfaceTensionMethod[mIndex]->CalSurfaceTension();
     }
 }
+
 
 OCP_BOOL Miscible::CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp)
 {

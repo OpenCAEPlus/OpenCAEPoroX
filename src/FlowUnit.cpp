@@ -130,12 +130,14 @@ void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
                      Swco, 
                      maxPcow, 
                      minPcow, 
-                     bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1)));
+                     bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1),
+                     &pc[2],
+                     &dPcdS[8]));
 }
 
-void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swin, const OCP_DBL& Pcowin)
+void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
 {
-    scalePcow->SetScaleVal(scalePcowIndex, bId, Swin, Pcowin);
+    scalePcow->SetScaleVal(bId, scalePcowIndex, Swinout, Pcowin);
 }
 
 
@@ -368,7 +370,7 @@ void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
         pc[2] = Pcwo;
     }
 
-    scalePcow->Scale(scalePcowIndex, bId, pc[2]);
+    scalePcow->Scale(bId, scalePcowIndex);
 }
 
 void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
@@ -431,7 +433,7 @@ void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId
         dPcdS[8] = dPcwodSw;
     }
 
-    scalePcow->Scale(scalePcowIndex, bId, pc[2], dPcdS[8]);
+    scalePcow->ScaleDer(bId, scalePcowIndex);
 }
 
 ///////////////////////////////////////////////

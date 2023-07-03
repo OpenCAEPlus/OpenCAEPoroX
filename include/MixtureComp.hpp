@@ -572,14 +572,9 @@ protected:
     void CalSurfaceTension();
 
 protected:
-    Miscible* misTerm; ///< Miscible term pointing to OptionalFeature
-
-    OCP_BOOL ifUseMiscible; ///< Miscible treatment of hydrocarbon phases for
-                            ///< compositional Model
-
-    OCP_DBL surTen; ///< Surface tension between hydrocarbons phases
-
-    vector<OCP_DBL> parachor; ///< Parachor params of hydrocarbon components
+    Miscible*       misTerm;       ///< Miscible term pointing to OptionalFeature
+    USI             stMethodIndex; ///< method index of surface tension calculation
+    vector<OCP_DBL> parachor;      ///< Parachor params of hydrocarbon components
 };
 
 /// Return the sign of double di

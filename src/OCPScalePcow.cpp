@@ -21,7 +21,6 @@
 ////////////////////////////////////////////////////////////////
 
 
-
 OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const
 {
     if (swatInit <= swco) {
@@ -41,16 +40,16 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 }
 
 
-void ScalePcowMethod01::Scale(const OCP_DBL& sv, OCP_DBL& Pcow, OCP_DBL& dPcowdSw) const
+void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 {
-    Pcow      = -((-Pcow - minPcow) * sv + minPcow);
-    dPcowdSw *= sv;
+    *Pcow_out      = -((-*Pcow_out - minPcow) * sv + minPcow);
+    *dPcowdSw_out *= sv;
 }
 
 
-void ScalePcowMethod01::Scale(const OCP_DBL& sv, OCP_DBL& Pcow) const
+void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 {
-    Pcow = -((-Pcow - minPcow) * sv + minPcow);
+    *Pcow_out = -((-*Pcow_out - minPcow) * sv + minPcow);
 }
 
 
@@ -59,20 +58,22 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv, OCP_DBL& Pcow) const
 ////////////////////////////////////////////////////////////////
 
 
-
 USI ScalePcow::Setup(const ScalePcowMethodParams& params)
 {
     if (ifScale) {
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");
         scaleVal.resize(swatInit.size(), 1.0);
-    }
-    scalePcowMethod.push_back(new ScalePcowMethod01(params));
 
-    return scalePcowMethod.size() - 1;
+        scalePcowMethod.push_back(new ScalePcowMethod01(params));
+        return scalePcowMethod.size() - 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 
-void ScalePcow::SetScaleVal(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
+void ScalePcow::SetScaleVal(const OCP_USI& bId, const USI& mIndex, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
 {
     if (ifScale) {
         scaleVal[bId] = scalePcowMethod[mIndex]->SetScaleVal(swatInit[bId], Swinout, Pcowin);
@@ -80,17 +81,17 @@ void ScalePcow::SetScaleVal(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Swin
 }
 
 
-void ScalePcow::Scale(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Pcow, OCP_DBL& dPcowdSw) const
+void ScalePcow::ScaleDer(const OCP_USI& bId, const USI& mIndex) const
 {
     if (ifScale) {
-        scalePcowMethod[mIndex]->Scale(scaleVal[bId], Pcow, dPcowdSw);
+        scalePcowMethod[mIndex]->ScaleDer(scaleVal[bId]);
     }
 }
 
-void ScalePcow::Scale(const USI& mIndex, const OCP_USI& bId, OCP_DBL& Pcow) const
+void ScalePcow::Scale(const OCP_USI& bId, const USI& mIndex) const
 {
     if (ifScale) {
-        scalePcowMethod[mIndex]->Scale(scaleVal[bId], Pcow);
+        scalePcowMethod[mIndex]->Scale(scaleVal[bId]);
     }
 }
 
