@@ -29,7 +29,7 @@ class OptionalFeatures
 public:
     void InputParam(const ParamReservoir& param)
     {
-        miscible.InputParam(param.miscstr);
+        miscible.InputParam(param.miscstr.ifMiscible);
         scalePcow.InputParam(param.scalePcow);
     };
     void ResetToLastTimeStep()

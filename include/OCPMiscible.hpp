@@ -165,7 +165,7 @@ class Miscible
 {
 public:
     /// Input param from input file
-    void InputParam(const Miscstr& misterm);
+    void InputParam(const OCP_BOOL& ifmiscible);
     /// Setup for Miscible terms
     USI Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams);
     /// Calculate Misscible Factor
@@ -186,12 +186,6 @@ public:
 protected:
     /// Miscible treatment of hydrocarbons, only used in compositional Model.
     OCP_BOOL ifMiscible{OCP_FALSE};
-    /// The reference surface tension - flow is immiscible when the surface tension
-    //  is greater than or equal to this value
-    OCP_DBL surTenRef;
-    OCP_DBL surTenMaxPc; ///< maximum surface tension for capillary pressure calculation
-    OCP_DBL surTenPc;    ///< Maximum surface tension for capillary pressure / surTenRef
-    OCP_DBL Fkexp{ 0.25 };    ///< Exponent set used to calculate Fk
     vector<OCP_DBL> surTen; ///< Surface tensions between hydrocarbon phases.
     vector<OCP_DBL> Fk;     ///< miscibility factor for permeability
     vector<OCP_DBL> Fp;     ///< miscibility factor for capillary pressure

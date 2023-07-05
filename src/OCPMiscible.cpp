@@ -45,14 +45,9 @@ USI MiscibleFcator::Setup(const MisFacMethodParams& param)
 }
 
 
-void Miscible::InputParam(const Miscstr& misterm)
+void Miscible::InputParam(const OCP_BOOL& ifmiscible)
 {
-    ifMiscible  = misterm.ifMiscible;
-    surTenRef   = misterm.surTenRef;
-    surTenMaxPc = misterm.surTenPc;
-    if (surTenMaxPc < 0) surTenMaxPc = surTenRef;
-    surTenPc    = 1;
-    Fkexp       = misterm.surTenExp;
+    ifMiscible  = ifmiscible;
 }
 
 USI Miscible::Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams)
@@ -86,7 +81,6 @@ void Miscible::CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex)
         surTen[bId] = sT.CalSurfaceTension(mIndex);
         mF.CalculateMiscibleFactor(mIndex, surTen[bId], Fk[bId], Fp[bId]);
     }
-
 }
 
 /// Coats expression
