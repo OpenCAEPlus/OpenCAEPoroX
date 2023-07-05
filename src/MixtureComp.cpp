@@ -110,8 +110,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
         lbc *= 10;
     }
 
-    InputMiscibleParam(param, tarId);
-
     CallId();
 
     USI len = NC * NC;
@@ -4590,7 +4588,7 @@ void MixtureComp::CalVfiVfp_full03()
                 }
                 nijPN += numCom;
             }
-            // don't skip water, no water in dXsdXp here.
+            // skip water, no water in dXsdXp here.
         }
     }
 }
@@ -4623,14 +4621,6 @@ USI MixtureComp::CubicRoot(const OCP_DBL&  a,
 
         sort(Ztmp.begin(), Ztmp.end());
 
-        // vector<OCP_DBL> e(3, 0);
-        // for (USI i = 0; i < 3; i++) {
-        //	e[i] = Ztmp[i] * (Ztmp[i] * (Ztmp[i] + a) + b) + c;
-        //}
-        // for (USI i = 0; i < 3; i++) {
-        //	cout << scientific << e[i] << "\t";
-        //}
-
         return 3;
     } else {
         OCP_DBL tmp1 = -R + sqrt(M);
@@ -4642,15 +4632,6 @@ USI MixtureComp::CubicRoot(const OCP_DBL&  a,
         if (NTflag) {
             NTcubicroot(Ztmp[0], a, b, c);
         }
-
-        // vector<OCP_DBL> e(1, 0);
-        // for (USI i = 0; i < 1; i++) {
-        //	e[i] = Ztmp[i] * (Ztmp[i] * (Ztmp[i] + a) + b) + c;
-        //}
-        // for (USI i = 0; i < 1; i++) {
-        //	cout << scientific << e[i] << "\t";
-        //}
-
         return 1;
     }
 }
@@ -4701,23 +4682,6 @@ void NTcubicroot(OCP_DBL& root, const OCP_DBL& a, const OCP_DBL& b, const OCP_DB
     root = optroot;
 }
 
-/////////////////////////////////////////////////////////////////////
-// For Output
-/////////////////////////////////////////////////////////////////////
-
-void MixtureComp::OutMixtureIters() const
-{
-    cout << "SSMSTA:     " << setw(12) << itersSSMSTA << setw(15)
-         << itersSSMSTA * 1.0 / countsSSMSTA << endl;
-    cout << "NRSTA:      " << setw(12) << itersNRSTA << setw(15)
-         << itersNRSTA * 1.0 / countsNRSTA << endl;
-    cout << "SSMSP:      " << setw(12) << itersSSMSP << setw(15)
-         << itersSSMSP * 1.0 / countsSSMSP << endl;
-    cout << "NRSP:       " << setw(12) << itersNRSP << setw(15)
-         << itersNRSP * 1.0 / countsNRSP << endl;
-    cout << "NRRR:       " << setw(12) << itersRR << setw(15)
-         << itersRR * 1.0 / itersSSMSP << endl;
-}
 
 /////////////////////////////////////////////////////////////////////
 // Optional Features
@@ -4730,15 +4694,10 @@ void MixtureComp::SetupOptionalFeatures(OptionalFeatures& optFeatures)
         AllocateSkip();
         skipSta->Setup(optFeatures.numBulk, numPhase - 1, numCom - 1);       
     }
-    misTerm = &optFeatures.miscible;
-    stMethodIndex =  misTerm->Setup(optFeatures.numBulk, 
-                     SurfaceTensionMethodParams(
-                     parachor,
-                     x[0].data(),
-                     x[1].data(),
-                     &xiC[0],
-                     &xiC[1],
-                     &NP));
+    miscible = &optFeatures.miscible;
+    mIndex   =  miscible->Setup(optFeatures.numBulk, 
+                     SurTenMethodParams(stm01Params), 
+                     MisFacMethodParams(mfm01Params));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -4858,17 +4817,48 @@ void MixtureComp::CalSkipForNextStep()
 // Miscible
 /////////////////////////////////////////////////////////////////////
 
-void MixtureComp::InputMiscibleParam(const ComponentParam& param, const USI& tarId)
+void MixtureComp::InputMiscibleParam(const ParamReservoir& rs_param, const USI& tarId)
 {
-    if (param.Parachor.activity) parachor = param.Parachor.data[tarId];
-    if (param.miscible && parachor.size() != NC) {
-        OCP_ABORT("PARACHOR has not been Input Correctly!");
+    // Input parachor
+    const Miscstr&        miscstr   = rs_param.miscstr;
+    const ComponentParam& compParam = rs_param.comsParam;
+    if (miscstr.ifMiscible) {
+        if (compParam.parachor.activity) {
+            if (compParam.parachor.data[tarId].size() == NC) {
+                stm01Params = SurTenMethod01Params(compParam.parachor.data[tarId], x[0].data(), x[1].data(),
+                                               &xiC[0], &xiC[1], &NP);
+            }
+            else {
+                OCP_ABORT("PARACHOR has not been Input Correctly!");
+            }
+        }
+        // Input surface tension term
+        mfm01Params = MisFacMethod01Params(miscstr.surTenRef, miscstr.surTenExp, miscstr.surTenPc);
     }
 }
 
 void MixtureComp::CalSurfaceTension()
 {
-    misTerm->CalSurfaceTension(bulkId, stMethodIndex);
+    miscible->CalMiscibleFactor(bulkId, mIndex);
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// For Output
+/////////////////////////////////////////////////////////////////////
+
+void MixtureComp::OutMixtureIters() const
+{
+    cout << "SSMSTA:     " << setw(12) << itersSSMSTA << setw(15)
+        << itersSSMSTA * 1.0 / countsSSMSTA << endl;
+    cout << "NRSTA:      " << setw(12) << itersNRSTA << setw(15)
+        << itersNRSTA * 1.0 / countsNRSTA << endl;
+    cout << "SSMSP:      " << setw(12) << itersSSMSP << setw(15)
+        << itersSSMSP * 1.0 / countsSSMSP << endl;
+    cout << "NRSP:       " << setw(12) << itersNRSP << setw(15)
+        << itersNRSP * 1.0 / countsNRSP << endl;
+    cout << "NRRR:       " << setw(12) << itersRR << setw(15)
+        << itersRR * 1.0 / itersSSMSP << endl;
 }
 
 /*----------------------------------------------------------------------------*/

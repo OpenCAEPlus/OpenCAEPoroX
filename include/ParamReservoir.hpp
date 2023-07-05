@@ -129,7 +129,7 @@ public:
     Type_A_r<vector<OCP_DBL>> OmegaA;   ///< OMEGA_A of hydrocarbon components
     Type_A_r<vector<OCP_DBL>> OmegaB;   ///< OMEGA_B of hydrocarbon components
     Type_A_r<vector<OCP_DBL>> Vshift;   ///< Volume shift of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Parachor; ///< PARACHOR of hydrocarbon components
+    Type_A_r<vector<OCP_DBL>> parachor; ///< PARACHOR of hydrocarbon components
     // for viscosity calculation
     Type_A_r<vector<OCP_DBL>>
         Vcvis; ///< Critical volume used for viscosity calculations only.
@@ -182,10 +182,6 @@ public:
     vector<OCP_DBL> Pref; ///< reference pressure
     vector<OCP_DBL> Tref; ///< reference temperature
 
-    // Miscibility
-    OCP_BOOL miscible{OCP_FALSE}; ///< Miscible treatment of hydrocarbons, used in
-                                  ///< compositional Model.
-
     vector<string> SSMparamSTA; ///< Params for Solving Phase Spliting with SSM
     vector<string> NRparamSTA;  ///< Params for Solving Phase Spliting with NR
     vector<string> SSMparamSP;  ///< Params for Solving Phase Spliting with SSM
@@ -197,11 +193,12 @@ public:
 class Miscstr
 {
 public:
-    vector<OCP_DBL> surTenRef;
-    // 0th entry: reference surface tension - flow is immiscible when the surface
-    // tension is greater than or equal to this value. 1th entry: maximum surface
-    // tension expected, it should be greater than surTenRef. 2th entry: maximum surface
-    // tension used to scale the input capillary pressure curves.
+    // vector<OCP_DBL> surTenRef;
+    OCP_BOOL        ifMiscible{ OCP_FALSE };
+    OCP_DBL         surTenRef{ -1 };  ///< reference surface tension - flow is immiscible when the surface tension is greater than or equal to this value.
+    OCP_DBL         surTenEpt{ -1 };  ///< maximum surface tension expected, it should be greater than surTenRef.
+    OCP_DBL         surTenPc{ -1 };   ///< maximum surface tension used to scale the input capillary pressure curves.
+    OCP_DBL         surTenExp{ 0.25 };  ///< exponent of the surface tension ratio
 };
 
 

@@ -167,10 +167,6 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputHLOSS(ifs);
                 break;
 
-            case Map_Str2Int("MISCIBLE", 8):
-                paramRs.comsParam.miscible = OCP_TRUE;
-                break;
-
             case Map_Str2Int("MISCSTR", 7):
                 paramRs.InputMISCSTR(ifs);
                 break;

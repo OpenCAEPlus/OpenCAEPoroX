@@ -37,6 +37,7 @@ const int OCP_ERROR           = -100; ///< Unidentified error
 // General consts
 const OCP_DBL  GAS_CONSTANT = 10.73159;    ///< Gas Constant
 const OCP_DBL  TINY         = 1E-8;        ///< Small constant
+const OCP_DBL  OCP_HUGE     = 1E16;        ///< Huge constant
 const OCP_DBL  PI           = 3.141592653; ///< Pi
 const OCP_BOOL OCP_TRUE     = 1;
 const OCP_BOOL OCP_FALSE    = 0;

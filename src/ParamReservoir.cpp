@@ -654,26 +654,39 @@ void ParamReservoir::InputHLOSS(ifstream& ifs)
 /// Read data from the MISCSTR keyword.
 void ParamReservoir::InputMISCSTR(ifstream& ifs)
 {
-    if (!comsParam.miscible) {
-        OCP_WARNING("MISCIBLE has not been declared. Keyword ignored!");
-    } else {
-        vector<string> vbuf;
-        ReadLine(ifs, vbuf);
-        if (vbuf[0] == "/") return;
-        if (vbuf.back() == "/") vbuf.pop_back();
+	miscstr.ifMiscible = OCP_TRUE;
+	vector<string> vbuf;
+	ReadLine(ifs, vbuf);
+	if (vbuf[0] == "/") return;
+	if (vbuf.back() == "/") vbuf.pop_back();
+    DealDefault(vbuf);
 
-        USI len = vbuf.size();
-        for (USI i = 0; i < len; i++) {
-            miscstr.surTenRef.push_back(stod(vbuf[i]));
-        }
+	const USI len = vbuf.size();
+    if (len > 0) {
+        if (vbuf[0] != "DEFAULT")
+            miscstr.surTenRef = stod(vbuf[0]);
+    }
+    if (len > 1) {
+        if (vbuf[1] != "DEFAULT")
+            miscstr.surTenEpt = stod(vbuf[1]);
+    }
+    if (len > 2) {
+        if (vbuf[2] != "DEFAULT")
+            miscstr.surTenPc = stod(vbuf[2]);
+    }
+    if (len > 3) {
+        if (vbuf[3] != "DEFAULT")
+            miscstr.surTenExp = stod(vbuf[3]);
     }
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         cout << "\n---------------------" << endl
             << "MISCSTR"
             << "\n---------------------" << endl;
-        for (auto& v : miscstr.surTenRef) cout << v << "   ";
-        cout << endl;
+        cout << miscstr.surTenRef << "   "
+            << miscstr.surTenEpt << "   "
+            << miscstr.surTenPc << "   "
+            << miscstr.surTenExp << endl;
     }
 }
 
@@ -1016,7 +1029,7 @@ Type_A_r<vector<OCP_DBL>>* ComponentParam::FindPtr01(const string& varName)
             break;
 
         case Map_Str2Int("PARACHOR", 8):
-            myPtr = &Parachor;
+            myPtr = &parachor;
             break;
 
         case Map_Str2Int("VCRITVIS", 8):

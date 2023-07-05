@@ -37,6 +37,7 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
             }
         }
     }
+    return 1.0;
 }
 
 

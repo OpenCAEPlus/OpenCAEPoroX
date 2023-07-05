@@ -275,7 +275,7 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
         SATmode = PHASE_ODGW02;
     } else {
         SATmode = PHASE_ODGW01;
-        if (rs_param.comsParam.miscible) {
+        if (rs_param.miscstr.ifMiscible) {
             SATmode = PHASE_ODGW01_MISCIBLE;
         }
     }

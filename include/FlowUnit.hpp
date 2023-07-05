@@ -62,17 +62,19 @@ public:
 
 protected:
 
-    vector<OCP_DBL> Scm; ///< critical saturation when phase becomes mobile / immobile
+    OCP_USI         bulkId; ///< index of work bulk
 
-    OCP_DBL         Swco;  ///< saturaion of connate water
+    vector<OCP_DBL> Scm;    ///< critical saturation when phase becomes mobile / immobile
 
-    vector<OCP_DBL> kr;    ///< relative permeability of phase
-    vector<OCP_DBL> pc;    ///< capillary pressure
-    vector<OCP_DBL> dKrdS; ///< dKr / dPc
-    vector<OCP_DBL> dPcdS; ///< dKr / dS
+    OCP_DBL         Swco;   ///< saturaion of connate water
 
-    vector<OCP_DBL> data;  ///< container to store the values of interpolation.
-    vector<OCP_DBL> cdata; ///< container to store the slopes of interpolation.
+    vector<OCP_DBL> kr;     ///< relative permeability of phase
+    vector<OCP_DBL> pc;     ///< capillary pressure
+    vector<OCP_DBL> dKrdS;  ///< dKr / dPc
+    vector<OCP_DBL> dPcdS;  ///< dKr / dS
+
+    vector<OCP_DBL> data;   ///< container to store the values of interpolation.
+    vector<OCP_DBL> cdata;  ///< container to store the slopes of interpolation.
 };
 
 ///////////////////////////////////////////////
@@ -179,7 +181,12 @@ class FlowUnit_OGW : public FlowUnit
 public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override final;
     void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override final;
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override final;
+    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override final;
+
 protected:
+    virtual void CalKrPc(const OCP_DBL* S_in) = 0;
+    virtual void CalKrPcFIM(const OCP_DBL* S_in) = 0;
     OCP_DBL CalKro_Stone2(const OCP_DBL& krow,
                           const OCP_DBL& krog,
                           const OCP_DBL& krw,
@@ -193,12 +200,15 @@ protected:
     const vector<OCP_DBL>& GetScm() const override { return Scm; }
 
 protected:
+    /// phase index
+    enum phaseIndex {oIndex, gIndex, wIndex};
+    enum p2p{oo, og, ow, go, gg, gw, wo, wg, ww};
     /// oil relative permeability in the presence of connate water only, used in stone2
     OCP_DBL    krocw;
 
     // For scaling the water-oil capillary pressure curves
     ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
-    USI        scalePcowIndex; ///< index of scalePcow
+    USI        spMethodIndex; ///< index of scalePcow
     OCP_DBL    maxPcow;        ///< maximum Pcow
     OCP_DBL    minPcow;        ///< minimum Pcow
     // For miscible
@@ -214,9 +224,16 @@ class FlowUnit_OGW01 : public FlowUnit_OGW
 public:
     FlowUnit_OGW01() = default;
     FlowUnit_OGW01(const ParamReservoir& rs_param, const USI& i);
-    virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    virtual void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
+    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) override { return SWOF.CalSw(Pcow); }
 
+    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg); }
+    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) override { return SGOF.CalSg(Pcgo); }
+    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return SWPCGW.Eval_Inv(1, pcgw, 0); }
+
+protected:
+    void CalKrPc(const OCP_DBL* S_in) override;
+    void CalKrPcFIM(const OCP_DBL* S_in) override;
     OCP_DBL CalKro_Stone2Der(const OCP_DBL&  krow,
                              const OCP_DBL&  krog,
                              const OCP_DBL&  krw,
@@ -235,14 +252,6 @@ public:
                               const OCP_DBL& dkrowSw,
                               OCP_DBL&       dkroSg,
                               OCP_DBL&       dkroSw) const;
-
-    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) override { return SWOF.CalPcow(Sw); }
-    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) override { return SWOF.CalSw(Pcow); }
-
-    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg); }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) override { return SGOF.CalSg(Pcgo); }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return SWPCGW.Eval_Inv(1, pcgw, 0); }
-
     void Generate_SWPCWG();
 
 protected:
@@ -263,12 +272,14 @@ public:
         : FlowUnit_OGW01(rs_param, i)
     {
         // gas is moveable all the time
-        Scm[1]  = 0;
+        Scm[oIndex]  = 0;
         maxPcow = SWOF.GetMaxPc();
         minPcow = SWOF.GetMinPc();
     }
-    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
+
+protected:
+    void CalKrPc(const OCP_DBL* S_in) override;
+    void CalKrPcFIM(const OCP_DBL* S_in) override;
 
 protected:
 
@@ -285,25 +296,6 @@ class FlowUnit_OGW02 : public FlowUnit_OGW
 public:
     FlowUnit_OGW02() = default;
     FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i);
-    void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL CalKro_Stone2Der(const OCP_DBL&  krow,
-                             const OCP_DBL&  krog,
-                             const OCP_DBL&  krw,
-                             const OCP_DBL&  krg,
-                             const OCP_DBL&  dkrwdSw,
-                             const OCP_DBL&  dkrowdSo,
-                             const OCP_DBL&  dkrgdSg,
-                             const OCP_DBL&  dkrogdSo,
-                             OCP_DBL& out_dkrodSo) const;
-    OCP_DBL CalKro_DefaultDer(const OCP_DBL& Sg,
-                              const OCP_DBL& Sw,
-                              const OCP_DBL& krog,
-                              const OCP_DBL& krow,
-                              const OCP_DBL& dkrogSo,
-                              const OCP_DBL& dkrowSo,
-                              OCP_DBL&       dkroSo) const;
-
     OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWFN.Eval(0, sw, 2); }
     OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override
     {
@@ -316,6 +308,26 @@ public:
         return SWPCGW.Eval_Inv(1, pcgw, 0);
     }
     void Generate_SWPCWG();
+
+protected:
+    void CalKrPc(const OCP_DBL* S_in) override;
+    void CalKrPcFIM(const OCP_DBL* S_in) override;
+    OCP_DBL CalKro_Stone2Der(const OCP_DBL& krow,
+        const OCP_DBL& krog,
+        const OCP_DBL& krw,
+        const OCP_DBL& krg,
+        const OCP_DBL& dkrwdSw,
+        const OCP_DBL& dkrowdSo,
+        const OCP_DBL& dkrgdSg,
+        const OCP_DBL& dkrogdSo,
+        OCP_DBL& out_dkrodSo) const;
+    OCP_DBL CalKro_DefaultDer(const OCP_DBL& Sg,
+        const OCP_DBL& Sw,
+        const OCP_DBL& krog,
+        const OCP_DBL& krow,
+        const OCP_DBL& dkrogSo,
+        const OCP_DBL& dkrowSo,
+        OCP_DBL& dkroSo) const;
 
 protected:
     OCPTable SWFN;   ///< saturation table about water.

@@ -163,8 +163,11 @@ public:
             data.resize(5);
             cdata.resize(5);
         }
-    };
 
+        // Input Miscible Params
+        InputMiscibleParam(rs_param, i);
+    };
+    /// Input and Setup basic component params
     MixtureComp(const ComponentParam& param, const USI& i);
 
     void InitPTZ(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Ziin)
@@ -568,13 +571,14 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
 protected:
-    void InputMiscibleParam(const ComponentParam& param, const USI& tarId);
+    void InputMiscibleParam(const ParamReservoir& rs_param, const USI& tarId);
     void CalSurfaceTension();
 
 protected:
-    Miscible*       misTerm;       ///< Miscible term pointing to OptionalFeature
-    USI             stMethodIndex; ///< method index of surface tension calculation
-    vector<OCP_DBL> parachor;      ///< Parachor params of hydrocarbon components
+    Miscible*        miscible;    ///< Miscible term pointing to OptionalFeature
+    USI              mIndex;      ///< method index of miscible factor calculation
+    SurTenMethod01Params stm01Params; ///< params used in surface tension method01
+    MisFacMethod01Params mfm01Params; ///< params used in miscible factor method01
 };
 
 /// Return the sign of double di

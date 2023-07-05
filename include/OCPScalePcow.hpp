@@ -25,7 +25,7 @@ using namespace std;
 // Scale The Water-Oil Capillary Pressure Curves (From SWATINIT)
 /////////////////////////////////////////////////////////////////////
 
-
+/// Params used to scale the water permeability curve.
 class ScalePcowMethodParams
 {
     friend class ScalePcowMethod01;
@@ -47,16 +47,16 @@ public:
     }
 
 protected:
-    OCP_DBL                    swco;         ///< connate water saturation
-    OCP_DBL                    maxPcow;      ///< maximum Pcow
-    OCP_DBL                    minPcow;      ///< minimum Pcow
-    function<OCP_DBL(OCP_DBL)> CalPcow;      ///< Functions to calculate Pcow by Sw
-    OCP_DBL*                   Pcow_out;     ///< Pcow(from FlowUnit, will be scaled)
-    OCP_DBL*                   dPcowdSw_out; ///< dPcowdSw(from FlowUnit, will be scaled)
+    OCP_DBL                           swco;         ///< connate water saturation
+    OCP_DBL                           maxPcow;      ///< maximum Pcow
+    OCP_DBL                           minPcow;      ///< minimum Pcow
+    function<OCP_DBL(const OCP_DBL&)> CalPcow;      ///< Functions to calculate Pcow by Sw
+    OCP_DBL*                          Pcow_out;     ///< Pcow(from FlowUnit, will be scaled)
+    OCP_DBL*                          dPcowdSw_out; ///< dPcowdSw(from FlowUnit, will be scaled)
 };
 
 
-/// Method for ScalePcow
+/// Method used to scale the water permeability curve.
 class ScalePcowMethod
 {
 public:
@@ -74,6 +74,8 @@ protected:
     OCP_DBL* dPcowdSw_out;               ///< dPcowdSw(from FlowUnit, will be scaled)
 };
 
+
+/// Method used to scale the water permeability curve.
 class ScalePcowMethod01 : public ScalePcowMethod
 {
 public:
@@ -96,13 +98,14 @@ public:
     void Scale(const OCP_DBL& sv) const override;
 
 protected:
-    OCP_DBL swco;                        ///< connate water saturation
-    OCP_DBL maxPcow;                     ///< maximum Pcow
-    OCP_DBL minPcow;                     ///< minimum Pcow
-    function<OCP_DBL(OCP_DBL)> CalPcow;  ///< Functions to calculate Pcow by Sw
+    OCP_DBL swco;                               ///< connate water saturation
+    OCP_DBL maxPcow;                            ///< maximum Pcow
+    OCP_DBL minPcow;                            ///< minimum Pcow
+    function<OCP_DBL(const OCP_DBL&)> CalPcow;  ///< Functions to calculate Pcow by Sw
 };
 
 
+/// The Class scales the Pcow
 class ScalePcow
 {
     friend class Reservoir;

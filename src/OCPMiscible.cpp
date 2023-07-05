@@ -1,5 +1,5 @@
-/*! \file    PhasePermeability.cpp
- *  \brief   PhasePermeability class declaration
+/*! \file    OCPMiscible.cpp
+ *  \brief   OCPMiscible class declaration
  *  \author  Shizhe Li
  *  \date    Dec/26/2022
  *
@@ -12,41 +12,50 @@
 #include "OCPMiscible.hpp"
 
 
-
-OCP_DBL SurfaceTensionMethod01::CalSurfaceTension()
+void MisFacMethod01::CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const
 {
-    if (*NP == 1)
-        return 100;
-    else {
-        const OCP_DBL Bv = *bv * CONV7;
-        const OCP_DBL Bl = *bl * CONV7;
-        OCP_DBL surTen = 0;
-        for (USI i = 0; i < NC; i++)
-            surTen += parachor[i] * (Bv * xv[i] - Bl * xl[i]);
-        return pow(surTen, 4.0);
+    if (st >= stref) {  // InMiscible
+        fk = -1.0;
+        fp = -1.0;
+    }
+    else {             // Miscible
+        fk = min(1.0, pow(st / stref, fkExp));
+        fp = min(stPcf, st / stref);
     }
 }
 
 
-/////////////////////////////////////////////////////////////////////
-// Miscible For Compositional Model
-/////////////////////////////////////////////////////////////////////
+USI MiscibleFcator::Setup(const MisFacMethodParams& param)
+{
+    if (OCP_FALSE) {
+
+    }
+    else {
+        // Default option
+        if (param.param01.IfUse()) {
+            mfMethod.push_back(new MisFacMethod01(param.param01));
+        }
+        else {
+            OCP_ABORT("NO MATHCHED METHOD IN MISCIBLE FACTOR METHOD!");
+        }
+        
+    }
+    
+    return mfMethod.size() - 1;
+}
+
 
 void Miscible::InputParam(const Miscstr& misterm)
 {
-    const USI len = misterm.surTenRef.size();
-    if (len > 0) {
-        ifMiscible = OCP_TRUE;
-        surTenRef     = misterm.surTenRef[0];
-        surTenPc      = 1;
-        if (len > 2) {
-            surTenPc = misterm.surTenRef[2] / surTenRef;
-        }
-        Fkexp = 0.25;
-    }
+    ifMiscible  = misterm.ifMiscible;
+    surTenRef   = misterm.surTenRef;
+    surTenMaxPc = misterm.surTenPc;
+    if (surTenMaxPc < 0) surTenMaxPc = surTenRef;
+    surTenPc    = 1;
+    Fkexp       = misterm.surTenExp;
 }
 
-USI Miscible::Setup(const OCP_USI& numBulk, const SurfaceTensionMethodParams& params)
+USI Miscible::Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams)
 {
     if (ifMiscible) {
         surTen.resize(numBulk);
@@ -56,32 +65,40 @@ USI Miscible::Setup(const OCP_USI& numBulk, const SurfaceTensionMethodParams& pa
         // Last time step
         lsurTen.resize(numBulk);
 
-        surfaceTensionMethod.push_back(new SurfaceTensionMethod01(params));
 
-        return surfaceTensionMethod.size() - 1;
+        // Setup Method
+        // Setup surface tension method
+        USI stmIndex = sT.Setup(stparams);
+        // Setup miscible factor method
+        USI mfmIndex = mF.Setup(mfparams);
+
+        OCP_ASSERT(stmIndex == mfmIndex, "Mismatched Methods!");
+
+        return stmIndex;
     }
     return 0;
 }
 
 
-void Miscible::CalSurfaceTension(const OCP_USI& bId, const USI& mIndex)
+void Miscible::CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex)
 {
     if (ifMiscible) {
-        surTen[bId] = surfaceTensionMethod[mIndex]->CalSurfaceTension();
+        surTen[bId] = sT.CalSurfaceTension(mIndex);
+        mF.CalculateMiscibleFactor(mIndex, surTen[bId], Fk[bId], Fp[bId]);
     }
+
 }
 
-
+/// Coats expression
 OCP_BOOL Miscible::CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp)
 {
-    if (surTen[n] >= surTenRef || surTen[n] <= TINY) {
-        Fk[n] = 1;
-        Fp[n] = 1;
-        return OCP_FALSE; // InMiscible
-    } else {
-        Fk[n] = fk = min(1.0, pow(surTen[n] / surTenRef, Fkexp));
-        Fp[n] = fp = min(surTenPc, surTen[n] / surTenRef);
-        return OCP_TRUE; // Miscible
+    if (Fk[n] < 0) {
+        return OCP_FALSE;
+    }
+    else {
+        fk = Fk[n];
+        fp = Fp[n];
+        return OCP_TRUE;
     }
 }
 

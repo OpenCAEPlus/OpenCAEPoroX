@@ -14,104 +14,162 @@
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
+#include "OCPSurfaceTension.hpp"
 
 #include <vector>
+#include <functional>
 
 using namespace std;
 
-/////////////////////////////////////////////////////////////////////
-// Miscible For Compositional Model
-/////////////////////////////////////////////////////////////////////
 
-class SurfaceTensionMethodParams
+
+class MisFacMethod
 {
-    friend class SurfaceTensionMethod01;
 public:
-    /// Default constructor
-    SurfaceTensionMethodParams() = default;
-    SurfaceTensionMethodParams(
-        const vector<OCP_DBL>& parachorin,
-        const OCP_DBL*         xvin,
-        const OCP_DBL*         xlin,
-        const OCP_DBL*         bvin,
-        const OCP_DBL*         blin,
-        const USI*             NPin
-    ) 
-    {
-        parachor = parachorin;
-        xv       = xvin;
-        xl       = xlin;
-        bv       = bvin;
-        bl       = blin;
-        NP       = NPin;
-    }
-protected:
-    vector<OCP_DBL> parachor;  ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
-    const OCP_DBL*  xv;        ///< molar fractions of vapour phase
-    const OCP_DBL*  xl;        ///< molar fractions of liquid phase
-    const OCP_DBL*  bv;        ///< molar density of vapour phase
-    const OCP_DBL*  bl;        ///< molar density of liquid phase
-    const USI*      NP;        ///< num of present phases
+    MisFacMethod() = default;
+    virtual void CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const = 0;
 };
 
 
-class SurfaceTensionMethod
+class MisFacMethod01Params
 {
+    friend class MisFacMethod01;
 public:
-    /// Default constructor
-    SurfaceTensionMethod() = default;
-    /// Calculate surface tensions
-    virtual OCP_DBL CalSurfaceTension() = 0;
+    MisFacMethod01Params() = default;
+    MisFacMethod01Params(const OCP_DBL& surTenRef, const OCP_DBL& FkExp, const OCP_DBL& surTenPc) {
+        ifUse   = OCP_TRUE;
+        stref   = surTenRef;
+        fkExp   = FkExp;
+        stPc    = surTenPc;
+        if (stPc < 0) stPc = stref;
+    }
+    OCP_BOOL IfUse() const { return ifUse; }
 
 protected:
-    const USI* NP;     ///< num of present phases
+    OCP_BOOL ifUse{ OCP_FALSE };
+    OCP_DBL  stref; ///< The reference surface tension (maximum allowed miscible surface tension)
+    OCP_DBL  fkExp; ///< exponent of the surface tension calculation
+    OCP_DBL  stPc;  ///< The maximum surface tension used to scale the input capillary pressure curves
 };
 
-/// Macleod - Sugden correlation
-class SurfaceTensionMethod01 : public SurfaceTensionMethod
+
+/// Coats expression
+class MisFacMethod01 : public MisFacMethod
+{
+public:
+    MisFacMethod01() = default;
+    MisFacMethod01(const MisFacMethod01Params& param) {
+        stref = param.stref;
+        fkExp = param.fkExp;
+        stPcf = param.stPc / stref;
+    }
+    void CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const override;
+
+public:
+    OCP_DBL stref;   ///< reference surface tension
+    OCP_DBL fkExp;   ///< exponent for Fk calcualtion
+    OCP_DBL stPcf;   ///< maximum surface tension for capillary pressure calculation / reference surface tension
+};
+
+
+class MisFacMethodParams
+{
+public:
+    MisFacMethodParams() = default;
+    MisFacMethodParams(const MisFacMethod01Params& param01in) {
+        param01 = param01in;
+    }
+    void SetupParams(const MisFacMethod01Params& param01in) {
+        param01 = param01in;
+    }
+
+public:
+    MisFacMethod01Params param01;
+};
+
+class MiscibleFcator
 {
 public:
     /// Default constructor
-    SurfaceTensionMethod01() = default;
-    /// Construct with parachor
-    SurfaceTensionMethod01(const SurfaceTensionMethodParams& params)
-    {
-        parachor = params.parachor;
-        xv       = params.xv;
-        xl       = params.xl;
-        bv       = params.bv;
-        bl       = params.bl;
-        NP       = params.NP;
-
-        NC       = parachor.size();
+    MiscibleFcator() = default;
+    USI Setup(const MisFacMethodParams& param);
+    void CalculateMiscibleFactor(const USI& mIndex, const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) {
+        mfMethod[mIndex]->CalculateMiscibleFactor(st, fk, fp);
     }
-    OCP_DBL CalSurfaceTension();
-    vector<OCP_DBL> parachor; ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
-    const OCP_DBL* xv;        ///< molar fractions of vapour phase
-    const OCP_DBL* xl;        ///< molar fractions of liquid phase
-    const OCP_DBL* bv;        ///< molar density of vapour phase
-    const OCP_DBL* bl;        ///< molar density of liquid phase
-    USI            NC;        ///< num of components
+protected:
+    vector<MisFacMethod*> mfMethod;
 };
 
 
-class MiscibleMethod
+/// Params uesd to correct permeability and capillary pressure
+class MiscibleCorrectionMethodParams
+{
+    friend class MiscibleCorrectionMethod01;
+public:
+    /// Default constructor
+    MiscibleCorrectionMethodParams() = default;
+    MiscibleCorrectionMethodParams(
+        OCP_DBL* krin,
+        OCP_DBL* Pcin,
+        OCP_DBL* dPcdSin,
+        const function<OCP_DBL(const OCP_DBL&)>& CalKrgin
+    ) {
+        kr_out    = krin;
+        Pc_out    = Pcin;
+        dPcdS_out = dPcdSin;
+        CalKrg    = CalKrgin;
+    }
+
+protected:
+    OCP_DBL*                          kr_out;    ///< permeability (will be corrected)
+    OCP_DBL*                          Pc_out;    ///< capillary pressure (will be corrected)
+    OCP_DBL*                          dPcdS_out; ///< dPcdS (will be corrected)
+    function<OCP_DBL(const OCP_DBL&)> CalKrg;    ///< function to calculate krg
+};
+
+
+/// Method uesd to correct permeability and capillary pressure
+class MiscibleCorrectionMethod
 {
 public:
-    MiscibleMethod() = default;
+    MiscibleCorrectionMethod() = default;
+
+protected:
+
+    OCP_DBL* kr_out;                           ///< permeability (will be corrected)
+    OCP_DBL* Pc_out;                           ///< capillary pressure (will be corrected)
+    OCP_DBL* dPcdS_out;                        ///< dPcdS (will be corrected)
+    function<OCP_DBL(const OCP_DBL&)> CalKrg;  ///< function to calculate krg
 };
 
+
+/// from CMG, see *SIGMA
+class MiscibleCorrectionMethod01 : public MiscibleCorrectionMethod
+{
+public:
+    MiscibleCorrectionMethod01() = default;
+    MiscibleCorrectionMethod01(const MiscibleCorrectionMethodParams& params) {
+        kr_out     = params.kr_out;   
+        kr_out     = params.kr_out;
+        Pc_out     = params.Pc_out;
+        dPcdS_out  = params.dPcdS_out;
+        CalKrg     = params.CalKrg;
+    }
+    void CorrectOGCurve();
+};
+
+
+/// The class Miscible considers the effect of miscible, Now three main parts are contained:
+/// surface tension calculations, miscible factor calculartions, permeability-curve correction.
 class Miscible
 {
 public:
     /// Input param from input file
     void InputParam(const Miscstr& misterm);
-    /// Allocate memory for Miscible term
-    USI Setup(const OCP_USI& numBulk, const SurfaceTensionMethodParams& params);
-    /// Calculate SurfaceTension
-    void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex);
-    /// Assign value to surTen
-    void AssignValue(const OCP_USI& n, const OCP_DBL& v) { surTen[n] = v; }
+    /// Setup for Miscible terms
+    USI Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams);
+    /// Calculate Misscible Factor
+    void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex);
     /// Calculate Fk, Fp and return if miscible
     OCP_BOOL CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp);
     /// Reset Miscible term to last time step
@@ -131,18 +189,23 @@ protected:
     /// The reference surface tension - flow is immiscible when the surface tension
     //  is greater than or equal to this value
     OCP_DBL surTenRef;
-    OCP_DBL surTenPc; ///< Maximum surface tension for capillary pressure / surTenRef
-    OCP_DBL Fkexp;    ///< Exponent set used to calculate Fk
+    OCP_DBL surTenMaxPc; ///< maximum surface tension for capillary pressure calculation
+    OCP_DBL surTenPc;    ///< Maximum surface tension for capillary pressure / surTenRef
+    OCP_DBL Fkexp{ 0.25 };    ///< Exponent set used to calculate Fk
     vector<OCP_DBL> surTen; ///< Surface tensions between hydrocarbon phases.
-    vector<OCP_DBL> Fk;     ///< The relative permeability interpolation parameter
-    vector<OCP_DBL> Fp;     ///< The capillary pressure interpolation parameter.
+    vector<OCP_DBL> Fk;     ///< miscibility factor for permeability
+    vector<OCP_DBL> Fp;     ///< miscibility factor for capillary pressure
 
     // Last time step
     vector<OCP_DBL> lsurTen; ///< last surTen.
 
     /// Method
 protected:
-    vector<SurfaceTensionMethod*> surfaceTensionMethod;
+    /// for surface tension calculation
+    SurfaceTension sT;
+    /// for miscible factor calculation
+    MiscibleFcator mF;
+
 };
 
 #endif /* end if __PHASEPERMEABILITY_HEADER__ */
@@ -153,5 +216,5 @@ protected:
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
 /*  Shizhe Li           Dec/26/2022      Create file                          */
-/*  Shizhe Li           Dec/26/2022      Rename to OCPMiscible                */
+/*  Shizhe Li           Jul/02/2022      Rename to OCPMiscible                */
 /*----------------------------------------------------------------------------*/
