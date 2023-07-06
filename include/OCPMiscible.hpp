@@ -22,7 +22,6 @@
 using namespace std;
 
 
-
 class MisFacMethod
 {
 public:
@@ -87,6 +86,7 @@ public:
     MisFacMethod01Params param01;
 };
 
+
 class MiscibleFcator
 {
 public:
@@ -101,38 +101,11 @@ protected:
 };
 
 
-/// Params uesd to correct permeability and capillary pressure
-class MiscibleCorrectionMethodParams
-{
-    friend class MiscibleCorrectionMethod01;
-public:
-    /// Default constructor
-    MiscibleCorrectionMethodParams() = default;
-    MiscibleCorrectionMethodParams(
-        OCP_DBL* krin,
-        OCP_DBL* Pcin,
-        OCP_DBL* dPcdSin,
-        const function<OCP_DBL(const OCP_DBL&)>& CalKrgin
-    ) {
-        kr_out    = krin;
-        Pc_out    = Pcin;
-        dPcdS_out = dPcdSin;
-        CalKrg    = CalKrgin;
-    }
-
-protected:
-    OCP_DBL*                          kr_out;    ///< permeability (will be corrected)
-    OCP_DBL*                          Pc_out;    ///< capillary pressure (will be corrected)
-    OCP_DBL*                          dPcdS_out; ///< dPcdS (will be corrected)
-    function<OCP_DBL(const OCP_DBL&)> CalKrg;    ///< function to calculate krg
-};
-
-
 /// Method uesd to correct permeability and capillary pressure
-class MiscibleCorrectionMethod
+class MisCurveMethod
 {
 public:
-    MiscibleCorrectionMethod() = default;
+    MisCurveMethod() = default;
 
 protected:
 
@@ -143,12 +116,39 @@ protected:
 };
 
 
-/// from CMG, see *SIGMA
-class MiscibleCorrectionMethod01 : public MiscibleCorrectionMethod
+/// Params uesd to correct permeability and capillary pressure
+class MisCurveMethodParams
+{
+    friend class MisCurveMethod01;
+public:
+    /// Default constructor
+    MisCurveMethodParams() = default;
+    MisCurveMethodParams(
+        OCP_DBL* krin,
+        OCP_DBL* Pcin,
+        OCP_DBL* dPcdSin,
+        const function<OCP_DBL(const OCP_DBL&)>& CalKrgin
+    ) {
+        kr_out = krin;
+        Pc_out = Pcin;
+        dPcdS_out = dPcdSin;
+        CalKrg = CalKrgin;
+    }
+
+protected:
+    OCP_DBL* kr_out;    ///< permeability (will be corrected)
+    OCP_DBL* Pc_out;    ///< capillary pressure (will be corrected)
+    OCP_DBL* dPcdS_out; ///< dPcdS (will be corrected)
+    function<OCP_DBL(const OCP_DBL&)> CalKrg;    ///< function to calculate krg
+};
+
+
+/// From CMG, see *SIGMA
+class MisCurveMethod01 : public MisCurveMethod
 {
 public:
-    MiscibleCorrectionMethod01() = default;
-    MiscibleCorrectionMethod01(const MiscibleCorrectionMethodParams& params) {
+    MisCurveMethod01() = default;
+    MisCurveMethod01(const MisCurveMethodParams& params) {
         kr_out     = params.kr_out;   
         kr_out     = params.kr_out;
         Pc_out     = params.Pc_out;
@@ -156,6 +156,17 @@ public:
         CalKrg     = params.CalKrg;
     }
     void CorrectOGCurve();
+};
+
+
+/// For miscible curve correction
+class MiscibleCurve
+{
+public:
+    MiscibleCurve() = default;
+    USI Setup(const MisCurveMethodParams& param);
+protected:
+    vector<MisCurveMethod*> mcMethod;
 };
 
 
@@ -199,10 +210,12 @@ protected:
     SurfaceTension sT;
     /// for miscible factor calculation
     MiscibleFcator mF;
+    /// for miscible curve correction
+
 
 };
 
-#endif /* end if __PHASEPERMEABILITY_HEADER__ */
+#endif /* end if __OCPMISCIBLE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

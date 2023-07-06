@@ -45,6 +45,12 @@ USI MiscibleFcator::Setup(const MisFacMethodParams& param)
 }
 
 
+USI MiscibleCurve::Setup(const MisCurveMethodParams& param)
+{
+
+}
+
+
 void Miscible::InputParam(const OCP_BOOL& ifmiscible)
 {
     ifMiscible  = ifmiscible;
