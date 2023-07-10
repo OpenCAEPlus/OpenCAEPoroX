@@ -45,9 +45,74 @@ USI MiscibleFcator::Setup(const MisFacMethodParams& param)
 }
 
 
-USI MiscibleCurve::Setup(const MisCurveMethodParams& param)
+void MisCurveMethod01::CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp)
 {
+    if (Fk > -TINY) {
+        // miscible
 
+        OCP3PFVarSet& vs = PF3->GetVarSet();
+
+        vs.Pcgo *= Fp;
+        vs.dPcgodSg *= Fp;
+
+        OCP_DBL       dkrgd1_Sw = 0;
+        const OCP_DBL krgt = PF3->CalKrg(1 - vs.Sw, dkrgd1_Sw);
+        const OCP_DBL krh = 0.5 * (vs.krow + krgt);
+
+        // from CMG, see *SIGMA
+        vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
+        vs.krg = Fk * vs.krg + (1 - Fk) * krh * vs.Sg / (1 - vs.Sw);
+
+        const OCP_DBL dkrhdSw = 0.5 * (vs.dKrowdSw - dkrgd1_Sw);
+        const OCP_DBL temp = (1 - Fk) / (1 - vs.Sw) * (krh / (1 - vs.Sw) + dkrhdSw);
+
+        vs.dKrodSo = (1 - Fk) * krh / (1 - vs.Sw);
+        vs.dKrodSg = Fk * vs.dKrodSg;
+        vs.dKrodSw = Fk * vs.dKrodSw + temp * vs.So;
+        vs.dKrgdSg = Fk * vs.dKrgdSg + (1 - Fk) * krh / (1 - vs.Sw);
+        vs.dKrgdSw = temp * vs.Sg;
+
+
+        //// for permeability
+
+        //OCP_DBL       dkrgd1_Sw = 0;
+        //const OCP_DBL krgt = PF3->CalKrg((1 - vs.Sw), dkrgd1_Sw);
+        //const OCP_DBL krh = 0.5 * (vs.krow + krgt);
+
+        //vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
+        //vs.krg = Fk * vs.krg + (1 - Fk) * krh * vs.Sg / (1 - vs.Sw);
+
+        //const OCP_DBL dKrhdSo = 0.5 * vs.dKrowdSo;
+        //const OCP_DBL dKrhdSw = 0.5 * (vs.dKrowdSw - dkrgd1_Sw);      
+        //const OCP_DBL temp = (1 - Fk) / (1 - vs.Sw) * (krh / (1 - vs.Sw) + dKrhdSw);
+
+        //vs.dKrodSo = Fk * vs.dKrodSo + (1 - Fk) * (dKrhdSo * vs.So + krh) / (1 - vs.Sw);
+        //vs.dKrodSg = Fk * vs.dKrodSg;
+        //vs.dKrodSw = Fk * vs.dKrodSw + (1 - Fk) * vs.So * (dKrhdSw * (1 - vs.Sw) + krh) / ((1 - vs.Sw) * (1 - vs.Sw));
+        //vs.dKrgdSo = (1 - Fk) * dKrhdSo * vs.Sg / (1 - vs.Sw);
+        //vs.dKrgdSg = Fk * vs.dKrgdSg + (1 - Fk) * krh / (1 - vs.Sw);
+        //vs.dKrgdSw = (1 - Fk) * vs.Sg * (dKrhdSw * (1 - vs.Sw) + krh) / ((1 - vs.Sw) * (1 - vs.Sw));
+
+        //// for capillary pressure
+        //vs.Pcgo     *= Fp;
+        //vs.dPcgodSo *= Fp;
+        //vs.dPcgodSg *= Fp;
+        //vs.dPcgodSw *= Fp;
+    }
+}
+
+
+USI MiscibleCurve::Setup(OCP3PhaseFlow* pf3)
+{
+    mcMethod.push_back(new MisCurveMethod01(pf3));
+    
+    return mcMethod.size() - 1;
+}
+
+
+void MiscibleCurve::CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp)
+{
+    mcMethod[mIndex]->CurveCorrect(Fk, Fp);
 }
 
 
@@ -81,6 +146,15 @@ USI Miscible::Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, 
 }
 
 
+USI Miscible::Setup(OCP3PhaseFlow* pf3)
+{
+    if (ifMiscible) {
+        return mC.Setup(pf3);
+    }
+    return 0;
+}
+
+
 void Miscible::CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex)
 {
     if (ifMiscible) {
@@ -89,10 +163,17 @@ void Miscible::CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex)
     }
 }
 
-/// Coats expression
+
+void Miscible::CorrectCurve(const OCP_USI& bId, const USI& mIndex)
+{
+    if (ifMiscible) {
+        mC.CorrectCurve(mIndex, Fk[bId], Fp[bId]);
+    }
+}
+
 OCP_BOOL Miscible::CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp)
 {
-    if (Fk[n] < 0) {
+    if (Fk[n] < -TINY) {
         return OCP_FALSE;
     }
     else {

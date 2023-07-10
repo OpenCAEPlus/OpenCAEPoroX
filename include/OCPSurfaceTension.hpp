@@ -1,7 +1,7 @@
 /*! \file    OCPSurfacTension.hpp
  *  \brief   OCPSurfacTension class declaration
  *  \author  Shizhe Li
- *  \date    Dec/26/2022
+ *  \date    Jul/03/2022
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -15,7 +15,6 @@
 #include "OCPConst.hpp"
 
 #include <vector>
-#include <functional>
 
 using namespace std;
 

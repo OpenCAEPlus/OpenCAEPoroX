@@ -63,6 +63,43 @@ OCP_DBL OCP_SGOF::GetSgcr() const
 	return -1;
 }
 
+
+/////////////////////////////////////////////////////
+// SOF3
+/////////////////////////////////////////////////////
+
+void OCP_SOF3::Setup(const vector<vector<OCP_DBL>>& src)
+{
+	table.Setup(src);
+	data.resize(table.GetColNum());
+	cdata.resize(table.GetColNum());
+}
+
+
+/////////////////////////////////////////////////////
+// SGFN
+/////////////////////////////////////////////////////
+
+void OCP_SGFN::Setup(const vector<vector<OCP_DBL>>& src)
+{
+	table.Setup(src);
+	data.resize(table.GetColNum());
+	cdata.resize(table.GetColNum());
+}
+
+
+/////////////////////////////////////////////////////
+// SWFN
+/////////////////////////////////////////////////////
+
+void OCP_SWFN::Setup(const vector<vector<OCP_DBL>>& src)
+{
+	table.Setup(src);
+	data.resize(table.GetColNum());
+	cdata.resize(table.GetColNum());
+}
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

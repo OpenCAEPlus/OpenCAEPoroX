@@ -1,7 +1,7 @@
 /*! \file    OCPSurfaceTension.cpp
  *  \brief   OCPSurfaceTension class declaration
  *  \author  Shizhe Li
- *  \date    Dec/26/2022
+ *  \date    Jul/03/2022
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.

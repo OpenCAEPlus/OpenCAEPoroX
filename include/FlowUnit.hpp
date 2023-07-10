@@ -20,6 +20,7 @@
 #include "OCPSATFunc.hpp"
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
+#include "OCP3PhaseFlow.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.
@@ -27,7 +28,7 @@ class FlowUnit
 {
 public:
     /// Default constructor.
-    FlowUnit()                                                        = default;
+    FlowUnit() = default;
     void Allocate(const USI& np) {
         kr.resize(np, 0);
         pc.resize(np, 0);
@@ -185,6 +186,9 @@ public:
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override final;
 
 protected:
+    virtual OCP_DBL GetKrgDer(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) = 0;
+
+protected:
     virtual void CalKrPc(const OCP_DBL* S_in) = 0;
     virtual void CalKrPcFIM(const OCP_DBL* S_in) = 0;
     OCP_DBL CalKro_Stone2(const OCP_DBL& krow,
@@ -200,19 +204,29 @@ protected:
     const vector<OCP_DBL>& GetScm() const override { return Scm; }
 
 protected:
+    void AssinValueDer();
+    void AssinValue();
+
+protected:
     /// phase index
     enum phaseIndex {oIndex, gIndex, wIndex};
-    enum p2p{oo, og, ow, go, gg, gw, wo, wg, ww};
+    enum p2p { oo, og, ow, go, gg, gw, wo, wg, ww };
+
+    OCP3PhaseFlow  PF3;
+    const OCP_BOOL newM{ true };
+
     /// oil relative permeability in the presence of connate water only, used in stone2
     OCP_DBL    krocw;
 
     // For scaling the water-oil capillary pressure curves
     ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
-    USI        spMethodIndex; ///< index of scalePcow
+    USI        spMethodIndex;  ///< index of scalePcow
+
     OCP_DBL    maxPcow;        ///< maximum Pcow
     OCP_DBL    minPcow;        ///< minimum Pcow
     // For miscible
     Miscible*  miscible;
+    USI        mcMethodIndex;  ///< index of miscible curve
 };
 
 ///////////////////////////////////////////////
@@ -230,6 +244,9 @@ public:
     OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) override { return SGOF.CalPcgo(Sg); }
     OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) override { return SGOF.CalSg(Pcgo); }
     OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override { return SWPCGW.Eval_Inv(1, pcgw, 0); }
+
+protected:
+    OCP_DBL GetKrgDer(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
     void CalKrPc(const OCP_DBL* S_in) override;
@@ -272,7 +289,6 @@ public:
         : FlowUnit_OGW01(rs_param, i)
     {
         // gas is moveable all the time
-        Scm[oIndex]  = 0;
         maxPcow = SWOF.GetMaxPc();
         minPcow = SWOF.GetMinPc();
     }
@@ -296,18 +312,21 @@ class FlowUnit_OGW02 : public FlowUnit_OGW
 public:
     FlowUnit_OGW02() = default;
     FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i);
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWFN.Eval(0, sw, 2); }
+    OCP_DBL GetPcowBySw(const OCP_DBL& sw) override { return SWFN.CalPcow(sw);}
     OCP_DBL GetSwByPcow(const OCP_DBL& pcow) override
     {
-        return SWFN.Eval_Inv(2, pcow, 0);
+        return SWFN.CalSw(pcow);
     }
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGFN.Eval(0, sg, 2); }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGFN.Eval(2, pcgo, 0); }
+    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) override { return SGFN.CalPcgo(sg); }
+    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) override { return SGFN.CalSg(pcgo); }
     OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) override
     {
         return SWPCGW.Eval_Inv(1, pcgw, 0);
     }
     void Generate_SWPCWG();
+
+protected:
+    OCP_DBL GetKrgDer(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) override { OCP_ABORT("NOT COMPLETED!"); }
 
 protected:
     void CalKrPc(const OCP_DBL* S_in) override;
@@ -330,9 +349,9 @@ protected:
         OCP_DBL& dkroSo) const;
 
 protected:
-    OCPTable SWFN;   ///< saturation table about water.
-    OCPTable SGFN;   ///< saturation table about gas.
-    OCPTable SOF3;   ///< saturation table about oil.
+    OCP_SWFN SWFN;
+    OCP_SGFN SGFN;
+    OCP_SOF3 SOF3;
     OCPTable SWPCGW; ///< auxiliary table: saturation of water vs. capillary
                      ///< pressure between water and gas.
 };

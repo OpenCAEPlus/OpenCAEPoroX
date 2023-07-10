@@ -52,7 +52,7 @@ void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 
     // three phase black oil model using stone 2
     OCP_DBL krw, krow, Pcwo;
-    SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
+    SWOF.CalKrwKrowPcwo(Sw, krw, krow, Pcwo);
 
     kr[0] = krow;
     kr[1] = krw;
@@ -64,7 +64,7 @@ void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     const OCP_DBL Sw = S_in[1];
     OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
-    SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
+    SWOF.CalKrwKrowPcwoDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
     kr[0] = krow;
     kr[1] = krw;
@@ -123,16 +123,10 @@ void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
 {
     // for miscible
     miscible       = &optFeatures.miscible;
+    mcMethodIndex  = miscible->Setup(&PF3);
     // for scalePcow
     scalePcow      = &optFeatures.scalePcow;
-    spMethodIndex = scalePcow->Setup(
-                     ScalePcowMethodParams(
-                     Swco, 
-                     maxPcow, 
-                     minPcow, 
-                     bind(&FlowUnit_OGW::GetPcowBySw, this, std::placeholders::_1),
-                     &pc[wIndex],
-                     &dPcdS[ww]));
+    spMethodIndex  = scalePcow->Setup(&PF3);
 }
 
 void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
@@ -153,7 +147,57 @@ void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     CalKrPcFIM(S_in);
+
+    if (newM) {        
+        miscible->CorrectCurve(bId, mcMethodIndex);
+        AssinValueDer();
+    }
+
     scalePcow->ScaleDer(bId, spMethodIndex);
+}
+
+
+void FlowUnit_OGW::AssinValueDer()
+{
+    const OCP3PFVarSet& vs = PF3.GetVarSet();
+    kr[oIndex] = vs.kro;
+    kr[gIndex] = vs.krg;
+    kr[wIndex] = vs.krw;
+    pc[oIndex] = 0;;
+    pc[gIndex] = vs.Pcgo;
+    pc[wIndex] = vs.Pcwo;
+
+    dKrdS[oo] = vs.dKrodSo;
+    dKrdS[og] = vs.dKrodSg;
+    dKrdS[ow] = vs.dKrodSw;
+    dKrdS[go] = vs.dKrgdSo;
+    dKrdS[gg] = vs.dKrgdSg;
+    dKrdS[gw] = vs.dKrgdSw;
+    dKrdS[wo] = vs.dKrwdSo;
+    dKrdS[wg] = vs.dKrwdSg;
+    dKrdS[ww] = vs.dKrwdSw;
+
+    dPcdS[oo] = 0;
+    dPcdS[og] = 0;
+    dPcdS[ow] = 0;
+    dPcdS[go] = vs.dPcgodSo;
+    dPcdS[gg] = vs.dPcgodSg;
+    dPcdS[gw] = vs.dPcgodSw;
+    dPcdS[wo] = vs.dPcwodSo;
+    dPcdS[wg] = vs.dPcwodSg;
+    dPcdS[ww] = vs.dPcwodSw;
+}
+
+
+void FlowUnit_OGW::AssinValue()
+{
+    const OCP3PFVarSet& vs = PF3.GetVarSet();
+    kr[oIndex] = vs.kro;
+    kr[gIndex] = vs.krg;
+    kr[wIndex] = vs.krw;
+    pc[oIndex] = 0;
+    pc[gIndex] = vs.Pcgo;
+    pc[wIndex] = vs.Pcwo;
 }
 
 
@@ -193,20 +237,33 @@ FlowUnit_OGW01::FlowUnit_OGW01(const ParamReservoir& rs_param, const USI& i)
 {
     Allocate(3);
 
-    SWOF.Setup(rs_param.SWOF_T.data[i]);
-    SGOF.Setup(rs_param.SGOF_T.data[i]);
+    if (!newM) {
+        SWOF.Setup(rs_param.SWOF_T.data[i]);
+        SGOF.Setup(rs_param.SGOF_T.data[i]);
 
-    krocw = SWOF.GetKrocw();
-    Swco  = SWOF.GetSwco();
+        krocw = SWOF.GetKrocw();
+        Swco = SWOF.GetSwco();
 
-    data.resize(4, 0);
-    cdata.resize(4, 0);
+        data.resize(4, 0);
+        cdata.resize(4, 0);
 
-    Generate_SWPCWG();
+        Generate_SWPCWG();
 
-    Scm.resize(3, 0);
-    Scm[gIndex] = SGOF.GetSgcr();
-    Scm[wIndex] = SWOF.GetSwcr();
+        Scm.resize(3, 0);
+        Scm[gIndex] = SGOF.GetSgcr();
+        Scm[wIndex] = SWOF.GetSwcr();
+    }
+    else {
+        PF3.Setup(rs_param, i);
+
+        SWOF.Setup(rs_param.SWOF_T.data[i]);
+        SGOF.Setup(rs_param.SGOF_T.data[i]);
+
+        krocw = SWOF.GetKrocw();
+        Swco = SWOF.GetSwco();
+        Generate_SWPCWG();
+    }
+
 }
 
 void FlowUnit_OGW01::CalKrPc(const OCP_DBL* S_in)
@@ -216,7 +273,7 @@ void FlowUnit_OGW01::CalKrPc(const OCP_DBL* S_in)
 
     // three phase black oil model using stone 2
     OCP_DBL krw, krow, Pcwo;
-    SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
+    SWOF.CalKrwKrowPcwo(Sw, krw, krow, Pcwo);
 
     OCP_DBL krg, krog, Pcgo;
     SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
@@ -234,53 +291,60 @@ void FlowUnit_OGW01::CalKrPc(const OCP_DBL* S_in)
 
 void FlowUnit_OGW01::CalKrPcFIM(const OCP_DBL* S_in)
 {
-    const OCP_DBL Sg = S_in[gIndex];
-    const OCP_DBL Sw = S_in[wIndex];
+    if (!newM) {
+        const OCP_DBL Sg = S_in[gIndex];
+        const OCP_DBL Sw = S_in[wIndex];
 
-    // three phase black oil model using stone 2
-    OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
-    SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
+        // three phase black oil model using stone 2
+        OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
+        SWOF.CalKrwKrowPcwoDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
-    OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
-    SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
+        OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
+        SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
 
-    OCP_DBL dKrodSg{0}, dKrodSw{0}, kro{0};
+        OCP_DBL dKrodSg{ 0 }, dKrodSw{ 0 }, kro{ 0 };
 
-    kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSw, dKrgdSg, dKrogdSg,
-                           dKrodSw, dKrodSg);
-    // if (kro < 0) {
-    //    cout << S_in[0] << "   " << S_in[1] << "   " << S_in[2] << endl;
-    //    kro = 0;
-    //}
-    // kro = CalKro_DefaultDer(Sg, Sw, krog, krow, dKrogdSg, dKrowdSw, dKrodSg,
-    // dKrodSw);
+        kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSw, dKrgdSg, dKrogdSg,
+            dKrodSw, dKrodSg);
+        // if (kro < 0) {
+        //    cout << S_in[0] << "   " << S_in[1] << "   " << S_in[2] << endl;
+        //    kro = 0;
+        //}
+        // kro = CalKro_DefaultDer(Sg, Sw, krog, krow, dKrogdSg, dKrowdSw, dKrodSg,
+        // dKrodSw);
 
-    kr[oIndex] = kro;
-    kr[gIndex] = krg;
-    kr[wIndex] = krw;
-    //pc[oIndex] = 0;
-    pc[gIndex] = Pcgo;
-    pc[wIndex] = Pcwo;
+        kr[oIndex] = kro;
+        kr[gIndex] = krg;
+        kr[wIndex] = krw;
+        //pc[oIndex] = 0;
+        pc[gIndex] = Pcgo;
+        pc[wIndex] = Pcwo;
 
-    //dKrdS[oo] = 0;
-    dKrdS[og] = dKrodSg;
-    dKrdS[ow] = dKrodSw;
-    //dKrdS[go] = 0;
-    dKrdS[gg] = dKrgdSg;
-    //dKrdS[gw] = 0;
-    //dKrdS[wo] = 0;
-    //dKrdS[wg] = 0;
-    dKrdS[ww] = dKrwdSw;
+        //dKrdS[oo] = 0;
+        dKrdS[og] = dKrodSg;
+        dKrdS[ow] = dKrodSw;
+        //dKrdS[go] = 0;
+        dKrdS[gg] = dKrgdSg;
+        //dKrdS[gw] = 0;
+        //dKrdS[wo] = 0;
+        //dKrdS[wg] = 0;
+        dKrdS[ww] = dKrwdSw;
 
-    //dPcdS[oo] = 0;
-    //dPcdS[og] = 0;
-    //dPcdS[ow] = 0;
-    //dPcdS[go] = 0;
-    dPcdS[gg] = dPcgodSg;
-    //dPcdS[gw] = 0;
-    //dPcdS[wo] = 0;
-    //dPcdS[wg] = 0;
-    dPcdS[ww] = dPcwodSw;
+        //dPcdS[oo] = 0;
+        //dPcdS[og] = 0;
+        //dPcdS[ow] = 0;
+        //dPcdS[go] = 0;
+        dPcdS[gg] = dPcgodSg;
+        //dPcdS[gw] = 0;
+        //dPcdS[wo] = 0;
+        //dPcdS[wg] = 0;
+        dPcdS[ww] = dPcwodSw;
+    }
+    else {
+        PF3.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    }
+
+
 }
 
 OCP_DBL FlowUnit_OGW01::CalKro_Stone2Der(const OCP_DBL& krow,
@@ -363,7 +427,7 @@ void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in)
         const OCP_DBL Sw = S_in[wIndex];
 
         OCP_DBL krw, krow, Pcwo;
-        SWOF.CalKrwKrowPcow(Sw, krw, krow, Pcwo);
+        SWOF.CalKrwKrowPcwo(Sw, krw, krow, Pcwo);
 
         OCP_DBL krg, krog, Pcgo;
         SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
@@ -389,62 +453,68 @@ void FlowUnit_OGW01_Miscible::CalKrPc(const OCP_DBL* S_in)
 
 void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in)
 {
-    if (!miscible->CalFkFp(bulkId, Fk, Fp)) {
-        FlowUnit_OGW01::CalKrPcFIM(S_in);
-    } else {
-        const OCP_DBL So = S_in[oIndex];
-        const OCP_DBL Sg = S_in[gIndex];
-        const OCP_DBL Sw = S_in[wIndex];
+    if (!newM) {
+        if (!miscible->CalFkFp(bulkId, Fk, Fp)) {
+            FlowUnit_OGW01::CalKrPcFIM(S_in);
+        }
+        else {
+            const OCP_DBL So = S_in[oIndex];
+            const OCP_DBL Sg = S_in[gIndex];
+            const OCP_DBL Sw = S_in[wIndex];
 
-        OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
-        SWOF.CalKrwKrowPcowDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
+            OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
+            SWOF.CalKrwKrowPcwoDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
 
-        OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
-        SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
-        Pcgo     *= Fp;
-        dPcgodSg *= Fp;
+            OCP_DBL krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg;
+            SGOF.CalKrgKrogPcgoDer(Sg, krg, krog, Pcgo, dKrgdSg, dKrogdSg, dPcgodSg);
+            Pcgo *= Fp;
+            dPcgodSg *= Fp;
 
-        OCP_DBL dKrodSg{0}, dKrodSw{0}, kro{0};
-        kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSw, dKrgdSg,
-                               dKrogdSg, dKrodSw, dKrodSg);
+            OCP_DBL dKrodSg{ 0 }, dKrodSw{ 0 }, kro{ 0 };
+            kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSw, dKrgdSg,
+                dKrogdSg, dKrodSw, dKrodSg);
 
-        OCP_DBL       dkrgd1_Sw = 0;
-        const OCP_DBL krgt = SGOF.CalKrg(1 - Sw, dkrgd1_Sw);
-        const OCP_DBL krh  = 0.5 * (krow + krgt);
+            OCP_DBL       dkrgd1_Sw = 0;
+            const OCP_DBL krgt = GetKrgDer(1 - Sw, dkrgd1_Sw);
+            const OCP_DBL krh = 0.5 * (krow + krgt);
 
-        // from CMG, see *SIGMA
-        kro = Fk * kro + (1 - Fk) * krh * So / (1 - Sw);
-        krg = Fk * krg + (1 - Fk) * krh * Sg / (1 - Sw);
+            // from CMG, see *SIGMA
+            kro = Fk * kro + (1 - Fk) * krh * So / (1 - Sw);
+            krg = Fk * krg + (1 - Fk) * krh * Sg / (1 - Sw);
 
-        kr[oIndex] = kro;
-        kr[gIndex] = krg;
-        kr[wIndex] = krw;
-        //pc[oIndex] = 0;
-        pc[gIndex] = Pcgo;
-        pc[wIndex] = Pcwo;
+            kr[oIndex] = kro;
+            kr[gIndex] = krg;
+            kr[wIndex] = krw;
+            //pc[oIndex] = 0;
+            pc[gIndex] = Pcgo;
+            pc[wIndex] = Pcwo;
 
-        const OCP_DBL dkrhdSw = 0.5 * (dKrowdSw - dkrgd1_Sw);
-        const OCP_DBL temp    = (1 - Fk) / (1 - Sw) * (krh / (1 - Sw) + dkrhdSw);
+            const OCP_DBL dkrhdSw = 0.5 * (dKrowdSw - dkrgd1_Sw);
+            const OCP_DBL temp = (1 - Fk) / (1 - Sw) * (krh / (1 - Sw) + dkrhdSw);
 
-        dKrdS[oo] = (1 - Fk) * krh / (1 - Sw);
-        dKrdS[og] = Fk * dKrodSg;
-        dKrdS[ow] = Fk * dKrodSw + temp * So;
-        //dKrdS[go] = 0;
-        dKrdS[gg] = Fk * dKrgdSg + (1 - Fk) * krh / (1 - Sw);
-        dKrdS[gw] = temp * Sg;
-        //dKrdS[wo] = 0;
-        //dKrdS[wg] = 0;
-        dKrdS[ww] = dKrwdSw;
+            dKrdS[oo] = (1 - Fk) * krh / (1 - Sw);
+            dKrdS[og] = Fk * dKrodSg;
+            dKrdS[ow] = Fk * dKrodSw + temp * So;
+            //dKrdS[go] = 0;
+            dKrdS[gg] = Fk * dKrgdSg + (1 - Fk) * krh / (1 - Sw);
+            dKrdS[gw] = temp * Sg;
+            //dKrdS[wo] = 0;
+            //dKrdS[wg] = 0;
+            dKrdS[ww] = dKrwdSw;
 
-        //dPcdS[oo] = 0;
-        //dPcdS[og] = 0;
-        //dPcdS[ow] = 0;
-        //dPcdS[go] = 0;
-        dPcdS[gg] = dPcgodSg;
-        //dPcdS[gw] = 0;
-        //dPcdS[wo] = 0;
-        //dPcdS[wg] = 0;
-        dPcdS[ww] = dPcwodSw;
+            //dPcdS[oo] = 0;
+            //dPcdS[og] = 0;
+            //dPcdS[ow] = 0;
+            //dPcdS[go] = 0;
+            dPcdS[gg] = dPcgodSg;
+            //dPcdS[gw] = 0;
+            //dPcdS[wo] = 0;
+            //dPcdS[wg] = 0;
+            dPcdS[ww] = dPcwodSw;
+        }
+    }
+    else {
+        PF3.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
     }
 }
 
@@ -454,19 +524,32 @@ void FlowUnit_OGW01_Miscible::CalKrPcFIM(const OCP_DBL* S_in)
 
 FlowUnit_OGW02::FlowUnit_OGW02(const ParamReservoir& rs_param, const USI& i)
 {
+
     Allocate(3);
+    if (!newM) {
+        SWFN.Setup(rs_param.SWFN_T.data[i]);
+        SGFN.Setup(rs_param.SGFN_T.data[i]);
+        SOF3.Setup(rs_param.SOF3_T.data[i]);
 
-    SWFN.Setup(rs_param.SWFN_T.data[i]);
-    SGFN.Setup(rs_param.SGFN_T.data[i]);
-    SOF3.Setup(rs_param.SOF3_T.data[i]);
+        krocw = SOF3.GetKrocw();
+        Swco = SWFN.GetSwco();
 
-    krocw = SOF3.GetCol(1).back();
-    Swco   = SWFN.GetCol(0)[0];
+        data.resize(3, 0);
+        cdata.resize(3, 0);
 
-    data.resize(3, 0);
-    cdata.resize(3, 0);
+        Generate_SWPCWG();
+    }
+    else {
+        SWFN.Setup(rs_param.SWFN_T.data[i]);
+        SGFN.Setup(rs_param.SGFN_T.data[i]);
+        SOF3.Setup(rs_param.SOF3_T.data[i]);
 
-    Generate_SWPCWG();
+        krocw = SOF3.GetKrocw();
+        Swco = SWFN.GetSwco();
+        Generate_SWPCWG();
+
+        PF3.Setup(rs_param, i);
+    }   
 }
 
 void FlowUnit_OGW02::CalKrPc(const OCP_DBL* S_in)
@@ -475,17 +558,15 @@ void FlowUnit_OGW02::CalKrPc(const OCP_DBL* S_in)
     const OCP_DBL Sg = S_in[gIndex];
     const OCP_DBL Sw = S_in[wIndex];
 
-    SWFN.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw  = data[1];
-    const OCP_DBL Pcwo = -data[2];
+    OCP_DBL krw, Pcwo;
+    SWFN.CalKrwPcwo(Sw, krw, Pcwo);
 
-    SGFN.Eval_All(0, Sg, data, cdata);
-    const OCP_DBL krg  = data[1];
-    const OCP_DBL Pcgo = data[2];
+    OCP_DBL krg, Pcgo;
+    SGFN.CalKrgPcgo(Sg, krg, Pcgo);
 
-    SOF3.Eval_All(0, So, data, cdata);
-    const OCP_DBL krow = data[1];
-    const OCP_DBL krog = data[2];
+    OCP_DBL krow;
+    OCP_DBL krog;
+    SOF3.CalKrowKrog(So, krow, krog);
 
     // OCP_DBL kro = CalKro_Stone2(krow, krog, krw, krg);
     const OCP_DBL kro = CalKro_Default(Sg, Sw, krog, krow);
@@ -500,59 +581,60 @@ void FlowUnit_OGW02::CalKrPc(const OCP_DBL* S_in)
 
 void FlowUnit_OGW02::CalKrPcFIM(const OCP_DBL* S_in)
 {
-    const OCP_DBL So = S_in[oIndex];
-    const OCP_DBL Sg = S_in[gIndex];
-    const OCP_DBL Sw = S_in[wIndex];
 
-    SWFN.Eval_All(0, Sw, data, cdata);
-    const OCP_DBL krw      = data[1];
-    const OCP_DBL dKrwdSw  = cdata[1];
-    const OCP_DBL Pcwo     = -data[2];
-    const OCP_DBL dPcwodSw = -cdata[2];
+    if (!newM) {
+        const OCP_DBL So = S_in[oIndex];
+        const OCP_DBL Sg = S_in[gIndex];
+        const OCP_DBL Sw = S_in[wIndex];
 
-    SGFN.Eval_All(0, Sg, data, cdata);
-    const OCP_DBL krg      = data[1];
-    const OCP_DBL dKrgdSg  = cdata[1];
-    const OCP_DBL Pcgo     = data[2];
-    const OCP_DBL dPcgodSg = cdata[2];
+        OCP_DBL krw, Pcwo, dKrwdSw, dPcwodSw;
+        SWFN.CalKrwPcwoDer(Sw, krw, Pcwo, dKrwdSw, dPcwodSw);
 
-    SOF3.Eval_All(0, So, data, cdata);
-    const OCP_DBL krow     = data[1];
-    const OCP_DBL dKrowdSo = cdata[1];
-    const OCP_DBL krog     = data[2];
-    const OCP_DBL dKrogdSo = cdata[2];
+        OCP_DBL krg, Pcgo, dKrgdSg, dPcgodSg;
+        SGFN.CalKrgPcgoDer(Sg, krg, Pcgo, dKrgdSg, dPcgodSg);
 
-    OCP_DBL dKroSo = 0;
-    const OCP_DBL kro    = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSo, dKrgdSg,
-                                      dKrogdSo, dKroSo);
-    // OCP_DBL kro = CalKro_DefaultDer(Sg, Sw, krog, krow, dKrogdSo, dKrowdSo, dKroSo);
 
-    kr[oIndex] = kro;
-    kr[gIndex] = krg;
-    kr[wIndex] = krw;
-    // pc[oIndex] = 0;
-    pc[gIndex] = Pcgo;
-    pc[wIndex] = Pcwo;
+        OCP_DBL krow, dKrowdSo;
+        OCP_DBL krog, dKrogdSo;
+        SOF3.CalKrowKrogDer(So, krow, krog, dKrowdSo, dKrogdSo);
 
-    dKrdS[oo] = dKroSo;
-    //dKrdS[og] = 0;
-    //dKrdS[ow] = 0;
-    //dKrdS[go] = 0;
-    dKrdS[gg] = dKrgdSg;
-    //dKrdS[gw] = 0;
-    //dKrdS[wo] = 0;
-    //dKrdS[wg] = 0;
-    dKrdS[ww] = dKrwdSw;
 
-    //dPcdS[oo] = 0;
-    //dPcdS[og] = 0;
-    //dPcdS[ow] = 0;
-    //dPcdS[go] = 0;
-    dPcdS[gg] = dPcgodSg;
-    //dPcdS[gw] = 0;
-    //dPcdS[wo] = 0;
-    //dPcdS[wg] = 0;
-    dPcdS[ww] = dPcwodSw;
+        OCP_DBL dKroSo = 0;
+        const OCP_DBL kro = CalKro_Stone2Der(krow, krog, krw, krg, dKrwdSw, dKrowdSo, dKrgdSg,
+            dKrogdSo, dKroSo);
+        // OCP_DBL kro = CalKro_DefaultDer(Sg, Sw, krog, krow, dKrogdSo, dKrowdSo, dKroSo);
+
+        kr[oIndex] = kro;
+        kr[gIndex] = krg;
+        kr[wIndex] = krw;
+        // pc[oIndex] = 0;
+        pc[gIndex] = Pcgo;
+        pc[wIndex] = Pcwo;
+
+        dKrdS[oo] = dKroSo;
+        //dKrdS[og] = 0;
+        //dKrdS[ow] = 0;
+        //dKrdS[go] = 0;
+        dKrdS[gg] = dKrgdSg;
+        //dKrdS[gw] = 0;
+        //dKrdS[wo] = 0;
+        //dKrdS[wg] = 0;
+        dKrdS[ww] = dKrwdSw;
+
+        //dPcdS[oo] = 0;
+        //dPcdS[og] = 0;
+        //dPcdS[ow] = 0;
+        //dPcdS[go] = 0;
+        dPcdS[gg] = dPcgodSg;
+        //dPcdS[gw] = 0;
+        //dPcdS[wo] = 0;
+        //dPcdS[wg] = 0;
+        dPcdS[ww] = dPcwodSw;
+    }
+    else {
+        PF3.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    }
+
 }
 
 OCP_DBL FlowUnit_OGW02::CalKro_Stone2Der(const OCP_DBL& krow,
@@ -602,11 +684,12 @@ void FlowUnit_OGW02::Generate_SWPCWG()
     if (SWFN.IsEmpty()) OCP_ABORT("SWFN is missing!");
     if (SGFN.IsEmpty()) OCP_ABORT("SGFN is missing!");
 
-    const std::vector<OCP_DBL> Sw(SWFN.GetCol(0));
-    std::vector<OCP_DBL> Pcow(SWFN.GetCol(2));
+    const std::vector<OCP_DBL> Sw(SWFN.GetSw());
+    std::vector<OCP_DBL> Pcow(SWFN.GetPcow());
     USI                  n = Sw.size();
     for (USI i = 0; i < n; i++) {
-        OCP_DBL Pcgo = SGFN.Eval(0, 1 - Sw[i], 2);
+        // OCP_DBL Pcgo = SGFN.Eval(0, 1 - Sw[i], 2);
+        OCP_DBL Pcgo = SGFN.CalPcgo(1 - Sw[i]);
         Pcow[i] += Pcgo; // pcgw
     }
 

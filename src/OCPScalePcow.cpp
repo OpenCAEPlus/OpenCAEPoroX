@@ -17,21 +17,29 @@
 
 
 ////////////////////////////////////////////////////////////////
-// ScalePcowMethod
+// ScalePcowMethod01
 ////////////////////////////////////////////////////////////////
+
+
+ScalePcowMethod01::ScalePcowMethod01(OCP3PhaseFlow* pf3) {
+    PF3     = pf3;
+    Swco    = PF3->GetSwco();
+    maxPcow = PF3->GetMaxPcow();
+    minPcow = PF3->GetMinPcow();
+}
 
 
 OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const
 {
-    if (swatInit <= swco) {
-        Swinout = swco;
-        const OCP_DBL PcowInit = CalPcow(Swinout);
+    if (swatInit <= Swco) {
+        Swinout = Swco;
+        const OCP_DBL PcowInit = PF3->CalPcowBySw(Swinout);
         return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
     }
     else {
         Swinout = swatInit;
         if (Pcowin > 0) {
-            const OCP_DBL PcowInit = CalPcow(Swinout);
+            const OCP_DBL PcowInit = PF3->CalPcowBySw(Swinout);
             if (PcowInit > 0) {
                 return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
             }
@@ -43,14 +51,16 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 
 void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 {
-    *Pcow_out      = -((-*Pcow_out - minPcow) * sv + minPcow);
-    *dPcowdSw_out *= sv;
+    OCP3PFVarSet vs = PF3->GetVarSet();
+    vs.Pcwo      = -((-vs.Pcwo - minPcow) * sv + minPcow);
+    vs.dPcwodSw *= sv;
 }
 
 
 void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 {
-    *Pcow_out = -((-*Pcow_out - minPcow) * sv + minPcow);
+    OCP3PFVarSet vs = PF3->GetVarSet();
+    vs.Pcwo = -((-vs.Pcwo - minPcow) * sv + minPcow);
 }
 
 
@@ -59,13 +69,13 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 ////////////////////////////////////////////////////////////////
 
 
-USI ScalePcow::Setup(const ScalePcowMethodParams& params)
+USI ScalePcow::Setup(OCP3PhaseFlow* pf3)
 {
     if (ifScale) {
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");
         scaleVal.resize(swatInit.size(), 1.0);
 
-        scalePcowMethod.push_back(new ScalePcowMethod01(params));
+        scalePcowMethod.push_back(new ScalePcowMethod01(pf3));
         return scalePcowMethod.size() - 1;
     }
     else {

@@ -15,9 +15,10 @@
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPSurfaceTension.hpp"
+#include "OCP3PhaseFlow.hpp"
 
 #include <vector>
-#include <functional>
+
 
 using namespace std;
 
@@ -106,40 +107,7 @@ class MisCurveMethod
 {
 public:
     MisCurveMethod() = default;
-
-protected:
-
-    OCP_DBL* kr_out;                           ///< permeability (will be corrected)
-    OCP_DBL* Pc_out;                           ///< capillary pressure (will be corrected)
-    OCP_DBL* dPcdS_out;                        ///< dPcdS (will be corrected)
-    function<OCP_DBL(const OCP_DBL&)> CalKrg;  ///< function to calculate krg
-};
-
-
-/// Params uesd to correct permeability and capillary pressure
-class MisCurveMethodParams
-{
-    friend class MisCurveMethod01;
-public:
-    /// Default constructor
-    MisCurveMethodParams() = default;
-    MisCurveMethodParams(
-        OCP_DBL* krin,
-        OCP_DBL* Pcin,
-        OCP_DBL* dPcdSin,
-        const function<OCP_DBL(const OCP_DBL&)>& CalKrgin
-    ) {
-        kr_out = krin;
-        Pc_out = Pcin;
-        dPcdS_out = dPcdSin;
-        CalKrg = CalKrgin;
-    }
-
-protected:
-    OCP_DBL* kr_out;    ///< permeability (will be corrected)
-    OCP_DBL* Pc_out;    ///< capillary pressure (will be corrected)
-    OCP_DBL* dPcdS_out; ///< dPcdS (will be corrected)
-    function<OCP_DBL(const OCP_DBL&)> CalKrg;    ///< function to calculate krg
+    virtual void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) = 0;
 };
 
 
@@ -148,14 +116,13 @@ class MisCurveMethod01 : public MisCurveMethod
 {
 public:
     MisCurveMethod01() = default;
-    MisCurveMethod01(const MisCurveMethodParams& params) {
-        kr_out     = params.kr_out;   
-        kr_out     = params.kr_out;
-        Pc_out     = params.Pc_out;
-        dPcdS_out  = params.dPcdS_out;
-        CalKrg     = params.CalKrg;
+    MisCurveMethod01(OCP3PhaseFlow* pf3) {
+        PF3 = pf3;
     }
-    void CorrectOGCurve();
+    void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
+
+protected:
+    OCP3PhaseFlow* PF3;
 };
 
 
@@ -164,7 +131,8 @@ class MiscibleCurve
 {
 public:
     MiscibleCurve() = default;
-    USI Setup(const MisCurveMethodParams& param);
+    USI Setup(OCP3PhaseFlow* pf3);
+    void CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp);
 protected:
     vector<MisCurveMethod*> mcMethod;
 };
@@ -177,10 +145,14 @@ class Miscible
 public:
     /// Input param from input file
     void InputParam(const OCP_BOOL& ifmiscible);
-    /// Setup for Miscible terms
+    /// Setup for miscible factor calculation
     USI Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams);
+    /// Setup for miscible curve correction
+    USI Setup(OCP3PhaseFlow* pf3);
     /// Calculate Misscible Factor
     void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex);
+    /// Correct miscible curve
+    void CorrectCurve(const OCP_USI& bId, const USI& mIndex);
     /// Calculate Fk, Fp and return if miscible
     OCP_BOOL CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp);
     /// Reset Miscible term to last time step
@@ -211,7 +183,7 @@ protected:
     /// for miscible factor calculation
     MiscibleFcator mF;
     /// for miscible curve correction
-
+    MiscibleCurve  mC;
 
 };
 
