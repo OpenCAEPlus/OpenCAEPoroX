@@ -17,10 +17,25 @@
 ///////////////////////////////////////////////
 
 
+void FlowUnit_OW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
+{
+    // for scalePcow
+    scalePcow     = &optFeatures.scalePcow;
+    spMethodIndex = scalePcow->Setup(&OWF);
+}
+
+
+void FlowUnit_OW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
+{
+    scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);
+}
+
+
 void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     OWF.CalKrPc(S_in[oIndex], S_in[wIndex]);
+    scalePcow->Scale(bId, spMethodIndex);
     AssinValue();
 }
 
@@ -29,6 +44,7 @@ void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     OWF.CalKrPcDer(S_in[oIndex], S_in[wIndex]);
+    scalePcow->ScaleDer(bId, spMethodIndex);
     AssinValueDer();
 }
 

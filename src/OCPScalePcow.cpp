@@ -21,11 +21,11 @@
 ////////////////////////////////////////////////////////////////
 
 
-ScalePcowMethod01::ScalePcowMethod01(OCPFlowOGW* pf3) {
-    OGWF     = pf3;
-    Swco    = OGWF->GetSwco();
-    maxPcow = OGWF->GetMaxPcow();
-    minPcow = OGWF->GetMinPcow();
+ScalePcowMethod01::ScalePcowMethod01(OCPFlow* flowin) {
+    flow    = flowin;
+    Swco    = flow->GetSwco();
+    maxPcow = flow->GetMaxPcow();
+    minPcow = flow->GetMinPcow();
 }
 
 
@@ -33,13 +33,13 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 {
     if (swatInit <= Swco) {
         Swinout = Swco;
-        const OCP_DBL PcowInit = OGWF->CalPcowBySw(Swinout);
+        const OCP_DBL PcowInit = flow->CalPcowBySw(Swinout);
         return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
     }
     else {
         Swinout = swatInit;
         if (Pcowin > 0) {
-            const OCP_DBL PcowInit = OGWF->CalPcowBySw(Swinout);
+            const OCP_DBL PcowInit = flow->CalPcowBySw(Swinout);
             if (PcowInit > 0) {
                 return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
             }
@@ -51,7 +51,7 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 
 void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 {
-    OCPFlowVarSet vs = OGWF->GetVarSet();
+    OCPFlowVarSet vs = flow->GetVarSet();
     vs.Pcwo      = -((-vs.Pcwo - minPcow) * sv + minPcow);
     vs.dPcwodSw *= sv;
 }
@@ -59,7 +59,7 @@ void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 
 void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 {
-    OCPFlowVarSet vs = OGWF->GetVarSet();
+    OCPFlowVarSet vs = flow->GetVarSet();
     vs.Pcwo = -((-vs.Pcwo - minPcow) * sv + minPcow);
 }
 
@@ -69,13 +69,24 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 ////////////////////////////////////////////////////////////////
 
 
-USI ScalePcow::Setup(OCPFlowOGW* pf3)
+USI ScalePcow::Setup(OCPFlow* flowin)
 {
+
+	switch (flowin->FlowType())
+	{
+    case OCPFLOW_OGW:
+    case OCPFLOW_OW:
+        break;
+	default:
+        OCP_ABORT("Wrong FlowType for ScalePcow!");
+		break;
+	}
+
     if (ifScale) {
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");
         scaleVal.resize(swatInit.size(), 1.0);
 
-        scalePcowMethod.push_back(new ScalePcowMethod01(pf3));
+        scalePcowMethod.push_back(new ScalePcowMethod01(flowin));
         return scalePcowMethod.size() - 1;
     }
     else {

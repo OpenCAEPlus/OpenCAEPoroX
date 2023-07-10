@@ -49,11 +49,11 @@ void MisCurveMethod01::CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp)
     if (Fk > -TINY) {
         // miscible
 
-        OCPFlowVarSet& vs = OGWF->GetVarSet();
+        OCPFlowVarSet& vs = flow->GetVarSet();
 
         // for permeability
         OCP_DBL tmp;
-        const OCP_DBL krgt = OGWF->CalKrg((1 - vs.Sw), tmp);
+        const OCP_DBL krgt = flow->CalKrg((1 - vs.Sw), tmp);
         const OCP_DBL krh = 0.5 * (vs.krow + krgt);
 
         vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
@@ -70,11 +70,11 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp)
     if (Fk > -TINY) {
         // miscible
 
-        OCPFlowVarSet& vs = OGWF->GetVarSet();
+        OCPFlowVarSet& vs = flow->GetVarSet();
 
         // for permeability
         OCP_DBL       dkrgd1_Sw = 0;
-        const OCP_DBL krgt = OGWF->CalKrg((1 - vs.Sw), dkrgd1_Sw);
+        const OCP_DBL krgt = flow->CalKrg((1 - vs.Sw), dkrgd1_Sw);
         const OCP_DBL krh = 0.5 * (vs.krow + krgt);
 
         vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
@@ -99,9 +99,9 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp)
 }
 
 
-USI MiscibleCurve::Setup(OCPFlowOGW* pf3)
+USI MiscibleCurve::Setup(OCPFlow* flowin)
 {
-    mcMethod.push_back(new MisCurveMethod01(pf3));
+    mcMethod.push_back(new MisCurveMethod01(flowin));
     
     return mcMethod.size() - 1;
 }
@@ -137,10 +137,11 @@ USI Miscible::Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, 
 }
 
 
-USI Miscible::Setup(OCPFlowOGW* pf3)
+USI Miscible::Setup(OCPFlow* flowin)
 {
+
     if (ifMiscible) {
-        return mC.Setup(pf3);
+        return mC.Setup(flowin);
     }
     return 0;
 }

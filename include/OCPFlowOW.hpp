@@ -74,9 +74,8 @@ protected:
 class OCPFlowOW : public OCPFlow
 {
 public:
-    OCPFlowOW() = default;
+    OCPFlowOW() { flowType = OCPFLOW_OW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sw) {
         SetSaturation(So, Sw);
         pfMethod->CalKrPc();
@@ -86,12 +85,14 @@ public:
         pfMethod->CalKrPcDer();
     }
 
-    OCP_DBL GetSwco() const { return pfMethod->GetSwco(); }
-    OCP_DBL GetMaxPcow() const { return pfMethod->GetMaxPcow(); }
-    OCP_DBL GetMinPcow() const { return pfMethod->GetMinPcow(); }
+    OCP_DBL GetSwco() const override { return pfMethod->GetSwco(); }
+    OCP_DBL GetMaxPcow() const override { return pfMethod->GetMaxPcow(); }
+    OCP_DBL GetMinPcow() const override { return pfMethod->GetMinPcow(); }
 
-    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const { return pfMethod->CalPcowBySw(Sw); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return pfMethod->CalPcowBySw(Sw); }
     OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const { return pfMethod->CalSwByPcow(Pcow); }
+
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Wrong Usage!"); }
 
 protected:
     void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sw) {
@@ -100,7 +101,6 @@ protected:
     }
 
 protected:
-    const USI      flowType = OCPFLOW_OW;
     OCPOWFMethod*  pfMethod;
 };
 

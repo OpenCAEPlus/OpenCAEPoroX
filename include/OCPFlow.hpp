@@ -18,6 +18,7 @@ using namespace std;
 
 const USI OCPFLOW_OG  = 21;
 const USI OCPFLOW_OW  = 22;
+const USI OCPFLOW_GW  = 23;
 const USI OCPFLOW_OGW = 3;
 
 /// oil-gas-water flow vars suite
@@ -78,8 +79,16 @@ class OCPFlow
 {
 public:
     OCPFlow() = default;
-
+    USI FlowType() const { return flowType; }
+    OCPFlowVarSet& GetVarSet() { return vs; }
+    
+    virtual OCP_DBL GetSwco() const = 0;
+    virtual OCP_DBL GetMaxPcow() const = 0;
+    virtual OCP_DBL GetMinPcow() const = 0;
+    virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const = 0;
+    virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
 protected:
+    USI           flowType;
     OCPFlowVarSet vs;
 };
 

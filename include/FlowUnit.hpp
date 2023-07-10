@@ -86,7 +86,7 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
-    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override { };
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override {};
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override {};
     OCP_DBL GetSwco() const override { return 0.0; }
     OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0.0; }
@@ -107,9 +107,8 @@ public:
         Allocate(2);
         OWF.Setup(rs_param, i);
     }
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
-    void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
+    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override;
+    void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override;
 
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;

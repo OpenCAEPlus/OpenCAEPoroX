@@ -167,9 +167,8 @@ protected:
 class OCPFlowOGW : public OCPFlow
 {
 public:
-    OCPFlowOGW() = default;
+    OCPFlowOGW() { flowType = OCPFLOW_OGW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
         SetSaturation(So, Sg, Sw);
         pfMethod->CalKrPc(); 
@@ -179,16 +178,16 @@ public:
         pfMethod->CalKrPcDer(); 
     }
 
-    OCP_DBL GetSwco() const { return pfMethod->GetSwco(); }
-    OCP_DBL GetMaxPcow() const { return pfMethod->GetMaxPcow(); }
-    OCP_DBL GetMinPcow() const { return pfMethod->GetMinPcow(); }
+    OCP_DBL GetSwco() const override { return pfMethod->GetSwco(); }
+    OCP_DBL GetMaxPcow() const override { return pfMethod->GetMaxPcow(); }
+    OCP_DBL GetMinPcow() const override { return pfMethod->GetMinPcow(); }
 
-    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const { return pfMethod->CalPcowBySw(Sw); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return pfMethod->CalPcowBySw(Sw); }
     OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const { return pfMethod->CalSwByPcow(Pcow); }
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return pfMethod->CalPcgoBySg(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return pfMethod->CalSgByPcgo(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const { return pfMethod->CalSwByPcgw(Pcgw); }
-    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) { return pfMethod->CalKrg(Sg, dKrgdSg); }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return pfMethod->CalKrg(Sg, dKrgdSg); }
 
 protected:
     void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) {
@@ -198,7 +197,6 @@ protected:
     }
 
 protected:
-    const USI       flowType = OCPFLOW_OGW;
     OCPOGWFMethod*  pfMethod;
 };
 

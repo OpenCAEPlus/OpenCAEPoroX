@@ -20,7 +20,7 @@ class OptionalFeatures
 {
     friend class MixtureComp;
     friend class FlowUnit_OGW;
-    friend class FlowUnit_OGW01_Miscible;
+    friend class FlowUnit_OW;
     friend class Reservoir;
 
     // For Output

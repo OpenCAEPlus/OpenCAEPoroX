@@ -31,6 +31,7 @@ public:
     virtual void CalKrPcDer() = 0;
     virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const = 0;
+    virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
 
 protected:
     OCPFlowVarSet* vs;
@@ -52,6 +53,7 @@ public:
 
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGOF.CalPcgo(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGOF.CalSg(Pcgo); }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
     OCP_SGOF            SGOF;
@@ -65,9 +67,8 @@ protected:
 class OCPFlowOG : public OCPFlow
 {
 public:
-    OCPFlowOG() = default;
+    OCPFlowOG() { flowType = OCPFLOW_OG; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
         SetSaturation(So, Sg);
         pfMethod->CalKrPc();
@@ -77,8 +78,14 @@ public:
         pfMethod->CalKrPcDer();
     }
 
+    OCP_DBL GetSwco() const override { OCP_ABORT("Wrong Usage!"); }
+    OCP_DBL GetMaxPcow() const override { OCP_ABORT("Wrong Usage!"); }
+    OCP_DBL GetMinPcow() const override { OCP_ABORT("Wrong Usage!"); }
+
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return pfMethod->CalSgByPcgo(Pcgo); }
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return pfMethod->CalPcgoBySg(Sg); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Wrong Usage!"); }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return pfMethod->CalKrg(Sg, dKrgdSg); }
 
 protected:
     void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sg) {
@@ -87,7 +94,6 @@ protected:
     }
 
 protected:
-    const USI      flowType = OCPFLOW_OG;
     OCPOGFMethod*  pfMethod;
 };
 
