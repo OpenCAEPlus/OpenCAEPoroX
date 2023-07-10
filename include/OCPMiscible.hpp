@@ -108,6 +108,7 @@ class MisCurveMethod
 public:
     MisCurveMethod() = default;
     virtual void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) = 0;
+    virtual void CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp) = 0;
 };
 
 
@@ -120,6 +121,7 @@ public:
         PF3 = pf3;
     }
     void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
+    void CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
 
 protected:
     OCP3PhaseFlow* PF3;
@@ -132,7 +134,12 @@ class MiscibleCurve
 public:
     MiscibleCurve() = default;
     USI Setup(OCP3PhaseFlow* pf3);
-    void CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp);
+    void CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp) {
+        mcMethod[mIndex]->CurveCorrect(Fk, Fp);
+    }
+    void CorrectCurveDer(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp) {
+        mcMethod[mIndex]->CurveCorrectDer(Fk, Fp);
+    }
 protected:
     vector<MisCurveMethod*> mcMethod;
 };
@@ -152,9 +159,12 @@ public:
     /// Calculate Misscible Factor
     void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex);
     /// Correct miscible curve
-    void CorrectCurve(const OCP_USI& bId, const USI& mIndex);
-    /// Calculate Fk, Fp and return if miscible
-    OCP_BOOL CalFkFp(const OCP_USI& n, OCP_DBL& fk, OCP_DBL& fp);
+    void CorrectCurve(const OCP_USI& bId, const USI& mIndex) {
+        if (ifMiscible) mC.CorrectCurve(mIndex, Fk[bId], Fp[bId]);
+    }
+    void CorrectCurveDer(const OCP_USI& bId, const USI& mIndex) {
+        if (ifMiscible) mC.CorrectCurveDer(mIndex, Fk[bId], Fp[bId]);
+    }
     /// Reset Miscible term to last time step
     void ResetTolastTimeStep() { surTen = lsurTen; }
     /// Update Miscible term at last time step

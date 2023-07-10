@@ -2,8 +2,9 @@ target_sources(
   OpenCAEPoroX
   PUBLIC AcceleratePVT.hpp
 		 AllWells.hpp
-		 BulkConn.hpp
 		 Bulk.hpp
+		 BulkConn.hpp
+		 CMakeLists.txt
 		 CornerGrid.hpp
 		 DenseMat.hpp
 		 Domain.hpp
@@ -12,18 +13,24 @@ target_sources(
 		 IsothermalSolver.hpp
 		 LinearSolver.hpp
 		 LinearSystem.hpp
+		 Mixture.hpp
 		 MixtureBO.hpp
 		 MixtureComp.hpp
-		 Mixture.hpp
 		 MixtureThermal.hpp
+		 OCP.hpp
+		 OCP3PhaseFlow.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
 		 OCPFluidMethod.hpp
 		 OCPFlux.hpp
-		 OCP.hpp
+		 OCPMiscible.hpp
 		 OCPOutput.hpp
+		 OCPPVTFunc.hpp
 		 OCPRock.hpp
+		 OCPSATFunc.hpp
+		 OCPScalePcow.hpp
 		 OCPStructure.hpp
+		 OCPSurfaceTension.hpp
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
 		 OptionalFeatures.hpp
@@ -36,7 +43,6 @@ target_sources(
 		 PardisoSolver.hpp
 		 Partition.hpp
 		 PetscSolver.hpp
-		 PhasePermeability.hpp
 		 PreParamGridWell.hpp
 		 PreProcess.hpp
 		 Reservoir.hpp
@@ -54,4 +60,3 @@ target_sources(
          
          
 target_include_directories(OpenCAEPoroX PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-

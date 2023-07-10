@@ -149,7 +149,7 @@ void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     PF3.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
-    miscible->CorrectCurve(bId, mcMethodIndex);
+    miscible->CorrectCurveDer(bId, mcMethodIndex);
     scalePcow->ScaleDer(bId, spMethodIndex);
     AssinValueDer(); 
 }
