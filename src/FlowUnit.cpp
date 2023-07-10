@@ -150,10 +150,10 @@ void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
 {
     // for miscible
     miscible       = &optFeatures.miscible;
-    mcMethodIndex  = miscible->Setup(&PF3);
+    mcMethodIndex  = miscible->Setup(&OGWF);
     // for scalePcow
     scalePcow      = &optFeatures.scalePcow;
-    spMethodIndex  = scalePcow->Setup(&PF3);
+    spMethodIndex  = scalePcow->Setup(&OGWF);
 }
 
 void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
@@ -165,7 +165,7 @@ void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DB
 void FlowUnit_OGW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
-    PF3.CalKrPc(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    OGWF.CalKrPc(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
     miscible->CorrectCurve(bId, mcMethodIndex);
     scalePcow->Scale(bId, spMethodIndex);
     AssinValue();
@@ -175,7 +175,7 @@ void FlowUnit_OGW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
-    PF3.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    OGWF.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
     miscible->CorrectCurveDer(bId, mcMethodIndex);
     scalePcow->ScaleDer(bId, spMethodIndex);
     AssinValueDer(); 
@@ -184,7 +184,7 @@ void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 
 void FlowUnit_OGW::AssinValueDer()
 {
-    const OCP3PFVarSet& vs = PF3.GetVarSet();
+    const OCP3PFVarSet& vs = OGWF.GetVarSet();
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
@@ -215,7 +215,7 @@ void FlowUnit_OGW::AssinValueDer()
 
 void FlowUnit_OGW::AssinValue()
 {
-    const OCP3PFVarSet& vs = PF3.GetVarSet();
+    const OCP3PFVarSet& vs = OGWF.GetVarSet();
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;

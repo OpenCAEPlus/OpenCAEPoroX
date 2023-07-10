@@ -1,5 +1,5 @@
-/*! \file    OCP3PhaseFlow.cpp
- *  \brief   OCP3PhaseFlow class declaration
+/*! \file    OCPFlowOGW.cpp
+ *  \brief   OCPFlowOGW class declaration
  *  \author  Shizhe Li
  *  \date    Jul/08/2023
  *
@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "OCP3PhaseFlow.hpp"
+#include "OCPFlowOGW.hpp"
 
 
  /////////////////////////////////////////////////////
@@ -223,11 +223,11 @@ void OCP3PFMethod02::Generate_SWPCWG()
 
 
 /////////////////////////////////////////////////////
-// OCP3PhaseFlow
+// OCPFlowOGW
 /////////////////////////////////////////////////////
 
 
-void OCP3PhaseFlow::Setup(const ParamReservoir& rs_param, const USI& i)
+void OCPFlowOGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
 	if (rs_param.SGOF_T.data.size() > 0 && rs_param.SWOF_T.data.size()) {
 		pfMethod = new OCP3PFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, &vs);

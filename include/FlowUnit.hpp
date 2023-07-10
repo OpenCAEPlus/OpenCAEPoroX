@@ -20,9 +20,9 @@
 #include "OCPSATFunc.hpp"
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
-#include "OCP3PhaseFlow.hpp"
-#include "OCPOWFlow.hpp"
-#include "OCPOGFlow.hpp"
+#include "OCPFlowOGW.hpp"
+#include "OCPFlowOW.hpp"
+#include "OCPFlowOG.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.
@@ -130,7 +130,7 @@ protected:
     enum phaseIndex { oIndex, wIndex };
     enum p2p { oo, ow, wo, ww };
 
-    OCPOWFlow  OWF;
+    OCPFlowOW  OWF;
 
     // For scaling the water-oil capillary pressure curves
     ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
@@ -167,7 +167,7 @@ protected:
     enum phaseIndex { oIndex, gIndex };
     enum p2p { oo, og, go, gg };
 
-    OCPOGFlow  OGF;
+    OCPFlowOG  OGF;
 };
 
 ///////////////////////////////////////////////
@@ -179,7 +179,7 @@ class FlowUnit_OGW : public FlowUnit
 public:
     FlowUnit_OGW(const ParamReservoir& rs_param, const USI& i) {
         Allocate(3);
-        PF3.Setup(rs_param, i);
+        OGWF.Setup(rs_param, i);
     }
 
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override final;
@@ -187,12 +187,12 @@ public:
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override final;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override final;
 
-    OCP_DBL GetSwco() const override { return PF3.GetSwco(); }
-    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return PF3.CalPcowBySw(Sw); }
-    OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const override { return PF3.CalSwByPcow(Pcow); }
-    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return PF3.CalPcgoBySg(Sg); }
-    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return PF3.CalSgByPcgo(Pcgo); }
-    OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw)  const override { return PF3.CalSwByPcgw(Pcgw); }
+    OCP_DBL GetSwco() const override { return OGWF.GetSwco(); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return OGWF.CalPcowBySw(Sw); }
+    OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const override { return OGWF.CalSwByPcow(Pcow); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return OGWF.CalPcgoBySg(Sg); }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return OGWF.CalSgByPcgo(Pcgo); }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw)  const override { return OGWF.CalSwByPcgw(Pcgw); }
 
 protected:
     void AssinValueDer();
@@ -203,7 +203,7 @@ protected:
     enum phaseIndex {oIndex, gIndex, wIndex};
     enum p2p { oo, og, ow, go, gg, gw, wo, wg, ww };
 
-    OCP3PhaseFlow  PF3;
+    OCPFlowOGW  OGWF;
 
     // For scaling the water-oil capillary pressure curves
     ScalePcow* scalePcow;      ///< ptr to ScalePcow modules

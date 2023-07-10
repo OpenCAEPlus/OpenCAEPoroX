@@ -21,11 +21,11 @@
 ////////////////////////////////////////////////////////////////
 
 
-ScalePcowMethod01::ScalePcowMethod01(OCP3PhaseFlow* pf3) {
-    PF3     = pf3;
-    Swco    = PF3->GetSwco();
-    maxPcow = PF3->GetMaxPcow();
-    minPcow = PF3->GetMinPcow();
+ScalePcowMethod01::ScalePcowMethod01(OCPFlowOGW* pf3) {
+    OGWF     = pf3;
+    Swco    = OGWF->GetSwco();
+    maxPcow = OGWF->GetMaxPcow();
+    minPcow = OGWF->GetMinPcow();
 }
 
 
@@ -33,13 +33,13 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 {
     if (swatInit <= Swco) {
         Swinout = Swco;
-        const OCP_DBL PcowInit = PF3->CalPcowBySw(Swinout);
+        const OCP_DBL PcowInit = OGWF->CalPcowBySw(Swinout);
         return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
     }
     else {
         Swinout = swatInit;
         if (Pcowin > 0) {
-            const OCP_DBL PcowInit = PF3->CalPcowBySw(Swinout);
+            const OCP_DBL PcowInit = OGWF->CalPcowBySw(Swinout);
             if (PcowInit > 0) {
                 return (Pcowin / PcowInit * maxPcow - minPcow) / (maxPcow - minPcow);
             }
@@ -51,7 +51,7 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 
 void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 {
-    OCP3PFVarSet vs = PF3->GetVarSet();
+    OCP3PFVarSet vs = OGWF->GetVarSet();
     vs.Pcwo      = -((-vs.Pcwo - minPcow) * sv + minPcow);
     vs.dPcwodSw *= sv;
 }
@@ -59,7 +59,7 @@ void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 
 void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 {
-    OCP3PFVarSet vs = PF3->GetVarSet();
+    OCP3PFVarSet vs = OGWF->GetVarSet();
     vs.Pcwo = -((-vs.Pcwo - minPcow) * sv + minPcow);
 }
 
@@ -69,7 +69,7 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 ////////////////////////////////////////////////////////////////
 
 
-USI ScalePcow::Setup(OCP3PhaseFlow* pf3)
+USI ScalePcow::Setup(OCPFlowOGW* pf3)
 {
     if (ifScale) {
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");

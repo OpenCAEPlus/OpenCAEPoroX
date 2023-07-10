@@ -15,7 +15,7 @@
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPSurfaceTension.hpp"
-#include "OCP3PhaseFlow.hpp"
+#include "OCPFlowOGW.hpp"
 
 #include <vector>
 
@@ -117,14 +117,14 @@ class MisCurveMethod01 : public MisCurveMethod
 {
 public:
     MisCurveMethod01() = default;
-    MisCurveMethod01(OCP3PhaseFlow* pf3) {
-        PF3 = pf3;
+    MisCurveMethod01(OCPFlowOGW* pf3) {
+        OGWF = pf3;
     }
     void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
     void CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
 
 protected:
-    OCP3PhaseFlow* PF3;
+    OCPFlowOGW* OGWF;
 };
 
 
@@ -133,7 +133,7 @@ class MiscibleCurve
 {
 public:
     MiscibleCurve() = default;
-    USI Setup(OCP3PhaseFlow* pf3);
+    USI Setup(OCPFlowOGW* pf3);
     void CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp) {
         mcMethod[mIndex]->CurveCorrect(Fk, Fp);
     }
@@ -155,7 +155,7 @@ public:
     /// Setup for miscible factor calculation
     USI Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams);
     /// Setup for miscible curve correction
-    USI Setup(OCP3PhaseFlow* pf3);
+    USI Setup(OCPFlowOGW* pf3);
     /// Calculate Misscible Factor
     void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex);
     /// Correct miscible curve

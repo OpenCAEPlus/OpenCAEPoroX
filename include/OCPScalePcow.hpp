@@ -14,7 +14,7 @@
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
-#include "OCP3PhaseFlow.hpp"
+#include "OCPFlowOGW.hpp"
 
 #include <vector>
 
@@ -48,7 +48,7 @@ public:
     /// Default constructor
     ScalePcowMethod01() = default;
     /// Construct with Pmax, Pmin
-    ScalePcowMethod01(OCP3PhaseFlow* pf3);
+    ScalePcowMethod01(OCPFlowOGW* pf3);
     /// Setup Scale coefficient
     OCP_DBL SetScaleVal(const OCP_DBL& Swinit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const override;
     /// Scale Pcow and dPcowdSw
@@ -60,7 +60,7 @@ protected:
     OCP_DBL        Swco;
     OCP_DBL        maxPcow;
     OCP_DBL        minPcow;
-    OCP3PhaseFlow* PF3;
+    OCPFlowOGW* OGWF;
 };
 
 
@@ -75,7 +75,7 @@ public:
     /// Input option param(data was distributed if have) from input file
     void InputParam(const OCP_BOOL& ifscale) { ifScale = ifscale; }
     /// Setup ScalePcow term
-    USI Setup(OCP3PhaseFlow* pf3);
+    USI Setup(OCPFlowOGW* pf3);
     /// Setup Scale coefficient
     void SetScaleVal(const OCP_USI& bId, const USI& mIndex, OCP_DBL& Swinout, const OCP_DBL& Pcowin);
     /// Scale Pcow and dPcowdSw

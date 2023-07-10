@@ -1,5 +1,5 @@
-/*! \file    OCP3PhaseFlow.hpp
- *  \brief   OCP3PhaseFlow class declaration
+/*! \file    OCPFlowOGW.hpp
+ *  \brief   OCPFlowOGW class declaration
  *  \author  Shizhe Li
  *  \date    Jul/08/2023
  *
@@ -9,12 +9,13 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCP3PHASEFLOW_HEADER__
-#define __OCP3PHASEFLOW_HEADER__
+#ifndef __OCPFLOWOGW_HEADER__
+#define __OCPFLOWOGW_HEADER__
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPSATFunc.hpp"
+#include "OCPFlow.hpp"
 
 #include <vector>
 
@@ -209,13 +210,13 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCP3PhaseFlow
+// OCPFlowOGW
 /////////////////////////////////////////////////////
 
-class OCP3PhaseFlow
+class OCPFlowOGW
 {
 public:
-    OCP3PhaseFlow() = default;
+    OCPFlowOGW() = default;
     void Setup(const ParamReservoir& rs_param, const USI& i);
     OCP3PFVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
@@ -246,6 +247,7 @@ protected:
     }
 
 protected:
+    const USI      flowType = OCPFLOW_OGW;
     OCP3PFVarSet   vs;
     OCP3PFMethod*  pfMethod;
 };

@@ -1,5 +1,5 @@
-/*! \file    OCPOWFlow.cpp
- *  \brief   OCPOWFlow class declaration
+/*! \file    OCPFlow.hpp
+ *  \brief   OCPFlow class declaration
  *  \author  Shizhe Li
  *  \date    Jul/10/2023
  *
@@ -9,42 +9,31 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "OCPOWFlow.hpp"
+#ifndef __OCPFLOW_HEADER__
+#define __OCPFLOW_HEADER__
+
+#include "OCPConst.hpp"
+
+using namespace std;
+
+const USI OCPFLOW_OG  = 21;
+const USI OCPFLOW_OW  = 22;
+const USI OCPFLOW_OGW = 3;
 
 
 /////////////////////////////////////////////////////
-// OCPOWFMethod01
+// OCPFlow
 /////////////////////////////////////////////////////
 
-OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOWFVarSet* vsin)
+class OCPFlow
 {
-    SWOF.Setup(SWOFin);
-    vs = vsin;
+public:
+    OCPFlow() = default;
 
-    vs->Swco = SWOF.GetSwco();
-}
-
-
-void OCPOWFMethod01::CalKrPc()
-{
-    SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->kro, vs->Pcwo);
-}
+};
 
 
-void OCPOWFMethod01::CalKrPcDer()
-{
-    SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->kro, vs->Pcwo, vs->dKrwdSw, vs->dKrodSw, vs->dPcwodSw);
-}
-
-
-
-void OCPOWFlow::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.SWOF_T.data.size()) {
-        pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], &vs);
-    }
-}
-
+#endif /* end if __OCPFLOW_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

@@ -1,5 +1,5 @@
-/*! \file    OCPOGFlow.hpp
- *  \brief   OCPOGFlow class declaration
+/*! \file    OCPFlowOG.hpp
+ *  \brief   OCPFlowOG class declaration
  *  \author  Shizhe Li
  *  \date    Jul/10/2023
  *
@@ -9,12 +9,13 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPOGFLOW_HEADER__
-#define __OCPOGFLOW_HEADER__
+#ifndef __OCPFLOWOG_HEADER__
+#define __OCPFLOWOG_HEADER__
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPSATFunc.hpp"
+#include "OCPFlow.hpp"
 
 #include <vector>
 
@@ -89,13 +90,13 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPOGFlow
+// OCPFlowOG
 /////////////////////////////////////////////////////
 
-class OCPOGFlow
+class OCPFlowOG
 {
 public:
-    OCPOGFlow() = default;
+    OCPFlowOG() = default;
     void Setup(const ParamReservoir& rs_param, const USI& i);
     OCPOGFVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
@@ -117,12 +118,13 @@ protected:
     }
 
 protected:
+    const USI      flowType = OCPFLOW_OG;
     OCPOGFVarSet   vs;
     OCPOGFMethod*  pfMethod;
 };
 
 
-#endif /* end if __OCPOGFLOW_HEADER__ */
+#endif /* end if __OCPFLOWOG_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
