@@ -162,7 +162,7 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
         EQUIL.PcOW = rs_param.EQUIL[3];
         EQUIL.DGOC = rs_param.EQUIL[4];
         EQUIL.PcGO = rs_param.EQUIL[5];
-        SATmode    = PHASE_DOGW;
+        SATmode    = PHASE_OGW;
         PVTmodeB   = PHASE_DOGW; // maybe it should be added later
     } else if (water && oil && gas && disGas) {
         // water, live oil, dry gas
@@ -174,12 +174,7 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
         EQUIL.DGOC = rs_param.EQUIL[4];
         EQUIL.PcGO = rs_param.EQUIL[5];
         PVTmodeB   = PHASE_ODGW;
-
-        if (rs_param.SOF3_T.data.size() > 0) {
-            SATmode = PHASE_ODGW02;
-        } else {
-            SATmode = PHASE_ODGW01;
-        }
+        SATmode = PHASE_OGW;
     }
     numComH = numCom - 1;
 
@@ -270,18 +265,12 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
     temp[1].push_back(rsTemp);
     initT_Tab.push_back(OCPTable(temp));
 
-    // Saturation mode
-    if (rs_param.SOF3_T.data.size() > 0) {
-        SATmode = PHASE_ODGW02;
-    } else {
-        SATmode = PHASE_ODGW01;
-        if (rs_param.miscstr.ifMiscible) {
-            SATmode = PHASE_ODGW01_MISCIBLE;
-        }
-    }
 
     // PVT mode
     for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureComp(rs_param, i));
+
+    // Saturation mode
+    SATmode = PHASE_OGW;
 
     // phase index
     phase2Index.resize(3);
@@ -368,21 +357,10 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param)
             for (USI i = 0; i < NTSFUN; i++)
                 flow.push_back(new FlowUnit_OW(rs_param, i));
             break;
-        case PHASE_ODGW01:
+        case PHASE_OGW:
             for (USI i = 0; i < NTSFUN; i++) {
-                flow.push_back(new FlowUnit_OGW01(rs_param, i));
-                satcm[i] = flow[i]->GetScm();
+                flow.push_back(new FlowUnit_OGW(rs_param, i));
             }
-            break;
-        case PHASE_ODGW01_MISCIBLE:
-            for (USI i = 0; i < NTSFUN; i++) {
-                flow.push_back(new FlowUnit_OGW01_Miscible(rs_param, i));
-                satcm[i] = flow[i]->GetScm();
-            }
-            break;
-        case PHASE_ODGW02:
-            for (USI i = 0; i < NTSFUN; i++)
-                flow.push_back(new FlowUnit_OGW02(rs_param, i));
             break;
         default:
             OCP_ABORT("Wrong Type!");
