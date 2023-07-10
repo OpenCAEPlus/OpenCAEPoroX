@@ -21,6 +21,7 @@
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
 #include "OCP3PhaseFlow.hpp"
+#include "OCPOWFlow.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.
@@ -38,11 +39,11 @@ public:
     virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     virtual void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) = 0;
-    virtual OCP_DBL GetPcowBySw(const OCP_DBL& sw) const = 0;
-    virtual OCP_DBL GetSwByPcow(const OCP_DBL& pcow) const = 0;
-    virtual OCP_DBL GetPcgoBySg(const OCP_DBL& sg) const = 0;
-    virtual OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) const = 0;
-    virtual OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) const = 0;
+    virtual OCP_DBL CalPcowBySw(const OCP_DBL& sw) const = 0;
+    virtual OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const = 0;
+    virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
+    virtual OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const = 0;
+    virtual OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const = 0;
 
     /// Calculate relative permeability and capillary pressure.
     virtual void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) = 0;
@@ -80,7 +81,6 @@ protected:
 class FlowUnit_W : public FlowUnit
 {
 public:
-    FlowUnit_W() = default;
     FlowUnit_W(const ParamReservoir& rs_param, const USI& i){ 
         Allocate(1);
         kr[0]    = 1;
@@ -94,11 +94,11 @@ public:
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL GetSwco() const override { return 0.0; }
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) const override { return 0.0; }
-    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) const override { return 1.0; }
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) const override { return 0.0; }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) const override { return 0.0; }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) const override { return 1.0; }
+    OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0.0; }
+    OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const override { return 1.0; }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const override { return 0.0; }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const override { return 0.0; }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const override { return 1.0; }
 };
 
 ///////////////////////////////////////////////
@@ -108,23 +108,39 @@ public:
 class FlowUnit_OW : public FlowUnit
 {
 public:
-    FlowUnit_OW() = default;
-    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i);
+    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i) {
+        Allocate(2);
+        OWF.Setup(rs_param, i);
+    }
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
+
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) const override { return SWOF.CalPcow(Sw); }
-    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) const override { return SWOF.CalSw(Pcow); }
-    OCP_DBL GetSwco() const override { return SWOF.GetSwco(); }
+
+    OCP_DBL GetSwco() const override { return OWF.GetSwco(); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return OWF.CalPcowBySw(Sw); }
+    OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const override { return OWF.CalSwByPcow(Pcow); }
     // useless
-    OCP_DBL GetPcgoBySg(const OCP_DBL& sg) const override { return 0; }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& pcgo) const override { return 0; }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const override { return 0; }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const override { return 0; }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
 
 protected:
-    OCP_SWOF SWOF; ///< saturation table about water and oil.
+    void AssinValueDer();
+    void AssinValue();
+
+protected:
+    /// phase index
+    enum phaseIndex { oIndex, wIndex };
+    enum p2p { oo, ow, wo, ww };
+
+    OCPOWFlow  OWF;
+
+    // For scaling the water-oil capillary pressure curves
+    ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
+    USI        spMethodIndex;  ///< index of scalePcow
 };
 
 ///////////////////////////////////////////////
@@ -134,20 +150,19 @@ protected:
 class FlowUnit_OG : public FlowUnit
 {
 public:
-    FlowUnit_OG() = default;
     FlowUnit_OG(const ParamReservoir& rs_param, const USI& i);
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) const override{ return SGOF.CalPcgo(Sg);}
-    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) const override{ return SGOF.CalSg(Pcgo); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override{ return SGOF.CalPcgo(Sg);}
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override{ return SGOF.CalSg(Pcgo); }
     OCP_DBL GetSwco() const override { return 0; }
     // useless
-    OCP_DBL GetPcowBySw(const OCP_DBL& sw) const override { return 0; }
-    OCP_DBL GetSwByPcow(const OCP_DBL& pcow) const override  { return 0; }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
+    OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0; }
+    OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const override  { return 0; }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
 
 protected:
     OCP_SGOF SGOF; ///< saturation table about gas and oil.
@@ -171,11 +186,11 @@ public:
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override final;
 
     OCP_DBL GetSwco() const override { return PF3.GetSwco(); }
-    OCP_DBL GetPcowBySw(const OCP_DBL& Sw) const override { return PF3.CalPcowBySw(Sw); }
-    OCP_DBL GetSwByPcow(const OCP_DBL& Pcow) const override { return PF3.CalSwByPcow(Pcow); }
-    OCP_DBL GetPcgoBySg(const OCP_DBL& Sg) const override { return PF3.CalPcgoBySg(Sg); }
-    OCP_DBL GetSgByPcgo(const OCP_DBL& Pcgo) const override { return PF3.CalSgByPcgo(Pcgo); }
-    OCP_DBL GetSwByPcgw(const OCP_DBL& Pcgw)  const override { return PF3.CalSwByPcgw(Pcgw); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { return PF3.CalPcowBySw(Sw); }
+    OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const override { return PF3.CalSwByPcow(Pcow); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return PF3.CalPcgoBySg(Sg); }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return PF3.CalSgByPcgo(Pcgo); }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw)  const override { return PF3.CalSwByPcgw(Pcgw); }
 
 protected:
     void AssinValueDer();

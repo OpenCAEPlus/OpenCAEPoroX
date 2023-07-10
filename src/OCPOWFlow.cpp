@@ -1,0 +1,55 @@
+/*! \file    OCPOWFlow.cpp
+ *  \brief   OCPOWFlow class declaration
+ *  \author  Shizhe Li
+ *  \date    Jul/10/2022
+ *
+ *-----------------------------------------------------------------------------------
+ *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
+ *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
+ *-----------------------------------------------------------------------------------
+ */
+
+#include "OCPOWFlow.hpp"
+
+
+/////////////////////////////////////////////////////
+// OCPOWFMethod01
+/////////////////////////////////////////////////////
+
+OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOWFVarSet* vsin)
+{
+    SWOF.Setup(SWOFin);
+    vs = vsin;
+
+    vs->Swco = SWOF.GetSwco();
+}
+
+
+void OCPOWFMethod01::CalKrPc()
+{
+    SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->kro, vs->Pcwo);
+}
+
+
+void OCPOWFMethod01::CalKrPcDer()
+{
+    SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->kro, vs->Pcwo, vs->dKrwdSw, vs->dKrodSw, vs->dPcwodSw);
+}
+
+
+
+void OCPOWFlow::Setup(const ParamReservoir& rs_param, const USI& i)
+{
+    if (rs_param.SWOF_T.data.size()) {
+        pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], &vs);
+    }
+}
+
+
+/*----------------------------------------------------------------------------*/
+/*  Brief Change History of This File                                         */
+/*----------------------------------------------------------------------------*/
+/*  Author              Date             Actions                              */
+/*----------------------------------------------------------------------------*/
+/*  Shizhe Li           Jul/10/2022      Create file                          */
+/*----------------------------------------------------------------------------*/

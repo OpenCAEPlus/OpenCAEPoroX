@@ -987,8 +987,8 @@ void Bulk::InitPTSw(const USI& tabrow)
     // whether capillary between water and oil is considered
     vector<OCP_BOOL> FlagPcow(NTSFUN, OCP_TRUE);
     for (USI i = 0; i < NTSFUN; i++) {
-        if (fabs(flow[i]->GetPcowBySw(0.0 - TINY)) < TINY &&
-            fabs(flow[i]->GetPcowBySw(1.0 + TINY) < TINY)) {
+        if (fabs(flow[i]->CalPcowBySw(0.0 - TINY)) < TINY &&
+            fabs(flow[i]->CalPcowBySw(1.0 + TINY) < TINY)) {
             FlagPcow[i] = OCP_FALSE;
         }
     }
@@ -1012,27 +1012,27 @@ void Bulk::InitPTSw(const USI& tabrow)
         OCP_DBL Pw   = data[3];
         OCP_DBL Pcgo = Pg - Po;
         OCP_DBL Pcow = Po - Pw;
-        OCP_DBL Sw   = flow[SATNUM[n]]->GetSwByPcow(Pcow);
+        OCP_DBL Sw   = flow[SATNUM[n]]->CalSwByPcow(Pcow);
         OCP_DBL Sg   = 0;
         if (gas) {
-            Sg = flow[SATNUM[n]]->GetSgByPcgo(Pcgo);
+            Sg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
         }
         if (Sw + Sg > 1) {
             // should be modified
             OCP_DBL Pcgw = Pcow + Pcgo;
-            Sw           = flow[SATNUM[n]]->GetSwByPcgw(Pcgw);
+            Sw           = flow[SATNUM[n]]->CalSwByPcgw(Pcgw);
             Sg           = 1 - Sw;
         }
 
         if (1 - Sw < TINY) {
             // all water
-            Po = Pw + flow[SATNUM[n]]->GetPcowBySw(1.0);
+            Po = Pw + flow[SATNUM[n]]->CalPcowBySw(1.0);
         } else if (1 - Sg < TINY) {
             // all gas
-            Po = Pg - flow[SATNUM[n]]->GetPcgoBySg(1.0);
+            Po = Pg - flow[SATNUM[n]]->CalPcgoBySg(1.0);
         } else if (1 - Sw - Sg < TINY) {
             // water and gas
-            Po = Pg - flow[SATNUM[n]]->GetPcgoBySg(Sg);
+            Po = Pg - flow[SATNUM[n]]->CalPcgoBySg(Sg);
         }
         P[n] = Po;
 
@@ -1066,14 +1066,14 @@ void Bulk::InitPTSw(const USI& tabrow)
             Pcow = Po - Pw;
             Pcgo = Pg - Po;
             avePcow += Pcow;
-            tmpSw = flow[SATNUM[n]]->GetSwByPcow(Pcow);
+            tmpSw = flow[SATNUM[n]]->CalSwByPcow(Pcow);
             if (gas) {
-                tmpSg = flow[SATNUM[n]]->GetSgByPcgo(Pcgo);
+                tmpSg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
             }
             if (tmpSw + tmpSg > 1) {
                 // should be modified
                 OCP_DBL Pcgw = Pcow + Pcgo;
-                tmpSw        = flow[SATNUM[n]]->GetSwByPcgw(Pcgw);
+                tmpSw        = flow[SATNUM[n]]->CalSwByPcgw(Pcgw);
                 tmpSg        = 1 - tmpSw;
             }
             Sw += tmpSw;

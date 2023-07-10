@@ -35,52 +35,54 @@ void FlowUnit_W::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 // FlowUnit_OW
 ///////////////////////////////////////////////
 
-FlowUnit_OW::FlowUnit_OW(const ParamReservoir& rs_param, const USI& i)
-{
-    Allocate(2);
-
-    SWOF.Setup(rs_param.SWOF_T.data[i]);
-    Swco = SWOF.GetSwco();
-
-    data.resize(4, 0);
-    cdata.resize(4, 0);
-}
 
 void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    const OCP_DBL Sw = S_in[1];
-
-    // three phase black oil model using stone 2
-    OCP_DBL krw, krow, Pcwo;
-    SWOF.CalKrwKrowPcwo(Sw, krw, krow, Pcwo);
-
-    kr[0] = krow;
-    kr[1] = krw;
-    //pc[0] = 0;
-    pc[1] = Pcwo;
+    bulkId = bId;
+    OWF.CalKrPc(S_in[oIndex], S_in[wIndex]);
+    AssinValue();
 }
+
 
 void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    const OCP_DBL Sw = S_in[1];
-    OCP_DBL krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw;
-    SWOF.CalKrwKrowPcwoDer(Sw, krw, krow, Pcwo, dKrwdSw, dKrowdSw, dPcwodSw);
-
-    kr[0] = krow;
-    kr[1] = krw;
-    //pc[0] = 0;
-    pc[1] = Pcwo;
-
-    //dKrdS[0] = 0;
-    dKrdS[1] = dKrowdSw;
-    //dKrdS[2] = 0;
-    dKrdS[3] = dKrwdSw;
-
-    //dPcdS[0] = 0;
-    //dPcdS[1] = 0;
-    //dPcdS[2] = 0;
-    dPcdS[3] = dPcwodSw;
+    bulkId = bId;
+    OWF.CalKrPcDer(S_in[oIndex], S_in[wIndex]);
+    AssinValueDer();
 }
+
+
+void FlowUnit_OW::AssinValueDer()
+{
+    const OCPOWFVarSet& vs = OWF.GetVarSet();
+
+    kr[oIndex]  = vs.kro;
+    kr[wIndex]  = vs.krw;
+    pc[oIndex]  = 0;
+    pc[wIndex]  = vs.Pcwo;
+
+    dKrdS[oo] = vs.dKrodSo;
+    dKrdS[ow] = vs.dKrodSw;
+    dKrdS[wo] = vs.dKrwdSo;
+    dKrdS[ww] = vs.dKrwdSw;
+
+    dPcdS[oo] = 0;
+    dPcdS[ow] = 0;
+    dPcdS[wo] = vs.dPcwodSo;
+    dPcdS[ww] = vs.dPcwodSw;
+}
+
+
+void FlowUnit_OW::AssinValue()
+{
+    const OCPOWFVarSet& vs = OWF.GetVarSet();
+
+    kr[oIndex] = vs.kro;
+    kr[wIndex] = vs.krw;
+    pc[oIndex] = 0;
+    pc[wIndex] = vs.Pcwo;
+}
+
 
 ///////////////////////////////////////////////
 // FlowUnit_OG
