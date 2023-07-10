@@ -21,43 +21,6 @@
 
 using namespace std;
 
-/// oil-water flow vars suite
-class OCPOWFVarSet
-{
-    /// oil phase is reference phase
-public:
-    OCPOWFVarSet() { Init0(); }
-    void Init0() {
-        Swco     = 0;
-        krocw    = 0;
-        So       = 0; Sw       = 0;
-        kro      = 0; krw      = 0;
-        dKrodSo  = 0; dKrodSw  = 0;
-        dKrwdSo  = 0; dKrwdSw  = 0;
-        Pcwo     = 0;
-        dPcwodSo = 0; dPcwodSw = 0;
-    }
-
-public:
-    /// saturaion of connate water
-    OCP_DBL Swco;
-    /// oil relative permeability in the presence of connate water only
-    OCP_DBL krocw;
-    /// oil, water saturations
-    OCP_DBL So, Sw;
-    /// oil, water relatve permeability
-    OCP_DBL kro, krw;
-    /// the corresponding derivatives of permeability
-    OCP_DBL dKrodSo, dKrodSw;
-    OCP_DBL dKrwdSo, dKrwdSw;
-
-    /// Capillary pressure   
-    OCP_DBL Pcwo;               ///< Pw - Po
-    /// the corresponding derivatives of capillary pressure
-    OCP_DBL dPcwodSo, dPcwodSw;
-};
-
-
 
 /// Calculate oil, gas, water relative permeability and capillary pressure
 class OCPOWFMethod
@@ -75,7 +38,7 @@ public:
     virtual OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const = 0;
 
 protected:
-    OCPOWFVarSet* vs;
+    OCPFlowVarSet* vs;
 };
 
 
@@ -88,8 +51,7 @@ protected:
 class OCPOWFMethod01 : public OCPOWFMethod
 {
 public:
-    OCPOWFMethod01() = default;
-    OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOWFVarSet* vsin);
+    OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet* vsin);
     void CalKrPc() override;
     void CalKrPcDer() override;
 
@@ -109,12 +71,12 @@ protected:
 // OCPFlowOW
 /////////////////////////////////////////////////////
 
-class OCPFlowOW
+class OCPFlowOW : public OCPFlow
 {
 public:
     OCPFlowOW() = default;
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCPOWFVarSet& GetVarSet() { return vs; }
+    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sw) {
         SetSaturation(So, Sw);
         pfMethod->CalKrPc();
@@ -139,7 +101,6 @@ protected:
 
 protected:
     const USI      flowType = OCPFLOW_OW;
-    OCPOWFVarSet   vs;
     OCPOWFMethod*  pfMethod;
 };
 

@@ -16,7 +16,7 @@
  // OCPOGFMethod01
  /////////////////////////////////////////////////////
 
-OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOGFVarSet* vsin)
+OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet* vsin)
 {
     SGOF.Setup(SWOFin);
     vs = vsin;

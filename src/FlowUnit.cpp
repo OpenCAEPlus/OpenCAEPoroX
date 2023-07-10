@@ -11,25 +11,6 @@
 
 #include "FlowUnit.hpp"
 
-///////////////////////////////////////////////
-// FlowUnit_W
-///////////////////////////////////////////////
-
-void FlowUnit_W::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    // constant value
-    //kr_out[0] = 1;
-    //pc_out[0] = 0;
-}
-
-void FlowUnit_W::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    // constant value
-    //kr_out[0] = 1;
-    //pc_out[0] = 0;
-    //dkrdS[0]  = 0;
-    //dPcjdS[0] = 0;
-}
 
 ///////////////////////////////////////////////
 // FlowUnit_OW
@@ -54,7 +35,7 @@ void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 
 void FlowUnit_OW::AssinValueDer()
 {
-    const OCPOWFVarSet& vs = OWF.GetVarSet();
+    const OCPFlowVarSet& vs = OWF.GetVarSet();
 
     kr[oIndex]  = vs.kro;
     kr[wIndex]  = vs.krw;
@@ -75,7 +56,7 @@ void FlowUnit_OW::AssinValueDer()
 
 void FlowUnit_OW::AssinValue()
 {
-    const OCPOWFVarSet& vs = OWF.GetVarSet();
+    const OCPFlowVarSet& vs = OWF.GetVarSet();
 
     kr[oIndex] = vs.kro;
     kr[wIndex] = vs.krw;
@@ -112,7 +93,7 @@ void FlowUnit_OG::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 
 void FlowUnit_OG::AssinValueDer()
 {
-    const OCPOGFVarSet& vs = OGF.GetVarSet();
+    const OCPFlowVarSet& vs = OGF.GetVarSet();
 
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
@@ -133,7 +114,7 @@ void FlowUnit_OG::AssinValueDer()
 
 void FlowUnit_OG::AssinValue()
 {
-    const OCPOGFVarSet& vs = OGF.GetVarSet();
+    const OCPFlowVarSet& vs = OGF.GetVarSet();
 
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
@@ -184,7 +165,7 @@ void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 
 void FlowUnit_OGW::AssinValueDer()
 {
-    const OCP3PFVarSet& vs = OGWF.GetVarSet();
+    const OCPFlowVarSet& vs = OGWF.GetVarSet();
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
@@ -215,7 +196,7 @@ void FlowUnit_OGW::AssinValueDer()
 
 void FlowUnit_OGW::AssinValue()
 {
-    const OCP3PFVarSet& vs = OGWF.GetVarSet();
+    const OCPFlowVarSet& vs = OGWF.GetVarSet();
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;

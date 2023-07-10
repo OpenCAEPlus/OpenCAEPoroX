@@ -49,7 +49,7 @@ void MisCurveMethod01::CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp)
     if (Fk > -TINY) {
         // miscible
 
-        OCP3PFVarSet& vs = OGWF->GetVarSet();
+        OCPFlowVarSet& vs = OGWF->GetVarSet();
 
         // for permeability
         OCP_DBL tmp;
@@ -70,7 +70,7 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp)
     if (Fk > -TINY) {
         // miscible
 
-        OCP3PFVarSet& vs = OGWF->GetVarSet();
+        OCPFlowVarSet& vs = OGWF->GetVarSet();
 
         // for permeability
         OCP_DBL       dkrgd1_Sw = 0;

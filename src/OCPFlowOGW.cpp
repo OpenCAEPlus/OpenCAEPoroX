@@ -17,7 +17,7 @@
  /////////////////////////////////////////////////////
 
 
-void OCP3POilPerMethod01::CalOilPer(OCP3PFVarSet* vs)
+void OCP3POilPerMethod01::CalOilPer(OCPFlowVarSet* vs)
 {
 	vs->kro = vs->krocw 
 		      * ((vs->krow / vs->krocw + vs->krw) * (vs->krog / vs->krocw + vs->krg) 
@@ -26,7 +26,7 @@ void OCP3POilPerMethod01::CalOilPer(OCP3PFVarSet* vs)
 }
 
 
-void OCP3POilPerMethod01::CalOilPerDer(OCP3PFVarSet* vs)
+void OCP3POilPerMethod01::CalOilPerDer(OCPFlowVarSet* vs)
 {
 
 	vs->kro = vs->krocw
@@ -54,7 +54,7 @@ void OCP3POilPerMethod01::CalOilPerDer(OCP3PFVarSet* vs)
 /////////////////////////////////////////////////////
 
 
-void OCP3POILPerMethod02::CalOilPer(OCP3PFVarSet* vs)
+void OCP3POILPerMethod02::CalOilPer(OCPFlowVarSet* vs)
 {
 	const OCP_DBL tmp = vs->Sg + vs->Sw - vs->Swco;
 	if (tmp <= TINY) {
@@ -66,7 +66,7 @@ void OCP3POILPerMethod02::CalOilPer(OCP3PFVarSet* vs)
 }
 
 
-void OCP3POILPerMethod02::CalOilPerDer(OCP3PFVarSet* vs)
+void OCP3POILPerMethod02::CalOilPerDer(OCPFlowVarSet* vs)
 {
 	const OCP_DBL tmp = vs->Sg + vs->Sw - vs->Swco;
 	if (tmp <= TINY) {
@@ -85,13 +85,13 @@ void OCP3POILPerMethod02::CalOilPerDer(OCP3PFVarSet* vs)
 
 
 /////////////////////////////////////////////////////
-// OCP3PFMethod01
+// OCPOGWFMethod01
 /////////////////////////////////////////////////////
 
 
-OCP3PFMethod01::OCP3PFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
+OCPOGWFMethod01::OCPOGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
 	const vector<vector<OCP_DBL>>& SWOFin,
-	const USI& i, OCP3PFVarSet* vsin) 
+	const USI& i, OCPFlowVarSet* vsin) 
 {
 	SGOF.Setup(SGOFin);
 	SWOF.Setup(SWOFin);
@@ -114,7 +114,7 @@ OCP3PFMethod01::OCP3PFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
 }
 
 
-void OCP3PFMethod01::Generate_SWPCWG()
+void OCPOGWFMethod01::Generate_SWPCWG()
 {
 	const std::vector<OCP_DBL> Sw(SWOF.GetSw());
 	std::vector<OCP_DBL>       Pcow(SWOF.GetPcow());
@@ -128,7 +128,7 @@ void OCP3PFMethod01::Generate_SWPCWG()
 }
 
 
-void OCP3PFMethod01::CalKrPc()
+void OCPOGWFMethod01::CalKrPc()
 {
 	SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->krow, vs->Pcwo);
 
@@ -138,7 +138,7 @@ void OCP3PFMethod01::CalKrPc()
 }
 
 
-void OCP3PFMethod01::CalKrPcDer()
+void OCPOGWFMethod01::CalKrPcDer()
 {
 	SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->krow, vs->Pcwo, vs->dKrwdSw, vs->dKrowdSw, vs->dPcwodSw);
 
@@ -148,13 +148,13 @@ void OCP3PFMethod01::CalKrPcDer()
 }
 
 /////////////////////////////////////////////////////
-// OCP3PFMethod01
+// OCPOGWFMethod01
 /////////////////////////////////////////////////////
 
-OCP3PFMethod02::OCP3PFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
+OCPOGWFMethod02::OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
 	const vector<vector<OCP_DBL>>& SGFNin,
 	const vector<vector<OCP_DBL>>& SWFNin,
-	const USI& i, OCP3PFVarSet* vsin)
+	const USI& i, OCPFlowVarSet* vsin)
 {
 	SOF3.Setup(SOF3in);	
 	SGFN.Setup(SGFNin);
@@ -179,7 +179,7 @@ OCP3PFMethod02::OCP3PFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
 }
 
 
-void OCP3PFMethod02::CalKrPc()
+void OCPOGWFMethod02::CalKrPc()
 {
 
 	SWFN.CalKrwPcwo(vs->Sw, vs->krw, vs->Pcwo);
@@ -192,7 +192,7 @@ void OCP3PFMethod02::CalKrPc()
 }
 
 
-void OCP3PFMethod02::CalKrPcDer()
+void OCPOGWFMethod02::CalKrPcDer()
 {
 
 	SWFN.CalKrwPcwoDer(vs->Sw, vs->krw, vs->Pcwo, vs->dKrwdSw, vs->dPcwodSw);
@@ -206,7 +206,7 @@ void OCP3PFMethod02::CalKrPcDer()
 }
 
 
-void OCP3PFMethod02::Generate_SWPCWG()
+void OCPOGWFMethod02::Generate_SWPCWG()
 {
 
 	const std::vector<OCP_DBL> Sw(SWFN.GetSw());
@@ -230,12 +230,12 @@ void OCP3PFMethod02::Generate_SWPCWG()
 void OCPFlowOGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
 	if (rs_param.SGOF_T.data.size() > 0 && rs_param.SWOF_T.data.size()) {
-		pfMethod = new OCP3PFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, &vs);
+		pfMethod = new OCPOGWFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, &vs);
 	}
 	else if (rs_param.SOF3_T.data.size() > 0 &&
 		rs_param.SGFN_T.data.size() > 0 &&
 		rs_param.SWFN_T.data.size() > 0) {
-		pfMethod = new OCP3PFMethod02(rs_param.SOF3_T.data[i], rs_param.SGFN_T.data[i], 
+		pfMethod = new OCPOGWFMethod02(rs_param.SOF3_T.data[i], rs_param.SGFN_T.data[i], 
 			rs_param.SWFN_T.data[i], 1, &vs);
 	}
 	else {

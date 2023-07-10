@@ -21,37 +21,6 @@
 
 using namespace std;
 
-/// oil-water flow vars suite
-class OCPOGFVarSet
-{
-    /// oil phase is reference phase
-public:
-    OCPOGFVarSet() { Init0(); }
-    void Init0() {
-        So       = 0; Sg       = 0;
-        kro      = 0; krg      = 0;
-        dKrodSo  = 0; dKrodSg  = 0;
-        dKrgdSo  = 0; dKrgdSg  = 0;
-        Pcgo     = 0;
-        dPcgodSo = 0; dPcgodSg = 0;
-    }
-
-public:
-    /// oil, gas saturations
-    OCP_DBL So, Sg;
-    /// oil, gas relatve permeability
-    OCP_DBL kro, krg;
-    /// the corresponding derivatives of permeability
-    OCP_DBL dKrodSo, dKrodSg;
-    OCP_DBL dKrgdSo, dKrgdSg;
-
-    /// Capillary pressure   
-    OCP_DBL Pcgo;               ///< Pg - Po
-    /// the corresponding derivatives of capillary pressure
-    OCP_DBL dPcgodSo, dPcgodSg;
-};
-
-
 
 /// Calculate oil, gas, water relative permeability and capillary pressure
 class OCPOGFMethod
@@ -64,7 +33,7 @@ public:
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const = 0;
 
 protected:
-    OCPOGFVarSet* vs;
+    OCPFlowVarSet* vs;
 };
 
 
@@ -77,7 +46,7 @@ protected:
 class OCPOGFMethod01 : public OCPOGFMethod
 {
 public:
-    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin, OCPOGFVarSet* vsin);
+    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin, OCPFlowVarSet* vsin);
     void CalKrPc() override;
     void CalKrPcDer() override;
 
@@ -93,12 +62,12 @@ protected:
 // OCPFlowOG
 /////////////////////////////////////////////////////
 
-class OCPFlowOG
+class OCPFlowOG : public OCPFlow
 {
 public:
     OCPFlowOG() = default;
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCPOGFVarSet& GetVarSet() { return vs; }
+    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
         SetSaturation(So, Sg);
         pfMethod->CalKrPc();
@@ -119,7 +88,6 @@ protected:
 
 protected:
     const USI      flowType = OCPFLOW_OG;
-    OCPOGFVarSet   vs;
     OCPOGFMethod*  pfMethod;
 };
 

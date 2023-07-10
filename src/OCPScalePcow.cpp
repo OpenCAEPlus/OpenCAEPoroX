@@ -51,7 +51,7 @@ OCP_DBL ScalePcowMethod01::SetScaleVal(const OCP_DBL& swatInit, OCP_DBL& Swinout
 
 void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 {
-    OCP3PFVarSet vs = OGWF->GetVarSet();
+    OCPFlowVarSet vs = OGWF->GetVarSet();
     vs.Pcwo      = -((-vs.Pcwo - minPcow) * sv + minPcow);
     vs.dPcwodSw *= sv;
 }
@@ -59,7 +59,7 @@ void ScalePcowMethod01::ScaleDer(const OCP_DBL& sv) const
 
 void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 {
-    OCP3PFVarSet vs = OGWF->GetVarSet();
+    OCPFlowVarSet vs = OGWF->GetVarSet();
     vs.Pcwo = -((-vs.Pcwo - minPcow) * sv + minPcow);
 }
 

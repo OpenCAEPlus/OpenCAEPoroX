@@ -16,7 +16,7 @@
 // OCPOWFMethod01
 /////////////////////////////////////////////////////
 
-OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOWFVarSet* vsin)
+OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet* vsin)
 {
     SWOF.Setup(SWOFin);
     vs = vsin;

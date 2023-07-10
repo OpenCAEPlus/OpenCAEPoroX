@@ -351,7 +351,7 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param)
     switch (SATmode) {
         case PHASE_W:
             for (USI i = 0; i < NTSFUN; i++)
-                flow.push_back(new FlowUnit_W(rs_param, i));
+                flow.push_back(new FlowUnit_SP(rs_param, i));
             break;
         case PHASE_OW:
             for (USI i = 0; i < NTSFUN; i++)

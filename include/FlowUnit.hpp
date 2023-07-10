@@ -69,13 +69,14 @@ protected:
 };
 
 ///////////////////////////////////////////////
-// FlowUnit_W
+// FlowUnit_SP
 ///////////////////////////////////////////////
 
-class FlowUnit_W : public FlowUnit
+/// Single phase
+class FlowUnit_SP : public FlowUnit
 {
 public:
-    FlowUnit_W(const ParamReservoir& rs_param, const USI& i){ 
+    FlowUnit_SP(const ParamReservoir& rs_param, const USI& i){ 
         Allocate(1);
         kr[0]    = 1;
         pc[0]    = 0;
@@ -85,8 +86,8 @@ public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
-    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override { };
+    void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override {};
     OCP_DBL GetSwco() const override { return 0.0; }
     OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0.0; }
     OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const override { return 1.0; }

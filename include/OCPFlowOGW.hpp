@@ -21,62 +21,13 @@
 
 using namespace std;
 
-/// oil-gas-water flow vars suite
-class OCP3PFVarSet
-{
-    /// oil phase is reference phase
-public:
-    OCP3PFVarSet() { Init0(); }
-    void Init0() {
-		Swco     = 0;
-        krocw    = 0;
-		So       = 0; Sg       = 0; Sw      = 0;		          
-		kro      = 0; krg      = 0; krw     = 0;
-		krog     = 0; krow     = 0;
-		dKrodSo  = 0; dKrodSg  = 0; dKrodSw = 0;
-		dKrgdSo  = 0; dKrgdSg  = 0; dKrgdSw = 0;
-		dKrwdSo  = 0; dKrwdSg  = 0; dKrwdSw = 0;
-		dKrogdSo = 0; dKrogdSg = 0;
-		dKrowdSo = 0; dKrowdSw = 0;
-		Pcgo     = 0; Pcwo     = 0;
-		dPcgodSo = 0; dPcgodSg = 0; dPcgodSw = 0;
-		dPcwodSo = 0; dPcwodSg = 0; dPcwodSw = 0;
-    }
-
-public:
-    /// saturaion of connate water
-    OCP_DBL Swco;
-    /// oil relative permeability in the presence of connate water only
-    OCP_DBL krocw;
-    /// oil, gas, water saturations
-    OCP_DBL So, Sg, Sw;
-    /// oil, gas, water relatve permeability
-    OCP_DBL kro, krg, krw;
-    /// the corresponding oil relative permeability when oil, gas and connate water are present
-    OCP_DBL krog;
-    /// the corresponding oil relative permeability when only oil and water are present
-    OCP_DBL krow;
-    /// the corresponding derivatives of permeability
-    OCP_DBL dKrodSo, dKrodSg, dKrodSw;
-    OCP_DBL dKrgdSo, dKrgdSg, dKrgdSw;
-    OCP_DBL dKrwdSo, dKrwdSg, dKrwdSw;
-    OCP_DBL dKrogdSo, dKrogdSg;
-    OCP_DBL dKrowdSo, dKrowdSw;
-
-    /// Capillary pressure   
-    OCP_DBL Pcgo, Pcwo;               ///< Pg - Po, Pw - Po
-    /// the corresponding derivatives of capillary pressure
-    OCP_DBL dPcgodSo, dPcgodSg, dPcgodSw;
-    OCP_DBL dPcwodSo, dPcwodSg, dPcwodSw;
-};
-
 
 /// Calculate oil permeability
 class OCP3POilPerMethod
 {
 public:
-    virtual void CalOilPer(OCP3PFVarSet* vs) = 0;
-    virtual void CalOilPerDer(OCP3PFVarSet* vs) = 0;
+    virtual void CalOilPer(OCPFlowVarSet* vs) = 0;
+    virtual void CalOilPerDer(OCPFlowVarSet* vs) = 0;
 };
 
 
@@ -89,8 +40,8 @@ class OCP3POilPerMethod01 : public OCP3POilPerMethod
 {
 public:
     OCP3POilPerMethod01() = default;
-    void CalOilPer(OCP3PFVarSet* vs) override;
-    void CalOilPerDer(OCP3PFVarSet* vs) override;
+    void CalOilPer(OCPFlowVarSet* vs) override;
+    void CalOilPerDer(OCPFlowVarSet* vs) override;
 };
 
 
@@ -104,15 +55,15 @@ class OCP3POILPerMethod02 : public OCP3POilPerMethod
 {
 public:
     OCP3POILPerMethod02() = default;
-    void CalOilPer(OCP3PFVarSet* vs) override;
-    void CalOilPerDer(OCP3PFVarSet* vs) override;
+    void CalOilPer(OCPFlowVarSet* vs) override;
+    void CalOilPerDer(OCPFlowVarSet* vs) override;
 };
 
 /// Calculate oil, gas, water relative permeability and capillary pressure
-class OCP3PFMethod
+class OCPOGWFMethod
 {
 public:
-    OCP3PFMethod() = default;
+    OCPOGWFMethod() = default;
     virtual void CalKrPc() = 0;
     virtual void CalKrPcDer() = 0;
 
@@ -129,22 +80,22 @@ public:
     
 
 protected:
-    OCP3PFVarSet*  vs;
+    OCPFlowVarSet*  vs;
 };
 
 
 /////////////////////////////////////////////////////
-// OCP3PFMethod01
+// OCPOGWFMethod01
 /////////////////////////////////////////////////////
 
 
 /// Use SGOF, SWOF
-class OCP3PFMethod01 : public OCP3PFMethod
+class OCPOGWFMethod01 : public OCPOGWFMethod
 {
 public:
-    OCP3PFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
+    OCPOGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
         const vector<vector<OCP_DBL>>& SWOFin,
-        const USI& i, OCP3PFVarSet* vsin);
+        const USI& i, OCPFlowVarSet* vsin);
     void CalKrPc() override;
     void CalKrPcDer() override;
 
@@ -171,18 +122,18 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCP3PFMethod02
+// OCPOGWFMethod02
 /////////////////////////////////////////////////////
 
 
 /// Use SOF3, SGFN, SWFN
-class OCP3PFMethod02 : public OCP3PFMethod
+class OCPOGWFMethod02 : public OCPOGWFMethod
 {
 public:
-    OCP3PFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
+    OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
         const vector<vector<OCP_DBL>>& SGFNin,
         const vector<vector<OCP_DBL>>& SWFNin,
-        const USI& i, OCP3PFVarSet* vsin);
+        const USI& i, OCPFlowVarSet* vsin);
     void CalKrPc() override;
     void CalKrPcDer() override;
 
@@ -213,12 +164,12 @@ protected:
 // OCPFlowOGW
 /////////////////////////////////////////////////////
 
-class OCPFlowOGW
+class OCPFlowOGW : public OCPFlow
 {
 public:
     OCPFlowOGW() = default;
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    OCP3PFVarSet& GetVarSet() { return vs; }
+    OCPFlowVarSet& GetVarSet() { return vs; }
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
         SetSaturation(So, Sg, Sw);
         pfMethod->CalKrPc(); 
@@ -247,9 +198,8 @@ protected:
     }
 
 protected:
-    const USI      flowType = OCPFLOW_OGW;
-    OCP3PFVarSet   vs;
-    OCP3PFMethod*  pfMethod;
+    const USI       flowType = OCPFLOW_OGW;
+    OCPOGWFMethod*  pfMethod;
 };
 
 
