@@ -1,7 +1,7 @@
 /*! \file    OCPOWFlow.hpp
  *  \brief   OCPOWFlow class declaration
  *  \author  Shizhe Li
- *  \date    Jul/10/2022
+ *  \date    Jul/10/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -42,9 +42,9 @@ public:
     OCP_DBL Swco;
     /// oil relative permeability in the presence of connate water only
     OCP_DBL krocw;
-    /// oil, gas, water saturations
+    /// oil, water saturations
     OCP_DBL So, Sw;
-    /// oil, gas, water relatve permeability
+    /// oil, water relatve permeability
     OCP_DBL kro, krw;
     /// the corresponding derivatives of permeability
     OCP_DBL dKrodSo, dKrodSw;
@@ -149,5 +149,5 @@ protected:
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jul/10/2022      Create file                          */
+/*  Shizhe Li           Jul/10/2023      Create file                          */
 /*----------------------------------------------------------------------------*/

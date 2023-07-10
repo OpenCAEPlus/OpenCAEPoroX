@@ -22,6 +22,7 @@
 #include "ParamReservoir.hpp"
 #include "OCP3PhaseFlow.hpp"
 #include "OCPOWFlow.hpp"
+#include "OCPOGFlow.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.
@@ -61,17 +62,10 @@ protected:
 
     OCP_USI         bulkId; ///< index of work bulk
 
-    vector<OCP_DBL> Scm;    ///< critical saturation when phase becomes mobile / immobile
-
-    OCP_DBL         Swco;   ///< saturaion of connate water
-
     vector<OCP_DBL> kr;     ///< relative permeability of phase
     vector<OCP_DBL> pc;     ///< capillary pressure
     vector<OCP_DBL> dKrdS;  ///< dKr / dPc
     vector<OCP_DBL> dPcdS;  ///< dKr / dS
-
-    vector<OCP_DBL> data;   ///< container to store the values of interpolation.
-    vector<OCP_DBL> cdata;  ///< container to store the slopes of interpolation.
 };
 
 ///////////////////////////////////////////////
@@ -156,8 +150,8 @@ public:
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
-    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override{ return SGOF.CalPcgo(Sg);}
-    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override{ return SGOF.CalSg(Pcgo); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return OGF.CalPcgoBySg(Sg); }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return OGF.CalSgByPcgo(Pcgo); }
     OCP_DBL GetSwco() const override { return 0; }
     // useless
     OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0; }
@@ -165,7 +159,15 @@ public:
     OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
 
 protected:
-    OCP_SGOF SGOF; ///< saturation table about gas and oil.
+    void AssinValueDer();
+    void AssinValue();
+
+protected:
+    /// phase index
+    enum phaseIndex { oIndex, gIndex };
+    enum p2p { oo, og, go, gg };
+
+    OCPOGFlow  OGF;
 };
 
 ///////////////////////////////////////////////

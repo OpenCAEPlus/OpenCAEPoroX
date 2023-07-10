@@ -1,7 +1,7 @@
 /*! \file    OCPSurfacTension.hpp
  *  \brief   OCPSurfacTension class declaration
  *  \author  Shizhe Li
- *  \date    Jul/03/2022
+ *  \date    Jul/03/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -131,5 +131,5 @@ protected:
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jul/03/2022      Create file                          */
+/*  Shizhe Li           Jul/03/2023      Create file                          */
 /*----------------------------------------------------------------------------*/

@@ -1,7 +1,7 @@
 /*! \file    OCP3PhaseFlow.hpp
  *  \brief   OCP3PhaseFlow class declaration
  *  \author  Shizhe Li
- *  \date    Jul/08/2022
+ *  \date    Jul/08/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -141,7 +141,6 @@ protected:
 class OCP3PFMethod01 : public OCP3PFMethod
 {
 public:
-    OCP3PFMethod01() = default;
     OCP3PFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
         const vector<vector<OCP_DBL>>& SWOFin,
         const USI& i, OCP3PFVarSet* vsin);
@@ -179,7 +178,6 @@ protected:
 class OCP3PFMethod02 : public OCP3PFMethod
 {
 public:
-    OCP3PFMethod02() = default;
     OCP3PFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
         const vector<vector<OCP_DBL>>& SGFNin,
         const vector<vector<OCP_DBL>>& SWFNin,
@@ -260,5 +258,5 @@ protected:
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jul/08/2022      Create file                          */
+/*  Shizhe Li           Jul/08/2023      Create file                          */
 /*----------------------------------------------------------------------------*/

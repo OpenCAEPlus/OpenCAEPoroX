@@ -88,32 +88,57 @@ void FlowUnit_OW::AssinValue()
 // FlowUnit_OG
 ///////////////////////////////////////////////
 
+
 FlowUnit_OG::FlowUnit_OG(const ParamReservoir& rs_param, const USI& i)
 {
     Allocate(2);
-
-    SGOF.Setup(rs_param.SGOF_T.data[i]);
-
-    data.resize(4, 0);
-    cdata.resize(4, 0);
+    OGF.Setup(rs_param, i);
 }
 
 void FlowUnit_OG::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    const OCP_DBL Sg = S_in[1];
-
-    OCP_DBL krg, krog, Pcgo;
-    SGOF.CalKrgKrogPcgo(Sg, krg, krog, Pcgo);
-
-    kr[0] = krog;
-    kr[1] = krg;
-    //pc[0] = 0;
-    pc[1] = Pcgo;
+    bulkId = bId;
+    OGF.CalKrPc(S_in[oIndex], S_in[gIndex]);
+    AssinValue();
 }
 
 void FlowUnit_OG::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
-    OCP_ABORT("Not Completed Now!");
+    bulkId = bId;
+    OGF.CalKrPcDer(S_in[oIndex], S_in[gIndex]);
+    AssinValueDer();
+}
+
+
+void FlowUnit_OG::AssinValueDer()
+{
+    const OCPOGFVarSet& vs = OGF.GetVarSet();
+
+    kr[oIndex] = vs.kro;
+    kr[gIndex] = vs.krg;
+    pc[oIndex] = 0;
+    pc[gIndex] = vs.Pcgo;
+
+    dKrdS[oo] = vs.dKrodSo;
+    dKrdS[og] = vs.dKrodSg;
+    dKrdS[go] = vs.dKrgdSo;
+    dKrdS[gg] = vs.dKrgdSg;
+
+    dPcdS[oo] = 0;
+    dPcdS[og] = 0;
+    dPcdS[go] = vs.dPcgodSo;
+    dPcdS[gg] = vs.dPcgodSg;
+}
+
+
+void FlowUnit_OG::AssinValue()
+{
+    const OCPOGFVarSet& vs = OGF.GetVarSet();
+
+    kr[oIndex] = vs.kro;
+    kr[gIndex] = vs.krg;
+    pc[oIndex] = 0;
+    pc[gIndex] = vs.Pcgo;
 }
 
 ///////////////////////////////////////////////

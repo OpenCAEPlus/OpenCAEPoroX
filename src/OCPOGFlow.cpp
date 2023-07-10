@@ -1,5 +1,5 @@
-/*! \file    OCPOWFlow.cpp
- *  \brief   OCPOWFlow class declaration
+/*! \file    OCPOGFlow.cpp
+ *  \brief   OCPOGFlow class declaration
  *  \author  Shizhe Li
  *  \date    Jul/10/2023
  *
@@ -9,39 +9,36 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "OCPOWFlow.hpp"
+#include "OCPOGFlow.hpp"
 
 
-/////////////////////////////////////////////////////
-// OCPOWFMethod01
-/////////////////////////////////////////////////////
+ /////////////////////////////////////////////////////
+ // OCPOGFMethod01
+ /////////////////////////////////////////////////////
 
-OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOWFVarSet* vsin)
+OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPOGFVarSet* vsin)
 {
-    SWOF.Setup(SWOFin);
+    SGOF.Setup(SWOFin);
     vs = vsin;
-
-    vs->Swco = SWOF.GetSwco();
 }
 
 
-void OCPOWFMethod01::CalKrPc()
+void OCPOGFMethod01::CalKrPc()
 {
-    SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->kro, vs->Pcwo);
+    SGOF.CalKrgKrogPcgo(vs->Sg, vs->krg, vs->kro, vs->Pcgo);
 }
 
 
-void OCPOWFMethod01::CalKrPcDer()
+void OCPOGFMethod01::CalKrPcDer()
 {
-    SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->kro, vs->Pcwo, vs->dKrwdSw, vs->dKrodSw, vs->dPcwodSw);
+    SGOF.CalKrgKrogPcgoDer(vs->Sg, vs->krg, vs->kro, vs->Pcgo, vs->dKrgdSg, vs->dKrodSg, vs->dPcgodSg);
 }
 
 
-
-void OCPOWFlow::Setup(const ParamReservoir& rs_param, const USI& i)
+void OCPOGFlow::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    if (rs_param.SWOF_T.data.size()) {
-        pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], &vs);
+    if (rs_param.SGOF_T.data.size()) {
+        pfMethod = new OCPOGFMethod01(rs_param.SGOF_T.data[i], &vs);
     }
 }
 
