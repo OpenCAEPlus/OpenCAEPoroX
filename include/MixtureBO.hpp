@@ -271,7 +271,7 @@ public:
 
 private:
     OCPTable        PVCO;  ///< PVT table for live oil (with dissolved gas).
-    OCPTable        PVDG;  ///< PVT table for dry gas.
+    OCP_PVDG        PVDG;
     OCP_PVTW        PVTW;
 };
 

@@ -88,8 +88,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // hypothetical Gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg = data[1] * (CONV1 / 1000);
+                OCP_DBL bg = PVDG.CalBg(P) * (CONV1 / 1000);
 
                 // total
                 vj[0]  = 0;
@@ -117,12 +116,13 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
 
-                mu[1]  = data[2];
-                xi[1]  = 1 / 1000 / bg;
+                mu[1]  = mug;
+                xi[1]  = 1.0 / 1000 / bg;
                 rho[1] = std_RhoG / bg;
                 Ni[1]  = Vpore * S[1] * xi[1];
 
@@ -134,7 +134,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * cbg + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
                 vfi[2] = CONV1 * bw;
@@ -205,13 +205,15 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 rho[0] = (std_RhoO + (1000 / CONV1) * rs * std_RhoG) / bo;
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
+
                 Ni[1]       = Vpore * S[1] / bg / 1000 + Ni[0] * rs;
                 xi[1]       = 1 / CONV1 / data[1];
                 rho[1]      = std_RhoG / bg;
-                mu[1]       = data[2];
+                mu[1]       = mug;
 
                 xij[0 * 3 + 0] = 1 / (1 + rs);
                 xij[0 * 3 + 1] = 1 - xij[0 * 3 + 0];
@@ -228,7 +230,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 S[1] = vj[1] / vf;
                 S[2] = vj[2] / vf;
                 vfP  = CONV1 * Ni[0] * cbosat +
-                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * cbg) +
+                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
                       CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
@@ -281,9 +283,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
                 // water, gas
 
                 // Ni[1]
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg = data[1] * (CONV1 / 1000);
-                xi[1]      = 1 / 1000 / bg;
+                xi[1]      = 1.0 / (CONV1 * PVDG.CalBg(P));
                 Ni[1]      = Vpore * S[1] * xi[1];
                 break;
             }
@@ -312,9 +312,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
                 Ni[0]      = Vpore * (1 - S[1] - S[2]) / (CONV1 * bo);
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg = data[1] * (CONV1 / 1000);
-                Ni[1]      = Vpore * S[1] / bg / 1000 + Ni[0] * rs;
+                Ni[1]      = Vpore * S[1] / (CONV1 * PVDG.CalBg(P)) + Ni[0] * rs;
                 break;
             }
     }
@@ -375,8 +373,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // hypothetical Gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg = data[1] * (CONV1 / 1000);
+                OCP_DBL bg = PVDG.CalBg(P) * (CONV1 / 1000);
 
                 // total
                 vj[0]  = 0;
@@ -404,12 +401,13 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
 
-                mu[1]  = data[2];
-                xi[1]  = 1 / 1000 / bg;
+                mu[1]  = mug;
+                xi[1]  = 1.0 / 1000 / bg;
                 rho[1] = std_RhoG / bg;
 
                 // total
@@ -425,7 +423,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * cbg + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
                 vfi[2] = CONV1 * bw;
@@ -491,12 +489,13 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 rho[0] = (std_RhoO + (1000 / CONV1) * rs * std_RhoG) / bo;
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
 
-                mu[1]  = data[2];
-                xi[1]  = 1 / CONV1 / data[1];
+                mu[1]  = mug;
+                xi[1]  = 1.0 / 1000 / bg;
                 rho[1] = std_RhoG / bg;
 
                 // total
@@ -513,7 +512,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 S[1]  = vj[1] / vf;
                 S[2]  = vj[2] / vf;
                 vfP   = CONV1 * Ni[0] * cbosat +
-                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * cbg) +
+                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
                       CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
@@ -594,8 +593,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // hypothetical Gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg = data[1] * (CONV1 / 1000);
+                OCP_DBL bg = PVDG.CalBg(P) * (CONV1 / 1000);
 
                 // total
                 vj[0]  = 0;
@@ -640,16 +638,17 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 OCP_DBL bo = data[2];
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
 
-                mu[1]  = data[2];
-                xi[1]  = 1 / 1000 / bg;
+                mu[1]  = mug;
+                xi[1]  = 1.0 / 1000 / bg;
                 rho[1] = std_RhoG / bg;
 
-                muP[1]  = cdata[2];
-                xiP[1]  = -cdata[1] / (CONV1 * data[1] * data[1]);
+                muP[1]  = mugp;
+                xiP[1] = -1.0 / 1000 * bgp / (bg * bg);
                 rhoP[1] = 1000 * std_RhoG * xiP[1];
 
                 // total
@@ -665,7 +664,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * cbg + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
                 vfi[2] = CONV1 * bw;
@@ -675,7 +674,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[2] = 0;               // dSo / dNg
                 dXsdXp[3] = 0;               // dSo / dNw
 
-                dXsdXp[1 * 4 + 0] = (1000 * Ni[1] * cbg - S[1] * vfP) / vf; // dSg / dP
+                dXsdXp[1 * 4 + 0] = (1000 * Ni[1] * bgp - S[1] * vfP) / vf; // dSg / dP
                 dXsdXp[1 * 4 + 1] = (-1000 * rs * bg - S[1] * vfi[0]) / vf; // dSg / dNo
                 dXsdXp[1 * 4 + 2] = (1000 * bg - S[1] * vfi[1]) / vf;       // dSg / dNg
                 dXsdXp[1 * 4 + 3] = -S[1] * vfi[2] / vf;                    // dSg / dNw
@@ -806,16 +805,17 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                     (std_RhoO + (1000 / CONV1) * rs * std_RhoG) * cbosat / (bo * bo);
 
                 // gas property
-                PVDG.Eval_All(0, P, data, cdata);
-                OCP_DBL bg  = data[1] * (CONV1 / 1000);
-                OCP_DBL cbg = cdata[1] * (CONV1 / 1000);
+                OCP_DBL bg, mug, bgp, mugp;
+                PVDG.CalBgMugDer(P, bg, mug, bgp, mugp);
+                bg  *= (CONV1 / 1000);
+                bgp *= (CONV1 / 1000);
 
-                mu[1]  = data[2];
-                xi[1]  = 1 / CONV1 / data[1];
+                mu[1]  = mug;
+                xi[1]  = 1.0 / 1000 / bg;
                 rho[1] = std_RhoG / bg;
 
-                muP[1]  = cdata[2];
-                xiP[1]  = -cdata[1] / (CONV1 * data[1] * data[1]);
+                muP[1]  = mugp;
+                xiP[1]  = -1.0 / 1000 * (bgp / (bg * bg));
                 rhoP[1] = 1000 * std_RhoG * xiP[1];
 
                 // total
@@ -832,7 +832,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 S[1]  = vj[1] / vf;
                 S[2]  = vj[2] / vf;
                 vfP   = CONV1 * Ni[0] * cbosat +
-                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * cbg) +
+                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
                       CONV1 * Ni[2] * bwp;
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
@@ -843,7 +843,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[2] = -S[0] * vfi[1] / vf;                        // dSo / dNg
                 dXsdXp[3] = -S[0] * vfi[2] / vf;                        // dSo / dNw
 
-                dXsdXp[1 * 4 + 0] = (1000 * (Ni[1] - rs * Ni[0]) * cbg -
+                dXsdXp[1 * 4 + 0] = (1000 * (Ni[1] - rs * Ni[0]) * bgp -
                                      1000 * Ni[0] * bg * crs - S[1] * vfP) /
                                     vf;                                     // dSg / dP
                 dXsdXp[1 * 4 + 1] = (-1000 * rs * bg - S[1] * vfi[0]) / vf; // dSg / dNo
@@ -878,10 +878,7 @@ BOMixture_ODGW::XiPhase(const OCP_DBL& Pin,
                         const USI&     tarPhase)
 {
     if (tarPhase == GAS) {
-        OCP_DBL bg = PVDG.Eval(0, Pin, 1);
-        // OCP_DBL xig = 1 / (CONV1 * bg);
-        OCP_DBL xig = 1 / CONV1 / bg;
-        return xig;
+        return 1 / CONV1 / PVDG.CalBg(Pin);
     } else if (tarPhase == WATER) {
         OCP_DBL xiw = 1 / CONV1 / PVTW.CalBw(Pin);
         return xiw;
@@ -907,12 +904,9 @@ BOMixture_ODGW::RhoPhase(const OCP_DBL& Pin,
         OCP_DBL rhoO   = (std_RhoO + (1000 / CONV1) * rs * std_RhoG) / bo;
         return rhoO;
     } else if (tarPhase == GAS) {
-        OCP_DBL bg   = PVDG.Eval(0, Pin, 1);
-        OCP_DBL rhog = (1000 / CONV1) * std_RhoG / bg;
-        return rhog;
+        return (1000 / CONV1) * std_RhoG / PVDG.CalBg(Pin);
     } else if (tarPhase == WATER) {
-        OCP_DBL rhow = std_RhoW / PVTW.CalBw(Pin);
-        return rhow;
+        return std_RhoW / PVTW.CalBw(Pin);
     } else {
         OCP_ABORT("WRONG tarPhase!");
     }
