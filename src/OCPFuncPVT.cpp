@@ -48,7 +48,25 @@ void OCP_PVTW::CalBwMuwDer(const OCP_DBL& Pw, OCP_DBL& bw, OCP_DBL& muw, OCP_DBL
 
 
 
+/////////////////////////////////////////////////////
+// PVDO
+/////////////////////////////////////////////////////
 
+
+OCP_DBL OCP_PVDO::CalBo(const OCP_DBL& P)
+{
+	return table.Eval(0, P, 1);
+}
+
+
+void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMudP)
+{
+	table.Eval_All(0, P, data, cdata);
+	bo    = data[1];
+	muo   = data[2];
+	dBodP = cdata[1];
+	dMudP = cdata[2];
+}
 
 
 /*----------------------------------------------------------------------------*/

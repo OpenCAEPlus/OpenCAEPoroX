@@ -211,7 +211,7 @@ public:
                       const OCP_DBL&            Tsurf) override;
 
 private:
-    OCPTable        PVDO;  ///< PVT table for dead oil
+    OCP_PVDO        PVDO;
     OCP_PVTW        PVTW;
 };
 

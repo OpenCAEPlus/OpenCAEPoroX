@@ -86,7 +86,7 @@ public:
 
 
 /////////////////////////////////////////////////////
-// PVDG
+// PVDO
 /////////////////////////////////////////////////////
 
 
@@ -100,6 +100,8 @@ class OCP_PVDO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDO() = default;
+	OCP_DBL CalBo(const OCP_DBL& P);
+	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMudP);
 };
 
 

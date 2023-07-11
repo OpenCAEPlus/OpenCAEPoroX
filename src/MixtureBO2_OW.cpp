@@ -23,10 +23,7 @@ BOMixture_OW::BOMixture_OW(const ParamReservoir& rs_param, const USI& i)
     BOMixtureInit(rs_param);
 
     PVTW.Setup(rs_param.PVTW_T.data[i]);
-    PVDO.Setup(rs_param.PVDO_T.data[i]);
-
-    data.resize(5, 0);
-    cdata.resize(5, 0);
+    PVDO.Setup(rs_param.PVDO_T.data[i]); 
 
     phaseExist[0] = OCP_TRUE;
     phaseExist[1] = OCP_TRUE;
@@ -62,11 +59,10 @@ void BOMixture_OW::InitFlashIMPEC(const OCP_DBL& Pin,
     Ni[1] = Vpore * S[1] * xi[1];
 
     // Oil Properties
-    PVDO.Eval_All(0, P, data, cdata);
-    OCP_DBL bo  = data[1];
-    OCP_DBL bop = cdata[1];
+    OCP_DBL bo, muo, bop, muoP;
+    PVDO.CalBoMuoDer(P, bo, muo, bop, muoP);
 
-    mu[0]  = data[2];
+    mu[0]  = muo;
     xi[0]  = 1 / (CONV1 * bo);
     rho[0] = std_RhoO / bo;
     Ni[0]  = Vpore * (1 - S[1]) * xi[0];
@@ -96,10 +92,8 @@ void BOMixture_OW::InitFlashFIM(const OCP_DBL& Pin,
     Ni[1]       = Vpore * S[1] * xi[1];
 
     // Oil Properties
-    PVDO.Eval_All(0, P, data, cdata);
-    OCP_DBL bo = data[1];
 
-    xi[0] = 1 / (CONV1 * bo);
+    xi[0] = 1 / (CONV1 * PVDO.CalBo(P));
     Ni[0] = Vpore * (1 - S[1]) * xi[0];
 
     FlashFIM(Pin, Tin, &Ni[0], 0, 0, 0, 0);
@@ -126,11 +120,10 @@ void BOMixture_OW::FlashIMPEC(const OCP_DBL& Pin,
     rho[1] = std_RhoW / bw;
 
     // Oil Properties
-    PVDO.Eval_All(0, P, data, cdata);
-    OCP_DBL bo  = data[1];
-    OCP_DBL bop = cdata[1];
+    OCP_DBL bo, muo, bop, muoP;
+    PVDO.CalBoMuoDer(P, bo, muo, bop, muoP);
 
-    mu[0]  = data[2];
+    mu[0]  = muo;
     xi[0]  = 1 / (CONV1 * bo);
     rho[0] = std_RhoO / bo;
 
@@ -166,20 +159,20 @@ void BOMixture_OW::FlashFIM(const OCP_DBL& Pin,
     xi[1]  = 1 / (bw * CONV1);
     rho[1] = std_RhoW / bw;
 
-    muP[1]  = cdata[3];
+    muP[1]  = muwP;
     xiP[1]  = -bwp / (bw * bw * CONV1);
     rhoP[1] = CONV1 * xiP[1] * std_RhoW;
 
     // Oil Properties
-    PVDO.Eval_All(0, P, data, cdata);
-    OCP_DBL bo  = data[1];
-    OCP_DBL bop = cdata[1];
 
-    mu[0]  = data[2];
+    OCP_DBL bo, muo, bop, muoP;
+    PVDO.CalBoMuoDer(P, bo, muo, bop, muoP);
+
+    mu[0]  = muo;
     xi[0]  = 1 / (CONV1 * bo);
     rho[0] = std_RhoO / bo;
 
-    muP[0]  = cdata[2];
+    muP[0]  = muoP;
     xiP[0]  = -xi[0] * bop / bo;
     rhoP[0] = -rho[0] * bop / bo;
 
@@ -222,8 +215,7 @@ OCP_DBL BOMixture_OW::RhoPhase(const OCP_DBL& Pin,
                                const USI&     tarPhase)
 {
     if (tarPhase == OIL) {
-        OCP_DBL bo = PVDO.Eval(0, Pin, 1);
-        return std_RhoO / bo;
+        return std_RhoO / PVDO.CalBo(Pin);
     } else if (tarPhase == WATER) {
         return std_RhoW / PVTW.CalBw(Pin);
     } else {
