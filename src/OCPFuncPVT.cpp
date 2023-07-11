@@ -47,6 +47,25 @@ void OCP_PVTW::CalBwMuwDer(const OCP_DBL& Pw, OCP_DBL& bw, OCP_DBL& muw, OCP_DBL
 /////////////////////////////////////////////////////
 
 
+/////////////////////////////////////////////////////
+// PVDG
+/////////////////////////////////////////////////////
+
+
+OCP_DBL OCP_PVDG::CalBg(const OCP_DBL& P)
+{
+	return table.Eval(0, P, 1);
+}
+
+void OCP_PVDG::CalBgMugDer(const OCP_DBL& P, OCP_DBL& bg, OCP_DBL& mug, OCP_DBL& dBgdP, OCP_DBL& dMugdP)
+{
+	table.Eval_All(0, P, data, cdata);
+	bg     = data[1];
+	mug    = data[2];
+	dBgdP  = cdata[1];
+	dMugdP = cdata[2];
+}
+
 
 /////////////////////////////////////////////////////
 // PVDO
@@ -59,13 +78,13 @@ OCP_DBL OCP_PVDO::CalBo(const OCP_DBL& P)
 }
 
 
-void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMudP)
+void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP)
 {
 	table.Eval_All(0, P, data, cdata);
-	bo    = data[1];
-	muo   = data[2];
-	dBodP = cdata[1];
-	dMudP = cdata[2];
+	bo     = data[1];
+	muo    = data[2];
+	dBodP  = cdata[1];
+	dMuodP = cdata[2];
 }
 
 

@@ -559,7 +559,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
     xi[2]  = 1 / CONV1 / bw;
     rho[2] = std_RhoW / bw;
 
-    muP[2]  = cdata[3];
+    muP[2]  = muwP;
     xiP[2]  = -bwp / (bw * bw * CONV1);
     rhoP[2] = CONV1 * xiP[2] * std_RhoW;
 

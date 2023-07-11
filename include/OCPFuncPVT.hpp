@@ -82,6 +82,8 @@ class OCP_PVDG : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDG() = default;
+	OCP_DBL CalBg(const OCP_DBL& P);
+	void CalBgMugDer(const OCP_DBL& P, OCP_DBL& bg, OCP_DBL& mug, OCP_DBL& dBgdP, OCP_DBL& dMugdP);
 };
 
 
@@ -101,7 +103,7 @@ public:
 	/// default constructor
 	OCP_PVDO() = default;
 	OCP_DBL CalBo(const OCP_DBL& P);
-	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMudP);
+	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP);
 };
 
 
