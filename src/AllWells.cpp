@@ -266,7 +266,7 @@ void AllWells::CalIPRT(const Bulk& myBulk, OCP_DBL dt)
         FWIR += wells[w].WWIR;
         FOPR += wells[w].WOPR;
         FGPR += wells[w].WGPR;
-        FWPR += wells[w].WWPR;
+        FWPR += wells[w].WWPR;       
     }
     FGIT += FGIR * dt;
     FWIT += FWIR * dt;

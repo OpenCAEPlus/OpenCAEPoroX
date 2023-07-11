@@ -36,6 +36,9 @@ class OCP_PVTW : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVTW() = default;
+	OCP_DBL CalBw(const OCP_DBL& Pw);
+	void CalBwMuwDer(const OCP_DBL& Pw, OCP_DBL& bw, OCP_DBL& muw, OCP_DBL& dBwdPw, OCP_DBL& dMuwdPw);
+	
 };
 
 

@@ -80,6 +80,9 @@ public:
 
     OCP_DBL Eval_Inv(const USI& j, const OCP_DBL& val, const USI& destj) const;
 
+    /// Return the closest row away from specific val with given column j
+    void GetCloseRow(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata) const;
+
     /// Display the data of table on screen.
     void Display() const;
 

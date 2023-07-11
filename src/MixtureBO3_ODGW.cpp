@@ -22,7 +22,7 @@ BOMixture_ODGW::BOMixture_ODGW(const ParamReservoir& rs_param, const USI& i)
     numCom      = 3;
     BOMixtureInit(rs_param);
 
-    PVTW.Setup(rs_param.PVTW_T.data[i]);
+    PVTW.Setup(rs_param.PVTW_T.data[i]);  
     PVCO.Setup(rs_param.PVCO_T.data[i]);
     PVDG.Setup(rs_param.PVDG_T.data[i]);
 
@@ -52,14 +52,10 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
     S[2] = Sjin[2]; // water saturation
 
     // Water Property
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
 
-    mu[2]  = data[3];
+    mu[2]  = muw;
     rho[2] = std_RhoW / bw;
     xi[2]  = 1 / (CONV1 * bw);
     Ni[2]  = Vpore * S[2] * xi[2];
@@ -259,13 +255,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
     S[2] = Sjin[2]; // water saturation
 
     // Water Property
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-
-    xi[2] = 1 / (CONV1 * bw);
+    xi[2] = 1 / (CONV1 * PVTW.CalBw(P));
     Ni[2] = Vpore * S[2] * xi[2];
 
     USI phasecae;
@@ -349,14 +339,10 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
     }
 
     // Water property
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
 
-    mu[2]  = data[3];
+    mu[2]  = muw;
     xi[2]  = 1 / (CONV1 * bw);
     rho[2] = std_RhoW / bw;
 
@@ -566,14 +552,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
     }
 
     // Water property
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
 
-    mu[2]  = data[3];
+    mu[2]  = muw;
     xi[2]  = 1 / CONV1 / bw;
     rho[2] = std_RhoW / bw;
 
@@ -901,13 +883,7 @@ BOMixture_ODGW::XiPhase(const OCP_DBL& Pin,
         OCP_DBL xig = 1 / CONV1 / bg;
         return xig;
     } else if (tarPhase == WATER) {
-
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0 = data[0];
-        OCP_DBL bw0 = data[1];
-        OCP_DBL cbw = data[2];
-        OCP_DBL bw  = bw0 * (1 - cbw * (Pin - Pw0));
-        OCP_DBL xiw = 1 / CONV1 / bw;
+        OCP_DBL xiw = 1 / CONV1 / PVTW.CalBw(Pin);
         return xiw;
     } else {
         OCP_ABORT("Wrong tarPhase!");
@@ -935,12 +911,7 @@ BOMixture_ODGW::RhoPhase(const OCP_DBL& Pin,
         OCP_DBL rhog = (1000 / CONV1) * std_RhoG / bg;
         return rhog;
     } else if (tarPhase == WATER) {
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0  = data[0];
-        OCP_DBL bw0  = data[1];
-        OCP_DBL cbw  = data[2];
-        OCP_DBL bw   = bw0 * (1 - cbw * (Pin - Pw0));
-        OCP_DBL rhow = std_RhoW / bw;
+        OCP_DBL rhow = std_RhoW / PVTW.CalBw(Pin);
         return rhow;
     } else {
         OCP_ABORT("WRONG tarPhase!");

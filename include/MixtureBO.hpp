@@ -154,7 +154,7 @@ public:
     };
 
 private:
-    OCPTable PVTW;
+    OCP_PVTW PVTW;
 };
 
 ///////////////////////////////////////////////
@@ -212,7 +212,7 @@ public:
 
 private:
     OCPTable        PVDO;  ///< PVT table for dead oil
-    OCPTable        PVTW;  ///< PVT table for water.
+    OCP_PVTW        PVTW;
 };
 
 ///////////////////////////////////////////////
@@ -272,7 +272,7 @@ public:
 private:
     OCPTable        PVCO;  ///< PVT table for live oil (with dissolved gas).
     OCPTable        PVDG;  ///< PVT table for dry gas.
-    OCPTable        PVTW;  ///< PVT table for water.
+    OCP_PVTW        PVTW;
 };
 
 #endif /* end if __MIXTUREBO_HEADER__ */

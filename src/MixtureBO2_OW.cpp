@@ -53,14 +53,9 @@ void BOMixture_OW::InitFlashIMPEC(const OCP_DBL& Pin,
     P    = Pin;
     S[1] = Sjin[1];
     // Water Properties
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
-
-    mu[1]  = data[3];
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
+    mu[1]  = muw;
     xi[1]  = 1 / (bw * CONV1);
     rho[1] = std_RhoW / bw;
 
@@ -97,12 +92,7 @@ void BOMixture_OW::InitFlashFIM(const OCP_DBL& Pin,
     P    = Pin;
     S[1] = Sjin[1];
     // Water Properties
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    xi[1]       = 1 / (bw * CONV1);
+    xi[1]       = 1 / (PVTW.CalBw(P) * CONV1);
     Ni[1]       = Vpore * S[1] * xi[1];
 
     // Oil Properties
@@ -128,14 +118,10 @@ void BOMixture_OW::FlashIMPEC(const OCP_DBL& Pin,
     Ni[1] = Niin[1];
 
     // Water Properties
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
 
-    mu[1]  = data[3];
+    mu[1]  = muw;
     xi[1]  = 1 / (bw * CONV1);
     rho[1] = std_RhoW / bw;
 
@@ -173,15 +159,10 @@ void BOMixture_OW::FlashFIM(const OCP_DBL& Pin,
     Ni[1] = Niin[1];
     Nt    = Ni[0] + Ni[1];
 
-    // Water Properties
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
+    OCP_DBL bw, muw, bwp, muwP;
+    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
 
-    mu[1]  = data[3];
+    mu[1]  = muw;
     xi[1]  = 1 / (bw * CONV1);
     rho[1] = std_RhoW / bw;
 
@@ -227,12 +208,7 @@ OCP_DBL BOMixture_OW::XiPhase(const OCP_DBL& Pin,
 {
     if (tarPhase == WATER) {
         // inj fluid is water
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0 = data[0];
-        OCP_DBL bw0 = data[1];
-        OCP_DBL cbw = data[2];
-        OCP_DBL bw  = bw0 * (1 - cbw * (Pin - Pw0));
-        OCP_DBL xiw = 1 / (CONV1 * bw);
+        OCP_DBL xiw = 1 / (CONV1 * PVTW.CalBw(Pin));
         return xiw;
     } else {
         OCP_ABORT("Wrong tarPhase!");
@@ -249,12 +225,7 @@ OCP_DBL BOMixture_OW::RhoPhase(const OCP_DBL& Pin,
         OCP_DBL bo = PVDO.Eval(0, Pin, 1);
         return std_RhoO / bo;
     } else if (tarPhase == WATER) {
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0 = data[0];
-        OCP_DBL bw0 = data[1];
-        OCP_DBL cbw = data[2];
-        OCP_DBL bw  = bw0 * (1 - cbw * (Pin - Pw0));
-        return std_RhoW / bw;
+        return std_RhoW / PVTW.CalBw(Pin);
     } else {
         OCP_ABORT("Wrong tarPhase!");
     }

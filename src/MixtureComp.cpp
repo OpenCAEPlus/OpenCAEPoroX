@@ -533,6 +533,7 @@ void MixtureComp::SetupWellOpt(WellOpt&                  opt,
         if (fluidName == "WAT") {
             tmpZi.back() = 1;
             opt.SetInjProdPhase(WATER);
+            opt.SetInjFactor(1.0);
         } else {
             // inj phase is gas
             opt.SetInjProdPhase(GAS);
