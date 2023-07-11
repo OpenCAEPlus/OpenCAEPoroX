@@ -1,7 +1,7 @@
-/*! \file    OCPPVTFunc.hpp
- *  \brief   Functions for PVT in OCP
+/*! \file    OCPFuncTable.hpp
+ *  \brief   Functions for Saturations in OCP
  *  \author  Shizhe Li
- *  \date    Jun/18/2023
+ *  \date    Jul/11/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -9,40 +9,40 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPPVTFUNC_HEADER__
-#define __OCPPVTFUNC_HEADER__
+#ifndef __OCPFUNCTABLE_HEADER__
+#define __OCPFUNCTABLE_HEADER__
 
-// OpenCAEPoroX header files
+ // OpenCAEPoroX header files
 #include "OCPTable.hpp"
 
 using namespace std;
 
-class PVTFunc
-{
-
-};
-
-class PVTW_Table
+class OCPFuncTable
 {
 public:
-	PVTW_Table(const vector<vector<OCP_DBL>>& src);
+	OCPFuncTable() = default;
+	void Setup(const vector<vector<OCP_DBL>>& src) {
+		table.Setup(src);
+		data.resize(table.GetColNum());
+		cdata.resize(table.GetColNum());
+	}
+	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 
 protected:
-	OCPTable table;
-
+	OCPTable          table;
+	vector<OCP_DBL>   data;
+	vector<OCP_DBL>   cdata;
 };
 
 
 
-
-
-#endif // __OCPPVTFUNC_HEADER__
+#endif // __OCPFUNCTABLE_HEADER__
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jun/18/2023      Create file                          */
+/*  Shizhe Li           Jul/11/2023      Create file                          */
 /*----------------------------------------------------------------------------*/
 

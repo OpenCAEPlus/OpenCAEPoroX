@@ -11,7 +11,6 @@
 
 // OpenCAEPoroX header files
 #include "MixtureThermal.hpp"
-#include "OCPTable.hpp"
 
 MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& tarId)
 {

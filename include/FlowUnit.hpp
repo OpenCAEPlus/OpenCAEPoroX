@@ -16,8 +16,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "OCPTable.hpp"
-#include "OCPSATFunc.hpp"
+#include "OCPFuncSAT.hpp"
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPFlowOGW.hpp"

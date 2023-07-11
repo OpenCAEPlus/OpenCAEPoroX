@@ -83,14 +83,14 @@ public:
     /// Display the data of table on screen.
     void Display() const;
 
-private:
+protected:
     USI                     nRow; ///< number of rows of the table
     USI                     nCol; ///< number of columns of the table
     mutable USI             bId;  ///< the starting point of rows when interpolating
     vector<vector<OCP_DBL>> data; ///< data of the table, data[i] is the ith column.
 };
 
-#endif /* end if __OCP_TABLE_HEADER__ */
+#endif /* end if __OCPTABLE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

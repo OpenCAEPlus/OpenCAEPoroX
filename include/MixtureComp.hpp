@@ -20,7 +20,7 @@
 // OpenCAEPoroX header files
 #include "DenseMat.hpp"
 #include "Mixture.hpp"
-#include "OCPTable.hpp"
+#include "OCPFuncPVT.hpp"
 
 using namespace std;
 

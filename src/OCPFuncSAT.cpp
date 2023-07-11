@@ -1,4 +1,4 @@
-/*! \file    OCPSATFunc.cpp
+/*! \file    OCPFuncSAT.cpp
  *  \brief   Functions for Saturation in OCP
  *  \author  Shizhe Li
  *  \date    Jun/29/2023
@@ -11,18 +11,12 @@
 
 
  // OpenCAEPoroX header files
-#include "OCPSATFunc.hpp"
+#include "OCPFuncSAT.hpp"
 
 /////////////////////////////////////////////////////
 // SWOF
 /////////////////////////////////////////////////////
 
-void OCP_SWOF::Setup(const vector<vector<OCP_DBL>>& src) 
-{ 
-	table.Setup(src); 
-	data.resize(table.GetColNum()); 
-	cdata.resize(table.GetColNum()); 
-}
 
 OCP_DBL OCP_SWOF::GetSwcr() const
 {
@@ -42,13 +36,6 @@ OCP_DBL OCP_SWOF::GetSwcr() const
 // SGOF
 /////////////////////////////////////////////////////
 
-void OCP_SGOF::Setup(const vector<vector<OCP_DBL>>& src)
-{
-	 table.Setup(src);
-	 data.resize(table.GetColNum());
-	 cdata.resize(table.GetColNum());
- }
-
 
 OCP_DBL OCP_SGOF::GetSgcr() const
 {
@@ -62,43 +49,6 @@ OCP_DBL OCP_SGOF::GetSgcr() const
 	OCP_ABORT("GAS is immobilable in SGOF!");
 	return -1;
 }
-
-
-/////////////////////////////////////////////////////
-// SOF3
-/////////////////////////////////////////////////////
-
-void OCP_SOF3::Setup(const vector<vector<OCP_DBL>>& src)
-{
-	table.Setup(src);
-	data.resize(table.GetColNum());
-	cdata.resize(table.GetColNum());
-}
-
-
-/////////////////////////////////////////////////////
-// SGFN
-/////////////////////////////////////////////////////
-
-void OCP_SGFN::Setup(const vector<vector<OCP_DBL>>& src)
-{
-	table.Setup(src);
-	data.resize(table.GetColNum());
-	cdata.resize(table.GetColNum());
-}
-
-
-/////////////////////////////////////////////////////
-// SWFN
-/////////////////////////////////////////////////////
-
-void OCP_SWFN::Setup(const vector<vector<OCP_DBL>>& src)
-{
-	table.Setup(src);
-	data.resize(table.GetColNum());
-	cdata.resize(table.GetColNum());
-}
-
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

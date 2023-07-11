@@ -14,7 +14,7 @@
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
-#include "OCPSATFunc.hpp"
+#include "OCPFuncSAT.hpp"
 #include "OCPFlow.hpp"
 
 #include <vector>

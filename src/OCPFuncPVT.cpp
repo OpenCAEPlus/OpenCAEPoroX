@@ -1,4 +1,4 @@
-/*! \file    OCPPVTFunc.cpp
+/*! \file    OCPFuncPVT.cpp
  *  \brief   Functions for PVT in OCP
  *  \author  Shizhe Li
  *  \date    Jun/18/2023
@@ -11,13 +11,22 @@
 
 
  // OpenCAEPoroX header files
-#include "OCPPVTFunc.hpp"
+#include "OCPFuncPVT.hpp"
 
 
-PVTW_Table::PVTW_Table(const vector<vector<OCP_DBL>>& src) 
-{
-	table.Setup(src);
-}
+/////////////////////////////////////////////////////
+// PVTW
+/////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////
+// PVCO
+/////////////////////////////////////////////////////
+
+
+
+
 
 
 /*----------------------------------------------------------------------------*/

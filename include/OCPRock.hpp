@@ -16,7 +16,6 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "OCPTable.hpp"
 #include "ParamReservoir.hpp"
 
 class OCPRock

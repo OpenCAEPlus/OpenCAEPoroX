@@ -1,4 +1,4 @@
-/*! \file    OCPSATFunc.hpp
+/*! \file    OCPFuncSAT.hpp
  *  \brief   Functions for Saturations in OCP
  *  \author  Shizhe Li
  *  \date    Jun/29/2023
@@ -9,11 +9,11 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPSATFUNC_HEADER__
-#define __OCPSATFUNC_HEADER__
+#ifndef __OCPFUNCSAT_HEADER__
+#define __OCPFUNCSAT_HEADER__
 
  // OpenCAEPoroX header files
-#include "OCPTable.hpp"
+#include "OCPFuncTable.hpp"
 
 using namespace std;
 
@@ -23,8 +23,7 @@ using namespace std;
 /////////////////////////////////////////////////////
 
 
-
-class OCP_SWOF
+class OCP_SWOF : public OCPFuncTable
 {
 	/// 0th column: The water saturation (Sw)
 	/// 1th column: The corresponding water relative permeability (Krw)
@@ -35,10 +34,6 @@ class OCP_SWOF
 public:
 	/// default constructor
 	OCP_SWOF() = default;
-	/// Setup internal table with 2D table
-	void     Setup(const vector<vector<OCP_DBL>>& src);
-	/// If table is empty
-	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 	/// Return the connate saturation
 	OCP_DBL  GetSwco() const { return table.GetCol(0)[0]; }
 	/// Return the critical saturation
@@ -77,11 +72,6 @@ public:
 		dkrowdSw  =  cdata[2];
 		dPcwodSw  = -cdata[3];
 	}
-
-protected:
-	OCPTable         table; ///< 2D table of SWOF
-	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
-	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
 };
 
 
@@ -89,7 +79,7 @@ protected:
 // SGOF
 /////////////////////////////////////////////////////
 
-class OCP_SGOF
+class OCP_SGOF : public OCPFuncTable
 {
 	/// 0th column: The gas saturation (Sg)
 	/// 1th column: The corresponding gas relative permeability (Krg)
@@ -99,10 +89,6 @@ class OCP_SGOF
 public:
 	/// default constructor
 	OCP_SGOF() = default;
-	/// Setup internal table with 2D table
-	void     Setup(const vector<vector<OCP_DBL>>& src);
-	/// If table is empty
-	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 	/// Return the critical saturation
 	OCP_DBL  GetSgcr() const;
 	/// Return corresponding Sg with Pcgo
@@ -133,11 +119,6 @@ public:
 		dkrogdSg = cdata[2];
 		dPcgodSg = cdata[3];
 	}
-
-protected:
-	OCPTable         table; ///< 2D table of SWOF
-	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
-	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
 };
 
 
@@ -145,7 +126,7 @@ protected:
 // SOF3
 /////////////////////////////////////////////////////
 
-class OCP_SOF3
+class OCP_SOF3 : public OCPFuncTable
 {
 	/// 0th column: The oil saturation (So)
 	/// 1th column: The corresponding oil relative permeability for regions where only oil and water are present (krow)
@@ -153,10 +134,6 @@ class OCP_SOF3
 	///             present (krog)
 public:
 	OCP_SOF3() = default;
-	/// Setup internal table with 2D table
-	void     Setup(const vector<vector<OCP_DBL>>& src);
-	/// If table is empty
-	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 	/// Return the oil relative permeability in the presence of connate water only
 	OCP_DBL  GetKrocw() const { return table.GetCol(1).back(); }
 
@@ -175,11 +152,6 @@ public:
 		dKrowdSo = cdata[1];
 		dKrogdSo = cdata[2];
 	}
-
-protected:
-	OCPTable         table; ///< 2D table of SOF3
-	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
-	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
 };
 
 
@@ -187,17 +159,13 @@ protected:
 // SGFN
 /////////////////////////////////////////////////////
 
-class OCP_SGFN
+class OCP_SGFN : public OCPFuncTable
 {
 	/// 0th column: The gas saturation (Sg)
 	/// 1th column: The corresponding gas relative permeability (krg)
 	/// 3th column: The corresponding oil-gas capillary pressure (Pcgo = Pg - Po)
 public:
 	OCP_SGFN() = default;
-	/// Setup internal table with 2D table
-	void     Setup(const vector<vector<OCP_DBL>>& src);
-	/// If table is empty
-	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 	/// Return the oil relative permeability in the presence of connate water only
 	OCP_DBL  GetKrocw() const { return table.GetCol(1).back(); }
 	/// Return corresponding Sg with Pcgo
@@ -222,11 +190,6 @@ public:
 		dKrgdSg  = cdata[1];
 		dPcgodSg = cdata[2];
 	}
-
-protected:
-	OCPTable         table; ///< 2D table of SOF3
-	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
-	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
 };
 
 
@@ -234,17 +197,13 @@ protected:
 // SWFN
 /////////////////////////////////////////////////////
 
-class OCP_SWFN
+class OCP_SWFN : public OCPFuncTable
 {
 	/// 0th column: The water saturation (Sw)
 	/// 1th column: The corresponding water relative permeability (krw)
 	/// 3th column: The corresponding water-oil capillary pressure (Pcow = Po - Pw)
 public:
 	OCP_SWFN() = default;
-	/// Setup internal table with 2D table
-	void     Setup(const vector<vector<OCP_DBL>>& src);
-	/// If table is empty
-	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 	/// Return the connate saturation
 	OCP_DBL  GetSwco() const { return table.GetCol(0)[0]; }
 	/// Return maximum pcow
@@ -275,17 +234,10 @@ public:
 		dKrwdSw  = cdata[1];
 		dPcwodSw = -cdata[2];
 	}
-
-protected:
-	OCPTable         table; ///< 2D table of SOF3
-	vector<OCP_DBL>  data;  ///< container to store the values of interpolation.
-	vector<OCP_DBL>  cdata; ///< container to store the slopes of interpolation.
 };
 
 
-
-
-#endif // __OCPSATFUNC_HEADER__
+#endif // __OCPFUNCSAT_HEADER__
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

@@ -16,7 +16,7 @@
 
 // OpenCAEPoroX header files
 #include "Mixture.hpp"
-#include "OCPTable.hpp"
+#include "OCPFuncPVT.hpp"
 
 /// BOMixture is inherited class of Mixture, it's used for black oil model.
 class BOMixture : public Mixture
