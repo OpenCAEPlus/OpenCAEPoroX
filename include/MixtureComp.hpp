@@ -156,10 +156,10 @@ public:
     {
         // water property
         if (rs_param.PVTW_T.data.size() != 0) {
-            PVTW.Setup(rs_param.PVTW_T.data[i]);
             if (rs_param.gravity.activity)
                 std_RhoW = RHOW_STD * rs_param.gravity.data[1];
             if (rs_param.density.activity) std_RhoW = RHOW_STD;
+            PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);
             data.resize(5);
             cdata.resize(5);
         }
@@ -293,7 +293,7 @@ private:
     vector<OCP_DBL> Ytlist;
 
 private:
-    OCPTable        PVTW;     ///< PVT table for water.
+    OCP_PVTW        PVTW;
     OCP_DBL         std_RhoW; ///< mass density of water phase in standard condition.
     vector<OCP_DBL> data;     ///< container used to store the results of values of
                               ///< interpolation of PVT tables.

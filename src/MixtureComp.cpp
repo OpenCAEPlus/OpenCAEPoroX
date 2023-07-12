@@ -175,15 +175,9 @@ void MixtureComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* N
     phaseExist[Wpid]          = OCP_TRUE;
     xij[Wpid * numCom + Wcid] = 1.0;
     Nt                        = Nh + Ni[Wcid];
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    mu[Wpid]    = data[3];
-    xi[Wpid]    = 1 / (CONV1 * bw);
-    rho[Wpid]   = std_RhoW / bw;
-    vj[Wpid]    = CONV1 * Ni[Wcid] * bw;
+
+    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
+    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
     vf += vj[Wpid];
 
     // Calculate Sj
@@ -234,21 +228,15 @@ void MixtureComp::InitFlashIMPEC(const OCP_DBL& Pin,
     USI Wcid                  = numCom - 1;
     phaseExist[Wpid]          = OCP_TRUE;
     xij[Wpid * numCom + Wcid] = 1.0;
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
-    mu[Wpid]    = data[3];
-    xi[Wpid]    = 1 / (CONV1 * bw);
-    rho[Wpid]   = std_RhoW / bw;
+
+    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
+
     Ni[Wcid]    = Vpore * Sw * xi[Wpid];
     Nt          = Nh + Ni[Wcid];
-    vj[Wpid]    = CONV1 * Ni[Wcid] * bw;
-    vf += vj[Wpid];
-    vfi[Wcid] = CONV1 * bw;
-    vfP += CONV1 * Ni[Wcid] * bwp;
+    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
+    vf         += vj[Wpid];
+    vfi[Wcid]   = 1 / xi[Wpid];
+    vfP         += -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
 
     // Calculate Sj
     CalSaturation();
@@ -300,24 +288,15 @@ void MixtureComp::InitFlashFIM(const OCP_DBL& Pin,
     USI Wcid                  = numCom - 1;
     phaseExist[Wpid]          = OCP_TRUE;
     xij[Wpid * numCom + Wcid] = 1.0;
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0       = data[0];
-    OCP_DBL bw0       = data[1];
-    OCP_DBL cbw       = data[2];
-    OCP_DBL bw        = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp       = -cbw * bw0;
-    mu[Wpid]          = data[3];
-    xi[Wpid]          = 1 / (CONV1 * bw);
-    rho[Wpid]         = std_RhoW / bw;
-    muP[Wpid]         = cdata[3];
-    xiP[Wpid]         = -bwp / (bw * bw * CONV1);
-    rhoP[Wpid]        = CONV1 * xiP[Wpid] * std_RhoW;
+
+    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
+
     Ni[Wcid]          = Vpore * Sw * xi[Wpid];
     nj[Wpid]          = Ni[Wcid];
     Nt                = Nh + Ni[Wcid];
-    vj[Wpid]          = CONV1 * Ni[Wcid] * bw;
-    vfi[Wcid]         = CONV1 * bw;
-    const OCP_DBL vwp = CONV1 * Ni[Wcid] * bwp;
+    vj[Wpid]          = Ni[Wcid] / xi[Wpid];
+    vfi[Wcid]         = 1 / xi[Wpid];
+    const OCP_DBL vwp = -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
     vf += vj[Wpid];
     vfP += vwp;
     vji[numPhase - 1][numCom - 1] = vfi[Wcid];
@@ -363,19 +342,13 @@ void MixtureComp::FlashIMPEC(const OCP_DBL& Pin,
     phaseExist[Wpid]          = OCP_TRUE;
     xij[Wpid * numCom + Wcid] = 1.0;
     Nt                        = Nh + Ni[Wcid];
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0 = data[0];
-    OCP_DBL bw0 = data[1];
-    OCP_DBL cbw = data[2];
-    OCP_DBL bw  = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp = -cbw * bw0;
-    mu[Wpid]    = data[3];
-    xi[Wpid]    = 1 / (CONV1 * bw);
-    rho[Wpid]   = std_RhoW / bw;
-    vj[Wpid]    = CONV1 * Ni[Wcid] * bw;
-    vf += vj[Wpid];
-    vfi[Wcid] = CONV1 * bw;
-    vfP += CONV1 * Ni[Wcid] * bwp;
+
+    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
+
+    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
+    vf         += vj[Wpid];
+    vfi[Wcid]   = 1 / xi[Wpid];
+    vfP        += -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
 
     // Calculate Sj
     CalSaturation();
@@ -417,23 +390,13 @@ void MixtureComp::FlashFIM(const OCP_DBL& Pin,
     xij[Wpid * numCom + Wcid] = 1.0;
     nj[Wpid]                  = Ni[Wcid];
     Nt                        = Nh + Ni[Wcid];
-    PVTW.Eval_All(0, P, data, cdata);
-    OCP_DBL Pw0       = data[0];
-    OCP_DBL bw0       = data[1];
-    OCP_DBL cbw       = data[2];
-    OCP_DBL bw        = bw0 * (1 - cbw * (P - Pw0));
-    OCP_DBL bwp       = -cbw * bw0;
-    mu[Wpid]          = data[3];
-    xi[Wpid]          = 1 / (CONV1 * bw);
-    rho[Wpid]         = std_RhoW / bw;
-    muP[Wpid]         = cdata[3];
-    xiP[Wpid]         = -bwp / (bw * bw * CONV1);
-    rhoP[Wpid]        = CONV1 * xiP[Wpid] * std_RhoW;
-    vj[Wpid]          = CONV1 * Ni[Wcid] * bw;
-    vfi[Wcid]         = CONV1 * bw;
-    const OCP_DBL vwp = CONV1 * Ni[Wcid] * bwp;
-    vf += vj[Wpid];
-    vfP += vwp;
+
+    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
+    vj[Wpid]          = Ni[Wcid] / xi[Wpid];
+    vfi[Wcid]         = 1 / xi[Wpid];
+    const OCP_DBL vwp = -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
+    vf               += vj[Wpid];
+    vfP              += vwp;
     vji[numPhase - 1][numCom - 1] = vfi[Wcid];
     vjp[numPhase - 1]             = vwp;
 
@@ -470,13 +433,7 @@ MixtureComp::XiPhase(const OCP_DBL& Pin,
     // assume that only single phase exists here
     if (tarPhase == WATER) {
         // water phase
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0   = data[0];
-        OCP_DBL bw0   = data[1];
-        OCP_DBL cbw   = data[2];
-        OCP_DBL bw    = bw0 * (1 - cbw * (Pin - Pw0));
-        OCP_DBL xitmp = 1 / (CONV1 * bw);
-        return xitmp;
+        return PVTW.CalXiW(Pin);
     } else {
         // hydrocarbon phase
         InitPTZ(Pin, Tin + CONV5, Ziin); // P, T has been Set !!!
@@ -504,13 +461,7 @@ MixtureComp::RhoPhase(const OCP_DBL& Pin,
     // assume that only single phase exists here
     if (tarPhase == WATER) {
         // water phase
-        PVTW.Eval_All(0, Pin, data, cdata);
-        OCP_DBL Pw0 = data[0];
-        OCP_DBL bw0 = data[1];
-        OCP_DBL cbw = data[2];
-        OCP_DBL bw  = (bw0 * (1 - cbw * (Pin - Pw0)));
-
-        return std_RhoW / bw;
+        return PVTW.CalRhoW(Pin);
     } else {
         // hydrocarbon phase
         OCP_DBL xitmp = XiPhase(Pin, Tin, Ziin, tarPhase);

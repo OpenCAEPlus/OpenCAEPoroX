@@ -53,7 +53,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
     S[2] = Sjin[2]; // water saturation
 
     // Water Property
-    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rhoP[2], xiP[2], muP[2]);
     Ni[2]  = Vpore * S[2] * xi[2];
 
     USI phasecae;
@@ -332,7 +332,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
     }
 
     // Water property
-    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rhoP[2], xiP[2], muP[2]);
 
     USI     phasecase;
     OCP_DBL Rs_sat = PVCOold.Eval(0, P, 1);
@@ -540,7 +540,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
     }
 
     // Water property
-    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rhoP[2], xiP[2], muP[2]);
 
     USI     phasecase;
     OCP_DBL Rs_sat = PVCOold.Eval(0, P, 1);
