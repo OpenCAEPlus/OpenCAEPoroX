@@ -22,7 +22,8 @@ BOMixture_ODGW::BOMixture_ODGW(const ParamReservoir& rs_param, const USI& i)
     numCom      = 3;
     BOMixtureInit(rs_param);
 
-    PVTW.Setup(rs_param.PVTW_T.data[i]);  
+    PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);  
+    PVCOold.Setup(rs_param.PVCO_T.data[i]);
     PVCO.Setup(rs_param.PVCO_T.data[i]);
     PVDG.Setup(rs_param.PVDG_T.data[i]);
 
@@ -52,12 +53,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
     S[2] = Sjin[2]; // water saturation
 
     // Water Property
-    OCP_DBL bw, muw, bwp, muwP;
-    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
-
-    mu[2]  = muw;
-    rho[2] = std_RhoW / bw;
-    xi[2]  = 1 / (CONV1 * bw);
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
     Ni[2]  = Vpore * S[2] * xi[2];
 
     USI phasecae;
@@ -83,7 +79,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -93,12 +89,12 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 // total
                 vj[0]  = 0;
                 vj[1]  = 0;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[2];
-                vfP    = CONV1 * Ni[2] * bwp;
+                vfP    = -Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -111,7 +107,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -128,16 +124,16 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
 
                 vj[0] = 0;
                 vj[1] = 1000 * Ni[1] * bg; // Ni[0] = 0;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
                 // total
                 vf     = vj[1] + vj[2];
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -149,7 +145,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
 
                 // oil property
                 OCP_DBL Pbb = Pbbin;
-                PVCO.Eval_All(0, Pbb, data, cdata);
+                PVCOold.Eval_All(0, Pbb, data, cdata);
                 OCP_DBL rs      = data[1];
                 OCP_DBL bosat   = data[2];
                 OCP_DBL muosat  = data[3];
@@ -174,15 +170,15 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
 
                 // total
                 vj[0]  = CONV1 * Ni[0] * bo;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[0] + vj[2];
                 S[0]   = vj[0] / vf;
                 S[1]   = 0;
                 S[2]   = vj[2] / vf;
-                vfP    = CONV1 * (Ni[0] * bop + Ni[2] * bwp);
+                vfP    = CONV1 * Ni[0] * bop - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * (bo - dBo_drs * (Ni[1] / Ni[0]));
                 vfi[1] = CONV1 * dBo_drs;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -193,7 +189,7 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 phaseExist[2] = OCP_TRUE;
 
                 // oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs     = data[1];
                 OCP_DBL bo     = data[2];
                 OCP_DBL crs    = cdata[1];
@@ -223,18 +219,17 @@ void BOMixture_ODGW::InitFlashIMPEC(const OCP_DBL& Pin,
                 // total
                 vj[0] = CONV1 * Ni[0] * bo;
                 vj[1] = 1000 * (Ni[1] - rs * Ni[0]) * bg;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
 
                 vf   = vj[0] + vj[1] + vj[2];
                 S[0] = vj[0] / vf;
                 S[1] = vj[1] / vf;
                 S[2] = vj[2] / vf;
                 vfP  = CONV1 * Ni[0] * cbosat +
-                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
-                      CONV1 * Ni[2] * bwp;
+                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -257,7 +252,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
     S[2] = Sjin[2]; // water saturation
 
     // Water Property
-    xi[2] = 1 / (CONV1 * PVTW.CalBw(P));
+    xi[2] = PVTW.CalXiW(P);
     Ni[2] = Vpore * S[2] * xi[2];
 
     USI phasecae;
@@ -292,7 +287,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
                 // water, oil, unsaturated
                 // Ni[0] and Ni[1]
                 OCP_DBL Pbb = Pbbin;
-                PVCO.Eval_All(0, Pbb, data, cdata);
+                PVCOold.Eval_All(0, Pbb, data, cdata);
                 OCP_DBL rs     = data[1];
                 OCP_DBL bosat  = data[2];
                 OCP_DBL cbosat = data[4];
@@ -306,7 +301,7 @@ void BOMixture_ODGW::InitFlashFIM(const OCP_DBL& Pin,
         case PHASE_ODGW:
             {
                 // oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
                 Ni[0]      = Vpore * (1 - S[1] - S[2]) / (CONV1 * bo);
@@ -337,15 +332,10 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
     }
 
     // Water property
-    OCP_DBL bw, muw, bwp, muwP;
-    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
-
-    mu[2]  = muw;
-    xi[2]  = 1 / (CONV1 * bw);
-    rho[2] = std_RhoW / bw;
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
 
     USI     phasecase;
-    OCP_DBL Rs_sat = PVCO.Eval(0, P, 1);
+    OCP_DBL Rs_sat = PVCOold.Eval(0, P, 1);
 
     if (Ni[0] < Nt * TINY) {
         if (Ni[1] <= Ni[0] * Rs_sat)
@@ -368,7 +358,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -378,12 +368,12 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 // total
                 vj[0]  = 0;
                 vj[1]  = 0;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[2];
-                vfP    = CONV1 * Ni[2] * bwp;
+                vfP    = -Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -396,7 +386,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -413,7 +403,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 // total
                 vj[0] = 0;
                 vj[1] = 1000 * (Ni[1] - rs * Ni[0]) * bg;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
 
 #ifdef DEBUG
                 if (vj[1] <= 0) OCP_ABORT("gas volume <= 0");
@@ -423,10 +413,10 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -442,7 +432,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
 
                 // oil property
                 OCP_DBL rs = Ni[1] / Ni[0];
-                PVCO.Eval_All(1, rs, data, cdata);
+                PVCOold.Eval_All(1, rs, data, cdata);
                 OCP_DBL pbb     = data[0];
                 OCP_DBL bosat   = data[2];
                 OCP_DBL muosat  = data[3];
@@ -459,15 +449,15 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
 
                 // total
                 vj[0]  = CONV1 * Ni[0] * bo;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[0] + vj[2];
                 S[0]   = vj[0] / vf;
                 S[1]   = 0;
                 S[2]   = vj[2] / vf;
-                vfP    = CONV1 * (Ni[0] * bop + Ni[2] * bwp);
+                vfP    = CONV1 * Ni[0] * bop - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * (bo - dBo_drs * (Ni[1] / Ni[0]));
                 vfi[1] = CONV1 * dBo_drs;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -478,7 +468,7 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
                 phaseExist[2] = OCP_TRUE;
 
                 // oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs     = data[1];
                 OCP_DBL bo     = data[2];
                 OCP_DBL crs    = cdata[1];
@@ -506,17 +496,16 @@ void BOMixture_ODGW::FlashIMPEC(const OCP_DBL& Pin,
 
                 vj[0] = CONV1 * Ni[0] * bo;
                 vj[1] = 1000 * (Ni[1] - rs * Ni[0]) * bg;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
                 vf    = vj[0] + vj[1] + vj[2];
                 S[0]  = vj[0] / vf;
                 S[1]  = vj[1] / vf;
                 S[2]  = vj[2] / vf;
-                vfP   = CONV1 * Ni[0] * cbosat +
-                      1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
-                      CONV1 * Ni[2] * bwp;
+                vfP = CONV1 * Ni[0] * cbosat +
+                    1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 break;
             }
@@ -551,19 +540,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
     }
 
     // Water property
-    OCP_DBL bw, muw, bwp, muwP;
-    PVTW.CalBwMuwDer(P, bw, muw, bwp, muwP);
-
-    mu[2]  = muw;
-    xi[2]  = 1 / CONV1 / bw;
-    rho[2] = std_RhoW / bw;
-
-    muP[2]  = muwP;
-    xiP[2]  = -bwp / (bw * bw * CONV1);
-    rhoP[2] = CONV1 * xiP[2] * std_RhoW;
+    PVTW.CalRhoXiMuDer(P, rho[2], xi[2], mu[2], rho[2], xiP[2], muP[2]);
 
     USI     phasecase;
-    OCP_DBL Rs_sat = PVCO.Eval(0, P, 1);
+    OCP_DBL Rs_sat = PVCOold.Eval(0, P, 1);
 
     if (Ni[0] < Nt * TINY) {
         if (Ni[1] <= Ni[0] * Rs_sat)
@@ -588,7 +568,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -598,12 +578,12 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 // total
                 vj[0]  = 0;
                 vj[1]  = 0;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[2];
-                vfP    = CONV1 * Ni[2] * bwp;
+                vfP    = -Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 // dXsdXp[0] = 0; // dSo / dP
                 dXsdXp[1] = CONV1 * bo / vf; // dSo / dNo
@@ -615,10 +595,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[1 * 4 + 2] = 1000 * bg / vf; // dSg / dNg
                 // dXsdXp[1 * 4 + 3] = 0;   // dSg / dNw
 
-                dXsdXp[2 * 4 + 0] = (Ni[2] * bwp * CONV1 - S[2] * vfP) / vf; // dSw / dP
+                dXsdXp[2 * 4 + 0] = (-Ni[2] * xiP[2] / (xi[2] * xi[2]) - S[2] * vfP) / vf; // dSw / dP
                 dXsdXp[2 * 4 + 1] = -S[2] * vfi[0] / vf;               // dSw / dNo
                 dXsdXp[2 * 4 + 2] = -S[2] * vfi[1] / vf;               // dSw / dNg
-                dXsdXp[2 * 4 + 3] = (CONV1 * bw - S[2] * vfi[2]) / vf; // dSw / dNw
+                dXsdXp[2 * 4 + 3] = (1 / xi[2] - S[2] * vfi[2]) / vf; // dSw / dNw
 
                 // pVnumCom[0] = 0; pVnumCom[1] = 0; pVnumCom[2] = 0;
 
@@ -633,7 +613,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 xij[2 * 3 + 2] = 1;
 
                 // hypothetical Oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs = data[1];
                 OCP_DBL bo = data[2];
 
@@ -654,7 +634,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 // total
                 vj[0] = 0;
                 vj[1] = 1000 * (Ni[1] - rs * Ni[0]) * bg;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
 
 #ifdef DEBUG
                 if (vj[1] <= 0) OCP_ABORT("gas volume <= 0");
@@ -664,10 +644,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 S[0]   = 0;
                 S[1]   = vj[1] / vf;
                 S[2]   = vj[2] / vf;
-                vfP    = 1000 * Ni[1] * bgp + CONV1 * Ni[2] * bwp;
+                vfP    = 1000 * Ni[1] * bgp - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 dXsdXp[0] = 0;               // dSo / dP
                 dXsdXp[1] = CONV1 * bo / vf; // dSo / dNo
@@ -679,10 +659,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[1 * 4 + 2] = (1000 * bg - S[1] * vfi[1]) / vf;       // dSg / dNg
                 dXsdXp[1 * 4 + 3] = -S[1] * vfi[2] / vf;                    // dSg / dNw
 
-                dXsdXp[2 * 4 + 0] = (CONV1 * Ni[2] * bwp - S[2] * vfP) / vf; // dSw / dP
+                dXsdXp[2 * 4 + 0] = (-Ni[2] * xiP[2] / (xi[2] * xi[2]) - S[2] * vfP) / vf; // dSw / dP
                 dXsdXp[2 * 4 + 1] = -S[2] * vfi[0] / vf;               // dSw / dNo
                 dXsdXp[2 * 4 + 2] = -S[2] * vfi[1] / vf;               // dSw / dNg
-                dXsdXp[2 * 4 + 3] = (CONV1 * bw - S[2] * vfi[2]) / vf; // dSw / dNw
+                dXsdXp[2 * 4 + 3] = (1 / xi[2] - S[2] * vfi[2]) / vf; // dSw / dNw
 
                 break;
             }
@@ -698,7 +678,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
 
                 // oil property
                 OCP_DBL rs = Ni[1] / Ni[0];
-                PVCO.Eval_All(1, rs, data, cdata);
+                PVCOold.Eval_All(1, rs, data, cdata);
                 OCP_DBL pbb     = data[0];
                 OCP_DBL bosat   = data[2];
                 OCP_DBL muosat  = data[3];
@@ -728,15 +708,15 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
 
                 // total
                 vj[0]  = CONV1 * Ni[0] * bo;
-                vj[2]  = CONV1 * Ni[2] * bw;
+                vj[2]  = Ni[2] / xi[2];
                 vf     = vj[0] + vj[2];
                 S[0]   = vj[0] / vf;
                 S[1]   = 0;
                 S[2]   = vj[2] / vf;
-                vfP    = CONV1 * (Ni[0] * bop + Ni[2] * bwp);
+                vfP    = CONV1 * Ni[0] * bop - Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * (bo - dBo_drs * (Ni[1] / Ni[0]));
                 vfi[1] = CONV1 * dBo_drs;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 dXsdXp[0] =
                     (-CONV1 * Ni[0] * cbosat * bosat - S[0] * vfP) / vf; // dSo / dP
@@ -746,10 +726,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[2] = (CONV1 * dBo_drs - S[0] * vfi[1]) / vf; // dSo / dNg
                 dXsdXp[3] = -S[0] / vf * vfi[2];                    // dSo / dNw
 
-                dXsdXp[2 * 4 + 0] = (Ni[2] * bwp * CONV1 - S[2] * vfP) / vf; // dSw / dP
+                dXsdXp[2 * 4 + 0] = (-Ni[2] * xiP[2] / (xi[2] * xi[2]) - S[2] * vfP) / vf; // dSw / dP
                 dXsdXp[2 * 4 + 1] = -S[2] * vfi[0] / vf;               // dSw / dNo
                 dXsdXp[2 * 4 + 2] = -S[2] * vfi[1] / vf;               // dSw / dNg
-                dXsdXp[2 * 4 + 3] = (CONV1 * bw - S[2] * vfi[2]) / vf; // dSw / dNw
+                dXsdXp[2 * 4 + 3] = (1 / xi[2] - S[2] * vfi[2]) / vf; // dSw / dNw
 
                 dXsdXp[3 * 4 + 1] = Ni[1] / pow((Ni[0] + Ni[1]), 2);  // d Xoo / d No
                 dXsdXp[3 * 4 + 2] = -Ni[0] / pow((Ni[0] + Ni[1]), 2); // d Xoo / d Ng
@@ -788,7 +768,7 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 phaseExist[2] = OCP_TRUE;
 
                 // oil property
-                PVCO.Eval_All(0, P, data, cdata);
+                PVCOold.Eval_All(0, P, data, cdata);
                 OCP_DBL rs     = data[1];
                 OCP_DBL bo     = data[2];
                 OCP_DBL crs    = cdata[1];
@@ -826,17 +806,17 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
 
                 vj[0] = CONV1 * Ni[0] * bo;
                 vj[1] = 1000 * (Ni[1] - rs * Ni[0]) * bg;
-                vj[2] = CONV1 * Ni[2] * bw;
+                vj[2] = Ni[2] / xi[2];
                 vf    = vj[0] + vj[1] + vj[2];
                 S[0]  = vj[0] / vf;
                 S[1]  = vj[1] / vf;
                 S[2]  = vj[2] / vf;
                 vfP   = CONV1 * Ni[0] * cbosat +
                       1000 * (-crs * Ni[0] * bg + (Ni[1] - rs * Ni[0]) * bgp) +
-                      CONV1 * Ni[2] * bwp;
+                    -Ni[2] * xiP[2] / (xi[2] * xi[2]);
                 vfi[0] = CONV1 * bo - 1000 * rs * bg;
                 vfi[1] = 1000 * bg;
-                vfi[2] = CONV1 * bw;
+                vfi[2] = 1 / xi[2];
 
                 dXsdXp[0] = (CONV1 * Ni[0] * cbosat - S[0] * vfP) / vf; // dSo / dP
                 dXsdXp[1] = (CONV1 * bo - S[0] * vfi[0]) / vf;          // dSo / dNo
@@ -850,10 +830,10 @@ void BOMixture_ODGW::FlashFIM(const OCP_DBL& Pin,
                 dXsdXp[1 * 4 + 2] = (1000 * bg - S[1] * vfi[1]) / vf;       // dSg / dNg
                 dXsdXp[1 * 4 + 3] = -S[1] * vfi[2] / vf;                    // dSg / dNw
 
-                dXsdXp[2 * 4 + 0] = (Ni[2] * bwp * CONV1 - S[2] * vfP) / vf; // dSw / dP
+                dXsdXp[2 * 4 + 0] = (-Ni[2] * xiP[2] / (xi[2] * xi[2]) - S[2] * vfP) / vf; // dSw / dP
                 dXsdXp[2 * 4 + 1] = -S[2] * vfi[0] / vf;               // dSw / dNo
                 dXsdXp[2 * 4 + 2] = -S[2] * vfi[1] / vf;               // dSw / dNg
-                dXsdXp[2 * 4 + 3] = (CONV1 * bw - S[2] * vfi[2]) / vf; // dSw / dNw
+                dXsdXp[2 * 4 + 3] = (1 / xi[2] - S[2] * vfi[2]) / vf; // dSw / dNw
 
                 dXsdXp[3 * 4 + 0] = -crs / ((1 + rs) * (1 + rs)); // d Xoo / dP
                 dXsdXp[4 * 4 + 0] = -dXsdXp[3 * 4 + 0];           // d Xgo / dP
@@ -880,8 +860,7 @@ BOMixture_ODGW::XiPhase(const OCP_DBL& Pin,
     if (tarPhase == GAS) {
         return 1 / CONV1 / PVDG.CalBg(Pin);
     } else if (tarPhase == WATER) {
-        OCP_DBL xiw = 1 / CONV1 / PVTW.CalBw(Pin);
-        return xiw;
+        return PVTW.CalXiW(Pin);
     } else {
         OCP_ABORT("Wrong tarPhase!");
     }
@@ -896,7 +875,7 @@ BOMixture_ODGW::RhoPhase(const OCP_DBL& Pin,
 {
 
     if (tarPhase == OIL) {
-        PVCO.Eval_All(0, Pbbin, data, cdata);
+        PVCOold.Eval_All(0, Pbbin, data, cdata);
         OCP_DBL rs     = data[1];
         OCP_DBL bosat  = data[2];
         OCP_DBL cbosat = data[4];
@@ -906,7 +885,7 @@ BOMixture_ODGW::RhoPhase(const OCP_DBL& Pin,
     } else if (tarPhase == GAS) {
         return (1000 / CONV1) * std_RhoG / PVDG.CalBg(Pin);
     } else if (tarPhase == WATER) {
-        return std_RhoW / PVTW.CalBw(Pin);
+        return PVTW.CalRhoW(Pin);
     } else {
         OCP_ABORT("WRONG tarPhase!");
     }

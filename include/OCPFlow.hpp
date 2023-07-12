@@ -21,7 +21,7 @@ const USI OCPFLOW_OW  = 22;
 const USI OCPFLOW_GW  = 23;
 const USI OCPFLOW_OGW = 3;
 
-/// oil-gas-water flow vars suite
+/// flow vars suite
 class OCPFlowVarSet
 {
     /// oil phase is reference phase

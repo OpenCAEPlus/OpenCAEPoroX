@@ -270,7 +270,8 @@ public:
                       const OCP_DBL&            Tsurf) override;
 
 private:
-    OCPTable        PVCO;  ///< PVT table for live oil (with dissolved gas).
+    OCPTable        PVCOold;  ///< PVT table for live oil (with dissolved gas).
+    OCP_PVCO        PVCO;
     OCP_PVDG        PVDG;
     OCP_PVTW        PVTW;
 };

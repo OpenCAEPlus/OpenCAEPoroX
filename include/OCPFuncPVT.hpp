@@ -36,9 +36,22 @@ class OCP_PVTW : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVTW() = default;
-	OCP_DBL CalBw(const OCP_DBL& Pw);
-	void CalBwMuwDer(const OCP_DBL& Pw, OCP_DBL& bw, OCP_DBL& muw, OCP_DBL& dBwdPw, OCP_DBL& dMuwdPw);
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoWin) {
+		OCPFuncTable::Setup(src);
+		stdRhoW = stdRhoWin;
+	}
+
+	OCP_DBL CalXiW(const OCP_DBL& P) { return 1 / CONV1 / CalBw(P);}
+	OCP_DBL CalRhoW(const OCP_DBL& P) { return stdRhoW / CalBw(P); }
+	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
+		               OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP);	
+
+protected:
+	OCP_DBL CalBw(const OCP_DBL& P);
+	void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP);
 	
+protected:
+	OCP_DBL stdRhoW;   ///< mass density of water phase in standard condition
 };
 
 
@@ -64,6 +77,11 @@ class OCP_PVCO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVCO() = default;
+	OCP_DBL CalRhoo(const OCP_DBL& P, const OCP_DBL& Pb);
+
+protected:
+	OCP_DBL stdRhoO;   ///< mass density of oil phase in standard condition
+	OCP_DBL stdRhoG;   ///< mass density of gas phase in standard condition
 };
 
 

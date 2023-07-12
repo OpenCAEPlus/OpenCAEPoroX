@@ -19,32 +19,58 @@
 /////////////////////////////////////////////////////
 
 
-OCP_DBL OCP_PVTW::CalBw(const OCP_DBL& Pw)
+OCP_DBL OCP_PVTW::CalBw(const OCP_DBL& P)
 {
-	table.GetCloseRow(0, Pw, data);
-	const OCP_DBL Pref   = data[0];
-	const OCP_DBL Bwref  = data[1];
-	const OCP_DBL cBwref = data[2];
-	return Bwref * (1 - cBwref * (Pw - Pref));
+	table.GetCloseRow(0, P, data);
+	const OCP_DBL Pref  = data[0];
+	const OCP_DBL bref  = data[1];
+	const OCP_DBL Cbref = data[2];
+	return bref * (1 - Cbref * (P - Pref));
 }
 
-void OCP_PVTW::CalBwMuwDer(const OCP_DBL& Pw, OCP_DBL& bw, OCP_DBL& muw, OCP_DBL& dBwdPw, OCP_DBL& dMuwdPw)
+
+void OCP_PVTW::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP)
 {
-	table.GetCloseRow(0, Pw, data);
-	const OCP_DBL Pref    = data[0];
-	const OCP_DBL Bwref   = data[1];
-	const OCP_DBL cBwref  = data[2];
-	const OCP_DBL Muwref  = data[3];
-	const OCP_DBL cMuwref = data[4];
-	bw      = Bwref * (1 - cBwref * (Pw - Pref));
-	dBwdPw  = -cBwref * Bwref;
-	muw     = Muwref * (1 + cMuwref * (Pw - Pref));
-	dMuwdPw = cMuwref * cMuwref;
+	OCP_DBL b, bp;
+	CalBwMuwDer(P, b, mu, bp, muP);
+	xi   = 1 / (b * CONV1);
+	rho  = stdRhoW / b;
+
+	xiP  = -bp / (b * b * CONV1);
+	rhoP = CONV1 * xiP * stdRhoW;
+}
+
+
+void OCP_PVTW::CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP)
+{
+	table.GetCloseRow(0, P, data);
+	const OCP_DBL Pref   = data[0];
+	const OCP_DBL bref   = data[1];
+	const OCP_DBL Cbref  = data[2];
+	const OCP_DBL muref  = data[3];
+	const OCP_DBL Cmuref = data[4];
+	b   = bref * (1 - Cbref * (P - Pref));
+	bP  = -Cbref * bref;
+	mu  = muref * (1 + Cmuref * (P - Pref));
+	muP = Cmuref * muref;
 }
 
 /////////////////////////////////////////////////////
 // PVCO
 /////////////////////////////////////////////////////
+
+
+OCP_DBL OCP_PVCO::CalRhoo(const OCP_DBL& P, const OCP_DBL& Pb)
+{
+	table.Eval_All(0, Pb, data);
+	OCP_DBL rssat  = data[1];
+	OCP_DBL bosat  = data[2];
+	OCP_DBL cbosat = data[4];
+	OCP_DBL bo = bosat * (1 - cbosat * (P - Pb));
+	OCP_DBL rhoO = (stdRhoO + (1000 / CONV1) * rssat * stdRhoG) / bo;
+	return rhoO;
+}
 
 
 /////////////////////////////////////////////////////
