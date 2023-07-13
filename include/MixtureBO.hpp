@@ -69,6 +69,9 @@ protected:
                        ///< interpolation of PVT tables.
     vector<OCP_DBL> cdata; ///< container used to store the results of slopes of
                            ///< interpolation of PVT tables.
+
+    vector<vector<OCP_DBL>> vji; ///< dVj/dNi
+    vector<OCP_DBL>         vjP; ///< dVj/dP
 };
 
 ///////////////////////////////////////////////
@@ -211,6 +214,8 @@ public:
                       const OCP_DBL&            Tsurf) override;
 
 private:
+    enum phaseIndex { oil, wat };
+    enum componentIndex { OIL, WAT };
     OCP_PVDO        PVDO;
     OCP_PVTW        PVTW;
 };
