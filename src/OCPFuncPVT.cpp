@@ -35,9 +35,9 @@ void OCP_PVTW::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	OCP_DBL b, bp;
 	CalBwMuwDer(P, b, mu, bp, muP);
 	xi   = 1 / CONV1 / b;
-	rho  = stdRhoW / b;
-
 	xiP  = -1 / CONV1 * bp / (b * b);
+
+	rho  = stdRhoW / b;
 	rhoP = -stdRhoW * bp / (b * b);
 }
 
@@ -61,15 +61,104 @@ void OCP_PVTW::CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& b
 /////////////////////////////////////////////////////
 
 
-OCP_DBL OCP_PVCO::CalRhoo(const OCP_DBL& P, const OCP_DBL& Pb)
+OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb)
 {
 	table.Eval_All(0, Pb, data);
 	const OCP_DBL rssat = data[1];
-	const OCP_DBL bosat = data[2];
-	const OCP_DBL cbosat = data[4];
-	const OCP_DBL bo = bosat * (1 - cbosat * (P - Pb));
-	const OCP_DBL rhoO   = (stdRhoO + (1000 / CONV1) * rssat * stdRhoG) / bo;
+	const OCP_DBL bref  = data[2];
+	const OCP_DBL Cbref = data[4];
+	const OCP_DBL b     = bref * (1 - Cbref * (P - Pb));
+	const OCP_DBL rhoO  = (stdRhoO + (1000 / CONV1) * rssat * stdRhoG) / b;
 	return rhoO;
+}
+
+
+OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P)
+{
+	table.Eval_All(0, P, data);
+	const OCP_DBL rs = data[1];
+	const OCP_DBL b  = data[2];
+	return (1 + rs) / (b * CONV1);
+}
+
+
+OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P, const OCP_DBL& Pb)
+{
+	table.Eval_All(0, Pb, data);
+	const OCP_DBL rs    = data[1];
+	const OCP_DBL bref  = data[2];
+	const OCP_DBL Cbref = data[4];
+	const OCP_DBL b     = bref * (1 - Cbref * (P - Pb));
+	return (1 + rs) / (b * CONV1);
+}
+
+
+void OCP_PVCO::CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP)
+{
+	OCP_DBL b, bP;
+	CalRsBoMuoDer(P, b, rs, mu, bP, rsP, muP);
+
+	xi  = (1 + rs) / (b * CONV1);
+	xiP = (rsP * b - (1 + rs) * bP) / (b * b * CONV1);
+
+	rho = (stdRhoO + (1000 / CONV1) * rs * stdRhoG) / b;
+	rhoP = (1000 / CONV1) * stdRhoG * rsP / b - (stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bP / (b * b);
+}
+
+
+void OCP_PVCO::CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
+	OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP)
+{
+	table.Eval_All(0, P, data, cdata);
+	rs  = data[1];
+	b   = data[2];
+	mu  = data[3];
+	rsP = cdata[1];
+	bP  = cdata[2];
+	muP = cdata[3];
+}
+
+
+void OCP_PVCO::CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs)
+{
+	OCP_DBL b, bP, bRs;
+	CalBoMuoDer(rs, P, b, mu, bP, muP, bRs, muRs);
+
+	xi    = (1 + rs) / (CONV1 * b);
+	xiP   = -(1 + rs) * bP / (CONV1 * b * b);
+	xiRs  = (b - (1 + rs) * bRs) / (CONV1 * b * b);
+
+	rho   = (stdRhoO + (1000 / CONV1) * rs * stdRhoG) / b;	
+	rhoP  = -(stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bP / (b * b);	
+	rhoRs = ((1000 / CONV1) * stdRhoG * b - (stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bRs) / (b * b);
+}
+
+
+void OCP_PVCO::CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu,
+						     OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs)
+{
+	table.Eval_All(1, rs, data, cdata);
+	const OCP_DBL Pref     = data[0];
+	const OCP_DBL bref     = data[2];
+	const OCP_DBL muref    = data[3];
+	const OCP_DBL Cbref    = data[4];
+	const OCP_DBL Cmuref   = data[5];
+	const OCP_DBL PrefRs   = cdata[0];
+	const OCP_DBL brefRs   = cdata[2];
+	const OCP_DBL murefRs  = cdata[3];
+	const OCP_DBL CbrefRs  = cdata[4];
+	const OCP_DBL CmurefRs = cdata[5];
+
+	b    = bref * (1 - Cbref * (P - Pref));
+	bP   = -bref * Cbref;
+	bRs  = brefRs * (1 - Cbref * (P - Pref)) + bref * (-CbrefRs * (P - Pref) + Cbref * PrefRs);
+
+	mu   = muref * (1 + Cmuref * (P - Pref));
+	muP  = muref * Cmuref;
+	muRs = murefRs * (1 + Cmuref * (P - Pref)) + muref * (CmurefRs * (P - Pref) - Cmuref * PrefRs);
+
 }
 
 
@@ -84,9 +173,9 @@ void OCP_PVDG::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	OCP_DBL b, bp;
 	CalBgMugDer(P, b, mu, bp, muP);
 	xi   = 1 / CONV1 / b;
-	rho  = 1000 / CONV1 * stdRhoG / b;
-	
 	xiP  = -1 / CONV1 * bp / (b * b);
+
+	rho  = 1000 / CONV1 * stdRhoG / b;	
 	rhoP = -1000 / CONV1 * stdRhoG * bp / (b * b);
 }
 
@@ -122,9 +211,9 @@ void OCP_PVDO::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	OCP_DBL b, bp;
 	CalBoMuoDer(P, b, mu, bp, muP);
 	xi   = 1 / CONV1 / b;
-	rho  = stdRhoO / b;
+	xiP  = -1 / CONV1 * bp / (b * b);
 
-	xiP  = - 1 / CONV1 * bp / (b * b);
+	rho  = stdRhoO / b;	
 	rhoP = -stdRhoO * bp / (b * b);
 }
 

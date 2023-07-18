@@ -222,7 +222,7 @@ void Well::CalFlux(const Bulk& myBulk, const OCP_BOOL ReCalXi)
             if (ReCalXi) {
                 USI pvtnum = myBulk.PVTNUM[k];
                 perf[p].xi = myBulk.flashCal[pvtnum]->XiPhase(
-                    perf[p].P, opt.injTemp, &opt.injZi[0], opt.injProdPhase);
+                    perf[p].P, opt.injTemp, &opt.injZi[0], opt.injPhase);
             }
             for (USI i = 0; i < numCom; i++) {
                 perf[p].qi_lbmol[i] = perf[p].qt_ft3 * perf[p].xi * opt.injZi[i];
@@ -276,7 +276,7 @@ OCP_DBL Well::CalInjRateMaxBHP(const Bulk& myBulk)
 
         USI     pvtnum = myBulk.PVTNUM[k];
         OCP_DBL xi = myBulk.flashCal[pvtnum]->XiPhase(Pperf, opt.injTemp, &opt.injZi[0],
-                                                      opt.injProdPhase);
+                                                      opt.injPhase);
 
         OCP_DBL dP = Pperf - myBulk.P[k];
         qj += perf[p].transINJ * xi * dP;
@@ -395,7 +395,7 @@ void Well::CalInjdG(const Bulk& myBulk)
             USI pvtnum = myBulk.PVTNUM[n];
             for (USI i = 0; i < seg_num; i++) {
                 Ptmp -= myBulk.flashCal[pvtnum]->RhoPhase(
-                            Ptmp, 0, opt.injTemp, opt.injZi.data(), opt.injProdPhase) *
+                            Ptmp, 0, opt.injTemp, opt.injZi.data(), opt.injPhase) *
                         GRAVITY_FACTOR * seg_len;
             }
             dGperf[p] = Pperf - Ptmp;
@@ -424,7 +424,7 @@ void Well::CalInjdG(const Bulk& myBulk)
             USI pvtnum = myBulk.PVTNUM[n];
             for (USI i = 0; i < seg_num; i++) {
                 Ptmp += myBulk.flashCal[pvtnum]->RhoPhase(
-                            Ptmp, 0, opt.injTemp, opt.injZi.data(), opt.injProdPhase) *
+                            Ptmp, 0, opt.injTemp, opt.injZi.data(), opt.injPhase) *
                         GRAVITY_FACTOR * seg_len;
             }
             dGperf[p] = Ptmp - Pperf;

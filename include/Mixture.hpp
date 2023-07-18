@@ -121,7 +121,7 @@ public:
                              const USI&     tarPhase) = 0;
 
     // for well
-    /// Setup injZi, injProdPhase and factorINJ for INJ well
+    /// Setup injZi, injPhase and factorINJ for INJ well
     /// Setup prodPhaseWeight for PROD well
     virtual void SetupWellOpt(WellOpt&                  opt,
                               const vector<SolventINJ>& sols,

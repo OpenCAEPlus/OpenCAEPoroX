@@ -77,11 +77,40 @@ class OCP_PVCO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVCO() = default;
-	OCP_DBL CalRhoo(const OCP_DBL& P, const OCP_DBL& Pb);
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, 
+												   const OCP_DBL& stdRhoGin) {
+		OCPFuncTable::Setup(src);
+		stdRhoO = stdRhoOin;
+		stdRhoG = stdRhoGin;	
+	}
+	
+	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb);
+	/// For saturated oil
+	OCP_DBL CalXiO(const OCP_DBL& P);
+	/// For unsaturated oil
+	OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb);
+	/// For saturated oil
+	void CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP);
+	/// For unsaturated oil
+	void CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs);
+	/// For saturated oil
+	OCP_DBL CalRs(const OCP_DBL& P) const { return table.Eval(0, P, 1); }	
 
 protected:
-	OCP_DBL stdRhoO;   ///< mass density of oil phase in standard condition
-	OCP_DBL stdRhoG;   ///< mass density of gas phase in standard condition
+	/// For saturated oil
+	void CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
+		OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP);
+	/// For unsaturated oil
+	void CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, 
+					   OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs);
+
+protected:
+	OCP_DBL stdRhoO;      ///< mass density of oil phase in standard condition
+	OCP_DBL stdRhoG;      ///< mass density of gas phase in standard condition
+	OCP_DBL stdVo{ 1 };   ///< molar volume of oil in standard condition
+	OCP_DBL stdVg{ 1 };   ///< molar volume of gas in standard condition
 };
 
 

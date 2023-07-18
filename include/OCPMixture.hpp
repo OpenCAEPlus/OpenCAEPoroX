@@ -29,7 +29,7 @@ const USI OCPMIXTURE_THERMAL = 3;
 class OCPMixtureVarSet
 {
 public:
-    OCPMixtureVarSet(const USI& numPhase, const USI& numCom) { Init(numPhase, numCom); }
+    OCPMixtureVarSet() {}
     void Init(const USI& numPhase, const USI& numCom) {
         // vars
         np = numPhase;
@@ -65,6 +65,8 @@ public:
     USI np, nc;
     /// pressure, temperature
     OCP_DBL P, T;
+    /// Buble point pressure 
+    OCP_DBL Pb;
     /// total moles of components
     OCP_DBL Nt;
     /// total volume of components
@@ -121,7 +123,6 @@ public:
     vector<OCP_DBL> muT;  
     /// dmu / dx
     vector<OCP_DBL> mux;  
-
 };
 
 

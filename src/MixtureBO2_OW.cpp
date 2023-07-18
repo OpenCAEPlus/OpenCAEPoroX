@@ -78,7 +78,7 @@ void BOMixture_OW::InitFlashFIM(const OCP_DBL& Pin,
                                 const OCP_USI& bId)
 {
     P       = Pin;
-    S[oil]  = Sjin[oil];
+    S[wat]  = Sjin[wat];
     // Water Properties
     xi[wat] = PVTW.CalXiW(P);
     Ni[WAT] = Vpore * S[wat] * xi[wat];
@@ -127,7 +127,7 @@ void BOMixture_OW::FlashFIM(const OCP_DBL& Pin,
 {
     fill(dXsdXp.begin(), dXsdXp.end(), 0.0);
 
-    P     = Pin;
+    P       = Pin;
     Ni[OIL] = Niin[OIL];
     Ni[WAT] = Niin[WAT];
     Nt      = Ni[OIL] + Ni[WAT];
@@ -147,9 +147,6 @@ void BOMixture_OW::FlashFIM(const OCP_DBL& Pin,
     vji[wat][WAT] = 1 / xi[wat];
     vjP[oil]      = -Ni[OIL] * xiP[oil] / (xi[oil] * xi[oil]);
     vjP[wat]      = -Ni[WAT] * xiP[wat] / (xi[wat] * xi[wat]);
-
-
-
 
     vfi[OIL]      = vji[oil][OIL];
     vfi[WAT]      = vji[wat][WAT];

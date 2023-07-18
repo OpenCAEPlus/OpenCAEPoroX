@@ -37,7 +37,7 @@ void OCPOGFMethod01::CalKrPcDer()
 
 void OCPFlowOG::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    if (rs_param.SGOF_T.data.size()) {
+    if (rs_param.SGOF_T.data.size() > 0) {
         pfMethod = new OCPOGFMethod01(rs_param.SGOF_T.data[i], &vs);
     }
 }

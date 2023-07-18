@@ -48,7 +48,7 @@ public:
         else
             OCP_ABORT("WRONG well type!");
     }
-    void SetInjProdPhase(const USI& inPhase) { injProdPhase = inPhase; }
+    void SetInjProdPhase(const USI& inPhase) { injPhase = inPhase; }
     void SetInjZi(const vector<OCP_DBL>& inZi)
     {
         if (type == INJ)
@@ -100,7 +100,7 @@ private:
     /// for production well, it gives the the components of fluids which we are
     /// interested in.
     vector<OCP_DBL> injZi;
-    USI             injProdPhase; ///< label the phase of injecting fluid if possible
+    USI             injPhase; ///< label the phase of injecting fluid if possible
     vector<OCP_DBL> prodPhaseWeight;
     OCP_DBL
     factorINJ;       ///< unit factor: Mscf -> lbmol for comps, Mscf -> Mscf in blackoil

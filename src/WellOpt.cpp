@@ -76,7 +76,7 @@ OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const
         if (fabs(this->prodPhaseWeight[i] - opt.prodPhaseWeight[i]) > TINY)
             return OCP_TRUE;
     }
-    if (this->injProdPhase != opt.injProdPhase) return OCP_TRUE;
+    if (this->injPhase != opt.injPhase) return OCP_TRUE;
     if (fabs(this->injTemp - opt.injTemp) > TINY) return OCP_TRUE;
     return OCP_FALSE;
 }

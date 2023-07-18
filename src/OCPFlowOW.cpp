@@ -40,7 +40,7 @@ void OCPOWFMethod01::CalKrPcDer()
 
 void OCPFlowOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    if (rs_param.SWOF_T.data.size()) {
+    if (rs_param.SWOF_T.data.size() > 0) {
         pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], &vs);
     }
 }

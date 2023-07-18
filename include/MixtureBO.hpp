@@ -274,8 +274,10 @@ public:
                       const OCP_DBL&            Psurf,
                       const OCP_DBL&            Tsurf) override;
 
-private:
-    OCPTable        PVCOold;  ///< PVT table for live oil (with dissolved gas).
+protected:
+    void CalNi(const OCP_DBL& Pin, const OCP_DBL& Pbbin, const OCP_DBL* Sjin, const OCP_DBL& Vpore);
+
+protected:
     OCP_PVCO        PVCO;
     OCP_PVDG        PVDG;
     OCP_PVTW        PVTW;

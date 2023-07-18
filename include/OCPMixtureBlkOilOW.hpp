@@ -22,6 +22,11 @@
 using namespace std;
 
 
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilOWMethod
+/////////////////////////////////////////////////////
+
+
 /// Calculate oil, gas, water relative permeability and capillary pressure
 class OCPMixtureBlkOilOWMethod
 {
@@ -36,18 +41,26 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPOWFMethod01
+// OCPMixtureBlkOilOWMethod01
 /////////////////////////////////////////////////////
 
 
-/// Use SWOF
+/// Use PVDO and PVTW
 class OCPMixtureBlkOilOWMethod01 : public OCPMixtureBlkOilOWMethod
 {
 public:
-    OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_DBL>>& PVDOin, OCPMixtureVarSet* vsin);
+    OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_DBL>>& PVDOin,
+                               const vector<vector<OCP_DBL>>& PVTWin,
+                               const OCP_DBL& stdRhoO,
+                               const OCP_DBL& stdRhoW,
+                               OCPMixtureVarSet* vsin) {
+        PVDO.Setup(PVDOin, stdRhoO);
+        PVTW.Setup(PVTWin, stdRhoW);
+        vs   = vsin;
+    }
+
 
 protected:
-    
     OCP_PVDO        PVDO;
     OCP_PVTW        PVTW;
 };
@@ -61,10 +74,25 @@ class OCPMixtureBlkOilOW : public OCPMixture
 {
 public:
     OCPMixtureBlkOilOW() { mixtureType = OCPMIXTURE_BO_OW; }
+    void Setup(const ParamReservoir& rs_param, const USI& i);
 
+protected:
+    void GetStdRhoOW(const ParamReservoir& rs_param);
+    void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) { 
+        vs.P = P;
+        vs.Ni[0] = Ni[0];
+        vs.Ni[1] = Ni[1];
+    }
+    void SetPN(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sw) {
+        vs.P     = P;
+        vs.Pb    = Pb;
+        vs.S[1]  = Sw;
+    }
 
 protected:
     OCPMixtureBlkOilOWMethod* pmMethod;
+    OCP_DBL                   stdRhoO;
+    OCP_DBL                   stdRhoW;
 };
 
 

@@ -229,7 +229,7 @@ void OCPOGWFMethod02::Generate_SWPCWG()
 
 void OCPFlowOGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-	if (rs_param.SGOF_T.data.size() > 0 && rs_param.SWOF_T.data.size()) {
+	if (rs_param.SGOF_T.data.size() > 0 && rs_param.SWOF_T.data.size() > 0) {
 		pfMethod = new OCPOGWFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, &vs);
 	}
 	else if (rs_param.SOF3_T.data.size() > 0 &&
