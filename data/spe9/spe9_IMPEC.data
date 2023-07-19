@@ -2661,7 +2661,7 @@ TUNING
 /
 
 METHOD
-IMPEC
+IMPEC csr.fasp
 /
 
 

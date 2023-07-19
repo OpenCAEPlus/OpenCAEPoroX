@@ -24,10 +24,6 @@ void BOMixture::BOMixtureInit(const ParamReservoir& rs_param)
         std_RhoW = RHOW_STD * rs_param.gravity.data[1];
         std_RhoG = RHOAIR_STD * rs_param.gravity.data[2];
     }
-
-    vji.resize(numPhase);
-    for (auto& v : vji) v.resize(numCom);
-    vjP.resize(numPhase);
 }
 
 /*----------------------------------------------------------------------------*/

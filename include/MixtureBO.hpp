@@ -18,6 +18,7 @@
 #include "Mixture.hpp"
 #include "OCPFuncPVT.hpp"
 #include "OCPMixtureBlkOilOW.hpp"
+#include "OCPMixtureBlkOilOGW.hpp"
 
 /// BOMixture is inherited class of Mixture, it's used for black oil model.
 class BOMixture : public Mixture
@@ -65,9 +66,6 @@ protected:
     OCP_DBL std_RhoO; ///< The density of oil at surface conditions : lb/ft3
     OCP_DBL std_RhoG; ///< The density of gas at surface conditions : lb/ft3
     OCP_DBL std_RhoW; ///< The density of water at surface conditions : lb/ft3
-
-    vector<vector<OCP_DBL>> vji; ///< dVj/dNi
-    vector<OCP_DBL>         vjP; ///< dVj/dP
 };
 
 ///////////////////////////////////////////////
@@ -306,13 +304,48 @@ public:
                       const OCP_DBL&            Psurf,
                       const OCP_DBL&            Tsurf) override;
 
-protected:
-    void CalNi(const OCP_DBL& Pin, const OCP_DBL& Pbbin, const OCP_DBL* Sjin, const OCP_DBL& Vpore);
+
+    const OCP_DBL& GetNt() const override { return OGWM.GetVarSet().Nt; }
+    const OCP_DBL& GetNi(const USI& i) const override {
+        return OGWM.GetVarSet().Ni[i];
+    }
+    const OCP_DBL& GetVf() const override { return OGWM.GetVarSet().vf; }
+    const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OGWM.GetVarSet().phaseExist[j]; }
+    const OCP_DBL& GetS(const USI& j) const override { return OGWM.GetVarSet().S[j]; }
+    const OCP_DBL& GetVj(const USI& j) const override { return OGWM.GetVarSet().vj[j]; }
+    const OCP_DBL& GetNj(const USI& j) const override { return OGWM.GetVarSet().nj[j]; }
+    const OCP_DBL& GetXij(const USI& j, const USI& i) const override
+    {
+        return OGWM.GetVarSet().xij[j * numCom + i];
+    }
+    const OCP_DBL& GetRho(const USI& j) const override { return OGWM.GetVarSet().rho[j]; }
+    const OCP_DBL& GetXi(const USI& j) const override { return OGWM.GetVarSet().xi[j]; }
+    const OCP_DBL& GetMu(const USI& j) const override { return OGWM.GetVarSet().mu[j]; }
+    const OCP_DBL& GetVfP() const override { return OGWM.GetVarSet().vfP; }
+    const OCP_DBL& GetVfT() const override { return OGWM.GetVarSet().vfT; }
+    const OCP_DBL& GetVfi(const USI& i) const override { return OGWM.GetVarSet().vfi[i]; }
+    const OCP_DBL& GetRhoP(const USI& j) const override { return OGWM.GetVarSet().rhoP[j]; }
+    const OCP_DBL& GetRhoT(const USI& j) const override { return OGWM.GetVarSet().rhoT[j]; }
+    const OCP_DBL& GetXiP(const USI& j) const override { return OGWM.GetVarSet().xiP[j]; }
+    const OCP_DBL& GetXiT(const USI& j) const override { return OGWM.GetVarSet().xiT[j]; }
+    const OCP_DBL& GetMuP(const USI& j) const override { return OGWM.GetVarSet().muP[j]; }
+    const OCP_DBL& GetMuT(const USI& j) const override { return OGWM.GetVarSet().muT[j]; }
+    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const override
+    {
+        return OGWM.GetVarSet().rhox[j * numCom + i];
+    }
+    const OCP_DBL& GetXiX(const USI& j, const USI& i) const override
+    {
+        return OGWM.GetVarSet().xix[j * numCom + i];
+    }
+    const OCP_DBL& GetMuX(const USI& j, const USI& i) const override
+    {
+        return OGWM.GetVarSet().mux[j * numCom + i];
+    }
+    const vector<OCP_DBL>& GetDXsDXp() const override { return OGWM.GetVarSet().dXsdXp; }
 
 protected:
-    OCP_PVCO        PVCO;
-    OCP_PVDG        PVDG;
-    OCP_PVTW        PVTW;
+    OCPMixtureBlkOilOGW OGWM;
 };
 
 #endif /* end if __MIXTUREBO_HEADER__ */

@@ -48,7 +48,8 @@ public:
         vfi.resize(nc);
         vjP.resize(np);
         if (ifThermal) vjT.resize(np);
-        vji.resize(np * nc);
+        vji.resize(np);
+        for (auto& v : vji) v.resize(nc);
         rhoP.resize(np);
         if (ifThermal) rhoT.resize(np);
         rhox.resize(np * nc);
@@ -105,7 +106,7 @@ public:
     /// dVj / dT
     vector<OCP_DBL> vjT;
     /// dVj / dNi
-    vector<OCP_DBL> vji;
+    vector<vector<OCP_DBL>> vji;
 
     // Derivatives (partial derivatives)
     /// drho / dP
