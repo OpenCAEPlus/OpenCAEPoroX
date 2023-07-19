@@ -83,7 +83,7 @@ void BOMixture_ODGW::CalNi(const OCP_DBL& Pin, const OCP_DBL& Pbbin, const OCP_D
 	    case PHASE_ODGW:
 	    {
 		    const OCP_DBL rs = PVCO.CalRs(P);
-		    Ni[0] = Vpore * (1 - S[1] - S[2]) * PVCO.CalXiO(P) / (1 + rs);
+		    Ni[0] = Vpore * (1 - S[1] - S[2]) * PVCO.CalXiO(P, P) / (1 + rs);
 		    Ni[1] = Vpore * S[1] * PVDG.CalXiG(P) + Ni[0] * rs;
 		    break;
 	    }

@@ -73,15 +73,6 @@ OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb)
 }
 
 
-OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P)
-{
-	table.Eval_All(0, P, data);
-	const OCP_DBL rs = data[1];
-	const OCP_DBL b  = data[2];
-	return (1 + rs) / (b * CONV1);
-}
-
-
 OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P, const OCP_DBL& Pb)
 {
 	table.Eval_All(0, Pb, data);

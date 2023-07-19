@@ -36,33 +36,6 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_D
 }
 
 
-OCP_DBL OCPMixtureBlkOilOWMethod01::CalRho(const OCP_DBL& P, const USI& tarPhase)
-{
-    if (tarPhase == OIL) {
-        return PVDO.CalRhoO(P);
-    }
-    else if (tarPhase == WATER) {
-        return PVTW.CalRhoW(P);
-    }
-    else {
-        OCP_ABORT("Wrong tarPhase!");
-    }
-}
-
-OCP_DBL OCPMixtureBlkOilOWMethod01::CalXi(const OCP_DBL& P, const USI& tarPhase)
-{
-    if (tarPhase == OIL) {
-        return PVDO.CalXiO(P);
-    }
-    else if (tarPhase == WATER) {
-        return PVTW.CalXiW(P);
-    }
-    else {
-        OCP_ABORT("Wrong tarPhase!");
-    }
-}
-
-
 void OCPMixtureBlkOilOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     vs.Ni[0] = Vp * (1 - vs.S[1]) * PVDO.CalXiO(vs.P);

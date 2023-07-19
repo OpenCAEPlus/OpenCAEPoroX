@@ -32,8 +32,10 @@ class OCPMixtureBlkOilOWMethod
 {
 public:
     OCPMixtureBlkOilOWMethod() = default;
-    virtual OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) = 0;
-    virtual OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) = 0;
+    virtual OCP_DBL CalRhoO(const OCP_DBL& P) = 0;
+    virtual OCP_DBL CalXiO(const OCP_DBL& P) = 0;
+    virtual OCP_DBL CalRhoW(const OCP_DBL& P) = 0;
+    virtual OCP_DBL CalXiW(const OCP_DBL& P) = 0;
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
@@ -55,8 +57,10 @@ public:
         const OCP_DBL& stdRhoO,
         const OCP_DBL& stdRhoW,
         OCPMixtureVarSet& vs);
-    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) override;
-    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) override;
+    OCP_DBL CalRhoO(const OCP_DBL& P) override { return PVDO.CalRhoO(P); }
+    OCP_DBL CalXiO(const OCP_DBL& P) override { return PVDO.CalXiO(P); }
+    OCP_DBL CalRhoW(const OCP_DBL& P) override { return PVTW.CalRhoW(P); }
+    OCP_DBL CalXiW(const OCP_DBL& P) override { return PVTW.CalXiW(P); }
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -93,8 +97,16 @@ public:
         SetPN(P, Ni);
         pmMethod->FlashDer(vs);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) { return pmMethod->CalXi(P, tarPhase); }
-    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) { return pmMethod->CalRho(P, tarPhase); }
+    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) { 
+        if (tarPhase == OIL)         return pmMethod->CalXiO(P);
+        else if (tarPhase == WATER)  return pmMethod->CalXiW(P);
+        else                         OCP_ABORT("WRONG TarPhase");
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) { 
+        if (tarPhase == OIL)         return pmMethod->CalRhoO(P);
+        else if (tarPhase == WATER)  return pmMethod->CalRhoW(P);
+        else                         OCP_ABORT("WRONG TarPhase");
+    }
 
 protected:
     void GetStdRhoOW(const ParamReservoir& rs_param);

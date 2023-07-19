@@ -85,9 +85,6 @@ public:
 	}
 	
 	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb);
-	/// For saturated oil
-	OCP_DBL CalXiO(const OCP_DBL& P);
-	/// For unsaturated oil
 	OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb);
 	/// For saturated oil
 	void CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
