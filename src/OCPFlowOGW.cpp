@@ -17,35 +17,35 @@
  /////////////////////////////////////////////////////
 
 
-void OCP3POilPerMethod01::CalOilPer(OCPFlowVarSet* vs)
+void OCP3POilPerMethod01::CalOilPer(OCPFlowVarSet& vs)
 {
-	vs->kro = vs->krocw 
-		      * ((vs->krow / vs->krocw + vs->krw) * (vs->krog / vs->krocw + vs->krg) 
-		      - (vs->krw + vs->krg));
-	if (vs->kro < 0) vs->kro = 0;
+	vs.kro = vs.krocw 
+		      * ((vs.krow / vs.krocw + vs.krw) * (vs.krog / vs.krocw + vs.krg) 
+		      - (vs.krw + vs.krg));
+	if (vs.kro < 0) vs.kro = 0;
 }
 
 
-void OCP3POilPerMethod01::CalOilPerDer(OCPFlowVarSet* vs)
+void OCP3POilPerMethod01::CalOilPerDer(OCPFlowVarSet& vs)
 {
 
-	vs->kro = vs->krocw
-		* ((vs->krow / vs->krocw + vs->krw) * (vs->krog / vs->krocw + vs->krg)
-			- (vs->krw + vs->krg));
+	vs.kro = vs.krocw
+		* ((vs.krow / vs.krocw + vs.krw) * (vs.krog / vs.krocw + vs.krg)
+			- (vs.krw + vs.krg));
 
-	if (vs->kro < 0) {
-		vs->kro     = 0;
-		vs->dKrodSo = 0;
-		vs->dKrodSg = 0;
-		vs->dKrodSw = 0;
+	if (vs.kro < 0) {
+		vs.kro     = 0;
+		vs.dKrodSo = 0;
+		vs.dKrodSg = 0;
+		vs.dKrodSw = 0;
 	}
 	else {
-		vs->dKrodSo = vs->dKrowdSo * (vs->krog / vs->krocw + vs->krg) 
-			          + vs->dKrogdSo * (vs->krow / vs->krocw + vs->krw);
-		vs->dKrodSw = vs->krocw * ((vs->dKrowdSw / vs->krocw + vs->dKrwdSw) 
-			          * (vs->krog / vs->krocw + vs->krg) - (vs->dKrwdSw));
-		vs->dKrodSg = vs->krocw * ((vs->krow / vs->krocw + vs->krw)
-			          * (vs->dKrogdSg / vs->krocw + vs->dKrgdSg) - (vs->dKrgdSg));
+		vs.dKrodSo = vs.dKrowdSo * (vs.krog / vs.krocw + vs.krg) 
+			          + vs.dKrogdSo * (vs.krow / vs.krocw + vs.krw);
+		vs.dKrodSw = vs.krocw * ((vs.dKrowdSw / vs.krocw + vs.dKrwdSw) 
+			          * (vs.krog / vs.krocw + vs.krg) - (vs.dKrwdSw));
+		vs.dKrodSg = vs.krocw * ((vs.krow / vs.krocw + vs.krw)
+			          * (vs.dKrogdSg / vs.krocw + vs.dKrgdSg) - (vs.dKrgdSg));
 	}
 }
 
@@ -54,32 +54,32 @@ void OCP3POilPerMethod01::CalOilPerDer(OCPFlowVarSet* vs)
 /////////////////////////////////////////////////////
 
 
-void OCP3POILPerMethod02::CalOilPer(OCPFlowVarSet* vs)
+void OCP3POILPerMethod02::CalOilPer(OCPFlowVarSet& vs)
 {
-	const OCP_DBL tmp = vs->Sg + vs->Sw - vs->Swco;
+	const OCP_DBL tmp = vs.Sg + vs.Sw - vs.Swco;
 	if (tmp <= TINY) {
-		vs->kro = vs->krocw;
+		vs.kro = vs.krocw;
 	}
 	else {
-		vs->kro = (vs->Sg * vs->krog + (vs->Sw - vs->Swco) * vs->krow) / tmp;
+		vs.kro = (vs.Sg * vs.krog + (vs.Sw - vs.Swco) * vs.krow) / tmp;
 	}	
 }
 
 
-void OCP3POILPerMethod02::CalOilPerDer(OCPFlowVarSet* vs)
+void OCP3POILPerMethod02::CalOilPerDer(OCPFlowVarSet& vs)
 {
-	const OCP_DBL tmp = vs->Sg + vs->Sw - vs->Swco;
+	const OCP_DBL tmp = vs.Sg + vs.Sw - vs.Swco;
 	if (tmp <= TINY) {
-		vs->kro     = vs->krocw;
-		vs->dKrodSo = 0;
-		vs->dKrodSg = 0;
-		vs->dKrodSw = 0;
+		vs.kro     = vs.krocw;
+		vs.dKrodSo = 0;
+		vs.dKrodSg = 0;
+		vs.dKrodSw = 0;
 	}
 	else {
-		vs->kro = (vs->Sg * vs->krog + (vs->Sw - vs->Swco) * vs->krow) / tmp;
-		vs->dKrodSo = (vs->Sg * vs->dKrogdSo + (vs->Sw - vs->Swco) * vs->dKrowdSo) / tmp;
-		vs->dKrodSg = (vs->krog + vs->Sg * vs->dKrogdSg - vs->kro) / tmp;
-		vs->dKrodSw = (vs->krow + (vs->Sw - vs->Swco) * vs->dKrowdSw - vs->kro) / tmp;
+		vs.kro = (vs.Sg * vs.krog + (vs.Sw - vs.Swco) * vs.krow) / tmp;
+		vs.dKrodSo = (vs.Sg * vs.dKrogdSo + (vs.Sw - vs.Swco) * vs.dKrowdSo) / tmp;
+		vs.dKrodSg = (vs.krog + vs.Sg * vs.dKrogdSg - vs.kro) / tmp;
+		vs.dKrodSw = (vs.krow + (vs.Sw - vs.Swco) * vs.dKrowdSw - vs.kro) / tmp;
 	}
 }
 
@@ -91,13 +91,12 @@ void OCP3POILPerMethod02::CalOilPerDer(OCPFlowVarSet* vs)
 
 OCPOGWFMethod01::OCPOGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
 	const vector<vector<OCP_DBL>>& SWOFin,
-	const USI& i, OCPFlowVarSet* vsin) 
+	const USI& i, OCPFlowVarSet& vs)
 {
 	SGOF.Setup(SGOFin);
 	SWOF.Setup(SWOFin);
-	vs = vsin;
-	vs->krocw = SWOF.GetKrocw();
-	vs->Swco  = SWOF.GetSwco();
+	vs.krocw = SWOF.GetKrocw();
+	vs.Swco  = SWOF.GetSwco();
 
 	Generate_SWPCWG();
 
@@ -128,21 +127,21 @@ void OCPOGWFMethod01::Generate_SWPCWG()
 }
 
 
-void OCPOGWFMethod01::CalKrPc()
+void OCPOGWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-	SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->krow, vs->Pcwo);
+	SWOF.CalKrwKrowPcwo(vs.Sw, vs.krw, vs.krow, vs.Pcwo);
 
-	SGOF.CalKrgKrogPcgo(vs->Sg, vs->krg, vs->krog, vs->Pcgo);
+	SGOF.CalKrgKrogPcgo(vs.Sg, vs.krg, vs.krog, vs.Pcgo);
 
 	opMethod->CalOilPer(vs);
 }
 
 
-void OCPOGWFMethod01::CalKrPcDer()
+void OCPOGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-	SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->krow, vs->Pcwo, vs->dKrwdSw, vs->dKrowdSw, vs->dPcwodSw);
+	SWOF.CalKrwKrowPcwoDer(vs.Sw, vs.krw, vs.krow, vs.Pcwo, vs.dKrwdSw, vs.dKrowdSw, vs.dPcwodSw);
 
-	SGOF.CalKrgKrogPcgoDer(vs->Sg, vs->krg, vs->krog, vs->Pcgo, vs->dKrgdSg, vs->dKrogdSg, vs->dPcgodSg);
+	SGOF.CalKrgKrogPcgoDer(vs.Sg, vs.krg, vs.krog, vs.Pcgo, vs.dKrgdSg, vs.dKrogdSg, vs.dPcgodSg);
 
 	opMethod->CalOilPerDer(vs);
 }
@@ -154,15 +153,14 @@ void OCPOGWFMethod01::CalKrPcDer()
 OCPOGWFMethod02::OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
 	const vector<vector<OCP_DBL>>& SGFNin,
 	const vector<vector<OCP_DBL>>& SWFNin,
-	const USI& i, OCPFlowVarSet* vsin)
+	const USI& i, OCPFlowVarSet& vs)
 {
 	SOF3.Setup(SOF3in);	
 	SGFN.Setup(SGFNin);
 	SWFN.Setup(SWFNin);
 
-	vs = vsin;
-	vs->krocw = SOF3.GetKrocw();
-	vs->Swco  = SWFN.GetSwco();
+	vs.krocw = SOF3.GetKrocw();
+	vs.Swco  = SWFN.GetSwco();
 
 	Generate_SWPCWG();
 
@@ -179,27 +177,27 @@ OCPOGWFMethod02::OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
 }
 
 
-void OCPOGWFMethod02::CalKrPc()
+void OCPOGWFMethod02::CalKrPc(OCPFlowVarSet& vs)
 {
 
-	SWFN.CalKrwPcwo(vs->Sw, vs->krw, vs->Pcwo);
+	SWFN.CalKrwPcwo(vs.Sw, vs.krw, vs.Pcwo);
 
-	SGFN.CalKrgPcgo(vs->Sg, vs->krg, vs->Pcgo);
+	SGFN.CalKrgPcgo(vs.Sg, vs.krg, vs.Pcgo);
 
-	SOF3.CalKrowKrog(vs->So, vs->krow, vs->krog);
+	SOF3.CalKrowKrog(vs.So, vs.krow, vs.krog);
 
 	opMethod->CalOilPer(vs);
 }
 
 
-void OCPOGWFMethod02::CalKrPcDer()
+void OCPOGWFMethod02::CalKrPcDer(OCPFlowVarSet& vs)
 {
 
-	SWFN.CalKrwPcwoDer(vs->Sw, vs->krw, vs->Pcwo, vs->dKrwdSw, vs->dPcwodSw);
+	SWFN.CalKrwPcwoDer(vs.Sw, vs.krw, vs.Pcwo, vs.dKrwdSw, vs.dPcwodSw);
 
-	SGFN.CalKrgPcgoDer(vs->Sg, vs->krg, vs->Pcgo, vs->dKrgdSg, vs->dPcgodSg);
+	SGFN.CalKrgPcgoDer(vs.Sg, vs.krg, vs.Pcgo, vs.dKrgdSg, vs.dPcgodSg);
 
-	SOF3.CalKrowKrogDer(vs->So, vs->krow, vs->krog, vs->dKrowdSo, vs->dKrogdSo);
+	SOF3.CalKrowKrogDer(vs.So, vs.krow, vs.krog, vs.dKrowdSo, vs.dKrogdSo);
 
 	opMethod->CalOilPerDer(vs);
 
@@ -230,13 +228,13 @@ void OCPOGWFMethod02::Generate_SWPCWG()
 void OCPFlowOGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
 	if (rs_param.SGOF_T.data.size() > 0 && rs_param.SWOF_T.data.size() > 0) {
-		pfMethod = new OCPOGWFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, &vs);
+		pfMethod = new OCPOGWFMethod01(rs_param.SGOF_T.data[i], rs_param.SWOF_T.data[i], 1, vs);
 	}
 	else if (rs_param.SOF3_T.data.size() > 0 &&
 		rs_param.SGFN_T.data.size() > 0 &&
 		rs_param.SWFN_T.data.size() > 0) {
 		pfMethod = new OCPOGWFMethod02(rs_param.SOF3_T.data[i], rs_param.SGFN_T.data[i], 
-			rs_param.SWFN_T.data[i], 1, &vs);
+			rs_param.SWFN_T.data[i], 1, vs);
 	}
 	else {
 		OCP_ABORT("NO MATCHED METHOD!");

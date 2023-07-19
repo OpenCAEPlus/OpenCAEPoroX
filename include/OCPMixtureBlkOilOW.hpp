@@ -32,11 +32,12 @@ class OCPMixtureBlkOilOWMethod
 {
 public:
     OCPMixtureBlkOilOWMethod() = default;
-
-protected:
-    enum phaseIndex { oil, wat };
-    enum componentIndex { OIL, WAT };
-    OCPMixtureVarSet* vs;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) = 0;
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) = 0;
+    virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
+    virtual void Flash(OCPMixtureVarSet& vs) = 0;
+    virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
+    virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
 };
 
 
@@ -50,16 +51,17 @@ class OCPMixtureBlkOilOWMethod01 : public OCPMixtureBlkOilOWMethod
 {
 public:
     OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_DBL>>& PVDOin,
-                               const vector<vector<OCP_DBL>>& PVTWin,
-                               const OCP_DBL& stdRhoO,
-                               const OCP_DBL& stdRhoW,
-                               OCPMixtureVarSet* vsin) {
-        PVDO.Setup(PVDOin, stdRhoO);
-        PVTW.Setup(PVTWin, stdRhoW);
-        vs   = vsin;
-    }
-
-
+        const vector<vector<OCP_DBL>>& PVTWin,
+        const OCP_DBL& stdRhoO,
+        const OCP_DBL& stdRhoW,
+        OCPMixtureVarSet& vs);
+    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) override;
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void FlashDer(OCPMixtureVarSet& vs) override;
+    
 protected:
     OCP_PVDO        PVDO;
     OCP_PVTW        PVTW;
@@ -75,21 +77,39 @@ class OCPMixtureBlkOilOW : public OCPMixture
 public:
     OCPMixtureBlkOilOW() { mixtureType = OCPMIXTURE_BO_OW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Sw);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Sw);
+        pmMethod->InitFlashDer(Vp, vs);
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->FlashDer(vs);
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) { return pmMethod->CalXi(P, tarPhase); }
+    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) { return pmMethod->CalRho(P, tarPhase); }
 
 protected:
     void GetStdRhoOW(const ParamReservoir& rs_param);
     void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) { 
-        vs.P = P;
+        vs.P     = P;
         vs.Ni[0] = Ni[0];
         vs.Ni[1] = Ni[1];
     }
-    void SetPN(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sw) {
+    void SetPS(const OCP_DBL& P, const OCP_DBL& Sw) {
         vs.P     = P;
-        vs.Pb    = Pb;
         vs.S[1]  = Sw;
     }
 
 protected:
+    ///< Phase and Component index
     OCPMixtureBlkOilOWMethod* pmMethod;
     OCP_DBL                   stdRhoO;
     OCP_DBL                   stdRhoW;

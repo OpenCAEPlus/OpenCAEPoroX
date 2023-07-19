@@ -27,14 +27,11 @@ class OCPOGFMethod
 {
 public:
     OCPOGFMethod() = default;
-    virtual void CalKrPc() = 0;
-    virtual void CalKrPcDer() = 0;
+    virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
+    virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
     virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const = 0;
     virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
-
-protected:
-    OCPFlowVarSet* vs;
 };
 
 
@@ -47,9 +44,9 @@ protected:
 class OCPOGFMethod01 : public OCPOGFMethod
 {
 public:
-    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin, OCPFlowVarSet* vsin);
-    void CalKrPc() override;
-    void CalKrPcDer() override;
+    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin);
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
 
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGOF.CalPcgo(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGOF.CalSg(Pcgo); }
@@ -71,11 +68,11 @@ public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
         SetSaturation(So, Sg);
-        pfMethod->CalKrPc();
+        pfMethod->CalKrPc(vs);
     }
     void CalKrPcDer(const OCP_DBL& So, const OCP_DBL& Sg) {
         SetSaturation(So, Sg);
-        pfMethod->CalKrPcDer();
+        pfMethod->CalKrPcDer(vs);
     }
 
     OCP_DBL GetSwco() const override { OCP_ABORT("Wrong Usage!"); }

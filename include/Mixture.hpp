@@ -57,13 +57,6 @@ public:
         xix.resize(numPhase * numCom);
         mux.resize(numPhase * numCom);
         dXsdXp.resize((numCom + 1) * (numPhase + numPhase * numCom));
-        // Thermal model
-
-        // used in FIM_n
-        res.resize(numPhase + numPhase * numCom +
-                   1); // a precomputed value stored in last position
-        // water not in hydrocarbon, hydrocarbon not in water
-        // keyDer.resize((numCom + 1) * ((numPhase - 1) * (numCom - 1) + 1));
     };
     virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     /// return type of mixture.
@@ -160,44 +153,43 @@ public:
     virtual void    OutMixtureIters() const = 0;
 
 public:
-    const OCP_DBL&  GetNt() const { return Nt; }
-    const OCP_DBL&  GetNi(const USI& i) const { return Ni[i]; }
-    const OCP_DBL&  GetVf() const { return vf; }
-    const OCP_BOOL& GetPhaseExist(const USI& j) const { return phaseExist[j]; }
-    const OCP_DBL&  GetS(const USI& j) const { return S[j]; }
-    const OCP_DBL&  GetVj(const USI& j) const { return vj[j]; }
-    const OCP_DBL&  GetNj(const USI& j) const { return nj[j]; }
-    const OCP_DBL&  GetXij(const USI& j, const USI& i) const
+    virtual const OCP_DBL&  GetNt() const { return Nt; }
+    virtual const OCP_DBL&  GetNi(const USI& i) const { return Ni[i]; }
+    virtual const OCP_DBL&  GetVf() const { return vf; }
+    virtual const OCP_BOOL& GetPhaseExist(const USI& j) const { return phaseExist[j]; }
+    virtual const OCP_DBL&  GetS(const USI& j) const { return S[j]; }
+    virtual const OCP_DBL&  GetVj(const USI& j) const { return vj[j]; }
+    virtual const OCP_DBL&  GetNj(const USI& j) const { return nj[j]; }
+    virtual const OCP_DBL&  GetXij(const USI& j, const USI& i) const
     {
         return xij[j * numCom + i];
     }
-    const OCP_DBL& GetRho(const USI& j) const { return rho[j]; }
-    const OCP_DBL& GetXi(const USI& j) const { return xi[j]; }
-    const OCP_DBL& GetMu(const USI& j) const { return mu[j]; }
-    const OCP_DBL& GetVfP() const { return vfP; }
-    const OCP_DBL& GetVfT() const { return vfT; }
-    const OCP_DBL& GetVfi(const USI& i) const { return vfi[i]; }
-    const OCP_DBL& GetRhoP(const USI& j) const { return rhoP[j]; }
-    const OCP_DBL& GetRhoT(const USI& j) const { return rhoT[j]; }
-    const OCP_DBL& GetXiP(const USI& j) const { return xiP[j]; }
-    const OCP_DBL& GetXiT(const USI& j) const { return xiT[j]; }
-    const OCP_DBL& GetMuP(const USI& j) const { return muP[j]; }
-    const OCP_DBL& GetMuT(const USI& j) const { return muT[j]; }
-    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const
+    virtual const OCP_DBL& GetRho(const USI& j) const { return rho[j]; }
+    virtual const OCP_DBL& GetXi(const USI& j) const { return xi[j]; }
+    virtual const OCP_DBL& GetMu(const USI& j) const { return mu[j]; }
+    virtual const OCP_DBL& GetVfP() const { return vfP; }
+    virtual const OCP_DBL& GetVfT() const { return vfT; }
+    virtual const OCP_DBL& GetVfi(const USI& i) const { return vfi[i]; }
+    virtual const OCP_DBL& GetRhoP(const USI& j) const { return rhoP[j]; }
+    virtual const OCP_DBL& GetRhoT(const USI& j) const { return rhoT[j]; }
+    virtual const OCP_DBL& GetXiP(const USI& j) const { return xiP[j]; }
+    virtual const OCP_DBL& GetXiT(const USI& j) const { return xiT[j]; }
+    virtual const OCP_DBL& GetMuP(const USI& j) const { return muP[j]; }
+    virtual const OCP_DBL& GetMuT(const USI& j) const { return muT[j]; }
+    virtual const OCP_DBL& GetRhoX(const USI& j, const USI& i) const
     {
         return rhox[j * numCom + i];
     }
-    const OCP_DBL& GetXiX(const USI& j, const USI& i) const
+    virtual const OCP_DBL& GetXiX(const USI& j, const USI& i) const
     {
         return xix[j * numCom + i];
     }
-    const OCP_DBL& GetMuX(const USI& j, const USI& i) const
+    virtual const OCP_DBL& GetMuX(const USI& j, const USI& i) const
     {
         return mux[j * numCom + i];
     }
-    const vector<OCP_DBL>& GetDXsDXp() const { return dXsdXp; }
-    const vector<OCP_DBL>& GetRes() const { return res; }
-    const OCP_DBL          GetResPc() const { return resPc; }
+    virtual const vector<OCP_DBL>& GetDXsDXp() const { return dXsdXp; }
+
     const OCP_DBL          GetUf() const { return Uf; }
     const OCP_DBL          GetUfP() const { return UfP; }
     const OCP_DBL          GetUfT() const { return UfT; }
@@ -259,11 +251,6 @@ protected:
     vector<OCP_DBL> H;   ///< Enthalpy
     vector<OCP_DBL> HT;  ///< d Hj / d T
     vector<OCP_DBL> Hx;  ///< d Hj / d xij
-
-    // Auxiliary variable for dSec_dPri
-
-    vector<OCP_DBL> res;    ///< residual of a set of equations
-    OCP_DBL         resPc;  ///< a precalculated value
 };
 
 #endif /* end if __MIXTURE_HEADER__ */

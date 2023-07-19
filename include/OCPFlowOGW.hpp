@@ -26,8 +26,8 @@ using namespace std;
 class OCP3POilPerMethod
 {
 public:
-    virtual void CalOilPer(OCPFlowVarSet* vs) = 0;
-    virtual void CalOilPerDer(OCPFlowVarSet* vs) = 0;
+    virtual void CalOilPer(OCPFlowVarSet& vs) = 0;
+    virtual void CalOilPerDer(OCPFlowVarSet& vs) = 0;
 };
 
 
@@ -40,8 +40,8 @@ class OCP3POilPerMethod01 : public OCP3POilPerMethod
 {
 public:
     OCP3POilPerMethod01() = default;
-    void CalOilPer(OCPFlowVarSet* vs) override;
-    void CalOilPerDer(OCPFlowVarSet* vs) override;
+    void CalOilPer(OCPFlowVarSet& vs) override;
+    void CalOilPerDer(OCPFlowVarSet& vs) override;
 };
 
 
@@ -55,8 +55,8 @@ class OCP3POILPerMethod02 : public OCP3POilPerMethod
 {
 public:
     OCP3POILPerMethod02() = default;
-    void CalOilPer(OCPFlowVarSet* vs) override;
-    void CalOilPerDer(OCPFlowVarSet* vs) override;
+    void CalOilPer(OCPFlowVarSet& vs) override;
+    void CalOilPerDer(OCPFlowVarSet& vs) override;
 };
 
 /// Calculate oil, gas, water relative permeability and capillary pressure
@@ -64,8 +64,8 @@ class OCPOGWFMethod
 {
 public:
     OCPOGWFMethod() = default;
-    virtual void CalKrPc() = 0;
-    virtual void CalKrPcDer() = 0;
+    virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
+    virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
 
     virtual OCP_DBL GetSwco() const = 0;
     virtual OCP_DBL GetMaxPcow() const = 0;
@@ -77,10 +77,6 @@ public:
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const = 0;
     virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const = 0;
     virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
-    
-
-protected:
-    OCPFlowVarSet*  vs;
 };
 
 
@@ -95,9 +91,9 @@ class OCPOGWFMethod01 : public OCPOGWFMethod
 public:
     OCPOGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
         const vector<vector<OCP_DBL>>& SWOFin,
-        const USI& i, OCPFlowVarSet* vsin);
-    void CalKrPc() override;
-    void CalKrPcDer() override;
+        const USI& i, OCPFlowVarSet& vs);
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
 
     OCP_DBL GetSwco() const override { return SWOF.GetSwco(); }
     OCP_DBL GetMaxPcow() const override { return SWOF.GetMaxPc(); }
@@ -133,9 +129,9 @@ public:
     OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
         const vector<vector<OCP_DBL>>& SGFNin,
         const vector<vector<OCP_DBL>>& SWFNin,
-        const USI& i, OCPFlowVarSet* vsin);
-    void CalKrPc() override;
-    void CalKrPcDer() override;
+        const USI& i, OCPFlowVarSet& vs);
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
 
     OCP_DBL GetSwco() const override { return SWFN.GetSwco(); }
     OCP_DBL GetMaxPcow() const override { return SWFN.GetMaxPc(); }
@@ -171,11 +167,11 @@ public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
         SetSaturation(So, Sg, Sw);
-        pfMethod->CalKrPc(); 
+        pfMethod->CalKrPc(vs); 
     }
     void CalKrPcDer(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
         SetSaturation(So, Sg, Sw);
-        pfMethod->CalKrPcDer(); 
+        pfMethod->CalKrPcDer(vs); 
     }
 
     OCP_DBL GetSwco() const override { return pfMethod->GetSwco(); }

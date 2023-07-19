@@ -94,7 +94,6 @@ const USI SAMGSOLVER     = 4; ///< Use linear solver in SAMG
 const USI OIL     = 0; ///< Fluid type = oil
 const USI GAS     = 1; ///< Fluid type = gas
 const USI WATER   = 2; ///< Fluid type = water
-const USI SOLVENT = 3; ///< Fluid type = solvent
 
 // Mixture types
 const USI BLKOIL      = 10; ///< Mixture model = black-oil

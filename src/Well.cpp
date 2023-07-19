@@ -486,10 +486,10 @@ void Well::CalProddG01(const Bulk& myBulk)
                 qtacc = rhoacc = 0;
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < myBulk.numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j];
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp;
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j);
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp -= rhoacc / qtacc * GRAVITY_FACTOR * seg_len;
@@ -538,10 +538,10 @@ void Well::CalProddG01(const Bulk& myBulk)
                 qtacc = rhoacc = 0;
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < myBulk.numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j];
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp;
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j);
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp += rhoacc / qtacc * GRAVITY_FACTOR * seg_len;
@@ -605,10 +605,10 @@ void Well::CalProddG02(const Bulk& myBulk)
                 qtacc = rhoacc = 0;
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < myBulk.numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j];
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp;
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j);
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp -= rhoacc / qtacc * GRAVITY_FACTOR * seg_len;
@@ -657,10 +657,10 @@ void Well::CalProddG02(const Bulk& myBulk)
                 qtacc = rhoacc = 0;
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < myBulk.numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j];
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp;
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j);
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp += rhoacc / qtacc * GRAVITY_FACTOR * seg_len;
@@ -740,10 +740,10 @@ void Well::CalProddG(const Bulk& myBulk)
             for (USI k = 0; k < seg_num; k++) {
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < myBulk.numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j] / seg_num;
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp *
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j) / seg_num;
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp *
                                   GRAVITY_FACTOR / seg_num;
 #ifdef DEBUG
                         if (rhotmp <= 0 || !isfinite(rhotmp)) {
@@ -807,10 +807,10 @@ void Well::CalProddG(const Bulk& myBulk)
             for (USI k = 0; k < seg_num; k++) {
                 myBulk.flashCal[pvtnum]->Flash(Ptmp, myBulk.T[n], tmpNi.data());
                 for (USI j = 0; j < numPhase; j++) {
-                    if (myBulk.flashCal[pvtnum]->phaseExist[j]) {
-                        rhotmp = myBulk.flashCal[pvtnum]->rho[j];
-                        qtacc += myBulk.flashCal[pvtnum]->vj[j] / seg_num;
-                        rhoacc += myBulk.flashCal[pvtnum]->vj[j] * rhotmp *
+                    if (myBulk.flashCal[pvtnum]->GetPhaseExist(j)) {
+                        rhotmp = myBulk.flashCal[pvtnum]->GetRho(j);
+                        qtacc += myBulk.flashCal[pvtnum]->GetVj(j) / seg_num;
+                        rhoacc += myBulk.flashCal[pvtnum]->GetVj(j) * rhotmp *
                                   GRAVITY_FACTOR / seg_num;
                     }
                 }

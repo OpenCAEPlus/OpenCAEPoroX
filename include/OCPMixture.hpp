@@ -29,8 +29,8 @@ const USI OCPMIXTURE_THERMAL = 3;
 class OCPMixtureVarSet
 {
 public:
-    OCPMixtureVarSet() {}
-    void Init(const USI& numPhase, const USI& numCom) {
+    OCPMixtureVarSet() = default;
+    void Init(const USI& numPhase, const USI& numCom, const OCP_BOOL& ifThermal) {
         // vars
         np = numPhase;
         nc = numCom;
@@ -47,17 +47,20 @@ public:
         // derivatives
         vfi.resize(nc);
         vjP.resize(np);
-        vjT.resize(np);
+        if (ifThermal) vjT.resize(np);
         vji.resize(np * nc);
         rhoP.resize(np);
-        rhoT.resize(np);
+        if (ifThermal) rhoT.resize(np);
         rhox.resize(np * nc);
         xiP.resize(np);
-        xiT.resize(np);
+        if (ifThermal) xiT.resize(np);
         xix.resize(np * nc);
         muP.resize(np);
-        muT.resize(np);
+        if (ifThermal) muT.resize(np);
         mux.resize(np * nc);
+
+        if (ifThermal) dXsdXp.resize(np * (nc + 1) * (nc + 2));
+        else           dXsdXp.resize(np * (nc + 1) * (nc + 1));
     }
 
 public:
@@ -70,7 +73,7 @@ public:
     /// total moles of components
     OCP_DBL Nt;
     /// total volume of components
-    OCP_DBL Vf;
+    OCP_DBL vf;
     /// mole number of components
     vector<OCP_DBL> Ni;
     /// existence of phase
@@ -123,6 +126,9 @@ public:
     vector<OCP_DBL> muT;  
     /// dmu / dx
     vector<OCP_DBL> mux;  
+
+    /// d(Sj, xij) / d(P,Ni,(T))
+    vector<OCP_DBL> dXsdXp;
 };
 
 
@@ -135,7 +141,7 @@ class OCPMixture
 public:
     OCPMixture() = default;
     USI MixtureType() const { return mixtureType; }
-    OCPMixtureVarSet& GetVarSet() { return vs; }
+    const OCPMixtureVarSet& GetVarSet() const { return vs; }
 
 protected:
     USI              mixtureType;

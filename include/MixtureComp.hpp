@@ -464,7 +464,6 @@ protected:
     void CalMuPX_partial();
     void CalMuPXLBC_partial();
     void CalXiRhoMuPN_pfullx();
-    void CaldXsdXpAPI04();
     void CaldXsdXp04();
 
     void CalRhoPNX_full();
@@ -493,7 +492,6 @@ protected:
     void CalMuPnLBC_partial();
     void CalXiRhoMuPN_pfullxn(const OCP_BOOL& xflag = OCP_TRUE);
 
-    void CaldXsdXpAPI03();
     void CaldXsdXp03();
     void CalVfiVfp_full03();
 

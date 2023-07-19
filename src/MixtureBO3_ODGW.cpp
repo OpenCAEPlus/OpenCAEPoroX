@@ -25,9 +25,6 @@ BOMixture_ODGW::BOMixture_ODGW(const ParamReservoir& rs_param, const USI& i)
     PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);  
     PVCO.Setup(rs_param.PVCO_T.data[i], std_RhoO, std_RhoG);
     PVDG.Setup(rs_param.PVDG_T.data[i], std_RhoG);
-
-    data.resize(6, 0);
-    cdata.resize(6, 0);
 }
 
 void BOMixture_ODGW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)

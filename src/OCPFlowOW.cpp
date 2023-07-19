@@ -16,24 +16,23 @@
 // OCPOWFMethod01
 /////////////////////////////////////////////////////
 
-OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet* vsin)
+OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet& vs)
 {
     SWOF.Setup(SWOFin);
-    vs = vsin;
 
-    vs->Swco = SWOF.GetSwco();
+    vs.Swco = SWOF.GetSwco();
 }
 
 
-void OCPOWFMethod01::CalKrPc()
+void OCPOWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-    SWOF.CalKrwKrowPcwo(vs->Sw, vs->krw, vs->kro, vs->Pcwo);
+    SWOF.CalKrwKrowPcwo(vs.Sw, vs.krw, vs.kro, vs.Pcwo);
 }
 
 
-void OCPOWFMethod01::CalKrPcDer()
+void OCPOWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-    SWOF.CalKrwKrowPcwoDer(vs->Sw, vs->krw, vs->kro, vs->Pcwo, vs->dKrwdSw, vs->dKrodSw, vs->dPcwodSw);
+    SWOF.CalKrwKrowPcwoDer(vs.Sw, vs.krw, vs.kro, vs.Pcwo, vs.dKrwdSw, vs.dKrodSw, vs.dPcwodSw);
 }
 
 
@@ -41,7 +40,7 @@ void OCPOWFMethod01::CalKrPcDer()
 void OCPFlowOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
     if (rs_param.SWOF_T.data.size() > 0) {
-        pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], &vs);
+        pfMethod = new OCPOWFMethod01(rs_param.SWOF_T.data[i], vs);
     }
 }
 

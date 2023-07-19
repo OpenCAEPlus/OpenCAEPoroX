@@ -27,8 +27,8 @@ class OCPOWFMethod
 {
 public:
     OCPOWFMethod() = default;
-    virtual void CalKrPc() = 0;
-    virtual void CalKrPcDer() = 0;
+    virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
+    virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
 
     virtual OCP_DBL GetSwco() const = 0;
     virtual OCP_DBL GetMaxPcow() const = 0;
@@ -37,8 +37,6 @@ public:
     virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const = 0;
     virtual OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const = 0;
 
-protected:
-    OCPFlowVarSet* vs;
 };
 
 
@@ -51,9 +49,9 @@ protected:
 class OCPOWFMethod01 : public OCPOWFMethod
 {
 public:
-    OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet* vsin);
-    void CalKrPc() override;
-    void CalKrPcDer() override;
+    OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet& vs);
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
 
     OCP_DBL GetSwco() const override { return SWOF.GetSwco(); }
     OCP_DBL GetMaxPcow() const override { return SWOF.GetMaxPc(); }
@@ -78,11 +76,11 @@ public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sw) {
         SetSaturation(So, Sw);
-        pfMethod->CalKrPc();
+        pfMethod->CalKrPc(vs);
     }
     void CalKrPcDer(const OCP_DBL& So, const OCP_DBL& Sw) {
         SetSaturation(So, Sw);
-        pfMethod->CalKrPcDer();
+        pfMethod->CalKrPcDer(vs);
     }
 
     OCP_DBL GetSwco() const override { return pfMethod->GetSwco(); }
