@@ -162,7 +162,7 @@ protected:
                            ///< interpolating tab
 
     OCPMixtureThermalOW OWTM;
-    EnthalpyMethod*     eM;
+    EnthalpyCalculation eC;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

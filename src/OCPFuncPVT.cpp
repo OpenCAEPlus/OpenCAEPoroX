@@ -220,7 +220,7 @@ void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL&
 
 
 /////////////////////////////////////////////////////
-// EnthalpyMethod
+// EnthalpyCalculation
 /////////////////////////////////////////////////////
 
 
@@ -321,6 +321,25 @@ OCP_DBL EnthalpyMethod02::CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_
 	return H;
 }
 
+
+void EnthalpyCalculation::Setup(const ComponentParam& param, const USI& tarId)
+{
+	if (param.cpl1.activity) {
+		eM = new EnthalpyMethod01(param.Tref[tarId],
+			param.cpl1.data[tarId], param.cpl2.data[tarId],
+			param.cpl3.data[tarId], param.cpl4.data[tarId]);
+	}
+	else if (param.cpg1.activity) {
+		eM = new EnthalpyMethod02(param.Tref[tarId], param.Tc.data[tarId],
+			param.cpg1.data[tarId], param.cpg2.data[tarId],
+			param.cpg3.data[tarId], param.cpg4.data[tarId],
+			param.hvapr.data[tarId], param.hvr.data[tarId],
+			param.ev.data[tarId]);
+	}
+	else {
+		OCP_ABORT("WRONG Enthalpy Calculation Params!");
+	}
+}
 
 
 /*----------------------------------------------------------------------------*/

@@ -39,6 +39,10 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
+
+protected:
+    EnthalpyCalculation eC;
+
 };
 
 
@@ -51,7 +55,7 @@ public:
 class OCPMixtureThermalOWMethod01 : public OCPMixtureThermalOWMethod
 {
 public:
-    OCPMixtureThermalOWMethod01(const ParamReservoir& param, const USI& tarId, OCPMixtureVarSet& vs);
+    OCPMixtureThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
     OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T) override;
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T) override;
     OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) override;
@@ -81,12 +85,6 @@ protected:
     vector<OCP_DBL> ct2;  
     /// The coefficient of density dependence on temperature and pressure, 1/psi-F
     vector<OCP_DBL> cpt;   
-    /// Calculated enthalpy of fluid based liquid
-    OCP_BOOL liquid_based{OCP_TRUE}; 
-    /// Calculated enthalpy of fluid based gas
-    OCP_BOOL gas_based{OCP_FALSE}; 
-    /// Calculated enthalpy of fluid with simple enthalpy of evaporation
-    OCP_BOOL simple_hvap{OCP_FALSE};   
            
     /// Coefficients in water and oil viscosity correlation formula
     vector<OCP_DBL> avisc;   

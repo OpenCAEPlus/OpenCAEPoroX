@@ -18,63 +18,65 @@
 /////////////////////////////////////////////////////
 
 
-OCPMixtureThermalOWMethod01::OCPMixtureThermalOWMethod01(const ParamReservoir& param, const USI& tarId, OCPMixtureVarSet& vs)
+OCPMixtureThermalOWMethod01::OCPMixtureThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs)
 {
-    if (param.comsParam.molden.activity)
-        xi_ref = param.comsParam.molden.data[tarId];
+    if (param.molden.activity)
+        xi_ref = param.molden.data[tarId];
     else
         OCP_ABORT("ACF hasn't been input!");
-    if (param.comsParam.avisc.activity || param.comsParam.bvisc.activity) {
-        if (param.comsParam.avisc.activity)
-            avisc = param.comsParam.avisc.data[tarId];
+    if (param.avisc.activity || param.bvisc.activity) {
+        if (param.avisc.activity)
+            avisc = param.avisc.data[tarId];
         else
             avisc.resize(2, 0);
-        if (param.comsParam.bvisc.activity)
-            bvisc = param.comsParam.bvisc.data[tarId];
+        if (param.bvisc.activity)
+            bvisc = param.bvisc.data[tarId];
         else
             bvisc.resize(2, 0);
         useViscTab = OCP_FALSE;
     }
     else {
-        if (param.comsParam.viscTab.data.size() <= tarId) {
+        if (param.viscTab.data.size() <= tarId) {
             OCP_ABORT("VISCTAB hasn't been input for " + to_string(tarId + 1) +
                 " th Region!");
         }
         useViscTab = OCP_TRUE;
-        visc.Setup(param.comsParam.viscTab.data[tarId]);
+        visc.Setup(param.viscTab.data[tarId]);
         // unit convert: F -> R
         for (auto& v : visc.GetCol(0)) {
             v += CONV5;
         }
     }
 
-    if (param.comsParam.cp.activity)
-        cp = param.comsParam.cp.data[tarId];
+    if (param.cp.activity)
+        cp = param.cp.data[tarId];
     else
         cp.resize(2, 0);
 
-    if (param.comsParam.ct1.activity)
-        ct1 = param.comsParam.ct1.data[tarId];
+    if (param.ct1.activity)
+        ct1 = param.ct1.data[tarId];
     else
         ct1.resize(2, 0);
 
-    if (param.comsParam.ct2.activity)
-        ct2 = param.comsParam.ct2.data[tarId];
+    if (param.ct2.activity)
+        ct2 = param.ct2.data[tarId];
     else
         ct2.resize(2, 0);
 
-    if (param.comsParam.cpt.activity)
-        cpt = param.comsParam.cpt.data[tarId];
+    if (param.cpt.activity)
+        cpt = param.cpt.data[tarId];
     else
         cpt.resize(2, 0);
 
-    if (param.comsParam.MW.activity)
-        MWc = param.comsParam.MW.data[tarId];
+    if (param.MW.activity)
+        MWc = param.MW.data[tarId];
     else
         OCP_ABORT("MW hasn't been input!");
 
-    Tref = param.comsParam.Tref[tarId] + CONV5;
-    Pref = param.comsParam.Pref[tarId];
+    Tref = param.Tref[tarId] + CONV5;
+    Pref = param.Pref[tarId];
+
+    eC.Setup(param, tarId);
   
     data.resize(3, 0);
     cdata.resize(3, 0);
@@ -300,7 +302,7 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 void OCPMixtureThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
     vs.Init(2, 2, OCP_TRUE);
-    pmMethod = new OCPMixtureThermalOWMethod01(rs_param, i, vs);
+    pmMethod = new OCPMixtureThermalOWMethod01(rs_param.comsParam, i, vs);
 }
 
 

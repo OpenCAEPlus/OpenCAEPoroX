@@ -14,6 +14,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPFuncTable.hpp"
+#include "ParamReservoir.hpp"
 
 using namespace std;
 
@@ -178,8 +179,9 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// EnthalpyMethod
+// EnthalpyCalculation
 /////////////////////////////////////////////////////
+
 
 class EnthalpyMethod
 {
@@ -248,6 +250,17 @@ protected:
 	vector<OCP_DBL> hvr;
 	/// Coefficients in the vaporization enthalpy calculations
 	vector<OCP_DBL> ev;
+};
+
+
+class EnthalpyCalculation
+{
+public:
+	void Setup(const ComponentParam& param, const USI& tarId);
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const { return eM->CalEnthalpy(T, xij); }
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const { return eM->CalEnthalpy(T, xij, HT, Hx); }
+protected:
+	EnthalpyMethod* eM;
 };
 
 

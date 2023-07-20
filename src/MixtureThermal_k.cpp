@@ -75,21 +75,7 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
     Pref = param.comsParam.Pref[tarId];
 
 
-    if (param.comsParam.cpl1.activity) {      
-        eM = new EnthalpyMethod01(param.comsParam.Tref[tarId],
-            param.comsParam.cpl1.data[tarId], param.comsParam.cpl2.data[tarId],
-            param.comsParam.cpl3.data[tarId], param.comsParam.cpl4.data[tarId]);
-    }
-    else if (param.comsParam.cpg1.activity){
-        eM = new EnthalpyMethod02(param.comsParam.Tref[tarId], param.comsParam.Tc.data[tarId],
-            param.comsParam.cpg1.data[tarId], param.comsParam.cpg2.data[tarId],
-            param.comsParam.cpg3.data[tarId], param.comsParam.cpg4.data[tarId],
-            param.comsParam.hvapr.data[tarId], param.comsParam.hvr.data[tarId],
-            param.comsParam.ev.data[tarId]);
-    }
-    else {
-        OCP_ABORT("WRONG Enthalpy Calculation Params!");
-    }
+    eC.Setup(param.comsParam, tarId);
 
 
 
@@ -319,8 +305,8 @@ void MixtureThermal_K01::FlashFIM(const OCP_DBL& Pin,
 void MixtureThermal_K01::CalEnthalpy()
 {
 
-    H[0] = eM->CalEnthalpy(T, &xij[0 * 2], HT[0], &Hx[0 * 2]);
-    H[1] = eM->CalEnthalpy(T, &xij[1 * 2], HT[1], &Hx[1 * 2]);
+    H[0] = eC.CalEnthalpy(T, &xij[0 * 2], HT[0], &Hx[0 * 2]);
+    H[1] = eC.CalEnthalpy(T, &xij[1 * 2], HT[1], &Hx[1 * 2]);
 
     // Internal energy per unit volume of fluid
 
@@ -347,7 +333,7 @@ void MixtureThermal_K01::CalEnthalpy()
 
 OCP_DBL MixtureThermal_K01::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin)
 {
-    return eM->CalEnthalpy(Tin + CONV5, Ziin);
+    return eC.CalEnthalpy(Tin + CONV5, Ziin);
 }
 
 OCP_DBL MixtureThermal_K01::XiPhase(const OCP_DBL& Pin,
