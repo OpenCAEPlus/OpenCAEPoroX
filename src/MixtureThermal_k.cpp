@@ -77,8 +77,6 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
 
     eC.Setup(param.comsParam, tarId);
 
-
-
     dXsdXp.resize((numCom + 2) * (numPhase + numPhase * numCom));
     MWp.resize(numPhase);
 

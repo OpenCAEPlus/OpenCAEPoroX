@@ -59,6 +59,22 @@ public:
     void CalOilPerDer(OCPFlowVarSet& vs) override;
 };
 
+
+class OCP3POilPerCalculation
+{
+public:
+    void Setup(const USI& i){
+        if (i == 1) pM = new OCP3POilPerMethod01();
+        else        pM = new OCP3POILPerMethod02();
+    }
+    void CalOilPer(OCPFlowVarSet& vs) { pM->CalOilPer(vs); }
+    void CalOilPerDer(OCPFlowVarSet& vs) { pM->CalOilPerDer(vs); }
+
+protected:
+    OCP3POilPerMethod* pM;
+};
+
+
 /// Calculate oil, gas, water relative permeability and capillary pressure
 class OCPOGWFMethod
 {
@@ -77,6 +93,9 @@ public:
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const = 0;
     virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const = 0;
     virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
+
+protected:
+    OCP3POilPerCalculation  opC;
 };
 
 
@@ -112,7 +131,6 @@ protected:
 protected:
     OCP_SGOF            SGOF;
     OCP_SWOF            SWOF;
-    OCP3POilPerMethod*  opMethod;
     OCPTable            SWPCGW; ///< auxiliary table: saturation of water vs. Pcgw
 };
 
@@ -151,7 +169,6 @@ protected:
     OCP_SOF3            SOF3;
     OCP_SGFN            SGFN;
     OCP_SWFN            SWFN;
-    OCP3POilPerMethod*  opMethod;
     OCPTable            SWPCGW; ///< auxiliary table: saturation of water vs. Pcgw
 };
 

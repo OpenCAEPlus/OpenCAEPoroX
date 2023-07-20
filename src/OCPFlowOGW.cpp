@@ -100,16 +100,7 @@ OCPOGWFMethod01::OCPOGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin,
 
 	Generate_SWPCWG();
 
-	switch (i)
-	{
-	case 1:
-		opMethod = new OCP3POilPerMethod01();
-		break;
-	case 2:
-	default:
-		opMethod = new OCP3POILPerMethod02();
-		break;
-	}
+	opC.Setup(1);
 }
 
 
@@ -133,7 +124,7 @@ void OCPOGWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 
 	SGOF.CalKrgKrogPcgo(vs.Sg, vs.krg, vs.krog, vs.Pcgo);
 
-	opMethod->CalOilPer(vs);
+	opC.CalOilPer(vs);
 }
 
 
@@ -143,7 +134,7 @@ void OCPOGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 
 	SGOF.CalKrgKrogPcgoDer(vs.Sg, vs.krg, vs.krog, vs.Pcgo, vs.dKrgdSg, vs.dKrogdSg, vs.dPcgodSg);
 
-	opMethod->CalOilPerDer(vs);
+	opC.CalOilPerDer(vs);
 }
 
 /////////////////////////////////////////////////////
@@ -164,16 +155,7 @@ OCPOGWFMethod02::OCPOGWFMethod02(const vector<vector<OCP_DBL>>& SOF3in,
 
 	Generate_SWPCWG();
 
-	switch (i)
-	{
-	case 1:
-		opMethod = new OCP3POilPerMethod01();
-		break;
-	case 2:
-	default:
-		opMethod = new OCP3POILPerMethod02();
-		break;
-	}
+	opC.Setup(1);
 }
 
 
@@ -186,7 +168,7 @@ void OCPOGWFMethod02::CalKrPc(OCPFlowVarSet& vs)
 
 	SOF3.CalKrowKrog(vs.So, vs.krow, vs.krog);
 
-	opMethod->CalOilPer(vs);
+	opC.CalOilPer(vs);
 }
 
 
@@ -199,7 +181,7 @@ void OCPOGWFMethod02::CalKrPcDer(OCPFlowVarSet& vs)
 
 	SOF3.CalKrowKrogDer(vs.So, vs.krow, vs.krog, vs.dKrowdSo, vs.dKrogdSo);
 
-	opMethod->CalOilPerDer(vs);
+	opC.CalOilPerDer(vs);
 
 }
 

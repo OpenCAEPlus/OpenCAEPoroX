@@ -222,74 +222,30 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.dXsdXp[6] = -vs.dXsdXp[2]; // dSw / dNw
     vs.dXsdXp[7] = -vs.dXsdXp[3]; // dSw / dT
 
-
-    // Calculate Enthalpy
-    //fill(vs.H.begin(), vs.H.end(), 0.0);
-    //fill(vs.HT.begin(), vs.HT.end(), 0.0);
-
-    //const OCP_DBL dT = vs.T - Tref;
-
-    //if (liquid_based || simple_hvap) {
-    //    for (USI j = 0; j < 2; j++) {
-    //        for (USI i = 0; i < 2; i++) {
-
-    //            Hx[j * 2 + i] =
-    //                (cpl1[i] * dT + 1.0 / 2 * cpl2[i] * pow(dT, 2) +
-    //                 1.0 / 3 * cpl3[i] * pow(dT, 3) + 1.0 / 4 * cpl4[i] * pow(dT, 4));
-
-    //            H[j] += xij[j * 2 + i] * Hx[j * 2 + i];
-
-    //            HT[j] +=
-    //                xij[j * 2 + i] * (cpl1[i] + cpl2[i] * dT +
-    //                                       cpl3[i] * pow(dT, 2) + cpl4[i] * pow(dT, 3));
-    //        }
-    //    }
-    //} else if (gas_based) {
-    //    for (USI j = 0; j < 2; j++) {
-    //        for (USI i = 0; i < 2; i++) {
-    //            Hx[j * 2 + i] = cpg1[i] * dT + 1.0 / 2 * cpg2[i] * pow(dT, 2) +
-    //                                 1.0 / 3 * cpg3[i] * pow(dT, 3) +
-    //                                 1.0 / 4 * cpg4[i] * pow(dT, 4);
-    //            H[j] += xij[j * 2 + i] * Hx[j * 2 + i];
-    //            HT[j] +=
-    //                xij[j * 2 + i] * (cpg1[i] + cpg2[i] * dT +
-    //                                       cpg3[i] * pow(dT, 2) + cpg4[i] * pow(dT, 3));
-
-    //            if (T < Tcrit[i]) {
-    //                Hx[j * 2 + i] -= hvr[i] * pow((Tcrit[i] - T), ev[i]);
-
-    //                H[j] -= xij[j * 2 + i] * hvr[i] * pow((Tcrit[i] - T), ev[i]);
-
-    //                HT[j] += xij[j * 2 + i] * hvr[i] * ev[i] *
-    //                         pow((Tcrit[i] - T), ev[i] - 1);
-    //            }
-    //        }
-    //    }
-    //} else {
-    //    OCP_ABORT("WRONG Type !");
-    //}
+    vs.H[0] = eC.CalEnthalpy(vs.T, &vs.xij[0 * 2], vs.HT[0], &vs.Hx[0 * 2]);
+    vs.H[1] = eC.CalEnthalpy(vs.T, &vs.xij[1 * 2], vs.HT[1], &vs.Hx[1 * 2]);
 
     //// Internal energy per unit volume of fluid
 
-    //// Uf, d Uf / d T, d Uf / d P
-    //Uf  = -P / (GRAVITY_FACTOR * CONV6);
-    //UfP = -1 / (GRAVITY_FACTOR * CONV6);
-    //UfT = 0;
+    // Uf, d Uf / d T, d Uf / d P
+    vs.Uf  = -vs.P / (GRAVITY_FACTOR * CONV6);
+    vs.UfP = -1 / (GRAVITY_FACTOR * CONV6);
+    vs.UfT = 0;
 
-    //for (USI j = 0; j < numPhase; j++) {
-    //    // Uf
-    //    Uf += S[j] * xi[j] * H[j];
-    //    // dUf / dP
-    //    UfP += -(vj[j] * xiP[j] / xi[j] + S[j] * vfP) / vf * xi[j] * H[j];
-    //    UfP += xiP[j] * S[j] * H[j];
-    //    // dUf / dT
-    //    UfT += -(vj[j] * xiT[j] / xi[j] + S[j] * vfT) / vf * xi[j] * H[j];
-    //    UfT += (xiT[j] * H[j] + HT[j] * xi[j]) * S[j];
-    //}
+    for (USI j = 0; j < 2; j++) {
+        // Uf
+        vs.Uf += vs.S[j] * vs.xi[j] * vs.H[j];
+        // dUf / dP
+        vs.UfP += -(vs.vj[j] * vs.xiP[j] / vs.xi[j] + vs.S[j] * vs.vfP) / vs.vf * vs.xi[j] * vs.H[j];
+        vs.UfP += vs.xiP[j] * vs.S[j] * vs.H[j];
+        // dUf / dT
+        vs.UfT += -(vs.vj[j] * vs.xiT[j] / vs.xi[j] + vs.S[j] * vs.vfT) / vs.vf * vs.xi[j] * vs.H[j];
+        vs.UfT += (vs.xiT[j] * vs.H[j] + vs.HT[j] * vs.xi[j]) * vs.S[j];
+    }
 
-    //// d Uf / d Ni
-    //Ufi[0] = dXsdXp[1] * xi[0] * H[0] + dXsdXp[5] * xi[1] * H[1];
-    //Ufi[1] = dXsdXp[2] * xi[0] * H[0] + dXsdXp[6] * xi[1] * H[1];
+    // d Uf / d Ni
+    vs.Ufi[0] = vs.dXsdXp[1] * vs.xi[0] * vs.H[0] + vs.dXsdXp[5] * vs.xi[1] * vs.H[1];
+    vs.Ufi[1] = vs.dXsdXp[2] * vs.xi[0] * vs.H[0] + vs.dXsdXp[6] * vs.xi[1] * vs.H[1];
 }
 
 
