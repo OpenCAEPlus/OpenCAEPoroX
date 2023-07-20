@@ -179,6 +179,28 @@ protected:
 
 
 /////////////////////////////////////////////////////
+// Viscosity Calculation
+/////////////////////////////////////////////////////
+
+class ViscosityMethod
+{
+public:
+	ViscosityMethod() = default;
+	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) = 0;
+	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz);
+};
+
+
+class ViscosityCalculation
+{
+public:
+
+protected:
+	ViscosityMethod* vM;
+};
+
+
+/////////////////////////////////////////////////////
 // EnthalpyCalculation
 /////////////////////////////////////////////////////
 
@@ -187,8 +209,8 @@ class EnthalpyMethod
 {
 public:
 	EnthalpyMethod() = default;
-	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const = 0;
-	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const = 0;
+	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const = 0;
+	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const = 0;
 };
 
 
@@ -198,8 +220,8 @@ class EnthalpyMethod01 : public EnthalpyMethod
 public:
 	EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
 				     const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in);
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const override;
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
 	/// reference temperature
@@ -226,8 +248,8 @@ public:
 		const vector<OCP_DBL>& cpg3in, const vector<OCP_DBL>& cpg4in, 
 		const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin, 
 		const vector<OCP_DBL>& evin);
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const override;
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
 	/// reference temperature
@@ -257,11 +279,14 @@ class EnthalpyCalculation
 {
 public:
 	void Setup(const ComponentParam& param, const USI& tarId);
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const { return eM->CalEnthalpy(T, xij); }
-	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const { return eM->CalEnthalpy(T, xij, HT, Hx); }
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const { return eM->CalEnthalpy(T, zi); }
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const { return eM->CalEnthalpy(T, zi, HT, Hz); }
 protected:
 	EnthalpyMethod* eM;
 };
+
+
+
 
 
 #endif // __OCPFUNCPVT_HEADER__
