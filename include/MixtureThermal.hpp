@@ -17,6 +17,7 @@
 // OpenCAEPoroX header files
 #include "Mixture.hpp"
 #include "OCPFuncPVT.hpp"
+#include "OCPMixtureThermalOW.hpp"
 
 /// MixtureThermal is inherited class of Mixture, it's used for ifThermal model.
 /// K-value Model
@@ -146,30 +147,7 @@ protected:
     vector<OCP_DBL> ct2;    ///< The second thermal expansion coefficient, 1/F
     vector<OCP_DBL> cpt; ///< The coefficient of density dependence on temperature and
                          ///< pressure, 1/psi-F
-    OCP_BOOL liquid_based{OCP_TRUE}; ///< Calculated enthalpy of fluid based liquid
-    OCP_BOOL gas_based{OCP_FALSE};   ///< Calculated enthalpy of fluid based gas
-    OCP_BOOL simple_hvap{OCP_FALSE}; ///< Calculated enthalpy of fluid with simple
-                                     ///< enthalpy of evaporation
-    vector<OCP_DBL> cpl1;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F
-    vector<OCP_DBL> cpl2;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^2
-    vector<OCP_DBL> cpl3;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^3
-    vector<OCP_DBL> cpl4;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^4
-    vector<OCP_DBL> cpg1;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F
-    vector<OCP_DBL> cpg2;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^2
-    vector<OCP_DBL> cpg3;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^3
-    vector<OCP_DBL> cpg4;            ///< Coefficients in the component liquid enthalpy
-                                     ///< calculations, Btu/lbmol/F^4
-    vector<OCP_DBL>
-        hvapr; ///< Coefficients in the component gas enthalpy calculations, Btu/lbmol
-    vector<OCP_DBL> hvr; ///< Coefficients in the vaporization enthalpy calculations
-    vector<OCP_DBL> ev;  ///< Coefficients in the vaporization enthalpy calculations
+
     vector<OCP_DBL>
         avisc; ///< Coefficients in water and oil viscosity correlation formulae
     vector<OCP_DBL>
@@ -182,6 +160,9 @@ protected:
                            ///< interpolating tab
     vector<OCP_DBL> cdata; ///< Auxiliary variables used to calculate viscosity with
                            ///< interpolating tab
+
+    OCPMixtureThermalOW OWTM;
+    EnthalpyMethod*     eM;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

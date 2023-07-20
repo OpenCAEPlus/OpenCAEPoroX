@@ -38,7 +38,7 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_D
 
 void OCPMixtureBlkOilOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * (1 - vs.S[1]) * PVDO.CalXiO(vs.P);
+    vs.Ni[0] = Vp * vs.S[0] * PVDO.CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
 
     Flash(vs);
@@ -74,7 +74,7 @@ void OCPMixtureBlkOilOWMethod01::Flash(OCPMixtureVarSet& vs)
 
 void OCPMixtureBlkOilOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * (1 - vs.S[1]) * PVDO.CalXiO(vs.P);
+    vs.Ni[0] = Vp * vs.S[0] * PVDO.CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
     
     FlashDer(vs);
@@ -85,13 +85,13 @@ void OCPMixtureBlkOilOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 {
     Flash(vs);
 
-    vs.dXsdXp[0]      = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.vf;             // dSo / dP
-    vs.dXsdXp[1]      = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.vf;  // dSo / dNo
-    vs.dXsdXp[2]      = -vs.S[0] * vs.vfi[1] / vs.vf;                       // dSo / dNw
-                      
-    vs.dXsdXp[3]      = (vs.vjP[1] - vs.S[1] * vs.vfP) / vs.vf;             // dSw / dP
-    vs.dXsdXp[4]      = -vs.S[1] * vs.vfi[0] / vs.vf;                       // dSw / dNo
-    vs.dXsdXp[5]      = (vs.vji[1][1] - vs.S[1] * vs.vfi[1]) / vs.vf;  // dSw / dNw
+    vs.dXsdXp[0] = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.vf;        // dSo / dP
+    vs.dXsdXp[1] = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.vf;  // dSo / dNo
+    vs.dXsdXp[2] = -vs.S[0] * vs.vfi[1] / vs.vf;                  // dSo / dNw
+                 
+    vs.dXsdXp[3] = -vs.dXsdXp[0];  // dSw / dP
+    vs.dXsdXp[4] = -vs.dXsdXp[1];  // dSw / dNo
+    vs.dXsdXp[5] = -vs.dXsdXp[2];  // dSw / dNw
 }
 
 

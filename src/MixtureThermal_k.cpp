@@ -66,66 +66,6 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
     else
         cpt.resize(numCom, 0);
 
-    if (param.comsParam.cpl1.activity)
-        cpl1 = param.comsParam.cpl1.data[tarId];
-    else
-        cpl1.resize(numCom, 0);
-
-    if (param.comsParam.cpl2.activity)
-        cpl2 = param.comsParam.cpl2.data[tarId];
-    else
-        cpl2.resize(numCom, 0);
-
-    if (param.comsParam.cpl3.activity)
-        cpl3 = param.comsParam.cpl3.data[tarId];
-    else
-        cpl3.resize(numCom, 0);
-
-    if (param.comsParam.cpl4.activity)
-        cpl4 = param.comsParam.cpl4.data[tarId];
-    else
-        cpl4.resize(numCom, 0);
-
-    if (param.comsParam.cpg1.activity)
-        cpg1 = param.comsParam.cpg1.data[tarId];
-    else
-        cpg1.resize(numCom, 0);
-
-    if (param.comsParam.cpg2.activity)
-        cpg2 = param.comsParam.cpg2.data[tarId];
-    else
-        cpg2.resize(numCom, 0);
-
-    if (param.comsParam.cpg3.activity)
-        cpg3 = param.comsParam.cpg3.data[tarId];
-    else
-        cpg3.resize(numCom, 0);
-
-    if (param.comsParam.cpg4.activity)
-        cpg4 = param.comsParam.cpg4.data[tarId];
-    else
-        cpg4.resize(numCom, 0);
-
-    if (param.comsParam.hvapr.activity)
-        hvapr = param.comsParam.hvapr.data[tarId];
-    else
-        hvapr.resize(numCom, 0);
-
-    if (param.comsParam.hvr.activity)
-        hvr = param.comsParam.hvr.data[tarId];
-    else
-        hvr.resize(numCom, 0);
-
-    if (param.comsParam.ev.activity)
-        ev = param.comsParam.ev.data[tarId];
-    else
-        ev.resize(numCom, 0);
-
-    if (param.comsParam.Tc.activity)
-        Tcrit = param.comsParam.Tc.data[tarId];
-    else
-        OCP_ABORT("TCRIT hasn't been input!");
-
     if (param.comsParam.MW.activity)
         MWc = param.comsParam.MW.data[tarId];
     else
@@ -133,6 +73,25 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
 
     Tref = param.comsParam.Tref[tarId] + CONV5;
     Pref = param.comsParam.Pref[tarId];
+
+
+    if (param.comsParam.cpl1.activity) {      
+        eM = new EnthalpyMethod01(param.comsParam.Tref[tarId],
+            param.comsParam.cpl1.data[tarId], param.comsParam.cpl2.data[tarId],
+            param.comsParam.cpl3.data[tarId], param.comsParam.cpl4.data[tarId]);
+    }
+    else if (param.comsParam.cpg1.activity){
+        eM = new EnthalpyMethod02(param.comsParam.Tref[tarId], param.comsParam.Tc.data[tarId],
+            param.comsParam.cpg1.data[tarId], param.comsParam.cpg2.data[tarId],
+            param.comsParam.cpg3.data[tarId], param.comsParam.cpg4.data[tarId],
+            param.comsParam.hvapr.data[tarId], param.comsParam.hvr.data[tarId],
+            param.comsParam.ev.data[tarId]);
+    }
+    else {
+        OCP_ABORT("WRONG Enthalpy Calculation Params!");
+    }
+
+
 
     dXsdXp.resize((numCom + 2) * (numPhase + numPhase * numCom));
     MWp.resize(numPhase);
@@ -157,6 +116,9 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
     fill(xix.begin(), xix.end(), 0.0);
     fill(muP.begin(), muP.end(), 0.0);
     fill(mux.begin(), mux.end(), 0.0);
+
+
+    OWTM.Setup(param, tarId);
 }
 
 void MixtureThermal_K01::Flash(const OCP_DBL& Pin,
@@ -356,50 +318,9 @@ void MixtureThermal_K01::FlashFIM(const OCP_DBL& Pin,
 
 void MixtureThermal_K01::CalEnthalpy()
 {
-    fill(H.begin(), H.end(), 0.0);
-    fill(HT.begin(), HT.end(), 0.0);
 
-    const OCP_DBL dT = T - Tref;
-
-    if (liquid_based || simple_hvap) {
-        for (USI j = 0; j < numPhase; j++) {
-            for (USI i = 0; i < numCom; i++) {
-
-                Hx[j * numCom + i] =
-                    (cpl1[i] * dT + 1.0 / 2 * cpl2[i] * pow(dT, 2) +
-                     1.0 / 3 * cpl3[i] * pow(dT, 3) + 1.0 / 4 * cpl4[i] * pow(dT, 4));
-
-                H[j] += xij[j * numCom + i] * Hx[j * numCom + i];
-
-                HT[j] +=
-                    xij[j * numCom + i] * (cpl1[i] + cpl2[i] * dT +
-                                           cpl3[i] * pow(dT, 2) + cpl4[i] * pow(dT, 3));
-            }
-        }
-    } else if (gas_based) {
-        for (USI j = 0; j < numPhase; j++) {
-            for (USI i = 0; i < numCom; i++) {
-                Hx[j * numCom + i] = cpg1[i] * dT + 1.0 / 2 * cpg2[i] * pow(dT, 2) +
-                                     1.0 / 3 * cpg3[i] * pow(dT, 3) +
-                                     1.0 / 4 * cpg4[i] * pow(dT, 4);
-                H[j] += xij[j * numCom + i] * Hx[j * numCom + i];
-                HT[j] +=
-                    xij[j * numCom + i] * (cpg1[i] + cpg2[i] * dT +
-                                           cpg3[i] * pow(dT, 2) + cpg4[i] * pow(dT, 3));
-
-                if (T < Tcrit[i]) {
-                    Hx[j * numCom + i] -= hvr[i] * pow((Tcrit[i] - T), ev[i]);
-
-                    H[j] -= xij[j * numCom + i] * hvr[i] * pow((Tcrit[i] - T), ev[i]);
-
-                    HT[j] += xij[j * numCom + i] * hvr[i] * ev[i] *
-                             pow((Tcrit[i] - T), ev[i] - 1);
-                }
-            }
-        }
-    } else {
-        OCP_ABORT("WRONG Type !");
-    }
+    H[0] = eM->CalEnthalpy(T, &xij[0 * 2], HT[0], &Hx[0 * 2]);
+    H[1] = eM->CalEnthalpy(T, &xij[1 * 2], HT[1], &Hx[1 * 2]);
 
     // Internal energy per unit volume of fluid
 
@@ -426,28 +347,7 @@ void MixtureThermal_K01::CalEnthalpy()
 
 OCP_DBL MixtureThermal_K01::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin)
 {
-    T                  = Tin + CONV5;
-    const OCP_DBL   dT = T - Tref;
-    vector<OCP_DBL> zi{0, 1};
-
-    OCP_DBL Hw = 0;
-    if (liquid_based) {
-        for (USI i = 0; i < numCom; i++) {
-            Hw += zi[i] *
-                  (cpl1[i] * dT + 1.0 / 2 * cpl2[i] * pow(dT, 2) +
-                   1.0 / 3 * cpl3[i] * pow(dT, 3) + 1.0 / 4 * cpl4[i] * pow(dT, 4));
-        }
-    } else if (gas_based) {
-        for (USI i = 0; i < numCom; i++) {
-            Hw += zi[i] *
-                  (cpg1[i] * dT + 1.0 / 2 * cpg2[i] * pow(dT, 2) +
-                   1.0 / 3 * cpg3[i] * pow(dT, 3) + 1.0 / 4 * cpg4[i] * pow(dT, 4));
-            if (T < Tcrit[i]) {
-                Hw -= zi[i] * hvr[i] * pow((Tcrit[i] - T), ev[i]);
-            }
-        }
-    }
-    return Hw;
+    return eM->CalEnthalpy(Tin + CONV5, Ziin);
 }
 
 OCP_DBL MixtureThermal_K01::XiPhase(const OCP_DBL& Pin,
@@ -455,19 +355,7 @@ OCP_DBL MixtureThermal_K01::XiPhase(const OCP_DBL& Pin,
                                     const OCP_DBL* Ziin,
                                     const USI&     tarPhase)
 {
-    P                = Pin;
-    T                = Tin + CONV5;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-
-    if (tarPhase == WATER) {
-        // inj fluid is water
-        OCP_DBL xiw = xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT -
-                                      ct2[1] * pow(dT, 2) / 2 + cpt[1] * dP * dT);
-        return xiw;
-    } else {
-        OCP_ABORT("Wrong tarPhase!");
-    }
+    return OWTM.CalXi(Pin, Tin, tarPhase);
 }
 
 OCP_DBL
@@ -477,23 +365,7 @@ MixtureThermal_K01::RhoPhase(const OCP_DBL& Pin,
                              const OCP_DBL* Ziin,
                              const USI&     tarPhase)
 {
-    P                = Pin;
-    T                = Tin + CONV5;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-
-    if (tarPhase == OIL) {
-        const OCP_DBL xio = xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT -
-                                            ct2[0] * pow(dT, 2) / 2 + cpt[0] * dP * dT);
-        return MWp[0] * xio;
-    } else if (tarPhase == WATER) {
-        // inj fluid is water
-        const OCP_DBL xiw = xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT -
-                                            ct2[1] * pow(dT, 2) / 2 + cpt[1] * dP * dT);
-        return MWp[1] * xiw;
-    } else {
-        OCP_ABORT("Wrong tarPhase!");
-    }
+    return OWTM.CalRho(Pin, Tin, tarPhase);
 }
 
 void MixtureThermal_K01::CalProdWeight(const OCP_DBL&         Pin,

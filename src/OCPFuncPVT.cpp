@@ -219,6 +219,110 @@ void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL&
 }
 
 
+/////////////////////////////////////////////////////
+// EnthalpyMethod
+/////////////////////////////////////////////////////
+
+
+EnthalpyMethod01::EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
+	const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in)
+{
+	Tref = Trefin + CONV5;
+	cpl1 = cpl1in;
+	cpl2 = cpl2in;
+	cpl3 = cpl3in;
+	cpl4 = cpl4in;
+	nc   = cpl1.size();
+}
+
+
+OCP_DBL EnthalpyMethod01::CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const
+{
+	OCP_DBL H = 0;
+	OCP_DBL Hxi;
+	const OCP_DBL dT = T - Tref;		
+	for (USI i = 0; i < nc; i++) {
+		Hxi = (cpl1[i] * dT + 1.0 / 2 * cpl2[i] * pow(dT, 2) 
+			+ 1.0 / 3 * cpl3[i] * pow(dT, 3) + 1.0 / 4 * cpl4[i] * pow(dT, 4));
+		H   += xij[i] * Hxi;
+	}
+	return H;
+}
+
+OCP_DBL EnthalpyMethod01::CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const
+{
+	OCP_DBL H = 0;
+	HT = 0;
+	const OCP_DBL dT = T - Tref;
+	for (USI i = 0; i < nc; i++) {
+
+		Hx[i] = (cpl1[i] * dT + 1.0 / 2 * cpl2[i] * pow(dT, 2) 
+			  + 1.0 / 3 * cpl3[i] * pow(dT, 3) + 1.0 / 4 * cpl4[i] * pow(dT, 4));
+
+		H     += xij[i] * Hx[i];
+		HT    += xij[i] * (cpl1[i] + cpl2[i] * dT + cpl3[i] * pow(dT, 2) + cpl4[i] * pow(dT, 3));
+	}
+	return H;
+}
+
+
+EnthalpyMethod02::EnthalpyMethod02(const OCP_DBL& Trefin, const vector<OCP_DBL>& Tcritin,
+	const vector<OCP_DBL>& cpg1in, const vector<OCP_DBL>& cpg2in,
+	const vector<OCP_DBL>& cpg3in, const vector<OCP_DBL>& cpg4in,
+	const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin,
+	const vector<OCP_DBL>& evin)
+{
+	Tref  = Trefin + CONV5;
+	Tcrit = Tcritin;
+	cpg1  = cpg1in;
+	cpg2  = cpg2in;
+	cpg3  = cpg3in;
+	cpg4  = cpg4in;
+	hvapr = hvaprin;
+	hvr   = hvrin;
+	ev    = evin;
+	nc    = cpg1.size();
+}
+
+
+OCP_DBL EnthalpyMethod02::CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const
+{
+	OCP_DBL H = 0;
+	OCP_DBL Hxi;
+	const OCP_DBL dT = T - Tref;
+	
+	for (USI i = 0; i < nc; i++) {
+		Hxi = cpg1[i] * dT + 1.0 / 2 * cpg2[i] * pow(dT, 2) 
+			+ 1.0 / 3 * cpg3[i] * pow(dT, 3) + 1.0 / 4 * cpg4[i] * pow(dT, 4);
+		H   += xij[i] * Hxi;
+	}
+	return H;
+}
+
+
+OCP_DBL EnthalpyMethod02::CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const
+{
+	OCP_DBL H = 0;
+	HT = 0;
+	const OCP_DBL dT = T - Tref;
+	for (USI i = 0; i < nc; i++) {
+		Hx[i] = cpg1[i] * dT + 1.0 / 2 * cpg2[i] * pow(dT, 2) 
+			  + 1.0 / 3 * cpg3[i] * pow(dT, 3) + 1.0 / 4 * cpg4[i] * pow(dT, 4);
+		H     += xij[i] * Hx[i];
+		HT    += xij[i] * (cpg1[i] + cpg2[i] * dT +
+				cpg3[i] * pow(dT, 2) + cpg4[i] * pow(dT, 3));
+
+		if (T < Tcrit[i]) {
+			Hx[i] -= hvr[i] * pow((Tcrit[i] - T), ev[i]);
+			H     -= xij[i] * hvr[i] * pow((Tcrit[i] - T), ev[i]);
+			HT    += xij[i] * hvr[i] * ev[i] * pow((Tcrit[i] - T), ev[i] - 1);
+		}
+	}
+	return H;
+}
+
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

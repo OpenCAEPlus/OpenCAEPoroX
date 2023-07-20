@@ -27,7 +27,6 @@ using namespace std;
 /////////////////////////////////////////////////////
 
 
-/// Calculate oil, gas, water relative permeability and capillary pressure
 class OCPMixtureBlkOilOGWMethod
 {
 public:
@@ -137,7 +136,6 @@ protected:
     }
 
 protected:
-    ///< Phase and Component index
     OCPMixtureBlkOilOGWMethod* pmMethod;
     OCP_DBL                    stdRhoO;
     OCP_DBL                    stdRhoG;

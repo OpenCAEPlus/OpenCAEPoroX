@@ -794,7 +794,7 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
     }
 
     NTSFUN = stoi(vbuf[0]);
-    NTPVT  = stoi(vbuf[1]);
+    comsParam.NTPVT = NTPVT  = stoi(vbuf[1]);
     NTROOC = stoi(vbuf[2]);
 
     if (CURRENT_RANK == MASTER_PROCESS) {
@@ -851,6 +851,8 @@ void ParamReservoir::CheckParam()
     CheckDenGrav();
     CheckPhase();
     CheckRock();
+    CheckCPL();
+    CheckCPG();
 }
 
 /// Check data dimension for potential problems.
@@ -950,6 +952,56 @@ void ParamReservoir::CheckEqlRegion() const
 {
     if (PBVD_T.data.size() > 1) {
         OCP_ABORT("More than one equilibrium region is not supported!");
+    }
+}
+
+
+/// Check cpl1, cpl2, cpl3, cpl4
+void ParamReservoir::CheckCPL()
+{
+    if (comsParam.cpl1.activity) {
+        const USI l = comsParam.cpl1.data.size();
+        const vector<OCP_DBL> tmp(comsParam.numCom, 0);
+        for (USI i = 0; i < l; i++) {
+            if (comsParam.cpl2.data.size() < l) {
+                comsParam.cpl2.data.push_back(tmp);
+            }
+            if (comsParam.cpl3.data.size() < l) {
+                comsParam.cpl3.data.push_back(tmp);
+            }
+            if (comsParam.cpl4.data.size() < l) {
+                comsParam.cpl4.data.push_back(tmp);
+            }
+        }
+    } 
+}
+
+/// Check cpg1, cpg2, cpg3, cpg4
+void ParamReservoir::CheckCPG()
+{
+    if (comsParam.cpg1.activity) {
+        const USI l = comsParam.cpg1.data.size();
+        const vector<OCP_DBL> tmp(l, 0);
+        for (USI i = 0; i < l; i++) {
+            if (comsParam.cpg2.data.size() < i) {
+                comsParam.cpg2.data.push_back(tmp);
+            }
+            if (comsParam.cpg3.data.size() < i) {
+                comsParam.cpg3.data.push_back(tmp);
+            }
+            if (comsParam.cpg4.data.size() < i) {
+                comsParam.cpg4.data.push_back(tmp);
+            }
+            if (comsParam.hvapr.data.size() < i) {
+                comsParam.hvapr.data.push_back(tmp);
+            }
+            if (comsParam.hvr.data.size() < i) {
+                comsParam.hvr.data.push_back(tmp);
+            }
+            if (comsParam.ev.data.size() < i) {
+                comsParam.ev.data.push_back(tmp);
+            }
+        }
     }
 }
 

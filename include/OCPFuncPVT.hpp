@@ -177,6 +177,80 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// EnthalpyMethod
+/////////////////////////////////////////////////////
+
+class EnthalpyMethod
+{
+public:
+	EnthalpyMethod() = default;
+	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const = 0;
+	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const = 0;
+};
+
+
+// liquid_based or simple_hvap
+class EnthalpyMethod01 : public EnthalpyMethod
+{
+public:
+	EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
+				     const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in);
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const override;
+
+protected:
+	/// reference temperature
+	OCP_DBL         Tref;
+	/// num of components
+	USI             nc;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F
+	vector<OCP_DBL> cpl1;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^2
+	vector<OCP_DBL> cpl2;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^3
+	vector<OCP_DBL> cpl3;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^4
+	vector<OCP_DBL> cpl4;
+};
+
+
+// gas_based
+class EnthalpyMethod02 : public EnthalpyMethod
+{
+public:
+	EnthalpyMethod02(const OCP_DBL& Trefin, const vector<OCP_DBL>& Tcritin,
+		const vector<OCP_DBL>& cpg1in, const vector<OCP_DBL>& cpg2in,
+		const vector<OCP_DBL>& cpg3in, const vector<OCP_DBL>& cpg4in, 
+		const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin, 
+		const vector<OCP_DBL>& evin);
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij) const override;
+	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* xij, OCP_DBL& HT, OCP_DBL* Hx) const override;
+
+protected:
+	/// reference temperature
+	OCP_DBL         Tref;
+	/// Critical temperature of hydrocarbon components
+	vector<OCP_DBL> Tcrit;
+	/// num of components
+	USI             nc;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F
+	vector<OCP_DBL> cpg1;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^2
+	vector<OCP_DBL> cpg2;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^3
+	vector<OCP_DBL> cpg3;
+	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^4
+	vector<OCP_DBL> cpg4;
+	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol
+	vector<OCP_DBL> hvapr;
+	/// Coefficients in the vaporization enthalpy calculations
+	vector<OCP_DBL> hvr;
+	/// Coefficients in the vaporization enthalpy calculations
+	vector<OCP_DBL> ev;
+};
+
+
 #endif // __OCPFUNCPVT_HEADER__
 
 /*----------------------------------------------------------------------------*/

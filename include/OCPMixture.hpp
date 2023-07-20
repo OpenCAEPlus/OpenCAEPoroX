@@ -18,12 +18,12 @@
 
 using namespace std;
 
-const USI OCPMIXTURE_BO_OG   = 121;
-const USI OCPMIXTURE_BO_OW   = 122;
-const USI OCPMIXTURE_BO_GW   = 123;
-const USI OCPMIXTURE_BO_OGW  = 13;
-const USI OCPMIXTURE_COMP    = 2;
-const USI OCPMIXTURE_THERMAL = 3;
+const USI OCPMIXTURE_BO_OG       = 121;
+const USI OCPMIXTURE_BO_OW       = 122;
+const USI OCPMIXTURE_BO_GW       = 123;
+const USI OCPMIXTURE_BO_OGW      = 13;
+const USI OCPMIXTURE_COMP        = 2;
+const USI OCPMIXTURE_THERMALK_OW = 3;
 
 /// mixture varset
 class OCPMixtureVarSet
@@ -59,6 +59,10 @@ public:
         muP.resize(np);
         if (ifThermal) muT.resize(np);
         mux.resize(np * nc);
+        if (ifThermal) Ufi.resize(nc);
+        if (ifThermal) H.resize(np);
+        if (ifThermal) HT.resize(np);
+        if (ifThermal) Hx.resize(np * nc);
 
         if (ifThermal) dXsdXp.resize(np * (nc + 1) * (nc + 2));
         else           dXsdXp.resize(np * (nc + 1) * (nc + 1));
@@ -127,6 +131,21 @@ public:
     vector<OCP_DBL> muT;  
     /// dmu / dx
     vector<OCP_DBL> mux;  
+
+    /// Internal energy of fluid
+    OCP_DBL Uf;
+    /// dUf / dP
+    OCP_DBL UfP;
+    /// dUf / dT
+    OCP_DBL UfT;
+    /// dUf / dNi
+    vector<OCP_DBL> Ufi; 
+    /// Enthalpy
+    vector<OCP_DBL> H;  
+    /// d Hj / d T
+    vector<OCP_DBL> HT;  
+    ///< d Hj / d xij
+    vector<OCP_DBL> Hx;  
 
     /// d(Sj, xij) / d(P,Ni,(T))
     vector<OCP_DBL> dXsdXp;

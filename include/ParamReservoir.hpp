@@ -116,7 +116,7 @@ public:
     void InputRR(ifstream& ifs);
 
 public:
-    USI            NTPVT{1};       ///< num of EoS region, constant now.
+    USI            NTPVT;          ///< num of EoS region.
     USI            numCom{0};      ///< num of components, water is excluded.
     USI            numPhase{2};    ///< num of phase, water is excluded, constant now.
     vector<string> Cname;          ///< Name of hydrocarbon components
@@ -434,6 +434,12 @@ public:
 
     /// (Todo) Initialization of equilibration of only one region is realized.
     void CheckEqlRegion() const;
+
+    /// Check cpl1, cpl2, cpl3, cpl4
+    void CheckCPL();
+
+    /// Check cpg1, cpg2, cpg3, cpg4
+    void CheckCPG();
 
 public:
 
