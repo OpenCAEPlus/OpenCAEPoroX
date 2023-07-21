@@ -24,29 +24,6 @@ OCPMixtureThermalOWMethod01::OCPMixtureThermalOWMethod01(const ComponentParam& p
         xi_ref = param.molden.data[tarId];
     else
         OCP_ABORT("ACF hasn't been input!");
-    if (param.avisc.activity || param.bvisc.activity) {
-        if (param.avisc.activity)
-            avisc = param.avisc.data[tarId];
-        else
-            avisc.resize(2, 0);
-        if (param.bvisc.activity)
-            bvisc = param.bvisc.data[tarId];
-        else
-            bvisc.resize(2, 0);
-        useViscTab = OCP_FALSE;
-    }
-    else {
-        if (param.viscTab.data.size() <= tarId) {
-            OCP_ABORT("VISCTAB hasn't been input for " + to_string(tarId + 1) +
-                " th Region!");
-        }
-        useViscTab = OCP_TRUE;
-        visc.Setup(param.viscTab.data[tarId]);
-        // unit convert: F -> R
-        for (auto& v : visc.GetCol(0)) {
-            v += CONV5;
-        }
-    }
 
     if (param.cp.activity)
         cp = param.cp.data[tarId];
@@ -76,10 +53,8 @@ OCPMixtureThermalOWMethod01::OCPMixtureThermalOWMethod01(const ComponentParam& p
     Tref = param.Tref[tarId] + CONV5;
     Pref = param.Pref[tarId];
 
+    vC.Setup(param, tarId);
     eC.Setup(param, tarId);
-  
-    data.resize(3, 0);
-    cdata.resize(3, 0);
 
     MWp = MWc;
 
@@ -155,21 +130,8 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.Nt = vs.Ni[0] + vs.Ni[1];
 
     // phase viscosity
-    if (useViscTab) {
-        visc.Eval_All(0, vs.T, data, cdata);
-        vs.mu[0] = data[1];
-        vs.mu[1] = data[2];
-        // d mu / dT
-        vs.muT[0] = cdata[1];
-        vs.muT[1] = cdata[2];
-
-    } else {
-        vs.mu[0] = avisc[0] * exp(bvisc[0] / vs.T);
-        vs.mu[1] = avisc[1] * exp(bvisc[1] / vs.T);
-        // d mu / dT
-        vs.muT[0] = vs.mu[0] * (-bvisc[0] / (vs.T * vs.T));
-        vs.muT[1] = vs.mu[1] * (-bvisc[1] / (vs.T * vs.T));
-    }
+    vs.mu[0] = vC.CalViscosity(vs.P, vs.T, &vs.xij[0 * 2], vs.muP[0], vs.muT[0], &vs.mux[0 * 2]);
+    vs.mu[1] = vC.CalViscosity(vs.P, vs.T, &vs.xij[1 * 2], vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
 
     // phase molar density
     vs.xi[0] = xi_ref[0] *

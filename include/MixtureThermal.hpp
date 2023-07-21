@@ -148,21 +148,12 @@ protected:
     vector<OCP_DBL> cpt; ///< The coefficient of density dependence on temperature and
                          ///< pressure, 1/psi-F
 
-    vector<OCP_DBL>
-        avisc; ///< Coefficients in water and oil viscosity correlation formulae
-    vector<OCP_DBL>
-        bvisc; ///< Coefficients in water and oil viscosity correlation formulae
     vector<OCP_DBL> avg; ///< Coefficients Ak in gas viscosity correlation formulae
     vector<OCP_DBL> bvg; ///< Coefficients Bk in gas viscosity correlation formulae
-    OCP_BOOL        useViscTab; ///< If use viscosity to calculate viscosity
-    OCPTable        visc;       ///< Viscosity-versus-temperature dependence
-    vector<OCP_DBL> data;  ///< Auxiliary variables used to calculate viscosity with
-                           ///< interpolating tab
-    vector<OCP_DBL> cdata; ///< Auxiliary variables used to calculate viscosity with
-                           ///< interpolating tab
 
-    OCPMixtureThermalOW OWTM;
-    EnthalpyCalculation eC;
+    OCPMixtureThermalOW  OWTM;
+    EnthalpyCalculation  eC;
+    ViscosityCalculation vC;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

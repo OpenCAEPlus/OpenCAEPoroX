@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////
 
 
-OCP_DBL OCP_PVTW::CalBw(const OCP_DBL& P)
+OCP_DBL OCP_PVTW::CalBw(const OCP_DBL& P) const
 {
 	table.GetCloseRow(0, P, data);
 	const OCP_DBL Pref  = data[0];
@@ -30,7 +30,7 @@ OCP_DBL OCP_PVTW::CalBw(const OCP_DBL& P)
 
 
 void OCP_PVTW::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP)
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const
 {
 	OCP_DBL b, bp;
 	CalBwMuwDer(P, b, mu, bp, muP);
@@ -42,7 +42,7 @@ void OCP_PVTW::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 }
 
 
-void OCP_PVTW::CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP)
+void OCP_PVTW::CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const
 {
 	table.GetCloseRow(0, P, data);
 	const OCP_DBL Pref   = data[0];
@@ -61,7 +61,7 @@ void OCP_PVTW::CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& b
 /////////////////////////////////////////////////////
 
 
-OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb)
+OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const
 {
 	table.Eval_All(0, Pb, data);
 	const OCP_DBL rssat = data[1];
@@ -73,7 +73,7 @@ OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb)
 }
 
 
-OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P, const OCP_DBL& Pb)
+OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) const
 {
 	table.Eval_All(0, Pb, data);
 	const OCP_DBL rs    = data[1];
@@ -85,7 +85,7 @@ OCP_DBL OCP_PVCO::CalXiO(const OCP_DBL& P, const OCP_DBL& Pb)
 
 
 void OCP_PVCO::CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
-	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP)
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP) const
 {
 	OCP_DBL b, bP;
 	CalRsBoMuoDer(P, b, rs, mu, bP, rsP, muP);
@@ -99,7 +99,7 @@ void OCP_PVCO::CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_
 
 
 void OCP_PVCO::CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
-	OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP)
+	OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP) const
 {
 	table.Eval_All(0, P, data, cdata);
 	rs  = data[1];
@@ -112,7 +112,7 @@ void OCP_PVCO::CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL&
 
 
 void OCP_PVCO::CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs)
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs) const
 {
 	OCP_DBL b, bP, bRs;
 	CalBoMuoDer(rs, P, b, mu, bP, muP, bRs, muRs);
@@ -128,7 +128,7 @@ void OCP_PVCO::CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, 
 
 
 void OCP_PVCO::CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu,
-						     OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs)
+						     OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs) const
 {
 	table.Eval_All(1, rs, data, cdata);
 	const OCP_DBL Pref     = data[0];
@@ -159,7 +159,7 @@ void OCP_PVCO::CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_
 
 
 void OCP_PVDG::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP)
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const
 {
 	OCP_DBL b, bp;
 	CalBgMugDer(P, b, mu, bp, muP);
@@ -170,12 +170,12 @@ void OCP_PVDG::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	rhoP = -1000 / CONV1 * stdRhoG * bp / (b * b);
 }
 
-OCP_DBL OCP_PVDG::CalBg(const OCP_DBL& P)
+OCP_DBL OCP_PVDG::CalBg(const OCP_DBL& P) const
 {
 	return table.Eval(0, P, 1);
 }
 
-void OCP_PVDG::CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP)
+void OCP_PVDG::CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const
 {
 	table.Eval_All(0, P, data, cdata);
 	b   = data[1];
@@ -190,14 +190,14 @@ void OCP_PVDG::CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& b
 /////////////////////////////////////////////////////
 
 
-OCP_DBL OCP_PVDO::CalBo(const OCP_DBL& P)
+OCP_DBL OCP_PVDO::CalBo(const OCP_DBL& P) const
 {
 	return table.Eval(0, P, 1);
 }
 
 
 void OCP_PVDO::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP)
+	OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const
 {
 	OCP_DBL b, bp;
 	CalBoMuoDer(P, b, mu, bp, muP);
@@ -209,13 +209,120 @@ void OCP_PVDO::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 }
 
 
-void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP)
+void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const
 {
 	table.Eval_All(0, P, data, cdata);
 	bo     = data[1];
 	muo    = data[2];
 	dBodP  = cdata[1];
 	dMuodP = cdata[2];
+}
+
+
+/////////////////////////////////////////////////////
+// ViscosityCalculation
+/////////////////////////////////////////////////////
+
+
+ViscosityMethod01::ViscosityMethod01(const TableSet& ts)
+{
+	table.Setup(ts);
+	nc = ts.colNum - 1;
+	muc.resize(nc);
+	mucP.resize(nc);
+	mucT.resize(nc);
+}
+
+
+OCP_DBL ViscosityMethod01::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+{
+	OCP_DBL mu = 0;
+	table.Eval(P, T - CONV5, muc);
+	for (USI i = 0; i < nc; i++)
+		mu += zi[i] * log(muc[i]);
+	return exp(mu);
+}
+
+
+OCP_DBL ViscosityMethod01::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+{
+	OCP_DBL mu = 0;
+	muP = 0;
+	muT = 0;
+	table.Eval(P, T - CONV5, muc, mucP, mucT);
+	for (USI i = 0; i < nc; i++) {
+		muz[i] = zi[i] * log(muc[i]);
+		mu     += muz[i];
+	}
+	mu = exp(mu);
+
+	for (USI i = 0; i < nc; i++) {
+		muP    += zi[i] / muc[i] * mucP[i];
+		muT    += zi[i] / muc[i] * mucT[i];
+		muz[i] *= mu;
+	}
+	muP *= mu;
+	muT *= mu;
+		
+	return mu;
+}
+
+
+ViscosityMethod02::ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP_DBL>& bv)
+{
+	avisc = av;
+	bvisc = bv;
+	nc    = avisc.size();
+}
+
+
+OCP_DBL ViscosityMethod02::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+{
+	OCP_DBL mu = 0;
+	for (USI i = 0; i < nc; i++) {
+		muc[i]  = avisc[i] * exp(bvisc[i] / T); 
+		mu      += zi[i] * log(muc[i]);
+	}
+	return exp(mu);
+}
+
+
+OCP_DBL ViscosityMethod02::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+{
+	OCP_DBL mu = 0;
+	muP = 0;
+	muT = 0;
+	for (USI i = 0; i < nc; i++) {
+		muc[i]  = avisc[i] * exp(bvisc[i] / T);
+		mucT[i] = -muc[i] * (bvisc[i] / T) / T;
+		muz[i]  = zi[i] * log(muc[i]);
+		mu      += muz[i];
+	}
+	mu = exp(mu);
+
+	for (USI i = 0; i < nc; i++) {
+		muP    += zi[i] / muc[i] * mucP[i];
+		muT    += zi[i] / muc[i] * mucT[i];
+		muz[i] *= mu;
+	}
+	muP *= mu;
+	muT *= mu;
+
+	return mu;
+}
+
+
+void ViscosityCalculation::Setup(const ComponentParam& param, const USI& tarId)
+{
+	if (param.avisc.activity) {
+		vM = new ViscosityMethod02(param.avisc.data[tarId], param.bvisc.data[tarId]);
+	}
+	else if (param.viscTab.data.size() > 0) {
+		vM = new ViscosityMethod01(param.viscTab);
+	}
+	else {
+		OCP_ABORT("WRONG Viscosity Calculation Params!");
+	}
 }
 
 

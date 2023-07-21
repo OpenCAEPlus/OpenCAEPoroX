@@ -23,28 +23,8 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
         xi_ref = param.comsParam.molden.data[tarId];
     else
         OCP_ABORT("ACF hasn't been input!");
-    if (param.comsParam.avisc.activity || param.comsParam.bvisc.activity) {
-        if (param.comsParam.avisc.activity)
-            avisc = param.comsParam.avisc.data[tarId];
-        else
-            avisc.resize(numCom, 0);
-        if (param.comsParam.bvisc.activity)
-            bvisc = param.comsParam.bvisc.data[tarId];
-        else
-            bvisc.resize(numCom, 0);
-        useViscTab = OCP_FALSE;
-    } else {
-        if (param.comsParam.viscTab.data.size() <= tarId) {
-            OCP_ABORT("VISCTAB hasn't been input for " + to_string(tarId + 1) +
-                      " th Region!");
-        }
-        useViscTab = OCP_TRUE;
-        visc.Setup(param.comsParam.viscTab.data[tarId]);
-        // unit convert: F -> R
-        for (auto& v : visc.GetCol(0)) {
-            v += CONV5;
-        }
-    }
+
+    vC.Setup(param.comsParam, tarId);
 
     if (param.comsParam.cp.activity)
         cp = param.comsParam.cp.data[tarId];
@@ -79,9 +59,6 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
 
     dXsdXp.resize((numCom + 2) * (numPhase + numPhase * numCom));
     MWp.resize(numPhase);
-
-    data.resize(3, 0);
-    cdata.resize(3, 0);
 
     // Init
     phaseExist[0] = true;
@@ -168,14 +145,17 @@ void MixtureThermal_K01::FlashIMPEC(const OCP_DBL& Pin,
     Ni[1]            = Niin[1];
 
     // phase viscosity
-    if (useViscTab) {
-        visc.Eval_All(0, T, data, cdata);
-        mu[0] = data[1];
-        mu[1] = data[2];
-    } else {
-        mu[0] = avisc[0] * exp(bvisc[0] / T);
-        mu[1] = avisc[1] * exp(bvisc[1] / T);
-    }
+    //if (useViscTab) {
+    //    visc.Eval_All(0, T, data, cdata);
+    //    mu[0] = data[1];
+    //    mu[1] = data[2];
+    //} else {
+    //    mu[0] = avisc[0] * exp(bvisc[0] / T);
+    //    mu[1] = avisc[1] * exp(bvisc[1] / T);
+    //}
+
+    mu[0] = vC.CalViscosity(P, T, &xij[0 * 2]);
+    mu[1] = vC.CalViscosity(P, T, &xij[1 * 2]);
 
     // phase molar density
     xi[0] = xi_ref[0] *
@@ -229,22 +209,8 @@ void MixtureThermal_K01::FlashFIM(const OCP_DBL& Pin,
     Ni[1]            = Niin[1];
     Nt               = Ni[0] + Ni[1];
 
-    // phase viscosity
-    if (useViscTab) {
-        visc.Eval_All(0, T, data, cdata);
-        mu[0] = data[1];
-        mu[1] = data[2];
-        // d mu / dT
-        muT[0] = cdata[1];
-        muT[1] = cdata[2];
-
-    } else {
-        mu[0] = avisc[0] * exp(bvisc[0] / T);
-        mu[1] = avisc[1] * exp(bvisc[1] / T);
-        // d mu / dT
-        muT[0] = mu[0] * (-bvisc[0] / (T * T));
-        muT[1] = mu[1] * (-bvisc[1] / (T * T));
-    }
+    mu[0] = vC.CalViscosity(P, T, &xij[0 * 2], muP[0], muT[0], &mux[0 * 2]);
+    mu[1] = vC.CalViscosity(P, T, &xij[1 * 2], muP[1], muT[1], &mux[1 * 2]);
 
     // phase molar density
     xi[0] = xi_ref[0] *

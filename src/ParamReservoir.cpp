@@ -1244,6 +1244,7 @@ void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
         ReadLine(ifs, vbuf);
         if (vbuf[0] == "/") {
             nReg++;
+            tmp.resize(numCom);
             objPtr->data.push_back(tmp);
             if (nReg >= NTPVT) break;
             tmp.clear();
@@ -1256,6 +1257,7 @@ void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
         }
         if (vbuf.back() == "/") {
             nReg++;
+            tmp.resize(numCom);
             objPtr->data.push_back(tmp);
             tmp.clear();
             if (nReg >= NTPVT) break;
@@ -1357,6 +1359,7 @@ void ComponentParam::InputVISCTAB(ifstream& ifs)
     USI                     ncol = numCom + 1; // temp + comps
     tmp.resize(ncol);
     OCP_BOOL flag = OCP_TRUE;
+
 
     while (OCP_TRUE) {
         if (flag) {

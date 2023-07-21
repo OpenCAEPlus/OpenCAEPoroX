@@ -54,7 +54,7 @@ public:
 	OCP_DBL  CalPcow(const OCP_DBL& Sw) const { return table.Eval(0, Sw, 3); }
 
 	/// Return corresponding Krw, Krow, Pcwo with Sw
-	void     CalKrwKrowPcwo(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& krow, OCP_DBL& Pcwo) {
+	void     CalKrwKrowPcwo(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& krow, OCP_DBL& Pcwo) const {
 		table.Eval_All(0, Sw, data);
 		krw  =  data[1];
 		krow =  data[2];
@@ -63,7 +63,7 @@ public:
 	/// Return corresponding Krw, Krow, Pcwo and derivatives with Sw 
 	void     CalKrwKrowPcwoDer(const OCP_DBL& Sw, 
 		OCP_DBL& krw, OCP_DBL& krow, OCP_DBL& Pcwo, 
-		OCP_DBL& dkrwdSw, OCP_DBL& dkrowdSw, OCP_DBL& dPcwodSw) {
+		OCP_DBL& dkrwdSw, OCP_DBL& dkrowdSw, OCP_DBL& dPcwodSw) const {
 		table.Eval_All(0, Sw, data, cdata);
 		krw       =  data[1];
 		krow      =  data[2];
@@ -101,7 +101,7 @@ public:
 	OCP_DBL  CalPcgo(const OCP_DBL& Sg) const { return table.Eval(0, Sg, 3); }
 
 	/// Return corresponding Krw, Krow, Pcwo with Sw
-	void     CalKrgKrogPcgo(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& krog, OCP_DBL& Pcgo) {
+	void     CalKrgKrogPcgo(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& krog, OCP_DBL& Pcgo) const {
 		table.Eval_All(0, Sg, data);
 		krg  = data[1];
 		krog = data[2];
@@ -110,7 +110,7 @@ public:
 	/// Return corresponding Krw, Krow, Pcwo and derivatives with Sw 
 	void     CalKrgKrogPcgoDer(const OCP_DBL& Sg,
 		OCP_DBL& krg, OCP_DBL& krog, OCP_DBL& Pcgo,
-		OCP_DBL& dkrgdSg, OCP_DBL& dkrogdSg, OCP_DBL& dPcgodSg) {
+		OCP_DBL& dkrgdSg, OCP_DBL& dkrogdSg, OCP_DBL& dPcgodSg) const {
 		table.Eval_All(0, Sg, data, cdata);
 		krg      = data[1];
 		krog     = data[2];
@@ -138,14 +138,14 @@ public:
 	OCP_DBL  GetKrocw() const { return table.GetCol(1).back(); }
 
 	/// Return corresponding Krow, krog with So
-	void     CalKrowKrog(const OCP_DBL& So, OCP_DBL& krow, OCP_DBL& krog) {
+	void     CalKrowKrog(const OCP_DBL& So, OCP_DBL& krow, OCP_DBL& krog) const {
 		table.Eval_All(0, So, data);
 		krow = data[1];
 		krog = data[2];
 	}
 	/// Return corresponding Krw, Krow, Pcwo and derivatives with So 
 	void     CalKrowKrogDer(const OCP_DBL& So, OCP_DBL& krow, OCP_DBL& krog, 
-		OCP_DBL& dKrowdSo, OCP_DBL& dKrogdSo) {
+		OCP_DBL& dKrowdSo, OCP_DBL& dKrogdSo) const {
 		table.Eval_All(0, So, data, cdata);
 		krow     = data[1];
 		krog     = data[2];
@@ -176,14 +176,14 @@ public:
 	OCP_DBL  CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const {return table.Eval(0, Sg, 1, dKrgdSg);}
 
 	/// Return corresponding Krg, Pcgo with Sg
-	void     CalKrgPcgo(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& Pcgo) {
+	void     CalKrgPcgo(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& Pcgo) const {
 		table.Eval_All(0, Sg, data);
 		krg  = data[1];
 		Pcgo = data[2];
 	}
 	/// /// Return corresponding Krg, Pcgo and derivatives with Sg 
 	void     CalKrgPcgoDer(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& Pcgo,
-		OCP_DBL& dKrgdSg, OCP_DBL& dPcgodSg) {
+		OCP_DBL& dKrgdSg, OCP_DBL& dPcgodSg) const {
 		table.Eval_All(0, Sg, data, cdata);
 		krg      = data[1];
 		Pcgo     = data[2];
@@ -220,14 +220,14 @@ public:
 	const vector<OCP_DBL>& GetPcow() const { return table.GetCol(2); }
 
 	/// Return corresponding Krw, Pcwo with Sw
-	void     CalKrwPcwo(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& Pcwo) {
+	void     CalKrwPcwo(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& Pcwo) const {
 		table.Eval_All(0, Sw, data);
 		krw  = data[1];
 		Pcwo = -data[2];
 	}
 	/// /// Return corresponding Krw, Pcwo and derivatives with Sw 
 	void     CalKrwPcwoDer(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& Pcwo,
-		OCP_DBL& dKrwdSw, OCP_DBL& dPcwodSw) {
+		OCP_DBL& dKrwdSw, OCP_DBL& dPcwodSw) const {
 		table.Eval_All(0, Sw, data, cdata);
 		krw      = data[1];
 		Pcwo     = -data[2];

@@ -1,5 +1,5 @@
 /*! \file    OCPFuncTable.hpp
- *  \brief   Functions for Saturations in OCP
+ *  \brief   Table Functions in OCP
  *  \author  Shizhe Li
  *  \date    Jul/11/2023
  *
@@ -14,8 +14,15 @@
 
  // OpenCAEPoroX header files
 #include "OCPTable.hpp"
+#include "ParamReservoir.hpp"
 
 using namespace std;
+
+
+/////////////////////////////////////////////////////
+// OCPFuncTable
+/////////////////////////////////////////////////////
+
 
 class OCPFuncTable
 {
@@ -29,9 +36,38 @@ public:
 	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 
 protected:
-	OCPTable          table;
-	vector<OCP_DBL>   data;
-	vector<OCP_DBL>   cdata;
+	OCPTable                  table;
+	mutable vector<OCP_DBL>   data;
+	mutable vector<OCP_DBL>   cdata;
+};
+
+
+/////////////////////////////////////////////////////
+// OCPFuncTable2
+/////////////////////////////////////////////////////
+
+
+class OCPFuncTable2
+{
+public:
+	OCPFuncTable2() = default;
+	void Setup(const TableSet& ts);
+	/// ref and tables[i][0] are both in in ascending order
+	void Eval(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out) const;
+	/// ref and tables[i][0] are both in in ascending order
+	void Eval(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out, 
+		vector<OCP_DBL>& slope1, vector<OCP_DBL>& slope2) const;
+	OCP_BOOL IsEmpty() const { return (numtable == 0); }
+
+protected:
+	USI                       numtable;
+	vector<OCP_DBL>           ref;
+	vector<OCPTable>          tables;
+
+	USI                       lendata;
+	mutable vector<OCP_DBL>   data;
+	mutable vector<OCP_DBL>   cdata1;
+	mutable vector<OCP_DBL>   cdata2;
 };
 
 

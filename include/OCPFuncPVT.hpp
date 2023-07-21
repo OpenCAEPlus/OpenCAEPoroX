@@ -14,7 +14,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPFuncTable.hpp"
-#include "ParamReservoir.hpp"
+
 
 using namespace std;
 
@@ -42,14 +42,14 @@ public:
 		stdRhoW = stdRhoWin;
 	}
 
-	OCP_DBL CalXiW(const OCP_DBL& P) { return 1 / CONV1 / CalBw(P);}
-	OCP_DBL CalRhoW(const OCP_DBL& P) { return stdRhoW / CalBw(P); }
+	OCP_DBL CalXiW(const OCP_DBL& P) const { return 1 / CONV1 / CalBw(P);}
+	OCP_DBL CalRhoW(const OCP_DBL& P) const { return stdRhoW / CalBw(P); }
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
-		               OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP);	
+		               OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 
 protected:
-	OCP_DBL CalBw(const OCP_DBL& P);
-	void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP);
+	OCP_DBL CalBw(const OCP_DBL& P) const;
+	void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 	
 protected:
 	OCP_DBL stdRhoW;   ///< mass density of water phase in standard condition
@@ -85,24 +85,24 @@ public:
 		stdRhoG = stdRhoGin;	
 	}
 	
-	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb);
-	OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb);
+	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const;
+	OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) const;
 	/// For saturated oil
 	void CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
-		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP);
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP) const;
 	/// For unsaturated oil
 	void CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs);
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs) const;
 	/// For saturated oil
 	OCP_DBL CalRs(const OCP_DBL& P) const { return table.Eval(0, P, 1); }	
 
 protected:
 	/// For saturated oil
 	void CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
-		OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP);
+		OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP) const;
 	/// For unsaturated oil
 	void CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, 
-					   OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs);
+					   OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs) const;
 
 protected:
 	OCP_DBL stdRhoO;      ///< mass density of oil phase in standard condition
@@ -131,14 +131,14 @@ public:
 		OCPFuncTable::Setup(src);
 		stdRhoG = stdRhoGin;
 	}
-	OCP_DBL CalXiG(const OCP_DBL& P){ return 1 / CONV1 / CalBg(P); }
-	OCP_DBL CalRhoG(const OCP_DBL& P){ return (1000 / CONV1) * stdRhoG / CalBg(P);}
+	OCP_DBL CalXiG(const OCP_DBL& P) const { return 1 / CONV1 / CalBg(P); }
+	OCP_DBL CalRhoG(const OCP_DBL& P) const { return (1000 / CONV1) * stdRhoG / CalBg(P);}
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-					   OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP);	
+					   OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 
 protected:
-	OCP_DBL CalBg(const OCP_DBL& P);
-	void CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP);
+	OCP_DBL CalBg(const OCP_DBL& P) const;
+	void CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 
 protected:
 	OCP_DBL stdRhoG;   ///< mass density of gas phase in standard condition
@@ -164,14 +164,14 @@ public:
 		OCPFuncTable::Setup(src);
 		stdRhoO = stdRhoOin;
 	}
-	OCP_DBL CalXiO(const OCP_DBL& P) { return 1 / CONV1 / CalBo(P); }
-	OCP_DBL CalRhoO(const OCP_DBL& P) { return stdRhoO / CalBo(P); }
+	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / CalBo(P); }
+	OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP);
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 	
 protected:
-	OCP_DBL CalBo(const OCP_DBL& P);
-	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP);
+	OCP_DBL CalBo(const OCP_DBL& P) const;
+	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
 
 protected:
 	OCP_DBL stdRhoO;   ///< mass density of oil phase in standard condition
@@ -187,14 +187,64 @@ class ViscosityMethod
 public:
 	ViscosityMethod() = default;
 	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) = 0;
-	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz);
+	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) = 0;
+
+protected:
+	/// num of components
+	USI              nc;
+	/// viscosity of components
+	vector<OCP_DBL>  muc;
+	/// d muC / dP 
+	vector<OCP_DBL>  mucP;
+	/// d muC / dT 
+	vector<OCP_DBL>  mucT;
+};
+
+
+/// Use temperature and pressure-dependent viscosity table (for liquid viscosities)
+/// Use linear mixing, T is in F(Field)
+class ViscosityMethod01 : public ViscosityMethod
+{
+public:
+	ViscosityMethod01(const TableSet& ts);
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+
+protected:
+	/// Viscosity-versus-temperature&pressure dependence
+	OCPFuncTable2    table;
+};
+
+
+/// Use tow params: avisc and bvisc (for liquid viscosities)
+/// Use linear mixing, T is in R(Field)
+class ViscosityMethod02 : public ViscosityMethod
+{
+public:
+	ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP_DBL>& bv);
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+
+protected:
+	/// Coefficients in water and oil viscosity correlation formula
+	vector<OCP_DBL>   avisc;
+	/// Coefficients in water and oil viscosity correlation formula
+	vector<OCP_DBL>   bvisc;
 };
 
 
 class ViscosityCalculation
 {
 public:
-
+	ViscosityCalculation() = default;
+	void Setup(const ComponentParam& param, const USI& tarId);
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) { 
+		return vM->CalViscosity(P, T, zi); 
+	}
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi,
+		OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) {
+		return vM->CalViscosity(P, T, zi, muP, muT, muz);
+	}
 protected:
 	ViscosityMethod* vM;
 };

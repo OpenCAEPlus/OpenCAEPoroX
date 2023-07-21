@@ -116,9 +116,7 @@ USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata) const
                 return bId;
             }
         }
-        for (USI k = 1; k < nCol; k++) {
-            outdata[k - 1] = data[k].back();
-        }
+        bId = nRow - 1;
     } else {
         for (OCP_INT i = bId - 1; i >= 0; i--) {
             if (val >= data[j][i]) {
@@ -131,12 +129,53 @@ USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata) const
                 return bId;
             }
         }
-        for (USI k = 1; k < nCol; k++) {
-            outdata[k - 1] = data[k].front();
-        }
+        bId = 0;
+    }
+    for (USI k = 1; k < nCol; k++) {
+        outdata[k - 1] = data[k][bId];
     }
     return bId;
 }
+
+
+USI OCPTable::Eval_All0(const OCP_DBL& val, vector<OCP_DBL>& outdata, vector<OCP_DBL>& slope) const
+{
+    const USI j = 0;
+    if (val >= data[j][bId]) {
+        for (USI i = bId + 1; i < nRow; i++) {
+            if (val < data[j][i]) {
+                bId = i - 1;
+                for (USI k = 1; k < nCol; k++) {
+                    slope[k - 1] = (data[k][bId + 1] - data[k][bId]) /
+                        (data[j][bId + 1] - data[j][bId]);
+                    outdata[k - 1] = data[k][bId] + slope[k - 1] * (val - data[j][bId]);
+                }
+                return bId;
+            }
+        }
+        bId = nRow - 1;
+    }
+    else {
+        for (OCP_INT i = bId - 1; i >= 0; i--) {
+            if (val >= data[j][i]) {
+                bId = i;
+                for (USI k = 1; k < nCol; k++) {
+                    slope[k - 1] = (data[k][bId + 1] - data[k][bId]) /
+                        (data[j][bId + 1] - data[j][bId]);
+                    outdata[k - 1] = data[k][bId] + slope[k - 1] * (val - data[j][bId]);
+                }
+                return bId;
+            }
+        }
+        bId = 0;
+    }
+    for (USI k = 1; k < nCol; k++) {
+        slope[k - 1]   = 0;
+        outdata[k - 1] = data[k][bId];
+    }
+    return bId;
+}
+
 
 OCP_DBL OCPTable::Eval(const USI& j, const OCP_DBL& val, const USI& destj) const
 {

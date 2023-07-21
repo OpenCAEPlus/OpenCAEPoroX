@@ -41,8 +41,8 @@ public:
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
 
 protected:
-    EnthalpyCalculation eC;
-
+    EnthalpyCalculation  eC;
+    ViscosityCalculation vC;
 };
 
 
@@ -85,23 +85,11 @@ protected:
     vector<OCP_DBL> ct2;  
     /// The coefficient of density dependence on temperature and pressure, 1/psi-F
     vector<OCP_DBL> cpt;   
-           
-    /// Coefficients in water and oil viscosity correlation formula
-    vector<OCP_DBL> avisc;   
-    /// Coefficients in water and oil viscosity correlation formulae
-    vector<OCP_DBL> bvisc;       
+             
     /// Coefficients Ak in gas viscosity correlation formulae
     vector<OCP_DBL> avg;       
     /// Coefficients Bk in gas viscosity correlation formulae
     vector<OCP_DBL> bvg;   
-    /// If use viscosity to calculate viscosity
-    OCP_BOOL        useViscTab;
-    /// Viscosity-versus-temperature dependence
-    OCPTable        visc; 
-    /// Auxiliary variables used to calculate viscosity with interpolating tab
-    vector<OCP_DBL> data;  
-    ///< Auxiliary variables used to calculate viscosity with interpolating tab
-    vector<OCP_DBL> cdata; 
 };
 
 
