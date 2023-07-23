@@ -179,7 +179,7 @@ protected:
     vector<SolventINJ> solvents;   ///< Sets of Solvent
     OCP_DBL            dPmax{0};   ///< Maximum BHP change
 
-    vector<Mixture*> flashCal;               ///< Useless now.
+    vector<MixtureUnit*> flashCal;               ///< Useless now.
     OCP_DBL          Psurf{PRESSURE_STD};    ///< well reference pressure
     OCP_DBL          Tsurf{TEMPERATURE_STD}; ///< well reference temperature
 

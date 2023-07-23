@@ -19,7 +19,7 @@
 
 // OpenCAEPoroX header files
 #include "DenseMat.hpp"
-#include "Mixture.hpp"
+#include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
 
 using namespace std;
@@ -122,7 +122,7 @@ public:
     OCP_DBL Vshift; ///< shift volume
 };
 
-class MixtureComp : public Mixture
+class MixtureComp : public MixtureUnit
 {
 
 public:

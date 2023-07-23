@@ -185,14 +185,14 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
             break;
         case PHASE_OW:
             for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new BOMixture_OW(rs_param, i));
+                flashCal.push_back(new MixtureUnitBlkOil_OW(rs_param, i));
             break;
         case PHASE_DOGW:
             OCP_ABORT("Wrong Type!");
             break;
         case PHASE_ODGW:
             for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new BOMixture_ODGW(rs_param, i));
+                flashCal.push_back(new MixtureUnitBlkOil_OGW(rs_param, i));
             break;
         default:
             OCP_ABORT("Wrong Type!");
@@ -331,7 +331,7 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
 
     // PVT mode
     for (USI i = 0; i < NTPVT; i++)
-        flashCal.push_back(new MixtureThermal_K01(rs_param, i));
+        flashCal.push_back(new MixtureUnitThermal_OW(rs_param, i));
 
     // phase index
     phase2Index.resize(3);

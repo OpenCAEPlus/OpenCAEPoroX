@@ -74,7 +74,7 @@ protected:
     USI                 numPerf; ///< num of perforations belonging to this well.
     vector<Perforation> perf;    ///< information of perforation belonging to this well.
 
-    vector<Mixture*> flashCal; ///< from bulks's flashCal
+    vector<MixtureUnit*> flashCal; ///< from bulks's flashCal
 
     OCP_DBL numPhase; ///< num of phases
     OCP_DBL numCom;   ///< num of components

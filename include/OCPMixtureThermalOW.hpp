@@ -1,5 +1,5 @@
-/*! \file    OCPMixtureThermalOW.hpp
- *  \brief   OCPMixtureThermalOW class declaration
+/*! \file    OCPMixtureUnitThermalOW.hpp
+ *  \brief   OCPMixtureUnitThermalOW class declaration
  *  \author  Shizhe Li
  *  \date    Jul/20/2023
  *
@@ -23,14 +23,14 @@ using namespace std;
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureThermalOWMethod
+// OCPMixtureUnitThermalOWMethod
 /////////////////////////////////////////////////////
 
 
-class OCPMixtureThermalOWMethod
+class OCPMixtureUnitThermalOWMethod
 {
 public:
-    OCPMixtureThermalOWMethod() = default;
+    OCPMixtureUnitThermalOWMethod() = default;
     virtual OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T) = 0;
     virtual OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T) = 0;
     virtual OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) = 0;
@@ -48,15 +48,15 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureThermalOWMethod01
+// OCPMixtureUnitThermalOWMethod01
 /////////////////////////////////////////////////////
 
 
 /// Oil and Water are immiscible
-class OCPMixtureThermalOWMethod01 : public OCPMixtureThermalOWMethod
+class OCPMixtureUnitThermalOWMethod01 : public OCPMixtureUnitThermalOWMethod
 {
 public:
-    OCPMixtureThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
+    OCPMixtureUnitThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
     OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T) override;
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T) override;
     OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) override;
@@ -95,13 +95,13 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureThermalOW 
+// OCPMixtureUnitThermalOW 
 /////////////////////////////////////////////////////
 
-class OCPMixtureThermalOW : public OCPMixture
+class OCPMixtureUnitThermalOW : public OCPMixture
 {
 public:
-    OCPMixtureThermalOW() { mixtureType = OCPMIXTURE_THERMALK_OW; }
+    OCPMixtureUnitThermalOW() { mixtureType = OCPMIXTURE_THERMALK_OW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
         SetPTS(P, T, Sw);
@@ -146,7 +146,7 @@ protected:
     }
 
 protected:
-    OCPMixtureThermalOWMethod* pmMethod;
+    OCPMixtureUnitThermalOWMethod* pmMethod;
 };
 
 

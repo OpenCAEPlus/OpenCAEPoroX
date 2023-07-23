@@ -20,10 +20,10 @@
 #include "DenseMat.hpp"
 #include "FlowUnit.hpp"
 #include "LinearSystem.hpp"
-#include "Mixture.hpp"
-#include "MixtureBO.hpp"
+#include "MixtureUnit.hpp"
+#include "MixtureUnitBlkOil.hpp"
 #include "MixtureComp.hpp"
-#include "MixtureThermal.hpp"
+#include "MixtureUnitThermal.hpp"
 #include "OCPConst.hpp"
 #include "OCPStructure.hpp"
 #include "ParamReservoir.hpp"
@@ -211,15 +211,15 @@ protected:
 public:
 
     /// Return flash.
-    const vector<Mixture*>& GetMixture() const { return flashCal; }
-    /// Output iterations in Mixture
+    const vector<MixtureUnit*>& GetMixture() const { return flashCal; }
+    /// Output iterations in MixtureUnit
     void OutMixtureIters() const { flashCal[0]->OutMixtureIters(); }
 
 protected:
     USI              NTPVT;    ///< num of PVT regions
     USI              PVTmodeB; ///< Identify PVT mode in black-oil model.
     vector<USI>      PVTNUM;   ///< Identify PVT region in black-oil model: numBulk.
-    vector<Mixture*> flashCal; ///< Flash calculation class.
+    vector<MixtureUnit*> flashCal; ///< Flash calculation class.
 
     USI               NTSFUN;  ///< num of SAT regions
     USI               SATmode; ///< Identify SAT mode.
