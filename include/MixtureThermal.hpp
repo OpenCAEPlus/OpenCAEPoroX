@@ -130,30 +130,58 @@ public:
                          const OCP_DBL&            Tsurf) override;
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override;
 
-protected:
-    void CalEnthalpy();
+    const OCP_DBL& GetNt() const override { return OWTM.GetVarSet().Nt; }
+    const OCP_DBL& GetNi(const USI& i) const override {
+        return OWTM.GetVarSet().Ni[i];
+    }
+    const OCP_DBL& GetVf() const override { return OWTM.GetVarSet().vf; }
+    const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OWTM.GetVarSet().phaseExist[j]; }
+    const OCP_DBL& GetS(const USI& j) const override { return OWTM.GetVarSet().S[j]; }
+    const OCP_DBL& GetVj(const USI& j) const override { return OWTM.GetVarSet().vj[j]; }
+    const OCP_DBL& GetNj(const USI& j) const override { return OWTM.GetVarSet().nj[j]; }
+    const OCP_DBL& GetXij(const USI& j, const USI& i) const override
+    {
+        return OWTM.GetVarSet().xij[j * numCom + i];
+    }
+    const OCP_DBL& GetRho(const USI& j) const override { return OWTM.GetVarSet().rho[j]; }
+    const OCP_DBL& GetXi(const USI& j) const override { return OWTM.GetVarSet().xi[j]; }
+    const OCP_DBL& GetMu(const USI& j) const override { return OWTM.GetVarSet().mu[j]; }
+    const OCP_DBL& GetVfP() const override { return OWTM.GetVarSet().vfP; }
+    const OCP_DBL& GetVfT() const override { return OWTM.GetVarSet().vfT; }
+    const OCP_DBL& GetVfi(const USI& i) const override { return OWTM.GetVarSet().vfi[i]; }
+    const OCP_DBL& GetRhoP(const USI& j) const override { return OWTM.GetVarSet().rhoP[j]; }
+    const OCP_DBL& GetRhoT(const USI& j) const override { return OWTM.GetVarSet().rhoT[j]; }
+    const OCP_DBL& GetXiP(const USI& j) const override { return OWTM.GetVarSet().xiP[j]; }
+    const OCP_DBL& GetXiT(const USI& j) const override { return OWTM.GetVarSet().xiT[j]; }
+    const OCP_DBL& GetMuP(const USI& j) const override { return OWTM.GetVarSet().muP[j]; }
+    const OCP_DBL& GetMuT(const USI& j) const override { return OWTM.GetVarSet().muT[j]; }
+    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const override
+    {
+        return OWTM.GetVarSet().rhox[j * numCom + i];
+    }
+    const OCP_DBL& GetXiX(const USI& j, const USI& i) const override
+    {
+        return OWTM.GetVarSet().xix[j * numCom + i];
+    }
+    const OCP_DBL& GetMuX(const USI& j, const USI& i) const override
+    {
+        return OWTM.GetVarSet().mux[j * numCom + i];
+    }
+    const vector<OCP_DBL>& GetDXsDXp() const override { return OWTM.GetVarSet().dXsdXp; }
+    const OCP_DBL          GetUf() const override { return OWTM.GetVarSet().Uf; }
+    const OCP_DBL          GetUfP() const override { return OWTM.GetVarSet().UfP; }
+    const OCP_DBL          GetUfT() const override { return OWTM.GetVarSet().UfT; }
+    const OCP_DBL          GetUfi(const USI& i) const override { return OWTM.GetVarSet().Ufi[i]; }
+    const OCP_DBL          GetH(const USI& j) const override { return OWTM.GetVarSet().H[j]; }
+    const OCP_DBL          GetHT(const USI& j) const override { return OWTM.GetVarSet().HT[j]; }
+    const OCP_DBL& GetHx(const USI& j, const USI& i) const override
+    {
+        return OWTM.GetVarSet().Hx[j * numCom + i];
+    }
 
 protected:
-    OCP_DBL Pref{PRESSURE_STD};    ///< Reference pressure
-    OCP_DBL Tref{TEMPERATURE_STD}; ///< Reference temperature
-
-    vector<OCP_DBL> MWc;    ///< Molecular Weight of components
-    vector<OCP_DBL> MWp;    ///< Molecular Weight of phase
-    vector<OCP_DBL> Tcrit;  ///< Critical temperature of hydrocarbon components
-    vector<OCP_DBL> xi_ref; ///< Component molar density at reference temperature and
-                            ///< reference pressure, lb/ft3
-    vector<OCP_DBL> cp;     ///< Component compressibility, 1/psi
-    vector<OCP_DBL> ct1;    ///< The first thermal expansion coefficient, 1/F
-    vector<OCP_DBL> ct2;    ///< The second thermal expansion coefficient, 1/F
-    vector<OCP_DBL> cpt; ///< The coefficient of density dependence on temperature and
-                         ///< pressure, 1/psi-F
-
-    vector<OCP_DBL> avg; ///< Coefficients Ak in gas viscosity correlation formulae
-    vector<OCP_DBL> bvg; ///< Coefficients Bk in gas viscosity correlation formulae
-
     OCPMixtureThermalOW  OWTM;
     EnthalpyCalculation  eC;
-    ViscosityCalculation vC;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

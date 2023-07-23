@@ -232,6 +232,31 @@ protected:
 	vector<OCP_DBL>   bvisc;
 };
 
+/// Lohrenz-Bray-Clark formula 
+class ViscosityMethod03 : public ViscosityMethod
+{
+public:
+	ViscosityMethod03(const ComponentParam& param, const USI& tarId);
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
+	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+
+protected:
+	/// num of components
+	USI             nc;
+	/// LBC coefficients for viscosity calculation
+	vector<OCP_DBL> coef;
+	/// Critical temperature of components
+	vector<OCP_DBL> Tc;     
+	/// Critical pressure of components
+	vector<OCP_DBL> Pc;
+	/// Critical volume used for viscosity calculations only
+	vector<OCP_DBL> Vcvis;
+	/// Molecular Weight of components
+	vector<OCP_DBL> MWC;
+	/// Auxiliary variables
+	vector<OCP_DBL> muAux;
+};
+
 
 class ViscosityCalculation
 {
@@ -264,7 +289,7 @@ public:
 };
 
 
-// liquid_based or simple_hvap
+// liquid_based or simple_hvap, T(R Field)
 class EnthalpyMethod01 : public EnthalpyMethod
 {
 public:
@@ -289,7 +314,7 @@ protected:
 };
 
 
-// gas_based
+// gas_based, T(R Field)
 class EnthalpyMethod02 : public EnthalpyMethod
 {
 public:

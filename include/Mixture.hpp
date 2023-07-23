@@ -29,10 +29,6 @@ using namespace std;
 /// density can calculated by it. it has the same data structure as the ones in bulks.
 class Mixture
 {
-    friend class Bulk;
-    friend class Well;
-    friend class AllWells;
-
 public:
     Mixture() = default;
     virtual ~Mixture(){};
@@ -190,13 +186,13 @@ public:
     }
     virtual const vector<OCP_DBL>& GetDXsDXp() const { return dXsdXp; }
 
-    const OCP_DBL          GetUf() const { return Uf; }
-    const OCP_DBL          GetUfP() const { return UfP; }
-    const OCP_DBL          GetUfT() const { return UfT; }
-    const OCP_DBL          GetUfi(const USI& i) const { return Ufi[i]; }
-    const OCP_DBL          GetH(const USI& j) const { return H[j]; }
-    const OCP_DBL          GetHT(const USI& j) const { return HT[j]; }
-    const OCP_DBL&         GetHx(const USI& j, const USI& i) const
+    virtual const OCP_DBL          GetUf() const { return Uf; }
+    virtual const OCP_DBL          GetUfP() const { return UfP; }
+    virtual const OCP_DBL          GetUfT() const { return UfT; }
+    virtual const OCP_DBL          GetUfi(const USI& i) const { return Ufi[i]; }
+    virtual const OCP_DBL          GetH(const USI& j) const { return H[j]; }
+    virtual const OCP_DBL          GetHT(const USI& j) const { return HT[j]; }
+    virtual const OCP_DBL&         GetHx(const USI& j, const USI& i) const
     {
         return Hx[j * numCom + i];
     }

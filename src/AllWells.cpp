@@ -295,9 +295,10 @@ void AllWells::CalReInjFluid(const Bulk& myBulk)
                 qt = Dnorm1(nc, &wG.reInjZi[0]);
             }
             flashCal[0]->Flash(Psurf, Tsurf, &wG.reInjZi[0]);
-            Dcopy(nc, &wG.reInjZi[0], &flashCal[0]->xij[wG.reInjPhase * nc]);
-            wG.reInjXi     = flashCal[0]->xi[wG.reInjPhase];
-            wG.reInjFactor = wG.reInjXi * flashCal[0]->vj[wG.reInjPhase] / qt;
+            for (USI i = 0; i < nc; i++)
+                wG.reInjZi[i] = flashCal[0]->GetXij(wG.reInjPhase, i);
+            wG.reInjXi     = flashCal[0]->GetXi(wG.reInjPhase);
+            wG.reInjFactor = wG.reInjXi * flashCal[0]->GetVj(wG.reInjPhase) / qt;
             // assign to every open injection well in wG
             for (auto& w : wG.wIdINJ) {
                 if (wells[w].IsOpen()) {

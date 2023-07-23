@@ -312,6 +312,96 @@ OCP_DBL ViscosityMethod02::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, cons
 }
 
 
+ViscosityMethod03::ViscosityMethod03(const ComponentParam& param, const USI& tarId)
+{
+	nc = param.numCom;
+	if (param.Tc.activity)    Tc = param.Tc.data[tarId];
+	else                      OCP_ABORT("TCRIT hasn't been input!");
+	if (param.Pc.activity)    Pc = param.Pc.data[tarId];
+	else                      OCP_ABORT("PCRIT hasn't been input!");
+	if (param.MW.activity)    MWC = param.MW.data[tarId];
+	else                      OCP_ABORT("MW hasn't been input!");
+
+	coef = param.LBCcoef;
+	for (auto& lbc : coef)    lbc *= 10; 
+
+	if (param.Vcvis.activity) Vcvis = param.Vcvis.data[tarId];
+	else if (param.Zcvis.activity) {
+		Vcvis.resize(nc);
+		const vector<OCP_DBL> Zcvis = param.Zcvis.data[tarId];
+		for (USI i = 0; i < nc; i++) {
+			Vcvis[i] = GAS_CONSTANT * Zcvis[i] * Tc[i] / Pc[i];
+		}
+	}
+	else {
+		if (param.Vc.activity)
+			Vcvis = param.Vc.data[tarId];
+		else if (param.Zc.activity) {
+			Vcvis.resize(nc);
+			const vector<OCP_DBL> Zc = param.Zc.data[tarId];
+			for (USI i = 0; i < nc; i++) {
+				Vcvis[i] = 10.73159 * Zc[i] * Tc[i] / Pc[i];
+			}
+		}
+		else
+			OCP_ABORT("VCRIT or ZCRIT hasn't been input!");
+	}		
+
+	muAux.resize(5);
+}
+
+
+OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+{
+
+	//OCP_DBL MW = 0;
+	//for (USI i = 0; i < nc; i++) MW += zi[i] * MWC[i];
+
+	//OCP_DBL tmp;
+	//OCP_DBL Tri;
+	//OCP_DBL xijT;
+	//OCP_DBL xijP;
+	//OCP_DBL xijV;
+
+	//fill(muAux.begin(), muAux.end(), 0.0);
+	//xijT = 0;
+	//xijP = 0;
+	//xijV = 0;
+
+	//for (USI i = 0; i < nc; i++) {
+	//	tmp = 5.4402 * pow(Tc[i], 1.0 / 6) / sqrt(MW) / pow(Pc[i], 2.0 / 3);
+	//	Tri = T / Tc[i];
+	//	if (Tri <= 1.5) {
+	//		tmp = 34 * 1E-5 * pow(Tri, 0.94) / tmp;
+	//	}
+	//	else {
+	//		tmp = 17.78 * 1E-5 * pow((4.58 * Tri - 1.67), 0.625) / tmp;
+	//	}
+	//	muAux[0] += zi[i] * sqrt(MWC[i]) * tmp;
+	//	muAux[1] += zi[i] * sqrt(MWC[i]);
+	//	xijT     += zi[i] * Tc[i];
+	//	xijP     += zi[i] * Pc[i];
+	//	xijV     += zi[i] * Vcvis[i];
+	//}
+	//muAux[2] = 5.4402 * pow(xijT, 1.0 / 6) / sqrt(MW) / pow(xijP, 2.0 / 3);
+	//muAux[3] = xi * xijV;
+
+	//if (muAux[3] <= 0.18 && OCP_FALSE) {
+	//	return muAux[0] / muAux[1] + 2.05 * 1E-4 * muAux[3] / muAux[2];
+	//}
+	//else {
+	//	muAux[4] = muAux[3] * (muAux[3] * (muAux[3] * (coef[4] * muAux[3] + coef[3]) + coef[2]) + coef[1]) + coef[0];
+	//	return muAux[0] / muAux[1] + 1E-4 * (pow(muAux[4], 4) - 1) / muAux[2];
+	//}
+}
+
+
+OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+{
+
+}
+
+
 void ViscosityCalculation::Setup(const ComponentParam& param, const USI& tarId)
 {
 	if (param.avisc.activity) {

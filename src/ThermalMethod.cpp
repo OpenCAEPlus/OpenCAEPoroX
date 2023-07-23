@@ -76,8 +76,8 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 
 #ifdef DEBUG
     // Output A, b, x
-    // ls.OutputLinearSystem("testA_FIMT.out", "testb_FIMT.out");
-    // ls.OutputSolution("testx_FIMT.out");
+     //ls.OutputLinearSystem("testA_FIMT.out", "testb_FIMT.out");
+     //ls.OutputSolution("testx_FIMT.out");
     // Check if inf or nan occurs in solution
     ls.CheckSolution();
 #endif // DEBUG

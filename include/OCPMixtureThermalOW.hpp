@@ -39,6 +39,7 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return eC.CalEnthalpy(T + CONV5, zi); }
 
 protected:
     EnthalpyCalculation  eC;
@@ -128,6 +129,7 @@ public:
         else if (tarPhase == WATER)  return pmMethod->CalRhoW(P, T);
         else                         OCP_ABORT("WRONG TarPhase");
     }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T, zi); }
 
 protected:
     void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
@@ -139,6 +141,7 @@ protected:
     void SetPTS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
         vs.P    = P;
         vs.T    = T + CONV5;
+        vs.S[0] = 1 - Sw;
         vs.S[1] = Sw;
     }
 

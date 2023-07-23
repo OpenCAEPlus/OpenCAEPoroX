@@ -12,7 +12,6 @@
 #include "OCPMixtureThermalOW.hpp"
 
 
-
 /////////////////////////////////////////////////////
 // OCPMixtureThermalOWMethod01
 /////////////////////////////////////////////////////
@@ -85,7 +84,7 @@ OCP_DBL OCPMixtureThermalOWMethod01::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
 {
     const OCP_DBL dP = P - Pref;
     const OCP_DBL dT = T - Tref + CONV5;
-    return xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * pow(dT, 2) / 2 + cpt[0] * dP * dT);
+    return xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
 }
 
 
@@ -99,25 +98,29 @@ OCP_DBL OCPMixtureThermalOWMethod01::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
 {
     const OCP_DBL dP = P - Pref;
     const OCP_DBL dT = T - Tref + CONV5;
-	return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * pow(dT, 2) / 2 + cpt[1] * dP * dT);
+	return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
 }
 
 
 void OCPMixtureThermalOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-
+    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T - CONV5);
+    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T - CONV5);
+    Flash(vs);
 }
 
 
 void OCPMixtureThermalOWMethod01::Flash(OCPMixtureVarSet& vs)
 {
-
+    FlashDer(vs);
 }
 
 
 void OCPMixtureThermalOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-
+    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T - CONV5);
+    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T - CONV5);
+    FlashDer(vs);
 }
 
 
@@ -134,16 +137,14 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.mu[1] = vC.CalViscosity(vs.P, vs.T, &vs.xij[1 * 2], vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
 
     // phase molar density
-    vs.xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] * pow(dT, 2) / 2 + cpt[0] * dP * dT);
-    vs.xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] * pow(dT, 2) / 2 + cpt[1] * dP * dT);
+    vs.xi[0] = xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(vs.T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
+    vs.xi[1] = xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(vs.T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
     // d xi / dP
     vs.xiP[0] = vs.xi[0] * (cp[0] + cpt[0] * dT);
     vs.xiP[1] = vs.xi[1] * (cp[1] + cpt[1] * dT);
     // d xi / dT
-    vs.xiT[0] = vs.xi[0] * (-ct1[0] - ct2[0] * dT + cpt[0] * dP);
-    vs.xiT[1] = vs.xi[1] * (-ct1[1] - ct2[1] * dT + cpt[1] * dP);
+    vs.xiT[0] = vs.xi[0] * (-ct1[0] - ct2[0] * vs.T + cpt[0] * dP);
+    vs.xiT[1] = vs.xi[1] * (-ct1[1] - ct2[1] * vs.T + cpt[1] * dP);
 
     // phase mass density
     vs.rho[0] = MWp[0] * vs.xi[0];
@@ -159,7 +160,7 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.vj[0] = vs.Ni[0] / vs.xi[0];
     vs.vj[1] = vs.Ni[1] / vs.xi[1];
     // total volume
-    vs.vf = vs.vj[0] + vs.vj[1];
+    vs.vf    = vs.vj[0] + vs.vj[1];
 
     // phase saturation
     vs.S[0] = vs.vj[0] / vs.vf;
@@ -187,7 +188,7 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.H[0] = eC.CalEnthalpy(vs.T, &vs.xij[0 * 2], vs.HT[0], &vs.Hx[0 * 2]);
     vs.H[1] = eC.CalEnthalpy(vs.T, &vs.xij[1 * 2], vs.HT[1], &vs.Hx[1 * 2]);
 
-    //// Internal energy per unit volume of fluid
+    // Internal energy per unit volume of fluid
 
     // Uf, d Uf / d T, d Uf / d P
     vs.Uf  = -vs.P / (GRAVITY_FACTOR * CONV6);
@@ -214,7 +215,6 @@ void OCPMixtureThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 /////////////////////////////////////////////////////
 // OCPMixtureThermalOW 
 /////////////////////////////////////////////////////
-
 
 
 void OCPMixtureThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)

@@ -16,69 +16,9 @@ MixtureThermal_K01::MixtureThermal_K01(const ParamReservoir& param, const USI& t
 {
     mixtureType = THERMAL;
     numPhase    = 2;
-    numCom      = param.numCom; // water is included
-    Allocate();
-
-    if (param.comsParam.molden.activity)
-        xi_ref = param.comsParam.molden.data[tarId];
-    else
-        OCP_ABORT("ACF hasn't been input!");
-
-    vC.Setup(param.comsParam, tarId);
-
-    if (param.comsParam.cp.activity)
-        cp = param.comsParam.cp.data[tarId];
-    else
-        cp.resize(numCom, 0);
-
-    if (param.comsParam.ct1.activity)
-        ct1 = param.comsParam.ct1.data[tarId];
-    else
-        ct1.resize(numCom, 0);
-
-    if (param.comsParam.ct2.activity)
-        ct2 = param.comsParam.ct2.data[tarId];
-    else
-        ct2.resize(numCom, 0);
-
-    if (param.comsParam.cpt.activity)
-        cpt = param.comsParam.cpt.data[tarId];
-    else
-        cpt.resize(numCom, 0);
-
-    if (param.comsParam.MW.activity)
-        MWc = param.comsParam.MW.data[tarId];
-    else
-        OCP_ABORT("MW hasn't been input!");
-
-    Tref = param.comsParam.Tref[tarId] + CONV5;
-    Pref = param.comsParam.Pref[tarId];
-
+    numCom      = 2;
 
     eC.Setup(param.comsParam, tarId);
-
-    dXsdXp.resize((numCom + 2) * (numPhase + numPhase * numCom));
-    MWp.resize(numPhase);
-
-    // Init
-    phaseExist[0] = true;
-    phaseExist[1] = true;
-
-    MWp[0] = MWc[0];
-    MWp[1] = MWc[1];
-
-    xij[0 * 2 + 0] = 1;
-    xij[0 * 2 + 1] = 0;
-    xij[1 * 2 + 0] = 0;
-    xij[1 * 2 + 1] = 1;
-
-    // d mu / dP
-    fill(rhox.begin(), rhox.end(), 0.0);
-    fill(xix.begin(), xix.end(), 0.0);
-    fill(muP.begin(), muP.end(), 0.0);
-    fill(mux.begin(), mux.end(), 0.0);
-
-
     OWTM.Setup(param, tarId);
 }
 
@@ -86,7 +26,7 @@ void MixtureThermal_K01::Flash(const OCP_DBL& Pin,
                                const OCP_DBL& Tin,
                                const OCP_DBL* Niin)
 {
-    FlashIMPEC(Pin, Tin, Niin, 0, 0, 0);
+    OWTM.Flash(Pin, Tin, Niin);
 }
 
 void MixtureThermal_K01::InitFlashIMPEC(const OCP_DBL& Pin,
@@ -97,23 +37,7 @@ void MixtureThermal_K01::InitFlashIMPEC(const OCP_DBL& Pin,
                                         const OCP_DBL* Ziin,
                                         const OCP_USI& bId)
 {
-    // assign value
-    P                = Pin;
-    T                = Tin + CONV5;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    S[1]             = Sjin[1];
-    S[0]             = 1 - S[1];
-
-    // phase molar density
-    xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] / 2 * pow(dT, 2) + cpt[0] * dP * dT);
-    xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] / 2 * pow(dT, 2) + cpt[1] * dP * dT);
-
-    // components moles
-    Ni[0] = Vpore * S[0] * xi[0];
-    Ni[1] = Vpore * S[1] * xi[1];
+    OWTM.InitFlash(Pin, Tin, Sjin[1], Vpore); 
 }
 
 void MixtureThermal_K01::InitFlashFIM(const OCP_DBL& Pin,
@@ -124,9 +48,7 @@ void MixtureThermal_K01::InitFlashFIM(const OCP_DBL& Pin,
                                       const OCP_DBL* Ziin,
                                       const OCP_USI& bId)
 {
-    InitFlashIMPEC(Pin, Pbbin, Tin, Sjin, Vpore, Ziin, bId);
-
-    FlashFIM(Pin, Tin, &Ni[0], 0, 0, 0, bId);
+    OWTM.InitFlashDer(Pin, Tin, Sjin[1], Vpore);
 }
 
 void MixtureThermal_K01::FlashIMPEC(const OCP_DBL& Pin,
@@ -136,60 +58,7 @@ void MixtureThermal_K01::FlashIMPEC(const OCP_DBL& Pin,
                                     const OCP_DBL* xijin,
                                     const OCP_USI& bId)
 {
-    // assign Value
-    P                = Pin;
-    T                = Tin + CONV5;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    Ni[0]            = Niin[0];
-    Ni[1]            = Niin[1];
-
-    // phase viscosity
-    //if (useViscTab) {
-    //    visc.Eval_All(0, T, data, cdata);
-    //    mu[0] = data[1];
-    //    mu[1] = data[2];
-    //} else {
-    //    mu[0] = avisc[0] * exp(bvisc[0] / T);
-    //    mu[1] = avisc[1] * exp(bvisc[1] / T);
-    //}
-
-    mu[0] = vC.CalViscosity(P, T, &xij[0 * 2]);
-    mu[1] = vC.CalViscosity(P, T, &xij[1 * 2]);
-
-    // phase molar density
-    xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] / 2 * pow(dT, 2) + cpt[0] * dP * dT);
-    xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] / 2 * pow(dT, 2) + cpt[1] * dP * dT);
-
-    // phase mass density
-    rho[0] = MWp[0] * xi[0];
-    rho[1] = MWp[1] * xi[1];
-
-    // phase volume
-    vj[0] = Ni[0] / xi[0];
-    vj[1] = Ni[1] / xi[1];
-    // total fluid volume
-    vf = vj[0] + vj[1];
-
-    // phase saturation
-    S[0] = vj[0] / vf;
-    S[1] = vj[1] / vf;
-
-    // d Vf / d Ni
-    vfi[0] = 1 / xi[0];
-    vfi[1] = 1 / xi[1];
-
-    // d Vf / dP
-    const OCP_DBL xiop = xi[0] * (cp[0] + cpt[0] * dT);
-    const OCP_DBL xiwp = xi[1] * (cp[1] + cpt[1] * dT);
-    vfP                = -(vj[0] * xiop / xi[0] + vj[1] * xiwp / xi[1]);
-
-    // d Vf / dT
-    const OCP_DBL xioT = xi[0] * (-ct1[0] - ct2[0] * dT + cpt[0] * dP);
-    const OCP_DBL xiwT = xi[1] * (-ct1[1] - ct2[1] * dT + cpt[1] * dP);
-    vfT                = -(vj[0] * xioT / xi[0] + vj[1] * xiwT / xi[1]);
+    OWTM.Flash(Pin, Tin, Niin);
 }
 
 void MixtureThermal_K01::FlashFIM(const OCP_DBL& Pin,
@@ -200,104 +69,13 @@ void MixtureThermal_K01::FlashFIM(const OCP_DBL& Pin,
                                   const OCP_DBL* xijin,
                                   const OCP_USI& bId)
 {
-    // Assign value
-    P                = Pin;
-    T                = Tin + CONV5;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    Ni[0]            = Niin[0];
-    Ni[1]            = Niin[1];
-    Nt               = Ni[0] + Ni[1];
-
-    mu[0] = vC.CalViscosity(P, T, &xij[0 * 2], muP[0], muT[0], &mux[0 * 2]);
-    mu[1] = vC.CalViscosity(P, T, &xij[1 * 2], muP[1], muT[1], &mux[1 * 2]);
-
-    // phase molar density
-    xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] * pow(dT, 2) / 2 + cpt[0] * dP * dT);
-    xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] * pow(dT, 2) / 2 + cpt[1] * dP * dT);
-    // d xi / dP
-    xiP[0] = xi[0] * (cp[0] + cpt[0] * dT);
-    xiP[1] = xi[1] * (cp[1] + cpt[1] * dT);
-    // d xi / dT
-    xiT[0] = xi[0] * (-ct1[0] - ct2[0] * dT + cpt[0] * dP);
-    xiT[1] = xi[1] * (-ct1[1] - ct2[1] * dT + cpt[1] * dP);
-
-    // phase mass density
-    rho[0] = MWp[0] * xi[0];
-    rho[1] = MWp[1] * xi[1];
-    // d rho / d P
-    rhoP[0] = MWp[0] * xiP[0];
-    rhoP[1] = MWp[1] * xiP[1];
-    // d rho / d T
-    rhoT[0] = MWp[0] * xiT[0];
-    rhoT[1] = MWp[1] * xiT[1];
-
-    // phase volume
-    vj[0] = Ni[0] / xi[0];
-    vj[1] = Ni[1] / xi[1];
-    // total volume
-    vf = vj[0] + vj[1];
-
-    // phase saturation
-    S[0] = vj[0] / vf;
-    S[1] = vj[1] / vf;
-
-    // d vf/ d Ni
-    vfi[0] = 1 / xi[0];
-    vfi[1] = 1 / xi[1];
-    // d vf / d P
-    vfP = -(vj[0] * xiP[0] / xi[0] + vj[1] * xiP[1] / xi[1]);
-    // d vf / d T
-    vfT = -(vj[0] * xiT[0] / xi[0] + vj[1] * xiT[1] / xi[1]);
-
-    // Derivative of secondary vars with respect to primary vars
-    dXsdXp[0] = (-vj[0] * xiP[0] / xi[0] - S[0] * vfP) / vf; // dSo / dP
-    dXsdXp[1] = (1 / xi[0] - S[0] * vfi[0]) / vf;            // dSo / dNo
-    dXsdXp[2] = -S[0] * vfi[1] / vf;                         // dSo / dNw
-    dXsdXp[3] = (-vj[0] * xiT[0] / xi[0] - S[0] * vfT) / vf; // dSo / dT
-
-    dXsdXp[4] = -dXsdXp[0]; // dSw / dP
-    dXsdXp[5] = -dXsdXp[1]; // dSw / dNo
-    dXsdXp[6] = -dXsdXp[2]; // dSw / dNw
-    dXsdXp[7] = -dXsdXp[3]; // dSw / dT
-
-    CalEnthalpy();
+    OWTM.FlashDer(Pin, Tin, Niin);
 }
 
-void MixtureThermal_K01::CalEnthalpy()
-{
-
-    H[0] = eC.CalEnthalpy(T, &xij[0 * 2], HT[0], &Hx[0 * 2]);
-    H[1] = eC.CalEnthalpy(T, &xij[1 * 2], HT[1], &Hx[1 * 2]);
-
-    // Internal energy per unit volume of fluid
-
-    // Uf, d Uf / d T, d Uf / d P
-    Uf  = -P / (GRAVITY_FACTOR * CONV6);
-    UfP = -1 / (GRAVITY_FACTOR * CONV6);
-    UfT = 0;
-
-    for (USI j = 0; j < numPhase; j++) {
-        // Uf
-        Uf += S[j] * xi[j] * H[j];
-        // dUf / dP
-        UfP += -(vj[j] * xiP[j] / xi[j] + S[j] * vfP) / vf * xi[j] * H[j];
-        UfP += xiP[j] * S[j] * H[j];
-        // dUf / dT
-        UfT += -(vj[j] * xiT[j] / xi[j] + S[j] * vfT) / vf * xi[j] * H[j];
-        UfT += (xiT[j] * H[j] + HT[j] * xi[j]) * S[j];
-    }
-
-    // d Uf / d Ni
-    Ufi[0] = dXsdXp[1] * xi[0] * H[0] + dXsdXp[5] * xi[1] * H[1];
-    Ufi[1] = dXsdXp[2] * xi[0] * H[0] + dXsdXp[6] * xi[1] * H[1];
-}
 
 OCP_DBL MixtureThermal_K01::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin)
 {
-    return eC.CalEnthalpy(Tin + CONV5, Ziin);
+    return OWTM.CalEnthalpy(Tin, Ziin);
 }
 
 OCP_DBL MixtureThermal_K01::XiPhase(const OCP_DBL& Pin,
@@ -324,28 +102,10 @@ void MixtureThermal_K01::CalProdWeight(const OCP_DBL&         Pin,
                                        const vector<OCP_DBL>& prodPhase,
                                        vector<OCP_DBL>&       prodWeight)
 {
-    P                = Pin;
-    T                = Tin + 460;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    Ni[0]            = Niin[0];
-    Ni[1]            = Niin[1];
-    Nt               = Ni[0] + Ni[1];
 
-    // phase molar density
-    xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] / 2 * pow(dT, 2) + cpt[0] * dP * dT);
-    xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] / 2 * pow(dT, 2) + cpt[1] * dP * dT);
-
-    // phase volume
-    vj[0] = Ni[0] / xi[0];
-    vj[1] = Ni[1] / xi[1];
-
-    OCP_DBL         qt = Nt;
     vector<OCP_DBL> factor(numPhase, 0);
-    factor[0] = vj[0] / qt / CONV1; // stb / lbmol
-    factor[1] = vj[1] / qt / CONV1; // stb  / lbmol
+    factor[0] = Niin[0] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, OIL) / CONV1; // stb / lbmol
+    factor[1] = Niin[1] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb  / lbmol
 
     OCP_DBL tmp = 0;
     for (USI i = 0; i < 2; i++) {
@@ -362,26 +122,8 @@ void MixtureThermal_K01::CalProdRate(const OCP_DBL&   Pin,
                                      const OCP_DBL*   Niin,
                                      vector<OCP_DBL>& prodRate)
 {
-    // assign Value
-    P                = Pin;
-    T                = Tin + 460;
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref;
-    Ni[0]            = Niin[0];
-    Ni[1]            = Niin[1];
-
-    // phase molar density
-    xi[0] = xi_ref[0] *
-            exp(cp[0] * dP - ct1[0] * dT - ct2[0] / 2 * pow(dT, 2) + cpt[0] * dP * dT);
-    xi[1] = xi_ref[1] *
-            exp(cp[1] * dP - ct1[1] * dT - ct2[1] / 2 * pow(dT, 2) + cpt[1] * dP * dT);
-
-    // phase volume
-    vj[0] = Ni[0] / xi[0];
-    vj[1] = Ni[1] / xi[1];
-
-    prodRate[0] = vj[0] / CONV1; // stb
-    prodRate[1] = vj[1] / CONV1; // stb
+    prodRate[0] = Niin[0] / OWTM.CalXi(Pin, Tin, OIL) / CONV1; // stb
+    prodRate[1] = Niin[1] / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb
 }
 
 void MixtureThermal_K01::SetupWellOpt(WellOpt&                  opt,
