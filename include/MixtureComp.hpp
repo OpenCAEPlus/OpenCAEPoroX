@@ -19,6 +19,7 @@
 
 // OpenCAEPoroX header files
 #include "DenseMat.hpp"
+#include "UtilMath.hpp"
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
 
@@ -103,24 +104,6 @@ private:
     RRparam     RR;
 };
 
-class COMP
-{
-public:
-    COMP() = default;
-    COMP(const vector<string>& comp);
-
-public:
-    string  name;   ///< Name of components
-    OCP_DBL Pc;     ///< Critical Pressure
-    OCP_DBL Tc;     ///< Critical Temperature
-    OCP_DBL acf;    ///< Acentric Factor
-    OCP_DBL MW;     ///< Molecular Weight
-    OCP_DBL VcMW;   ///< Critical Volume / MW
-    OCP_DBL Vc;     ///< VcMW * MW
-    OCP_DBL OmegaA; ///< Param A of Components
-    OCP_DBL OmegaB; ///< Param B of Components
-    OCP_DBL Vshift; ///< shift volume
-};
 
 class MixtureComp : public MixtureUnit
 {
@@ -284,7 +267,6 @@ private:
     OCP_DBL         P;       ///< Current Pressure
     OCP_DBL         T;       ///< Current Temperature
     vector<OCP_DBL> zi;      ///< mole fraction of hydrocarbon components
-    vector<COMP>    comp;    ///< properties of hydrocarbon components
     USI             lId;     ///< index of lightest components
     EoScontrol      EoSctrl; ///< method params for solving phase equilibrium
 
@@ -311,11 +293,6 @@ public:
     // Calculate Aj and Bj with specified xj
     void CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const vector<OCP_DBL>& xj) const;
     void CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const OCP_DBL* xj) const;
-    /// Result is stored in Ztmp.
-    USI CubicRoot(const OCP_DBL&  a,
-                  const OCP_DBL&  b,
-                  const OCP_DBL&  c,
-                  const OCP_BOOL& NTflag = OCP_FALSE) const;
     /// test
     void PrintZtmp()
     {
@@ -579,11 +556,5 @@ protected:
     MisFacMethod01Params mfm01Params; ///< params used in miscible factor method01
 };
 
-/// Return the sign of double di
-OCP_DBL signD(const OCP_DBL& d);
-
-OCP_DBL delta(const USI& i, const USI& j);
-
-void NTcubicroot(OCP_DBL& root, const OCP_DBL& a, const OCP_DBL& b, const OCP_DBL& c);
 
 #endif //__MIXTURECOMP_HEADER__
