@@ -344,6 +344,10 @@ private:
     vector<OCP_DBL> MW;           ///< Molecular Weight
     vector<USI>     phaseLabel;   ///< Label of phase
 
+    vector<OCP_DBL>          vmj; ///< molar volume of phase
+    vector<OCP_DBL>          vmP; ///< molar volume of phase
+    vector<vector<OCP_DBL>>  vmx; ///< molar volume of phase
+
 public:
     // Method Function
     // Allocate memoery for Method variables

@@ -357,7 +357,7 @@ OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>&
 }
 
 
-OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, OCP_DBL* vmx)
+OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, vector<OCP_DBL>& vmx)
 {
     CalAjBjZj(P, T, x);
     CalAxBxZx(P, T, x);

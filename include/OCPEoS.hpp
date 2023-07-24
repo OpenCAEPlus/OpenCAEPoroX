@@ -44,7 +44,7 @@ public:
 	/// Calculate molar volume
 	virtual OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x) = 0;
 	/// Calculate molar volume and derivatives
-	virtual OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, OCP_DBL* vmx) = 0;
+	virtual OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, vector<OCP_DBL>& vmx) = 0;
 
 };
 
@@ -78,7 +78,7 @@ public:
 	/// Calculate molar volume
 	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x) override;
 	/// Calculate molar volume and derivatives
-	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, OCP_DBL* vmx) override;
+	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, vector<OCP_DBL>& vmx) override;
 
 
 protected:
@@ -189,7 +189,7 @@ public:
 	/// Calculate molar volume
 	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x) { return eos->CalVm(P, T, x); }
 	/// Calculate molar volume and derivatives
-	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, OCP_DBL* vmx) { 
+	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, vector<OCP_DBL>& vmx) {
 		return eos->CalVmDer(P, T, x, vmP, vmx);
 	}
 

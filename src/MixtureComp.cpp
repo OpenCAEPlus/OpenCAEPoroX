@@ -651,11 +651,16 @@ void MixtureComp::AllocatePhase()
     phi.resize(NPmax);
     fug.resize(NPmax);
     n.resize(NPmax);
+    vmj.resize(NPmax);
+    vmP.resize(NPmax);
+    vmx.resize(NPmax);
+    for (auto& v : vmx) v.resize(numCom);
     for (USI j = 0; j < NPmax; j++) {
         x[j].resize(NC);
         phi[j].resize(NC);
         fug[j].resize(NC);
         n[j].resize(NC);
+        vmx[j].resize(NC);
     }
     ln = n;
 }
@@ -2394,37 +2399,12 @@ void MixtureComp::CalXiPNX_partial()
     // See MixtureComp::CalXiPNX_full01()
 
     // Calculate xix and xiP
-    OCP_DBL CgTP = GAS_CONSTANT * T / P;
-    OCP_DBL tmp;
-
     for (USI j = 0; j < NP; j++) {
-        const vector<OCP_DBL>& xj = x[j];
-        OCP_DBL                aj = Aj[j];
-        OCP_DBL                bj = Bj[j];
-        OCP_DBL                zj = Zj[j];
-
-        Bx = Bi;
+        xiC[j] = 1 / vmj[j];
         for (USI i = 0; i < NC; i++) {
-            tmp = 0;
-            for (USI k = 0; k < NC; k++) {
-                tmp += xj[k] * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]);
-            }
-            Ax[i] = 2 * tmp;
-            Zx[i] =
-                ((bj - zj) * Ax[i] +
-                 ((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-                  ((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
-                  (delta1 + delta2 - 1) * zj * zj) *
-                     Bx[i]) /
-                (3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-                 (aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
+            xixC[j * NC + i] = -xiC[j] * xiC[j] * vmx[j][i];
         }
-
-        tmp = -xiC[j] * xiC[j];
-        for (USI i = 0; i < NC; i++) {
-            xixC[j * NC + i] = tmp * (CgTP * Zx[i] - Vshift[i]);
-        }
-        xiPC[j] = tmp * CgTP * (Zp[j] - Zj[j] / P);
+        xiPC[j] = -xiC[j] * xiC[j] * vmP[j];
     }
 
     // xiNC
@@ -3264,51 +3244,31 @@ void MixtureComp::CalVfiVfp_full02()
     // Attention!
     // NP = 1 or NP = 2
 
+    for (USI j = 0; j < NP; j++) {
+        vmj[j] = eos.CalVmDer(P, T, x[j], vmP[j], vmx[j]);
+    }
+    
+
     OCP_DBL CgTP = GAS_CONSTANT * T / P;
 
     if (NP == 1) {
-
-        // NP = 1
-        const OCP_DBL&         aj   = Aj[0];
-        const OCP_DBL&         bj   = Bj[0];
-        const OCP_DBL&         zj   = Zj[0];
-        const vector<OCP_DBL>& xj   = x[0];
-        vector<OCP_DBL>&       Znij = Zn[0];
-        OCP_DBL                tmp;
-
+        vfP = nu[0] * vmP[0];
         for (USI i = 0; i < NC; i++) {
-            tmp = 0;
-            for (USI m = 0; m < NC; m++) {
-                tmp += (1 - BIC[i * NC + m]) * sqrt(Ai[i] * Ai[m]) * xj[m];
+            vfi[i] = vmj[0] + vmx[0][i];
+            for (USI k = 0; k < NC; k++) {
+                vfi[i] -= vmx[0][k] * x[0][k];
             }
-            An[i] = 2 / nu[0] * (tmp - aj);
-            Bn[i] = 1 / nu[0] * (Bi[i] - bj);
-            Znij[i] =
-                ((bj - zj) * An[i] +
-                 ((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-                  ((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
-                  (delta1 + delta2 - 1) * zj * zj) *
-                     Bn[i]) /
-                (3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-                 (aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
-            vfi[i] = CgTP * (zj + nu[0] * Znij[i]) - Vshift[i];
         }
-        Zp[0] = ((bj - zj) * aj +
-                 ((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-                  ((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
-                  (delta1 + delta2 - 1) * zj * zj) *
-                     bj) /
-                P /
-                (3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-                 (aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
-        vfP = CgTP * nu[0] * (Zp[0] - zj / P);
+
     } else {
         // NP = 2,  IF NP > 2  ->  WRONG!
         CalFugNAll();
-        // for (USI j = 0; j < NP; j++) eos.CalFugN(P, T, n[j], fugN[j]);
+        //for (USI j = 0; j < NP; j++) 
+        //    eos.CalFugN(P, T, n[j], fugN[j]);
 
         CalFugPAll();
-        // for (USI j = 0; j < NP; j++) eos.CalFugP(P, T, x[j], fugP[j]);
+        //for (USI j = 0; j < NP; j++) 
+        //    eos.CalFugP(P, T, x[j], fugP[j]);
 
         AssembleMatVfiVfp_full02();
         AssembleRhsVfiVfp_full02();
