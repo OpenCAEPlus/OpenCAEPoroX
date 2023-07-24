@@ -57,9 +57,9 @@ void OCPMixtureBlkOilOWMethod01::Flash(OCPMixtureVarSet& vs)
     vs.Nt             = vs.Ni[0] + vs.Ni[1];
     vs.vj[0]          = vs.Ni[0] / vs.xi[0];
     vs.vj[1]          = vs.Ni[1] / vs.xi[1];
-    vs.vf             = vs.vj[0] + vs.vj[1];
-    vs.S[0]           = vs.vj[0] / vs.vf;
-    vs.S[1]           = vs.vj[1] / vs.vf;
+    vs.Vf             = vs.vj[0] + vs.vj[1];
+    vs.S[0]           = vs.vj[0] / vs.Vf;
+    vs.S[1]           = vs.vj[1] / vs.Vf;
 
     vs.vji[0][0]      = 1 / vs.xi[0];
     vs.vji[1][1]      = 1 / vs.xi[1];
@@ -85,9 +85,9 @@ void OCPMixtureBlkOilOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 {
     Flash(vs);
 
-    vs.dXsdXp[0] = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.vf;        // dSo / dP
-    vs.dXsdXp[1] = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.vf;  // dSo / dNo
-    vs.dXsdXp[2] = -vs.S[0] * vs.vfi[1] / vs.vf;                  // dSo / dNw
+    vs.dXsdXp[0] = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.Vf;        // dSo / dP
+    vs.dXsdXp[1] = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.Vf;  // dSo / dNo
+    vs.dXsdXp[2] = -vs.S[0] * vs.vfi[1] / vs.Vf;                  // dSo / dNw
                  
     vs.dXsdXp[3] = -vs.dXsdXp[0];  // dSw / dP
     vs.dXsdXp[4] = -vs.dXsdXp[1];  // dSw / dNo

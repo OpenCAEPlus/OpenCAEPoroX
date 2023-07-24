@@ -200,7 +200,7 @@ public:
     const OCP_DBL& GetNi(const USI& i) const override { 
         return OWM.GetVarSet().Ni[i];
     }
-    const OCP_DBL& GetVf() const override { return OWM.GetVarSet().vf; }
+    const OCP_DBL& GetVf() const override { return OWM.GetVarSet().Vf; }
     const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OWM.GetVarSet().phaseExist[j]; }
     const OCP_DBL& GetS(const USI& j) const override { return OWM.GetVarSet().S[j]; }
     const OCP_DBL& GetVj(const USI& j) const override { return OWM.GetVarSet().vj[j]; }
@@ -298,7 +298,7 @@ public:
     const OCP_DBL& GetNi(const USI& i) const override {
         return OGWM.GetVarSet().Ni[i];
     }
-    const OCP_DBL& GetVf() const override { return OGWM.GetVarSet().vf; }
+    const OCP_DBL& GetVf() const override { return OGWM.GetVarSet().Vf; }
     const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OGWM.GetVarSet().phaseExist[j]; }
     const OCP_DBL& GetS(const USI& j) const override { return OGWM.GetVarSet().S[j]; }
     const OCP_DBL& GetVj(const USI& j) const override { return OGWM.GetVarSet().vj[j]; }

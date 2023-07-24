@@ -147,6 +147,8 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     AllocatePhase();
     AllocateMethod();
     AllocateOthers();
+
+    eos.Setup(param, tarId);
 }
 
 void MixtureComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
@@ -645,21 +647,6 @@ void MixtureComp::CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const vector<OCP_DBL>& xj)
     }
 }
 
-void MixtureComp::CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const OCP_DBL* xj) const
-{
-    AjT = 0;
-    BjT = 0;
-
-    for (USI i1 = 0; i1 < NC; i1++) {
-        BjT += Bi[i1] * xj[i1];
-        AjT += xj[i1] * xj[i1] * Ai[i1] * (1 - BIC[i1 * NC + i1]);
-
-        for (USI i2 = 0; i2 < i1; i2++) {
-            AjT +=
-                2 * xj[i1] * xj[i2] * sqrt(Ai[i1] * Ai[i2]) * (1 - BIC[i1 * NC + i2]);
-        }
-    }
-}
 
 void MixtureComp::AllocatePhase()
 {
@@ -683,115 +670,6 @@ void MixtureComp::AllocatePhase()
     ln = n;
 }
 
-void MixtureComp::CalFugPhi(vector<OCP_DBL>&       phiT,
-                            vector<OCP_DBL>&       fugT,
-                            const vector<OCP_DBL>& xj)
-{
-    OCP_DBL aj, bj, zj;
-    CalAjBj(aj, bj, xj);
-    SolEoS(zj, aj, bj);
-
-    const OCP_DBL m1 = delta1;
-    const OCP_DBL m2 = delta2;
-    // const OCP_DBL m1Mm2 = delta1M2;
-
-    OCP_DBL tmp;
-    for (USI i = 0; i < NC; i++) {
-        tmp = 0;
-        for (USI k = 0; k < NC; k++) {
-            tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-        }
-        phiT[i] = exp(Bi[i] / bj * (zj - 1) - log(zj - bj) -
-                      aj / (m1 - m2) / bj * (tmp / aj - Bi[i] / bj) *
-                          log((zj + m1 * bj) / (zj + m2 * bj)));
-        fugT[i] = phiT[i] * xj[i] * P;
-    }
-
-    //   OCP_DBL       tmp01 = log(zj - bj);
-    //   OCP_DBL       tmp02 = aj / (m1Mm2) / bj * log((zj + m1 * bj) / (zj + m2 * bj));
-
-    // for (USI i = 0; i < NC; i++) {
-    //	tmp = 0;
-    //	for (int k = 0; k < NC; k++) {
-    //		tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-    //	}
-    //       phiT[i] = exp(Bi[i] / bj * (zj - 1) - tmp01 - tmp02 * (tmp / aj - Bi[i] /
-    //       bj));
-    //	fugT[i] = phiT[i] * xj[i] * P;
-    //}
-
-    Asta = aj;
-    Bsta = bj;
-    Zsta = zj;
-}
-
-void MixtureComp::CalFugPhi(OCP_DBL* phiT, OCP_DBL* fugT, const OCP_DBL* xj)
-{
-    OCP_DBL aj, bj, zj;
-    CalAjBj(aj, bj, xj);
-    SolEoS(zj, aj, bj);
-
-    const OCP_DBL m1    = delta1;
-    const OCP_DBL m2    = delta2;
-    const OCP_DBL m1Mm2 = delta1M2;
-
-    // OCP_DBL tmp01 = log(zj - bj);
-    // OCP_DBL tmp02 = aj / (m1Mm2) / bj * log((zj + m1 * bj) / (zj + m2 * bj));
-
-    OCP_DBL tmp;
-    for (USI i = 0; i < NC; i++) {
-        tmp = 0;
-        for (USI k = 0; k < NC; k++) {
-            tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-        }
-        phiT[i] = exp(Bi[i] / bj * (zj - 1) - log(zj - bj) -
-                      aj / (m1Mm2) / bj * (tmp / aj - Bi[i] / bj) *
-                          log((zj + m1 * bj) / (zj + m2 * bj)));
-        fugT[i] = phiT[i] * xj[i] * P;
-    }
-    // for (USI i = 0; i < NC; i++) {
-    //    tmp = 0;
-    //    for (int k = 0; k < NC; k++) {
-    //        tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-    //    }
-    //    phiT[i] = exp(Bi[i] / bj * (zj - 1) - tmp01 - tmp02 * (tmp / aj - Bi[i] /
-    //    bj)); fugT[i] = phiT[i] * xj[i] * P;
-    //}
-
-    Asta = aj;
-    Bsta = bj;
-    Zsta = zj;
-}
-
-void MixtureComp::CalFugPhi(OCP_DBL* fugT, const OCP_DBL* xj)
-{
-    OCP_DBL aj, bj, zj;
-    CalAjBj(aj, bj, xj);
-    SolEoS(zj, aj, bj);
-
-    const OCP_DBL m1    = delta1;
-    const OCP_DBL m2    = delta2;
-    const OCP_DBL m1Mm2 = delta1M2;
-
-    // OCP_DBL tmp01 = log(zj - bj);
-    // OCP_DBL tmp02 = aj / (m1Mm2) / bj * log((zj + m1 * bj) / (zj + m2 * bj));
-
-    OCP_DBL tmp;
-    for (USI i = 0; i < NC; i++) {
-        tmp = 0;
-        for (USI k = 0; k < NC; k++) {
-            tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-        }
-        tmp     = exp(Bi[i] / bj * (zj - 1) - log(zj - bj) -
-                      aj / (m1Mm2) / bj * (tmp / aj - Bi[i] / bj) *
-                          log((zj + m1 * bj) / (zj + m2 * bj)));
-        fugT[i] = tmp * xj[i] * P;
-    }
-
-    Asta = aj;
-    Bsta = bj;
-    Zsta = zj;
-}
 
 void MixtureComp::CalFugPhiAll()
 {
@@ -821,19 +699,6 @@ void MixtureComp::CalFugPhiAll()
                               log((zj + m1 * bj) / (zj + m2 * bj)));
             fugT[i] = phiT[i] * xj[i] * P;
         }
-
-        // tmp01 = log(zj - bj);
-        // tmp02 = aj / (m1Mm2) / bj * log((zj + m1 * bj) / (zj + m2 * bj));
-        // for (USI i = 0; i < NC; i++) {
-        //	tmp = 0;
-        //	for (int k = 0; k < NC; k++) {
-        //		tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-        //	}
-        //          phiT[i] =
-        //              exp(Bi[i] / bj * (zj - 1) - tmp01 - tmp02 * (tmp / aj - Bi[i] /
-        //              bj));
-        //	fugT[i] = phiT[i] * xj[i] * P;
-        //}
     }
 }
 
@@ -854,6 +719,10 @@ void MixtureComp::CalVfXiRho()
     vf = 0;
     OCP_DBL tmp;
     for (USI j = 0; j < NP; j++) {
+
+        CalAiBi();
+        CalAjBj(Aj[0], Bj[0], x[0]);
+        SolEoS(Zj[0], Aj[0], Bj[0]);
 
         vector<OCP_DBL>& xj = x[j];
         tmp                 = Zj[j] * GAS_CONSTANT * T / P;
@@ -1015,9 +884,6 @@ void MixtureComp::PhaseEquilibrium()
             NP       = 1;
             nu[0]    = 1;
             x[0]     = zi;
-            CalAiBi();
-            CalAjBj(Aj[0], Bj[0], x[0]);
-            SolEoS(Zj[0], Aj[0], Bj[0]);
             // record error
             ePEC = 0.0;
             break;
@@ -1099,7 +965,9 @@ OCP_BOOL MixtureComp::StableSSM01(const USI& Id)
     USI      iter, k;
 
     const vector<OCP_DBL>& xj = x[Id];
-    CalFugPhi(phi[Id], fug[Id], xj);
+
+    eos.CalFug(P, T, x[Id], fug[Id]);
+
     const vector<OCP_DBL>& fugId = fug[Id];
 
     vector<OCP_DBL>& ks = Ks[0];
@@ -1128,8 +996,7 @@ OCP_BOOL MixtureComp::StableSSM01(const USI& Id)
                     break;
                 }
             }
-
-            CalFugPhi(&fugSta[0], &Y[0]);
+            eos.CalFug(P, T, Y, fugSta);
             Se = 0;
             Sk = 0;
             for (USI i = 0; i < NC; i++) {
@@ -1188,7 +1055,7 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
     // if stable, return OCP_TRUE
 
     const vector<OCP_DBL>& xj = x[Id];
-    CalFugPhi(phi[Id], fug[Id], xj);
+    eos.CalFugPhi(P, T, x[Id], fug[Id], phi[Id]);
     const vector<OCP_DBL>& fugId = fug[Id];
 
     for (USI i = 0; i < NC; i++) {
@@ -1213,8 +1080,8 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
             Yt += Y[i];
         }
         Dscalar(NC, 1 / Yt, &Y[0]);
-        // CalFugPhi(phiSta, fugSta, Y);
-        CalFugPhi(&phiSta[0], &fugSta[0], &Y[0]);
+
+        eos.CalFugPhi(P, T, Y, fugSta, phiSta);
 
         Se = 0;
         for (USI i = 0; i < NC; i++) {
@@ -1241,8 +1108,9 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
                 Yt += Y[i];
             }
             Dscalar(NC, 1 / Yt, &Y[0]);
-            // CalFugPhi(phiSta, fugSta, Y);
-            CalFugPhi(&phiSta[0], &fugSta[0], &Y[0]);
+
+            eos.CalFugPhi(P, T, Y, fugSta, phiSta);
+
             Se = 0;
             for (USI i = 0; i < NC; i++) {
                 Se += pow(log(fugSta[i] / fugId[i] * Yt), 2);
@@ -1295,7 +1163,7 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
 
     while (Se > Stol) {
 
-        CalFugXSTA();
+        eos.CalFugX(P, T, Y, fugX[0]);
         AssembleJmatSTA();
         // LUSolve(1, NC, &JmatSTA[0], &resSTA[0], &pivot[0]);
         SYSSolve(1, &uplo, NC, &JmatSTA[0], &resSTA[0], &pivot[0], &JmatWork[0],
@@ -1309,7 +1177,7 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
         }
         Dscalar(NC, 1 / Yt, &Y[0]);
 
-        CalFugPhi(&fugSta[0], &Y[0]);
+        eos.CalFug(P, T, Y, fugSta);
         for (USI i = 0; i < NC; i++) {
             resSTA[i] = log(fug[Id][i] / (fugSta[i] * Yt));
         }
@@ -1326,84 +1194,6 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
     EoSctrl.NRsta.conflag = OCP_TRUE;
     EoSctrl.NRsta.realTol = Se;
     return OCP_TRUE;
-}
-
-void MixtureComp::CalFugXSTA()
-{
-    // Y sums to be 1 now, it's actually the mole fraction of spliting phase
-    // for stability analysis
-    vector<OCP_DBL>& fugx = fugX[0];
-    OCP_DBL          aj   = Asta;
-    OCP_DBL          bj   = Bsta;
-    OCP_DBL          zj   = Zsta;
-    OCP_DBL          tmp  = 0;
-
-    const OCP_DBL m1    = delta1;
-    const OCP_DBL m2    = delta2;
-    const OCP_DBL m1Pm2 = delta1P2;
-    const OCP_DBL m1Mm2 = delta1M2;
-    const OCP_DBL m1Tm2 = delta1T2;
-
-    Bx = Bi;
-    for (USI i = 0; i < NC; i++) {
-        tmp = 0;
-        for (USI k = 0; k < NC; k++) {
-            tmp += Y[k] * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]);
-        }
-        Ax[i] = 2 * tmp;
-        Zx[i] = ((bj - zj) * Ax[i] + ((aj + m1Tm2 * (3 * bj * bj + 2 * bj)) +
-                                      ((m1Pm2) * (2 * bj + 1) - 2 * m1Tm2 * bj) * zj -
-                                      (m1Pm2 - 1) * zj * zj) *
-                                         Bx[i]) /
-                (3 * zj * zj + 2 * ((m1Pm2 - 1) * bj - 1) * zj +
-                 (aj + m1Tm2 * bj * bj - (m1Pm2)*bj * (bj + 1)));
-    }
-
-    OCP_DBL C, E, G;
-    OCP_DBL Cxk, Dxk, Exk, Gxk;
-    OCP_DBL aik;
-    G = (zj + m1 * bj) / (zj + m2 * bj);
-
-    for (USI i = 0; i < NC; i++) {
-
-        C = Y[i] * P / (zj - bj);
-        // C = 1 / (zj - bj);
-        // D = Bx[i] * (zj - 1) / bj;
-        E = -aj / ((m1Mm2)*bj) * (Ax[i] / aj - Bx[i] / bj);
-
-        for (USI k = 0; k < NC; k++) {
-            aik = (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]);
-
-            // Cxk = -Y[i] * (Zx[k] - Bx[k]) / ((zj - bj) * (zj - bj));
-            Cxk = ((zj - bj) * delta(i, k) - Y[i] * (Zx[k] - Bx[k])) * P /
-                  ((zj - bj) * (zj - bj));
-            Dxk = Bx[i] / bj * (Zx[k] - Bx[k] * (zj - 1) / bj);
-            /*Exk = (Ax[k] * bj - aj * Bx[k]) / (bj * bj) * (Ax[i] / aj - Bx[i] / bj) +
-               aj / bj * (2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) / aj -
-                Ax[k] * Ax[i] / (aj * aj) + Bx[i] * Bx[k] / (bj * bj));*/
-            Exk = (2 * (aj / bj * Bx[k] * Bx[i] + bj * aik) - Ax[i] * Bx[k] -
-                   Ax[k] * Bi[i]) /
-                  (bj * bj);
-            Exk /= -(m1Mm2);
-            Gxk = (m1Mm2) / (zj + m2 * bj) / (zj + m2 * bj) * (zj * Bx[k] - Zx[k] * bj);
-            fugx[i * NC + k] = 1 / C * Cxk + Dxk + Exk * log(G) + E / G * Gxk;
-        }
-    }
-    // cout << "PhiX" << endl;
-    // for (USI i = 0; i < NC; i++) {
-    //	for (USI k = 0; k < NC; k++) {
-    //		cout << fugx[i * NC + k] << "      ";
-    //	}
-    //	cout << endl;
-    //}
-
-#ifdef OCP_NANCHECK
-    for (USI j = 0; j < NP; j++) {
-        if (!CheckNan(fugX[j].size(), &fugX[j][0])) {
-            OCP_ABORT("INF or NAN in fugX !");
-        }
-    }
-#endif // NANCHECK
 }
 
 void MixtureComp::AssembleJmatSTA()
@@ -1424,13 +1214,6 @@ void MixtureComp::AssembleJmatSTA()
             JmatSTA[i * NC + j] = (fugx[i * NC + j] - tmp + 1) / Yt;
         }
     }
-    // cout << "JmatSTA" << endl;
-    // for (USI i = 0; i < NC; i++) {
-    //	for (USI k = 0; k < NC; k++) {
-    //		cout << JmatSTA[k * NC + i] << "      ";
-    //	}
-    //	cout << endl;
-    //}
 }
 
 void MixtureComp::PhaseSplit()
@@ -1457,20 +1240,6 @@ void MixtureComp::PhaseSplit()
     itersRR += EoSctrl.RR.curIt;
     countsSSMSP++;
     countsNRSP++;
-
-    // cout << scientific << setprecision(8);
-    // for (USI i = 0; i < NC; i++) {
-    //     cout << x[0][i] / x[1][i] << "   ";
-    // }
-    // cout << endl;
-    // cout << "Yt = " << scientific << setprecision(12) << Yt << "   "
-    //     << setw(3) << "SSMtol = " << setprecision(6) << sqrt(EoSctrl.SSMsp.realTol)
-    //     << "   "
-    //     << setw(3) << EoSctrl.SSMsp.curIt << "   "
-    //     << setw(3) << "NRtol = " << setprecision(6) << EoSctrl.NRsp.realTol << "   "
-    //     << setw(3) << EoSctrl.NRsp.curIt << "   "
-    //     << setw(2) << lNP << "   " << setw(2) << NP << "   "
-    //     << (lNP == NP ? "N" : "Y") << "   ";
 }
 
 OCP_BOOL MixtureComp::CheckSplit()
@@ -1487,7 +1256,7 @@ OCP_BOOL MixtureComp::CheckSplit()
         if (OCP_TRUE) {
             // Calculate Gibbs Energy
 
-            CalFugPhi(phiSta, fugSta, zi);
+            eos.CalFug(P, T, zi, fugSta);
             GibbsEnergyB = 0;
             GibbsEnergyE = 0;
             for (USI i = 0; i < NC; i++) {
@@ -1576,6 +1345,9 @@ void MixtureComp::SplitSSM2(const OCP_BOOL& flag)
         RachfordRice2();
         UpdateXRR();
         CalFugPhiAll();
+        //for (USI j = 0; j < NP; j++)
+        //    eos.CalFugPhi(P, T, x[j], fug[j], phi[j]);
+
         Se = 0;
         for (USI i = 0; i < NC; i++) {
             Se += pow(fug[1][i] / fug[0][i] - 1, 2);
@@ -1768,7 +1540,11 @@ void MixtureComp::SplitNR()
 
         // eNR0 = eNR;
         ln = n;
-        CalFugNAll();
+
+        // CalFugNAll();
+        for (USI j = 0; j < NP; j++)  
+            eos.CalFugN(P, T, n[j], fugN[j]);
+
         AssembleJmatSP();
 
         // LUSolve(1, len, &JmatSP[0], &resSP[0], &pivot[0]);
@@ -1810,6 +1586,9 @@ void MixtureComp::SplitNR()
         }
 
         CalFugPhiAll();
+        //for (USI j = 0; j < NP; j++)
+        //    eos.CalFug(P, T, n[j], fug[j]);
+
         CalResSP();
         eNR = Dnorm2(len, &resSP[0]);
         iter++;
@@ -1846,7 +1625,7 @@ void MixtureComp::CalResSP()
     }
 }
 
-void MixtureComp::CalFugNAll(const OCP_BOOL& Znflag)
+void MixtureComp::CalFugNAll()
 {
     OCP_DBL C, E, G;
     OCP_DBL Cnk, Dnk, Enk, Gnk;
@@ -1866,20 +1645,18 @@ void MixtureComp::CalFugNAll(const OCP_BOOL& Znflag)
             for (USI m = 0; m < NC; m++) {
                 tmp += (1 - BIC[i * NC + m]) * sqrt(Ai[i] * Ai[m]) * xj[m];
             }
-            An[i] = 2 / nu[j] * (tmp - aj);
-            Bn[i] = 1 / nu[j] * (Bi[i] - bj);
-            if (Znflag) {
-                Znj[i] =
-                    ((bj - zj) * An[i] +
-                     ((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-                      ((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) *
-                          zj -
-                      (delta1 + delta2 - 1) * zj * zj) *
-                         Bn[i]) /
-                    (3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-                     (aj + delta1 * delta2 * bj * bj -
-                      (delta1 + delta2) * bj * (bj + 1)));
-            }
+			An[i] = 2 / nu[j] * (tmp - aj);
+			Bn[i] = 1 / nu[j] * (Bi[i] - bj);
+			Znj[i] =
+				((bj - zj) * An[i] +
+					((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
+						((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) *
+						zj -
+						(delta1 + delta2 - 1) * zj * zj) *
+					Bn[i]) /
+				(3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
+					(aj + delta1 * delta2 * bj * bj -
+						(delta1 + delta2) * bj * (bj + 1)));
         }
 
         G = (zj + delta1 * bj) / (zj + delta2 * bj);
@@ -2197,7 +1974,7 @@ void MixtureComp::CalFugXAll()
 #endif // NANCHECK
 }
 
-void MixtureComp::CalFugPAll(const OCP_BOOL& Zpflag)
+void MixtureComp::CalFugPAll()
 {
 
     OCP_DBL C, E, G;
@@ -2214,16 +1991,14 @@ void MixtureComp::CalFugPAll(const OCP_BOOL& Zpflag)
 
         OCP_DBL Ap = aj / P;
         OCP_DBL Bp = bj / P;
-        if (Zpflag) {
-            Zp[j] =
-                ((bj - zj) * Ap +
-                 ((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-                  ((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
-                  (delta1 + delta2 - 1) * zj * zj) *
-                     Bp) /
-                (3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-                 (aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
-        }
+		Zp[j] =
+			((bj - zj) * Ap +
+				((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
+					((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
+					(delta1 + delta2 - 1) * zj * zj) *
+				Bp) /
+			(3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
+				(aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
 
         G  = (zj + delta1 * bj) / (zj + delta2 * bj);
         Gp = (delta1 - delta2) / ((zj + delta2 * bj) * (zj + delta2 * bj)) *
@@ -3542,6 +3317,7 @@ void MixtureComp::CalVfiVfp_full02()
     OCP_DBL CgTP = GAS_CONSTANT * T / P;
 
     if (NP == 1) {
+
         // NP = 1
         const OCP_DBL&         aj   = Aj[0];
         const OCP_DBL&         bj   = Bj[0];
@@ -3579,7 +3355,11 @@ void MixtureComp::CalVfiVfp_full02()
     } else {
         // NP = 2,  IF NP > 2  ->  WRONG!
         CalFugNAll();
+        // for (USI j = 0; j < NP; j++) eos.CalFugN(P, T, n[j], fugN[j]);
+
         CalFugPAll();
+        // for (USI j = 0; j < NP; j++) eos.CalFugP(P, T, x[j], fugP[j]);
+
         AssembleMatVfiVfp_full02();
         AssembleRhsVfiVfp_full02();
         LUSolve(NC + 1, NC, &JmatDer[0], &rhsDer[0], &pivot[0]);
@@ -3603,10 +3383,8 @@ void MixtureComp::CalVfiVfp_full02()
             vji[j0][i] = 0;
             vji[j1][i] = 0;
             for (USI k = 0; k < NC; k++) {
-                vji[j0][i] +=
-                    (CgTP * (Zj[0] + nu[0] * Zn[0][k]) - Vshift[k]) * dnkjdNP[k];
-                vji[j1][i] += (CgTP * (Zj[1] + nu[1] * Zn[1][k]) - Vshift[k]) *
-                              (delta(i, k) - dnkjdNP[k]);
+                vji[j0][i] += (CgTP * (Zj[0] + nu[0] * Zn[0][k]) - Vshift[k]) * dnkjdNP[k];
+                vji[j1][i] += (CgTP * (Zj[1] + nu[1] * Zn[1][k]) - Vshift[k]) * (delta(i, k) - dnkjdNP[k]);
             }
             vfi[i] = vji[j0][i] + vji[j1][i];
             dnkjdNP += NC;

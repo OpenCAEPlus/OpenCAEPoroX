@@ -134,7 +134,7 @@ public:
     const OCP_DBL& GetNi(const USI& i) const override {
         return OWTM.GetVarSet().Ni[i];
     }
-    const OCP_DBL& GetVf() const override { return OWTM.GetVarSet().vf; }
+    const OCP_DBL& GetVf() const override { return OWTM.GetVarSet().Vf; }
     const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OWTM.GetVarSet().phaseExist[j]; }
     const OCP_DBL& GetS(const USI& j) const override { return OWTM.GetVarSet().S[j]; }
     const OCP_DBL& GetVj(const USI& j) const override { return OWTM.GetVarSet().vj[j]; }

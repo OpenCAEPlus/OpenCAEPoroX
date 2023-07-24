@@ -160,11 +160,11 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.vj[0] = vs.Ni[0] / vs.xi[0];
     vs.vj[1] = vs.Ni[1] / vs.xi[1];
     // total volume
-    vs.vf    = vs.vj[0] + vs.vj[1];
+    vs.Vf    = vs.vj[0] + vs.vj[1];
 
     // phase saturation
-    vs.S[0] = vs.vj[0] / vs.vf;
-    vs.S[1] = vs.vj[1] / vs.vf;
+    vs.S[0] = vs.vj[0] / vs.Vf;
+    vs.S[1] = vs.vj[1] / vs.Vf;
 
     // d vf/ d Ni
     vs.vfi[0] = 1 / vs.xi[0];
@@ -175,10 +175,10 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.vfT = -(vs.vj[0] * vs.xiT[0] / vs.xi[0] + vs.vj[1] * vs.xiT[1] / vs.xi[1]);
 
     // Derivative of secondary vars with respect to primary vars
-    vs.dXsdXp[0] = (-vs.vj[0] * vs.xiP[0] / vs.xi[0] - vs.S[0] * vs.vfP) / vs.vf; // dSo / dP
-    vs.dXsdXp[1] = (1 / vs.xi[0] - vs.S[0] * vs.vfi[0]) / vs.vf;            // dSo / dNo
-    vs.dXsdXp[2] = -vs.S[0] * vs.vfi[1] / vs.vf;                         // dSo / dNw
-    vs.dXsdXp[3] = (-vs.vj[0] * vs.xiT[0] / vs.xi[0] - vs.S[0] * vs.vfT) / vs.vf; // dSo / dT
+    vs.dXsdXp[0] = (-vs.vj[0] * vs.xiP[0] / vs.xi[0] - vs.S[0] * vs.vfP) / vs.Vf; // dSo / dP
+    vs.dXsdXp[1] = (1 / vs.xi[0] - vs.S[0] * vs.vfi[0]) / vs.Vf;            // dSo / dNo
+    vs.dXsdXp[2] = -vs.S[0] * vs.vfi[1] / vs.Vf;                         // dSo / dNw
+    vs.dXsdXp[3] = (-vs.vj[0] * vs.xiT[0] / vs.xi[0] - vs.S[0] * vs.vfT) / vs.Vf; // dSo / dT
 
     vs.dXsdXp[4] = -vs.dXsdXp[0]; // dSw / dP
     vs.dXsdXp[5] = -vs.dXsdXp[1]; // dSw / dNo
@@ -199,10 +199,10 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
         // Uf
         vs.Uf += vs.S[j] * vs.xi[j] * vs.H[j];
         // dUf / dP
-        vs.UfP += -(vs.vj[j] * vs.xiP[j] / vs.xi[j] + vs.S[j] * vs.vfP) / vs.vf * vs.xi[j] * vs.H[j];
+        vs.UfP += -(vs.vj[j] * vs.xiP[j] / vs.xi[j] + vs.S[j] * vs.vfP) / vs.Vf * vs.xi[j] * vs.H[j];
         vs.UfP += vs.xiP[j] * vs.S[j] * vs.H[j];
         // dUf / dT
-        vs.UfT += -(vs.vj[j] * vs.xiT[j] / vs.xi[j] + vs.S[j] * vs.vfT) / vs.vf * vs.xi[j] * vs.H[j];
+        vs.UfT += -(vs.vj[j] * vs.xiT[j] / vs.xi[j] + vs.S[j] * vs.vfT) / vs.Vf * vs.xi[j] * vs.H[j];
         vs.UfT += (vs.xiT[j] * vs.H[j] + vs.HT[j] * vs.xi[j]) * vs.S[j];
     }
 

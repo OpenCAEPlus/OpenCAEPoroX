@@ -292,12 +292,6 @@ public:
     void CalAiBi();
     // Calculate Aj and Bj with specified xj
     void CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const vector<OCP_DBL>& xj) const;
-    void CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const OCP_DBL* xj) const;
-    /// test
-    void PrintZtmp()
-    {
-        for (auto z : Ztmp) cout << z << "\t";
-    }
 
 private:
     // EoS Variables
@@ -319,10 +313,6 @@ public:
     // Phase Function
     // Allocate memoery for phase variables
     void AllocatePhase();
-    void
-    CalFugPhi(vector<OCP_DBL>& phiT, vector<OCP_DBL>& fugT, const vector<OCP_DBL>& xj);
-    void CalFugPhi(OCP_DBL* phiT, OCP_DBL* fugT, const OCP_DBL* xj);
-    void CalFugPhi(OCP_DBL* fugT, const OCP_DBL* xj);
     void CalFugPhiAll();
     void CalMW();
     void CalVfXiRho();
@@ -365,7 +355,6 @@ public:
     OCP_BOOL StableSSM(const USI& Id);   ///< strict SSM
     OCP_BOOL StableSSM01(const USI& Id); ///< relaxed SSM
     OCP_BOOL StableNR(const USI& Id);
-    void     CalFugXSTA(); ///< Calculate d ln(Fug) / dx for Y
     void     AssembleJmatSTA();
     OCP_BOOL CheckSplit();
     void     PhaseSplit();
@@ -379,7 +368,7 @@ public:
     void     SplitBFGS();      ///< Use BFGS to calculate phase splitting
     void     SplitNR();        ///< Use NR to calculate phase splitting
     void     CalResSP();
-    void     CalFugNAll(const OCP_BOOL& Znflag = OCP_TRUE);
+    void     CalFugNAll();
     void     PrintFugN();
     void     AssembleJmatSP();
     OCP_DBL  CalStepNRsp();
@@ -390,7 +379,6 @@ private:
     vector<vector<OCP_DBL>> Kw;  ///< Equilibrium Constant of Whilson
     vector<vector<OCP_DBL>> Ks;  ///< Approximation of Equilibrium Constant in SSM
     vector<OCP_DBL>         lKs; ///< last Ks
-    OCP_DBL                 Asta, Bsta, Zsta;
     vector<OCP_DBL> phiSta; ///< Fugacity coefficient used in phase stability analysis
     vector<OCP_DBL> fugSta; ///< Fugacity used in phase stability analysis
     // SSM in Stability Analysis
@@ -433,7 +421,7 @@ protected:
     void CalViscoLBC();
     void CalViscoHZYT();
     void CalFugXAll();
-    void CalFugPAll(const OCP_BOOL& Zpflag = OCP_TRUE);
+    void CalFugPAll();
 
     void CalVjpVfpVfx_partial();
     void CalXiPNX_partial();
@@ -498,6 +486,12 @@ private:
     vector<OCP_DBL> muN;  ///< d mu[j] / d N[i]: numphase * numCom
     vector<OCP_DBL> xiN;  ///< d xi[j] / d N[i]: numphase * numCom
     vector<OCP_DBL> rhoN; ///< d rho[j] / d N[i]: numphase * numCom
+
+    /////////////////////////////////////////////////////////////////////
+    // EoS
+    /////////////////////////////////////////////////////////////////////
+
+    EoSCalculation eos;
 
     /////////////////////////////////////////////////////////////////////
     // Optional Features

@@ -78,7 +78,7 @@ public:
     /// total moles of components
     OCP_DBL Nt;
     /// total volume of components
-    OCP_DBL vf;
+    OCP_DBL Vf;
     /// mole number of components
     vector<OCP_DBL> Ni;
     /// existence of phase

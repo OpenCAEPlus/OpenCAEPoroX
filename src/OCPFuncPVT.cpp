@@ -393,12 +393,13 @@ OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, cons
 	//	muAux[4] = muAux[3] * (muAux[3] * (muAux[3] * (coef[4] * muAux[3] + coef[3]) + coef[2]) + coef[1]) + coef[0];
 	//	return muAux[0] / muAux[1] + 1E-4 * (pow(muAux[4], 4) - 1) / muAux[2];
 	//}
+	return 0;
 }
 
 
 OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
 {
-
+	return 0;
 }
 
 

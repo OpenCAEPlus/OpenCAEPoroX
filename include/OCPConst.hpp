@@ -105,9 +105,6 @@ const USI BLKOIL_ODGW = 15; ///< black oil model with live oil, dry gas, water
 const USI EOS_PVTW    = 20; ///< Mixture model = equation-of-state
 const USI THERMAL     = 30; ///< Mixture model = ifThermal
 
-// EoS models
-const USI EOS_PR  = 1; ///< EoS model = PR
-const USI EOS_SRK = 2; ///< EoS model = SRK
 
 // Phase types
 const USI PHASE_W               = 1;   ///< Phase type = water only

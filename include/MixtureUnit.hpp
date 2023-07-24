@@ -21,6 +21,7 @@
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
 #include "WellOpt.hpp"
+#include "OCPEoS.hpp"
 
 using namespace std;
 
