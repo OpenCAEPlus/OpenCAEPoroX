@@ -313,7 +313,6 @@ public:
     // Phase Function
     // Allocate memoery for phase variables
     void AllocatePhase();
-    void CalFugPhiAll();
     void CalMW();
     void CalVfXiRho();
     void CalSaturation();

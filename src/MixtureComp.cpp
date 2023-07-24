@@ -671,37 +671,6 @@ void MixtureComp::AllocatePhase()
 }
 
 
-void MixtureComp::CalFugPhiAll()
-{
-    OCP_DBL       tmp; // , tmp01, tmp02;
-    const OCP_DBL m1    = delta1;
-    const OCP_DBL m2    = delta2;
-    const OCP_DBL m1Mm2 = delta1M2;
-
-    for (USI j = 0; j < NP; j++) {
-        const vector<OCP_DBL>& xj   = x[j];
-        vector<OCP_DBL>&       phiT = phi[j];
-        vector<OCP_DBL>&       fugT = fug[j];
-        OCP_DBL&               aj   = Aj[j];
-        OCP_DBL&               bj   = Bj[j];
-        OCP_DBL&               zj   = Zj[j];
-
-        CalAjBj(aj, bj, xj);
-        SolEoS(zj, aj, bj);
-
-        for (USI i = 0; i < NC; i++) {
-            tmp = 0;
-            for (USI k = 0; k < NC; k++) {
-                tmp += 2 * (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-            }
-            phiT[i] = exp(Bi[i] / bj * (zj - 1) - log(zj - bj) -
-                          aj / (m1Mm2) / bj * (tmp / aj - Bi[i] / bj) *
-                              log((zj + m1 * bj) / (zj + m2 * bj)));
-            fugT[i] = phiT[i] * xj[i] * P;
-        }
-    }
-}
-
 void MixtureComp::CalMW()
 {
     // Calculate Molecular Weight of phase
@@ -721,8 +690,8 @@ void MixtureComp::CalVfXiRho()
     for (USI j = 0; j < NP; j++) {
 
         CalAiBi();
-        CalAjBj(Aj[0], Bj[0], x[0]);
-        SolEoS(Zj[0], Aj[0], Bj[0]);
+        CalAjBj(Aj[j], Bj[j], x[j]);
+        SolEoS(Zj[j], Aj[j], Bj[j]);
 
         vector<OCP_DBL>& xj = x[j];
         tmp                 = Zj[j] * GAS_CONSTANT * T / P;
@@ -848,9 +817,6 @@ void MixtureComp::PhaseEquilibrium()
             NP       = 1;
             nu[0]    = 1;
             x[0]     = zi;
-            CalAiBi();
-            CalAjBj(Aj[0], Bj[0], x[0]);
-            SolEoS(Zj[0], Aj[0], Bj[0]);
             CalKwilson();
             while (!PhaseStable()) {
                 NP++;
@@ -893,7 +859,6 @@ void MixtureComp::PhaseEquilibrium()
             flagSkip = OCP_FALSE;
             NP       = 2;
             Yt       = 1.01;
-            CalAiBi();
             CalKwilson();
             PhaseSplit();
 
@@ -1284,8 +1249,6 @@ OCP_BOOL MixtureComp::CheckSplit()
                 NP    = 1;
                 x[0]  = zi;
                 nu[0] = 1;
-                CalAjBj(Aj[0], Bj[0], x[0]);
-                SolEoS(Zj[0], Aj[0], Bj[0]);
 
                 EoSctrl.SSMsta.conflag = OCP_FALSE;
                 EoSctrl.NRsta.conflag  = OCP_FALSE;
@@ -1344,9 +1307,8 @@ void MixtureComp::SplitSSM2(const OCP_BOOL& flag)
 
         RachfordRice2();
         UpdateXRR();
-        CalFugPhiAll();
-        //for (USI j = 0; j < NP; j++)
-        //    eos.CalFugPhi(P, T, x[j], fug[j], phi[j]);
+        for (USI j = 0; j < NP; j++)
+            eos.CalFugPhi(P, T, x[j], fug[j], phi[j]);
 
         Se = 0;
         for (USI i = 0; i < NC; i++) {
@@ -1541,7 +1503,6 @@ void MixtureComp::SplitNR()
         // eNR0 = eNR;
         ln = n;
 
-        // CalFugNAll();
         for (USI j = 0; j < NP; j++)  
             eos.CalFugN(P, T, n[j], fugN[j]);
 
@@ -1585,9 +1546,8 @@ void MixtureComp::SplitNR()
             x[NP - 1][i] = fabs(n[NP - 1][i] / nu[NP - 1]);
         }
 
-        CalFugPhiAll();
-        //for (USI j = 0; j < NP; j++)
-        //    eos.CalFug(P, T, n[j], fug[j]);
+        for (USI j = 0; j < NP; j++)
+            eos.CalFug(P, T, x[j], fug[j]);
 
         CalResSP();
         eNR = Dnorm2(len, &resSP[0]);
