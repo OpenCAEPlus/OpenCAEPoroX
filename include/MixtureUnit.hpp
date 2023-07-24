@@ -95,7 +95,7 @@ public:
     // needed. if tar phase is water, only Pin is needed.
     virtual OCP_DBL XiPhase(const OCP_DBL& Pin,
                             const OCP_DBL& Tin,
-                            const OCP_DBL* Ziin,
+                            const vector<OCP_DBL>& Ziin,
                             const USI&     tarPhase) = 0;
 
     /// return mass density of phase
@@ -106,7 +106,7 @@ public:
     virtual OCP_DBL RhoPhase(const OCP_DBL& Pin,
                              const OCP_DBL& Pbb,
                              const OCP_DBL& Tin,
-                             const OCP_DBL* Ziin,
+                             const vector<OCP_DBL>& Ziin,
                              const USI&     tarPhase) = 0;
 
     // for well

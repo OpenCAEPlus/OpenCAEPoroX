@@ -102,14 +102,14 @@ public:
     /// injection fluids in injection wells.
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
-                    const OCP_DBL* Ziin,
+                    const vector<OCP_DBL>& Ziin,
                     const USI&     tarPhase) override;
 
     /// return mass density of phase.
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
-                     const OCP_DBL* Ziin,
+                     const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override;
 
     // for Well

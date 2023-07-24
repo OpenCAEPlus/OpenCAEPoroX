@@ -116,7 +116,7 @@ public:
     };
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
-                    const OCP_DBL* Ziin,
+                    const vector<OCP_DBL>& Ziin,
                     const USI&     tarPhase) override
     {
         OCP_ABORT("Not Completed!");
@@ -125,7 +125,7 @@ public:
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
-                     const OCP_DBL* Ziin,
+                     const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override
     {
         OCP_ABORT("Not Completed!");
@@ -182,12 +182,12 @@ public:
                   const OCP_USI& bId) override;
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
-                    const OCP_DBL* Ziin,
+                    const vector<OCP_DBL>& Ziin,
                     const USI&     tarPhase) override;
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
-                     const OCP_DBL* Ziin,
+                     const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override;
 
     // for Well
@@ -279,12 +279,12 @@ public:
                   const OCP_USI& bId) override;
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
-                    const OCP_DBL* Ziin,
+                    const vector<OCP_DBL>& Ziin,
                     const USI&     tarPhase) override;
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
-                     const OCP_DBL* Ziin,
+                     const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override;
 
     // for Well

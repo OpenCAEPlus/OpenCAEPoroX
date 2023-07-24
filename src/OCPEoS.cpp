@@ -346,34 +346,35 @@ void EoS_PR::CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 }
 
 
-OCP_DBL EoS_PR::CalVj(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
 {
-
-}
-
-
-OCP_DBL EoS_PR::CalVjDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& xiP, OCP_DBL* xix)
-{
-    const OCP_DBL CgTP = GAS_CONSTANT * T / P;
-    OCP_DBL tmp;
-
     CalAjBjZj(P, T, x);
-    CalAxBxZx(P, T, x);
-    CalApBpZp(P, T, x);
-
     OCP_DBL v = Zj * GAS_CONSTANT * T / P;
     for (USI i = 0; i < nc; i++) {
         v -= x[i] * Vshift[i];
     }
-    const OCP_DBL xi = 1 / v;
+    return v;
+}
 
-	tmp = -xi * xi;
+
+OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, OCP_DBL* vmx)
+{
+    CalAjBjZj(P, T, x);
+    CalAxBxZx(P, T, x);
+    CalApBpZp(P, T, x);
+
+    const OCP_DBL CgTP = GAS_CONSTANT * T / P;
+    OCP_DBL v = Zj * CgTP;
+    for (USI i = 0; i < nc; i++) {
+        v -= x[i] * Vshift[i];
+    }
+
 	for (USI i = 0; i < nc; i++) {
-		xix[i] = tmp * (CgTP * Zx[i] - Vshift[i]);
+		vmx[i] = CgTP * Zx[i] - Vshift[i];
 	}
-	xiP = tmp * CgTP * (Zp - Zj / P);
+	vmP = CgTP * (Zp - Zj / P);
 
-    return xi;
+    return v;
 }
 
 

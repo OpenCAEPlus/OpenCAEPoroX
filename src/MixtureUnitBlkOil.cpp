@@ -74,7 +74,7 @@ void MixtureUnitBlkOil_OW::FlashFIM(const OCP_DBL& Pin,
 
 OCP_DBL MixtureUnitBlkOil_OW::XiPhase(const OCP_DBL& Pin,
     const OCP_DBL& Tin,
-    const OCP_DBL* Ziin,
+    const vector<OCP_DBL>& Ziin,
     const USI& tarPhase)
 {
     return OWM.CalXi(Pin, tarPhase);
@@ -83,7 +83,7 @@ OCP_DBL MixtureUnitBlkOil_OW::XiPhase(const OCP_DBL& Pin,
 OCP_DBL MixtureUnitBlkOil_OW::RhoPhase(const OCP_DBL& Pin,
     const OCP_DBL& Pbb,
     const OCP_DBL& Tin,
-    const OCP_DBL* Ziin,
+    const vector<OCP_DBL>& Ziin,
     const USI& tarPhase)
 {
     return OWM.CalRho(Pin, tarPhase);
@@ -200,7 +200,7 @@ void MixtureUnitBlkOil_OGW::FlashFIM(const OCP_DBL& Pin,
 OCP_DBL
 MixtureUnitBlkOil_OGW::XiPhase(const OCP_DBL& Pin,
     const OCP_DBL& Tin,
-    const OCP_DBL* Ziin,
+    const vector<OCP_DBL>& Ziin,
     const USI& tarPhase)
 {
     return OGWM.CalXi(Pin, Pin, tarPhase);
@@ -210,7 +210,7 @@ OCP_DBL
 MixtureUnitBlkOil_OGW::RhoPhase(const OCP_DBL& Pin,
     const OCP_DBL& Pbbin,
     const OCP_DBL& Tin,
-    const OCP_DBL* Ziin,
+    const vector<OCP_DBL>& Ziin,
     const USI& tarPhase)
 {
     return OGWM.CalRho(Pin, Pbbin, tarPhase);

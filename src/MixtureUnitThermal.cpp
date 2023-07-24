@@ -80,7 +80,7 @@ OCP_DBL MixtureUnitThermal_OW::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_
 
 OCP_DBL MixtureUnitThermal_OW::XiPhase(const OCP_DBL& Pin,
                                     const OCP_DBL& Tin,
-                                    const OCP_DBL* Ziin,
+                                    const vector<OCP_DBL>& Ziin,
                                     const USI&     tarPhase)
 {
     return OWTM.CalXi(Pin, Tin, tarPhase);
@@ -90,7 +90,7 @@ OCP_DBL
 MixtureUnitThermal_OW::RhoPhase(const OCP_DBL& Pin,
                              const OCP_DBL& Pbb,
                              const OCP_DBL& Tin,
-                             const OCP_DBL* Ziin,
+                             const vector<OCP_DBL>& Ziin,
                              const USI&     tarPhase)
 {
     return OWTM.CalRho(Pin, Tin, tarPhase);
@@ -140,7 +140,7 @@ void MixtureUnitThermal_OW::SetupWellOpt(WellOpt&                  opt,
             opt.SetInjProdPhase(WATER);
             // lbmol / ft3 -> lbmol  / bbl  for
             // injfluid Use flash in Bulk in surface condition
-            OCP_DBL tmp = CONV1 * XiPhase(Psurf, Tsurf, &tmpZi[0], WATER);
+            OCP_DBL tmp = CONV1 * XiPhase(Psurf, Tsurf, tmpZi, WATER);
             opt.SetInjFactor(tmp);
         } else {
             OCP_ABORT("WRONG Fluid Type!");

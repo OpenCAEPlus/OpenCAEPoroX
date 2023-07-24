@@ -416,7 +416,7 @@ void MixtureComp::CalFlash()
 OCP_DBL
 MixtureComp::XiPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Tin,
-                     const OCP_DBL* Ziin,
+                     const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase)
 {
     // assume that only single phase exists here
@@ -424,18 +424,8 @@ MixtureComp::XiPhase(const OCP_DBL& Pin,
         // water phase
         return PVTW.CalXiW(Pin);
     } else {
-        // hydrocarbon phase
-        InitPTZ(Pin, Tin + CONV5, Ziin); // P, T has been Set !!!
-        NP = 1;
-        CalAiBi();
-        CalAjBj(Aj[0], Bj[0], zi);
-        SolEoS(Zj[0], Aj[0], Bj[0]);
-        OCP_DBL vtmp = Zj[0] * GAS_CONSTANT * T / P;
-        for (USI i = 0; i < NC; i++) {
-            vtmp -= zi[i] * Vshift[i];
-        }
-        OCP_DBL xitmp = 1 / vtmp;
-        return xitmp;
+        // oil phase
+        return 1 / eos.CalVm(Pin, Tin + CONV5, Ziin);
     }
 }
 
@@ -443,7 +433,7 @@ OCP_DBL
 MixtureComp::RhoPhase(const OCP_DBL& Pin,
                       const OCP_DBL& Pbb,
                       const OCP_DBL& Tin,
-                      const OCP_DBL* Ziin,
+                      const vector<OCP_DBL>& Ziin,
                       const USI&     tarPhase)
 {
 
@@ -484,7 +474,7 @@ void MixtureComp::SetupWellOpt(WellOpt&                  opt,
                     tmpZi.resize(numCom);
                     // Convert volume units Mscf/stb to molar units lbmoles for
                     // injfluid Use flash in Bulk in surface condition
-                    OCP_DBL tmp = 1000 * XiPhase(Psurf, Tsurf, &tmpZi[0], GAS);
+                    OCP_DBL tmp = 1000 * XiPhase(Psurf, Tsurf, tmpZi, GAS);
                     opt.SetInjFactor(tmp);
                     break;
                 }
