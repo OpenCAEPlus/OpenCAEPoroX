@@ -62,7 +62,6 @@ EoS_PR::EoS_PR(const ComponentParam& param, const USI& tarId)
     An.resize(nc);
     Bn.resize(nc);
     Zn.resize(nc);
-    x.resize(nc);
 }
 
 
@@ -151,12 +150,12 @@ void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& n, const OCP_DBL& nt)
+void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt)
 {
     for (USI i = 0; i < nc; i++) {
         OCP_DBL tmp = 0;
         for (USI m = 0; m < nc; m++) {
-            tmp += (1 - BIC[i * nc + m]) * sqrt(Ai[i] * Ai[m]) * n[m];
+            tmp += (1 - BIC[i * nc + m]) * sqrt(Ai[i] * Ai[m]) * x[m];
         }
         An[i] = 2 / nt * (tmp - Aj);
         Bn[i] = 1 / nt * (Bi[i] - Bj);
@@ -253,28 +252,24 @@ void EoS_PR::CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 }
 
 
-void EoS_PR::CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& n, vector<OCP_DBL>& fugn)
+void EoS_PR::CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt, vector<OCP_DBL>& fugn)
 {
-    OCP_DBL nt = 0;
-    for (USI i = 0; i < nc; i++) nt += n[i];
-    for (USI i = 0; i < nc; i++) x[i] = n[i] / nt;
 
     CalAjBjZj(P, T, x);
-    CalAnBnZn(P, T, n, nt);
+    CalAnBnZn(P, T, x, nt);
 
     OCP_DBL C, E, G;
     OCP_DBL Cnk, Dnk, Enk, Gnk;
     OCP_DBL tmp, aik;
 
-
 	G = (Zj + delta1 * Bj) / (Zj + delta2 * Bj);
 	for (USI i = 0; i < nc; i++) {
 		// i th fugacity
-		C = n[i] * P / (Zj - Bj);
+		C = x[i] * P / (Zj - Bj);
 		// D = Bi[i] / Bj * (Zj - 1);
 		tmp = 0;
 		for (USI k = 0; k < nc; k++) {
-			tmp += (1 - BIC[i * nc + k]) * sqrt(Ai[i] * Ai[k]) * n[k];
+			tmp += (1 - BIC[i * nc + k]) * sqrt(Ai[i] * Ai[k]) * x[k];
 		}
 		E = -Aj / ((delta1 - delta2) * Bj) * (2 * tmp / Aj - Bi[i] / Bj);
 
@@ -284,8 +279,8 @@ void EoS_PR::CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 			aik = (1 - BIC[i * nc + k]) * sqrt(Ai[i] * Ai[k]);
 
 			Cnk = P / (Zj - Bj) / (Zj - Bj) *
-				((Zj - Bj) / nt * (delta(i, k) - n[i]) -
-					n[i] * (Zn[k] - Bn[k]));
+				((Zj - Bj) / nt * (delta(i, k) - x[i]) -
+					x[i] * (Zn[k] - Bn[k]));
 			Dnk = Bi[i] / Bj * (Zn[k] - (Bi[k] - Bj) * (Zj - 1) / (nt * Bj));
 			Gnk = (delta1 - delta2) / ((Zj + delta2 * Bj) * (Zj + delta2 * Bj)) *
 				(Bn[k] * Zj - Zn[k] * Bj);

@@ -35,7 +35,7 @@ public:
 		vector<OCP_DBL>& fugx) = 0;
 	/// Calculate d(lnfug) / dn
 	virtual void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugn) = 0;
+		const OCP_DBL& nt, vector<OCP_DBL>& fugn) = 0;
 	/// Calculate d(lnfug) / dP
 	virtual void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 		vector<OCP_DBL>& fugP) = 0;
@@ -68,8 +68,8 @@ public:
 	void CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
 				 vector<OCP_DBL>& fugx) override;
 	/// Calculate d(lnfug) / dn
-	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& n,
-		vector<OCP_DBL>& fugn) override;
+	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
+		const OCP_DBL& nt, vector<OCP_DBL>& fugn) override;
 	/// Calculate d(lnfug) / dP
 	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 		vector<OCP_DBL>& fugP) override;
@@ -149,8 +149,6 @@ protected:
 	OCP_DBL         Bp;
 	/// dZj / dP
 	OCP_DBL         Zp;
-	/// molar fraction
-	vector<OCP_DBL> x;
 };
 
 
@@ -175,9 +173,9 @@ public:
 		eos->CalFugX(P, T, x, fugx);
 	}
 	/// Calculate d(lnfug) / dn
-	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& n,
-		vector<OCP_DBL>& fugn) {
-		eos->CalFugN(P, T, n, fugn);
+	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
+		const OCP_DBL& nt, vector<OCP_DBL>& fugn) {
+		eos->CalFugN(P, T, x, nt, fugn);
 	}
 	/// Calculate d(lnfug) / dP
 	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,

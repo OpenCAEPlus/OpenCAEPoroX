@@ -1494,12 +1494,11 @@ void MixtureComp::SplitNR()
     USI     iter = 0;
     eNR0         = eNR;
     while (eNR > NRtol) {
-
+     
         // eNR0 = eNR;
-        ln = n;
-
+        ln = n;        
         for (USI j = 0; j < NP; j++)  
-            eos.CalFugN(P, T, n[j], fugN[j]);
+            eos.CalFugN(P, T, x[j], nu[j], fugN[j]);
 
         AssembleJmatSP();
 
@@ -3247,9 +3246,6 @@ void MixtureComp::CalVfiVfp_full02()
     for (USI j = 0; j < NP; j++) {
         vmj[j] = eos.CalVmDer(P, T, x[j], vmP[j], vmx[j]);
     }
-    
-
-    OCP_DBL CgTP = GAS_CONSTANT * T / P;
 
     if (NP == 1) {
         vfP = nu[0] * vmP[0];
@@ -3262,42 +3258,45 @@ void MixtureComp::CalVfiVfp_full02()
 
     } else {
         // NP = 2,  IF NP > 2  ->  WRONG!
-        CalFugNAll();
-        //for (USI j = 0; j < NP; j++) 
-        //    eos.CalFugN(P, T, n[j], fugN[j]);
+        for (USI j = 0; j < NP; j++)
+            eos.CalFugN(P, T, x[j], nu[j], fugN[j]);
 
-        CalFugPAll();
-        //for (USI j = 0; j < NP; j++) 
-        //    eos.CalFugP(P, T, x[j], fugP[j]);
+        for (USI j = 0; j < NP; j++) 
+            eos.CalFugP(P, T, x[j], fugP[j]);
 
         AssembleMatVfiVfp_full02();
         AssembleRhsVfiVfp_full02();
         LUSolve(NC + 1, NC, &JmatDer[0], &rhsDer[0], &pivot[0]);
         // now d nm0 / dP(dNk) has been available
-        const OCP_DBL* dnkjdNP = &rhsDer[0];
-        // Calculate Vfp
+        OCP_DBL tmp0 = 0;
+        OCP_DBL tmp1 = 0;
+        for (USI i = 0; i < NC; i++) {
+            tmp0 -= vmx[0][i] * x[0][i];
+            tmp1 -= vmx[1][i] * x[1][i];
+        }
         const USI j0 = phaseLabel[0];
         const USI j1 = phaseLabel[1];
-        vjp[j0]      = CgTP * nu[0] * (Zp[0] - Zj[0] / P);
-        vjp[j1]      = CgTP * nu[1] * (Zp[1] - Zj[1] / P);
+        // vfP
+        const OCP_DBL* dnkjdP = &rhsDer[0];        
+        vjp[j0] = nu[0] * vmP[0];
+        vjp[j1] = nu[1] * vmP[1];
         for (USI k = 0; k < NC; k++) {
-            vjp[j0] += (CgTP * (Zj[0] + nu[0] * Zn[0][k]) - Vshift[k]) * dnkjdNP[k];
-            vjp[j1] -= (CgTP * (Zj[1] + nu[1] * Zn[1][k]) - Vshift[k]) * dnkjdNP[k];
+            vjp[j0] += (vmj[0] + tmp0 + vmx[0][k]) * dnkjdP[k];
+            vjp[j1] -= (vmj[1] + tmp1 + vmx[1][k]) * dnkjdP[k];
         }
         vfP = vjp[j0] + vjp[j1];
-        dnkjdNP += NC;
 
         // Calculate Vfi
+        const OCP_DBL* dnkjdN = dnkjdP + NC;        
         for (USI i = 0; i < NC; i++) {
-            vfi[i]     = 0;
             vji[j0][i] = 0;
             vji[j1][i] = 0;
             for (USI k = 0; k < NC; k++) {
-                vji[j0][i] += (CgTP * (Zj[0] + nu[0] * Zn[0][k]) - Vshift[k]) * dnkjdNP[k];
-                vji[j1][i] += (CgTP * (Zj[1] + nu[1] * Zn[1][k]) - Vshift[k]) * (delta(i, k) - dnkjdNP[k]);
+                vji[j0][i] += (vmj[0] + tmp0 + vmx[0][k]) * dnkjdN[k];
+                vji[j1][i] += (vmj[1] + tmp1 + vmx[1][k]) * (delta(i, k) - dnkjdN[k]);
             }
             vfi[i] = vji[j0][i] + vji[j1][i];
-            dnkjdNP += NC;
+            dnkjdN += NC;
         }
     }
 }
