@@ -341,6 +341,48 @@ void EoS_PR::CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 }
 
 
+void EoS_PR::CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+    const OCP_DBL& nt, vector<OCP_DBL>& phin)
+{
+    OCP_DBL C, E, G;
+    OCP_DBL Cnk, Dnk, Enk, Gnk;
+    OCP_DBL tmp, aik;
+
+    CalAjBjZj(P, T, x);
+    CalAnBnZn(P, T, x, nt);
+
+    G = (Zj + delta1 * Bj) / (Zj + delta2 * Bj);
+
+    for (USI i = 0; i < nc; i++) {
+        // i th fugacity
+        C = 1 / (Zj - Bj);
+        // D = Bi[i] / Bj * (Zj - 1);
+        tmp = 0;
+        for (USI k = 0; k < nc; k++) {
+            tmp += (1 - BIC[i * nc + k]) * sqrt(Ai[i] * Ai[k]) * x[k];
+        }
+        E = -Aj / ((delta1 - delta2) * Bj) * (2 * tmp / Aj - Bi[i] / Bj);
+
+        for (USI k = 0; k <= i; k++) {
+            // k th components
+
+            aik = (1 - BIC[i * nc + k]) * sqrt(Ai[i] * Ai[k]);
+
+            Cnk = (Bn[k] - Zn[k]) / ((Zj - Bj) * (Zj - Bj));
+            Dnk = Bi[i] / Bj * (Zn[k] - (Bi[k] - Bj) * (Zj - 1) / (nt * Bj));
+            Gnk = (delta1 - delta2) / ((Zj + delta2 * Bj) * (Zj + delta2 * Bj)) *
+                (Bn[k] * Zj - Zn[k] * Bj);
+            Enk = -1 / (delta1 - delta2) / (Bj * Bj) *
+                (2 * (Bj * aik / nt + Bn[k] * (Bi[i] * Aj / Bj - tmp)) -
+                    An[k] * Bi[i] - Aj * Bi[i] / nt);
+            Enk -= E / nt;
+            phin[i * nc + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
+            phin[k * nc + i] = phin[i * nc + k];
+        }
+    }
+}
+
+
 OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
 {
     CalAjBjZj(P, T, x);

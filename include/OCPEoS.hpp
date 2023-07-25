@@ -39,6 +39,9 @@ public:
 	/// Calculate d(lnfug) / dP
 	virtual void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 		vector<OCP_DBL>& fugP) = 0;
+	/// Calculate d(lnphi) / dn
+	virtual void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& phin) = 0;
 
 public:
 	/// Calculate molar volume
@@ -73,6 +76,9 @@ public:
 	/// Calculate d(lnfug) / dP
 	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 		vector<OCP_DBL>& fugP) override;
+	/// Calculate d(lnphi) / dn
+	void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& phin) override;
 
 public:
 	/// Calculate molar volume
@@ -181,6 +187,11 @@ public:
 	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 		vector<OCP_DBL>& fugP) {
 		eos->CalFugP(P, T, x, fugP);
+	}
+	/// Calculate d(lnphi) / dn
+	void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& phin) {
+		eos->CalPhiN(P, T, x, nt, phin);
 	}
 
 public:

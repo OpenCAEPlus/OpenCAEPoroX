@@ -143,8 +143,6 @@ public:
                 std_RhoW = RHOW_STD * rs_param.gravity.data[1];
             if (rs_param.density.activity) std_RhoW = RHOW_STD;
             PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);
-            data.resize(5);
-            cdata.resize(5);
         }
 
         // Input Miscible Params
@@ -277,10 +275,6 @@ private:
 private:
     OCP_PVTW        PVTW;
     OCP_DBL         std_RhoW; ///< mass density of water phase in standard condition.
-    vector<OCP_DBL> data;     ///< container used to store the results of values of
-                              ///< interpolation of PVT tables.
-    vector<OCP_DBL> cdata;    ///< container used to store the results of slopes of
-                              ///< interpolation of PVT tables.
 
 public:
     // EoS Function
@@ -431,10 +425,13 @@ protected:
     void CalMuPXLBC_partial();
     void CalXiRhoMuPN_full();
 
+    // For Phase num : any
     void CalVfiVfp_full01();
     void AssembleMatVfiVfp_full01();
     void AssembleRhsVfiVfp_full01();
+    void CaldXsdXpAPI01();
 
+    // For Phase num : <=2
     void CalVfiVfp_full02();
     void AssembleMatVfiVfp_full02();
     void AssembleRhsVfiVfp_full02();
