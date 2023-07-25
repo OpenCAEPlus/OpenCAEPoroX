@@ -423,45 +423,22 @@ protected:
     void CalViscosity();
     void CalViscoLBC();
     void CalViscoHZYT();
-    void CalFugXAll();
     void CalFugPAll();
 
-    void CalVjpVfpVfx_partial();
     void CalXiPNX_partial();
     void CalRhoPX_partial();
     void CalMuPX_partial();
     void CalMuPXLBC_partial();
-    void CalXiRhoMuPN_pfullx();
-    void CaldXsdXp04();
+    void CalXiRhoMuPN_full();
 
-    void CalRhoPNX_full();
-
-    void CalXiPNX_full01();
-    void CalRhoPNX_full01();
-    void CalMuPX_full01();
-    void CalMuPXLBC_full01();
     void CalVfiVfp_full01();
     void AssembleMatVfiVfp_full01();
     void AssembleRhsVfiVfp_full01();
-    void CaldXsdXp01();
-    void CaldXsdXpAPI01();
 
-    void CalXiPNX_full02();
     void CalVfiVfp_full02();
     void AssembleMatVfiVfp_full02();
     void AssembleRhsVfiVfp_full02();
     void CaldXsdXpAPI02();
-    void CaldXsdXpAPI02p();
-
-    void CalVjpVfpVfn_partial();
-    void CalXiPn_partial();
-    void CalRhoPn_partial();
-    void CalMuPn_partial();
-    void CalMuPnLBC_partial();
-    void CalXiRhoMuPN_pfullxn(const OCP_BOOL& xflag = OCP_TRUE);
-
-    void CaldXsdXp03();
-    void CalVfiVfp_full03();
 
 private:
     // Phase properties and auxiliary variables
