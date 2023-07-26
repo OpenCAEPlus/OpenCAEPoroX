@@ -417,19 +417,18 @@ protected:
     void CalRhoPX_partial();
     void CalMuPX_partial();
     void CalMuPXLBC_partial();
-    void CalXiRhoMuPN_full();
 
     // For Phase num : any
     void CalVfiVfp_full01();
     void AssembleMatVfiVfp_full01();
     void AssembleRhsVfiVfp_full01();
-    void CaldXsdXpAPI01();
+    void CaldXsdXp01();
 
     // For Phase num : <=2
     void CalVfiVfp_full02();
     void AssembleMatVfiVfp_full02();
     void AssembleRhsVfiVfp_full02();
-    void CaldXsdXpAPI02();
+    void CaldXsdXp02();
 
 private:
     // Phase properties and auxiliary variables
@@ -450,12 +449,6 @@ private:
 
     vector<OCP_DBL> vjp; ///< dvj / dp, used in 2 hydrocarbon phase in EOS
     vector<vector<OCP_DBL>> vji; ///< dvj / dNi, used in 2 hydrocarbon phase in EOS; or dvj / dnij
-    vector<OCP_DBL> xixC; ///< d xi / d xij
-    vector<OCP_DBL> xiPC; ///< d xi / d P
-    vector<OCP_DBL> xiNC; ///< d xi / d Nk
-    vector<OCP_DBL> muN;  ///< d mu[j] / d N[i]: numphase * numCom
-    vector<OCP_DBL> xiN;  ///< d xi[j] / d N[i]: numphase * numCom
-    vector<OCP_DBL> rhoN; ///< d rho[j] / d N[i]: numphase * numCom
 
     /////////////////////////////////////////////////////////////////////
     // Optional Features
