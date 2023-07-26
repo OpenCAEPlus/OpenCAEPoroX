@@ -31,17 +31,17 @@ public:
 	virtual void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
 						   vector<OCP_DBL>& fug, vector<OCP_DBL>& phi) = 0;
 	/// Calculate d(lnfug) / dx
-	virtual void CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugx) = 0;
+	virtual void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		vector<OCP_DBL>& lnfugx) = 0;
 	/// Calculate d(lnfug) / dn
-	virtual void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		const OCP_DBL& nt, vector<OCP_DBL>& fugn) = 0;
+	virtual void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& lnfugn) = 0;
 	/// Calculate d(lnfug) / dP
-	virtual void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugP) = 0;
+	virtual void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		vector<OCP_DBL>& lnfugP) = 0;
 	/// Calculate d(lnphi) / dn
-	virtual void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		const OCP_DBL& nt, vector<OCP_DBL>& phin) = 0;
+	virtual void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& lnphin) = 0;
 
 public:
 	/// Calculate molar volume
@@ -68,17 +68,17 @@ public:
 	void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
 				   vector<OCP_DBL>& fug, vector<OCP_DBL>& phi) override;
 	/// Calculate d(lnfug) / dx
-	void CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
-				 vector<OCP_DBL>& fugx) override;
+	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
+				 vector<OCP_DBL>& lnfugx) override;
 	/// Calculate d(lnfug) / dn
-	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
-		const OCP_DBL& nt, vector<OCP_DBL>& fugn) override;
+	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
+		const OCP_DBL& nt, vector<OCP_DBL>& lnfugn) override;
 	/// Calculate d(lnfug) / dP
-	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugP) override;
+	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		vector<OCP_DBL>& lnfugP) override;
 	/// Calculate d(lnphi) / dn
-	void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		const OCP_DBL& nt, vector<OCP_DBL>& phin) override;
+	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& lnphin) override;
 
 public:
 	/// Calculate molar volume
@@ -174,24 +174,24 @@ public:
 		eos->CalFugPhi(P, T, x, fug, phi);
 	}
 		/// Calculate d(lnfug) / dx
-	void CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugx) {
-		eos->CalFugX(P, T, x, fugx);
+	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		vector<OCP_DBL>& lnfugx) {
+		eos->CalLnFugX(P, T, x, lnfugx);
 	}
 	/// Calculate d(lnfug) / dn
-	void CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
-		const OCP_DBL& nt, vector<OCP_DBL>& fugn) {
-		eos->CalFugN(P, T, x, nt, fugn);
+	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
+		const OCP_DBL& nt, vector<OCP_DBL>& lnfugn) {
+		eos->CalLnFugN(P, T, x, nt, lnfugn);
 	}
 	/// Calculate d(lnfug) / dP
-	void CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		vector<OCP_DBL>& fugP) {
-		eos->CalFugP(P, T, x, fugP);
+	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		vector<OCP_DBL>& lnfugP) {
+		eos->CalLnFugP(P, T, x, lnfugP);
 	}
 	/// Calculate d(lnphi) / dn
-	void CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-		const OCP_DBL& nt, vector<OCP_DBL>& phin) {
-		eos->CalPhiN(P, T, x, nt, phin);
+	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+		const OCP_DBL& nt, vector<OCP_DBL>& lnphin) {
+		eos->CalLnPhiN(P, T, x, nt, lnphin);
 	}
 
 public:

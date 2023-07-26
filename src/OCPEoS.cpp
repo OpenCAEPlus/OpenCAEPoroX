@@ -215,7 +215,7 @@ void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& fugx)
+void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& lnfugx)
 {
 
     CalAjBjZj(P, T, x);
@@ -240,19 +240,19 @@ void EoS_PR::CalFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
             Exk = (2 * (Aj / Bj * Bx[k] * Bx[i] + Bj * aik) - Ax[i] * Bx[k] - Ax[k] * Bi[i]) / (Bj * Bj);
             Exk /= -(delta1 - delta2);
             Gxk = (delta1 - delta2) / (Zj + delta2 * Bj) / (Zj + delta2 * Bj) * (Zj * Bx[k] - Zx[k] * Bj);
-            fugx[i * nc + k] = 1 / C * Cxk + Dxk + Exk * log(G) + E / G * Gxk;
+            lnfugx[i * nc + k] = 1 / C * Cxk + Dxk + Exk * log(G) + E / G * Gxk;
         }
     }
 
 #ifdef OCP_NANCHECK
-	if (!CheckNan(fugx.size(), &fugx[0])) {
+	if (!CheckNan(lnfugx.size(), &lnfugx[0])) {
 		OCP_ABORT("INF or NAN in fugX !");
 	}
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt, vector<OCP_DBL>& fugn)
+void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt, vector<OCP_DBL>& lnfugn)
 {
 
     CalAjBjZj(P, T, x);
@@ -288,20 +288,20 @@ void EoS_PR::CalFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 				(2 * (Bj * aik / nt + Bn[k] * (Bi[i] * Aj / Bj - tmp)) -
 					An[k] * Bi[i] - Aj * Bi[i] / nt);
 			Enk -= E / nt;
-			fugn[i * nc + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
-			fugn[k * nc + i] = fugn[i * nc + k];
+            lnfugn[i * nc + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
+            lnfugn[k * nc + i] = lnfugn[i * nc + k];
 		}
 	}
 
 #ifdef OCP_NANCHECK
-    if (!CheckNan(fugn.size(), &fugn[0])) {
-        OCP_ABORT("INF or NAN in fugN !");
+    if (!CheckNan(lnfugn.size(), &lnfugn[0])) {
+        OCP_ABORT("INF or NAN in lnfugN !");
     }
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& fugP)
+void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& lnfugP)
 {
 
     CalAjBjZj(P, T, x);
@@ -330,19 +330,19 @@ void EoS_PR::CalFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
 
 		// Attention that if x[i] = 0, then fugp[i] = nan
 		// but Cp also contains x[i], so eliminate it first
-		fugP[i] = Cp / C + Dp + E / G * Gp;
+        lnfugP[i] = Cp / C + Dp + E / G * Gp;
 	}
 
 #ifdef OCP_NANCHECK
-    if (!CheckNan(fugP.size(), &fugP[0])) {
-    	OCP_ABORT("INF or NAN in fugP !");
+    if (!CheckNan(lnfugP.size(), &lnfugP[0])) {
+    	OCP_ABORT("INF or NAN in lnfugP !");
     }
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-    const OCP_DBL& nt, vector<OCP_DBL>& phin)
+void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
+    const OCP_DBL& nt, vector<OCP_DBL>& lnphin)
 {
     OCP_DBL C, E, G;
     OCP_DBL Cnk, Dnk, Enk, Gnk;
@@ -376,8 +376,8 @@ void EoS_PR::CalPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& 
                 (2 * (Bj * aik / nt + Bn[k] * (Bi[i] * Aj / Bj - tmp)) -
                     An[k] * Bi[i] - Aj * Bi[i] / nt);
             Enk -= E / nt;
-            phin[i * nc + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
-            phin[k * nc + i] = phin[i * nc + k];
+            lnphin[i * nc + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
+            lnphin[k * nc + i] = lnphin[i * nc + k];
         }
     }
 }

@@ -82,8 +82,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
         lbc *= 10;
     }
 
-    CallId();
-
     EoSctrl.SSMsta.maxIt = stoi(param.SSMparamSTA[0]);
     EoSctrl.SSMsta.tol   = stod(param.SSMparamSTA[1]);
     EoSctrl.SSMsta.eYt   = stod(param.SSMparamSTA[2]);
@@ -511,13 +509,7 @@ void MixtureComp::CalProdRate(const OCP_DBL&   Pin,
     prodRate[2] = vj[2] * xi[2]; // stb
 }
 
-void MixtureComp::CallId()
-{
-    lId = 0;
-    for (USI i = 1; i < NC; i++) {
-        if (MWC[i] < MWC[lId]) lId = i;
-    }
-}
+
 
 
 void MixtureComp::AllocatePhase()
@@ -608,16 +600,6 @@ void MixtureComp::x2n()
     }
 }
 
-void MixtureComp::PrintX()
-{
-    for (USI j = 0; j < NP; j++) {
-        for (USI i = 0; i < NC; i++) {
-            cout << x[j][i] << "   ";
-        }
-        cout << endl;
-    }
-    cout << "----------------------" << endl;
-}
 
 void MixtureComp::AllocateMethod()
 {
@@ -987,7 +969,7 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
 
     while (Se > Stol) {
 
-        eos.CalFugX(P, T, Y, fugX[0]);
+        eos.CalLnFugX(P, T, Y, fugX[0]);
         AssembleJmatSTA();
         // LUSolve(1, NC, &JmatSTA[0], &resSTA[0], &pivot[0]);
         SYSSolve(1, &uplo, NC, &JmatSTA[0], &resSTA[0], &pivot[0], &JmatWork[0],
@@ -1362,7 +1344,7 @@ void MixtureComp::SplitNR()
         // eNR0 = eNR;
         ln = n;        
         for (USI j = 0; j < NP; j++)  
-            eos.CalFugN(P, T, x[j], nu[j], fugN[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
 
         AssembleJmatSP();
 
@@ -1869,8 +1851,8 @@ void MixtureComp::CalVfiVfp_full01()
     } else {
         // NP > 1
         for (USI j = 0; j < NP; j++) {
-            eos.CalFugN(P, T, x[j], nu[j], fugN[j]);
-            eos.CalFugP(P, T, x[j], fugP[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
+            eos.CalLnFugP(P, T, x[j], fugP[j]);
         }
         AssembleMatVfiVfp_full01();
         AssembleRhsVfiVfp_full01();
@@ -2079,8 +2061,8 @@ void MixtureComp::CalVfiVfp_full02()
     else if (NP == 2) {
         // JUST FOR NP = 2
         for (USI j = 0; j < NP; j++) {
-            eos.CalFugN(P, T, x[j], nu[j], fugN[j]);
-            eos.CalFugP(P, T, x[j], fugP[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
+            eos.CalLnFugP(P, T, x[j], fugP[j]);
         }
 
         AssembleMatVfiVfp_full02();
@@ -2275,7 +2257,7 @@ void MixtureComp::AllocateSkip()
 
 void MixtureComp::CalPhiNSkip()
 {
-    eos.CalPhiN(P, T, x[0], nu[0], phiN);
+    eos.CalLnPhiN(P, T, x[0], nu[0], phiN);
 }
 
 void MixtureComp::AssembleSkipMatSTA()

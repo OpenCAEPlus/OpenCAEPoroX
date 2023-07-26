@@ -239,80 +239,110 @@ public:
         OCP_ABORT("Can not be used in Compositional Model!");
     }
 
-    void CallId();
 
-private:
+protected:
     // Basic Components Informations
-    vector<string>  Cname;  ///< Name of hydrocarbon components
-    vector<OCP_DBL> Tc;     ///< Critical temperature of hydrocarbon components
-    vector<OCP_DBL> Pc;     ///< Critical pressure of hydrocarbon components
-    vector<OCP_DBL> Vc;     ///< Critical volume of hydrocarbon components
-    vector<OCP_DBL> MWC;    ///< Molecular Weight of hydrocarbon components
-    vector<OCP_DBL> Acf;    ///< Acentric factor of hydrocarbon components
+    /// num of hydrocarbon components
+    USI             NC;   
+    /// name of hydrocarbon components
+    vector<string>  Cname;  
+    /// critical temperature of hydrocarbon components
+    vector<OCP_DBL> Tc; 
+    /// critical pressure of hydrocarbon components
+    vector<OCP_DBL> Pc;
+    /// critical volume of hydrocarbon components
+    vector<OCP_DBL> Vc; 
+    /// molecular Weight of hydrocarbon components
+    vector<OCP_DBL> MWC; 
+    /// acentric factor of hydrocarbon components
+    vector<OCP_DBL> Acf;
     // for viscosity calculation
-    vector<OCP_DBL> Vcvis;   ///< Critical volume used for viscosity calculations only
-    vector<OCP_DBL> Zcvis;   ///< Critical Z-factor used for viscosity calculations only
-    vector<OCP_DBL> LBCcoef; ///< LBC coefficients for viscosity calculation
+    /// critical volume used for viscosity calculations only
+    vector<OCP_DBL> Vcvis;
+    /// critical Z-factor used for viscosity calculations only
+    vector<OCP_DBL> Zcvis;
+    /// LBC coefficients for viscosity calculation
+    vector<OCP_DBL> LBCcoef;
 
-    // Initial properties
-    USI             NC;      ///< num of hydrocarbon components
-    USI             NPmax;   ///< num of hydrocarbon phase
-    OCP_DBL         P;       ///< Current Pressure
-    OCP_DBL         T;       ///< Current Temperature
-    vector<OCP_DBL> zi;      ///< mole fraction of hydrocarbon components
-    USI             lId;     ///< index of lightest components
-    EoScontrol      EoSctrl; ///< method params for solving phase equilibrium
-
-    vector<OCP_DBL> Plist;
-    vector<OCP_DBL> Tlist;
-    vector<OCP_DBL> Ytlist;
-
-private:
+protected:
+    // water property
+    /// PVTW
     OCP_PVTW        PVTW;
-    OCP_DBL         std_RhoW; ///< mass density of water phase in standard condition.
+    /// mass density of water phase in standard condition.
+    OCP_DBL         std_RhoW;
 
-private:
-    // EoS
-    EoSCalculation eos;
+protected:
+    // EoS Calculations
+    EoSCalculation  eos;
 
-public:
+protected:
+    // Flash method Control
+    /// allowable maximum num of hydrocarbon phases
+    USI             NPmax;
+    /// method params for solving phase equilibrium
+    EoScontrol      EoSctrl;
+
+protected:
+    // Initial properties for flash   
+    /// current Pressure
+    OCP_DBL         P;
+    /// current Temperature
+    OCP_DBL         T;
+    /// mole fraction of hydrocarbon components
+    vector<OCP_DBL> zi;
+
+protected:
+    // The following variables are all for hydrocarbon phases and components
+    /// last num of phase in last NR Step from external iterations
+    USI                      lNP; 
+    /// current num of phase
+    USI                      NP;    
+    /// total moles of components
+    OCP_DBL                  Nh;  
+    /// volume of phase
+    vector<OCP_DBL>          vC; 
+    /// molar fraction of phase
+    vector<OCP_DBL>          nu; 
+    /// molar fraction of i-th component in jth phase
+    vector<vector<OCP_DBL>>  x;
+    /// fugacity coefficient of i-th component in j-th phase
+    vector<vector<OCP_DBL>>  phi; 
+    /// fugacity of i-th component in j-th phase
+    vector<vector<OCP_DBL>>  fug;
+    /// moles of i-th component in jth phase
+    vector<vector<OCP_DBL>>  n;
+    /// last n in NR iterations in phase spliting calculations
+    vector<vector<OCP_DBL>>  ln;  
+    /// Gibbs energy, before flash (not true value)
+    OCP_DBL                  GibbsEnergyB; 
+    /// Gibbs energy, after flash (not true value)
+    OCP_DBL                  GibbsEnergyE; 
+    /// molar density of phase
+    vector<OCP_DBL>          xiC;
+    /// mass density of phase
+    vector<OCP_DBL>          rhoC;  
+    /// molecular weight of phase
+    vector<OCP_DBL>          MW;
+    /// label of phase
+    vector<USI>              phaseLabel;
+    /// molar volume of phase
+    vector<OCP_DBL>          vmj;
+    /// d vm / dP
+    vector<OCP_DBL>          vmP;
+    /// d vm / dx
+    vector<vector<OCP_DBL>>  vmx;
+
+protected:
     // Phase Function
-    // Allocate memoery for phase variables
+    /// Allocate memoery for phase variables
     void AllocatePhase();
+    /// Calculate molecular weight of phase
     void CalMW();
     void CalVfXiRho();
     void CalSaturation();
     USI  FindMWmax();
-    void x2n(); ///< x[j][i] -> n[j][i]
-    void PrintX();
-
-private:
-    // Phase Variables
-    USI             lNP{0};  ///< last num of hydrocarbon phase
-    USI             NP;      ///< current num of hydrocarbon phase
-    OCP_DBL         Nh;      ///< total moles of components exclude water
-    vector<OCP_DBL> vC;      ///< vC represents the volume of phase
-    vector<OCP_DBL>
-        nu; ///< nu[j] represents the mole fraction of j-th phase in flash calculation
-    vector<vector<OCP_DBL>>
-        x; ///< x[j][i] represents the mole fraction of i-th comp in jth phase
-    vector<vector<OCP_DBL>> phi; ///< phi[j][i] represents the fugacity coefficient of
-                                 ///< i-th comp in j-th phase
-    vector<vector<OCP_DBL>>
-        fug; ///< fug[j][i] represents the fugacity of ith comp in j-th phase
-    vector<vector<OCP_DBL>>
-        n; ///< n[j][i] represents the moles of ith comp in jth phase
-    vector<vector<OCP_DBL>> ln;   ///< last n in NR iterations.
-    OCP_DBL         GibbsEnergyB; ///< Gibbs energy, before flash (not true value)
-    OCP_DBL         GibbsEnergyE; ///< Gibbs energy, after flash (not true value)
-    vector<OCP_DBL> xiC;          ///< Molar density of phase
-    vector<OCP_DBL> rhoC;         ///< Mass density of phase;
-    vector<OCP_DBL> MW;           ///< Molecular Weight
-    vector<USI>     phaseLabel;   ///< Label of phase
-
-    vector<OCP_DBL>          vmj; ///< molar volume of phase
-    vector<OCP_DBL>          vmP; ///< molar volume of phase
-    vector<vector<OCP_DBL>>  vmx; ///< molar volume of phase
+    /// x[j][i] -> n[j][i]
+    void x2n();
 
 public:
     // Method Function
@@ -419,8 +449,7 @@ private:
     vector<OCP_DBL> rhsDer;
 
     vector<OCP_DBL> vjp; ///< dvj / dp, used in 2 hydrocarbon phase in EOS
-    vector<vector<OCP_DBL>>
-        vji; ///< dvj / dNi, used in 2 hydrocarbon phase in EOS; or dvj / dnij
+    vector<vector<OCP_DBL>> vji; ///< dvj / dNi, used in 2 hydrocarbon phase in EOS; or dvj / dnij
     vector<OCP_DBL> xixC; ///< d xi / d xij
     vector<OCP_DBL> xiPC; ///< d xi / d P
     vector<OCP_DBL> xiNC; ///< d xi / d Nk
