@@ -49,7 +49,7 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     if (param.Vc.activity)
         Vc = param.Vc.data[tarId];
     else if (param.Zc.activity) {
-        Zc = param.Zc.data[tarId];
+        const vector<OCP_DBL>& Zc = param.Zc.data[tarId];
         Vc.resize(NC);
         for (USI i = 0; i < NC; i++) {
             Vc[i] = 10.73159 * Zc[i] * Tc[i] / Pc[i];
@@ -65,21 +65,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
         Acf = param.Acf.data[tarId];
     else
         OCP_ABORT("ACF hasn't been input!");
-    if (param.OmegaA.activity)
-        OmegaA = param.OmegaA.data[tarId];
-    else
-        OmegaA.resize(NC, 0.457235529);
-    if (param.OmegaB.activity)
-        OmegaB = param.OmegaB.data[tarId];
-    else
-        OmegaB.resize(NC, 0.077796074);
-
-    if (param.Vshift.activity) {
-        Vshift = param.Vshift.data[tarId];
-        for (USI i = 0; i < NC; i++)
-            Vshift[i] *= (GAS_CONSTANT * OmegaB[i] * Tc[i] / Pc[i]);
-    } else
-        Vshift.resize(NC, 0);
 
     if (param.Vcvis.activity)
         Vcvis = param.Vcvis.data[tarId];
@@ -98,29 +83,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     }
 
     CallId();
-
-    USI len = NC * NC;
-    BIC.resize(len, 0);
-
-    if (param.BIC[tarId].size() != len) {
-        USI iter = 0;
-        for (USI i = 1; i < NC; i++) {
-            for (USI j = 0; j < i; j++) {
-                BIC[i * NC + j] = param.BIC[tarId][iter];
-                BIC[j * NC + i] = BIC[i * NC + j];
-                iter++;
-            }
-        }
-    } else {
-        BIC = param.BIC[tarId];
-    }
-
-    //for (USI i = 0; i < NC; i++) {
-    //    for (USI j = 0; j < NC; j++) {
-    //        cout << setw(10) << BIC[i * NC + j] << "   ";
-    //    }
-    //    cout << endl;
-    //}
 
     EoSctrl.SSMsta.maxIt = stoi(param.SSMparamSTA[0]);
     EoSctrl.SSMsta.tol   = stod(param.SSMparamSTA[1]);
@@ -143,7 +105,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     EoSctrl.RR.tol   = stod(param.RRparam[1]);
     EoSctrl.RR.tol2  = EoSctrl.RR.tol * EoSctrl.RR.tol;
 
-    AllocateEoS();
     AllocatePhase();
     AllocateMethod();
     AllocateOthers();
@@ -558,86 +519,6 @@ void MixtureComp::CallId()
     }
 }
 
-void MixtureComp::AllocateEoS()
-{
-    // Allocate Memoery for EoS variables
-    Ai.resize(NC);
-    Bi.resize(NC);
-    Aj.resize(NPmax);
-    Bj.resize(NPmax);
-    Zj.resize(NPmax);
-    Ztmp.resize(3);
-    delta1P2 = delta1 + delta2;
-    delta1M2 = delta1 - delta2;
-    delta1T2 = delta1 * delta2;
-}
-
-void MixtureComp::SolEoS(OCP_DBL& ZjT, const OCP_DBL& AjT, const OCP_DBL& BjT) const
-{
-    const OCP_DBL aj = AjT;
-    const OCP_DBL bj = BjT;
-
-    const OCP_DBL a = (delta1 + delta2 - 1) * bj - 1;
-    const OCP_DBL b =
-        (aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1));
-    const OCP_DBL c = -(aj * bj + delta1 * delta2 * bj * bj * (bj + 1));
-
-    USI flag = CubicRoot(a, b, c, OCP_TRUE, Ztmp);
-    if (flag == 1) {
-        ZjT = Ztmp[0];
-    } else {
-        OCP_DBL zj1 = Ztmp[0];
-        OCP_DBL zj2 = Ztmp[2];
-        OCP_DBL dG  = (zj2 - zj1) + log((zj1 - bj) / (zj2 - bj)) -
-                     aj / (bj * (delta2 - delta1)) *
-                         log((zj1 + delta1 * bj) * (zj2 + delta2 * bj) /
-                             ((zj1 + delta2 * bj) * (zj2 + delta1 * bj)));
-        if (dG > 0)
-            ZjT = zj1;
-        else
-            ZjT = zj2;
-    }
-}
-
-void MixtureComp::CalAiBi()
-{
-    // Calculate Ai, Bi
-    OCP_DBL acf, mwi;
-    OCP_DBL Pri, Tri;
-
-    for (USI i = 0; i < NC; i++) {
-        acf = Acf[i];
-        // PR
-        if (acf <= 0.49) {
-            mwi = 0.37464 + 1.54226 * acf - 0.26992 * pow(acf, 2);
-        } else {
-            mwi = 0.379642 + 1.48503 * acf - 0.164423 * pow(acf, 2) +
-                  0.016667 * pow(acf, 3);
-        }
-
-        Pri   = P / Pc[i];
-        Tri   = T / Tc[i];
-        Ai[i] = OmegaA[i] * Pri / pow(Tri, 2) * pow((1 + mwi * (1 - sqrt(Tri))), 2);
-        Bi[i] = OmegaB[i] * Pri / Tri;
-    }
-}
-
-void MixtureComp::CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const vector<OCP_DBL>& xj) const
-{
-    AjT = 0;
-    BjT = 0;
-
-    for (USI i1 = 0; i1 < NC; i1++) {
-        BjT += Bi[i1] * xj[i1];
-        AjT += xj[i1] * xj[i1] * Ai[i1] * (1 - BIC[i1 * NC + i1]);
-
-        for (USI i2 = 0; i2 < i1; i2++) {
-            AjT +=
-                2 * xj[i1] * xj[i2] * sqrt(Ai[i1] * Ai[i2]) * (1 - BIC[i1 * NC + i2]);
-        }
-    }
-}
-
 
 void MixtureComp::AllocatePhase()
 {
@@ -682,22 +563,11 @@ void MixtureComp::CalVfXiRho()
 {
     // Attention that nu is moles of phase instead of molar fraction of phase now
     vf = 0;
-    OCP_DBL tmp;
     for (USI j = 0; j < NP; j++) {
-
-        CalAiBi();
-        CalAjBj(Aj[j], Bj[j], x[j]);
-        SolEoS(Zj[j], Aj[j], Bj[j]);
-
-        vector<OCP_DBL>& xj = x[j];
-        tmp                 = Zj[j] * GAS_CONSTANT * T / P;
-        for (USI i = 0; i < NC; i++) {
-            tmp -= xj[i] * Vshift[i];
-        }
-
-        vC[j] = tmp * nu[j];
+        vmj[j] = eos.CalVmDer(P, T, x[j], vmP[j], vmx[j]);
+        vC[j] = vmj[j] * nu[j];
         vf += vC[j];
-        xiC[j]  = 1 / tmp;
+        xiC[j]  = 1 / vmj[j];
         rhoC[j] = MW[j] * xiC[j];
     }
 }
@@ -768,9 +638,6 @@ void MixtureComp::AllocateMethod()
     resSTA.resize(NC);
 
     JmatSTA.resize(NC * NC);
-    Ax.resize(NC);
-    Bx.resize(NC);
-    Zx.resize(NC);
     lKs.resize(NC);
 
     resRR.resize(NPmax - 1);
@@ -778,14 +645,10 @@ void MixtureComp::AllocateMethod()
     JmatSP.resize(static_cast<size_t>(NC * NC) * NPmax * NPmax);
     fugX.resize(NPmax);
     fugN.resize(NPmax);
-    Zn.resize(NPmax);
     for (USI j = 0; j < NPmax; j++) {
         fugX[j].resize(NC * NC);
         fugN[j].resize(NC * NC);
-        Zn[j].resize(NC);
     }
-    An.resize(NC);
-    Bn.resize(NC);
     pivot.resize(static_cast<size_t>(NC + 1) * NPmax, 1);
     lJmatWork = NC * (NPmax - 1);
     JmatWork.resize(lJmatWork);
@@ -1580,87 +1443,6 @@ void MixtureComp::CalResSP()
     }
 }
 
-void MixtureComp::CalFugNAll()
-{
-    OCP_DBL C, E, G;
-    OCP_DBL Cnk, Dnk, Enk, Gnk;
-    OCP_DBL tmp, aik;
-
-    for (USI j = 0; j < NP; j++) {
-        // j th phase
-        vector<OCP_DBL>&       fugn = fugN[j];
-        const OCP_DBL&         aj   = Aj[j];
-        const OCP_DBL&         bj   = Bj[j];
-        const OCP_DBL&         zj   = Zj[j];
-        const vector<OCP_DBL>& xj   = x[j];
-        vector<OCP_DBL>&       Znj  = Zn[j];
-
-        for (USI i = 0; i < NC; i++) {
-            tmp = 0;
-            for (USI m = 0; m < NC; m++) {
-                tmp += (1 - BIC[i * NC + m]) * sqrt(Ai[i] * Ai[m]) * xj[m];
-            }
-			An[i] = 2 / nu[j] * (tmp - aj);
-			Bn[i] = 1 / nu[j] * (Bi[i] - bj);
-			Znj[i] =
-				((bj - zj) * An[i] +
-					((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-						((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) *
-						zj -
-						(delta1 + delta2 - 1) * zj * zj) *
-					Bn[i]) /
-				(3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-					(aj + delta1 * delta2 * bj * bj -
-						(delta1 + delta2) * bj * (bj + 1)));
-        }
-
-        G = (zj + delta1 * bj) / (zj + delta2 * bj);
-
-        for (USI i = 0; i < NC; i++) {
-            // i th fugacity
-            C = xj[i] * P / (zj - bj);
-            // D = Bi[i] / bj * (zj - 1);
-            tmp = 0;
-            for (USI k = 0; k < NC; k++) {
-                tmp += (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]) * xj[k];
-            }
-            E = -aj / ((delta1 - delta2) * bj) * (2 * tmp / aj - Bi[i] / bj);
-
-            for (USI k = 0; k <= i; k++) {
-                // k th components
-
-                aik = (1 - BIC[i * NC + k]) * sqrt(Ai[i] * Ai[k]);
-
-                Cnk = P / (zj - bj) / (zj - bj) *
-                      ((zj - bj) / nu[j] * (delta(i, k) - xj[i]) -
-                       xj[i] * (Znj[k] - Bn[k]));
-                Dnk = Bi[i] / bj * (Znj[k] - (Bi[k] - bj) * (zj - 1) / (nu[j] * bj));
-                Gnk = (delta1 - delta2) / ((zj + delta2 * bj) * (zj + delta2 * bj)) *
-                      (Bn[k] * zj - Znj[k] * bj);
-                /*Enk = 1 / ((delta1 - delta2) * bj * bj) * (An[k] * bj - Bn[k] * aj) *
-                   (Bi[i] / bj - 2 * tmp / aj)
-                    + aj / ((delta1 - delta2) * bj) * (-Bi[i] / (bj * bj) * Bn[k] - 2 /
-                   (aj * aj) * (aj * (aik - tmp) / nu[j] - An[k] * tmp));*/
-                Enk = -1 / (delta1 - delta2) / (bj * bj) *
-                      (2 * (bj * aik / nu[j] + Bn[k] * (Bi[i] * aj / bj - tmp)) -
-                       An[k] * Bi[i] - aj * Bi[i] / nu[j]);
-                Enk -= E / nu[j];
-                fugn[i * NC + k] = 1 / C * Cnk + Dnk + Enk * log(G) + E / G * Gnk;
-                fugn[k * NC + i] = fugn[i * NC + k];
-                /*cout << "fnn[" << j << "][" << i << "][" << k << "] = " << fugn[i * NC
-                + k]; cout << endl;*/
-            }
-        }
-    }
-    // PrintFugN();
-#ifdef OCP_NANCHECK
-    for (USI j = 0; j < NP; j++) {
-        if (!CheckNan(fugN[j].size(), &fugN[j][0])) {
-            OCP_ABORT("INF or NAN in fugN !");
-        }
-    }
-#endif // NANCHECK
-}
 
 void MixtureComp::PrintFugN()
 {
@@ -1859,67 +1641,6 @@ void MixtureComp::CalViscoLBC()
 }
 
 void MixtureComp::CalViscoHZYT() {}
-
-
-void MixtureComp::CalFugPAll()
-{
-
-    OCP_DBL C, E, G;
-    OCP_DBL Cp, Dp, Gp;
-    OCP_DBL tmp;
-
-    for (USI j = 0; j < NP; j++) {
-
-        vector<OCP_DBL>& fugp = fugP[j];
-        vector<OCP_DBL>& xj   = x[j];
-        OCP_DBL&         aj   = Aj[j];
-        OCP_DBL&         bj   = Bj[j];
-        OCP_DBL&         zj   = Zj[j];
-
-        OCP_DBL Ap = aj / P;
-        OCP_DBL Bp = bj / P;
-		Zp[j] =
-			((bj - zj) * Ap +
-				((aj + delta1 * delta2 * (3 * bj * bj + 2 * bj)) +
-					((delta1 + delta2) * (2 * bj + 1) - 2 * delta1 * delta2 * bj) * zj -
-					(delta1 + delta2 - 1) * zj * zj) *
-				Bp) /
-			(3 * zj * zj + 2 * ((delta1 + delta2 - 1) * bj - 1) * zj +
-				(aj + delta1 * delta2 * bj * bj - (delta1 + delta2) * bj * (bj + 1)));
-
-        G  = (zj + delta1 * bj) / (zj + delta2 * bj);
-        Gp = (delta1 - delta2) / ((zj + delta2 * bj) * (zj + delta2 * bj)) *
-             (Bp * zj - Zp[j] * bj);
-        for (USI i = 0; i < NC; i++) {
-
-            C = P / (zj - bj);
-            // D = Bi[i] / bj * (zj - 1);
-
-            tmp = 0;
-            for (USI m = 0; m < NC; m++) {
-                tmp += (1 - BIC[i * NC + m]) * sqrt(Ai[i] * Ai[m]) * xj[m];
-            }
-
-            E = -aj / ((delta1 - delta2) * bj) * (2 * tmp / aj - Bi[i] / bj);
-
-            Cp = ((zj - bj) - P * (Zp[j] - Bp)) / ((zj - bj) * (zj - bj));
-            Dp = Bi[i] / bj * Zp[j];
-            // Ep = 0;
-
-            // Attention that if xj[i] = 0, then fugp[i] = nan
-            // but Cp also contains xj[i], so eliminate it first
-            fugp[i] = Cp / C + Dp + E / G * Gp;
-        }
-    }
-
-#ifdef OCP_NANCHECK
-    for (USI j = 0; j < NP; j++) {
-        if (!CheckNan(fugP[j].size(), &fugP[j][0])) {
-            OCP_ABORT("INF or NAN in fugP !");
-        }
-    }
-#endif // NANCHECK
-}
 
 
 void MixtureComp::CalXiPNX_partial()
@@ -2399,7 +2120,7 @@ void MixtureComp::CalVfiVfp_full02()
         }
     }
     else {
-        OCP_ABORT("USE CalVfiVfp_full02 !");
+        OCP_ABORT("USE CalVfiVfp_full01 !");
     }
 }
 

@@ -249,15 +249,10 @@ private:
     vector<OCP_DBL> Vc;     ///< Critical volume of hydrocarbon components
     vector<OCP_DBL> MWC;    ///< Molecular Weight of hydrocarbon components
     vector<OCP_DBL> Acf;    ///< Acentric factor of hydrocarbon components
-    vector<OCP_DBL> OmegaA; ///< OMEGA_A of hydrocarbon components
-    vector<OCP_DBL> OmegaB; ///< OMEGA_B of hydrocarbon components
-    vector<OCP_DBL> Vshift; ///< Volume shift of hydrocarbon components
-    vector<OCP_DBL> Zc;     ///< Critical Z-factor of hydrocarbon components
     // for viscosity calculation
     vector<OCP_DBL> Vcvis;   ///< Critical volume used for viscosity calculations only
     vector<OCP_DBL> Zcvis;   ///< Critical Z-factor used for viscosity calculations only
     vector<OCP_DBL> LBCcoef; ///< LBC coefficients for viscosity calculation
-    vector<OCP_DBL> BIC;     ///< Binary interaction between hydrocarbon components
 
     // Initial properties
     USI             NC;      ///< num of hydrocarbon components
@@ -276,32 +271,9 @@ private:
     OCP_PVTW        PVTW;
     OCP_DBL         std_RhoW; ///< mass density of water phase in standard condition.
 
-public:
-    // EoS Function
-    // Allocate memory for EoS
-    void AllocateEoS();
-    // Setup and Solve EoS for specified A,B
-    void SolEoS(OCP_DBL& ZjT, const OCP_DBL& AjT, const OCP_DBL& BjT) const;
-    // Calculate Ai and Bi
-    void CalAiBi();
-    // Calculate Aj and Bj with specified xj
-    void CalAjBj(OCP_DBL& AjT, OCP_DBL& BjT, const vector<OCP_DBL>& xj) const;
-
 private:
-    // EoS Variables
-    vector<OCP_DBL>         Ai;
-    vector<OCP_DBL>         Bi;
-    vector<OCP_DBL>         Aj;
-    vector<OCP_DBL>         Bj;
-    vector<OCP_DBL>         Zj;
-    mutable vector<OCP_DBL> Ztmp; ///< Cubic root space,size: 3
-
-    // PR default
-    OCP_DBL delta1 = 2.41421356237;
-    OCP_DBL delta2 = -0.41421356237;
-    OCP_DBL delta1P2;
-    OCP_DBL delta1M2;
-    OCP_DBL delta1T2;
+    // EoS
+    EoSCalculation eos;
 
 public:
     // Phase Function
@@ -365,7 +337,6 @@ public:
     void     SplitBFGS();      ///< Use BFGS to calculate phase splitting
     void     SplitNR();        ///< Use NR to calculate phase splitting
     void     CalResSP();
-    void     CalFugNAll();
     void     PrintFugN();
     void     AssembleJmatSP();
     OCP_DBL  CalStepNRsp();
@@ -386,9 +357,6 @@ private:
     vector<OCP_DBL>         resSTA;
     vector<OCP_DBL>         JmatSTA; ///< d g / d Y
     vector<vector<OCP_DBL>> fugX;    ///< d ln f / d X
-    vector<OCP_DBL>         Ax;      ///< d Aj / d xkj, j is fixed
-    vector<OCP_DBL>         Bx;      ///< d Bj / d xkj, j is fixed
-    vector<OCP_DBL>         Zx;      ///< d Zj / d xkj, j is fixed
 
     // SSM in Phase Split
     vector<OCP_DBL> resRR; ///< Error in Rachford-Rice equations.
@@ -398,9 +366,6 @@ private:
     vector<OCP_DBL> JmatSP; ///< Jacobian Matrix of (ln fij - ln fi,np) wrt. nij
     vector<vector<OCP_DBL>>
                     fugN;       ///< d ln fij / d nkj, in each subvector, ordered by k.
-    vector<OCP_DBL> An;         ///< d Aj / d nkj, j is fixed
-    vector<OCP_DBL> Bn;         ///< d Bj / d nkj, j is fixed
-    vector<vector<OCP_DBL>> Zn; ///< d Zj / d nkj
     // for linearsolve with lapack
     vector<OCP_INT> pivot;     ///< used in dgesv_ in lapack
     vector<OCP_DBL> JmatWork;  ///< work space for Jmat in STA and SP
@@ -417,7 +382,6 @@ protected:
     void CalViscosity();
     void CalViscoLBC();
     void CalViscoHZYT();
-    void CalFugPAll();
 
     void CalXiPNX_partial();
     void CalRhoPX_partial();
@@ -463,12 +427,6 @@ private:
     vector<OCP_DBL> muN;  ///< d mu[j] / d N[i]: numphase * numCom
     vector<OCP_DBL> xiN;  ///< d xi[j] / d N[i]: numphase * numCom
     vector<OCP_DBL> rhoN; ///< d rho[j] / d N[i]: numphase * numCom
-
-    /////////////////////////////////////////////////////////////////////
-    // EoS
-    /////////////////////////////////////////////////////////////////////
-
-    EoSCalculation eos;
 
     /////////////////////////////////////////////////////////////////////
     // Optional Features
