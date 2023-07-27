@@ -283,6 +283,10 @@ protected:
     EoScontrol      EoSctrl;
 
 protected:
+    // viscosity calculations
+    ViscosityCalculation visCal;
+
+protected:
     // Initial properties for flash   
     /// current Pressure
     OCP_DBL         P;
@@ -344,6 +348,7 @@ protected:
     /// x[j][i] -> n[j][i]
     void x2n();
 
+
 public:
     // Method Function
     // Allocate memoery for Method variables
@@ -367,7 +372,6 @@ public:
     void     SplitBFGS();      ///< Use BFGS to calculate phase splitting
     void     SplitNR();        ///< Use NR to calculate phase splitting
     void     CalResSP();
-    void     PrintFugN();
     void     AssembleJmatSP();
     OCP_DBL  CalStepNRsp();
 
@@ -386,7 +390,8 @@ private:
     // NR in Stability Analysis
     vector<OCP_DBL>         resSTA;
     vector<OCP_DBL>         JmatSTA; ///< d g / d Y
-    vector<vector<OCP_DBL>> fugX;    ///< d ln f / d X
+    /// d ln fij / d xkj, in each subvector, ordered by k.
+    vector<vector<OCP_DBL>> lnfugX;
 
     // SSM in Phase Split
     vector<OCP_DBL> resRR; ///< Error in Rachford-Rice equations.
@@ -394,13 +399,24 @@ private:
     vector<OCP_DBL> lresSP; ///< last resSP, used in BFGS
     vector<OCP_DBL> resSP;  ///< d G / d nij, G is Gibbs free energy: ln fij - ln fi,np
     vector<OCP_DBL> JmatSP; ///< Jacobian Matrix of (ln fij - ln fi,np) wrt. nij
-    vector<vector<OCP_DBL>>
-                    fugN;       ///< d ln fij / d nkj, in each subvector, ordered by k.
+    /// d ln fij / d nkj, in each subvector, ordered by k.
+    vector<vector<OCP_DBL>> lnfugN;
     // for linearsolve with lapack
     vector<OCP_INT> pivot;     ///< used in dgesv_ in lapack
     vector<OCP_DBL> JmatWork;  ///< work space for Jmat in STA and SP
     OCP_INT         lJmatWork; ///< length of JmatWork
     char            uplo{'U'};
+
+protected:
+    
+    void CalProperty();
+    void CalXi();
+    void CalRho();
+    void CalMu();
+    void CalPropertyDer();   
+    void CalXiDer();
+    void CalRhoDer();
+    void CalMuDer();
 
 protected:
     // After Phase Equilibrium Calculation finishs, properties and some auxiliary
@@ -431,15 +447,7 @@ protected:
     void CaldXsdXp02();
 
 private:
-    // Phase properties and auxiliary variables
-    vector<OCP_DBL> muC; ///< Viscosity of phase
-    vector<vector<OCP_DBL>>
-        muAux; ///< Auxiliary variables for Viscosity, used to calculate Derivative
-    vector<OCP_DBL>
-        muAux1I; ///< Auxiliary variables for Viscosity, used to calculate Derivative
-    vector<OCP_DBL>         sqrtMWi;
-    vector<vector<OCP_DBL>> fugP; ///< d ln fij / d P
-    vector<OCP_DBL>         Zp;   ///< d Z / d P
+    vector<vector<OCP_DBL>> lnfugP; ///< d ln fij / d P
 
     vector<OCP_DBL> JmatTmp; ///< Temp Mat for transpose of a matrix
     vector<OCP_DBL> JmatDer; ///< Used to store Jacobian Mat for calculating derivates

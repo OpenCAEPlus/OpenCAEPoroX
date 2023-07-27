@@ -105,6 +105,7 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     AllocateOthers();
 
     eos.Setup(param, tarId);
+    visCal.Setup(param, tarId);
 }
 
 void MixtureComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
@@ -129,6 +130,7 @@ void MixtureComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* N
     CalSaturation();
 }
 
+
 void MixtureComp::InitFlashIMPEC(const OCP_DBL& Pin,
                                  const OCP_DBL& Pbbin,
                                  const OCP_DBL& Tin,
@@ -146,10 +148,10 @@ void MixtureComp::InitFlashIMPEC(const OCP_DBL& Pin,
     PhaseEquilibrium();
     // Attention Nt = 1 now
     CalMW();
+    IdentifyPhase();
     CalVfXiRho();
     CalViscosity();
-    CalSurfaceTension();
-    IdentifyPhase();
+    CalSurfaceTension();  
     CopyPhase();
 
     // Calulate Nt, water is exclued
@@ -206,10 +208,11 @@ void MixtureComp::InitFlashFIM(const OCP_DBL& Pin,
     PhaseEquilibrium();
     // Attention Nt = 1 now
     CalMW();
+    IdentifyPhase();
     CalVfXiRho();
     CalViscosity();
     CalSurfaceTension();
-    IdentifyPhase();
+    
     CopyPhase();
 
     // Calulate Nt, water is exclued
@@ -361,12 +364,12 @@ void MixtureComp::CalFlash()
 {
     PhaseEquilibrium();
     // Next, nu represents moles of phase instead of molar fraction of phase
-    Dscalar(NP, Nh, &nu[0]);
     CalMW();
+    IdentifyPhase();
+    Dscalar(NP, Nh, &nu[0]);  
     CalVfXiRho();
     CalViscosity();
-    CalSurfaceTension();
-    IdentifyPhase();
+    CalSurfaceTension(); 
     CopyPhase();
 }
 
@@ -401,10 +404,9 @@ MixtureComp::RhoPhase(const OCP_DBL& Pin,
     } else {
         // hydrocarbon phase
         OCP_DBL xitmp = XiPhase(Pin, Tin, Ziin, tarPhase);
-        NP            = 1;
-        x[0]          = zi;
-        CalMW();
-        return MW[0] * xitmp;
+        OCP_DBL MWtmp = 0;
+        for (USI i = 0; i < NC; i++) MWtmp += zi[i] * MWC[i];
+        return MWtmp * xitmp;
     }
 }
 
@@ -505,8 +507,6 @@ void MixtureComp::CalProdRate(const OCP_DBL&   Pin,
     prodRate[1] = vj[1] / 1000;  // Mscf
     prodRate[2] = vj[2] * xi[2]; // stb
 }
-
-
 
 
 void MixtureComp::AllocatePhase()
@@ -622,11 +622,11 @@ void MixtureComp::AllocateMethod()
     resRR.resize(NPmax - 1);
     resSP.resize(static_cast<size_t>(NC) * NPmax);
     JmatSP.resize(static_cast<size_t>(NC * NC) * NPmax * NPmax);
-    fugX.resize(NPmax);
-    fugN.resize(NPmax);
+    lnfugX.resize(NPmax);
+    lnfugN.resize(NPmax);
     for (USI j = 0; j < NPmax; j++) {
-        fugX[j].resize(NC * NC);
-        fugN[j].resize(NC * NC);
+        lnfugX[j].resize(NC * NC);
+        lnfugN[j].resize(NC * NC);
     }
     pivot.resize(static_cast<size_t>(NC + 1) * NPmax, 1);
     lJmatWork = NC * (NPmax - 1);
@@ -833,9 +833,6 @@ OCP_BOOL MixtureComp::StableSSM01(const USI& Id)
             // flag = StableNR(Id);
         }
 
-        // cout << "Yt = " << setprecision(8) << scientific << Yt << "   " << setw(2)
-        //     << "Sk = " << setprecision(3) << scientific << Sk << "   " << setw(2)
-        //     << iter << "  ";
         EoSctrl.SSMsta.curIt += iter;
 
         if (flag && Yt > 1 - 0.1 && Sk > 1) {
@@ -873,8 +870,6 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
     USI      iter;
     USI      k;
 
-    // cout << "SSMBEGINS" << endl;
-
     for (k = 0; k < 4; k++) {
 
         Yt = 0;
@@ -894,16 +889,7 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
         flag = OCP_TRUE;
         iter = 0;
 
-        // cout << "ssmbegins" << endl;
-
         while (Se > Stol) {
-
-            // cout << setprecision(6) << scientific << Se;
-            // cout << "         ";
-            // cout << setprecision(12) << scientific << Yt;
-            // cout << "         " << iter << endl;
-            // PrintDX(NC, &xj[0]);
-            // PrintDX(NC, &Y[0]);
 
             Yt = 0;
             for (USI i = 0; i < NC; i++) {
@@ -932,21 +918,11 @@ OCP_BOOL MixtureComp::StableSSM(const USI& Id)
         // splitting calculation may get into trouble and single phase is indentified
         // finally
         if (flag && Yt > 1 + eYt) {
-            // cout << "Yt = " << setprecision(12) << scientific << Yt << "    " <<
-            // setw(3)
-            //     << EoSctrl.SSMsta.curIt << "    " << setw(3) << EoSctrl.NRsta.curIt
-            //     << "   " << flag << "   " << k << "   " << 2 << "   ";
             EoSctrl.SSMsta.conflag = OCP_TRUE;
             EoSctrl.SSMsta.realTol = sqrt(Se);
             return OCP_FALSE;
         }
     }
-    // cout << "Yt = " << setprecision(12) << scientific << Yt << "    " << setw(3)
-    //     << EoSctrl.SSMsta.curIt << "    " << setw(3) << EoSctrl.NRsta.curIt << "   "
-    //     << flag << "   " << k << "   " << 1 << "   ";
-    /*if (!flag) {
-        OCP_WARNING("SSM not converged in Stability Analysis");
-    }*/
     EoSctrl.SSMsta.realTol = sqrt(Se);
     return OCP_TRUE;
 }
@@ -966,7 +942,7 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
 
     while (Se > Stol) {
 
-        eos.CalLnFugX(P, T, Y, fugX[0]);
+        eos.CalLnFugX(P, T, Y, lnfugX[0]);
         AssembleJmatSTA();
         // LUSolve(1, NC, &JmatSTA[0], &resSTA[0], &pivot[0]);
         SYSSolve(1, &uplo, NC, &JmatSTA[0], &resSTA[0], &pivot[0], &JmatWork[0],
@@ -1001,7 +977,7 @@ OCP_BOOL MixtureComp::StableNR(const USI& Id)
 
 void MixtureComp::AssembleJmatSTA()
 {
-    vector<OCP_DBL>& fugx = fugX[0];
+    vector<OCP_DBL>& fugx = lnfugX[0];
     fill(JmatSTA.begin(), JmatSTA.end(), 0.0);
     OCP_DBL tmp;
     for (USI i = 0; i < NC; i++) {
@@ -1341,7 +1317,7 @@ void MixtureComp::SplitNR()
         // eNR0 = eNR;
         ln = n;        
         for (USI j = 0; j < NP; j++)  
-            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], lnfugN[j]);
 
         AssembleJmatSP();
 
@@ -1423,19 +1399,6 @@ void MixtureComp::CalResSP()
 }
 
 
-void MixtureComp::PrintFugN()
-{
-    for (USI j = 0; j < NP; j++) {
-        for (USI i = 0; i < NC; i++) {
-            for (USI k = 0; k < NC; k++) {
-                cout << fugN[j][i * NC + k] << "   ";
-            }
-            cout << endl;
-        }
-        cout << "---------------" << endl;
-    }
-}
-
 void MixtureComp::AssembleJmatSP()
 {
     // Dim: (NP-1)*NC
@@ -1447,8 +1410,8 @@ void MixtureComp::AssembleJmatSP()
     const OCP_DBL* fugNj;
 
     for (USI j = 0; j < NP - 1; j++) {
-        fugNp = &fugN[NP - 1][0];
-        fugNj = &fugN[j][0];
+        fugNp = &lnfugN[NP - 1][0];
+        fugNj = &lnfugN[j][0];
 
         for (USI i = 0; i < NC; i++) {
             // ith components
@@ -1462,14 +1425,6 @@ void MixtureComp::AssembleJmatSP()
         }
         Jtmp += NC;
     }
-
-    // cout << endl << "Jmat" << endl;
-    // for (USI i = 0; i < NC; i++) {
-    //     for (USI j = 0; j < NC; j++) {
-    //         cout << scientific << setprecision(6) << JmatSP[i * NC + j] << "   ";
-    //     }
-    //     cout << endl;
-    // }
 }
 
 OCP_DBL MixtureComp::CalStepNRsp()
@@ -1494,22 +1449,10 @@ OCP_DBL MixtureComp::CalStepNRsp()
 
 void MixtureComp::AllocateOthers()
 {
-    sqrtMWi.resize(NC);
-    for (USI i = 0; i < NC; i++) sqrtMWi[i] = sqrt(MWC[i]);
-    muC.resize(NPmax);
-    muAux.resize(NPmax);
-    for (USI i = 0; i < NPmax; i++) {
-        muAux[i].resize(5);
-    }
-    muAux1I.resize(NC);
-    for (USI i = 0; i < NC; i++) {
-        muAux1I[i] = 5.4402 * pow(Tc[i], 1.0 / 6) / pow(Pc[i], 2.0 / 3);
-    }
-    fugP.resize(NPmax);
+    lnfugP.resize(NPmax);
     for (USI j = 0; j < NPmax; j++) {
-        fugP[j].resize(NC);
+        lnfugP[j].resize(NC);
     }
-    Zp.resize(NPmax);
     JmatDer.resize(NPmax * NPmax * (NC + 1) * (NC + 1));
     JmatTmp = JmatDer;
     rhsDer.resize(NPmax * (NC + 1) * (NC + 1));
@@ -1554,6 +1497,86 @@ void MixtureComp::IdentifyPhase()
     }
 }
 
+
+void MixtureComp::CalProperty()
+{
+    CalXi();
+    CalRho();
+    CalMu();
+}
+
+
+void MixtureComp::CalXi()
+{
+    for (USI j = 0; j < NP; j++) {
+        const USI j0 = phaseLabel[j];
+        vmj[j] = eos.CalVmDer(P, T, x[j], vmP[j], vmx[j]);
+        xi[j0] = 1 / vmj[j];
+    }
+}
+
+
+void MixtureComp::CalRho()
+{
+    for (USI j = 0; j < NP; j++) {
+        const USI j0 = phaseLabel[j];
+        rho[j0] = MW[j] * xi[j0];
+    }
+}
+
+
+void MixtureComp::CalMu()
+{
+    CalMuDer();
+}
+
+
+void MixtureComp::CalPropertyDer()
+{
+    CalXiDer();
+    CalRhoDer();
+    CalMuDer();
+}
+
+
+void MixtureComp::CalXiDer()
+{
+    for (USI j = 0; j < NP; j++) {
+        const USI j0 = phaseLabel[j];
+        vmj[j] = eos.CalVmDer(P, T, x[j], vmP[j], vmx[j]);
+        xi[j0] = 1 / vmj[j];
+        for (USI i = 0; i < NC; i++) {
+            xix[j0 * numCom + i] = -xi[j0] * xi[j0] * vmx[j][i];
+        }
+        xiP[j0] = -xi[j0] * xi[j0] * vmP[j];
+    }
+}
+
+
+void MixtureComp::CalRhoDer()
+{
+    for (USI j = 0; j < NP; j++) {
+        const USI j0 = phaseLabel[j];
+        rho[j0]  = MW[j] * xi[j0];
+        rhoP[j0] = MW[j] * xiP[j0];
+        for (USI i = 0; i < NC; i++) {
+            rhox[j0 * numCom + i] = xix[j0 * numCom + i] * MW[j] + xi[j0] * MWC[i];
+        }
+    }
+}
+
+
+void MixtureComp::CalMuDer()
+{
+    for (USI j = 0; j < NP; j++) {
+        const USI j1 = phaseLabel[j];
+        OCP_DBL   dummy;
+        mu[j1] = visCal.CalViscosity(ViscosityParams(&P, &T, &x[j][0], &xi[j1], &xiP[j1], nullptr, &xix[j1 * numCom]),
+            muP[j1], dummy, &mux[j1 * numCom]);
+    }
+}
+
+
 void MixtureComp::CopyPhase()
 {
     // copy vj, x, mu, xi, rho
@@ -1561,7 +1584,6 @@ void MixtureComp::CopyPhase()
         const USI j1 = phaseLabel[j];
         vj[j1]       = vC[j];
         copy(x[j].begin(), x[j].end(), &xij[j1 * numCom]);
-        mu[j1]  = muC[j];
         xi[j1]  = xiC[j];
         rho[j1] = rhoC[j];
         nj[j1]  = nu[j];
@@ -1572,47 +1594,10 @@ void MixtureComp::CalViscosity() { CalViscoLBC(); }
 
 void MixtureComp::CalViscoLBC()
 {
-    OCP_DBL tmp;
-    OCP_DBL Tri;
-    OCP_DBL xijT;
-    OCP_DBL xijP;
-    OCP_DBL xijV;
-
     for (USI j = 0; j < NP; j++) {
-        const vector<OCP_DBL>& xj  = x[j];
-        vector<OCP_DBL>&       muA = muAux[j];
-        fill(muA.begin(), muA.end(), 0.0);
-        xijT = 0;
-        xijP = 0;
-        xijV = 0;
-
-        for (USI i = 0; i < NC; i++) {
-            tmp = 5.4402 * pow(Tc[i], 1.0 / 6) / sqrt(MW[j]) / pow(Pc[i], 2.0 / 3);
-            // tmp = muAux1I[i] / sqrt(MW[j]);
-            Tri = T / Tc[i];
-            if (Tri <= 1.5) {
-                tmp = 34 * 1E-5 * pow(Tri, 0.94) / tmp;
-            } else {
-                tmp = 17.78 * 1E-5 * pow((4.58 * Tri - 1.67), 0.625) / tmp;
-            }
-            muA[0] += xj[i] * sqrt(MWC[i]) * tmp;
-            muA[1] += xj[i] * sqrt(MWC[i]);
-            xijT += xj[i] * Tc[i];
-            xijP += xj[i] * Pc[i];
-            xijV += xj[i] * Vcvis[i];
-        }
-        muA[2] = 5.4402 * pow(xijT, 1.0 / 6) / sqrt(MW[j]) / pow(xijP, 2.0 / 3);
-        muA[3] = xiC[j] * xijV;
-
-        if (muA[3] <= 0.18 && OCP_FALSE) {
-            muC[j] = muA[0] / muA[1] + 2.05 * 1E-4 * muA[3] / muA[2];
-        } else {
-            muA[4] = muA[3] * (muA[3] * (muA[3] * (LBCcoef[4] * muA[3] + LBCcoef[3]) +
-                                         LBCcoef[2]) +
-                               LBCcoef[1]) +
-                     LBCcoef[0];
-            muC[j] = muA[0] / muA[1] + 1E-4 * (pow(muA[4], 4) - 1) / muA[2];
-        }
+        const USI j1 = phaseLabel[j];
+        OCP_DBL   dummy;
+        mu[j1] = visCal.CalViscosity(ViscosityParams(&P, &T, &x[j][0], &xi[j1]));
     }
 }
 
@@ -1624,11 +1609,10 @@ void MixtureComp::CalXiPNX_partial()
     // Calculate xix and xiP
     for (USI j = 0; j < NP; j++) {
         const USI j0 = phaseLabel[j];
-        xi[j0] = 1 / vmj[j];
+        xiP[j0] = -xi[j0] * xi[j0] * vmP[j];
         for (USI i = 0; i < NC; i++) {
             xix[j0 * numCom + i] = -xi[j0] * xi[j0] * vmx[j][i];
-        }
-        xiP[j0] = -xi[j0] * xi[j0] * vmP[j];
+        }        
     }
 }
 
@@ -1650,92 +1634,7 @@ void MixtureComp::CalMuPX_partial()
 
 void MixtureComp::CalMuPXLBC_partial()
 {
-    // Here!
-    // dmu/dP = dmu/dP
-    // dmu/dNk = dmu/dNk = 0
-    // // dxij / dP = dxij / dNk = 0
-    // See MixtureComp::CalMuPXLBC_full01()
-
-    OCP_DBL val1IJ, val2IJ;
-    OCP_DBL der1IJ, der2IJ, der3J, der4J, der6J, der7J, der8J;
-    OCP_DBL Tri, tmp;
-    OCP_DBL xTj, xPj, xVj;
-    OCP_DBL derxTj, derxPj, derMWj;
-
-    // dxij / dP = 0, d MJ / dP = 0
-    // Calculate dmuj / dP
-    // der2IJ = der3J = der4J = der6J = 0;
-
-    for (USI j = 0; j < NP; j++) {
-        const USI              j1     = phaseLabel[j];
-        const vector<OCP_DBL>& xj     = x[j];
-        const vector<OCP_DBL>& muAuxj = muAux[j];
-
-        xTj = xPj = xVj = 0;
-        for (USI i = 0; i < NC; i++) {
-            xTj += xj[i] * Tc[i];
-            xPj += xj[i] * Pc[i];
-            xVj += xj[i] * Vcvis[i];
-        }
-        der7J = xVj * xiP[j1];
-        if (muAuxj[3] <= 0.18 && OCP_FALSE) {
-            muP[j1] = (2.05 * 1E-4) * der7J / muAuxj[2];
-        } else {
-            der8J   = der7J * (LBCcoef[1] +
-                             muAuxj[3] * (2 * LBCcoef[2] +
-                                          muAuxj[3] * (3 * LBCcoef[3] +
-                                                       muAuxj[3] * 4 * LBCcoef[4])));
-            muP[j1] = (4 * 1E-4) * pow(muAuxj[4], 3) * der8J / muAuxj[2];
-        }
-
-        // Calculate dmuj / xkj
-        const USI bId = numCom * j1;
-        for (USI k = 0; k < NC; k++) {
-            derxTj = Tc[k];
-            derxPj = Pc[k];
-            derMWj = MWC[k];
-            der3J  = 0;
-            for (USI i = 0; i < NC; i++) {
-                val1IJ = muAux1I[i] / sqrt(MW[j]);
-                der1IJ = -(1 / 2) * muAux1I[i] * pow(MW[j], -1.5) * derMWj;
-                Tri    = T / Tc[i];
-                if (Tri <= 1.5) {
-                    tmp = 34 * 1E-5 * pow(Tri, 0.94);
-                } else {
-                    tmp = 17.78 * 1E-5 * pow(4.58 * Tri - 1.67, 0.625);
-                }
-                val2IJ = tmp / val1IJ;
-                der2IJ = -tmp * der1IJ / (val1IJ * val1IJ);
-                der3J +=
-                    xj[i] * sqrtMWi[i] * der2IJ + delta(i, k) * sqrtMWi[k] * val2IJ;
-            }
-            der4J = sqrtMWi[k];
-            der6J =
-                5.4402 *
-                (1.0 / 6 * pow(xTj, -5.0 / 6) * derxTj -
-                 pow(xTj, 1.0 / 6) * (0.5 / MW[j] * derMWj + 2.0 / 3 / xPj * derxPj)) /
-                (sqrt(MW[j]) * pow(xPj, 2.0 / 3));
-            der7J = xix[j1 * numCom + k] * xVj + xi[j1] * Vcvis[k];
-            if (muAuxj[3] <= 0.18 && OCP_FALSE) {
-                mux[bId + k] =
-                    (der3J * muAuxj[1] - muAuxj[0] * der4J) / (muAuxj[1] * muAuxj[1]) +
-                    2.05 * 1E-4 * (der7J * muAuxj[2] - muAuxj[3] * der6J) /
-                        (muAuxj[2] * muAuxj[2]);
-            } else {
-                der8J =
-                    der7J * (LBCcoef[1] +
-                             muAuxj[3] * (2 * LBCcoef[2] +
-                                          muAuxj[3] * (3 * LBCcoef[3] +
-                                                       muAuxj[3] * 4 * LBCcoef[4])));
-                mux[bId + k] =
-                    (der3J * muAuxj[1] - muAuxj[0] * der4J) / (muAuxj[1] * muAuxj[1]) +
-                    1E-4 *
-                        (4 * pow(muAuxj[4], 3) * der8J * muAuxj[2] -
-                         (pow(muAuxj[4], 4) - 1) * der6J) /
-                        (muAuxj[2] * muAuxj[2]);
-            }
-        }
-    }
+    CalMuDer();
 }
 
 
@@ -1760,8 +1659,8 @@ void MixtureComp::CalVfiVfp_full01()
     } else {
         // NP > 1
         for (USI j = 0; j < NP; j++) {
-            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
-            eos.CalLnFugP(P, T, x[j], fugP[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], lnfugN[j]);
+            eos.CalLnFugP(P, T, x[j], lnfugP[j]);
         }
         AssembleMatVfiVfp_full01();
         AssembleRhsVfiVfp_full01();
@@ -1819,7 +1718,7 @@ void MixtureComp::AssembleMatVfiVfp_full01()
     OCP_DBL* bId = &JmatDer[0];
     for (USI j = 0; j < NP - 1; j++) {
         // for jth phase
-        OCP_DBL* fugNj = &fugN[j][0];
+        OCP_DBL* fugNj = &lnfugN[j][0];
         for (USI i = 0; i < NC; i++) {
             // for ith components
             Dcopy(NC, bId, fugNj);
@@ -1832,7 +1731,7 @@ void MixtureComp::AssembleMatVfiVfp_full01()
     }
     // NP - 1 phase
     bId            = &JmatDer[(NP - 1) * (NP * NC * NC)];
-    OCP_DBL* fugNj = &fugN[NP - 1][0];
+    OCP_DBL* fugNj = &lnfugN[NP - 1][0];
     for (USI i = 0; i < NC; i++) {
         for (USI j = 0; j < NP - 1; j++) {
             Dcopy(NC, bId, fugNj);
@@ -1852,7 +1751,7 @@ void MixtureComp::AssembleRhsVfiVfp_full01()
     // d P
     for (USI j = 0; j < NP; j++) {
         for (USI i = 0; i < NC; i++) {
-            rhstmp[i] = fugP[NP - 1][i] - fugP[j][i];
+            rhstmp[i] = lnfugP[NP - 1][i] - lnfugP[j][i];
         }
         rhstmp += NC;
     }
@@ -1970,8 +1869,8 @@ void MixtureComp::CalVfiVfp_full02()
     else if (NP == 2) {
         // JUST FOR NP = 2
         for (USI j = 0; j < NP; j++) {
-            eos.CalLnFugN(P, T, x[j], nu[j], fugN[j]);
-            eos.CalLnFugP(P, T, x[j], fugP[j]);
+            eos.CalLnFugN(P, T, x[j], nu[j], lnfugN[j]);
+            eos.CalLnFugP(P, T, x[j], lnfugP[j]);
         }
 
         AssembleMatVfiVfp_full02();
@@ -2024,7 +1923,7 @@ void MixtureComp::AssembleMatVfiVfp_full02()
     OCP_DBL* tmpMat = &JmatDer[0];
     for (USI i = 0; i < NC; i++) {
         for (USI m = 0; m < NC; m++) {
-            tmpMat[m] = fugN[0][i * NC + m] + fugN[1][i * NC + m];
+            tmpMat[m] = lnfugN[0][i * NC + m] + lnfugN[1][i * NC + m];
         }
         tmpMat += NC;
     }
@@ -2038,14 +1937,14 @@ void MixtureComp::AssembleRhsVfiVfp_full02()
 
     // dP
     for (USI i = 0; i < NC; i++) {
-        rhstmp[i] = fugP[1][i] - fugP[0][i];
+        rhstmp[i] = lnfugP[1][i] - lnfugP[0][i];
     }
     rhstmp += NC;
 
     // dNk
     for (USI k = 0; k < NC; k++) {
         for (USI i = 0; i < NC; i++) {
-            rhstmp[i] = fugN[1][k * NC + i]; // d lnfij / d nkj = d lnfkj / d nij
+            rhstmp[i] = lnfugN[1][k * NC + i]; // d lnfij / d nkj = d lnfkj / d nij
         }
         rhstmp += NC;
     }

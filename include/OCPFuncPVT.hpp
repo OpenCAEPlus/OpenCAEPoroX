@@ -14,7 +14,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPFuncTable.hpp"
-
+#include "UtilMath.hpp"
 
 using namespace std;
 
@@ -182,12 +182,41 @@ protected:
 // Viscosity Calculation
 /////////////////////////////////////////////////////
 
+class ViscosityParams
+{
+public:
+	ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin, const OCP_DBL* xin) :
+		P(Pin), T(Tin), x(xin) {};
+	ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin, const OCP_DBL* xin,
+		const OCP_DBL* xiin) :
+		P(Pin), T(Tin), x(xin), xi(xiin) {};
+	ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin, const OCP_DBL* xin,
+		            const OCP_DBL* xiin, const OCP_DBL* xiPin, const OCP_DBL* xiTin,
+		            const OCP_DBL* xixin) :
+		P(Pin), T(Tin), x(xin), xi(xiin), xiP(xiPin), xiT(xiTin), xix(xixin) {};
+public:
+	/// Pressure
+	const OCP_DBL* P{ nullptr };
+	/// Temperature
+	const OCP_DBL* T{ nullptr };
+	/// molar fraction
+	const OCP_DBL* x{ nullptr };
+	/// molar density
+	const OCP_DBL* xi{ nullptr };
+	/// d xi / d P
+	const OCP_DBL* xiP{ nullptr };
+	/// d xi / d T
+	const OCP_DBL* xiT{ nullptr };
+	/// d xi / d x
+	const OCP_DBL* xix{ nullptr };
+};
+
 class ViscosityMethod
 {
 public:
 	ViscosityMethod() = default;
-	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) = 0;
-	virtual OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) = 0;
+	virtual OCP_DBL CalViscosity(const ViscosityParams& vp) = 0;
+	virtual OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) = 0;
 
 protected:
 	/// num of components
@@ -207,8 +236,8 @@ class ViscosityMethod01 : public ViscosityMethod
 {
 public:
 	ViscosityMethod01(const TableSet& ts);
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
 	/// Viscosity-versus-temperature&pressure dependence
@@ -222,8 +251,8 @@ class ViscosityMethod02 : public ViscosityMethod
 {
 public:
 	ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP_DBL>& bv);
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
 	/// Coefficients in water and oil viscosity correlation formula
@@ -237,8 +266,8 @@ class ViscosityMethod03 : public ViscosityMethod
 {
 public:
 	ViscosityMethod03(const ComponentParam& param, const USI& tarId);
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) override;
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
 	/// num of components
@@ -253,8 +282,16 @@ protected:
 	vector<OCP_DBL> Vcvis;
 	/// Molecular Weight of components
 	vector<OCP_DBL> MWC;
+	/// Molecular Weight of phase
+	OCP_DBL MW;
 	/// Auxiliary variables
-	vector<OCP_DBL> muAux;
+	vector<OCP_DBL> sqrtMWC;
+	/// Auxiliary variables
+	OCP_DBL xPc, xTc, xVc;
+	/// Auxiliary variables
+	vector<OCP_DBL> auxA;
+	/// Auxiliary variables
+	vector<OCP_DBL> auxB;
 };
 
 
@@ -263,12 +300,11 @@ class ViscosityCalculation
 public:
 	ViscosityCalculation() = default;
 	void Setup(const ComponentParam& param, const USI& tarId);
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi) { 
-		return vM->CalViscosity(P, T, zi); 
+	OCP_DBL CalViscosity(const ViscosityParams& vp) {
+		return vM->CalViscosity(vp); 
 	}
-	OCP_DBL CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi,
-		OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz) {
-		return vM->CalViscosity(P, T, zi, muP, muT, muz);
+	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) {
+		return vM->CalViscosity(vp, muP, muT, mux);
 	}
 protected:
 	ViscosityMethod* vM;

@@ -133,8 +133,8 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.Nt = vs.Ni[0] + vs.Ni[1];
 
     // phase viscosity
-    vs.mu[0] = vC.CalViscosity(vs.P, vs.T, &vs.xij[0 * 2], vs.muP[0], vs.muT[0], &vs.mux[0 * 2]);
-    vs.mu[1] = vC.CalViscosity(vs.P, vs.T, &vs.xij[1 * 2], vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
+    vs.mu[0] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.xij[0 * 2]), vs.muP[0], vs.muT[0], &vs.mux[0 * 2]);
+    vs.mu[1] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.xij[1 * 2]), vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
 
     // phase molar density
     vs.xi[0] = xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(vs.T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);

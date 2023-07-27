@@ -234,32 +234,33 @@ ViscosityMethod01::ViscosityMethod01(const TableSet& ts)
 }
 
 
-OCP_DBL ViscosityMethod01::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp)
 {
+
 	OCP_DBL mu = 0;
-	table.Eval(P, T - CONV5, muc);
+	table.Eval((*vp.P), (*vp.T) - CONV5, muc);
 	for (USI i = 0; i < nc; i++)
-		mu += zi[i] * log(muc[i]);
+		mu += vp.x[i] * log(muc[i]);
 	return exp(mu);
 }
 
 
-OCP_DBL ViscosityMethod01::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux)
 {
 	OCP_DBL mu = 0;
 	muP = 0;
 	muT = 0;
-	table.Eval(P, T - CONV5, muc, mucP, mucT);
+	table.Eval((*vp.P), (*vp.T) - CONV5, muc, mucP, mucT);
 	for (USI i = 0; i < nc; i++) {
-		muz[i] = zi[i] * log(muc[i]);
-		mu     += muz[i];
+		mux[i] = vp.x[i] * log(muc[i]);
+		mu     += mux[i];
 	}
 	mu = exp(mu);
 
 	for (USI i = 0; i < nc; i++) {
-		muP    += zi[i] / muc[i] * mucP[i];
-		muT    += zi[i] / muc[i] * mucT[i];
-		muz[i] *= mu;
+		muP    += vp.x[i] / muc[i] * mucP[i];
+		muT    += vp.x[i] / muc[i] * mucT[i];
+		mux[i] *= mu;
 	}
 	muP *= mu;
 	muT *= mu;
@@ -276,34 +277,34 @@ ViscosityMethod02::ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP
 }
 
 
-OCP_DBL ViscosityMethod02::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+OCP_DBL ViscosityMethod02::CalViscosity(const ViscosityParams& vp)
 {
 	OCP_DBL mu = 0;
 	for (USI i = 0; i < nc; i++) {
-		muc[i]  = avisc[i] * exp(bvisc[i] / T); 
-		mu      += zi[i] * log(muc[i]);
+		muc[i]  = avisc[i] * exp(bvisc[i] / (*vp.T)); 
+		mu      += vp.x[i] * log(muc[i]);
 	}
 	return exp(mu);
 }
 
 
-OCP_DBL ViscosityMethod02::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+OCP_DBL ViscosityMethod02::CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux)
 {
 	OCP_DBL mu = 0;
 	muP = 0;
 	muT = 0;
 	for (USI i = 0; i < nc; i++) {
-		muc[i]  = avisc[i] * exp(bvisc[i] / T);
-		mucT[i] = -muc[i] * (bvisc[i] / T) / T;
-		muz[i]  = zi[i] * log(muc[i]);
-		mu      += muz[i];
+		muc[i]  = avisc[i] * exp(bvisc[i] / (*vp.T));
+		mucT[i] = -muc[i] * (bvisc[i] / (*vp.T)) / (*vp.T);
+		mux[i]  = vp.x[i] * log(muc[i]);
+		mu      += mux[i];
 	}
 	mu = exp(mu);
 
 	for (USI i = 0; i < nc; i++) {
-		muP    += zi[i] / muc[i] * mucP[i];
-		muT    += zi[i] / muc[i] * mucT[i];
-		muz[i] *= mu;
+		muP    += vp.x[i] / muc[i] * mucP[i];
+		muT    += vp.x[i] / muc[i] * mucT[i];
+		mux[i] *= mu;
 	}
 	muP *= mu;
 	muT *= mu;
@@ -347,59 +348,131 @@ ViscosityMethod03::ViscosityMethod03(const ComponentParam& param, const USI& tar
 			OCP_ABORT("VCRIT or ZCRIT hasn't been input!");
 	}		
 
-	muAux.resize(5);
+	sqrtMWC.resize(nc);
+	for (USI i = 0; i < nc; i++) {
+		sqrtMWC[i] = sqrt(MWC[i]);
+	}
+	auxA.resize(5);
+	auxB.resize(nc);
+	for (USI i = 0; i < nc; i++) {
+		auxB[i] = 5.4402 * pow(Tc[i], 1.0 / 6) / pow(Pc[i], 2.0 / 3);
+	}
 }
 
 
-OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi)
+OCP_DBL ViscosityMethod03::CalViscosity(const ViscosityParams& vp)
 {
+	MW = 0;
+	for (USI i = 0; i < nc; i++) MW += vp.x[i] * MWC[i];
 
-	//OCP_DBL MW = 0;
-	//for (USI i = 0; i < nc; i++) MW += zi[i] * MWC[i];
+	OCP_DBL tmp;
+	OCP_DBL Tri;
+	xPc = xTc = xVc = 0;
 
-	//OCP_DBL tmp;
-	//OCP_DBL Tri;
-	//OCP_DBL xijT;
-	//OCP_DBL xijP;
-	//OCP_DBL xijV;
+	fill(auxA.begin(), auxA.end(), 0.0);
 
-	//fill(muAux.begin(), muAux.end(), 0.0);
-	//xijT = 0;
-	//xijP = 0;
-	//xijV = 0;
+	for (USI i = 0; i < nc; i++) {
+		tmp = auxB[i] / sqrt(MW);
+		Tri = (*vp.T) / Tc[i];
+		if (Tri <= 1.5) {
+			tmp = 34 * 1E-5 * pow(Tri, 0.94) / tmp;
+		}
+		else {
+			tmp = 17.78 * 1E-5 * pow((4.58 * Tri - 1.67), 0.625) / tmp;
+		}
+		auxA[0] += vp.x[i] * sqrtMWC[i] * tmp;
+		auxA[1] += vp.x[i] * sqrtMWC[i];
+		xPc += vp.x[i] * Pc[i];
+		xTc += vp.x[i] * Tc[i];		
+		xVc += vp.x[i] * Vcvis[i];
+	}
+	auxA[2] = 5.4402 * pow(xTc, 1.0 / 6) / sqrt(MW) / pow(xPc, 2.0 / 3);
+	auxA[3] = (*vp.xi) * xVc;
 
-	//for (USI i = 0; i < nc; i++) {
-	//	tmp = 5.4402 * pow(Tc[i], 1.0 / 6) / sqrt(MW) / pow(Pc[i], 2.0 / 3);
-	//	Tri = T / Tc[i];
-	//	if (Tri <= 1.5) {
-	//		tmp = 34 * 1E-5 * pow(Tri, 0.94) / tmp;
-	//	}
-	//	else {
-	//		tmp = 17.78 * 1E-5 * pow((4.58 * Tri - 1.67), 0.625) / tmp;
-	//	}
-	//	muAux[0] += zi[i] * sqrt(MWC[i]) * tmp;
-	//	muAux[1] += zi[i] * sqrt(MWC[i]);
-	//	xijT     += zi[i] * Tc[i];
-	//	xijP     += zi[i] * Pc[i];
-	//	xijV     += zi[i] * Vcvis[i];
-	//}
-	//muAux[2] = 5.4402 * pow(xijT, 1.0 / 6) / sqrt(MW) / pow(xijP, 2.0 / 3);
-	//muAux[3] = xi * xijV;
-
-	//if (muAux[3] <= 0.18 && OCP_FALSE) {
-	//	return muAux[0] / muAux[1] + 2.05 * 1E-4 * muAux[3] / muAux[2];
-	//}
-	//else {
-	//	muAux[4] = muAux[3] * (muAux[3] * (muAux[3] * (coef[4] * muAux[3] + coef[3]) + coef[2]) + coef[1]) + coef[0];
-	//	return muAux[0] / muAux[1] + 1E-4 * (pow(muAux[4], 4) - 1) / muAux[2];
-	//}
-	return 0;
+	if (auxA[3] <= 0.18 && OCP_FALSE) {
+		return auxA[0] / auxA[1] + 2.05 * 1E-4 * auxA[3] / auxA[2];
+	}
+	else {
+		auxA[4] = auxA[3] * (auxA[3] * (auxA[3] * (coef[4] * auxA[3] + coef[3]) + coef[2]) + coef[1]) + coef[0];
+		return auxA[0] / auxA[1] + 1E-4 * (pow(auxA[4], 4) - 1) / auxA[2];
+	}
 }
 
 
-OCP_DBL ViscosityMethod03::CalViscosity(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* muz)
+OCP_DBL ViscosityMethod03::CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux)
 {
-	return 0;
+
+	const OCP_DBL mu = CalViscosity(vp);
+
+	OCP_DBL val1IJ, val2IJ;
+	OCP_DBL der1IJ, der2IJ, der3J, der4J, der6J, der7J, der8J;
+	OCP_DBL Tri, tmp;
+	OCP_DBL derxTc, derxPc, derMWC;
+
+	// der2IJ = der3J = der4J = der6J = 0;
+
+	if (vp.xiP != nullptr) {
+		der7J = xVc * (*vp.xiP);
+		if (auxA[3] <= 0.18 && OCP_FALSE) {
+			muP = (2.05 * 1E-4) * der7J / auxA[2];
+		}
+		else {
+			der8J = der7J * (coef[1] + auxA[3] * (2 * coef[2] + auxA[3] * (3 * coef[3] + auxA[3] * 4 * coef[4])));
+			muP = (4 * 1E-4) * pow(auxA[4], 3) * der8J / auxA[2];
+		}
+	}
+
+	if (vp.xiT != nullptr) {
+
+	}
+
+	if (vp.xix != nullptr) {
+		// Calculate dmu / xk
+		for (USI k = 0; k < nc; k++) {
+			derxTc = Tc[k];
+			derxPc = Pc[k];
+			derMWC = MWC[k];
+			der3J  = 0;
+			for (USI i = 0; i < nc; i++) {
+				val1IJ = auxB[i] / sqrt(MW);
+				der1IJ = -(1 / 2) * auxB[i] * pow(MW, -1.5) * derMWC;
+				Tri = (*vp.T) / Tc[i];
+				if (Tri <= 1.5) {
+					tmp = 34 * 1E-5 * pow(Tri, 0.94);
+				}
+				else {
+					tmp = 17.78 * 1E-5 * pow(4.58 * Tri - 1.67, 0.625);
+				}
+				val2IJ = tmp / val1IJ;
+				der2IJ = -tmp * der1IJ / (val1IJ * val1IJ);
+				der3J += vp.x[i] * sqrtMWC[i] * der2IJ + delta(i, k) * sqrtMWC[k] * val2IJ;
+			}
+			der4J = sqrtMWC[k];
+			der6J =
+				5.4402 *
+				(1.0 / 6 * pow(xTc, -5.0 / 6) * derxTc -
+					pow(xTc, 1.0 / 6) * (0.5 / MW * derMWC + 2.0 / 3 / xPc * derxPc)) /
+				(sqrt(MW) * pow(xPc, 2.0 / 3));
+			der7J = vp.xix[k] * xVc + (*vp.xi) * Vcvis[k];
+			if (auxA[3] <= 0.18 && OCP_FALSE) {
+				mux[k] =
+					(der3J * auxA[1] - auxA[0] * der4J) / (auxA[1] * auxA[1]) +
+					2.05 * 1E-4 * (der7J * auxA[2] - auxA[3] * der6J) /
+					(auxA[2] * auxA[2]);
+			}
+			else {
+				der8J = der7J * (coef[1] + auxA[3] * (2 * coef[2] + auxA[3] * (3 * coef[3] + auxA[3] * 4 * coef[4])));
+				mux[k] =
+					(der3J * auxA[1] - auxA[0] * der4J) / (auxA[1] * auxA[1]) +
+					1E-4 *
+					(4 * pow(auxA[4], 3) * der8J * auxA[2] -
+						(pow(auxA[4], 4) - 1) * der6J) /
+					(auxA[2] * auxA[2]);
+			}
+		}
+	}
+
+	return mu;
 }
 
 
@@ -410,6 +483,9 @@ void ViscosityCalculation::Setup(const ComponentParam& param, const USI& tarId)
 	}
 	else if (param.viscTab.data.size() > 0) {
 		vM = new ViscosityMethod01(param.viscTab);
+	}
+	else if (param.LBCcoef.size() > 0) {
+		vM = new ViscosityMethod03(param, tarId);
 	}
 	else {
 		OCP_ABORT("WRONG Viscosity Calculation Params!");
