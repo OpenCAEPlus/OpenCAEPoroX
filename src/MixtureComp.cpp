@@ -63,21 +63,6 @@ MixtureComp::MixtureComp(const ComponentParam& param, const USI& tarId)
     else
         OCP_ABORT("ACF hasn't been input!");
 
-    if (param.Vcvis.activity)
-        Vcvis = param.Vcvis.data[tarId];
-    else if (param.Zcvis.activity) {
-        Zcvis = param.Zcvis.data[tarId];
-        Vcvis.resize(NC);
-        for (USI i = 0; i < NC; i++) {
-            Vcvis[i] = GAS_CONSTANT * Zcvis[i] * Tc[i] / Pc[i];
-        }
-    } else
-        Vcvis = Vc;
-
-    LBCcoef = param.LBCcoef;
-    for (auto& lbc : LBCcoef) {
-        lbc *= 10;
-    }
 
     EoSctrl.SSMsta.maxIt = stoi(param.SSMparamSTA[0]);
     EoSctrl.SSMsta.tol   = stod(param.SSMparamSTA[1]);

@@ -256,13 +256,6 @@ protected:
     vector<OCP_DBL> MWC; 
     /// acentric factor of hydrocarbon components
     vector<OCP_DBL> Acf;
-    // for viscosity calculation
-    /// critical volume used for viscosity calculations only
-    vector<OCP_DBL> Vcvis;
-    /// critical Z-factor used for viscosity calculations only
-    vector<OCP_DBL> Zcvis;
-    /// LBC coefficients for viscosity calculation
-    vector<OCP_DBL> LBCcoef;
 
 protected:
     // water property
