@@ -217,6 +217,17 @@ bool CheckNan(const int& N, const T* x)
     return true;
 }
 
+/// swap value instead of pointer
+template <typename T>
+inline void OCPSwap(T a, T b, const int& n, T w)
+{
+    for (int i = 0; i < n; i++) {
+        w[i] = a[i];
+        a[i] = b[i];
+        b[i] = w[i];
+    }
+}
+
 #endif
 
 /*----------------------------------------------------------------------------*/

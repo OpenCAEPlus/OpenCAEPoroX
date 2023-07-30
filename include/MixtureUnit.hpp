@@ -41,7 +41,7 @@ public:
         S.resize(numPhase);
         xi.resize(numPhase);
         nj.resize(numPhase);
-        xij.resize(numPhase * numCom);
+        x.resize(numPhase * numCom);
         rho.resize(numPhase);
         mu.resize(numPhase);
         // Derivatives
@@ -145,7 +145,6 @@ public:
         if (!flag) OCP_ABORT("Ni is negative!");
     }
 
-    virtual OCP_DBL GetErrorPEC()           = 0;
     virtual void    OutMixtureIters() const = 0;
 
 public:
@@ -158,7 +157,7 @@ public:
     virtual const OCP_DBL&  GetNj(const USI& j) const { return nj[j]; }
     virtual const OCP_DBL&  GetXij(const USI& j, const USI& i) const
     {
-        return xij[j * numCom + i];
+        return x[j * numCom + i];
     }
     virtual const OCP_DBL& GetRho(const USI& j) const { return rho[j]; }
     virtual const OCP_DBL& GetXi(const USI& j) const { return xi[j]; }
@@ -216,7 +215,7 @@ protected:
     vector<OCP_DBL>  S;          ///< saturation of phase: numPhase
     vector<OCP_DBL>  vj;         ///< volume of phase: numPhase;
     vector<OCP_DBL>  nj;         ///< mole number of phase j
-    vector<OCP_DBL>  xij;        ///< Nij / nj: numPhase*numCom
+    vector<OCP_DBL>  x;        ///< Nij / nj: numPhase*numCom
     vector<OCP_DBL>  rho;        ///< mass density of phase: numPhase
     vector<OCP_DBL>  xi;         ///< molar density of phase: numPhase
     vector<OCP_DBL>  mu;         ///< viscosity of phase: numPhase

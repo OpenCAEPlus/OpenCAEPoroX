@@ -84,7 +84,7 @@ void EoS_PR::CalAiBi(const OCP_DBL& P, const OCP_DBL& T)
 }
 
 
-void EoS_PR::CalAjBj(const vector<OCP_DBL>& x)
+void EoS_PR::CalAjBj(const OCP_DBL* x)
 {
     Aj = 0;
     Bj = 0;
@@ -99,7 +99,7 @@ void EoS_PR::CalAjBj(const vector<OCP_DBL>& x)
 }
 
 
-void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 {
     const OCP_DBL a = (delta1 + delta2 - 1) * Bj - 1;
     const OCP_DBL b = (Aj + delta1 * delta2 * Bj * Bj - (delta1 + delta2) * Bj * (Bj + 1));
@@ -124,7 +124,7 @@ void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
 }
 
 
-void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 {
     CalAiBi(P, T);
     CalAjBj(x);
@@ -132,7 +132,7 @@ void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 {
     Bx = Bi;
     for (USI i = 0; i < nc; i++) {
@@ -150,7 +150,7 @@ void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt)
+void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt)
 {
     for (USI i = 0; i < nc; i++) {
         OCP_DBL tmp = 0;
@@ -168,7 +168,7 @@ void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 {
     Ap = Aj / P;
     Bp = Bj / P;
@@ -180,8 +180,7 @@ void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-    vector<OCP_DBL>& fug)
+void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* fug)
 {
     CalAjBjZj(P, T, x);
 
@@ -197,8 +196,8 @@ void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x
 }
 
 
-void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, 
-                       vector<OCP_DBL>& fug, vector<OCP_DBL>& phi)
+void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, 
+                       OCP_DBL* fug, OCP_DBL* phi)
 {
     CalAjBjZj(P, T, x);
 
@@ -215,7 +214,7 @@ void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& lnfugx)
+void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugx)
 {
 
     CalAjBjZj(P, T, x);
@@ -245,14 +244,14 @@ void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
     }
 
 #ifdef OCP_NANCHECK
-	if (!CheckNan(lnfugx.size(), &lnfugx[0])) {
-		OCP_ABORT("INF or NAN in fugX !");
-	}
+    if (!CheckNan(nc * nc, &lnfugx[0])) {
+        OCP_ABORT("INF or NAN in fugX !");
+    }
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, const OCP_DBL& nt, vector<OCP_DBL>& lnfugn)
+void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn)
 {
 
     CalAjBjZj(P, T, x);
@@ -294,14 +293,14 @@ void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 	}
 
 #ifdef OCP_NANCHECK
-    if (!CheckNan(lnfugn.size(), &lnfugn[0])) {
+    if (!CheckNan(nc * nc, &lnfugn[0])) {
         OCP_ABORT("INF or NAN in lnfugN !");
     }
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, vector<OCP_DBL>& lnfugP)
+void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugP)
 {
 
     CalAjBjZj(P, T, x);
@@ -334,15 +333,15 @@ void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 	}
 
 #ifdef OCP_NANCHECK
-    if (!CheckNan(lnfugP.size(), &lnfugP[0])) {
+    if (!CheckNan(nc, &lnfugP[0])) {
     	OCP_ABORT("INF or NAN in lnfugP !");
     }
 #endif // NANCHECK
 }
 
 
-void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x,
-    const OCP_DBL& nt, vector<OCP_DBL>& lnphin)
+void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x,
+    const OCP_DBL& nt, OCP_DBL* lnphin)
 {
     OCP_DBL C, E, G;
     OCP_DBL Cnk, Dnk, Enk, Gnk;
@@ -383,7 +382,7 @@ void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>
 }
 
 
-OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x)
+OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 {
     CalAjBjZj(P, T, x);
     OCP_DBL v = Zj * GAS_CONSTANT * T / P;
@@ -394,7 +393,7 @@ OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>&
 }
 
 
-OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const vector<OCP_DBL>& x, OCP_DBL& vmP, vector<OCP_DBL>& vmx)
+OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx)
 {
     CalAjBjZj(P, T, x);
     CalAxBxZx(P, T, x);

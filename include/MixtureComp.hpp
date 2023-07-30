@@ -22,114 +22,17 @@
 #include "UtilMath.hpp"
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
+#include "OCPPhaseEquilibrium.hpp"
 
 using namespace std;
-
-/// Params for SSM in Phase Stability Analysis
-class SSMparamSTA
-{
-public:
-    USI      maxIt;      ///< Max Iteration
-    OCP_DBL  tol;        ///< Tolerance
-    OCP_DBL  Ktol{1E-4}; ///< tolerace^2 for K
-    OCP_DBL  dYtol{1E-6};
-    OCP_DBL  eYt{1E-8}; ///< if Yt > 1 + eYt, then single phase is unstable
-    OCP_DBL  tol2;      ///< tol*tol
-    OCP_DBL  realTol;   ///< Real tol
-    OCP_BOOL conflag;   ///< convergence flag, if converges, conflag = OCP_TRUE
-                        // test
-    USI     curIt;      ///< current Iterations
-    OCP_DBL curSk;
-};
-
-/// Params for NR in Phase Stability Analysis
-class NRparamSTA
-{
-public:
-    USI      maxIt;   ///< Max Iteration
-    OCP_DBL  tol;     ///< Tolerance
-    OCP_DBL  tol2;    ///< tol*tol
-    OCP_DBL  realTol; ///< Real tol
-    OCP_BOOL conflag; ///< convergence flag, if converges, conflag = OCP_TRUE
-    // test
-    USI curIt; ///< current Iters
-};
-
-/// Params for SSM in Phase Split
-class SSMparamSP
-{
-public:
-    USI      maxIt;   ///< Max Iteration
-    OCP_DBL  tol;     ///< Tolerance
-    OCP_DBL  tol2;    ///< tol*tol
-    OCP_DBL  realTol; ///< Real tol
-    OCP_BOOL conflag; ///< convergence flag, if converges, conflag = OCP_TRUE
-    // test
-    USI curIt; ///< current Iters
-};
-
-/// Params for NR in Phase Split
-class NRparamSP
-{
-public:
-    USI      maxIt;   ///< Max Iteration
-    OCP_DBL  tol;     ///< Tolerance
-    OCP_DBL  tol2;    ///< tol*tol
-    OCP_DBL  realTol; ///< Real tol
-    OCP_BOOL conflag; ///< convergence flag, if converges, conflag = OCP_TRUE
-    // test
-    USI curIt; ///< current Iters
-};
-
-/// Param for Solving Rachford-Rice Equations
-class RRparam
-{
-public:
-    USI     maxIt; ///< Max Iteration
-    OCP_DBL tol;   ///< Tolerance
-    OCP_DBL tol2;  ///< tol*tol
-    // test
-    USI curIt; ///< current Iters
-};
-
-class EoScontrol
-{
-    friend class MixtureComp;
-
-private:
-    SSMparamSTA SSMsta;
-    NRparamSTA  NRsta;
-    SSMparamSP  SSMsp;
-    NRparamSP   NRsp;
-    RRparam     RR;
-};
 
 
 class MixtureComp : public MixtureUnit
 {
 
 public:
-    OCP_DBL GetErrorPEC() override { return ePEC; }
     void    OutMixtureIters() const override;
 
-private:
-    // total iters
-    OCP_ULL itersSSMSTA{0};
-    OCP_ULL itersNRSTA{0};
-    OCP_ULL itersSSMSP{0};
-    OCP_ULL itersNRSP{0};
-    OCP_ULL itersRR{0};
-    // total counts, one count may contain many iters
-    OCP_ULL countsSSMSTA{0};
-    OCP_ULL countsNRSTA{0};
-    OCP_ULL countsSSMSP{0};
-    OCP_ULL countsNRSP{0};
-
-    OCP_ULL countsFailed{0};
-    // phase equilibrium calculation error
-    // if NP = 1, it's from phase stable analysis, if skiped, it's 0
-    // if NP > 1, it's from phase spliting calculation
-    OCP_DBL ePEC;
 
 public:
     MixtureComp() = default;
@@ -194,8 +97,6 @@ public:
                     const OCP_DBL* xijin,
                     const OCP_USI& bId) override;
 
-    void CalFlash();
-
     void FlashFIM(const OCP_DBL& Pin,
                   const OCP_DBL& Tin,
                   const OCP_DBL* Niin,
@@ -238,24 +139,38 @@ public:
     {
         OCP_ABORT("Can not be used in Compositional Model!");
     }
-
+   
 
 protected:
-    // Basic Components Informations
-    /// num of hydrocarbon components
-    USI             NC;   
-    /// name of hydrocarbon components
-    vector<string>  Cname;  
+    /// maximum number of hydrocarbon phase
+    USI             NPmax;
+    /// number of hydrocarbon components
+    USI             NC;
+    /// number of existing hydrocarbon phase
+    USI             NP;
+    /// molar fraction for hydrocarbon components
+    vector<OCP_DBL> zi;
+    OCP_DBL         Nh;
+    USI             lNP;
+    vector<OCP_DBL> MW;
+    vector<OCP_DBL> vm;
+    vector<OCP_DBL> vmP;
+    vector<vector<OCP_DBL>> vmx;
+    // for linearsolve with lapack
+/// used in dgesv_ in lapack
+    vector<OCP_INT>         pivot;
+    vector<USI>  epIndex;
+    vector<USI>  epIndexH;
+    /// molecular Weight of hydrocarbon components
+    vector<OCP_DBL> MWC;
     /// critical temperature of hydrocarbon components
-    vector<OCP_DBL> Tc; 
+    vector<OCP_DBL> Tc;
     /// critical pressure of hydrocarbon components
     vector<OCP_DBL> Pc;
     /// critical volume of hydrocarbon components
-    vector<OCP_DBL> Vc; 
-    /// molecular Weight of hydrocarbon components
-    vector<OCP_DBL> MWC; 
-    /// acentric factor of hydrocarbon components
-    vector<OCP_DBL> Acf;
+    vector<OCP_DBL> Vc;
+    /// phase labels, used to identify phase
+    vector<USI> phaseLabel;
 
 protected:
     // water property
@@ -265,167 +180,57 @@ protected:
     OCP_DBL         std_RhoW;
 
 protected:
+    /// Phase equilibrium calculations
+    OCPPhaseEquilibrium PE;
     // EoS Calculations
-    EoSCalculation  eos;
-
-protected:
-    // Flash method Control
-    /// allowable maximum num of hydrocarbon phases
-    USI             NPmax;
-    /// method params for solving phase equilibrium
-    EoScontrol      EoSctrl;
+    EoSCalculation      eos;
 
 protected:
     // viscosity calculations
     ViscosityCalculation visCal;
 
-protected:
-    // Initial properties for flash   
-    /// current Pressure
-    OCP_DBL         P;
-    /// current Temperature
-    OCP_DBL         T;
-    /// mole fraction of hydrocarbon components
-    vector<OCP_DBL> zi;
 
 protected:
-    // The following variables are all for hydrocarbon phases and components
-    /// last num of phase in last NR Step from external iterations
-    USI                      lNP; 
-    /// current num of phase
-    USI                      NP;    
-    /// total moles of components
-    OCP_DBL                  Nh;  
-    /// volume of phase
-    vector<OCP_DBL>          vC; 
-    /// molar fraction of phase
-    vector<OCP_DBL>          nu; 
-    /// molar fraction of i-th component in jth phase
-    vector<vector<OCP_DBL>>  x;
-    /// fugacity coefficient of i-th component in j-th phase
-    vector<vector<OCP_DBL>>  phi; 
-    /// fugacity of i-th component in j-th phase
-    vector<vector<OCP_DBL>>  fug;
-    /// moles of i-th component in jth phase
-    vector<vector<OCP_DBL>>  n;
-    /// last n in NR iterations in phase spliting calculations
-    vector<vector<OCP_DBL>>  ln;  
-    /// Gibbs energy, before flash (not true value)
-    OCP_DBL                  GibbsEnergyB; 
-    /// Gibbs energy, after flash (not true value)
-    OCP_DBL                  GibbsEnergyE; 
-    /// molar density of phase
-    vector<OCP_DBL>          xiC;
-    /// mass density of phase
-    vector<OCP_DBL>          rhoC;  
-    /// molecular weight of phase
-    vector<OCP_DBL>          MW;
-    /// label of phase
-    vector<USI>              phaseLabel;
-    /// molar volume of phase
-    vector<OCP_DBL>          vmj;
-    /// d vm / dP
-    vector<OCP_DBL>          vmP;
-    /// d vm / dx
-    vector<vector<OCP_DBL>>  vmx;
-
-protected:
-    // Phase Function
-    /// Allocate memoery for phase variables
-    void AllocatePhase();
-    /// Calculate molecular weight of phase
-    void CalMW();
-    void CalVfXiRho();
+    /// Calculate molecular weight of phase   
     void CalSaturation();
-    USI  FindMWmax();
-    /// x[j][i] -> n[j][i]
-    void x2n();
-
-
-public:
-    // Method Function
-    // Allocate memoery for Method variables
-    void     AllocateMethod();
-    void     PhaseEquilibrium();
-    void     CalKwilson();
-    OCP_BOOL PhaseStable();
-    OCP_BOOL StableSSM(const USI& Id);   ///< strict SSM
-    OCP_BOOL StableSSM01(const USI& Id); ///< relaxed SSM
-    OCP_BOOL StableNR(const USI& Id);
-    void     AssembleJmatSTA();
-    OCP_BOOL CheckSplit();
-    void     PhaseSplit();
-    void     SplitSSM(const OCP_BOOL& flag);
-    void     SplitSSM2(const OCP_BOOL& flag);
-    void     SplitSSM3(const OCP_BOOL& flag);
-    void     RachfordRice2();  ///< Used when NP = 2
-    void     RachfordRice2P(); ///< Used when NP = 2, improved Rachford-Rice2
-    void     RachfordRice3();  ///< Used when NP > 2
-    void     UpdateXRR();      ///< Update X according to RR
-    void     SplitBFGS();      ///< Use BFGS to calculate phase splitting
-    void     SplitNR();        ///< Use NR to calculate phase splitting
-    void     CalResSP();
-    void     AssembleJmatSP();
-    OCP_DBL  CalStepNRsp();
-
-private:
-    // Method Variables
-    USI testPId;                 ///< Index of the testing phase in stability analysis
-    vector<vector<OCP_DBL>> Kw;  ///< Equilibrium Constant of Whilson
-    vector<vector<OCP_DBL>> Ks;  ///< Approximation of Equilibrium Constant in SSM
-    vector<OCP_DBL>         lKs; ///< last Ks
-    vector<OCP_DBL> phiSta; ///< Fugacity coefficient used in phase stability analysis
-    vector<OCP_DBL> fugSta; ///< Fugacity used in phase stability analysis
-    // SSM in Stability Analysis
-    vector<OCP_DBL> Y;  ///< x[i] / Yt
-    OCP_DBL         Yt; ///< Sum Y
-    vector<OCP_DBL> di; ///< phi(id) * x(id), id is the index of testing phase
-    // NR in Stability Analysis
-    vector<OCP_DBL>         resSTA;
-    vector<OCP_DBL>         JmatSTA; ///< d g / d Y
-    /// d ln fij / d xkj, in each subvector, ordered by k.
-    vector<vector<OCP_DBL>> lnfugX;
-
-    // SSM in Phase Split
-    vector<OCP_DBL> resRR; ///< Error in Rachford-Rice equations.
-    // NR in Phase Split
-    vector<OCP_DBL> lresSP; ///< last resSP, used in BFGS
-    vector<OCP_DBL> resSP;  ///< d G / d nij, G is Gibbs free energy: ln fij - ln fi,np
-    vector<OCP_DBL> JmatSP; ///< Jacobian Matrix of (ln fij - ln fi,np) wrt. nij
-    /// d ln fij / d nkj, in each subvector, ordered by k.
-    vector<vector<OCP_DBL>> lnfugN;
-    // for linearsolve with lapack
-    vector<OCP_INT> pivot;     ///< used in dgesv_ in lapack
-    vector<OCP_DBL> JmatWork;  ///< work space for Jmat in STA and SP
-    OCP_INT         lJmatWork; ///< length of JmatWork
-    char            uplo{'U'};
 
 protected:
-    
+
+    /// Copy phase properties from PhaseEquilibrium
+    void CopyPhaseFromPE();
+    /// Calculate Molecular Weight
+    void CalMW();
+    /// Calculate moalr volume and volume of phase
+    void CalVmVj();
+    /// Calculate phase property
     void CalProperty();
-    void CalXi();
-    void CalRho();
-    void CalMu();
-    void CalPropertyDer();   
-    void CalXiDer();
-    void CalRhoDer();
-    void CalMuDer();
+    /// Calculate phases' molar density, mass density and viscosity
+    void CalXiRhoMu();
+    /// Calculate phase property and derivatives
+    void CalPropertyDer();
+    /// Calculate phases' molar density, mass density and viscosity and derivatives
+    void CalXiRhoMuDer();
+
+
+protected:
+    /// Identify Phase
+    void IdentifyPhase();
+    /// ReOrder Phase
+    void ReOrderPhase();
+    /// ReOrder Phase and ders
+    void ReOrderPhaseDer();
+
+protected:
+    /// work space for reorder
+    vector<OCP_DBL> rowork;
+
 
 protected:
     // After Phase Equilibrium Calculation finishs, properties and some auxiliary
     // variables will be calculated.
     void AllocateOthers();
-    void IdentifyPhase();
-    /// Copy the basic properties from MixtureComp to Mixture
-    void CopyPhase();
-    void CalViscosity();
-    void CalViscoLBC();
-    void CalViscoHZYT();
-
-    void CalXiPNX_partial();
-    void CalRhoPX_partial();
-    void CalMuPX_partial();
-    void CalMuPXLBC_partial();
+    
+    
 
     // For Phase num : any
     void CalVfiVfp_full01();
@@ -441,6 +246,7 @@ protected:
 
 private:
     vector<vector<OCP_DBL>> lnfugP; ///< d ln fij / d P
+    vector<vector<OCP_DBL>> lnfugN; ///< d ln fij / d nkj
 
     vector<OCP_DBL> JmatTmp; ///< Temp Mat for transpose of a matrix
     vector<OCP_DBL> JmatDer; ///< Used to store Jacobian Mat for calculating derivates
@@ -458,9 +264,10 @@ private:
 public:
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override;
 
-    /////////////////////////////////////////////////////////////////////
-    // Accelerate PVT
-    /////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////
+    // Skip Phase-Stability Analysis
+    ///////////////////////////////////////////////
 
 protected:
     /// Allocate memory for variables used in skipping stability analysis
@@ -480,18 +287,23 @@ protected:
     }
 
 protected:
-    SkipStaAnaly* skipSta; ///< Skip analysis Term pointing to OptionalFeature
-
-    USI ftype{0}; ///< Decide the start point of flash
-    /// If ture, then skipping could be try,
-    //  if ftype = 0 also, then new range should be calculated
+    /// Skip analysis Term pointing to OptionalFeature
+    SkipStaAnaly* skipSta;
+    /// Decide the start point of flash
+    USI ftype{ 0 };
+    ///  if try to skip
     OCP_BOOL        flagSkip;
-    vector<OCP_DBL> phiN;       ///< d ln phi[i][j] / d n[k][j]
-    vector<OCP_SIN> skipMatSTA; ///< matrix for skipping Stability Analysis
+    /// d ln phi[i][j] / d n[k][j]
+    vector<OCP_DBL> lnphiN;
+    /// matrix for skipping Stability Analysis,    
+    vector<OCP_SIN> skipMatSTA;
     /// eigen values of matrix for skipping Skip Stability Analysis.
-    //  Only the minimum eigen value will be used
+    /// Only the minimum eigen value will be used
     vector<OCP_SIN> eigenSkip;
-    vector<OCP_SIN> eigenWork; ///< work space for computing eigenvalues with ssyevd_
+    /// work space for computing eigenvalues with ssyevd_
+    vector<OCP_SIN> eigenWork;
+
+
 
     /////////////////////////////////////////////////////////////////////
     // Miscible

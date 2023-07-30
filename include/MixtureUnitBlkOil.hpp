@@ -48,12 +48,6 @@ public:
     {
         OCP_ABORT("Can not be used in Black Oil Model!");
     }
-
-    OCP_DBL GetErrorPEC() override
-    {
-        OCP_ABORT("Should not be used in Black Oil mode!");
-        return 0;
-    }
     void OutMixtureIters() const override{};
 
 };

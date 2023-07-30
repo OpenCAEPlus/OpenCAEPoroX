@@ -32,7 +32,7 @@ public:
         S.resize(numPhase);
         vj.resize(numPhase);
         nj.resize(numPhase);
-        xij.resize(numPhase * numCom);
+        x.resize(numPhase * numCom);
         rho.resize(numPhase);
         xi.resize(numPhase);
         mu.resize(numPhase);
@@ -53,12 +53,6 @@ public:
         Hx.resize(numPhase * numCom);
     }
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
-    // usless in Thermal model
-    OCP_DBL GetErrorPEC() override
-    {
-        OCP_ABORT("Should not be used in Thermal mode!");
-        return 0;
-    }
     void OutMixtureIters() const override{};
 };
 
