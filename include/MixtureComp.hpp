@@ -46,6 +46,8 @@ public:
                 std_RhoW = RHOW_STD * rs_param.gravity.data[1];
             if (rs_param.density.activity) std_RhoW = RHOW_STD;
             PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);
+            wIdP = numPhase - 1;
+            wIdC = numCom - 1;
         }
 
         // Input Miscible Params
@@ -58,14 +60,20 @@ public:
     {
         P = Pin;
         T = Tin;
-        Dcopy(NC, &zi[0], Ziin);
+        copy(Ziin, Ziin + NC, zi.begin());
+        Nh = 1;
     }
     void InitPTN(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
     {
         P = Pin;
         T = Tin;
-        Dcopy(numCom, &Ni[0], Niin);
-        Nh = Dnorm1(NC, &Ni[0]);
+        Nh = 0;
+        for (USI i = 0; i < NC; i++) {
+            Ni[i] = Niin[i];
+            Nh    += Ni[i];
+        }
+        Ni[wIdC] = Niin[wIdC];
+        Nt       = Nh + Ni[wIdC];
         for (USI i = 0; i < NC; i++) zi[i] = Ni[i] / Nh;
     }
 
@@ -157,7 +165,7 @@ protected:
     vector<OCP_DBL> vmP;
     vector<vector<OCP_DBL>> vmx;
     // for linearsolve with lapack
-/// used in dgesv_ in lapack
+    /// used in dgesv_ in lapack
     vector<OCP_INT>         pivot;
     vector<USI>  epIndex;
     vector<USI>  epIndexH;
@@ -173,11 +181,18 @@ protected:
     vector<USI> phaseLabel;
 
 protected:
+    void CalPropertyW(const OCP_DBL& vw);
+
+protected:
     // water property
     /// PVTW
     OCP_PVTW        PVTW;
     /// mass density of water phase in standard condition.
     OCP_DBL         std_RhoW;
+    /// index of water phase
+    USI             wIdP;
+    /// index of water component
+    USI             wIdC;
 
 protected:
     /// Phase equilibrium calculations
@@ -192,7 +207,7 @@ protected:
 
 protected:
     /// Calculate molecular weight of phase   
-    void CalSaturation();
+    void CalVfS();
 
 protected:
 
@@ -203,11 +218,11 @@ protected:
     /// Calculate moalr volume and volume of phase
     void CalVmVj();
     /// Calculate phase property
-    void CalProperty();
+    void CalPropertyH();
     /// Calculate phases' molar density, mass density and viscosity
     void CalXiRhoMu();
     /// Calculate phase property and derivatives
-    void CalPropertyDer();
+    void CalPropertyHDer();
     /// Calculate phases' molar density, mass density and viscosity and derivatives
     void CalXiRhoMuDer();
 

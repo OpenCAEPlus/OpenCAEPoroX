@@ -76,8 +76,8 @@ protected:
 
     vector<MixtureUnit*> flashCal; ///< from bulks's flashCal
 
-    OCP_DBL numPhase; ///< num of phases
-    OCP_DBL numCom;   ///< num of components
+    USI numPhase; ///< num of phases
+    USI numCom;   ///< num of components
 
     OCP_DBL Psurf{PRESSURE_STD};    ///< Well surface Pressure, psia
     OCP_DBL Tsurf{TEMPERATURE_STD}; ///< Well surface Temperature, F

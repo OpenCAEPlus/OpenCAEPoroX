@@ -69,26 +69,11 @@ void MixtureComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* N
 
     InitPTN(Pin, Tin + CONV5, Niin);
     PE.PhaseEquilibrium(P, T, &zi[0], 0, 0, 0);
-    CalProperty();
+    CalPropertyH();
+    CalPropertyW(-1.0);
 
-    // Water Properties
-    const USI Wpid            = numPhase - 1;
-    const USI Wcid            = numCom - 1;
-    phaseExist[Wpid]          = OCP_TRUE;
-    x[Wpid * numCom + Wcid]   = 1.0;
-    Nt                        = Nh + Ni[Wcid];
-
-    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
-    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
-    vf = 0;
-    for (USI j = 0; j < NP; j++) {
-        if (phaseExist[j]) {
-            vf += vj[j];
-        }
-    }
-
-    // Calculate Sj
-    CalSaturation();
+    // Calculate Vf and Sj
+    CalVfS();
 }
 
 
@@ -104,50 +89,32 @@ void MixtureComp::InitFlashIMPEC(const OCP_DBL& Pin,
     SetBulkId(bId);
     ftype = 0;
     lNP   = 0;
+    const OCP_DBL Sw = Sjin[numPhase - 1];
 
     InitPTZ(Pin, Tin + CONV5, Ziin);
     PE.PhaseEquilibrium(P, T, &zi[0], 0, 0, 0);
-    Nh = 1;
-    CalProperty();
-
-    CalSurfaceTension();
-
-    // Calulate Nt, water is exclued
-    const OCP_DBL Sw = Sjin[numPhase - 1];
-    Nh               = Vpore * (1 - Sw) / (vj[0] + vj[1]);
-    vj[0]            *= Nh;
-    vj[1]            *= Nh;
-    // CalVfiVfp_full01();
-    CalVfiVfp_full02();
-    // Calculate Ni
+    CalPropertyH();
+    CalPropertyW(Vpore * Sw);
+    
+    // Correct Nh
+    Nh    = Vpore * (1 - Sw) / (vj[0] + vj[1]);
+    nj[0] *= Nh;
+    nj[1] *= Nh;
+    vj[0] *= Nh;
+    vj[1] *= Nh;
     for (USI i = 0; i < NC; i++) {
         Ni[i] = zi[i] * Nh;
     }
+    Nt = Nh + Ni[wIdC];
 
-    // Water Properties
-    USI Wpid                  = numPhase - 1;
-    USI Wcid                  = numCom - 1;
-    phaseExist[Wpid]          = OCP_TRUE;
-    x[Wpid * numCom + Wcid] = 1.0;
-    nj[Wpid] = Ni[Wcid];
+    // CalVfiVfp_full01();
+    CalVfiVfp_full02();
+    // Calculate Vf and Sj
+    CalVfS();
 
-    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
 
-    Ni[Wcid]    = Vpore * Sw * xi[Wpid];
-    Nt          = Nh + Ni[Wcid];
-    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
-    vf = 0;
-    for (USI j = 0; j < numPhase; j++) {
-        if (phaseExist[j]) {
-            vf += vj[j];
-        }
-    }
-    vfi[Wcid]   = 1 / xi[Wpid];
-    vfP         += -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
 
-    // Calculate Sj
-    CalSaturation();
-
+    CalSurfaceTension();
     CalSkipForNextStep();
 }
 
@@ -165,53 +132,34 @@ void MixtureComp::InitFlashFIM(const OCP_DBL& Pin,
     lNP   = 0;
 
     InitPTZ(Pin, Tin + CONV5, Ziin);
-    PE.PhaseEquilibrium(P, T, &zi[0], 0, 0, 0);
-    Nh = 1;
-    CalPropertyDer();
-    CalSurfaceTension();
-
-
-    // Calulate Nt, water is exclued
     const OCP_DBL Sw = Sjin[numPhase - 1];
+
+    PE.PhaseEquilibrium(P, T, &zi[0], 0, 0, 0);
+    CalPropertyHDer();
+    CalPropertyW(Vpore * Sw);   
+
+    // Correct Nh 
     Nh    = Vpore * (1 - Sw) / (vj[0] + vj[1]);
     nj[0] *= Nh;
     nj[1] *= Nh;
     vj[0] *= Nh;
     vj[1] *= Nh;
-    // CalVfiVfp_full01();
-    CalVfiVfp_full02();
-    // Calculate Ni
     for (USI i = 0; i < NC; i++) {
         Ni[i] = zi[i] * Nh;
     }
+    Nt = Nh + Ni[wIdC];
 
-    // Water Properties
-    USI Wpid                  = numPhase - 1;
-    USI Wcid                  = numCom - 1;
-    phaseExist[Wpid]          = OCP_TRUE;
-    x[Wpid * numCom + Wcid] = 1.0;
+    // CalVfiVfp_full01();
+    CalVfiVfp_full02();   
 
-    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
-
-    Ni[Wcid]          = Vpore * Sw * xi[Wpid];
-    nj[Wpid]          = Ni[Wcid];
-    Nt                = Nh + Ni[Wcid];
-    vj[Wpid]          = Ni[Wcid] / xi[Wpid];
-    vfi[Wcid]         = 1 / xi[Wpid];
-    const OCP_DBL vwp = -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
-    vf = 0;
-    for (USI j = 0; j < numPhase; j++) {
-        if (phaseExist[j]) {
-            vf += vj[j];
-        }
-    }
-    vfP += vwp;
-    vji[numPhase - 1][numCom - 1] = vfi[Wcid];
-    vjp[numPhase - 1]             = vwp;
-
-    CalSaturation();
+    // Calculate Vf and Sj
+    CalVfS();
 
     CaldXsdXp02();
+
+
+
+    CalSurfaceTension();
     CalSkipForNextStep();
 }
 
@@ -235,36 +183,20 @@ void MixtureComp::FlashIMPEC(const OCP_DBL& Pin,
     InitPTN(Pin, Tin + CONV5, Niin);
     CalFtypeIMPEC();
     PE.PhaseEquilibrium(P, T, &zi[0], ftype, lNP, &lKs[0]);
-    CalProperty();
+    CalPropertyH();
+    CalPropertyW(-1.0);
     
     // Calculate derivates for hydrocarbon phase and components
     // d vf / d Ni, d vf / d P
     // CalVfiVfp_full01();
     CalVfiVfp_full02();
 
-    // Water Properties
-    const USI Wpid            = numPhase - 1;
-    const USI Wcid            = numCom - 1;
-    phaseExist[Wpid]          = OCP_TRUE;
-    x[Wpid * numCom + Wcid] = 1.0;
-    nj[Wpid] = Ni[Wcid];
-    Nt                        = Nh + Ni[Wcid];
+    // Calculate Vf and Sj
+    CalVfS();
 
-    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
 
-    vj[Wpid]    = Ni[Wcid] / xi[Wpid];
-    vf = 0;
-    for (USI j = 0; j < numPhase; j++) {
-        if (phaseExist[j]) {
-            vf += vj[j];
-        }
-    }
-    vfi[Wcid]   = 1 / xi[Wpid];
-    vfP        += -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
 
-    // Calculate Sj
-    CalSaturation();
-
+    CalSurfaceTension();
     CalSkipForNextStep();
 }
 
@@ -291,39 +223,21 @@ void MixtureComp::FlashFIM(const OCP_DBL& Pin,
     InitPTN(Pin, Tin + CONV5, Niin);
     CalFtypeFIM(Sjin);
     PE.PhaseEquilibrium(P, T, &zi[0], ftype, lNP, &lKs[0]);
-    CalPropertyDer();
+    CalPropertyHDer();
+    CalPropertyW(-1.0);
 
     // Calculate derivates for hydrocarbon phase and components
     // d vf / d Ni, d vf / d P 
     CalVfiVfp_full02();
 
-    // Water Properties
-    USI Wpid                  = numPhase - 1;
-    USI Wcid                  = numCom - 1;
-    phaseExist[Wpid]          = OCP_TRUE;
-    x[Wpid * numCom + Wcid] = 1.0;
-    nj[Wpid]                  = Ni[Wcid];
-    Nt                        = Nh + Ni[Wcid];
-
-    PVTW.CalRhoXiMuDer(P, rho[Wpid], xi[Wpid], mu[Wpid], rhoP[Wpid], xiP[Wpid], muP[Wpid]);
-    vj[Wpid]          = Ni[Wcid] / xi[Wpid];
-    vfi[Wcid]         = 1 / xi[Wpid];
-    const OCP_DBL vwp = -Ni[Wcid] * xiP[Wpid] / (xi[Wpid] * xi[Wpid]);
-
-    vf = 0;
-    for (USI j = 0; j < numPhase; j++) {
-        if (phaseExist[j]) {
-            vf += vj[j];
-        }
-    }
-    vfP              += vwp;
-    vji[numPhase - 1][numCom - 1] = vfi[Wcid];
-    vjp[numPhase - 1]             = vwp;
-
-    CalSaturation();
+    // Calculate Vf and Sj
+    CalVfS();
 
     CaldXsdXp02();
 
+
+
+    CalSurfaceTension();
     CalSkipForNextStep();
 }
 
@@ -464,8 +378,32 @@ void MixtureComp::CalProdRate(const OCP_DBL&   Pin,
 }
 
 
-void MixtureComp::CalSaturation()
+void MixtureComp::CalPropertyW(const OCP_DBL& vw)
 {
+    // if vw >= 0(water volume is given), then correct Nw
+    phaseExist[wIdP]        = OCP_TRUE;
+    x[wIdP * numCom + wIdC] = 1.0;
+   
+    PVTW.CalRhoXiMuDer(P, rho[wIdP], xi[wIdP], mu[wIdP], rhoP[wIdP], xiP[wIdP], muP[wIdP]);
+    if (vw >= 0) {
+        Ni[wIdC] = vw * xi[wIdP];
+    }
+    nj[wIdP]        = Ni[wIdC];
+    vj[wIdP]        = nj[wIdP] / xi[wIdP];
+    vji[wIdP][wIdC] = 1 / xi[wIdP];
+    vjp[wIdP]       = -nj[wIdP] * xiP[wIdP] / (xi[wIdP] * xi[wIdP]);
+}
+
+
+void MixtureComp::CalVfS()
+{
+    vf = 0;
+    for (USI j = 0; j < numPhase; j++) {
+        if (phaseExist[j]) {
+            vf += vj[j];
+        }
+    }
+
     for (USI j = 0; j < numPhase; j++) {
         S[j] = 0;
         if (phaseExist[j]) {
@@ -528,7 +466,7 @@ void MixtureComp::CalVmVj()
 }
 
 
-void MixtureComp::CalProperty()
+void MixtureComp::CalPropertyH()
 {
     CopyPhaseFromPE();
     CalMW();
@@ -544,12 +482,12 @@ void MixtureComp::CalXiRhoMu()
     for (USI j = 0; j < NP; j++) {
         xi[j]  = 1 / vm[j];
         rho[j] = MW[j] * xi[j];
-        mu[j]  = visCal.CalViscosity(ViscosityParams(&P, &T, &x[j + numCom], &xi[j]));
+        mu[j]  = visCal.CalViscosity(ViscosityParams(&P, &T, &x[j * numCom], &xi[j]));
     }
 }
 
 
-void MixtureComp::CalPropertyDer()
+void MixtureComp::CalPropertyHDer()
 {
     CopyPhaseFromPE();
     CalMW();
@@ -728,6 +666,10 @@ void MixtureComp::CalVfiVfp_full01()
         }
     }
 
+    // for water
+    vfP       += vjp[wIdP];
+    vfi[wIdC] = vji[wIdP][wIdC];
+
 #ifdef OCP_NANCHECK
     if (!CheckNan(vfi.size(), &vfi[0])) {
         OCP_ABORT("INF or NAN in vfi !");
@@ -799,23 +741,24 @@ void MixtureComp::AssembleRhsVfiVfp_full01()
 
 void MixtureComp::CaldXsdXp01()
 {
+    // Calculate Sj before
+
     // dS / dP
     // S = Sj, xij
     // P = P, Ni
     // water is included
     fill(dXsdXp.begin(), dXsdXp.end(), 0);
     const USI     ncol = numCom + 1;
-    const OCP_DBL vf2  = vf * vf;
 
     // dS / dP, dS / dN
     for (const auto& j : epIndex) {
 		OCP_DBL* bId = &dXsdXp[j * ncol];
 		// dS / dP
-		bId[0] = (vjp[j] * vf - vfP * vj[j]) / vf2;
+		bId[0] = (vjp[j] - vfP * S[j]) / vf;
 		bId++;
 		// dS / dN
 		for (USI m = 0; m < numCom; m++) {
-			bId[m] = (vji[j][m] * vf - vfi[m] * vj[j]) / vf2;
+			bId[m] = (vji[j][m] - vfi[m] * S[j]) / vf;
 		}
     }
 
@@ -925,6 +868,10 @@ void MixtureComp::CalVfiVfp_full02()
     else {
         OCP_ABORT("USE CalVfiVfp_full01 !");
     }
+
+    // for water
+    vfP       += vjp[wIdP];
+    vfi[wIdC] = vji[wIdP][wIdC];
 }
 
 void MixtureComp::AssembleMatVfiVfp_full02()
@@ -966,6 +913,8 @@ void MixtureComp::AssembleRhsVfiVfp_full02()
 
 void MixtureComp::CaldXsdXp02()
 {
+    // Calculate Sj before
+
     // Attention!
     // NP = 1 or NP = 2
 
@@ -975,16 +924,15 @@ void MixtureComp::CaldXsdXp02()
     // water is included
     fill(dXsdXp.begin(), dXsdXp.end(), 0);
     const USI     ncol = numCom + 1;
-    const OCP_DBL vf2  = vf * vf;
 
     for (const auto& j : epIndex) {
         OCP_DBL* bId = &dXsdXp[j * ncol];
         // dS / dP
-        bId[0] = (vjp[j] * vf - vfP * vj[j]) / vf2;
+        bId[0] = (vjp[j] - vfP * S[j]) / vf;
         bId++;
         // dS / dN
         for (USI m = 0; m < numCom; m++) {
-            bId[m] = (vji[j][m] * vf - vfi[m] * vj[j]) / vf2;
+            bId[m] = (vji[j][m] - vfi[m] * S[j]) / vf;
         }
     }
 
