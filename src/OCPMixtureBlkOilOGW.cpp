@@ -30,12 +30,12 @@ OCPMixtureBlkOilOGWMethod01::OCPMixtureBlkOilOGWMethod01(const vector<vector<OCP
 
 	vs.phaseExist[2] = OCP_TRUE;
 
-	vs.xij[1 * 3 + 0] = 0;
-	vs.xij[1 * 3 + 1] = 1;
-	vs.xij[1 * 3 + 2] = 0;
-	vs.xij[2 * 3 + 0] = 0;
-	vs.xij[2 * 3 + 1] = 0;
-	vs.xij[2 * 3 + 2] = 1;
+	vs.x[1 * 3 + 0] = 0;
+	vs.x[1 * 3 + 1] = 1;
+	vs.x[1 * 3 + 2] = 0;
+	vs.x[2 * 3 + 0] = 0;
+	vs.x[2 * 3 + 1] = 0;
+	vs.x[2 * 3 + 2] = 1;
 }
 
 
@@ -205,8 +205,8 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 		vs.phaseExist[0]  = OCP_TRUE;
 		vs.phaseExist[1]  = OCP_FALSE;
 		vs.phaseExist[2]  = OCP_TRUE;
-		vs.xij[0 * 3 + 0] = vs.Ni[0] / (vs.Ni[0] + vs.Ni[1]);
-		vs.xij[0 * 3 + 1] = 1 - vs.xij[0 * 3 + 0];
+		vs.x[0 * 3 + 0] = vs.Ni[0] / (vs.Ni[0] + vs.Ni[1]);
+		vs.x[0 * 3 + 1] = 1 - vs.x[0 * 3 + 0];
 
 		// oil property
 		const OCP_DBL rs = vs.Ni[1] / vs.Ni[0];
@@ -276,8 +276,8 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 		// water property
 		PVTW.CalRhoXiMuDer(vs.P, vs.rho[2], vs.xi[2], vs.mu[2], vs.rhoP[2], vs.xiP[2], vs.muP[2]);
 	
-		vs.xij[0 * 3 + 0] = 1 / (1 + rs);
-		vs.xij[0 * 3 + 1] = 1 - vs.xij[0 * 3 + 0];
+		vs.x[0 * 3 + 0] = 1 / (1 + rs);
+		vs.x[0 * 3 + 1] = 1 - vs.x[0 * 3 + 0];
 
 		// total
 		vs.vj[0]  = vs.Ni[0] * (1 + rs) / vs.xi[0];

@@ -61,10 +61,10 @@ OCPMixtureUnitThermalOWMethod01::OCPMixtureUnitThermalOWMethod01(const Component
     vs.phaseExist[0] = true;
     vs.phaseExist[1] = true;
 
-    vs.xij[0 * 2 + 0] = 1;
-    vs.xij[0 * 2 + 1] = 0;
-    vs.xij[1 * 2 + 0] = 0;
-    vs.xij[1 * 2 + 1] = 1;
+    vs.x[0 * 2 + 0] = 1;
+    vs.x[0 * 2 + 1] = 0;
+    vs.x[1 * 2 + 0] = 0;
+    vs.x[1 * 2 + 1] = 1;
 
     // d mu / dP
     fill(vs.rhox.begin(), vs.rhox.end(), 0.0);
@@ -133,8 +133,8 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.Nt = vs.Ni[0] + vs.Ni[1];
 
     // phase viscosity
-    vs.mu[0] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.xij[0 * 2]), vs.muP[0], vs.muT[0], &vs.mux[0 * 2]);
-    vs.mu[1] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.xij[1 * 2]), vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
+    vs.mu[0] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.x[0 * 2]), vs.muP[0], vs.muT[0], &vs.mux[0 * 2]);
+    vs.mu[1] = vC.CalViscosity(ViscosityParams(&vs.P, &vs.T, &vs.x[1 * 2]), vs.muP[1], vs.muT[1], &vs.mux[1 * 2]);
 
     // phase molar density
     vs.xi[0] = xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(vs.T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
@@ -185,8 +185,8 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     vs.dXsdXp[6] = -vs.dXsdXp[2]; // dSw / dNw
     vs.dXsdXp[7] = -vs.dXsdXp[3]; // dSw / dT
 
-    vs.H[0] = eC.CalEnthalpy(vs.T, &vs.xij[0 * 2], vs.HT[0], &vs.Hx[0 * 2]);
-    vs.H[1] = eC.CalEnthalpy(vs.T, &vs.xij[1 * 2], vs.HT[1], &vs.Hx[1 * 2]);
+    vs.H[0] = eC.CalEnthalpy(vs.T, &vs.x[0 * 2], vs.HT[0], &vs.Hx[0 * 2]);
+    vs.H[1] = eC.CalEnthalpy(vs.T, &vs.x[1 * 2], vs.HT[1], &vs.Hx[1 * 2]);
 
     // Internal energy per unit volume of fluid
 

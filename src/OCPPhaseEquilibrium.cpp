@@ -960,7 +960,7 @@ OCP_BOOL OCPPhaseEquilibrium::CheckSplit()
             eX += (x[0][i] - x[1][i]) * (x[0][i] - x[1][i]);
         }
 
-        if (OCP_TRUE) {
+        if (OCP_TRUE && OCP_FALSE) {
             // Calculate Gibbs Energy
 
             eos->CalFug(P, T, &zi[0], &fugSta[0]);
@@ -979,8 +979,7 @@ OCP_BOOL OCPPhaseEquilibrium::CheckSplit()
                 cout << GibbsEnergyE << "   ";
                 cout << nuMax << "   ";
                 cout << eX << "   ";
-                cout << flashCtrl.NRsp.conflag << "   ";
-                cout << bulkId << endl;
+                cout << flashCtrl.NRsp.conflag << endl;
             }
         }
 

@@ -135,7 +135,7 @@ public:
     const OCP_DBL& GetNj(const USI& j) const override { return OWTM.GetVarSet().nj[j]; }
     const OCP_DBL& GetXij(const USI& j, const USI& i) const override
     {
-        return OWTM.GetVarSet().xij[j * numCom + i];
+        return OWTM.GetVarSet().x[j * numCom + i];
     }
     const OCP_DBL& GetRho(const USI& j) const override { return OWTM.GetVarSet().rho[j]; }
     const OCP_DBL& GetXi(const USI& j) const override { return OWTM.GetVarSet().xi[j]; }

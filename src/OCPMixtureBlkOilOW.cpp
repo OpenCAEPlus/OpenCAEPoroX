@@ -29,10 +29,10 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_D
     vs.phaseExist[0]  = OCP_TRUE;
     vs.phaseExist[1]  = OCP_TRUE;
 
-    vs.xij[0 * 2 + 0] = 1;
-    vs.xij[0 * 2 + 1] = 0;
-    vs.xij[1 * 2 + 0] = 0;
-    vs.xij[1 * 2 + 1] = 1;
+    vs.x[0 * 2 + 0] = 1;
+    vs.x[0 * 2 + 1] = 0;
+    vs.x[1 * 2 + 0] = 0;
+    vs.x[1 * 2 + 1] = 1;
 }
 
 

@@ -136,8 +136,6 @@ protected:
     OCP_DBL         T;
     /// mole fraction of hydrocarbon components
     vector<OCP_DBL> zi;
-    /// current bulk index
-    OCP_USI         bulkId;
 
 
 ///////////////////////////////////////////////

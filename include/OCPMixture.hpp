@@ -39,7 +39,7 @@ public:
         S.resize(np);
         nj.resize(np);
         vj.resize(np);
-        xij.resize(np * nc);
+        x.resize(np * nc);
         rho.resize(np);
         xi.resize(np);
         mu.resize(np);
@@ -90,7 +90,7 @@ public:
     /// volume of phases
     vector<OCP_DBL> vj;
     /// molar fraction of component i in phase j
-    vector<OCP_DBL>  xij;   
+    vector<OCP_DBL>  x;   
     /// mass density of phases
     vector<OCP_DBL>  rho;    
     /// molar density of phases

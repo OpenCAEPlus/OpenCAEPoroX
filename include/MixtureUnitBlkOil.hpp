@@ -201,7 +201,7 @@ public:
     const OCP_DBL& GetNj(const USI& j) const override  { return OWM.GetVarSet().nj[j]; }
     const OCP_DBL& GetXij(const USI& j, const USI& i) const override
     {
-        return OWM.GetVarSet().xij[j * numCom + i];
+        return OWM.GetVarSet().x[j * numCom + i];
     }
     const OCP_DBL& GetRho(const USI& j) const override { return OWM.GetVarSet().rho[j]; }
     const OCP_DBL& GetXi(const USI& j) const override { return OWM.GetVarSet().xi[j]; }
@@ -299,7 +299,7 @@ public:
     const OCP_DBL& GetNj(const USI& j) const override { return OGWM.GetVarSet().nj[j]; }
     const OCP_DBL& GetXij(const USI& j, const USI& i) const override
     {
-        return OGWM.GetVarSet().xij[j * numCom + i];
+        return OGWM.GetVarSet().x[j * numCom + i];
     }
     const OCP_DBL& GetRho(const USI& j) const override { return OGWM.GetVarSet().rho[j]; }
     const OCP_DBL& GetXi(const USI& j) const override { return OGWM.GetVarSet().xi[j]; }

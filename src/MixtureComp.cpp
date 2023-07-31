@@ -423,12 +423,10 @@ void MixtureComp::AllocateOthers()
         lnfugN[j].resize(NC * NC);
     }
     JmatDer.resize(NPmax * NPmax * (NC + 1) * (NC + 1));
-    JmatTmp = JmatDer;
     rhsDer.resize(NPmax * (NC + 1) * (NC + 1));
 
     // new
     JmatDer.resize((numPhase + NPmax * NC) * (numPhase + NPmax * NC));
-    JmatTmp = JmatDer;
     rhsDer.resize((numPhase + NPmax * NC) * (numCom + 1 + 1));
 }
 

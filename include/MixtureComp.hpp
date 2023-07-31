@@ -263,7 +263,6 @@ private:
     vector<vector<OCP_DBL>> lnfugP; ///< d ln fij / d P
     vector<vector<OCP_DBL>> lnfugN; ///< d ln fij / d nkj
 
-    vector<OCP_DBL> JmatTmp; ///< Temp Mat for transpose of a matrix
     vector<OCP_DBL> JmatDer; ///< Used to store Jacobian Mat for calculating derivates
     /// rhs or d nij / d Nk, d nij / dP in calVtiVtp
     /// rhs or dXs / dXp in Cal dXsdXp
