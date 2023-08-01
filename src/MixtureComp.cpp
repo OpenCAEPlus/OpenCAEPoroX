@@ -435,7 +435,6 @@ void MixtureComp::CopyPhaseFromPE()
 {
     NP       = PE.GetNP();
     ftype    = PE.GetFtype();
-    flagSkip = PE.GetFlagSkip();
     for (USI j = 0; j < NP; j++) {
         nj[j] = Nh * PE.GetNu(j);
         copy(PE.GetX(j).begin(), PE.GetX(j).end(), &x[j * numCom]);
@@ -1034,11 +1033,8 @@ void MixtureComp::AssembleSkipMatSTA()
 
 void MixtureComp::CalSkipForNextStep()
 {
-    if (flagSkip && ftype == 0) {
-        // 1. Np == 1 is base for Skipping
-        // 2. If flagSkip == true, then next stablity analysis is possible to be
-        // skipped, it depends on if conditions are met
-        // 3. If ftype == 0, then the range should be calculated, which also means last
+    if (ftype == 0) {
+        // the range should be calculated, which also means last
         // skip is unsatisfied
         CalPhiNSkip();
         AssembleSkipMatSTA();
@@ -1050,8 +1046,17 @@ void MixtureComp::CalSkipForNextStep()
 
         CalEigenSY(NC, &skipMatSTA[0], &eigenSkip[0], &eigenWork[0], 2 * NC + 1);
         skipSta->AssignValue(bulkId, eigenSkip[0], P, T, zi);
+        skipSta->SetFlagSkip(bulkId, OCP_TRUE);
     }
-    skipSta->SetFlagSkip(bulkId, flagSkip);
+    else if (ftype == 1) {
+        skipSta->SetFlagSkip(bulkId, OCP_TRUE);
+    }
+    else if (ftype == 2) {
+        skipSta->SetFlagSkip(bulkId, OCP_FALSE);
+    }
+    else {
+        OCP_ABORT("WRONG Ftype!");
+    }
 }
 
 /////////////////////////////////////////////////////////////////////

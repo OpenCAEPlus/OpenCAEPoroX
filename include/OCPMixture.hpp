@@ -36,6 +36,7 @@ public:
         nc = numCom;
         Ni.resize(nc);
         phaseExist.resize(np);
+        epIndex.resize(np);
         S.resize(np);
         nj.resize(np);
         vj.resize(np);
@@ -82,7 +83,9 @@ public:
     /// mole number of components
     vector<OCP_DBL> Ni;
     /// existence of phase
-    vector<OCP_BOOL> phaseExist; 
+    vector<OCP_BOOL> phaseExist;
+    /// index of all existing phase
+    vector<USI>      epIndex;
     /// saturation of phase
     vector<OCP_DBL> S;
     /// mole number of phases

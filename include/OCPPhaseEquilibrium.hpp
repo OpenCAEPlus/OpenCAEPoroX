@@ -88,8 +88,6 @@ public:
     const auto& GetNu(const USI& j) const { return nu[j]; }
     /// Return ftype
     const auto& GetFtype() const { return ftype; }
-    /// Return flagSkip
-    const auto& GetFlagSkip() const { return flagSkip; }
 
 protected:
     void SetInitalValue(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin, 
@@ -337,9 +335,7 @@ protected:
 
 protected:
     /// Decide the start point of flash
-    USI ftype{ 0 };
-    ///  if try to skip
-    OCP_BOOL        flagSkip;
+    USI         ftype{ 0 };
 };
 
 

@@ -305,8 +305,6 @@ protected:
     SkipStaAnaly* skipSta;
     /// Decide the start point of flash
     USI ftype{ 0 };
-    ///  if try to skip
-    OCP_BOOL        flagSkip;
     /// d ln phi[i][j] / d n[k][j]
     vector<OCP_DBL> lnphiN;
     /// matrix for skipping Stability Analysis,    

@@ -17,14 +17,20 @@
 /////////////////////////////////////////////////////
 
 
-OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_DBL>>& PVDOin,
-    const vector<vector<OCP_DBL>>& PVTWin,
-    const OCP_DBL& stdRhoO,
-    const OCP_DBL& stdRhoW,
-    OCPMixtureVarSet& vs) 
+OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs) 
 {
-    PVDO.Setup(PVDOin, stdRhoO);
-    PVTW.Setup(PVTWin, stdRhoW);
+    OCP_DBL stdRhoO, stdRhoW;
+    if (rs_param.density.activity) {
+        stdRhoO = rs_param.density.data[0];
+        stdRhoW = rs_param.density.data[1];
+    }
+    else {
+        stdRhoO = (141.5 * RHOW_STD) / (rs_param.gravity.data[0] + 131.5);
+        stdRhoW = RHOW_STD * rs_param.gravity.data[1];
+    }
+
+    PVDO.Setup(rs_param.PVDO_T.data[i], stdRhoO);
+    PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW);
 
     vs.phaseExist[0]  = OCP_TRUE;
     vs.phaseExist[1]  = OCP_TRUE;
@@ -102,26 +108,11 @@ void OCPMixtureBlkOilOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {  
     vs.Init(2, 2, OCP_FALSE);
-    GetStdRhoOW(rs_param);
 	if (rs_param.PVTW_T.data.size() > 0 && rs_param.PVDO_T.data.size() > 0) {
-		pmMethod = new OCPMixtureBlkOilOWMethod01(rs_param.PVDO_T.data[i], 
-                                                  rs_param.PVTW_T.data[i], 
-                                                  stdRhoO, stdRhoW, vs);
+		pmMethod = new OCPMixtureBlkOilOWMethod01(rs_param, i, vs);
 	}
 }
 
-
-void OCPMixtureBlkOilOW::GetStdRhoOW(const ParamReservoir& rs_param)
-{
-    if (rs_param.density.activity) {
-        stdRhoO = rs_param.density.data[0];
-        stdRhoW = rs_param.density.data[1];
-    }
-    else {
-        stdRhoO = (141.5 * RHOW_STD) / (rs_param.gravity.data[0] + 131.5);
-        stdRhoW = RHOW_STD * rs_param.gravity.data[1];
-    }
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

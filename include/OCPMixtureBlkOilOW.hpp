@@ -51,11 +51,7 @@ public:
 class OCPMixtureBlkOilOWMethod01 : public OCPMixtureBlkOilOWMethod
 {
 public:
-    OCPMixtureBlkOilOWMethod01(const vector<vector<OCP_DBL>>& PVDOin,
-        const vector<vector<OCP_DBL>>& PVTWin,
-        const OCP_DBL& stdRhoO,
-        const OCP_DBL& stdRhoW,
-        OCPMixtureVarSet& vs);
+    OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     OCP_DBL CalRhoO(const OCP_DBL& P) override { return PVDO.CalRhoO(P); }
     OCP_DBL CalXiO(const OCP_DBL& P) override { return PVDO.CalXiO(P); }
     OCP_DBL CalRhoW(const OCP_DBL& P) override { return PVTW.CalRhoW(P); }
@@ -108,7 +104,6 @@ public:
     }
 
 protected:
-    void GetStdRhoOW(const ParamReservoir& rs_param);
     void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) { 
         vs.P     = P;
         vs.Ni[0] = Ni[0];
@@ -122,8 +117,6 @@ protected:
 
 protected:
     OCPMixtureBlkOilOWMethod* pmMethod;
-    OCP_DBL                   stdRhoO;
-    OCP_DBL                   stdRhoW;
 };
 
 

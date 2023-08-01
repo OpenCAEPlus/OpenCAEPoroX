@@ -78,7 +78,6 @@ void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Ti
     switch (ftype) {
     case 0:
         // flash from single phase
-        flagSkip = OCP_TRUE;
         NP = 1;
         nu[0] = 1;
         x[0]  = zi;
@@ -88,14 +87,9 @@ void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Ti
             PhaseSplit();
             if (NP == NPmax || NP == 1) break;
         }
-        if (NP > 1) {
-            flagSkip = OCP_FALSE;
-        }
-
         break;
     case 1:
         // Skip Phase Stability analysis, only single phase exists
-        flagSkip = OCP_TRUE;
         NP = 1;
         nu[0] = 1;
         x[0] = zi;
@@ -103,7 +97,6 @@ void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Ti
 
     case 2:
         // Skip Phase Stability analysis, two phases exist
-        flagSkip = OCP_FALSE;
         NP = 2;
         Yt = 1.01;
         CalKwilson();
@@ -114,6 +107,8 @@ void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Ti
         OCP_ABORT("Wrong flash type!");
         break;
     }
+
+    if (NP > 1) ftype = 2;
 }
 
 
@@ -278,7 +273,7 @@ OCP_BOOL OCPPhaseEquilibrium::PhaseStable()
 
         if (tmpNP != lNP) {
             flag = StableSSM(testPId);
-            flagSkip = OCP_FALSE;
+            ftype = 2;
         }
     }
     itersSSMSTA += flashCtrl.SSMsta.curIt;
@@ -374,7 +369,7 @@ OCP_BOOL OCPPhaseEquilibrium::StableSSM01(const USI& Id)
 
         if (flag && Yt > 1 - 0.1 && Sk > 1) {
             // close to phase boundary, or more than 1 phase, So don't skip at next step
-            flagSkip = OCP_FALSE;
+            ftype = 2;
         }
         if (flag && Yt > 1 + eYt) {
             flashCtrl.SSMsta.conflag = OCP_TRUE;
