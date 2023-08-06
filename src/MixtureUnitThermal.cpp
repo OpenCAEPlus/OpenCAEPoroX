@@ -14,12 +14,9 @@
 
 MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId)
 {
-    mixtureType = THERMAL;
-    numPhase    = 2;
-    numCom      = 2;
-
-    eC.Setup(param.comsParam, tarId);
     OWTM.Setup(param, tarId);
+    mixtureType = OWTM.MixtureType();
+    vs          = &OWTM.GetVarSet();
 }
 
 void MixtureUnitThermal_OW::Flash(const OCP_DBL& Pin,
@@ -103,7 +100,7 @@ void MixtureUnitThermal_OW::CalProdWeight(const OCP_DBL&         Pin,
                                        vector<OCP_DBL>&       prodWeight)
 {
 
-    vector<OCP_DBL> factor(numPhase, 0);
+    vector<OCP_DBL> factor(vs->np, 0);
     factor[0] = Niin[0] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, OIL) / CONV1; // stb / lbmol
     factor[1] = Niin[1] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb  / lbmol
 
@@ -134,7 +131,7 @@ void MixtureUnitThermal_OW::SetupWellOpt(WellOpt&                  opt,
     const USI wellType = opt.WellType();
     if (wellType == INJ) {
         const string    fluidName = opt.InjFluidType();
-        vector<OCP_DBL> tmpZi(numCom, 0);
+        vector<OCP_DBL> tmpZi(vs->nc, 0);
         if (fluidName == "WAT") {
             tmpZi.back() = 1;
             opt.SetInjProdPhase(WATER);
@@ -147,7 +144,7 @@ void MixtureUnitThermal_OW::SetupWellOpt(WellOpt&                  opt,
         }
         opt.SetInjZi(tmpZi);
     } else if (wellType == PROD) {
-        vector<OCP_DBL> tmpWght(numPhase, 0);
+        vector<OCP_DBL> tmpWght(vs->np, 0);
         switch (opt.OptMode()) {
             case BHP_MODE:
                 break;

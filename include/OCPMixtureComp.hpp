@@ -31,25 +31,27 @@ using namespace std;
 
 /// OCPMixtureCompMethod is a bsaic class used in compositional model
 /// all variables are about components and phases participating in 
-/// Phase Equilibrium Calculations
+/// Phase Equilibrium Calculations, these components and phases should be 
+/// be ranked first.
 /// For Isothermal Model
 class OCPMixtureCompMethod
 {
 public:
     OCPMixtureCompMethod() = default;
-    virtual OCP_DBL CalRhoO(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalXiO(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalRhoW(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalXiW(const OCP_DBL& P) = 0;
-    virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
+    virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
+    virtual void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
-    virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
+    virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    void OutIters() const { PE.OutMixtureIters(); }
 
 ////////////////////////////////////////////////////////////////
 // Basic variables
 ////////////////////////////////////////////////////////////////
 
+    /// Input components param from input file, allocate and setup
     void Setup(const ComponentParam& param, const USI& tarId);
 
 protected:
@@ -60,7 +62,7 @@ protected:
     /// num of existing phases
     USI             NP;
     /// total mole number of components
-    OCP_DBL         Nh;
+    OCP_DBL         Nt;
     /// molar fraction of components
     vector<OCP_DBL> zi;
 
@@ -71,14 +73,14 @@ protected:
     
 
 protected:
-    /// Molecular Weight of components
-    vector<OCP_DBL> MWC;
     /// critical temperature of components
     vector<OCP_DBL> Tc;
     /// critical pressure of components
     vector<OCP_DBL> Pc;
     /// critical volume of components
     vector<OCP_DBL> Vc;
+    /// Molecular Weight of components
+    vector<OCP_DBL> MWC;
 
 ////////////////////////////////////////////////////////////////
 // EoS and Phase Equilibrium Calculation
@@ -156,23 +158,23 @@ protected:
 protected:
     // For Phase num : any
     /// Calculate dVf / dP, dVf / dNi (full derivatives)
-    void CalVfiVfp_full01(OCPMixtureVarSet& vs);
+    virtual void CalVfiVfp_full01(OCPMixtureVarSet& vs);
     /// Assemble Matrix for CalVfiVfp_full01
     void AssembleMatVfiVfp_full01();
     /// Assemble Rhs for CalVfiVfp_full01
     void AssembleRhsVfiVfp_full01();
     /// Calculate d (Sj xij) / d (P , Ni)
-    void CaldXsdXp01(OCPMixtureVarSet& vs);
+    virtual void CaldXsdXp01(OCPMixtureVarSet& vs);
 
     // For Phase num : <=2
     /// Calculate dVf / dP, dVf / dNi (full derivatives)
-    void CalVfiVfp_full02(OCPMixtureVarSet& vs);
+    virtual void CalVfiVfp_full02(OCPMixtureVarSet& vs);
     /// Assemble Matrix for CalVfiVfp_full02
     void AssembleMatVfiVfp_full02();
     /// Assemble Rhs for CalVfiVfp_full02
     void AssembleRhsVfiVfp_full02();
     /// Calculate d (Sj xij) / d (P , Ni)
-    void CaldXsdXp02(OCPMixtureVarSet& vs);
+    virtual void CaldXsdXp02(OCPMixtureVarSet& vs);
 
 protected:
     /// d ln fij / d P
@@ -187,25 +189,6 @@ protected:
     // for linearsolve with lapack
     /// used in dgesv_ in lapack
     vector<OCP_INT>         pivot;
-
-////////////////////////////////////////////////////////////////
-// Skip Stability Analysis
-////////////////////////////////////////////////////////////////
-
-protected:
-
-    /// start point of current flash and next flash
-    // INPUT:
-    // ftype == 0: flash from single phase
-    // ftype == 1: single phase(skip phase stability analysis)
-    // ftype == 2: two phase(skip phase stability analysis)
-    // OUTPUT:
-    // ftype == 0: try to skip phase stability analysis in next flash for current bulk,
-    //             and recalculate the range for judgement
-    // ftype == 1: try to skip phase stability analysis in next flash for current bulk,
-    //             and don't recalculate the range for judgement
-    // ftype == 1: don't skip phase stability analysis in next flash for current bulk.
-    USI             ftype{ 0 };
 };
 
 
@@ -218,14 +201,18 @@ protected:
 class OCPMixtureCompMethod01 : public OCPMixtureCompMethod
 {
 public:
-    OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i);
-    OCP_DBL CalRhoW(const OCP_DBL& P) override { return PVTW.CalRhoW(P); }
-    OCP_DBL CalXiW(const OCP_DBL& P) override { return PVTW.CalXiW(P); }
-    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
-    void FlashDer(OCPMixtureVarSet& vs) override;
+    void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
 
+protected:
+    void InitNtZ(OCPMixtureVarSet& vs);
+    void CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs);
 
 protected:
 
@@ -235,16 +222,29 @@ protected:
 
 protected:
     void CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs);
+    OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
+    OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }   
 
 protected:
     /// PVTW
     OCP_PVTW PVTW;
-    /// mass density of water phase in standard condition.
-    OCP_DBL  std_RhoW;
     /// index of water phase
     USI      wIdP;
     /// index of water component
     USI      wIdC;
+
+
+    ////////////////////////////////////////////////////////////
+    // Derivatives Calculations
+    ////////////////////////////////////////////////////////////
+
+protected:
+    void CalVfiVfp_full01(OCPMixtureVarSet& vs) override;
+    void CaldXsdXp01(OCPMixtureVarSet& vs) override;
+    void CalVfiVfp_full02(OCPMixtureVarSet& vs) override;
+    void CaldXsdXp02(OCPMixtureVarSet& vs) override;
+    void AddVfpVfiW(OCPMixtureVarSet& vs);
+    void CaldXsdXpW(OCPMixtureVarSet& vs);
 };
 
 
@@ -255,40 +255,42 @@ protected:
 class OCPMixtureComp : public OCPMixture
 {
 public:
-    OCPMixtureComp() { mixtureType = OCPMIXTURE_BO_OW; }
+    OCPMixtureComp() { mixtureType = OCPMIXTURE_COMP; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL& Vp) {
-        SetPTS(P, T, S);
-        pmMethod->InitFlash(Vp, vs);
-    }
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL& Vp) {
-        SetPTS(P, T, S);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp) {
+        SetPTSN(P, T, S, Ni);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& ftype, const USI& lNP, const OCP_DBL* lx) {
+        SetPTN(P, T, Ni);
+        pmMethod->Flash(vs, ftype, lNP, lx);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp) {
+        SetPTSN(P, T, S, Ni);
         pmMethod->InitFlashDer(Vp, vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& ftype, const USI& lNP, const OCP_DBL* lx) {
         SetPTN(P, T, Ni);
-        pmMethod->FlashDer(vs);
+        pmMethod->FlashDer(vs, ftype, lNP, lx);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalXiO(P);
-        else if (tarPhase == WATER)  return pmMethod->CalXiW(P);
-        else                         OCP_ABORT("WRONG TarPhase");
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
+        pmMethod->CalXi(P, T, z, tarPhase);
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalRhoO(P);
-        else if (tarPhase == WATER)  return pmMethod->CalRhoW(P);
-        else                         OCP_ABORT("WRONG TarPhase");
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
+        pmMethod->CalRho(P, T, z, tarPhase);
     }
+    void OutputIters() const { pmMethod->OutIters(); }
 
 protected:
-    void SetPTS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S) {
+    void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {
         vs.P = P;
         vs.T = T + CONV5;
         copy(S, S + vs.np, vs.S.begin());
+        copy(Ni, Ni + vs.nc, vs.Ni.begin());
     }
     void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         vs.P = P;

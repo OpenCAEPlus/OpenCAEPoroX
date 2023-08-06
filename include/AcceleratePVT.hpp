@@ -12,66 +12,32 @@
 #ifndef __ACCELERATEPVT_HEADER__
 #define __ACCELERATEPVT_HEADER__
 
-#include "DenseMat.hpp"
-#include "OCPConst.hpp"
+#include "OCPPhaseEquilibrium.hpp"
+
 #include <vector>
 
 using namespace std;
 
-/////////////////////////////////////////////////////////////////////
-// Skip Stability Analysis
-/////////////////////////////////////////////////////////////////////
 
-class SkipStaAnaly
+class SkipPSAVarset
 {
 
-public:
-    /// Set ifUseSkip to true or false
-    void SetUseSkip(const OCP_BOOL& flag) { ifUseSkip = flag; }
-    /// Return ifUseSkip
-    OCP_BOOL IfUseSkip() const { return ifUseSkip; }
-    /// Allocate memory for SkipStaAnaly term
-    void Setup(const OCP_USI& nb, const USI& np, const USI& nc);
-    /// Set flag for skipping
-    void SetFlagSkip(const OCP_USI& n, const OCP_BOOL& flagSkip) { flag[n] = flagSkip; }
-    /// Update variables used for determine if skipping will happen
-    void AssignValue(const OCP_USI&         n,
-                     const OCP_DBL&         minEigenSkip,
-                     const OCP_DBL&         PSkip,
-                     const OCP_DBL&         TSkip,
-                     const vector<OCP_DBL>& ziSkip);
-    /// Determine if skipping will happen
-    OCP_BOOL IfSkip(const OCP_DBL&         Pin,
-                    const OCP_DBL&         Tin,
-                    const OCP_DBL&         Ntin,
-                    const vector<OCP_DBL>& Niin,
-                    const OCP_USI&         n) const;
-    /// Calculate the ftype for IMPEC
-    USI CalFtypeIMPEC(const OCP_DBL&         Pin,
-                      const OCP_DBL&         Tin,
-                      const OCP_DBL&         Ntin,
-                      const vector<OCP_DBL>& Niin,
-                      const OCP_USI&         n);
-    /// Calculate the ftype for FIM
-    USI CalFtypeFIM(const OCP_DBL&         Pin,
-                    const OCP_DBL&         Tin,
-                    const OCP_DBL&         Ntin,
-                    const vector<OCP_DBL>& Niin,
-                    const OCP_DBL*         S,
-                    const USI&             np,
-                    const OCP_USI&         n) const;
-    /// Reset SkipStaAnaly term to last time step
+public:  
+    void Setup(const USI& nbin, const USI& npin, const USI& ncin) {
+        nb = nbin;
+        np = npin;
+        nc = ncin;
+    }
+    /// Reset SkipPSA vars to last time step
     void ResetToLastTimeStep();
-    /// Update SkipStaAnaly term at last time step
+    /// Update SkipPSA vars at last time step
     void UpdateLastTimeStep();
 
-protected:
-    OCP_BOOL ifSetup{OCP_FALSE}; ///< Only one setup is needed.
-
-    OCP_BOOL ifUseSkip{OCP_TRUE}; ///< If true, then Skip option will be used
-    OCP_USI  numBulk;
-    USI      numPhase; ///< Num of phase used in phase equilibrium calculation
-    USI      numCom;   ///< Num of components used in phase equilibrium calculation
+public:
+    OCP_BOOL         ifSetup{ OCP_FALSE };  ///< Only one setup is needed.
+    OCP_USI          nb;                    ///< Num of bulk num
+    USI              np;                    ///< Num of phase used in phase equilibrium calculation
+    USI              nc;                    ///< Num of components used in phase equilibrium calculation
 
     vector<OCP_BOOL> flag;     ///< If true, skip will be test
     vector<OCP_DBL>  minEigen; ///< minimum eigenvalue used for testing skipping
@@ -84,6 +50,122 @@ protected:
     vector<OCP_DBL>  lP;        ///< Last P
     vector<OCP_DBL>  lT;        ///< Last T
     vector<OCP_DBL>  lzi;       ///< Last zi
+};
+
+
+class SkipPSAMethod
+{
+public:
+    SkipPSAMethod() = default;
+    /// Calculate the ftype without predicted saturations
+    virtual USI CalFtype(const OCP_DBL& Pin,
+                         const OCP_DBL& Tin,
+                         const OCP_DBL* Niin,
+                         const OCP_USI& n) = 0;
+    /// Calculate the ftype with predicted saturations
+    virtual USI CalFtype(const OCP_DBL& Pin,
+                         const OCP_DBL& Tin,
+                         const OCP_DBL* Niin,
+                         const OCP_DBL* S,
+                         const USI&     np,
+                         const OCP_USI& n) = 0;
+    /// Calculate skip info for next step
+    virtual void CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquilibrium& PE) = 0;
+
+};
+
+
+////////////////////////////////////////////////////////////////
+// SkipPSAMethod01
+////////////////////////////////////////////////////////////////
+
+
+class SkipPSAMethod01 : public SkipPSAMethod
+{
+public:
+    SkipPSAMethod01(SkipPSAVarset* vsin);
+    /// Calculate the ftype without predicted saturations
+    USI CalFtype(const OCP_DBL& Pin,
+                 const OCP_DBL& Tin,
+                 const OCP_DBL* Niin,
+                 const OCP_USI& n) override;
+    /// Calculate the ftype with predicted saturations
+    USI CalFtype(const OCP_DBL& Pin,
+                 const OCP_DBL& Tin,
+                 const OCP_DBL* Niin,
+                 const OCP_DBL* S,
+                 const USI&     np,
+                 const OCP_USI& n) override;
+    void CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquilibrium& PE) override;
+
+protected:
+    void SetPTZ(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin);
+    OCP_BOOL IfSkip(const OCP_USI& n) const;
+
+protected:
+    /// pointer of variables set
+    SkipPSAVarset* vs;
+    /// Pressure
+    OCP_DBL         P;
+    /// Temperature
+    OCP_DBL         T;
+    /// Total mole number
+    OCP_DBL         Nt;
+    /// molar fraction
+    vector<OCP_DBL> zi;
+    
+    /// d ln phi[i][j] / d n[k][j]
+    vector<OCP_DBL> lnphiN;
+    /// matrix for skipping Stability Analysis,    
+    vector<OCP_SIN> skipMatSTA;
+    /// eigen values of matrix for skipping Skip Stability Analysis.
+    /// Only the minimum eigen value will be used
+    vector<OCP_SIN> eigenSkip;
+    /// work space for computing eigenvalues with ssyevd_
+    vector<OCP_SIN> eigenWork;
+};
+
+
+class SkipPSA
+{
+
+public:
+    /// Set ifUseSkip to true or false
+    void SetUseSkip(const OCP_BOOL& flag) { ifUseSkip = flag; }
+    /// Return ifUseSkip
+    OCP_BOOL IfUseSkip() const { return ifUseSkip; }
+    /// Calculate the ftype without predicted saturations
+    USI CalFtype(const OCP_DBL& Pin,
+                 const OCP_DBL& Tin,
+                 const OCP_DBL* Niin,
+                 const OCP_USI& n,
+                 const USI&     mIndex)
+    {
+        sm[mIndex]->CalFtype(Pin, Tin, Niin, n);
+    }
+    /// Calculate the ftype with predicted saturations
+    USI CalFtype(const OCP_DBL& Pin,
+                 const OCP_DBL& Tin,
+                 const OCP_DBL* Niin,
+                 const OCP_DBL* S,
+                 const USI&     np,
+                 const OCP_USI& n,
+                 const USI&     mIndex)
+    {
+        sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, n);
+    }
+    /// Reset SkipPSA vars to last time step
+    void ResetToLastTimeStep() { vs.ResetToLastTimeStep(); }
+    /// Update SkipPSA vars at last time step
+    void UpdateLastTimeStep() { vs.UpdateLastTimeStep(); }
+
+protected:
+    /// If use skipping PSA option
+    OCP_BOOL                 ifUseSkip{ OCP_TRUE };
+    /// variables set
+    SkipPSAVarset            vs;
+    /// Skipping Method
+    vector<SkipPSAMethod*>   sm;
 };
 
 #endif /* end if __ACCELERATEPVT_HEADER__ */

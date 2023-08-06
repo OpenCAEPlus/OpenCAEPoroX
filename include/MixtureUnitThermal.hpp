@@ -25,33 +25,6 @@ class MixtureUnitThermal : public MixtureUnit
 {
 public:
     MixtureUnitThermal() = default;
-    void Allocate()
-    {
-        Ni.resize(numCom);
-        phaseExist.resize(numPhase);
-        S.resize(numPhase);
-        vj.resize(numPhase);
-        nj.resize(numPhase);
-        x.resize(numPhase * numCom);
-        rho.resize(numPhase);
-        xi.resize(numPhase);
-        mu.resize(numPhase);
-        vfi.resize(numCom);
-        rhoP.resize(numPhase);
-        rhoT.resize(numPhase);
-        rhox.resize(numPhase * numCom);
-        xiP.resize(numPhase);
-        xiT.resize(numPhase);
-        xix.resize(numPhase * numCom);
-        muP.resize(numPhase);
-        muT.resize(numPhase);
-        mux.resize(numPhase * numCom);
-        dXsdXp.resize((numCom + 1) * numPhase * (numCom + 2));
-        Ufi.resize(numCom);
-        H.resize(numPhase);
-        HT.resize(numPhase);
-        Hx.resize(numPhase * numCom);
-    }
     void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void OutMixtureIters() const override{};
 };
@@ -124,58 +97,8 @@ public:
                          const OCP_DBL&            Tsurf) override;
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override;
 
-    const OCP_DBL& GetNt() const override { return OWTM.GetVarSet().Nt; }
-    const OCP_DBL& GetNi(const USI& i) const override {
-        return OWTM.GetVarSet().Ni[i];
-    }
-    const OCP_DBL& GetVf() const override { return OWTM.GetVarSet().Vf; }
-    const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OWTM.GetVarSet().phaseExist[j]; }
-    const OCP_DBL& GetS(const USI& j) const override { return OWTM.GetVarSet().S[j]; }
-    const OCP_DBL& GetVj(const USI& j) const override { return OWTM.GetVarSet().vj[j]; }
-    const OCP_DBL& GetNj(const USI& j) const override { return OWTM.GetVarSet().nj[j]; }
-    const OCP_DBL& GetXij(const USI& j, const USI& i) const override
-    {
-        return OWTM.GetVarSet().x[j * numCom + i];
-    }
-    const OCP_DBL& GetRho(const USI& j) const override { return OWTM.GetVarSet().rho[j]; }
-    const OCP_DBL& GetXi(const USI& j) const override { return OWTM.GetVarSet().xi[j]; }
-    const OCP_DBL& GetMu(const USI& j) const override { return OWTM.GetVarSet().mu[j]; }
-    const OCP_DBL& GetVfP() const override { return OWTM.GetVarSet().vfP; }
-    const OCP_DBL& GetVfT() const override { return OWTM.GetVarSet().vfT; }
-    const OCP_DBL& GetVfi(const USI& i) const override { return OWTM.GetVarSet().vfi[i]; }
-    const OCP_DBL& GetRhoP(const USI& j) const override { return OWTM.GetVarSet().rhoP[j]; }
-    const OCP_DBL& GetRhoT(const USI& j) const override { return OWTM.GetVarSet().rhoT[j]; }
-    const OCP_DBL& GetXiP(const USI& j) const override { return OWTM.GetVarSet().xiP[j]; }
-    const OCP_DBL& GetXiT(const USI& j) const override { return OWTM.GetVarSet().xiT[j]; }
-    const OCP_DBL& GetMuP(const USI& j) const override { return OWTM.GetVarSet().muP[j]; }
-    const OCP_DBL& GetMuT(const USI& j) const override { return OWTM.GetVarSet().muT[j]; }
-    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const override
-    {
-        return OWTM.GetVarSet().rhox[j * numCom + i];
-    }
-    const OCP_DBL& GetXiX(const USI& j, const USI& i) const override
-    {
-        return OWTM.GetVarSet().xix[j * numCom + i];
-    }
-    const OCP_DBL& GetMuX(const USI& j, const USI& i) const override
-    {
-        return OWTM.GetVarSet().mux[j * numCom + i];
-    }
-    const vector<OCP_DBL>& GetDXsDXp() const override { return OWTM.GetVarSet().dXsdXp; }
-    const OCP_DBL          GetUf() const override { return OWTM.GetVarSet().Uf; }
-    const OCP_DBL          GetUfP() const override { return OWTM.GetVarSet().UfP; }
-    const OCP_DBL          GetUfT() const override { return OWTM.GetVarSet().UfT; }
-    const OCP_DBL          GetUfi(const USI& i) const override { return OWTM.GetVarSet().Ufi[i]; }
-    const OCP_DBL          GetH(const USI& j) const override { return OWTM.GetVarSet().H[j]; }
-    const OCP_DBL          GetHT(const USI& j) const override { return OWTM.GetVarSet().HT[j]; }
-    const OCP_DBL& GetHx(const USI& j, const USI& i) const override
-    {
-        return OWTM.GetVarSet().Hx[j * numCom + i];
-    }
-
 protected:
     OCPMixtureUnitThermalOW  OWTM;
-    EnthalpyCalculation  eC;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

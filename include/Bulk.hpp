@@ -22,7 +22,7 @@
 #include "LinearSystem.hpp"
 #include "MixtureUnit.hpp"
 #include "MixtureUnitBlkOil.hpp"
-#include "MixtureComp.hpp"
+#include "MixtureUnitComp.hpp"
 #include "MixtureUnitThermal.hpp"
 #include "OCPConst.hpp"
 #include "OCPStructure.hpp"

@@ -18,9 +18,60 @@
 
 
 ////////////////////////////////////////////////////////////////
-// Baisc Components Property £¨Phase Equilibrium Calculations£©
+// Baisc Components Property
 ////////////////////////////////////////////////////////////////
 
+
+void OCPMixtureCompMethod::Setup(const ComponentParam& param, const USI& tarId)
+{
+    NPmax = param.numPhase;
+    NC    = param.numCom; 
+
+    if (param.Tc.activity)   Tc = param.Tc.data[tarId];
+    else                     OCP_ABORT("TCRIT hasn't been input!");
+    if (param.Pc.activity)   Pc = param.Pc.data[tarId];
+    else                     OCP_ABORT("PCRIT hasn't been input!");
+
+    if (param.Vc.activity)   Vc = param.Vc.data[tarId];
+    else if (param.Zc.activity) {
+        const vector<OCP_DBL>& Zc = param.Zc.data[tarId];
+        Vc.resize(NC);
+        for (USI i = 0; i < NC; i++) {
+            Vc[i] = GAS_CONSTANT * Zc[i] * Tc[i] / Pc[i];
+        }
+    }
+    else                     OCP_ABORT("VCRIT or ZCRIT hasn't been input!");
+
+    if (param.MW.activity)   MWC = param.MW.data[tarId];
+    else                     OCP_ABORT("MW hasn't been input!");
+
+    /// Setup modules
+    eos.Setup(param, tarId);
+    visCal.Setup(param, tarId);
+    PE.Setup(param, tarId, &eos);
+
+    /// Allocate memory
+    zi.resize(NC);
+    MW.resize(NPmax);
+    vm.resize(NPmax);
+    vmP.resize(NPmax);
+    vmx.resize(NPmax);
+    for (auto& v : vmx)
+        v.resize(NC);
+    phaseLabel.resize(NPmax);
+    epIndex.resize(NPmax);
+    rowork.resize(NC);
+
+    pivot.resize(NPmax * NC);
+    lnfugP.resize(NPmax);
+    lnfugN.resize(NPmax);
+    for (USI j = 0; j < NPmax; j++) {
+        lnfugP[j].resize(NC);
+        lnfugN[j].resize(NC * NC);
+    }
+    JmatDer.resize(NPmax * NC * NPmax  * NC);
+    rhsDer.resize(NPmax * NC * (NC + 1));
+}
 
 
 ////////////////////////////////////////////////////////////////
@@ -31,9 +82,8 @@
 void OCPMixtureCompMethod::CopyPhaseFromPE(OCPMixtureVarSet& vs)
 {
     NP = PE.GetNP();
-    ftype = PE.GetFtype();
     for (USI j = 0; j < NP; j++) {
-        vs.nj[j] = Nh * PE.GetNu(j);
+        vs.nj[j] = Nt * PE.GetNu(j);
         copy(PE.GetX(j).begin(), PE.GetX(j).end(), &vs.x[j * vs.nc]);
     }
 }
@@ -354,13 +404,13 @@ void OCPMixtureCompMethod::CaldXsdXp01(OCPMixtureVarSet& vs)
     const USI ncol = vs.nc + 1;
 
     // dS / dP, dS / dN
-    for (const auto& j : vs.epIndex) {
+    for (const auto& j : epIndex) {
 		OCP_DBL* bId = &vs.dXsdXp[j * ncol];
 		// dS / dP
 		bId[0] = (vs.vjP[j] - vs.vfP * vs.S[j]) / vs.Vf;
 		bId++;
 		// dS / dN
-		for (USI m = 0; m < vs.nc; m++) {
+		for (USI m = 0; m < NC; m++) {
 			bId[m] = (vs.vji[j][m] - vs.vfi[m] * vs.S[j]) / vs.Vf;
 		}
     }
@@ -370,7 +420,7 @@ void OCPMixtureCompMethod::CaldXsdXp01(OCPMixtureVarSet& vs)
         OCP_DBL* bId = &vs.dXsdXp[(vs.np + epIndex[0] * vs.nc) * ncol + 1];
         for (USI i = 0; i < NC; i++) {
             for (USI m = 0; m < NC; m++) {
-                bId[m] = (delta(i, m) * Nh - vs.Ni[i]) / (Nh * Nh);
+                bId[m] = (delta(i, m) * Nt - vs.Ni[i]) / (Nt * Nt);
             }
             bId += ncol;
         }
@@ -516,7 +566,8 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
 {
     // Calculate Sj and Vf before
     // Note that vf is the total fluid volume
-    // And all vji, vjP are available(for all phase, all components)
+    // And all vji, vjP are available
+    // for phases and components that are in PE
 
 
     // Attention!
@@ -529,13 +580,13 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
     fill(vs.dXsdXp.begin(), vs.dXsdXp.end(), 0);
     const USI     ncol = vs.nc + 1;
 
-    for (const auto& j : vs.epIndex) {
+    for (const auto& j : epIndex) {
         OCP_DBL* bId = &vs.dXsdXp[j * ncol];
         // dS / dP
         bId[0] = (vs.vjP[j] - vs.vfP * vs.S[j]) / vs.Vf;
         bId++;
         // dS / dN
-        for (USI m = 0; m < vs.nc; m++) {
+        for (USI m = 0; m < NC; m++) {
             bId[m] = (vs.vji[j][m] - vs.vfi[m] * vs.S[j]) / vs.Vf;
         }
     }
@@ -545,7 +596,7 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
 		OCP_DBL* bId = &vs.dXsdXp[(vs.np + epIndex[0] * vs.nc) * ncol + 1];
 		for (USI i = 0; i < NC; i++) {
 			for (USI m = 0; m < NC; m++) {
-				bId[m] = (delta(i, m) * Nh - vs.Ni[i]) / (Nh * Nh);
+				bId[m] = (delta(i, m) * Nt - vs.Ni[i]) / (Nt * Nt);
 			}
 			bId += ncol;
 		}
@@ -591,11 +642,158 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
 }
 
 
+////////////////////////////////////////////////////////////////
+// OCPMixtureCompMethod01
+////////////////////////////////////////////////////////////////
+
+
+OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
+{
+    Setup(rs_param.comsParam, i);
+    // water property
+    OCP_DBL std_RhoW;
+    if (rs_param.PVTW_T.data.size() != 0) {
+        if (rs_param.gravity.activity)
+            std_RhoW = RHOW_STD * rs_param.gravity.data[1];
+        if (rs_param.density.activity) std_RhoW = RHOW_STD;
+        PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);
+    }
+    else {
+        OCP_ABORT("PVTW is Missing!");
+    }
+    wIdP = vs.np - 1;
+    wIdC = vs.nc - 1;
+
+    // setup constant value
+    vs.phaseExist[wIdP]       = OCP_TRUE;
+    vs.x[wIdP * vs.nc + wIdC] = 1.0;
+}
+
+
+void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs)
+{
+    InitNtZ(vs);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
+    CalProperty(vs);
+    CalPropertyW(-1.0, vs);
+    vs.CalVfS();
+}
+
+
+void OCPMixtureCompMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+{
+    InitNtZ(vs);
+    Nt = 1;
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
+    CalPropertyDer(vs);
+    CalPropertyW(Vp * vs.S[wIdP], vs);
+    CorrectNt(Vp * (1 - vs.S[wIdP]), vs);
+    vs.CalVfS();
+    CalVfiVfp_full02(vs);
+}
+
+
+void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin)
+{
+    InitNtZ(vs);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, lNP - 1, lxin, vs.nc);
+    CalProperty(vs);
+    CalPropertyW(-1.0, vs);
+    vs.CalVfS();
+    CalVfiVfp_full02(vs);  
+}
+
+
+void OCPMixtureCompMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+{
+    InitNtZ(vs);
+    Nt = 1;
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
+    CalPropertyDer(vs);
+    CalPropertyW(Vp * vs.S[wIdP], vs);
+    CorrectNt(Vp * (1 - vs.S[wIdP]), vs);
+    vs.CalVfS();
+    CalVfiVfp_full02(vs);
+    CaldXsdXp02(vs);
+}
+
+
+void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin)
+{
+    InitNtZ(vs);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, lNP - 1, lxin, vs.nc);
+    CalPropertyDer(vs);
+    CalPropertyW(-1.0, vs);
+    vs.CalVfS();
+    CalVfiVfp_full02(vs);    
+    CaldXsdXp02(vs);
+}
+
+
+OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase)
+{
+    // assume that only single phase exists here
+    if (tarPhase == WATER) {
+        // water phase
+        return PVTW.CalRhoW(P);
+    }
+    else {
+        // hydrocarbon phase
+        OCP_DBL xitmp = CalXi(P, T, &z[0], tarPhase);
+        OCP_DBL MWtmp = 0;
+        for (USI i = 0; i < NC; i++) MWtmp += zi[i] * MWC[i];
+        return MWtmp * xitmp;
+    }
+}
+
+
+OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase)
+{
+    // assume that only single phase exists here
+    if (tarPhase == WATER) {
+        // water phase
+        return PVTW.CalXiW(P);
+    }
+    else {
+        // oil phase
+        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
+    }
+}
+
+
+void OCPMixtureCompMethod01::InitNtZ(OCPMixtureVarSet& vs)
+{
+    Nt = 0;
+    for (USI i = 0; i < NC; i++)    Nt += vs.Ni[i];
+    vs.Nt = Nt + vs.Ni[wIdC];
+    for (USI i = 0; i < NC; i++)    zi[i] = vs.Ni[i] / Nt;
+}
+
+
+void OCPMixtureCompMethod01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
+{
+    // correct Nt
+    OCP_DBL vtmp = 0;
+    for (const auto& j : epIndex) {
+        vtmp += vs.vj[j];
+    }
+    Nt = vh / vtmp;
+    for (const auto& j : epIndex) {
+        vs.nj[j] *= Nt;
+        vs.vj[j] *= Nt;
+    }
+    for (USI i = 0; i < NC; i++) {
+        vs.Ni[i] = zi[i] * Nt;
+    }
+    vs.Nt = Nt + vs.Ni[wIdC];
+}
 
 
 ///////////////////////////////////////////////
 // Water Property
 ///////////////////////////////////////////////
+
+
 
 void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs)
 {
@@ -614,6 +812,66 @@ void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& v
 }
 
 
+////////////////////////////////////////////////////////////
+// Derivatives Calculations
+////////////////////////////////////////////////////////////
+
+
+void OCPMixtureCompMethod01::CalVfiVfp_full01(OCPMixtureVarSet& vs)
+{
+    OCPMixtureCompMethod::CalVfiVfp_full01(vs);
+    AddVfpVfiW(vs);
+}
+
+
+void OCPMixtureCompMethod01::CaldXsdXp01(OCPMixtureVarSet& vs)
+{
+    OCPMixtureCompMethod::CaldXsdXp01(vs);
+    CaldXsdXpW(vs);
+}
+
+
+void OCPMixtureCompMethod01::CalVfiVfp_full02(OCPMixtureVarSet& vs)
+{
+    OCPMixtureCompMethod::CalVfiVfp_full02(vs);
+    AddVfpVfiW(vs);
+}
+
+
+void OCPMixtureCompMethod01::CaldXsdXp02(OCPMixtureVarSet& vs)
+{
+    OCPMixtureCompMethod::CaldXsdXp02(vs);
+    CaldXsdXpW(vs);
+}
+
+
+void OCPMixtureCompMethod01::AddVfpVfiW(OCPMixtureVarSet& vs)
+{
+    // for water
+    vs.vfP       += vs.vjP[wIdP];
+    vs.vfi[wIdC] =  vs.vji[wIdP][wIdC];
+}
+
+
+void OCPMixtureCompMethod01::CaldXsdXpW(OCPMixtureVarSet& vs)
+{
+    // for water
+    // d Sj / dNw
+    const USI ncol = vs.nc + 1;   
+    for (const auto& j : epIndex) {
+        OCP_DBL* bId = &vs.dXsdXp[j* ncol + wIdC + 1];
+        bId[0]       = (vs.vji[j][wIdC] - vs.vfi[wIdC] * vs.S[j]) / vs.Vf;
+    }
+    // d Sw / d (P, Ni, Nw)
+    OCP_DBL* bId = &vs.dXsdXp[wIdP * ncol];
+    bId[0]       = (vs.vjP[wIdP] - vs.vfP * vs.S[wIdP]) / vs.Vf;
+    bId++;
+    for (USI i = 0; i < vs.nc; i++) {
+        bId[i] = (vs.vji[wIdP][i] - vs.vfi[i] * vs.S[wIdP]) / vs.Vf;
+    }
+}
+
+
 ////////////////////////////////////////////////////////////////
 // OCPMixtureComp 
 ////////////////////////////////////////////////////////////////
@@ -622,7 +880,9 @@ void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& v
 void OCPMixtureComp::Setup(const ParamReservoir& rs_param, const USI& i)
 {
     vs.Init(rs_param.numPhase, rs_param.numCom, OCP_FALSE);
-
+    if (rs_param.PVTW_T.data[i].size() > 0) {
+        pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
+    }
 }
 
 

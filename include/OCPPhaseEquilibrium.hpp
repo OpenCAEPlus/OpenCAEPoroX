@@ -14,7 +14,6 @@
 
 #include "OCPConst.hpp"
 #include "OCPEoS.hpp"
-#include "OptionalFeatures.hpp"
 #include <vector>
 
 using namespace std;
@@ -79,7 +78,9 @@ public:
     void Setup(const ComponentParam& param, const USI& tarId, EoSCalculation* eosin);
     /// PhaseEquilibrium API
     void PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* ziin,
-                          const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lKsin);
+                          const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lxin, 
+                          const USI& nc);
+    void PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* ziin);
     /// Get num of present phases
     const auto& GetNP() const { return NP; }
     /// return molar fraction of components in j-phase
@@ -88,10 +89,19 @@ public:
     const auto& GetNu(const USI& j) const { return nu[j]; }
     /// Return ftype
     const auto& GetFtype() const { return ftype; }
+    /// Return Pressure
+    const auto& GetP() const { return P; }
+    /// Return Temperature
+    const auto& GetT() const { return T; }
+    /// Return zi
+    const auto& GetZi() const { return zi; }
+    /// Return EoS
+    const auto GetEoS() const { return eos; }
 
 protected:
     void SetInitalValue(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin, 
-                        const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lKsin);
+                        const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lxin,
+                        const USI& nc);
 
 ///////////////////////////////////////////////
 // Basic Component properties
@@ -334,7 +344,17 @@ protected:
 ///////////////////////////////////////////////
 
 protected:
-    /// Decide the start point of flash
+    /// start point of current flash and next flash
+    // INPUT:
+    // ftype == 0: flash from single phase
+    // ftype == 1: single phase(skip single phase stability analysis)
+    // ftype == 2: two phase(skip single phase stability analysis)
+    // OUTPUT:
+    // ftype == 0: try to skip single phase stability analysis in next flash for current bulk,
+    //             and recalculate the range for judgement
+    // ftype == 1: try to skip single phase stability analysis in next flash for current bulk,
+    //             and don't recalculate the range for judgement
+    // ftype == 2: don't skip single phase stability analysis in next flash for current bulk.
     USI         ftype{ 0 };
 };
 

@@ -18,7 +18,7 @@
 
 class OptionalFeatures
 {
-    friend class MixtureComp;
+    friend class MixtureUnitComp;
     friend class FlowUnit_OGW;
     friend class FlowUnit_OW;
     friend class Reservoir;
@@ -31,15 +31,17 @@ public:
     {
         miscible.InputParam(param.miscstr.ifMiscible);
         scalePcow.InputParam(param.scalePcow);
+        skipPSA.SetUseSkip(OCP_TRUE);
+
     };
     void ResetToLastTimeStep()
     {
-        skipStaAnaly.ResetToLastTimeStep();
+        skipPSA.ResetToLastTimeStep();
         miscible.ResetTolastTimeStep();
     }
     void UpdateLastTimeStep()
     {
-        skipStaAnaly.UpdateLastTimeStep();
+        skipPSA.UpdateLastTimeStep();
         miscible.UpdateLastTimeStep();
     }
 
@@ -55,7 +57,7 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
 protected:
-    SkipStaAnaly skipStaAnaly; ///< Skip Stability Analysis term
+    SkipPSA skipPSA; ///< Skip Stability Analysis term
 
     /////////////////////////////////////////////////////////////////////
     // Phase Permeability Curve

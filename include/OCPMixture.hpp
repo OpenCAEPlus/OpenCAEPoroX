@@ -18,6 +18,7 @@
 
 using namespace std;
 
+const USI OCPMIXTURE_SP          = 0;
 const USI OCPMIXTURE_BO_OG       = 121;
 const USI OCPMIXTURE_BO_OW       = 122;
 const USI OCPMIXTURE_BO_GW       = 123;
@@ -36,7 +37,6 @@ public:
         nc = numCom;
         Ni.resize(nc);
         phaseExist.resize(np);
-        epIndex.resize(np);
         S.resize(np);
         nj.resize(np);
         vj.resize(np);
@@ -70,6 +70,22 @@ public:
     }
 
 public:
+    void CalVfS() {
+        Vf = 0;
+        for (USI j = 0; j < np; j++) {
+            if (phaseExist[j]) {
+                Vf += vj[j];
+            }
+        }
+        for (USI j = 0; j < np; j++) {
+            S[j] = 0;
+            if (phaseExist[j]) {
+                S[j] = vj[j] / Vf;
+            }
+        }
+    }
+
+public:
     /// num of phase, components
     USI np, nc;
     /// pressure, temperature
@@ -84,8 +100,6 @@ public:
     vector<OCP_DBL> Ni;
     /// existence of phase
     vector<OCP_BOOL> phaseExist;
-    /// index of all existing phase
-    vector<USI>      epIndex;
     /// saturation of phase
     vector<OCP_DBL> S;
     /// mole number of phases

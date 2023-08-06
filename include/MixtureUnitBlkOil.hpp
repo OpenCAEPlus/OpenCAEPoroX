@@ -42,7 +42,7 @@ public:
                      const OCP_DBL*   Niin,
                      vector<OCP_DBL>& prodRate) override
     {
-        prodRate.assign(Niin, Niin + numCom);
+        prodRate.assign(Niin, Niin + vs->nc);
     };
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override
     {
@@ -190,45 +190,6 @@ public:
                       const OCP_DBL&            Psurf,
                       const OCP_DBL&            Tsurf) override;
 
-    const OCP_DBL& GetNt() const override { return OWM.GetVarSet().Nt; }
-    const OCP_DBL& GetNi(const USI& i) const override { 
-        return OWM.GetVarSet().Ni[i];
-    }
-    const OCP_DBL& GetVf() const override { return OWM.GetVarSet().Vf; }
-    const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OWM.GetVarSet().phaseExist[j]; }
-    const OCP_DBL& GetS(const USI& j) const override { return OWM.GetVarSet().S[j]; }
-    const OCP_DBL& GetVj(const USI& j) const override { return OWM.GetVarSet().vj[j]; }
-    const OCP_DBL& GetNj(const USI& j) const override  { return OWM.GetVarSet().nj[j]; }
-    const OCP_DBL& GetXij(const USI& j, const USI& i) const override
-    {
-        return OWM.GetVarSet().x[j * numCom + i];
-    }
-    const OCP_DBL& GetRho(const USI& j) const override { return OWM.GetVarSet().rho[j]; }
-    const OCP_DBL& GetXi(const USI& j) const override { return OWM.GetVarSet().xi[j]; }
-    const OCP_DBL& GetMu(const USI& j) const override { return OWM.GetVarSet().mu[j]; }
-    const OCP_DBL& GetVfP() const override { return OWM.GetVarSet().vfP; }
-    const OCP_DBL& GetVfT() const override { return OWM.GetVarSet().vfT; }
-    const OCP_DBL& GetVfi(const USI& i) const override { return OWM.GetVarSet().vfi[i]; }
-    const OCP_DBL& GetRhoP(const USI& j) const override { return OWM.GetVarSet().rhoP[j]; }
-    const OCP_DBL& GetRhoT(const USI& j) const override { return OWM.GetVarSet().rhoT[j]; }
-    const OCP_DBL& GetXiP(const USI& j) const override { return OWM.GetVarSet().xiP[j]; }
-    const OCP_DBL& GetXiT(const USI& j) const override { return OWM.GetVarSet().xiT[j]; }
-    const OCP_DBL& GetMuP(const USI& j) const override { return OWM.GetVarSet().muP[j]; }
-    const OCP_DBL& GetMuT(const USI& j) const override { return OWM.GetVarSet().muT[j]; }
-    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const override
-    {
-        return OWM.GetVarSet().rhox[j * numCom + i];
-    }
-    const OCP_DBL& GetXiX(const USI& j, const USI& i) const override
-    {
-        return OWM.GetVarSet().xix[j * numCom + i];
-    }
-    const OCP_DBL& GetMuX(const USI& j, const USI& i) const override
-    {
-        return OWM.GetVarSet().mux[j * numCom + i];
-    }
-    const vector<OCP_DBL>& GetDXsDXp() const override { return OWM.GetVarSet().dXsdXp; }
-
 private:
     OCPMixtureBlkOilOW OWM;
 };
@@ -286,46 +247,6 @@ public:
                       const vector<SolventINJ>& sols,
                       const OCP_DBL&            Psurf,
                       const OCP_DBL&            Tsurf) override;
-
-
-    const OCP_DBL& GetNt() const override { return OGWM.GetVarSet().Nt; }
-    const OCP_DBL& GetNi(const USI& i) const override {
-        return OGWM.GetVarSet().Ni[i];
-    }
-    const OCP_DBL& GetVf() const override { return OGWM.GetVarSet().Vf; }
-    const OCP_BOOL& GetPhaseExist(const USI& j) const override { return OGWM.GetVarSet().phaseExist[j]; }
-    const OCP_DBL& GetS(const USI& j) const override { return OGWM.GetVarSet().S[j]; }
-    const OCP_DBL& GetVj(const USI& j) const override { return OGWM.GetVarSet().vj[j]; }
-    const OCP_DBL& GetNj(const USI& j) const override { return OGWM.GetVarSet().nj[j]; }
-    const OCP_DBL& GetXij(const USI& j, const USI& i) const override
-    {
-        return OGWM.GetVarSet().x[j * numCom + i];
-    }
-    const OCP_DBL& GetRho(const USI& j) const override { return OGWM.GetVarSet().rho[j]; }
-    const OCP_DBL& GetXi(const USI& j) const override { return OGWM.GetVarSet().xi[j]; }
-    const OCP_DBL& GetMu(const USI& j) const override { return OGWM.GetVarSet().mu[j]; }
-    const OCP_DBL& GetVfP() const override { return OGWM.GetVarSet().vfP; }
-    const OCP_DBL& GetVfT() const override { return OGWM.GetVarSet().vfT; }
-    const OCP_DBL& GetVfi(const USI& i) const override { return OGWM.GetVarSet().vfi[i]; }
-    const OCP_DBL& GetRhoP(const USI& j) const override { return OGWM.GetVarSet().rhoP[j]; }
-    const OCP_DBL& GetRhoT(const USI& j) const override { return OGWM.GetVarSet().rhoT[j]; }
-    const OCP_DBL& GetXiP(const USI& j) const override { return OGWM.GetVarSet().xiP[j]; }
-    const OCP_DBL& GetXiT(const USI& j) const override { return OGWM.GetVarSet().xiT[j]; }
-    const OCP_DBL& GetMuP(const USI& j) const override { return OGWM.GetVarSet().muP[j]; }
-    const OCP_DBL& GetMuT(const USI& j) const override { return OGWM.GetVarSet().muT[j]; }
-    const OCP_DBL& GetRhoX(const USI& j, const USI& i) const override
-    {
-        return OGWM.GetVarSet().rhox[j * numCom + i];
-    }
-    const OCP_DBL& GetXiX(const USI& j, const USI& i) const override
-    {
-        return OGWM.GetVarSet().xix[j * numCom + i];
-    }
-    const OCP_DBL& GetMuX(const USI& j, const USI& i) const override
-    {
-        return OGWM.GetVarSet().mux[j * numCom + i];
-    }
-    const vector<OCP_DBL>& GetDXsDXp() const override { return OGWM.GetVarSet().dXsdXp; }
 
 protected:
     OCPMixtureBlkOilOGW OGWM;

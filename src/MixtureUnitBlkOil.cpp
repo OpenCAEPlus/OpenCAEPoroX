@@ -17,11 +17,10 @@
 
 MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i)
 {
-    mixtureType = BLKOIL_OW;
-    numPhase = 2;
-    numCom = 2;
-
     OWM.Setup(rs_param, i);
+
+    mixtureType = OWM.MixtureType();
+    vs          = &OWM.GetVarSet();
 }
 
 void MixtureUnitBlkOil_OW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
@@ -140,11 +139,9 @@ void MixtureUnitBlkOil_OW::SetupWellOpt(WellOpt& opt,
 
 MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i)
 {
-    mixtureType = BLKOIL_ODGW;
-    numPhase = 3;
-    numCom = 3;
-
     OGWM.Setup(rs_param, i);
+    mixtureType = OGWM.MixtureType();
+    vs          = &OGWM.GetVarSet();
 }
 
 void MixtureUnitBlkOil_OGW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)

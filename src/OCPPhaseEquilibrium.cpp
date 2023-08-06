@@ -69,10 +69,10 @@ void OCPPhaseEquilibrium::Setup(const ComponentParam& param, const USI& tarId, E
 
 
 void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin,
-    const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lKsin)
+    const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lxin, const USI& nc)
 {
 
-    SetInitalValue(Pin, Tin, Niin, ftypein, lNPin, lKsin);
+    SetInitalValue(Pin, Tin, Niin, ftypein, lNPin, lxin, nc);
 
     // Attention: sum of components' moles equals 1
     switch (ftype) {
@@ -112,16 +112,29 @@ void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Ti
 }
 
 
+void OCPPhaseEquilibrium::PhaseEquilibrium(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* ziin)
+{
+    PhaseEquilibrium(Pin, Tin, ziin, 0, 0, 0, 0);
+}
+
+
 void OCPPhaseEquilibrium::SetInitalValue(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* ziin,
-    const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lKsin)
+    const USI& ftypein, const OCP_DBL& lNPin, const OCP_DBL* lxin, const USI& nc)
 {
     P = Pin;
     T = Tin;
     copy(ziin, ziin + NC, zi.begin());
     ftype = ftypein;
     lNP   = lNPin;
-    if (lNP == 2)
-        copy(lKsin, lKsin + NC, lKs.begin());
+    if (lNP == 2) {
+        for (USI i = 0; i < NC; i++) {
+            lKs[i] = lxin[i] / lxin[i + nc];
+        }
+    }
+    else if (lNP > 2) {
+        OCP_ABORT("Not Completed!");
+    }
+        
 }
 
 

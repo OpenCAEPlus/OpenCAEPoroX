@@ -21,7 +21,7 @@
 #include "OptionalFeatures.hpp"
 #include "ParamReservoir.hpp"
 #include "WellOpt.hpp"
-#include "OCPEoS.hpp"
+#include "OCPMixture.hpp"
 
 using namespace std;
 
@@ -32,28 +32,6 @@ class MixtureUnit
 {
 public:
     MixtureUnit() = default;
-    /// Allocate memory for common variables for basic class
-    void Allocate()
-    {
-        Ni.resize(numCom);
-        phaseExist.resize(numPhase);
-        vj.resize(numPhase);
-        S.resize(numPhase);
-        xi.resize(numPhase);
-        nj.resize(numPhase);
-        x.resize(numPhase * numCom);
-        rho.resize(numPhase);
-        mu.resize(numPhase);
-        // Derivatives
-        vfi.resize(numCom);
-        rhoP.resize(numPhase);
-        xiP.resize(numPhase);
-        muP.resize(numPhase);
-        rhox.resize(numPhase * numCom);
-        xix.resize(numPhase * numCom);
-        mux.resize(numPhase * numCom);
-        dXsdXp.resize((numCom + 1) * (numPhase + numPhase * numCom));
-    };
     virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     /// return type of mixture.
     USI GetMixtureType() const { return mixtureType; }
@@ -129,123 +107,45 @@ public:
                                 vector<OCP_DBL>& prodRate)                      = 0;
     virtual OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) = 0;
 
-    /// check if Ni input from param is negative, it's used in debug mode to check
-    /// Hidden trouble. actually, very small error in very short time may not make
-    /// trouble.
-    void CheckNi(const OCP_DBL* Ni)
-    {
-        OCP_BOOL flag = OCP_TRUE;
-        for (USI i = 0; i < numCom; i++) {
-            if (Ni[i] < 0) {
-                cout << "Ni[" << i << "] = " << Ni[i] << endl;
-                flag = OCP_FALSE;
-                break; // skip the rest checks
-            }
-        }
-        if (!flag) OCP_ABORT("Ni is negative!");
-    }
-
-    virtual void    OutMixtureIters() const = 0;
+    virtual void OutMixtureIters() const = 0;
 
 public:
-    virtual const OCP_DBL&  GetNt() const { return Nt; }
-    virtual const OCP_DBL&  GetNi(const USI& i) const { return Ni[i]; }
-    virtual const OCP_DBL&  GetVf() const { return vf; }
-    virtual const OCP_BOOL& GetPhaseExist(const USI& j) const { return phaseExist[j]; }
-    virtual const OCP_DBL&  GetS(const USI& j) const { return S[j]; }
-    virtual const OCP_DBL&  GetVj(const USI& j) const { return vj[j]; }
-    virtual const OCP_DBL&  GetNj(const USI& j) const { return nj[j]; }
-    virtual const OCP_DBL&  GetXij(const USI& j, const USI& i) const
-    {
-        return x[j * numCom + i];
-    }
-    virtual const OCP_DBL& GetRho(const USI& j) const { return rho[j]; }
-    virtual const OCP_DBL& GetXi(const USI& j) const { return xi[j]; }
-    virtual const OCP_DBL& GetMu(const USI& j) const { return mu[j]; }
-    virtual const OCP_DBL& GetVfP() const { return vfP; }
-    virtual const OCP_DBL& GetVfT() const { return vfT; }
-    virtual const OCP_DBL& GetVfi(const USI& i) const { return vfi[i]; }
-    virtual const OCP_DBL& GetRhoP(const USI& j) const { return rhoP[j]; }
-    virtual const OCP_DBL& GetRhoT(const USI& j) const { return rhoT[j]; }
-    virtual const OCP_DBL& GetXiP(const USI& j) const { return xiP[j]; }
-    virtual const OCP_DBL& GetXiT(const USI& j) const { return xiT[j]; }
-    virtual const OCP_DBL& GetMuP(const USI& j) const { return muP[j]; }
-    virtual const OCP_DBL& GetMuT(const USI& j) const { return muT[j]; }
-    virtual const OCP_DBL& GetRhoX(const USI& j, const USI& i) const
-    {
-        return rhox[j * numCom + i];
-    }
-    virtual const OCP_DBL& GetXiX(const USI& j, const USI& i) const
-    {
-        return xix[j * numCom + i];
-    }
-    virtual const OCP_DBL& GetMuX(const USI& j, const USI& i) const
-    {
-        return mux[j * numCom + i];
-    }
-    virtual const vector<OCP_DBL>& GetDXsDXp() const { return dXsdXp; }
-
-    virtual const OCP_DBL          GetUf() const { return Uf; }
-    virtual const OCP_DBL          GetUfP() const { return UfP; }
-    virtual const OCP_DBL          GetUfT() const { return UfT; }
-    virtual const OCP_DBL          GetUfi(const USI& i) const { return Ufi[i]; }
-    virtual const OCP_DBL          GetH(const USI& j) const { return H[j]; }
-    virtual const OCP_DBL          GetHT(const USI& j) const { return HT[j]; }
-    virtual const OCP_DBL&         GetHx(const USI& j, const USI& i) const
-    {
-        return Hx[j * numCom + i];
-    }
+    const auto& GetNt() const { return vs->Nt; }
+    const auto& GetNi(const USI& i) const { return vs->Ni[i]; }
+    const auto& GetVf() const { return vs->Vf; }
+    const auto& GetPhaseExist(const USI& j) const { return vs->phaseExist[j]; }
+    const auto& GetS(const USI& j) const { return vs->S[j]; }
+    const auto& GetVj(const USI& j) const { return vs->vj[j]; }
+    const auto& GetNj(const USI& j) const { return vs->nj[j]; }
+    const auto& GetXij(const USI& j, const USI& i) const { return vs->x[j * vs->nc + i]; }
+    const auto& GetRho(const USI& j) const { return vs->rho[j]; }
+    const auto& GetXi(const USI& j) const { return vs->xi[j]; }
+    const auto& GetMu(const USI& j) const { return vs->mu[j]; }
+    const auto& GetVfP() const { return vs->vfP; }
+    const auto& GetVfT() const { return vs->vfT; }
+    const auto& GetVfi(const USI& i) const { return vs->vfi[i]; }
+    const auto& GetRhoP(const USI& j) const { return vs->rhoP[j]; }
+    const auto& GetRhoT(const USI& j) const { return vs->rhoT[j]; }
+    const auto& GetXiP(const USI& j) const { return vs->xiP[j]; }
+    const auto& GetXiT(const USI& j) const { return vs->xiT[j]; }
+    const auto& GetMuP(const USI& j) const { return vs->muP[j]; }
+    const auto& GetMuT(const USI& j) const { return vs->muT[j]; }
+    const auto& GetRhoX(const USI& j, const USI& i) const { return vs->rhox[j * vs->nc + i]; }
+    const auto& GetXiX(const USI& j, const USI& i) const { return vs->xix[j * vs->nc + i]; }
+    const auto& GetMuX(const USI& j, const USI& i) const { return vs->mux[j * vs->nc + i]; }
+    const auto& GetDXsDXp() const { return vs->dXsdXp; }
+    const auto& GetUf() const { return vs->Uf; }
+    const auto& GetUfP() const { return vs->UfP; }
+    const auto& GetUfT() const { return vs->UfT; }
+    const auto& GetUfi(const USI& i) const { return vs->Ufi[i]; }
+    const auto& GetH(const USI& j) const { return vs->H[j]; }
+    const auto& GetHT(const USI& j) const { return vs->HT[j]; }
+    const auto& GetHx(const USI& j, const USI& i) const { return vs->Hx[j * vs->nc + i]; }
 
 protected:
-    void SetBulkId(const OCP_USI& n) { bulkId = n; }
-
-protected:
-    USI mixtureType;  ///< indicates the type of mixture, black oil or compositional or
-                      ///< others.
-    OCP_USI bulkId;   ///< index of current bulk
-    USI     numPhase; ///< num of phases.
-    USI     numCom;   ///< num of components.
-    OCP_DBL P;        ///< pressure when flash calculation.
-    OCP_DBL T;        ///< temperature when flash calculation.
-
-    OCP_DBL          vf;         ///< volume of total fluids.
-    OCP_DBL          Nt;         ///< Total moles of Components.
-    vector<OCP_DBL>  Ni;         ///< moles of component: numCom
-    vector<OCP_BOOL> phaseExist; ///< existence of phase: numPhase
-    vector<OCP_DBL>  S;          ///< saturation of phase: numPhase
-    vector<OCP_DBL>  vj;         ///< volume of phase: numPhase;
-    vector<OCP_DBL>  nj;         ///< mole number of phase j
-    vector<OCP_DBL>  x;        ///< Nij / nj: numPhase*numCom
-    vector<OCP_DBL>  rho;        ///< mass density of phase: numPhase
-    vector<OCP_DBL>  xi;         ///< molar density of phase: numPhase
-    vector<OCP_DBL>  mu;         ///< viscosity of phase: numPhase
-
-    // Derivatives
-    OCP_DBL vfP; ///< dVf / dP, the derivative of volume of total fluids with respect to
-                 ///< pressure.
-    OCP_DBL         vfT; ///< d vf  / dT
-    vector<OCP_DBL> vfi; ///< dVf / dNi: numCom  the derivative of volume of total
-                         ///< fluids with respect to moles of components.
-
-    vector<OCP_DBL> rhoP; ///< d rho / dP: numphase
-    vector<OCP_DBL> rhoT; ///< d rho j / dT: numPhase
-    vector<OCP_DBL> rhox; ///< d rho[j] / d x[i][j]: numphase * numCom
-    vector<OCP_DBL> xiP;  ///< d xi / dP: numphase
-    vector<OCP_DBL> xiT;  ///< d xi j / dT: numPhase
-    vector<OCP_DBL> xix;  ///< d xi[j] / d x[i][j]: numphase * numCom
-    vector<OCP_DBL> muP;  ///< d mu / dP: numPhase
-    vector<OCP_DBL> muT;  ///< d mu j  / dT: numPhase
-    vector<OCP_DBL> mux;  ///< d mu[j] / d x[i][j]: numphase * numCom
-
-    vector<OCP_DBL> dXsdXp; ///< derivatives of second variables wrt. primary variables
-
-    OCP_DBL         Uf;  ///< Internal energy of fluid
-    OCP_DBL         UfP; ///< dUf / dP
-    OCP_DBL         UfT; ///< dUf / dT
-    vector<OCP_DBL> Ufi; ///< dUf / dNi
-    vector<OCP_DBL> H;   ///< Enthalpy
-    vector<OCP_DBL> HT;  ///< d Hj / d T
-    vector<OCP_DBL> Hx;  ///< d Hj / d xij
+    /// type of mixture model
+    USI                     mixtureType;  
+    const OCPMixtureVarSet* vs;
 };
 
 #endif /* end if __MIXTURE_HEADER__ */

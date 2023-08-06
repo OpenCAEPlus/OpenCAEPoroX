@@ -201,19 +201,19 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
 
     phase2Index.resize(3);
     switch (flashCal[0]->GetMixtureType()) {
-        case BLKOIL_W:
+        case OCPMIXTURE_SP:
             phase2Index[WATER] = 0;
             break;
-        case BLKOIL_OW:
+        case OCPMIXTURE_BO_OW:
             phase2Index[OIL]   = 0;
             phase2Index[WATER] = 1;
             break;
-        case BLKOIL_OG:
+        case OCPMIXTURE_BO_OG:
             phase2Index[OIL] = 0;
             phase2Index[GAS] = 1;
             break;
-        case BLKOIL_DOGW:
-        case BLKOIL_ODGW:
+        case OCPMIXTURE_BO_OGW:
+        case OCPMIXTURE_COMP:
             phase2Index[OIL]   = 0;
             phase2Index[GAS]   = 1;
             phase2Index[WATER] = 2;
@@ -267,7 +267,7 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
 
 
     // PVT mode
-    for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureComp(rs_param, i));
+    for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureUnitComp(rs_param, i));
 
     // Saturation mode
     SATmode = PHASE_OGW;
