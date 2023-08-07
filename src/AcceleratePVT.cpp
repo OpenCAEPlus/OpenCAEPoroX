@@ -34,15 +34,15 @@ void SkipPSAVarset::UpdateLastTimeStep()
 SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin)
 {
     vs = vsin;
+    
+    const USI& nc = vs->nc;
+
+
     if (!vs->ifSetup) {
 
         vs->ifSetup = OCP_TRUE;
-
         const OCP_USI& nb = vs->nb;
-        const USI&     nc = vs->nc;
 
-        zi.resize(nc);
-      
         vs->flag.resize(nb);
         vs->P.resize(nb);
         vs->T.resize(nb);
@@ -55,34 +55,34 @@ SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin)
         vs->lminEigen.resize(nb);
         vs->lzi.resize(nb * nc);
     }
+
+    lnphiN.resize(nc * nc);
+    skipMatSTA.resize(nc * nc);
+    eigenSkip.resize(nc);
+    eigenWork.resize(2 * nc + 1);
 }
 
 
-void SkipPSAMethod01::SetPTZ(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
+OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_DBL& Pin,
+                                 const OCP_DBL& Tin,
+                                 const OCP_DBL* Niin,
+                                 const OCP_USI& bId) const
 {
-    P = Pin;
-    T = Tin;
-    Nt = 0;
-    for (USI i = 0; i < vs->nc; i++) {
-        Nt += Niin[i];
-    }
-    for (USI i = 0; i < vs->nc; i++) {
-        zi[i] = Niin[i] / Nt;
-    }
-}
+    if (vs->flag[bId]) {
 
+        OCP_DBL Nt = 0;
+        for (USI i = 0; i < vs->nc; i++) {
+            Nt += Niin[i];
+        }
 
-OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_USI& n) const
-{
-    if (vs->flag[n]) {
-        if (fabs(1 - vs->P[n] / P) >= vs->minEigen[n] / 10) {
+        if (fabs(1 - vs->P[bId] / Pin) >= vs->minEigen[bId] / 10) {
             return OCP_FALSE;
         }
-        if (fabs(vs->T[n] - T) >= vs->minEigen[n] * 10) {
+        if (fabs(vs->T[bId] - (Tin + CONV5)) >= vs->minEigen[bId] * 10) {
             return OCP_FALSE;
         }
         for (USI i = 0; i < vs->nc; i++) {
-            if (fabs(zi[i] - vs->zi[n * vs->nc + i]) >= vs->minEigen[n] / 10) {
+            if (fabs(Niin[i] / Nt - vs->zi[bId * vs->nc + i]) >= vs->minEigen[bId] / 10) {
                 return OCP_FALSE;
             }
         }
@@ -97,10 +97,9 @@ OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_USI& n) const
 USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
                               const OCP_DBL& Tin,
                               const OCP_DBL* Niin,
-                              const OCP_USI& n)
+                              const OCP_USI& bId)
 {
-    SetPTZ(Pin, Tin, Niin);
-	if (IfSkip(n)) {
+	if (IfSkip(Pin, Tin, Niin, bId)) {
 		return 1;
 	}
 	else {
@@ -114,10 +113,9 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
                      const OCP_DBL*          Niin,
                      const OCP_DBL*          S,
                      const USI&              np,
-                     const OCP_USI&          n)
+                     const OCP_USI&          bId)
 {
-    SetPTZ(Pin, Tin, Niin);
-	if (IfSkip(n)) {
+	if (IfSkip(Pin, Tin, Niin, bId)) {
 		return 1;
 	}
 	else if (np >= 2) {
@@ -138,15 +136,19 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
 }
 
 
-void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquilibrium& PE)
+void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp)
 {
-    const USI& ftype    = PE.GetFtype();
-    EoSCalculation* eos = PE.GetEoS();
+    const USI& ftype    = comp.GetFtypePE();
+    
 
     if (ftype == 0) {
         // the range should be calculated, which also means last skip is unsatisfied
-        const USI& nc = vs->nc;
-
+        EoSCalculation* eos       = comp.GetEoSPE();
+        const OCP_DBL&  P         = comp.GetP();
+        const OCP_DBL&  T         = comp.GetT();
+        const OCP_DBL&  Nt        = comp.GetNtPE();
+        const vector<OCP_DBL>& zi = comp.GetZiPE();
+        const USI&      nc  = vs->nc;
 
         eos->CalLnPhiN(P, T, &zi[0], Nt, &lnphiN[0]);;
 
@@ -178,6 +180,16 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquil
     }
     else {
         OCP_ABORT("WRONG Ftype!");
+    }
+}
+
+
+USI SkipPSA::Setup(const OCP_USI& nb, const USI& np, const USI& nc)
+{
+    if (ifUseSkip) {
+        vs.Setup(nb, np, nc);
+        sm.push_back(new SkipPSAMethod01(&vs));
+        return sm.size() - 1;
     }
 }
 

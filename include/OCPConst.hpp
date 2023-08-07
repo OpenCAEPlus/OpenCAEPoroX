@@ -90,21 +90,10 @@ const USI VECTORFASP     = 2; ///< Use vector linear solver in Fasp
 const USI PARDISOSOLVER  = 3; ///< Use linear solver in Pardiso
 const USI SAMGSOLVER     = 4; ///< Use linear solver in SAMG
 
-// Fluid types
+// Fluid Index
 const USI OIL     = 0; ///< Fluid type = oil
 const USI GAS     = 1; ///< Fluid type = gas
 const USI WATER   = 2; ///< Fluid type = water
-
-// Mixture types
-const USI BLKOIL      = 10; ///< Mixture model = black-oil
-const USI BLKOIL_W    = 11; ///< black oil model only with water
-const USI BLKOIL_OW   = 12; ///< black oil model with oil and water
-const USI BLKOIL_OG   = 13; ///< black oil model with oil and gas
-const USI BLKOIL_DOGW = 14; ///< black oil model with dead oil, dry gas, water
-const USI BLKOIL_ODGW = 15; ///< black oil model with live oil, dry gas, water
-const USI EOS_PVTW    = 20; ///< Mixture model = equation-of-state
-const USI THERMAL     = 30; ///< Mixture model = ifThermal
-
 
 // Phase types
 const USI PHASE_W               = 1;   ///< Phase type = water only

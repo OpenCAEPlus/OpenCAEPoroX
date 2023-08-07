@@ -887,12 +887,12 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 #ifdef DEBUG
     // Output A, b, x
     
-    //ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_FIM.out", 
-    //                      "proc" + to_string(myrank) + "_testb_FIM.out");
+    //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
+    //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
     //MPI_Barrier(rs.domain.myComm);
     //OCP_ABORT("Stop");
     //
-    ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
+    //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
     // Check if inf or nan occurs in solution
     // ls.CheckSolution();
 #endif // DEBUG

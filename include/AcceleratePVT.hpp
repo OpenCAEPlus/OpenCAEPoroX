@@ -12,7 +12,7 @@
 #ifndef __ACCELERATEPVT_HEADER__
 #define __ACCELERATEPVT_HEADER__
 
-#include "OCPPhaseEquilibrium.hpp"
+#include "OCPMixtureComp.hpp"
 
 #include <vector>
 
@@ -70,7 +70,7 @@ public:
                          const USI&     np,
                          const OCP_USI& n) = 0;
     /// Calculate skip info for next step
-    virtual void CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquilibrium& PE) = 0;
+    virtual void CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp) = 0;
 
 };
 
@@ -88,31 +88,25 @@ public:
     USI CalFtype(const OCP_DBL& Pin,
                  const OCP_DBL& Tin,
                  const OCP_DBL* Niin,
-                 const OCP_USI& n) override;
+                 const OCP_USI& bId) override;
     /// Calculate the ftype with predicted saturations
     USI CalFtype(const OCP_DBL& Pin,
                  const OCP_DBL& Tin,
                  const OCP_DBL* Niin,
                  const OCP_DBL* S,
                  const USI&     np,
-                 const OCP_USI& n) override;
-    void CalSkipForNextStep(const OCP_USI& bId, const OCPPhaseEquilibrium& PE) override;
+                 const OCP_USI& bId) override;
+    void CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp) override;
 
 protected:
-    void SetPTZ(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin);
-    OCP_BOOL IfSkip(const OCP_USI& n) const;
+    OCP_BOOL IfSkip(const OCP_DBL& Pin,
+                    const OCP_DBL& Tin,
+                    const OCP_DBL* Niin,
+                    const OCP_USI& bId) const;
 
 protected:
     /// pointer of variables set
-    SkipPSAVarset* vs;
-    /// Pressure
-    OCP_DBL         P;
-    /// Temperature
-    OCP_DBL         T;
-    /// Total mole number
-    OCP_DBL         Nt;
-    /// molar fraction
-    vector<OCP_DBL> zi;
+    SkipPSAVarset*  vs;
     
     /// d ln phi[i][j] / d n[k][j]
     vector<OCP_DBL> lnphiN;
@@ -130,6 +124,8 @@ class SkipPSA
 {
 
 public:
+    /// Setup SkipPSA
+    USI Setup(const OCP_USI& nb, const USI& np, const USI& nc);
     /// Set ifUseSkip to true or false
     void SetUseSkip(const OCP_BOOL& flag) { ifUseSkip = flag; }
     /// Return ifUseSkip
@@ -138,10 +134,11 @@ public:
     USI CalFtype(const OCP_DBL& Pin,
                  const OCP_DBL& Tin,
                  const OCP_DBL* Niin,
-                 const OCP_USI& n,
+                 const OCP_USI& bId,
                  const USI&     mIndex)
     {
-        sm[mIndex]->CalFtype(Pin, Tin, Niin, n);
+        if (ifUseSkip) return sm[mIndex]->CalFtype(Pin, Tin, Niin, bId);
+        else           return 0;
     }
     /// Calculate the ftype with predicted saturations
     USI CalFtype(const OCP_DBL& Pin,
@@ -149,10 +146,16 @@ public:
                  const OCP_DBL* Niin,
                  const OCP_DBL* S,
                  const USI&     np,
-                 const OCP_USI& n,
+                 const OCP_USI& bId,
                  const USI&     mIndex)
     {
-        sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, n);
+        if (ifUseSkip) return sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, bId);
+        else           return 0;
+    }
+    void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex, const OCPMixtureComp& comp)
+    {
+        if (ifUseSkip) 
+            sm[mIndex]->CalSkipForNextStep(bId, comp);        
     }
     /// Reset SkipPSA vars to last time step
     void ResetToLastTimeStep() { vs.ResetToLastTimeStep(); }

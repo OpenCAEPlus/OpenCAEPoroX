@@ -21,7 +21,7 @@ MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i)
 
 void MixtureUnitComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
 {
-
+    compM.Flash(Pin, Tin, Niin);
 }
 
 
@@ -33,7 +33,8 @@ void MixtureUnitComp::InitFlashIMPEC(const OCP_DBL& Pin,
                                  const OCP_DBL* Ziin,
                                  const OCP_USI& bId)
 {
-
+    compM.InitFlash(Pin, Tin, Sjin, Ziin, Vpore);
+    skipPSA.CalSkipForNextStep(bId, skipMethodIndex, compM);
 }
 
 void MixtureUnitComp::InitFlashFIM(const OCP_DBL& Pin,
@@ -44,7 +45,8 @@ void MixtureUnitComp::InitFlashFIM(const OCP_DBL& Pin,
                                const OCP_DBL* Ziin,
                                const OCP_USI& bId)
 {
-
+    compM.InitFlashDer(Pin, Tin, Sjin, Ziin, Vpore);
+    skipPSA.CalSkipForNextStep(bId, skipMethodIndex, compM);
 }
 
 void MixtureUnitComp::FlashIMPEC(const OCP_DBL& Pin,
@@ -54,7 +56,9 @@ void MixtureUnitComp::FlashIMPEC(const OCP_DBL& Pin,
                              const OCP_DBL* xijin,
                              const OCP_USI& bId)
 {
-
+    const USI ftype = skipPSA.CalFtype(Pin, Tin, Niin, bId, skipMethodIndex);
+    compM.Flash(Pin, Tin, Niin, ftype, lastNP, xijin);
+    skipPSA.CalSkipForNextStep(bId, skipMethodIndex, compM);
 }
 
 void MixtureUnitComp::FlashFIM(const OCP_DBL& Pin,
@@ -65,17 +69,19 @@ void MixtureUnitComp::FlashFIM(const OCP_DBL& Pin,
                            const OCP_DBL* xijin,
                            const OCP_USI& bId)
 {
-
+    const USI ftype = skipPSA.CalFtype(Pin, Tin, Niin, Sjin, compM.GetNumPhasePE(lastNP), bId, skipMethodIndex);
+    compM.FlashDer(Pin, Tin, Niin, ftype, lastNP, xijin);
+    skipPSA.CalSkipForNextStep(bId, skipMethodIndex, compM);
 }
 
 
 OCP_DBL
 MixtureUnitComp::XiPhase(const OCP_DBL& Pin,
-                     const OCP_DBL& Tin,
-                     const vector<OCP_DBL>& Ziin,
-                     const USI&     tarPhase)
+                         const OCP_DBL& Tin,
+                         const vector<OCP_DBL>& Ziin,
+                         const USI&     tarPhase)
 {
-
+    return compM.CalXi(Pin, Tin, &Ziin[0], tarPhase);
 }
 
 OCP_DBL
@@ -85,7 +91,7 @@ MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
                       const vector<OCP_DBL>& Ziin,
                       const USI&     tarPhase)
 {
-
+    return compM.CalRho(Pin, Tin, &Ziin[0], tarPhase);
 }
 
 void MixtureUnitComp::SetupWellOpt(WellOpt&                  opt,
@@ -155,9 +161,9 @@ void MixtureUnitComp::CalProdWeight(const OCP_DBL&     Pin,
                                 const vector<OCP_DBL>& prodPhase,
                                 vector<OCP_DBL>&       prodWeight)
 {
-    Flash(Pin, Tin, Niin);
+    compM.Flash(Pin, Tin, Niin);
 
-    OCP_DBL         qt = vs->Nt;
+    const OCP_DBL   qt = vs->Nt;
     vector<OCP_DBL> factor(vs->np, 0);
 
     factor[0] = vs->vj[0] / qt / CONV1; // stb / lbmol
@@ -179,7 +185,7 @@ void MixtureUnitComp::CalProdRate(const OCP_DBL&   Pin,
                               const OCP_DBL*   Niin,
                               vector<OCP_DBL>& prodRate)
 {
-    Flash(Pin, Tin, Niin);
+    compM.Flash(Pin, Tin, Niin);
 
     prodRate[0] = vs->vj[0] / CONV1; // stb
     prodRate[1] = vs->vj[1] / 1000;  // Mscf
@@ -193,7 +199,7 @@ void MixtureUnitComp::CalProdRate(const OCP_DBL&   Pin,
 
 void MixtureUnitComp::SetupOptionalFeatures(OptionalFeatures& optFeatures)
 {
-
+    skipMethodIndex = skipPSA.Setup(optFeatures.numBulk, compM.GetNPmaxPE(), compM.GetNCPE());
 }
 
 

@@ -798,9 +798,6 @@ void OCPMixtureCompMethod01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
 void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs)
 {
     // if vw >= 0(water volume is given), then correct Nw
-    vs.phaseExist[wIdP] = OCP_TRUE;
-    vs.x[vs.nc + wIdC] = 1.0;
-
     PVTW.CalRhoXiMuDer(vs.P, vs.rho[wIdP], vs.xi[wIdP], vs.mu[wIdP], vs.rhoP[wIdP], vs.xiP[wIdP], vs.muP[wIdP]);
     if (vw >= 0) {
         vs.Ni[wIdC] = vw * vs.xi[wIdP];
@@ -879,7 +876,7 @@ void OCPMixtureCompMethod01::CaldXsdXpW(OCPMixtureVarSet& vs)
 
 void OCPMixtureComp::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    vs.Init(rs_param.numPhase, rs_param.numCom, OCP_FALSE);
+    vs.Init(3, rs_param.numCom + 1, OCP_FALSE);  // temp set
     if (rs_param.PVTW_T.data[i].size() > 0) {
         pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
     }

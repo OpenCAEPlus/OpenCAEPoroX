@@ -38,14 +38,37 @@ class OCPMixtureCompMethod
 {
 public:
     OCPMixtureCompMethod() = default;
+    /// With P, Ni, perform flash calculations only
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
+    /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
+    /// With P, Ni, perform flash calculations, and calculate VfP,Vfi only
     virtual void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
+    /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi,dXsdXp
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
+    /// With P, Ni, perform flash calculations, and calculate VfP,Vfi,dXsdXp
     virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
+    /// Calculate molar density of target phase
     virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    /// Calculate mass density of target phase
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    /// Input total number of existing phase, return the number of existing phase in PEC
+    virtual USI GetNumPhasePE(const USI& np) const = 0;
+    /// OutPut total flash iterations during the simulation
     void OutIters() const { PE.OutMixtureIters(); }
+    /// Get number of components in PE
+    const auto& GetNC() const { return NC; }
+    /// Get allowable maximum number of phases in PE
+    const auto& GetNPmax() const { return NPmax; }
+    /// Get EoS
+    const auto GetEoS() { return &eos; }
+    /// Get Ftype
+    const auto& GetFtype() const { return PE.GetFtype(); }
+    /// Get zi
+    const auto& GetZi() const { return zi; }
+    /// Get Nt
+    const auto& GetNt() const { return Nt; }
+    
 
 ////////////////////////////////////////////////////////////////
 // Basic variables
@@ -209,6 +232,8 @@ public:
     void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    /// Water is always present
+    USI GetNumPhasePE(const USI& np) const override { return np - 1; }
 
 protected:
     void InitNtZ(OCPMixtureVarSet& vs);
@@ -278,12 +303,21 @@ public:
         pmMethod->FlashDer(vs, ftype, lNP, lx);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        pmMethod->CalXi(P, T, z, tarPhase);
+        return pmMethod->CalXi(P, T, z, tarPhase);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        pmMethod->CalRho(P, T, z, tarPhase);
+        return pmMethod->CalRho(P, T, z, tarPhase);
     }
     void OutputIters() const { pmMethod->OutIters(); }
+    const auto& GetNCPE() const { return pmMethod->GetNC(); }
+    const auto& GetNPmaxPE() const { return pmMethod->GetNPmax(); }
+    const auto GetEoSPE() const { return pmMethod->GetEoS(); }
+    const auto GetFtypePE() const { return pmMethod->GetFtype(); }
+    const auto GetNumPhasePE(const USI& np) const { return pmMethod->GetNumPhasePE(np); }
+    const auto& GetZiPE() const { return pmMethod->GetZi(); }
+    const auto& GetNtPE() const { return pmMethod->GetNt(); }
+    const auto& GetP() const { return vs.P; }
+    const auto& GetT() const { return vs.T; }
 
 protected:
     void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {

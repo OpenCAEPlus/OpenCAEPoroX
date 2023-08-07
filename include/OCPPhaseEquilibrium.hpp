@@ -89,14 +89,6 @@ public:
     const auto& GetNu(const USI& j) const { return nu[j]; }
     /// Return ftype
     const auto& GetFtype() const { return ftype; }
-    /// Return Pressure
-    const auto& GetP() const { return P; }
-    /// Return Temperature
-    const auto& GetT() const { return T; }
-    /// Return zi
-    const auto& GetZi() const { return zi; }
-    /// Return EoS
-    const auto GetEoS() const { return eos; }
 
 protected:
     void SetInitalValue(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin, 
