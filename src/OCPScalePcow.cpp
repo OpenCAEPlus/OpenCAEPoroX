@@ -73,8 +73,8 @@ USI ScalePcow::Setup(OCPFlow* flowin)
 {
 	switch (flowin->FlowType())
 	{
-    case OCPFLOW_OGW:
-    case OCPFLOW_OW:
+    case OCPFlowType::OGW:
+    case OCPFlowType::OW:
         break;
 	default:
         OCP_ABORT("Wrong FlowType for ScalePcow!");

@@ -282,7 +282,7 @@ protected:
 class OCPMixtureComp : public OCPMixture
 {
 public:
-    OCPMixtureComp() { mixtureType = OCPMIXTURE_COMP; }
+    OCPMixtureComp() { mixtureType = OCPMixtureType::COMP; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);

@@ -101,7 +101,7 @@ protected:
 class OCPMixtureUnitThermalOW : public OCPMixture
 {
 public:
-    OCPMixtureUnitThermalOW() { mixtureType = OCPMIXTURE_THERMALK_OW; }
+    OCPMixtureUnitThermalOW() { mixtureType = OCPMixtureType::THERMALK_OW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
         SetPTS(P, T, Sw);

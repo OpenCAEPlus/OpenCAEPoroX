@@ -180,7 +180,7 @@ protected:
 class OCPFlowOGW : public OCPFlow
 {
 public:
-    OCPFlowOGW() { flowType = OCPFLOW_OGW; }
+    OCPFlowOGW() { flowType = OCPFlowType::OGW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg, const OCP_DBL& Sw) { 
         SetSaturation(So, Sg, Sw);

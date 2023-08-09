@@ -33,7 +33,7 @@ class MixtureUnit
 public:
     MixtureUnit() = default;
     /// return type of mixture.
-    USI GetMixtureType() const { return mixtureType; }
+    auto GetMixtureType() const { return mixtureType; }
     /// flash calculation with saturation of phases.
     virtual void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) = 0;
     virtual void InitFlashIMPEC(const OCP_DBL& Pin,
@@ -143,7 +143,7 @@ public:
 
 protected:
     /// type of mixture model
-    USI                     mixtureType;  
+    OCPMixtureType          mixtureType;
     const OCPMixtureVarSet* vs;
 };
 

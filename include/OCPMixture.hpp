@@ -18,13 +18,24 @@
 
 using namespace std;
 
-const USI OCPMIXTURE_SP          = 0;
-const USI OCPMIXTURE_BO_OG       = 121;
-const USI OCPMIXTURE_BO_OW       = 122;
-const USI OCPMIXTURE_BO_GW       = 123;
-const USI OCPMIXTURE_BO_OGW      = 13;
-const USI OCPMIXTURE_COMP        = 2;
-const USI OCPMIXTURE_THERMALK_OW = 3;
+
+enum class OCPMixtureType
+{
+    /// single phase
+    SP,
+    /// blackoil: oil, gas
+    BO_OG,
+    /// blackoil: oil, water
+    BO_OW,
+    /// blackoil: gas and water
+    BO_GW,
+    /// blackoil: oil, gas and water
+    BO_OGW,
+    /// Compositional Model
+    COMP,
+    /// Thermal-K
+    THERMALK_OW
+};
 
 /// mixture varset
 class OCPMixtureVarSet
@@ -181,12 +192,12 @@ class OCPMixture
 {
 public:
     OCPMixture() = default;
-    USI MixtureType() const { return mixtureType; }
+    auto MixtureType() const { return mixtureType; }
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
 
 protected:
     /// mixture type
-    USI              mixtureType;
+    OCPMixtureType   mixtureType;
     /// mixture variables set
     OCPMixtureVarSet vs;
 };

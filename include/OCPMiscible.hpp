@@ -96,8 +96,8 @@ public:
     MisCurveMethod01(OCPFlow* flowin) {
         switch (flowin->FlowType())
         {
-        case OCPFLOW_OG:
-        case OCPFLOW_OGW:
+        case OCPFlowType::OG:
+        case OCPFlowType::OGW:
             break;
         default:
             OCP_ABORT("Wrong FlowType for ScalePcow!");

@@ -16,10 +16,20 @@
 
 using namespace std;
 
-const USI OCPFLOW_OG  = 21;
-const USI OCPFLOW_OW  = 22;
-const USI OCPFLOW_GW  = 23;
-const USI OCPFLOW_OGW = 3;
+
+enum class OCPFlowType 
+{
+    /// single phase
+    SP,
+    /// oil and gas
+    OG,
+    /// oil and water
+    OW,
+    /// gas and water
+    GW,
+    /// oil, gas and water
+    OGW
+};
 
 /// flow vars suite
 class OCPFlowVarSet
@@ -27,6 +37,8 @@ class OCPFlowVarSet
     /// oil phase is reference phase
 public:
     OCPFlowVarSet() { Init0(); }
+    void Setup(const USI& np, const OCPFlowType& type) {
+    }
     void Init0() {
 		Swco     = 0;
         krocw    = 0;
@@ -68,6 +80,22 @@ public:
     /// the corresponding derivatives of capillary pressure
     OCP_DBL dPcgodSo, dPcgodSg, dPcgodSw;
     OCP_DBL dPcwodSo, dPcwodSg, dPcwodSw;
+
+
+    /// num of phases
+    USI             np;
+    /// Index of Phases
+    USI             o, g, w;
+    /// Saturations
+    vector<OCP_DBL> S;
+    /// Relative Permeability
+    vector<OCP_DBL> Kr;
+    /// Capillary Pressure
+    vector<OCP_DBL> Pc;
+    /// dKr / dS
+    vector<OCP_DBL> dKrdS;
+    /// dPc / dS
+    vector<OCP_DBL> dPcdS;
 };
 
 
@@ -79,7 +107,7 @@ class OCPFlow
 {
 public:
     OCPFlow() = default;
-    USI FlowType() const { return flowType; }
+    auto FlowType() const { return flowType; }
     OCPFlowVarSet& GetVarSet() { return vs; }
     
     virtual OCP_DBL GetSwco() const = 0;
@@ -88,7 +116,7 @@ public:
     virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const = 0;
     virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
 protected:
-    USI           flowType;
+    OCPFlowType   flowType;
     OCPFlowVarSet vs;
 };
 

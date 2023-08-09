@@ -201,19 +201,19 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& op
 
     phase2Index.resize(3);
     switch (flashCal[0]->GetMixtureType()) {
-        case OCPMIXTURE_SP:
+        case OCPMixtureType::SP:
             phase2Index[WATER] = 0;
             break;
-        case OCPMIXTURE_BO_OW:
+        case OCPMixtureType::BO_OW:
             phase2Index[OIL]   = 0;
             phase2Index[WATER] = 1;
             break;
-        case OCPMIXTURE_BO_OG:
+        case OCPMixtureType::BO_OG:
             phase2Index[OIL] = 0;
             phase2Index[GAS] = 1;
             break;
-        case OCPMIXTURE_BO_OGW:
-        case OCPMIXTURE_COMP:
+        case OCPMixtureType::BO_OGW:
+        case OCPMixtureType::COMP:
             phase2Index[OIL]   = 0;
             phase2Index[GAS]   = 1;
             phase2Index[WATER] = 2;

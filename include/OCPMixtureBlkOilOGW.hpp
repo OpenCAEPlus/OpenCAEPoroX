@@ -83,7 +83,7 @@ protected:
 class OCPMixtureBlkOilOGW : public OCPMixture
 {
 public:
-    OCPMixtureBlkOilOGW() { mixtureType = OCPMIXTURE_BO_OGW; }
+    OCPMixtureBlkOilOGW() { mixtureType = OCPMixtureType::BO_OGW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void InitFlash(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw, const OCP_DBL& Vp) {
         SetPS(P, Pb, Sg, Sw);

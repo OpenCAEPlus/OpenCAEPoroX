@@ -113,6 +113,7 @@ USI MiscibleCurve::Setup(OCPFlow* flowin, const MiscibleFactor* misfactor)
 {
     if (!misfactor->IfUse()) {
         ifUse = OCP_FALSE;
+        return 0;
     }
     else {
         misFac = misfactor;
