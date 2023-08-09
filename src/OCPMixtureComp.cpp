@@ -741,7 +741,7 @@ OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const
         // hydrocarbon phase
         OCP_DBL xitmp = CalXi(P, T, &z[0], tarPhase);
         OCP_DBL MWtmp = 0;
-        for (USI i = 0; i < NC; i++) MWtmp += zi[i] * MWC[i];
+        for (USI i = 0; i < NC; i++) MWtmp += z[i] * MWC[i];
         return MWtmp * xitmp;
     }
 }

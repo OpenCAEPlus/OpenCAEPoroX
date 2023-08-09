@@ -661,7 +661,8 @@ void Bulk::InitPTSw(const USI& tabrow)
                                                                tmpInitZi, WATER);
             Pwtmp[id + 1] = Pwtmp[id] + gammaWtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
-    } else if (Dref > DOWC) {
+    } 
+    else if (Dref > DOWC) {
         OCP_DBL myz;
         // reference pressure is water pressure
         if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
@@ -814,7 +815,8 @@ void Bulk::InitPTSw(const USI& tabrow)
             }
         }
 
-    } else {
+    } 
+    else {
         OCP_DBL myz;
         // reference pressure is oil pressure
         Poref = Pref;
