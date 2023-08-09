@@ -31,38 +31,11 @@ public:
 };
 
 
-class MisFacMethod01Params
-{
-    friend class MisFacMethod01;
-public:
-    MisFacMethod01Params() = default;
-    MisFacMethod01Params(const OCP_DBL& surTenRef, const OCP_DBL& FkExp, const OCP_DBL& surTenPc) {
-        ifUse   = OCP_TRUE;
-        stref   = surTenRef;
-        fkExp   = FkExp;
-        stPc    = surTenPc;
-        if (stPc < 0) stPc = stref;
-    }
-    OCP_BOOL IfUse() const { return ifUse; }
-
-protected:
-    OCP_BOOL ifUse{ OCP_FALSE };
-    OCP_DBL  stref; ///< The reference surface tension (maximum allowed miscible surface tension)
-    OCP_DBL  fkExp; ///< exponent of the surface tension calculation
-    OCP_DBL  stPc;  ///< The maximum surface tension used to scale the input capillary pressure curves
-};
-
-
 /// Coats expression
 class MisFacMethod01 : public MisFacMethod
 {
 public:
-    MisFacMethod01() = default;
-    MisFacMethod01(const MisFacMethod01Params& param) {
-        stref = param.stref;
-        fkExp = param.fkExp;
-        stPcf = param.stPc / stref;
-    }
+    MisFacMethod01(const Miscstr& param);
     void CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const override;
 
 public:
@@ -72,33 +45,36 @@ public:
 };
 
 
-class MisFacMethodParams
-{
-public:
-    MisFacMethodParams() = default;
-    MisFacMethodParams(const MisFacMethod01Params& param01in) {
-        param01 = param01in;
-    }
-    void SetupParams(const MisFacMethod01Params& param01in) {
-        param01 = param01in;
-    }
-
-public:
-    MisFacMethod01Params param01;
-};
-
-
-class MiscibleFcator
+class MiscibleFactor
 {
 public:
     /// Default constructor
-    MiscibleFcator() = default;
-    USI Setup(const MisFacMethodParams& param);
-    void CalculateMiscibleFactor(const USI& mIndex, const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) {
-        mfMethod[mIndex]->CalculateMiscibleFactor(st, fk, fp);
+    MiscibleFactor() = default;
+    USI Setup(const ParamReservoir& param, const USI& i, const OCP_USI& nb, const SurfaceTension* st);
+    void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex) {
+        if (ifUse) {
+            mfMethod[mIndex]->CalculateMiscibleFactor(surTen->GetSurfaceTension(bId), Fk[bId], Fp[bId]);
+        }       
     }
+    const auto IfUse()const { return ifUse; }
+    const auto GetFk(const OCP_USI& bId) const { return Fk[bId]; }
+    const auto GetFp(const OCP_USI& bId) const { return Fp[bId]; }
+    void ResetTolastTimeStep() { }
+    void UpdateLastTimeStep() { }
+
 protected:
+    /// if calculate miscible factor
+    OCP_BOOL              ifUse{ OCP_FALSE };
+    /// miscibility factor for permeability
+    vector<OCP_DBL>       Fk;
+    /// miscible factor for capillary pressure
+    vector<OCP_DBL>       Fp;
+    /// method of miscible factor calculation
     vector<MisFacMethod*> mfMethod;
+
+    // Dependent modules
+    /// Surface tension Calculation
+    const SurfaceTension* surTen;
 };
 
 
@@ -143,69 +119,29 @@ class MiscibleCurve
 {
 public:
     MiscibleCurve() = default;
-    USI Setup(OCPFlow* flowin);
-    void CorrectCurve(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp) {
-        mcMethod[mIndex]->CurveCorrect(Fk, Fp);
-    }
-    void CorrectCurveDer(const USI& mIndex, const OCP_DBL& Fk, const OCP_DBL& Fp) {
-        mcMethod[mIndex]->CurveCorrectDer(Fk, Fp);
-    }
-protected:
-    vector<MisCurveMethod*> mcMethod;
-};
-
-
-/// The class Miscible considers the effect of miscible, Now three main parts are contained:
-/// surface tension calculations, miscible factor calculartions, permeability-curve correction.
-class Miscible
-{
-public:
-    /// Input param from input file
-    void InputParam(const OCP_BOOL& ifmiscible);
-    /// Setup for miscible factor calculation
-    USI Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams);
-    /// Setup for miscible curve correction
-    USI Setup(OCPFlow* flowin);
-    /// Calculate Misscible Factor
-    void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex);
-    /// Correct miscible curve
+    USI Setup(OCPFlow* flowin, const MiscibleFactor* misfactor);
     void CorrectCurve(const OCP_USI& bId, const USI& mIndex) {
-        if (ifMiscible) mC.CorrectCurve(mIndex, Fk[bId], Fp[bId]);
+        if (ifUse) {
+            mcMethod[mIndex]->CurveCorrect(misFac->GetFk(bId), misFac->GetFp(bId));
+        }
     }
     void CorrectCurveDer(const OCP_USI& bId, const USI& mIndex) {
-        if (ifMiscible) mC.CorrectCurveDer(mIndex, Fk[bId], Fp[bId]);
+        if (ifUse) {
+            mcMethod[mIndex]->CurveCorrectDer(misFac->GetFk(bId), misFac->GetFp(bId));
+        }
     }
-    /// Reset Miscible term to last time step
-    void ResetTolastTimeStep() { surTen = lsurTen; }
-    /// Update Miscible term at last time step
-    void UpdateLastTimeStep() { lsurTen = surTen; }
-    /// Return surTen
-    OCP_DBL GetSurTen(const OCP_USI& n) const { return surTen[n]; }
-    /// Return Fk
-    OCP_DBL GetFk(const OCP_USI& n) const { return Fk[n]; }
-    /// Return Fp
-    OCP_DBL GetFp(const OCP_USI& n) const { return Fp[n]; }
-
+    void ResetTolastTimeStep() { }
+    void UpdateLastTimeStep() { }
 protected:
-    /// Miscible treatment of hydrocarbons, only used in compositional Model.
-    OCP_BOOL ifMiscible{OCP_FALSE};
-    vector<OCP_DBL> surTen; ///< Surface tensions between hydrocarbon phases.
-    vector<OCP_DBL> Fk;     ///< miscibility factor for permeability
-    vector<OCP_DBL> Fp;     ///< miscibility factor for capillary pressure
+    /// If use Miscible curve correction
+    OCP_BOOL                ifUse{ OCP_FALSE };
+    /// Methods for Miscible Curve 
+    vector<MisCurveMethod*> mcMethod;
 
-    // Last time step
-    vector<OCP_DBL> lsurTen; ///< last surTen.
-
-    /// Method
-protected:
-    /// for surface tension calculation
-    SurfaceTension sT;
-    /// for miscible factor calculation
-    MiscibleFcator mF;
-    /// for miscible curve correction
-    MiscibleCurve  mC;
-
+    // Dependent modules
+    const MiscibleFactor*   misFac;
 };
+
 
 #endif /* end if __OCPMISCIBLE_HEADER__ */
 

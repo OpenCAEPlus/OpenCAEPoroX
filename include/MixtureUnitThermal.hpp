@@ -25,7 +25,6 @@ class MixtureUnitThermal : public MixtureUnit
 {
 public:
     MixtureUnitThermal() = default;
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void OutMixtureIters() const override{};
 };
 
@@ -33,7 +32,7 @@ class MixtureUnitThermal_OW : public MixtureUnitThermal
 {
 public:
     MixtureUnitThermal_OW() = default;
-    MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId);
+    MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalFeatures& opts);
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     /// flash calculation with saturation of phases.
     void InitFlashIMPEC(const OCP_DBL& Pin,

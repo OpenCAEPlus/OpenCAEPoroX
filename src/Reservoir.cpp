@@ -459,9 +459,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 void Reservoir::InputDistParamOthers(const ParamRead& param)
 {
     domain.SetGirdDimens(param.paramRs.dimens.nx, param.paramRs.dimens.ny, param.paramRs.dimens.nz);
-    bulk.InputParam(param.paramRs);
+    bulk.InputParam(param.paramRs, optFeatures);
     allWells.InputParam(param.paramWell, domain);
-    optFeatures.InputParam(param.paramRs);
 }
 
 
@@ -472,7 +471,6 @@ void Reservoir::SetupIsoT()
     bulk.SetupIsoT(domain);
     conn.SetupIsoT(bulk);
     allWells.Setup(bulk);
-    bulk.SetupOptionalFeatures(optFeatures);
 }
 
 void Reservoir::SetupT()
@@ -480,7 +478,6 @@ void Reservoir::SetupT()
     bulk.SetupT(domain);
     conn.SetupT(bulk);
     allWells.Setup(bulk);
-    bulk.SetupOptionalFeatures(optFeatures);
 }
 
 void Reservoir::ApplyControl(const USI& i)

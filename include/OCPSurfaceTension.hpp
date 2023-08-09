@@ -13,6 +13,8 @@
 #define __OCPSURFACETENSION_HEADER__
 
 #include "OCPConst.hpp"
+#include "ParamReservoir.hpp"
+#include "OCPMixtureComp.hpp"
 
 #include <vector>
 
@@ -28,44 +30,8 @@ public:
     /// Calculate surface tensions
     virtual OCP_DBL CalSurfaceTension() const = 0;
 
-protected:
-    const USI* NP;     ///< num of present phases
 };
 
-
-/// Params uesd to calculate surface tension
-class SurTenMethod01Params
-{
-    friend class SurTenMethod01;
-public:
-    /// Default constructor
-    SurTenMethod01Params() = default;
-    SurTenMethod01Params(const vector<OCP_DBL>& parachorin,
-                   const OCP_DBL* xvin,
-                   const OCP_DBL* xlin,
-                   const OCP_DBL* bvin,
-                   const OCP_DBL* blin,
-                   const USI* NPin
-    )
-    {
-        ifUse    = OCP_TRUE;
-        parachor = parachorin;
-        xv       = xvin;
-        xl       = xlin;
-        bv       = bvin;
-        bl       = blin;
-        NP       = NPin;
-    }
-    OCP_BOOL IfUse() const { return ifUse; }
-protected:
-    OCP_BOOL        ifUse{ OCP_FALSE };
-    vector<OCP_DBL> parachor;  ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
-    const OCP_DBL*  xv;        ///< molar fractions of vapour phase
-    const OCP_DBL*  xl;        ///< molar fractions of liquid phase
-    const OCP_DBL*  bv;        ///< molar density of vapour phase
-    const OCP_DBL*  bl;        ///< molar density of liquid phase
-    const USI*      NP;        ///< num of present phases
-};
 
 
 /// Macleod - Sugden correlation
@@ -73,37 +39,20 @@ class SurTenMethod01 : public SurTenMethod
 {
 public:
     /// Default constructor
-    SurTenMethod01() = default;
-    /// Construct with parachor
-    SurTenMethod01(const SurTenMethod01Params& params)
-    {
-        parachor = params.parachor;
-        xv = params.xv;
-        xl = params.xl;
-        bv = params.bv;
-        bl = params.bl;
-        NP = params.NP;
-        NC = parachor.size();
+    SurTenMethod01(const vector<OCP_DBL>& parachorin, OCPMixtureComp* mix) {
+        parachor = parachorin;
+        NC       = parachor.size();
+        mixture  = mix;
     }
     OCP_DBL CalSurfaceTension() const;
-    vector<OCP_DBL> parachor; ///< used to calculate oil-gas surface tension by Macleod-Sugden correlation
-    const OCP_DBL*  xv;       ///< molar fractions of vapour phase
-    const OCP_DBL*  xl;       ///< molar fractions of liquid phase
-    const OCP_DBL*  bv;       ///< molar density of vapour phase
-    const OCP_DBL*  bl;       ///< molar density of liquid phase
-    USI             NC;       ///< num of components
-};
 
-
-class SurTenMethodParams
-{
-public:
-    SurTenMethodParams(const SurTenMethod01Params& params01in) {
-        params01 = params01in;
-    }
-
-public:
-    SurTenMethod01Params params01;
+protected:
+    /// used to calculate oil-gas surface tension by Macleod-Sugden correlation
+    vector<OCP_DBL> parachor; 
+    /// num of components
+    USI             NC;
+    /// mixture model
+    OCPMixtureComp* mixture;
 };
 
 
@@ -112,14 +61,29 @@ class SurfaceTension
 public:
     /// Default constructor
     SurfaceTension() = default;
-    /// Setuo surface tension method
-    USI Setup(const SurTenMethodParams& params);
+    /// Setup surface tension method(different mixture use different setup)
+    USI Setup(const ParamReservoir& rs_param, const USI& i, const OCP_USI& nb, OCPMixtureComp* mix);
     /// Calculate surface tension with specified method
-    OCP_DBL CalSurfaceTension(const USI& mIndex) const {
-        return stMethod[mIndex]->CalSurfaceTension();
+    void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex) {
+        if (ifUse) {
+            surTen[bId] = stMethod[mIndex]->CalSurfaceTension();
+        }        
     }
+    const auto IfUse() const { return ifUse; }
+    const auto GetSurfaceTension(const OCP_USI& bId) const {
+        OCP_ASSERT(ifUse, "Surface Tension is not available!");
+        return surTen[bId];
+    }
+    void ResetTolastTimeStep() { }
+    void UpdateLastTimeStep()  { }
+
 protected:
+    /// If calculate surface tension
+    OCP_BOOL              ifUse{ OCP_FALSE };
+    /// surface tension calculation methods
     vector<SurTenMethod*> stMethod;
+    /// surface tension
+    vector<OCP_DBL>       surTen;
 };
 
 

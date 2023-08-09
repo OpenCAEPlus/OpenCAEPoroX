@@ -96,7 +96,7 @@ void HeatLoss::UpdateLastTimeStep()
 /////////////////////////////////////////////////////////////////////
 
 /// Read parameters from rs_param data structure.
-void Bulk::InputParam(const ParamReservoir& rs_param)
+void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     OCP_FUNCNAME;
 
@@ -118,19 +118,19 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
 
     if (ifBlackOil) {
         // Isothermal blackoil model
-        InputParamBLKOIL(rs_param);
+        InputParamBLKOIL(rs_param, opts);
     } else if (ifComps) {
         // Isothermal compositional model
-        InputParamCOMPS(rs_param);
+        InputParamCOMPS(rs_param, opts);
     } else if (ifThermal) {
         // ifThermal model
-        InputParamTHERMAL(rs_param);
+        InputParamTHERMAL(rs_param, opts);
     }
 
-    InputSatFunc(rs_param);
+    InputSatFunc(rs_param, opts);
 }
 
-void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
+void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     oil    = rs_param.oil;
     gas    = rs_param.gas;
@@ -185,14 +185,14 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
             break;
         case PHASE_OW:
             for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new MixtureUnitBlkOil_OW(rs_param, i));
+                flashCal.push_back(new MixtureUnitBlkOil_OW(rs_param, i, opts));
             break;
         case PHASE_DOGW:
             OCP_ABORT("Wrong Type!");
             break;
         case PHASE_ODGW:
             for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new MixtureUnitBlkOil_OGW(rs_param, i));
+                flashCal.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
             break;
         default:
             OCP_ABORT("Wrong Type!");
@@ -228,7 +228,7 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
         cout << endl << "BLACKOIL model is selected" << endl;
 }
 
-void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
+void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
 
     // Water exists and is excluded in EoS model NOW!
@@ -267,7 +267,7 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
 
 
     // PVT mode
-    for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureUnitComp(rs_param, i));
+    for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureUnitComp(rs_param, i, opts));
 
     // Saturation mode
     SATmode = PHASE_OGW;
@@ -284,7 +284,7 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
         cout << endl << "COMPOSITIONAL model is selected" << endl;
 }
 
-void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
+void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     oil   = rs_param.oil;
     gas   = rs_param.gas;
@@ -331,7 +331,7 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
 
     // PVT mode
     for (USI i = 0; i < NTPVT; i++)
-        flashCal.push_back(new MixtureUnitThermal_OW(rs_param, i));
+        flashCal.push_back(new MixtureUnitThermal_OW(rs_param, i, opts));
 
     // phase index
     phase2Index.resize(3);
@@ -344,22 +344,22 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
         cout << endl << "THERMAL model is selected" << endl;
 }
 
-void Bulk::InputSatFunc(const ParamReservoir& rs_param)
+void Bulk::InputSatFunc(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     // Setup Saturation function
     satcm.resize(NTSFUN);
     switch (SATmode) {
         case PHASE_W:
             for (USI i = 0; i < NTSFUN; i++)
-                flow.push_back(new FlowUnit_SP(rs_param, i));
+                flow.push_back(new FlowUnit_SP(rs_param, i, opts));
             break;
         case PHASE_OW:
             for (USI i = 0; i < NTSFUN; i++)
-                flow.push_back(new FlowUnit_OW(rs_param, i));
+                flow.push_back(new FlowUnit_OW(rs_param, i, opts));
             break;
         case PHASE_OGW:
             for (USI i = 0; i < NTSFUN; i++) {
-                flow.push_back(new FlowUnit_OGW(rs_param, i));
+                flow.push_back(new FlowUnit_OGW(rs_param, i, opts));
             }
             break;
         default:
@@ -440,15 +440,6 @@ void Bulk::SetupT(const Domain& domain)
     hLoss.Setup(numBulk);
 }
 
-void Bulk::SetupOptionalFeatures(OptionalFeatures& optFeatures)
-{
-    for (USI i = 0; i < NTPVT; i++) {
-        flashCal[i]->SetupOptionalFeatures(optFeatures);
-    }
-    for (USI i = 0; i < NTSFUN; i++) {
-        flow[i]->SetupOptionalFeatures(optFeatures);
-    }
-}
 
 /////////////////////////////////////////////////////////////////////
 // Initial Properties

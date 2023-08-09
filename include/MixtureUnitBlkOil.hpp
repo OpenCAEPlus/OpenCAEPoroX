@@ -25,7 +25,6 @@ class MixtureUnitBlkOil : public MixtureUnit
 {
 public:
     MixtureUnitBlkOil() = default;
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
 
     // For Well
     void CalProdWeight(const OCP_DBL&         Pin,
@@ -61,7 +60,7 @@ class MixtureUnitBlkOil_SP : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_SP() = default;
-    MixtureUnitBlkOil_SP(const ParamReservoir& rs_param, const USI& i)
+    MixtureUnitBlkOil_SP(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts)
     {
         OCP_ABORT("Not Completed!");
     };
@@ -145,7 +144,7 @@ class MixtureUnitBlkOil_OW : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_OW() = default;
-    MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i);
+    MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_DBL& Pin,
                         const OCP_DBL& Pbbin,
@@ -202,7 +201,7 @@ class MixtureUnitBlkOil_OGW : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_OGW() = default;
-    MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i);
+    MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
 
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_DBL& Pin,

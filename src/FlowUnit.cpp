@@ -17,14 +17,6 @@
 ///////////////////////////////////////////////
 
 
-void FlowUnit_OW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
-{
-    // for scalePcow
-    scalePcow     = &optFeatures.scalePcow;
-    spMethodIndex = scalePcow->Setup(&OWF);
-}
-
-
 void FlowUnit_OW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
 {
     scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);
@@ -86,12 +78,6 @@ void FlowUnit_OW::AssinValue()
 ///////////////////////////////////////////////
 
 
-FlowUnit_OG::FlowUnit_OG(const ParamReservoir& rs_param, const USI& i)
-{
-    Allocate(2);
-    OGF.Setup(rs_param, i);
-}
-
 void FlowUnit_OG::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
@@ -143,16 +129,6 @@ void FlowUnit_OG::AssinValue()
 ///////////////////////////////////////////////
 
 
-void FlowUnit_OGW::SetupOptionalFeatures(OptionalFeatures& optFeatures)
-{
-    // for miscible
-    miscible       = &optFeatures.miscible;
-    mcMethodIndex  = miscible->Setup(&OGWF);
-    // for scalePcow
-    scalePcow      = &optFeatures.scalePcow;
-    spMethodIndex  = scalePcow->Setup(&OGWF);
-}
-
 void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
 {
     scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);
@@ -163,7 +139,7 @@ void FlowUnit_OGW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     OGWF.CalKrPc(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
-    miscible->CorrectCurve(bId, mcMethodIndex);
+    misCurve->CorrectCurve(bId, mcMethodIndex);
     scalePcow->Scale(bId, spMethodIndex);
     AssinValue();
 }
@@ -173,7 +149,7 @@ void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
 {
     bulkId = bId;
     OGWF.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
-    miscible->CorrectCurveDer(bId, mcMethodIndex);
+    misCurve->CorrectCurveDer(bId, mcMethodIndex);
     scalePcow->ScaleDer(bId, spMethodIndex);
     AssinValueDer(); 
 }

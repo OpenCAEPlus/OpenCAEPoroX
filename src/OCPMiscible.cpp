@@ -12,6 +12,14 @@
 #include "OCPMiscible.hpp"
 
 
+MisFacMethod01::MisFacMethod01(const Miscstr& param)
+{
+    stref = param.surTenRef;
+    fkExp = param.surTenExp;
+    stPcf = param.surTenPc;
+    if (stPcf < 0) stPcf = stref;
+}
+
 void MisFacMethod01::CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const
 {
     if (st >= stref) {  // InMiscible
@@ -25,21 +33,23 @@ void MisFacMethod01::CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP
 }
 
 
-USI MiscibleFcator::Setup(const MisFacMethodParams& param)
+USI MiscibleFactor::Setup(const ParamReservoir& param, const USI& i, const OCP_USI& nb, const SurfaceTension* st)
 {
-    if (OCP_FALSE) {
-
-    }
-    else {
-        // Default option
-        if (param.param01.IfUse()) {
-            mfMethod.push_back(new MisFacMethod01(param.param01));
+    if (param.miscstr.ifMiscible) {
+        if (!st->IfUse()) {
+            OCP_ABORT("Surface Tension is not set!");
         }
         else {
-            OCP_ABORT("NO MATHCHED METHOD IN MISCIBLE FACTOR METHOD!");
-        }      
+            surTen = st;
+        }
+        ifUse = OCP_TRUE;
+        mfMethod.push_back(new MisFacMethod01(param.miscstr));
     }
-    
+
+    if (ifUse) {
+        Fk.resize(nb);
+        Fp.resize(nb);
+    }
     return mfMethod.size() - 1;
 }
 
@@ -99,60 +109,17 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp)
 }
 
 
-USI MiscibleCurve::Setup(OCPFlow* flowin)
+USI MiscibleCurve::Setup(OCPFlow* flowin, const MiscibleFactor* misfactor)
 {
-    mcMethod.push_back(new MisCurveMethod01(flowin));
-    
-    return mcMethod.size() - 1;
-}
-
-
-void Miscible::InputParam(const OCP_BOOL& ifmiscible)
-{
-    ifMiscible  = ifmiscible;
-}
-
-USI Miscible::Setup(const OCP_USI& numBulk, const SurTenMethodParams& stparams, const MisFacMethodParams& mfparams)
-{
-    if (ifMiscible) {
-        surTen.resize(numBulk);
-        Fk.resize(numBulk);
-        Fp.resize(numBulk);
-
-        // Last time step
-        lsurTen.resize(numBulk);
-
-
-        // Setup Method
-        // Setup surface tension method
-        USI stmIndex = sT.Setup(stparams);
-        // Setup miscible factor method
-        USI mfmIndex = mF.Setup(mfparams);
-
-        OCP_ASSERT(stmIndex == mfmIndex, "Mismatched Methods!");
-
-        return stmIndex;
+    if (!misfactor->IfUse()) {
+        ifUse = OCP_FALSE;
     }
-    return 0;
-}
-
-
-USI Miscible::Setup(OCPFlow* flowin)
-{
-
-    if (ifMiscible) {
-        return mC.Setup(flowin);
-    }
-    return 0;
-}
-
-
-void Miscible::CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex)
-{
-    if (ifMiscible) {
-        surTen[bId] = sT.CalSurfaceTension(mIndex);
-        mF.CalculateMiscibleFactor(mIndex, surTen[bId], Fk[bId], Fp[bId]);
-    }
+    else {
+        misFac = misfactor;
+        ifUse  = OCP_TRUE;
+        mcMethod.push_back(new MisCurveMethod01(flowin));
+        return mcMethod.size() - 1;
+    }  
 }
 
 

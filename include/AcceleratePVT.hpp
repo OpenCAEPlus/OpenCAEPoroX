@@ -23,11 +23,7 @@ class SkipPSAVarset
 {
 
 public:  
-    void Setup(const USI& nbin, const USI& npin, const USI& ncin) {
-        nb = nbin;
-        np = npin;
-        nc = ncin;
-    }
+    void SetNb(const USI& nbin) { nb = nbin; }
     /// Reset SkipPSA vars to last time step
     void ResetToLastTimeStep();
     /// Update SkipPSA vars at last time step
@@ -70,7 +66,7 @@ public:
                          const USI&     np,
                          const OCP_USI& n) = 0;
     /// Calculate skip info for next step
-    virtual void CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp) = 0;
+    virtual void CalSkipForNextStep(const OCP_USI& bId) = 0;
 
 };
 
@@ -83,7 +79,7 @@ public:
 class SkipPSAMethod01 : public SkipPSAMethod
 {
 public:
-    SkipPSAMethod01(SkipPSAVarset* vsin);
+    SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureComp* compsin);
     /// Calculate the ftype without predicted saturations
     USI CalFtype(const OCP_DBL& Pin,
                  const OCP_DBL& Tin,
@@ -96,7 +92,7 @@ public:
                  const OCP_DBL* S,
                  const USI&     np,
                  const OCP_USI& bId) override;
-    void CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp) override;
+    void CalSkipForNextStep(const OCP_USI& bId) override;
 
 protected:
     OCP_BOOL IfSkip(const OCP_DBL& Pin,
@@ -106,17 +102,19 @@ protected:
 
 protected:
     /// pointer of variables set
-    SkipPSAVarset*  vs;
+    SkipPSAVarset*        vs;
+    /// support modules
+    const OCPMixtureComp* comps;
     
     /// d ln phi[i][j] / d n[k][j]
-    vector<OCP_DBL> lnphiN;
+    vector<OCP_DBL>       lnphiN;
     /// matrix for skipping Stability Analysis,    
-    vector<OCP_SIN> skipMatSTA;
+    vector<OCP_SIN>       skipMatSTA;
     /// eigen values of matrix for skipping Skip Stability Analysis.
     /// Only the minimum eigen value will be used
-    vector<OCP_SIN> eigenSkip;
+    vector<OCP_SIN>       eigenSkip;
     /// work space for computing eigenvalues with ssyevd_
-    vector<OCP_SIN> eigenWork;
+    vector<OCP_SIN>       eigenWork;
 };
 
 
@@ -125,11 +123,11 @@ class SkipPSA
 
 public:
     /// Setup SkipPSA
-    USI Setup(const OCP_USI& nb, const USI& np, const USI& nc);
-    /// Set ifUseSkip to true or false
-    void SetUseSkip(const OCP_BOOL& flag) { ifUseSkip = flag; }
-    /// Return ifUseSkip
-    OCP_BOOL IfUseSkip() const { return ifUseSkip; }
+    USI Setup(const OCP_USI& nb, const OCPMixtureComp* compsin);
+    /// Set ifUse to true or false
+    void SetUseSkip(const OCP_BOOL& flag) { ifUse = flag; }
+    /// Return ifUse
+    OCP_BOOL IfUseSkip() const { return ifUse; }
     /// Calculate the ftype without predicted saturations
     USI CalFtype(const OCP_DBL& Pin,
                  const OCP_DBL& Tin,
@@ -137,7 +135,7 @@ public:
                  const OCP_USI& bId,
                  const USI&     mIndex)
     {
-        if (ifUseSkip) return sm[mIndex]->CalFtype(Pin, Tin, Niin, bId);
+        if (ifUse) return sm[mIndex]->CalFtype(Pin, Tin, Niin, bId);
         else           return 0;
     }
     /// Calculate the ftype with predicted saturations
@@ -149,22 +147,22 @@ public:
                  const OCP_USI& bId,
                  const USI&     mIndex)
     {
-        if (ifUseSkip) return sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, bId);
+        if (ifUse) return sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, bId);
         else           return 0;
     }
-    void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex, const OCPMixtureComp& comp)
+    void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex)
     {
-        if (ifUseSkip) 
-            sm[mIndex]->CalSkipForNextStep(bId, comp);        
+        if (ifUse) 
+            sm[mIndex]->CalSkipForNextStep(bId);        
     }
     /// Reset SkipPSA vars to last time step
-    void ResetToLastTimeStep() { vs.ResetToLastTimeStep(); }
+    void ResetToLastTimeStep() { if(ifUse) vs.ResetToLastTimeStep(); }
     /// Update SkipPSA vars at last time step
-    void UpdateLastTimeStep() { vs.UpdateLastTimeStep(); }
+    void UpdateLastTimeStep() { if (ifUse) vs.UpdateLastTimeStep(); }
 
 protected:
     /// If use skipping PSA option
-    OCP_BOOL                 ifUseSkip{ OCP_TRUE };
+    OCP_BOOL                 ifUse{ OCP_TRUE };
     /// variables set
     SkipPSAVarset            vs;
     /// Skipping Method

@@ -31,35 +31,34 @@ void SkipPSAVarset::UpdateLastTimeStep()
 }
 
 
-SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin)
+SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureComp* compsin)
 {
-    vs = vsin;
-    
-    const USI& nc = vs->nc;
-
+    vs     = vsin;
+    comps  = compsin;   
+    vs->np = comps->GetNPmaxPE();
+    vs->nc = comps->GetNCPE();
 
     if (!vs->ifSetup) {
 
         vs->ifSetup = OCP_TRUE;
-        const OCP_USI& nb = vs->nb;
 
-        vs->flag.resize(nb);
-        vs->P.resize(nb);
-        vs->T.resize(nb);
-        vs->minEigen.resize(nb);
-        vs->zi.resize(nb * nc);
+        vs->flag.resize(vs->nb);
+        vs->P.resize(vs->nb);
+        vs->T.resize(vs->nb);
+        vs->minEigen.resize(vs->nb);
+        vs->zi.resize(vs->nb * vs->nc);
 
-        vs->lflag.resize(nb);
-        vs->lP.resize(nb);
-        vs->lT.resize(nb);
-        vs->lminEigen.resize(nb);
-        vs->lzi.resize(nb * nc);
+        vs->lflag.resize(vs->nb);
+        vs->lP.resize(vs->nb);
+        vs->lT.resize(vs->nb);
+        vs->lminEigen.resize(vs->nb);
+        vs->lzi.resize(vs->nb * vs->nc);
     }
 
-    lnphiN.resize(nc * nc);
-    skipMatSTA.resize(nc * nc);
-    eigenSkip.resize(nc);
-    eigenWork.resize(2 * nc + 1);
+    lnphiN.resize(vs->nc * vs->nc);
+    skipMatSTA.resize(vs->nc * vs->nc);
+    eigenSkip.resize(vs->nc);
+    eigenWork.resize(2 * vs->nc + 1);
 }
 
 
@@ -136,18 +135,18 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
 }
 
 
-void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureComp& comp)
+void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
 {
-    const USI& ftype    = comp.GetFtypePE();
+    const USI& ftype    = comps->GetFtypePE();
     
 
     if (ftype == 0) {
         // the range should be calculated, which also means last skip is unsatisfied
-        EoSCalculation* eos       = comp.GetEoSPE();
-        const OCP_DBL&  P         = comp.GetP();
-        const OCP_DBL&  T         = comp.GetT();
-        const OCP_DBL&  Nt        = comp.GetNtPE();
-        const vector<OCP_DBL>& zi = comp.GetZiPE();
+        EoSCalculation* eos       = comps->GetEoSPE();
+        const OCP_DBL&  P         = comps->GetP();
+        const OCP_DBL&  T         = comps->GetT();
+        const OCP_DBL&  Nt        = comps->GetNtPE();
+        const vector<OCP_DBL>& zi = comps->GetZiPE();
         const USI&      nc  = vs->nc;
 
         eos->CalLnPhiN(P, T, &zi[0], Nt, &lnphiN[0]);;
@@ -184,11 +183,11 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, const OCPMixtureCom
 }
 
 
-USI SkipPSA::Setup(const OCP_USI& nb, const USI& np, const USI& nc)
+USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureComp* compsin)
 {
-    if (ifUseSkip) {
-        vs.Setup(nb, np, nc);
-        sm.push_back(new SkipPSAMethod01(&vs));
+    if (ifUse) {
+        vs.SetNb(nb);
+        sm.push_back(new SkipPSAMethod01(&vs, compsin));
         return sm.size() - 1;
     }
 }

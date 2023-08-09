@@ -31,11 +31,10 @@ using namespace std;
 class MixtureUnitComp : public MixtureUnit
 {
 
-
 public:
     MixtureUnitComp() = default;
 
-    MixtureUnitComp(const ParamReservoir& rs_param, const USI& i);
+    MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
 
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
 
@@ -110,17 +109,19 @@ public:
 
     void OutMixtureIters() const override { compM.OutputIters(); }
 
-public:
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override;
-
 
 protected:
     /// mixture of components
-    OCPMixtureComp compM;
+    OCPMixtureComp  compM;
     /// Skip stability analysis
-    SkipPSA        skipPSA;
-    USI            skipMethodIndex;
-
+    SkipPSA*        skipPSA;
+    USI             skipMethodIndex;
+    /// Surface tension
+    SurfaceTension* surTen;
+    USI             stMethodIndex;
+    /// Miscible Factor
+    MiscibleFactor* misFac;
+    USI             mfMethodIndex;
 
 };
 

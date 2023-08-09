@@ -148,11 +148,11 @@ class Bulk
 
 public:
     /// Input param from internal data structure ParamReservoir.
-    void InputParam(const ParamReservoir& rs_param);
-    void InputParamBLKOIL(const ParamReservoir& rs_param);
-    void InputParamCOMPS(const ParamReservoir& rs_param);
-    void InputParamTHERMAL(const ParamReservoir& rs_param);
-    void InputSatFunc(const ParamReservoir& rs_param);
+    void InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts);
+    void InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts);
+    void InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts);
+    void InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts);
+    void InputSatFunc(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputRockFunc(const ParamReservoir& rs_param);
     void InputRockFuncT(const ParamReservoir& rs_param);
 
@@ -160,8 +160,6 @@ public:
     void SetupIsoT(const Domain& domain);
     /// Allocate memory for fluid grid for ifThermal model.
     void SetupT(const Domain& domain);
-    /// Setup optional features.
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures);
 
     /////////////////////////////////////////////////////////////////////
     // General Variables

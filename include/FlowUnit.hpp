@@ -36,9 +36,7 @@ public:
         dKrdS.resize(np * np, 0);
         dPcdS.resize(np * np, 0);
     }
-    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
-    virtual void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) = 0;
+    virtual void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) = 0;
     virtual OCP_DBL CalPcowBySw(const OCP_DBL& sw) const = 0;
     virtual OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const = 0;
     virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
@@ -75,14 +73,13 @@ protected:
 class FlowUnit_SP : public FlowUnit
 {
 public:
-    FlowUnit_SP(const ParamReservoir& rs_param, const USI& i){ 
+    FlowUnit_SP(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts){
         Allocate(1);
         kr[0]    = 1;
         pc[0]    = 0;
         dKrdS[0] = 0;
         dPcdS[0] = 0;
     };
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
     void
     SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override {};
@@ -102,11 +99,13 @@ public:
 class FlowUnit_OW : public FlowUnit
 {
 public:
-    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i) {
+    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
         Allocate(2);
         OWF.Setup(rs_param, i);
+        // for scalePcow
+        scalePcow     = &opts.scalePcow;
+        spMethodIndex = scalePcow->Setup(&OWF);
     }
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override;
     void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override;
 
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
@@ -143,10 +142,11 @@ protected:
 class FlowUnit_OG : public FlowUnit
 {
 public:
-    FlowUnit_OG(const ParamReservoir& rs_param, const USI& i);
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override{};
-    void
-    SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
+    FlowUnit_OG(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
+        Allocate(2);
+        OGF.Setup(rs_param, i);
+    }
+    void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override{};
     void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
     void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return OGF.CalPcgoBySg(Sg); }
@@ -176,12 +176,17 @@ protected:
 class FlowUnit_OGW : public FlowUnit
 {
 public:
-    FlowUnit_OGW(const ParamReservoir& rs_param, const USI& i) {
+    FlowUnit_OGW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
         Allocate(3);
         OGWF.Setup(rs_param, i);
+        // for miscible
+        misCurve = &opts.misCur;
+        mcMethodIndex = misCurve->Setup(&OGWF, &opts.misFac);
+        // for scalePcow
+        scalePcow = &opts.scalePcow;
+        spMethodIndex = scalePcow->Setup(&OGWF);
     }
 
-    void SetupOptionalFeatures(OptionalFeatures& optFeatures) override final;
     void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override final;
     void CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override final;
     void CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override final;
@@ -205,12 +210,16 @@ protected:
     OCPFlowOGW  OGWF;
 
     // For scaling the water-oil capillary pressure curves
-    ScalePcow* scalePcow;      ///< ptr to ScalePcow modules
-    USI        spMethodIndex;  ///< index of scalePcow
+    /// Scale Pcow
+    ScalePcow*      scalePcow;
+    /// Index of method
+    USI             spMethodIndex;
 
     // For miscible
-    Miscible*  miscible;
-    USI        mcMethodIndex;  ///< index of miscible curve
+    /// Miscible curve correction
+    MiscibleCurve*  misCurve;
+    /// Index of method
+    USI             mcMethodIndex;
 };
 
 

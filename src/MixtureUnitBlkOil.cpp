@@ -15,7 +15,7 @@
  // MixtureUnitBlkOil_OW
  ///////////////////////////////////////////////
 
-MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i)
+MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts)
 {
     OWM.Setup(rs_param, i);
 
@@ -137,7 +137,7 @@ void MixtureUnitBlkOil_OW::SetupWellOpt(WellOpt& opt,
 // MixtureUnitBlkOil_OGW
 ///////////////////////////////////////////////
 
-MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i)
+MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts)
 {
     OGWM.Setup(rs_param, i);
     mixtureType = OGWM.MixtureType();

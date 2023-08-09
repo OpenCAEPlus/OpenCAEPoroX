@@ -70,6 +70,7 @@ public:
     }
 
 public:
+    /// Calculate total fluid volume and phase saturation with vj
     void CalVfS() {
         Vf = 0;
         for (USI j = 0; j < np; j++) {
@@ -86,46 +87,49 @@ public:
     }
 
 public:
+    const OCP_DBL* GetXj(const USI& j) const { return &x[j * nc]; }
+
+public:
     /// num of phase, components
-    USI np, nc;
+    USI                     np, nc;
     /// pressure, temperature
-    OCP_DBL P, T;
+    OCP_DBL                 P, T;
     /// Buble point pressure 
-    OCP_DBL Pb;
+    OCP_DBL                 Pb;
     /// total moles of components
-    OCP_DBL Nt;
+    OCP_DBL                 Nt;
     /// total volume of components
-    OCP_DBL Vf;
+    OCP_DBL                 Vf;
     /// mole number of components
-    vector<OCP_DBL> Ni;
+    vector<OCP_DBL>         Ni;
     /// existence of phase
-    vector<OCP_BOOL> phaseExist;
+    vector<OCP_BOOL>        phaseExist;
     /// saturation of phase
-    vector<OCP_DBL> S;
+    vector<OCP_DBL>         S;
     /// mole number of phases
-    vector<OCP_DBL> nj;
+    vector<OCP_DBL>         nj;
     /// volume of phases
-    vector<OCP_DBL> vj;
+    vector<OCP_DBL>         vj;
     /// molar fraction of component i in phase j
-    vector<OCP_DBL>  x;   
+    vector<OCP_DBL>         x;
     /// mass density of phases
-    vector<OCP_DBL>  rho;    
+    vector<OCP_DBL>         rho;
     /// molar density of phases
-    vector<OCP_DBL>  xi;   
+    vector<OCP_DBL>         xi;
     /// viscosity of phases
-    vector<OCP_DBL>  mu;
+    vector<OCP_DBL>         mu;
 
     // Derivatives (full derivatives)
     /// dVf / dP
-    OCP_DBL vfP;
+    OCP_DBL                 vfP;
     /// dVf / dT
-    OCP_DBL vfT; 
+    OCP_DBL                 vfT; 
     /// dVf / dNi
-    vector<OCP_DBL> vfi;
-    /// dVj / dP
-    vector<OCP_DBL> vjP;
-    /// dVj / dT
-    vector<OCP_DBL> vjT;
+    vector<OCP_DBL>         vfi;
+    /// dVj / dP            
+    vector<OCP_DBL>         vjP;
+    /// dVj / dT            
+    vector<OCP_DBL>         vjT;
     /// dVj / dNi
     vector<vector<OCP_DBL>> vji;
 
@@ -181,7 +185,9 @@ public:
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
 
 protected:
+    /// mixture type
     USI              mixtureType;
+    /// mixture variables set
     OCPMixtureVarSet vs;
 };
 

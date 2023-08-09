@@ -32,7 +32,6 @@ class MixtureUnit
 {
 public:
     MixtureUnit() = default;
-    virtual void SetupOptionalFeatures(OptionalFeatures& optFeatures) = 0;
     /// return type of mixture.
     USI GetMixtureType() const { return mixtureType; }
     /// flash calculation with saturation of phases.

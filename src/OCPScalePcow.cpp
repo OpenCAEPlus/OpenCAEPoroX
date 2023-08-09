@@ -71,7 +71,6 @@ void ScalePcowMethod01::Scale(const OCP_DBL& sv) const
 
 USI ScalePcow::Setup(OCPFlow* flowin)
 {
-
 	switch (flowin->FlowType())
 	{
     case OCPFLOW_OGW:
@@ -82,7 +81,8 @@ USI ScalePcow::Setup(OCPFlow* flowin)
 		break;
 	}
 
-    if (ifScale) {
+    if (swatInit.size() > 0) {
+        ifScale = OCP_TRUE;
         OCP_ASSERT(swatInit.size() > 0, "SWATINIT is MISSING!");
         scaleVal.resize(swatInit.size(), 1.0);
 
@@ -90,8 +90,9 @@ USI ScalePcow::Setup(OCPFlow* flowin)
         return scalePcowMethod.size() - 1;
     }
     else {
-        return 0;
+        ifScale = OCP_FALSE;
     }
+    return 0;
 }
 
 

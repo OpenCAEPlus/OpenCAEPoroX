@@ -58,6 +58,8 @@ public:
     void OutIters() const { PE.OutMixtureIters(); }
     /// Get number of components in PE
     const auto& GetNC() const { return NC; }
+    /// Get number if phases in PE
+    const auto& GetNP() const { return NP; }
     /// Get allowable maximum number of phases in PE
     const auto& GetNPmax() const { return NPmax; }
     /// Get EoS
@@ -310,6 +312,7 @@ public:
     }
     void OutputIters() const { pmMethod->OutIters(); }
     const auto& GetNCPE() const { return pmMethod->GetNC(); }
+    const auto& GetNPPE() const { return pmMethod->GetNP(); }
     const auto& GetNPmaxPE() const { return pmMethod->GetNPmax(); }
     const auto GetEoSPE() const { return pmMethod->GetEoS(); }
     const auto GetFtypePE() const { return pmMethod->GetFtype(); }

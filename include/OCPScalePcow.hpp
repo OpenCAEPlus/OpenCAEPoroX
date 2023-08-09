@@ -57,9 +57,13 @@ public:
     void Scale(const OCP_DBL& sv) const override;
 
 protected:
+    /// saturation of connate water
     OCP_DBL        Swco;
+    /// maximum capillary pressure: Po - Pw
     OCP_DBL        maxPcow;
+    /// minimum capillary pressure: Po - Pw
     OCP_DBL        minPcow;
+    /// flow model
     OCPFlow*       flow;
 };
 

@@ -27,28 +27,26 @@ class OptionalFeatures
     friend class Out4RPT;
 
 public:
-    void InputParam(const ParamReservoir& param)
-    {
-        miscible.InputParam(param.miscstr.ifMiscible);
-        scalePcow.InputParam(param.scalePcow);
-        skipPSA.SetUseSkip(OCP_TRUE);
-
-    };
     void ResetToLastTimeStep()
     {
         skipPSA.ResetToLastTimeStep();
-        miscible.ResetTolastTimeStep();
+        surTen.ResetTolastTimeStep();
+        misFac.ResetTolastTimeStep();
+        misCur.ResetTolastTimeStep();
     }
     void UpdateLastTimeStep()
     {
         skipPSA.UpdateLastTimeStep();
-        miscible.UpdateLastTimeStep();
+        surTen.UpdateLastTimeStep();
+        misFac.UpdateLastTimeStep();
+        misCur.UpdateLastTimeStep();
     }
 
     /////////////////////////////////////////////////////////////////////
     // Common vars
     /////////////////////////////////////////////////////////////////////
 protected:
+    /// num of bulks
     OCP_USI numBulk;
 
 
@@ -57,15 +55,22 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
 protected:
-    SkipPSA skipPSA; ///< Skip Stability Analysis term
+    /// Skip Stability Analysis
+    SkipPSA skipPSA;
 
     /////////////////////////////////////////////////////////////////////
     // Phase Permeability Curve
     /////////////////////////////////////////////////////////////////////
 
 protected:
-    Miscible  miscible;  ///< Miscible term for Compositional Model
-    ScalePcow scalePcow; ///< Scale water-oil capillary pressure term
+    /// Surface Tension Calculation
+    SurfaceTension surTen;
+    /// Miscible Factore Calculation
+    MiscibleFactor misFac;
+    /// Miscible Curve Correct
+    MiscibleCurve  misCur;
+    /// Scale water-oil capillary pressure
+    ScalePcow      scalePcow;
 };
 
 #endif /* end if __OptionalFeatures_HEADER__ */
