@@ -24,6 +24,7 @@
 #include "ParamWell.hpp"
 #include "WellOpt.hpp"
 #include "WellPerf.hpp"
+#include "OCPMixture.hpp"
 
 using namespace std;
 
@@ -58,6 +59,12 @@ public:
     /// Setup the well after Grid and Bulk finish setup.
     void Setup(const Bulk& bk, const vector<SolventINJ>& sols);
 
+protected:
+    /// Setup well operations
+    void SetupOpts(const vector<SolventINJ>& sols);
+    void SetupOptsBO_OW(WellOpt& opt);
+    void SetupOptsBO_OGW(WellOpt& opt);
+
     /////////////////////////////////////////////////////////////////////
     // Basic Well information
     /////////////////////////////////////////////////////////////////////
@@ -79,11 +86,16 @@ protected:
     USI numPhase; ///< num of phases
     USI numCom;   ///< num of components
 
-    OCP_DBL Psurf{PRESSURE_STD};    ///< Well surface Pressure, psia
-    OCP_DBL Tsurf{TEMPERATURE_STD}; ///< Well surface Temperature, F
+    /// Well surface pressure, psia
+    OCP_DBL Psurf{PRESSURE_STD};
+    /// Well surface temperature, F
+    OCP_DBL Tsurf{TEMPERATURE_STD};
 
     USI wOId; ///< well index in allWells, closed well is excluded, it's the well index
               ///< in equations
+
+    /// fluid model(where is it from?)
+    OCPMixture* mixture;
 
 public:
     /// Initialize the Well BHP
@@ -197,6 +209,7 @@ public:
     OCP_BOOL IfUseUnweight() const { return ifUseUnweight; }
 
 protected:
+    
     /////////////////////////////////////////////////////////////////////
     // Well Physical information
     /////////////////////////////////////////////////////////////////////
@@ -233,11 +246,11 @@ protected:
 public:
     /// Assemble matrix for Reinjection Well, used in production well when injection
     /// well is under RATE control
-    void AssembleMatReinjection_IMPEC(const Bulk&         myBulk,
-                                      LinearSystem&       myLS,
-                                      const OCP_DBL&      dt,
-                                      const vector<Well>& allWell,
-                                      const vector<USI>&  injId) const;
+    //void AssembleMatReinjection_IMPEC(const Bulk&         myBulk,
+    //                                  LinearSystem&       myLS,
+    //                                  const OCP_DBL&      dt,
+    //                                  const vector<Well>& allWell,
+    //                                  const vector<USI>&  injId) const;
 
     /////////////////////////////////////////////////////////////////////
     // FIM
@@ -246,11 +259,11 @@ public:
 public:
     /// Assemble matrix for Reinjection Well, used in production well when injection
     /// well is under RATE control
-    void AssembleMatReinjection_FIM(const Bulk&         myBulk,
-                                    LinearSystem&       myLS,
-                                    const OCP_DBL&      dt,
-                                    const vector<Well>& allWell,
-                                    const vector<USI>&  injId) const;
+    //void AssembleMatReinjection_FIM(const Bulk&         myBulk,
+    //                                LinearSystem&       myLS,
+    //                                const OCP_DBL&      dt,
+    //                                const vector<Well>& allWell,
+    //                                const vector<USI>&  injId) const;
 
     // for output
     //void SetPolyhedronWell(const Grid& myGrid, OCPpolyhedron& mypol);

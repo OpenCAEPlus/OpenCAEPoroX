@@ -33,7 +33,6 @@ using namespace std;
 /// all variables are about components and phases participating in 
 /// Phase Equilibrium Calculations, these components and phases should be 
 /// be ranked first.
-/// For Isothermal Model
 class OCPMixtureCompMethod
 {
 public:
@@ -253,8 +252,10 @@ protected:
     OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }   
 
 protected:
-    /// PVTW
+    /// PVTW table
     OCP_PVTW PVTW;
+    /// molar volume of water phase in std conditions
+    OCP_DBL  stdVw;
     /// index of water phase
     USI      wIdP;
     /// index of water component
@@ -284,7 +285,7 @@ class OCPMixtureComp : public OCPMixture
 public:
     OCPMixtureComp() { mixtureType = OCPMixtureType::COMP; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
@@ -309,6 +310,9 @@ public:
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
         return pmMethod->CalRho(P, T, z, tarPhase);
+    }
+    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+
     }
     void OutputIters() const { pmMethod->OutIters(); }
     const auto& GetNCPE() const { return pmMethod->GetNC(); }

@@ -31,9 +31,9 @@ OCPMixtureBlkOilOGWMethod01::OCPMixtureBlkOilOGWMethod01(const ParamReservoir& r
 		stdRhoG = RHOAIR_STD * rs_param.gravity.data[2];
 	}
 
-	PVCO.Setup(rs_param.PVCO_T.data[i], stdRhoO, stdRhoG);
-	PVDG.Setup(rs_param.PVDG_T.data[i], stdRhoG);
-	PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW);
+	PVCO.Setup(rs_param.PVCO_T.data[i], stdRhoO, stdRhoG, stdVo, stdVg);
+	PVDG.Setup(rs_param.PVDG_T.data[i], stdRhoG, stdVg);
+	PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW, stdVw);
 
 	vs.phaseExist[2] = OCP_TRUE;
 
@@ -65,16 +65,16 @@ void OCPMixtureBlkOilOGWMethod01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 	}
 	else if (vs.S[1] < TINY) {
 		// oil, water
-		const OCP_DBL rs = PVCO.CalRs(vs.Pb);
-		vs.Ni[0] = Vp * vs.S[0] * PVCO.CalXiO(vs.P, vs.Pb) / (1 + rs);
-		vs.Ni[1] = vs.Ni[0] * rs;
+		x  = PVCO.CalRs(vs.Pb) * stdVo / stdVg;
+		vs.Ni[0] = Vp * vs.S[0] * PVCO.CalXiO(vs.P, vs.Pb) / (1 + x);
+		vs.Ni[1] = vs.Ni[0] * x;
 		vs.Ni[2] = Vp * vs.S[2] * PVTW.CalXiW(vs.P);
 	}
 	else {
 		// oil, gas, water
-		const OCP_DBL rs = PVCO.CalRs(vs.P);
-		vs.Ni[0] = Vp * vs.S[0] * PVCO.CalXiO(vs.P, vs.P) / (1 + rs);
-		vs.Ni[1] = Vp * vs.S[1] * PVDG.CalXiG(vs.P) + vs.Ni[0] * rs;
+		x = PVCO.CalRs(vs.P) * stdVo / stdVg;
+		vs.Ni[0] = Vp * vs.S[0] * PVCO.CalXiO(vs.P, vs.P) / (1 + x);
+		vs.Ni[1] = Vp * vs.S[1] * PVDG.CalXiG(vs.P) + vs.Ni[0] * x;
 		vs.Ni[2] = Vp * vs.S[2] * PVTW.CalXiW(vs.P);
 	}
 }
@@ -114,11 +114,11 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 	vs.Nt = vs.Ni[0] + vs.Ni[1] + vs.Ni[2];
 
 	// some derivatives are ignored, which lead to a more roubust result
+	x = PVCO.CalRs(vs.P) * stdVo / stdVg;
 
-	const OCP_DBL Rs_sat = PVCO.CalRs(vs.P);
 	if (vs.Ni[0] < vs.Nt * TINY) 
 	{
-		if (vs.Ni[1] <= vs.Ni[0] * Rs_sat) 
+		if (vs.Ni[1] <= vs.Ni[0] * x)
 		{
 			// only water
 			vs.phaseExist[0]  = OCP_FALSE;
@@ -168,9 +168,12 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 			OCP_DBL rs, rsP;
 			PVCO.CalRhoXiMuRsDer(vs.P, vs.rho[0], vs.xi[0], vs.mu[0], rs, vs.rhoP[0], vs.xiP[0], vs.muP[0], rsP);
 
+			x = rs * (stdVo / stdVg);
+			const OCP_DBL xP = rsP * (stdVo / stdVg);
+
 			// total
 			vs.vj[0]  = 0;
-			vs.vj[1]  = (vs.Ni[1] - rs * vs.Ni[0]) / vs.xi[1];
+			vs.vj[1]  = (vs.Ni[1] - x * vs.Ni[0]) / vs.xi[1];
 			vs.vj[2]  = vs.Ni[2] / vs.xi[2];
 
 			vs.Vf     = vs.vj[1] + vs.vj[2];
@@ -178,13 +181,13 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 			vs.S[1]   = vs.vj[1] / vs.Vf;
 			vs.S[2]   = vs.vj[2] / vs.Vf;
 
-			vs.vjP[0] = vs.Ni[0] * (rsP * vs.xi[0] - (1 + rs) * vs.xiP[0]) / (vs.xi[0] * vs.xi[0]);
-			vs.vjP[1] = (-rsP * vs.Ni[0] * vs.xi[1] - (vs.Ni[1] - rs * vs.Ni[0]) * vs.xiP[1]) / (vs.xi[1] * vs.xi[1]);
+			vs.vjP[0] = vs.Ni[0] * (xP * vs.xi[0] - (1 + x) * vs.xiP[0]) / (vs.xi[0] * vs.xi[0]);
+			vs.vjP[1] = (-xP * vs.Ni[0] * vs.xi[1] - (vs.Ni[1] - x * vs.Ni[0]) * vs.xiP[1]) / (vs.xi[1] * vs.xi[1]);
 			vs.vjP[2] = -vs.Ni[2] * vs.xiP[2] / (vs.xi[2] * vs.xi[2]);
 			vs.vfP    = vs.vjP[0] + vs.vjP[1] + vs.vjP[2];
 
-			vs.vji[0][0] = (1 + rs) / vs.xi[0];
-			vs.vji[1][0] = -rs / vs.xi[1];
+			vs.vji[0][0] = (1 + x) / vs.xi[0];
+			vs.vji[1][0] = -x / vs.xi[1];
 			vs.vji[1][1] = 1 / vs.xi[1];
 			vs.vji[2][2] = 1 / vs.xi[2];
 			vs.vfi[0]    = vs.vji[0][0] + vs.vji[1][0];
@@ -203,29 +206,34 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 			vs.dXsdXp[2 * 4 + 2] = -vs.S[2] * vs.vfi[1] / vs.Vf;                  // dSw / dNg
 			vs.dXsdXp[2 * 4 + 3] = (vs.vji[2][2] - vs.S[2] * vs.vfi[2]) / vs.Vf;  // dSw / dNw
 
-			vs.dXsdXp[3 * 4 + 0]    = -rsP / ((1 + rs) * (1 + rs));               // d Xoo / dP
+			vs.dXsdXp[3 * 4 + 0]    = -xP / ((1 + x) * (1 + x));               // d Xoo / dP
 			vs.dXsdXp[4 * 4 + 0]    = -vs.dXsdXp[3 * 4 + 0];                      // d Xgo / dP
 		}
 	}
-	else if (vs.Ni[1] <= vs.Ni[0] * Rs_sat) {
+	else if (vs.Ni[1] <= vs.Ni[0] * x) {
 		// unsaturated oil and water
+		x = vs.Ni[1] / vs.Ni[0];
+
 		vs.phaseExist[0]  = OCP_TRUE;
 		vs.phaseExist[1]  = OCP_FALSE;
 		vs.phaseExist[2]  = OCP_TRUE;
-		vs.x[0 * 3 + 0] = vs.Ni[0] / (vs.Ni[0] + vs.Ni[1]);
-		vs.x[0 * 3 + 1] = 1 - vs.x[0 * 3 + 0];
+		vs.x[0 * 3 + 0]   = 1 / (1 + x);
+		vs.x[0 * 3 + 1]   = 1 - vs.x[0 * 3 + 0];
 
 		// oil property
-		const OCP_DBL rs = vs.Ni[1] / vs.Ni[0];
+		const OCP_DBL rs = x * (stdVg / stdVo);
 		OCP_DBL rhooRs, xioRs, muoRs;
 		PVCO.CalRhoXiMuDer(rs, vs.P, vs.rho[0], vs.xi[0], vs.mu[0], vs.rhoP[0], vs.xiP[0], vs.muP[0], rhooRs, xioRs, muoRs);
+		const OCP_DBL xiox  = xioRs * (stdVg / stdVo);
+		const OCP_DBL rhoox = rhooRs * (stdVg / stdVo);
+		const OCP_DBL muox  = muoRs * (stdVg / stdVo);
+
 
 		// water property
 		PVTW.CalRhoXiMuDer(vs.P, vs.rho[2], vs.xi[2], vs.mu[2], vs.rhoP[2], vs.xiP[2], vs.muP[2]);
 
-
 		// total
-		vs.vj[0]  = vs.Ni[0] * (1 + rs) / vs.xi[0];
+		vs.vj[0]  = (vs.Ni[0] + vs.Ni[1]) / vs.xi[0];
 		vs.vj[1]  = 0;
 		vs.vj[2]  = vs.Ni[2] / vs.xi[2];
 		vs.Vf     = vs.vj[0] + vs.vj[2];
@@ -233,12 +241,12 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 		vs.S[1]   = 0;
 		vs.S[2]   = vs.vj[2] / vs.Vf;
 
-		vs.vjP[0] = -vs.Ni[0] * (1 + rs) * vs.xiP[0] / (vs.xi[0] * vs.xi[0]);
+		vs.vjP[0] = -(vs.Ni[0] + vs.Ni[1]) * vs.xiP[0] / (vs.xi[0] * vs.xi[0]);
 		vs.vjP[2] = -vs.Ni[2] * vs.xiP[2] / (vs.xi[2] * vs.xi[2]);
 		vs.vfP    = vs.vjP[0] + vs.vjP[2];
 
-		vs.vji[0][0] = (1 + rs) / vs.xi[0] - (vs.xi[0] - (1 + rs) * xioRs) / (vs.xi[0] * vs.xi[0]) * rs;
-		vs.vji[0][1] = (vs.xi[0] - (1 + rs) * xioRs) / (vs.xi[0] * vs.xi[0]);
+		vs.vji[0][0] = (vs.xi[0] + x * (1 + x) * xiox) / (vs.xi[0] * vs.xi[0]);
+		vs.vji[0][1] = (vs.xi[0] - (1 + x) * xiox) / (vs.xi[0] * vs.xi[0]);
 		vs.vji[2][2] = 1 / vs.xi[2];
 		vs.vfi[0]    = vs.vji[0][0];
 		vs.vfi[1]    = vs.vji[0][1];
@@ -259,13 +267,13 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 		vs.dXsdXp[4 * 4 + 1] = -vs.dXsdXp[3 * 4 + 1];                          // d Xgo / d No
 		vs.dXsdXp[4 * 4 + 2] = -vs.dXsdXp[3 * 4 + 2];                          // d Xgo / d Ng
 
-		OCP_DBL tmp_new = (1 + rs) * (1 + rs);
-		vs.mux[0]       = -muoRs * tmp_new;         // dMuo / dXoo
-		vs.mux[1]       = muoRs * tmp_new;          // dMuo / dXgo				        
-		vs.xix[0]       = -xioRs * tmp_new;         // dXio / dXoo
-		vs.xix[1]       = xioRs * tmp_new;          // dXio / dXgo
-		vs.rhox[0]      = -rhooRs * tmp_new;        // dRhoo / dXoo
-		vs.rhox[1]      = rhooRs * tmp_new;         // dRhoo / dXgo
+		const OCP_DBL tmp_new = (1 + x) * (1 + x);
+		vs.mux[0]       = -muox * tmp_new;         // dMuo / dXoo
+		vs.mux[1]       = muox * tmp_new;          // dMuo / dXgo				        
+		vs.xix[0]       = -xiox * tmp_new;         // dXio / dXoo
+		vs.xix[1]       = xiox * tmp_new;          // dXio / dXgo
+		vs.rhox[0]      = -rhoox * tmp_new;        // dRhoo / dXoo
+		vs.rhox[1]      = rhoox * tmp_new;         // dRhoo / dXgo
 	}
 	else {
 		// saturated oil, gas and water
@@ -282,26 +290,29 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 
 		// water property
 		PVTW.CalRhoXiMuDer(vs.P, vs.rho[2], vs.xi[2], vs.mu[2], vs.rhoP[2], vs.xiP[2], vs.muP[2]);
-	
-		vs.x[0 * 3 + 0] = 1 / (1 + rs);
+		
+		x = rs * (stdVo / stdVg);
+		const OCP_DBL xP = rsP * (stdVo / stdVg);
+
+		vs.x[0 * 3 + 0] = 1 / (1 + x);
 		vs.x[0 * 3 + 1] = 1 - vs.x[0 * 3 + 0];
 
 		// total
-		vs.vj[0]  = vs.Ni[0] * (1 + rs) / vs.xi[0];
-		vs.vj[1]  = (vs.Ni[1] - rs * vs.Ni[0]) / vs.xi[1];
+		vs.vj[0]  = vs.Ni[0] * (1 + x) / vs.xi[0];
+		vs.vj[1]  = (vs.Ni[1] - x * vs.Ni[0]) / vs.xi[1];
 		vs.vj[2]  = vs.Ni[2] / vs.xi[2];
 		vs.Vf     = vs.vj[0] + vs.vj[1] + vs.vj[2];
 		vs.S[0]   = vs.vj[0] / vs.Vf;
 		vs.S[1]   = vs.vj[1] / vs.Vf;
 		vs.S[2]   = vs.vj[2] / vs.Vf;
 
-		vs.vjP[0] = vs.Ni[0] * (rsP * vs.xi[0] - (1 + rs) * vs.xiP[0]) / (vs.xi[0] * vs.xi[0]);
-		vs.vjP[1] = (-rsP * vs.Ni[0] * vs.xi[1] - (vs.Ni[1] - rs * vs.Ni[0]) * vs.xiP[1]) / (vs.xi[1] * vs.xi[1]);
+		vs.vjP[0] = vs.Ni[0] * (xP * vs.xi[0] - (1 + x) * vs.xiP[0]) / (vs.xi[0] * vs.xi[0]);
+		vs.vjP[1] = (-xP * vs.Ni[0] * vs.xi[1] - (vs.Ni[1] - x * vs.Ni[0]) * vs.xiP[1]) / (vs.xi[1] * vs.xi[1]);
 		vs.vjP[2] = -vs.Ni[2] * vs.xiP[2] / (vs.xi[2] * vs.xi[2]);
 		vs.vfP    = vs.vjP[0] + vs.vjP[1] + vs.vjP[2];
 
-		vs.vji[0][0] = (1 + rs) / vs.xi[0];
-		vs.vji[1][0] = -rs / vs.xi[1];
+		vs.vji[0][0] = (1 + x) / vs.xi[0];
+		vs.vji[1][0] = -x / vs.xi[1];
 		vs.vji[1][1] = 1 / vs.xi[1];
 		vs.vji[2][2] = 1 / vs.xi[2];
 		vs.vfi[0]    = vs.vji[0][0] + vs.vji[1][0];
@@ -323,9 +334,18 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 		vs.dXsdXp[2 * 4 + 2] = -vs.S[2] * vs.vfi[1] / vs.Vf;                     // dSw / dNg
 		vs.dXsdXp[2 * 4 + 3] = (vs.vji[2][2] - vs.S[2] * vs.vfi[2]) / vs.Vf;     // dSw / dNw
 
-		vs.dXsdXp[3 * 4 + 0] = -rsP / ((1 + rs) * (1 + rs));                     // d Xoo / dP
+		vs.dXsdXp[3 * 4 + 0] = -xP / ((1 + x) * (1 + x));                        // d Xoo / dP
 		vs.dXsdXp[4 * 4 + 0] = -vs.dXsdXp[3 * 4 + 0];                            // d Xgo / dP
 	}
+}
+
+
+OCP_DBL OCPMixtureBlkOilOGWMethod01::GetXiStd(const PhaseType& pt)
+{
+	if      (pt == PhaseType::oil)    return 1 / (stdVo * CONV1);
+    else if (pt == PhaseType::gas)    return 1 / (stdVg * 1000);
+    else if (pt == PhaseType::water)  return 1 / (stdVw * CONV1);
+    else    OCP_ABORT("Wrong Phase Type!");
 }
 
 
@@ -336,7 +356,7 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 
 void OCPMixtureBlkOilOGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-	vs.Init(3, 3, OCP_FALSE);
+	vs.Init(3, 3, mixtureType);
 	if (rs_param.PVCO_T.data.size() > 0 &&
 		rs_param.PVDG_T.data.size() > 0 &&
 		rs_param.PVTW_T.data.size() > 0) {

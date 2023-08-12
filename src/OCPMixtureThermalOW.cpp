@@ -219,7 +219,7 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 
 void OCPMixtureUnitThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    vs.Init(2, 2, OCP_TRUE);
+    vs.Init(2, 2, mixtureType);
     pmMethod = new OCPMixtureUnitThermalOWMethod01(rs_param.comsParam, i, vs);
 }
 

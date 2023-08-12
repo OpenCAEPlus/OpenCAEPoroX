@@ -58,6 +58,7 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     numCom   = bk.numCom;
     numPhase = bk.numPhase;
     flashCal = bk.flashCal;
+    mixture  = bk.flashCal[0]->GetMixture();
 
     qi_lbmol.resize(numCom);
     prodWeight.resize(numCom);
@@ -68,8 +69,10 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
         if (!bk.ifThermal) {
             opt.injTemp = bk.rsTemp;
         }
-        flashCal[0]->SetupWellOpt(opt, sols, Psurf, Tsurf);
+        flashCal[0]->SetupWellOpt(opt, sols, Psurf, Tsurf);      
     }
+
+    // SetupOpts(sols);
 
     // Perf
     for (USI p = 0; p < numPerf; p++) {
@@ -89,6 +92,113 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     CalWI_Peaceman(bk);
     // test
     // ShowPerfStatus(bk);
+}
+
+
+void Well::SetupOpts(const vector<SolventINJ>& sols)
+{
+    for (auto& opt : optSet) {
+        if (!opt.state) continue;
+        switch (mixture->MixtureType())
+        {
+        case OCPMixtureType::BO_OW:
+            SetupOptsBO_OW(opt);
+            break;
+        case OCPMixtureType::BO_OGW:
+            SetupOptsBO_OGW(opt);
+            break;
+        case OCPMixtureType::COMP:
+            break;
+        case OCPMixtureType::THERMALK_OW:
+            break;
+        default:
+            OCP_ABORT("Inavailable Mixture Type!");
+            break;
+        }
+    }
+}
+
+
+void Well::SetupOptsBO_OW(WellOpt& opt)
+{
+    if (opt.type == INJ) {
+        if (opt.fluidType == "WAT") {
+            opt.injPhase  = WATER;
+            opt.injZi     = vector<OCP_DBL>{ 0,1 }; 
+            opt.factorINJ = CONV1 * mixture->GetXiStd(PhaseType::water);
+            opt.maxRate   *= opt.factorINJ;
+        }
+        else {
+            OCP_ABORT("Inavailable Injecting Fluid!");
+        }
+    }
+    else if (opt.type == PROD) {
+        switch (opt.OptMode()) {
+        case BHP_MODE:
+            break;
+        case ORATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0 };
+            break;
+        case WRATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,1 };
+            break;
+        case LRATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,1 };
+            break;
+        default:
+            OCP_ABORT("WRONG Opt Mode!");
+            break;
+        }
+    }
+    else {
+        OCP_ABORT("Inavailable Well Type!");
+    }
+}
+
+
+void Well::SetupOptsBO_OGW(WellOpt& opt)
+{
+    if (opt.type == INJ) {
+        if (opt.fluidType == "WAT") {
+            opt.injPhase  = WATER;
+            opt.injZi     = vector<OCP_DBL>{ 0,0,1 };
+            opt.factorINJ = CONV1 * mixture->GetXiStd(PhaseType::water);
+            opt.maxRate   *= opt.factorINJ;
+        }
+        else if (opt.fluidType == "GAS") {
+            opt.injPhase  = GAS;
+            opt.injZi     = vector<OCP_DBL>{ 0,1,0 };
+            opt.factorINJ = 1000 * mixture->GetXiStd(PhaseType::gas);
+            opt.maxRate   *= opt.factorINJ;
+        }
+        else {
+            OCP_ABORT("Inavailable Injecting Fluid!");
+        }
+    }
+    else if (opt.type == PROD) {
+        switch (opt.OptMode()) {
+        case BHP_MODE:
+            break;
+        case ORATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0,0 };
+            break;
+        case GRATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,1,0 };
+            break;
+        case WRATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,0,1 };
+            break;
+        case LRATE_MODE:
+            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0,1 };
+            break;
+        default:
+            OCP_ABORT("WRONG Opt Mode!");
+            break;
+        }
+    }
+    else {
+        OCP_ABORT("Inavailable Well Type!");
+    }
 }
 
 
@@ -1095,160 +1205,160 @@ void Well::ShowPerfStatus(const Bulk& myBulk) const
     }
 }
 
-void Well::AssembleMatReinjection_IMPEC(const Bulk&         myBulk,
-                                        LinearSystem&       myLS,
-                                        const OCP_DBL&      dt,
-                                        const vector<Well>& allWell,
-                                        const vector<USI>&  injId) const
-{
-    // find Open injection well under Rate control
-    vector<OCP_USI> tarId;
-    for (auto& w : injId) {
-        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
-            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
-    }
-
-    USI tlen = tarId.size();
-    if (tlen > 0) {
-        // All inj well has the same factor
-        const OCP_DBL factor = allWell[injId[0]].opt.reInjFactor * dt;
-        const OCP_USI prodId = wOId + myBulk.numBulk;
-        OCP_USI       n, bId;
-        OCP_DBL       tmp, valb;
-        OCP_DBL       valw = 0;
-        OCP_DBL       rhsw = 0;
-        for (USI p = 0; p < numPerf; p++) {
-            n    = perf[p].location;
-            valb = 0;
-
-            for (USI j = 0; j < numPhase; j++) {
-                bId = n * numPhase + j;
-                if (myBulk.phaseExist[bId]) {
-                    tmp = perf[p].transj[j] * myBulk.xi[bId];
-                    valb += tmp;
-                    rhsw += tmp * (myBulk.Pc[bId] - dG[p]);
-                }
-            }
-            valb *= factor;
-            for (USI t = 0; t < tlen; t++) {
-                myLS.NewOffDiag(tarId[t], n, -valb);
-            }
-            valw += valb;
-        }
-        rhsw *= factor;
-        // rhs and prod well
-        for (USI t = 0; t < tlen; t++) {
-            myLS.AddRhs(tarId[t], rhsw);
-            myLS.NewOffDiag(tarId[t], prodId, valw);
-        }
-    }
-}
-
-void Well::AssembleMatReinjection_FIM(const Bulk&         myBulk,
-                                      LinearSystem&       myLS,
-                                      const OCP_DBL&      dt,
-                                      const vector<Well>& allWell,
-                                      const vector<USI>&  injId) const
-{
-    // find Open injection well under Rate control
-    vector<OCP_USI> tarId;
-    for (auto& w : injId) {
-        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
-            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
-    }
-
-    USI tlen = tarId.size();
-    if (tlen > 0) {
-        // All inj well has the same factor
-        const OCP_DBL factor = allWell[injId[0]].opt.reInjFactor;
-        const OCP_USI prodId = wOId + myBulk.numBulk;
-
-        const USI ncol   = numCom + 1;
-        const USI ncol2  = numPhase * numCom + numPhase;
-        const USI bsize  = ncol * ncol;
-        const USI bsize2 = ncol * ncol2;
-
-        OCP_DBL xij, xi, mu, muP, xiP, dP, transIJ, tmp;
-        OCP_USI n_np_j;
-
-        vector<OCP_DBL> bmat(bsize, 0);
-        vector<OCP_DBL> bmat2(bsize, 0);
-        vector<OCP_DBL> tmpMat(bsize, 0);
-        vector<OCP_DBL> dQdXpB(bsize, 0);
-        vector<OCP_DBL> dQdXpW(bsize, 0);
-        vector<OCP_DBL> dQdXsB(bsize2, 0);
-
-        for (USI p = 0; p < numPerf; p++) {
-            const OCP_USI n = perf[p].location;
-            fill(dQdXpB.begin(), dQdXpB.end(), 0.0);
-            fill(dQdXpW.begin(), dQdXpW.end(), 0.0);
-            fill(dQdXsB.begin(), dQdXsB.end(), 0.0);
-
-            for (USI j = 0; j < numPhase; j++) {
-                n_np_j = n * numPhase + j;
-                if (!myBulk.phaseExist[n_np_j]) continue;
-
-                dP  = myBulk.Pj[n_np_j] - bhp - dG[p];
-                xi  = myBulk.xi[n_np_j];
-                mu  = myBulk.mu[n_np_j];
-                muP = myBulk.muP[n_np_j];
-                xiP = myBulk.xiP[n_np_j];
-
-                for (USI i = 0; i < numCom; i++) {
-                    xij = myBulk.xij[n_np_j * numCom + i];
-                    // dQ / dP
-                    transIJ = perf[p].transj[j] * xi * xij;
-                    dQdXpB[(i + 1) * ncol] += transIJ * (1 - dP * muP / mu) +
-                                              dP * perf[p].transj[j] * xij * xiP;
-                    dQdXpW[(i + 1) * ncol] += -transIJ;
-
-                    // dQ / dS
-                    for (USI k = 0; k < numPhase; k++) {
-                        tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
-                              xij * myBulk.dKrdS[n_np_j * numPhase + k];
-                        // capillary pressure
-                        tmp += transIJ * myBulk.dPcdS[n_np_j * numPhase + k];
-                        dQdXsB[(i + 1) * ncol2 + k] += tmp;
-                    }
-                    // dQ / dCij
-                    for (USI k = 0; k < numCom; k++) {
-                        tmp = dP * perf[p].transj[j] * xij *
-                              (myBulk.xix[n_np_j * numCom + k] -
-                               xi / mu * myBulk.mux[n_np_j * numCom + k]);
-                        if (k == i) {
-                            tmp += perf[p].transj[j] * xi * dP;
-                        }
-                        dQdXsB[(i + 1) * ncol2 + numPhase + j * numCom + k] += tmp;
-                    }
-                }
-            }
-
-            // for Prod Well
-            for (USI i = 0; i < numCom; i++) {
-                tmpMat[0] += dQdXpW[(i + 1) * ncol] * factor;
-            }
-
-            // for Perf(bulk) of Prod Well
-            bmat = dQdXpB;
-            DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &myBulk.dSec_dPri[n * bsize2],
-                    1, bmat.data());
-            fill(bmat2.begin(), bmat2.end(), 0.0);
-            for (USI i = 0; i < numCom; i++) {
-                // becareful '-' before factor
-                Daxpy(ncol, -factor, bmat.data() + (i + 1) * ncol, bmat2.data());
-            }
-
-            // Insert bulk val into equations in ascending order
-            for (USI t = 0; t < tlen; t++) {
-                myLS.NewOffDiag(tarId[t], n, bmat2);
-            }
-        }
-        // prod well
-        for (USI t = 0; t < tlen; t++) {
-            myLS.NewOffDiag(tarId[t], prodId, tmpMat);
-        }
-    }
-}
+//void Well::AssembleMatReinjection_IMPEC(const Bulk&         myBulk,
+//                                        LinearSystem&       myLS,
+//                                        const OCP_DBL&      dt,
+//                                        const vector<Well>& allWell,
+//                                        const vector<USI>&  injId) const
+//{
+//    // find Open injection well under Rate control
+//    vector<OCP_USI> tarId;
+//    for (auto& w : injId) {
+//        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
+//            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
+//    }
+//
+//    USI tlen = tarId.size();
+//    if (tlen > 0) {
+//        // All inj well has the same factor
+//        const OCP_DBL factor = allWell[injId[0]].opt.reInjFactor * dt;
+//        const OCP_USI prodId = wOId + myBulk.numBulk;
+//        OCP_USI       n, bId;
+//        OCP_DBL       tmp, valb;
+//        OCP_DBL       valw = 0;
+//        OCP_DBL       rhsw = 0;
+//        for (USI p = 0; p < numPerf; p++) {
+//            n    = perf[p].location;
+//            valb = 0;
+//
+//            for (USI j = 0; j < numPhase; j++) {
+//                bId = n * numPhase + j;
+//                if (myBulk.phaseExist[bId]) {
+//                    tmp = perf[p].transj[j] * myBulk.xi[bId];
+//                    valb += tmp;
+//                    rhsw += tmp * (myBulk.Pc[bId] - dG[p]);
+//                }
+//            }
+//            valb *= factor;
+//            for (USI t = 0; t < tlen; t++) {
+//                myLS.NewOffDiag(tarId[t], n, -valb);
+//            }
+//            valw += valb;
+//        }
+//        rhsw *= factor;
+//        // rhs and prod well
+//        for (USI t = 0; t < tlen; t++) {
+//            myLS.AddRhs(tarId[t], rhsw);
+//            myLS.NewOffDiag(tarId[t], prodId, valw);
+//        }
+//    }
+//}
+//
+//void Well::AssembleMatReinjection_FIM(const Bulk&         myBulk,
+//                                      LinearSystem&       myLS,
+//                                      const OCP_DBL&      dt,
+//                                      const vector<Well>& allWell,
+//                                      const vector<USI>&  injId) const
+//{
+//    // find Open injection well under Rate control
+//    vector<OCP_USI> tarId;
+//    for (auto& w : injId) {
+//        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
+//            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
+//    }
+//
+//    USI tlen = tarId.size();
+//    if (tlen > 0) {
+//        // All inj well has the same factor
+//        const OCP_DBL factor = allWell[injId[0]].opt.reInjFactor;
+//        const OCP_USI prodId = wOId + myBulk.numBulk;
+//
+//        const USI ncol   = numCom + 1;
+//        const USI ncol2  = numPhase * numCom + numPhase;
+//        const USI bsize  = ncol * ncol;
+//        const USI bsize2 = ncol * ncol2;
+//
+//        OCP_DBL xij, xi, mu, muP, xiP, dP, transIJ, tmp;
+//        OCP_USI n_np_j;
+//
+//        vector<OCP_DBL> bmat(bsize, 0);
+//        vector<OCP_DBL> bmat2(bsize, 0);
+//        vector<OCP_DBL> tmpMat(bsize, 0);
+//        vector<OCP_DBL> dQdXpB(bsize, 0);
+//        vector<OCP_DBL> dQdXpW(bsize, 0);
+//        vector<OCP_DBL> dQdXsB(bsize2, 0);
+//
+//        for (USI p = 0; p < numPerf; p++) {
+//            const OCP_USI n = perf[p].location;
+//            fill(dQdXpB.begin(), dQdXpB.end(), 0.0);
+//            fill(dQdXpW.begin(), dQdXpW.end(), 0.0);
+//            fill(dQdXsB.begin(), dQdXsB.end(), 0.0);
+//
+//            for (USI j = 0; j < numPhase; j++) {
+//                n_np_j = n * numPhase + j;
+//                if (!myBulk.phaseExist[n_np_j]) continue;
+//
+//                dP  = myBulk.Pj[n_np_j] - bhp - dG[p];
+//                xi  = myBulk.xi[n_np_j];
+//                mu  = myBulk.mu[n_np_j];
+//                muP = myBulk.muP[n_np_j];
+//                xiP = myBulk.xiP[n_np_j];
+//
+//                for (USI i = 0; i < numCom; i++) {
+//                    xij = myBulk.xij[n_np_j * numCom + i];
+//                    // dQ / dP
+//                    transIJ = perf[p].transj[j] * xi * xij;
+//                    dQdXpB[(i + 1) * ncol] += transIJ * (1 - dP * muP / mu) +
+//                                              dP * perf[p].transj[j] * xij * xiP;
+//                    dQdXpW[(i + 1) * ncol] += -transIJ;
+//
+//                    // dQ / dS
+//                    for (USI k = 0; k < numPhase; k++) {
+//                        tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
+//                              xij * myBulk.dKrdS[n_np_j * numPhase + k];
+//                        // capillary pressure
+//                        tmp += transIJ * myBulk.dPcdS[n_np_j * numPhase + k];
+//                        dQdXsB[(i + 1) * ncol2 + k] += tmp;
+//                    }
+//                    // dQ / dCij
+//                    for (USI k = 0; k < numCom; k++) {
+//                        tmp = dP * perf[p].transj[j] * xij *
+//                              (myBulk.xix[n_np_j * numCom + k] -
+//                               xi / mu * myBulk.mux[n_np_j * numCom + k]);
+//                        if (k == i) {
+//                            tmp += perf[p].transj[j] * xi * dP;
+//                        }
+//                        dQdXsB[(i + 1) * ncol2 + numPhase + j * numCom + k] += tmp;
+//                    }
+//                }
+//            }
+//
+//            // for Prod Well
+//            for (USI i = 0; i < numCom; i++) {
+//                tmpMat[0] += dQdXpW[(i + 1) * ncol] * factor;
+//            }
+//
+//            // for Perf(bulk) of Prod Well
+//            bmat = dQdXpB;
+//            DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &myBulk.dSec_dPri[n * bsize2],
+//                    1, bmat.data());
+//            fill(bmat2.begin(), bmat2.end(), 0.0);
+//            for (USI i = 0; i < numCom; i++) {
+//                // becareful '-' before factor
+//                Daxpy(ncol, -factor, bmat.data() + (i + 1) * ncol, bmat2.data());
+//            }
+//
+//            // Insert bulk val into equations in ascending order
+//            for (USI t = 0; t < tlen; t++) {
+//                myLS.NewOffDiag(tarId[t], n, bmat2);
+//            }
+//        }
+//        // prod well
+//        for (USI t = 0; t < tlen; t++) {
+//            myLS.NewOffDiag(tarId[t], prodId, tmpMat);
+//        }
+//    }
+//}
 
 //void Well::SetPolyhedronWell(const Grid& myGrid, OCPpolyhedron& mypol)
 //{

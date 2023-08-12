@@ -37,8 +37,6 @@ class OCPFlowVarSet
     /// oil phase is reference phase
 public:
     OCPFlowVarSet() { Init0(); }
-    void Setup(const USI& np, const OCPFlowType& type) {
-    }
     void Init0() {
 		Swco     = 0;
         krocw    = 0;
@@ -75,27 +73,11 @@ public:
     OCP_DBL dKrogdSo, dKrogdSg;
     OCP_DBL dKrowdSo, dKrowdSw;
 
-    /// Capillary pressure   
-    OCP_DBL Pcgo, Pcwo;               ///< Pg - Po, Pw - Po
+    /// Capillary pressure : Pg - Po, Pw - Po
+    OCP_DBL Pcgo, Pcwo;               
     /// the corresponding derivatives of capillary pressure
     OCP_DBL dPcgodSo, dPcgodSg, dPcgodSw;
     OCP_DBL dPcwodSo, dPcwodSg, dPcwodSw;
-
-
-    /// num of phases
-    USI             np;
-    /// Index of Phases
-    USI             o, g, w;
-    /// Saturations
-    vector<OCP_DBL> S;
-    /// Relative Permeability
-    vector<OCP_DBL> Kr;
-    /// Capillary Pressure
-    vector<OCP_DBL> Pc;
-    /// dKr / dS
-    vector<OCP_DBL> dKrdS;
-    /// dPc / dS
-    vector<OCP_DBL> dPcdS;
 };
 
 

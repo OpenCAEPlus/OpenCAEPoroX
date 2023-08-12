@@ -190,6 +190,7 @@ USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureComp* compsin)
         sm.push_back(new SkipPSAMethod01(&vs, compsin));
         return sm.size() - 1;
     }
+    return 0;
 }
 
 

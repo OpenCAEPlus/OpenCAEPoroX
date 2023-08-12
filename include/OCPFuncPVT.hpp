@@ -37,12 +37,13 @@ class OCP_PVTW : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVTW() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoWin) {
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoWin, const OCP_DBL& stdVwin) {
 		OCPFuncTable::Setup(src);
 		stdRhoW = stdRhoWin;
+		stdVw   = stdVwin;
 	}
 
-	OCP_DBL CalXiW(const OCP_DBL& P) const { return 1 / CONV1 / CalBw(P);}
+	OCP_DBL CalXiW(const OCP_DBL& P) const { return 1 / CONV1 / (CalBw(P) * stdVw);}
 	OCP_DBL CalRhoW(const OCP_DBL& P) const { return stdRhoW / CalBw(P); }
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
 		               OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
@@ -52,7 +53,10 @@ protected:
 	void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 	
 protected:
-	OCP_DBL stdRhoW;   ///< mass density of water phase in standard condition
+	/// mass density of water phase in standard condition
+	OCP_DBL stdRhoW;
+	/// molar volume of water phase in standard conditions (stb/lbmol)
+	OCP_DBL stdVw;
 };
 
 
@@ -78,11 +82,14 @@ class OCP_PVCO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVCO() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, 
-												   const OCP_DBL& stdRhoGin) {
+	void Setup(const vector<vector<OCP_DBL>>& src, 
+		const OCP_DBL& stdRhoOin, const OCP_DBL& stdRhoGin,
+		const OCP_DBL& stdVoin,   const OCP_DBL& stdVgin) {
 		OCPFuncTable::Setup(src);
 		stdRhoO = stdRhoOin;
 		stdRhoG = stdRhoGin;	
+		stdVo   = stdVoin;
+		stdVg   = stdVgin;
 	}
 	
 	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const;
@@ -105,10 +112,14 @@ protected:
 					   OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs) const;
 
 protected:
-	OCP_DBL stdRhoO;      ///< mass density of oil phase in standard condition
-	OCP_DBL stdRhoG;      ///< mass density of gas phase in standard condition
-	OCP_DBL stdVo{ 1 };   ///< molar volume of oil in standard condition
-	OCP_DBL stdVg{ 1 };   ///< molar volume of gas in standard condition
+	/// mass density of oil phase in standard condition
+	OCP_DBL stdRhoO;      
+	/// mass density of gas phase in standard condition
+	OCP_DBL stdRhoG;   
+	/// molar volume of oil in standard condition (stb/lbmol)
+	OCP_DBL stdVo;  
+	/// molar volume of gas in standard condition (Mscf/lbmol)
+	OCP_DBL stdVg;        
 };
 
 
@@ -127,11 +138,12 @@ class OCP_PVDG : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDG() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoGin) {
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoGin, const OCP_DBL& stdVgin) {
 		OCPFuncTable::Setup(src);
 		stdRhoG = stdRhoGin;
+		stdVg   = stdVgin;
 	}
-	OCP_DBL CalXiG(const OCP_DBL& P) const { return 1 / CONV1 / CalBg(P); }
+	OCP_DBL CalXiG(const OCP_DBL& P) const { return 1 / CONV1 / (CalBg(P) * stdVg); }
 	OCP_DBL CalRhoG(const OCP_DBL& P) const { return (1000 / CONV1) * stdRhoG / CalBg(P);}
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 					   OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
@@ -141,7 +153,10 @@ protected:
 	void CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 
 protected:
-	OCP_DBL stdRhoG;   ///< mass density of gas phase in standard condition
+	/// mass density of gas phase in standard condition
+	OCP_DBL stdRhoG;
+	/// molar volume of gas phase in standard conditions (stb/lbmol)
+	OCP_DBL stdVg;
 };
 
 
@@ -160,11 +175,12 @@ class OCP_PVDO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDO() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin) {
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
 		OCPFuncTable::Setup(src);
 		stdRhoO = stdRhoOin;
+		stdVo   = stdVoin;
 	}
-	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / CalBo(P); }
+	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
 	OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
@@ -174,7 +190,10 @@ protected:
 	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
 
 protected:
-	OCP_DBL stdRhoO;   ///< mass density of oil phase in standard condition
+	/// mass density of oil phase in standard conditions
+	OCP_DBL stdRhoO;   
+	/// molar volume of oil phase in standard conditions (stb/lbmol)
+	OCP_DBL stdVo;     
 };
 
 

@@ -41,6 +41,7 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
+    virtual OCP_DBL GetXiStd(const PhaseType& pt) = 0;
 };
 
 
@@ -50,6 +51,7 @@ public:
 
 
 /// Use PVDO and PVTW
+// Note that Vo,std, Vg,std, Vw,std are assumed to be 1
 class OCPMixtureBlkOilOGWMethod01 : public OCPMixtureBlkOilOGWMethod
 {
 public:
@@ -65,14 +67,26 @@ public:
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs) override;
+    OCP_DBL GetXiStd(const PhaseType& pt) override;
 
 protected:
     void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
 
 protected:
+    /// PVCO table
     OCP_PVCO        PVCO;
+    /// PVDG table
     OCP_PVDG        PVDG;
+    /// PVTW table
     OCP_PVTW        PVTW;
+    /// 1 lbmol oil components could absorb x lbmol gas components
+    OCP_DBL         x;
+    /// molar volume of oil phase in standard conditions
+    const OCP_DBL   stdVo{ 1 };
+    /// molar volume of gas phase in standard conditions
+    const OCP_DBL   stdVg{ 1 };
+    /// molar volume of water phase in standard conditions
+    const OCP_DBL   stdVw{ 1 };
 };
 
 
@@ -112,6 +126,12 @@ public:
         else if (tarPhase == GAS)    return pmMethod->CalRhoG(P);
         else if (tarPhase == WATER)  return pmMethod->CalRhoW(P);
         else                         OCP_ABORT("WRONG TarPhase");
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        Flash(P, Ni);
+    }
+    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->GetXiStd(pt);
     }
 
 protected:

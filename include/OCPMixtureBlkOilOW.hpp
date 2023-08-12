@@ -39,6 +39,7 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
+    virtual OCP_DBL GetXiStd(const PhaseType& pt) = 0;
 };
 
 
@@ -48,6 +49,7 @@ public:
 
 
 /// Use PVDO and PVTW
+// Note that Vo,std, Vw,std are assumed to be 1
 class OCPMixtureBlkOilOWMethod01 : public OCPMixtureBlkOilOWMethod
 {
 public:
@@ -60,10 +62,18 @@ public:
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs) override;
+    OCP_DBL GetXiStd(const PhaseType& pt) override;
+    
     
 protected:
+    /// PVDO table
     OCP_PVDO        PVDO;
+    /// PVTW table
     OCP_PVTW        PVTW;
+    /// molar volume of oil phase in standard conditions (stb/lbmol)
+    const OCP_DBL   stdVo{ 1 };
+    /// molar volume of water phase in standard conditions (stb/lbmol)
+    const OCP_DBL   stdVw{ 1 };
 };
 
 
@@ -92,16 +102,23 @@ public:
         SetPN(P, Ni);
         pmMethod->FlashDer(vs);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) { 
+    OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) {
         if (tarPhase == OIL)         return pmMethod->CalXiO(P);
         else if (tarPhase == WATER)  return pmMethod->CalXiW(P);
         else                         OCP_ABORT("WRONG TarPhase");
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) { 
+    OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) {
         if (tarPhase == OIL)         return pmMethod->CalRhoO(P);
         else if (tarPhase == WATER)  return pmMethod->CalRhoW(P);
         else                         OCP_ABORT("WRONG TarPhase");
     }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        Flash(P, Ni);
+    }
+    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->GetXiStd(pt);
+    }
+
 
 protected:
     void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) { 

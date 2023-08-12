@@ -31,18 +31,39 @@ enum class OCPMixtureType
     BO_GW,
     /// blackoil: oil, gas and water
     BO_OGW,
-    /// Compositional Model
+    /// Compositional Model with const temperature
     COMP,
-    /// Thermal-K
+    /// Compositional Model with variable temperature
+    COMPT,
+    /// Thermal-K: oil and water
     THERMALK_OW
 };
+
+
+enum class PhaseType
+{
+    /// oil phase
+    oil,
+    /// gas phase
+    gas,
+    /// water phase
+    water
+};
+
 
 /// mixture varset
 class OCPMixtureVarSet
 {
 public:
     OCPMixtureVarSet() = default;
-    void Init(const USI& numPhase, const USI& numCom, const OCP_BOOL& ifThermal) {
+    void Init(const USI& numPhase, const USI& numCom, const OCPMixtureType& mixType) {
+
+        OCP_BOOL ifThermal = OCP_FALSE;
+        if (mixType == OCPMixtureType::THERMALK_OW ||
+            mixType == OCPMixtureType::COMPT) {
+            ifThermal = OCP_TRUE;
+        }
+
         // vars
         np = numPhase;
         nc = numCom;
@@ -194,6 +215,9 @@ public:
     OCPMixture() = default;
     auto MixtureType() const { return mixtureType; }
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
+    virtual void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
+    virtual OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
+    OCP_DBL GetXiStd(const PhaseType& pt) { return GetXiStd(0, 0, 0, pt); }
 
 protected:
     /// mixture type

@@ -649,6 +649,8 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
 
 OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
+    vs.Init(rs_param.comsParam.numPhase + 1, rs_param.comsParam.numCom + 1, OCPMixtureType::COMP);
+
     Setup(rs_param.comsParam, i);
     // water property
     OCP_DBL std_RhoW;
@@ -656,7 +658,7 @@ OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, c
         if (rs_param.gravity.activity)
             std_RhoW = RHOW_STD * rs_param.gravity.data[1];
         if (rs_param.density.activity) std_RhoW = RHOW_STD;
-        PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW);
+        PVTW.Setup(rs_param.PVTW_T.data[i], std_RhoW, stdVw);
     }
     else {
         OCP_ABORT("PVTW is Missing!");
@@ -876,7 +878,6 @@ void OCPMixtureCompMethod01::CaldXsdXpW(OCPMixtureVarSet& vs)
 
 void OCPMixtureComp::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    vs.Init(3, rs_param.numCom + 1, OCP_FALSE);  // temp set
     if (rs_param.PVTW_T.data[i].size() > 0) {
         pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
     }

@@ -107,7 +107,7 @@ public:
         SetPTS(P, T, Sw);
         pmMethod->InitFlash(Vp, vs);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
@@ -128,6 +128,9 @@ public:
         if (tarPhase == OIL)         return pmMethod->CalRhoO(P, T);
         else if (tarPhase == WATER)  return pmMethod->CalRhoW(P, T);
         else                         OCP_ABORT("WRONG TarPhase");
+    }
+    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return CalXi(P, T, USI(pt));
     }
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T, zi); }
 

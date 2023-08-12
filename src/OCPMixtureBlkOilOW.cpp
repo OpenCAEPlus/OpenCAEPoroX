@@ -29,8 +29,8 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_
         stdRhoW = RHOW_STD * rs_param.gravity.data[1];
     }
 
-    PVDO.Setup(rs_param.PVDO_T.data[i], stdRhoO);
-    PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW);
+    PVDO.Setup(rs_param.PVDO_T.data[i], stdRhoO, stdVo);
+    PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW, stdVw);
 
     vs.phaseExist[0]  = OCP_TRUE;
     vs.phaseExist[1]  = OCP_TRUE;
@@ -101,13 +101,21 @@ void OCPMixtureBlkOilOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
+OCP_DBL OCPMixtureBlkOilOWMethod01::GetXiStd(const PhaseType& pt)
+{
+    if      (pt == PhaseType::oil)    return 1 / (stdVo * CONV1);
+    else if (pt == PhaseType::water)  return 1 / (stdVw * CONV1);
+    else    OCP_ABORT("Wrong Phase Type!");
+}
+
+
 /////////////////////////////////////////////////////
 // OCPMixtureBlkOilOW 
 /////////////////////////////////////////////////////
 
 void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {  
-    vs.Init(2, 2, OCP_FALSE);
+    vs.Init(2, 2, mixtureType);
 	if (rs_param.PVTW_T.data.size() > 0 && rs_param.PVDO_T.data.size() > 0) {
 		pmMethod = new OCPMixtureBlkOilOWMethod01(rs_param, i, vs);
 	}

@@ -34,6 +34,7 @@ public:
     MixtureUnit() = default;
     /// return type of mixture.
     auto GetMixtureType() const { return mixtureType; }
+    virtual OCPMixture* GetMixture() = 0;
     /// flash calculation with saturation of phases.
     virtual void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) = 0;
     virtual void InitFlashIMPEC(const OCP_DBL& Pin,
