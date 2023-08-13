@@ -88,12 +88,6 @@ public:
                              const USI&     tarPhase) = 0;
 
     // for well
-    /// Setup injZi, injPhase and factorINJ for INJ well
-    /// Setup prodPhaseWeight for PROD well
-    virtual void SetupWellOpt(WellOpt&                  opt,
-                              const vector<SolventINJ>& sols,
-                              const OCP_DBL&            Psurf,
-                              const OCP_DBL&            Tsurf) = 0;
     /// Calculate ProdWeight for PROD well
     virtual void CalProdWeight(const OCP_DBL&         Pin,
                                const OCP_DBL&         Tin,

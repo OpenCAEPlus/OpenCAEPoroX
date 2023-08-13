@@ -58,6 +58,32 @@ public:
     OCPMixtureVarSet() = default;
     void Init(const USI& numPhase, const USI& numCom, const OCPMixtureType& mixType) {
 
+        switch (mixType)
+        {
+        case OCPMixtureType::BO_OG:
+            o = 0;
+            g = 1;
+            w = -1;
+            break;
+        case OCPMixtureType::BO_OW:
+        case OCPMixtureType::THERMALK_OW:
+            o = 0;
+            w = 1;
+            g = -1;
+            break;
+        case OCPMixtureType::BO_OGW:
+        case OCPMixtureType::COMP:
+            o = 0;
+            g = 1;
+            w = 2;
+            break;
+        default:
+            OCP_ABORT("Inavailable Mixture Type!");
+            break;
+        }
+        if (o >= 0) l.push_back(o);
+        if (w >= 0) l.push_back(w);
+
         OCP_BOOL ifThermal = OCP_FALSE;
         if (mixType == OCPMixtureType::THERMALK_OW ||
             mixType == OCPMixtureType::COMPT) {
@@ -122,6 +148,12 @@ public:
     const OCP_DBL* GetXj(const USI& j) const { return &x[j * nc]; }
 
 public:
+    // Index of phases
+    /// oil, gas, water
+    OCP_INT                 o, g, w;
+    /// liquid 
+    vector<OCP_INT>         l;
+
     /// num of phase, components
     USI                     np, nc;
     /// pressure, temperature
@@ -217,7 +249,12 @@ public:
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
     virtual void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
     virtual OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
-    OCP_DBL GetXiStd(const PhaseType& pt) { return GetXiStd(0, 0, 0, pt); }
+
+public:
+    auto OilIndex() const { return vs.o; }
+    auto GasIndex() const { return vs.g; }
+    auto WatIndex() const { return vs.w; }
+    auto LiquidIndex() const { return vs.l; }
 
 protected:
     /// mixture type

@@ -87,10 +87,6 @@ public:
              const USI&     tarPhase) override;
 
     // For Well
-    void SetupWellOpt(WellOpt&                  opt,
-                      const vector<SolventINJ>& sols,
-                      const OCP_DBL&            Psurf,
-                      const OCP_DBL&            Tsurf) override;
     void CalProdWeight(const OCP_DBL&         Pin,
                        const OCP_DBL&         Tin,
                        const OCP_DBL*         Niin,

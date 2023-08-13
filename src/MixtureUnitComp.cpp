@@ -111,66 +111,6 @@ OCP_DBL MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
     return compM.CalRho(Pin, Tin, &Ziin[0], tarPhase);
 }
 
-void MixtureUnitComp::SetupWellOpt(WellOpt&              opt,
-                               const vector<SolventINJ>& sols,
-                               const OCP_DBL&            Psurf,
-                               const OCP_DBL&            Tsurf)
-{
-    const USI wellType = opt.WellType();
-    if (wellType == INJ) {
-        const string    fluidName = opt.InjFluidType();
-        vector<OCP_DBL> tmpZi(vs->nc, 0);
-        if (fluidName == "WAT") {
-            tmpZi.back() = 1;
-            opt.SetInjProdPhase(WATER);
-            opt.SetInjFactor(1.0);
-        } else {
-            // inj phase is gas
-            opt.SetInjProdPhase(GAS);
-            const USI len = sols.size();
-            for (USI i = 0; i < len; i++) {
-                if (fluidName == sols[i].name) {
-                    tmpZi = sols[i].data;
-                    tmpZi.resize(vs->nc);
-                    // Convert volume units Mscf/stb to molar units lbmoles for
-                    // injfluid Use flash in Bulk in surface condition
-                    OCP_DBL tmp = 1000 * XiPhase(Psurf, Tsurf, tmpZi, GAS);
-                    opt.SetInjFactor(tmp);
-                    break;
-                }
-                if (i == len - 1) {
-                    OCP_ABORT("Wrong FluidType!");
-                }
-            }
-        }
-        opt.SetInjZi(tmpZi);
-    } else if (wellType == PROD) {
-        vector<OCP_DBL> tmpWght(vs->np, 0);
-        switch (opt.OptMode()) {
-            case BHP_MODE:
-                break;
-            case ORATE_MODE:
-                tmpWght[0] = 1;
-                break;
-            case GRATE_MODE:
-                tmpWght[1] = 1;
-                break;
-            case WRATE_MODE:
-                tmpWght[2] = 1;
-                break;
-            case LRATE_MODE:
-                tmpWght[0] = 1;
-                tmpWght[2] = 1;
-                break;
-            default:
-                OCP_ABORT("WRONG optMode");
-                break;
-        }
-        opt.SetProdPhaseWeight(tmpWght);
-    } else {
-        OCP_ABORT("Wrong Well Type!");
-    }
-}
 
 void MixtureUnitComp::CalProdWeight(const OCP_DBL&     Pin,
                                 const OCP_DBL&         Tin,

@@ -69,10 +69,9 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
         if (!bk.ifThermal) {
             opt.injTemp = bk.rsTemp;
         }
-        flashCal[0]->SetupWellOpt(opt, sols, Psurf, Tsurf);      
     }
 
-    // SetupOpts(sols);
+    SetupOpts(sols);
 
     // Perf
     for (USI p = 0; p < numPerf; p++) {
@@ -99,105 +98,91 @@ void Well::SetupOpts(const vector<SolventINJ>& sols)
 {
     for (auto& opt : optSet) {
         if (!opt.state) continue;
-        switch (mixture->MixtureType())
-        {
-        case OCPMixtureType::BO_OW:
-            SetupOptsBO_OW(opt);
-            break;
-        case OCPMixtureType::BO_OGW:
-            SetupOptsBO_OGW(opt);
-            break;
-        case OCPMixtureType::COMP:
-            break;
-        case OCPMixtureType::THERMALK_OW:
-            break;
-        default:
-            OCP_ABORT("Inavailable Mixture Type!");
-            break;
+        if (opt.type == INJ) {
+            SetupOptsInj(opt, sols);
+        }
+        else if (opt.type == PROD) {
+            SetupOptsProd(opt);
+        }
+        else {
+            OCP_ABORT("Inavailable Well Type!");
         }
     }
 }
 
 
-void Well::SetupOptsBO_OW(WellOpt& opt)
+void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
 {
-    if (opt.type == INJ) {
-        if (opt.fluidType == "WAT") {
-            opt.injPhase  = WATER;
-            opt.injZi     = vector<OCP_DBL>{ 0,1 }; 
-            opt.factorINJ = CONV1 * mixture->GetXiStd(PhaseType::water);
-            opt.maxRate   *= opt.factorINJ;
-        }
-        else {
-            OCP_ABORT("Inavailable Injecting Fluid!");
-        }
+    const auto g = mixture->GasIndex();
+    const auto w = mixture->WatIndex();
+ 
+    if (opt.fluidType == "WAT") {     
+        if (w < 0) OCP_ABORT("WRONG INJECTED FLUID -- NO WATER!");
+        opt.injZi.assign(numCom, 0);
+        opt.injPhase     =  WATER;
+        opt.injZi.back() =  1.0;
+        opt.factorINJ    =  CONV1 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::water);
+        opt.maxRate      *= opt.factorINJ;
     }
-    else if (opt.type == PROD) {
-        switch (opt.OptMode()) {
-        case BHP_MODE:
-            break;
-        case ORATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0 };
-            break;
-        case WRATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,1 };
-            break;
-        case LRATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,1 };
-            break;
-        default:
-            OCP_ABORT("WRONG Opt Mode!");
-            break;
+    else if (!sols.empty())
+    {
+        opt.injPhase  =  GAS;
+        for (auto& s : sols) {
+            if (opt.fluidType == s.name) {
+                opt.injZi = s.data;
+                opt.injZi.resize(numCom);
+            }
         }
+        if (opt.injZi.size() != numCom) {
+            OCP_ABORT("Inavailable INJECTED FLUID -- " + opt.fluidType + "!");
+        }
+        opt.factorINJ = 1000 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.maxRate   *= opt.factorINJ;
+    }
+    else if (opt.fluidType == "GAS") {
+        if (g < 0) OCP_ABORT("WRONG INJECTED FLUID -- NO GAS!");
+        opt.injZi.assign(numCom, 0);
+        opt.injPhase  =  GAS;
+        opt.injZi[g]  =  1.0;
+        opt.factorINJ =  1000 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.maxRate   *= opt.factorINJ;
     }
     else {
-        OCP_ABORT("Inavailable Well Type!");
+        OCP_ABORT("Inavailable INJECTED FLUID!");
     }
 }
 
 
-void Well::SetupOptsBO_OGW(WellOpt& opt)
+void Well::SetupOptsProd(WellOpt& opt)
 {
-    if (opt.type == INJ) {
-        if (opt.fluidType == "WAT") {
-            opt.injPhase  = WATER;
-            opt.injZi     = vector<OCP_DBL>{ 0,0,1 };
-            opt.factorINJ = CONV1 * mixture->GetXiStd(PhaseType::water);
-            opt.maxRate   *= opt.factorINJ;
-        }
-        else if (opt.fluidType == "GAS") {
-            opt.injPhase  = GAS;
-            opt.injZi     = vector<OCP_DBL>{ 0,1,0 };
-            opt.factorINJ = 1000 * mixture->GetXiStd(PhaseType::gas);
-            opt.maxRate   *= opt.factorINJ;
-        }
-        else {
-            OCP_ABORT("Inavailable Injecting Fluid!");
-        }
-    }
-    else if (opt.type == PROD) {
-        switch (opt.OptMode()) {
-        case BHP_MODE:
-            break;
-        case ORATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0,0 };
-            break;
-        case GRATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,1,0 };
-            break;
-        case WRATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 0,0,1 };
-            break;
-        case LRATE_MODE:
-            opt.prodPhaseWeight = vector<OCP_DBL>{ 1,0,1 };
-            break;
-        default:
-            OCP_ABORT("WRONG Opt Mode!");
-            break;
-        }
-    }
-    else {
-        OCP_ABORT("Inavailable Well Type!");
+    const auto o = mixture->OilIndex();
+    const auto g = mixture->GasIndex();
+    const auto w = mixture->WatIndex();
+    const auto l = mixture->LiquidIndex();
+
+    opt.prodPhaseWeight.assign(numPhase, 0);
+    switch (opt.optMode) {
+    case BHP_MODE:
+        break;
+    case ORATE_MODE:
+        if (o < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO OIL!");
+        opt.prodPhaseWeight[o] = 1.0;
+        break;
+    case GRATE_MODE:
+        if (g < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO GAS!");
+        opt.prodPhaseWeight[g] = 1.0;
+        break;
+    case WRATE_MODE:
+        if (w < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO WATER!");
+        opt.prodPhaseWeight[w] = 1.0;
+        break;
+    case LRATE_MODE:
+        if (l.size() == 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO LIQUID!");
+        for (auto& i : l)  opt.prodPhaseWeight[i] = 1.0;
+        break;
+    default:
+        OCP_ABORT("WRONG Opt Mode!");
+        break;
     }
 }
 

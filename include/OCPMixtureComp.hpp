@@ -49,6 +49,8 @@ public:
     virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
     /// Calculate molar density of target phase
     virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    /// Calculate molar density of target phase in standard conditions
+    virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) = 0;
     /// Calculate mass density of target phase
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
     /// Input total number of existing phase, return the number of existing phase in PEC
@@ -232,6 +234,7 @@ public:
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) override;
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
     /// Water is always present
     USI GetNumPhasePE(const USI& np) const override { return np - 1; }
@@ -253,13 +256,13 @@ protected:
 
 protected:
     /// PVTW table
-    OCP_PVTW PVTW;
+    OCP_PVTW       PVTW;
     /// molar volume of water phase in std conditions
-    OCP_DBL  stdVw;
+    const OCP_DBL  stdVw{ 1 };
     /// index of water phase
-    USI      wIdP;
+    USI            wIdP;
     /// index of water component
-    USI      wIdC;
+    USI            wIdC;
 
 
     ////////////////////////////////////////////////////////////
@@ -312,7 +315,7 @@ public:
         return pmMethod->CalRho(P, T, z, tarPhase);
     }
     OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-
+        return pmMethod->CalXiStd(P, T, z, pt);
     }
     void OutputIters() const { pmMethod->OutIters(); }
     const auto& GetNCPE() const { return pmMethod->GetNC(); }

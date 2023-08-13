@@ -91,10 +91,6 @@ public:
                      const OCP_DBL*   Niin,
                      vector<OCP_DBL>& prodRate) override;
 
-    void    SetupWellOpt(WellOpt&                  wellopt,
-                         const vector<SolventINJ>& sols,
-                         const OCP_DBL&            Psurf,
-                         const OCP_DBL&            Tsurf) override;
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override;
 
 protected:

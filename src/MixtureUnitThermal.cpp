@@ -123,50 +123,7 @@ void MixtureUnitThermal_OW::CalProdRate(const OCP_DBL&   Pin,
     prodRate[1] = Niin[1] / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb
 }
 
-void MixtureUnitThermal_OW::SetupWellOpt(WellOpt&                  opt,
-                                      const vector<SolventINJ>& sols,
-                                      const OCP_DBL&            Psurf,
-                                      const OCP_DBL&            Tsurf)
-{
-    const USI wellType = opt.WellType();
-    if (wellType == INJ) {
-        const string    fluidName = opt.InjFluidType();
-        vector<OCP_DBL> tmpZi(vs->nc, 0);
-        if (fluidName == "WAT") {
-            tmpZi.back() = 1;
-            opt.SetInjProdPhase(WATER);
-            // lbmol / ft3 -> lbmol  / bbl  for
-            // injfluid Use flash in Bulk in surface condition
-            OCP_DBL tmp = CONV1 * XiPhase(Psurf, Tsurf, tmpZi, WATER);
-            opt.SetInjFactor(tmp);
-        } else {
-            OCP_ABORT("WRONG Fluid Type!");
-        }
-        opt.SetInjZi(tmpZi);
-    } else if (wellType == PROD) {
-        vector<OCP_DBL> tmpWght(vs->np, 0);
-        switch (opt.OptMode()) {
-            case BHP_MODE:
-                break;
-            case ORATE_MODE:
-                tmpWght[0] = 1;
-                break;
-            case WRATE_MODE:
-                tmpWght[1] = 1;
-                break;
-            case LRATE_MODE:
-                tmpWght[0] = 1;
-                tmpWght[1] = 1;
-                break;
-            default:
-                OCP_ABORT("WRONG optMode");
-                break;
-        }
-        opt.SetProdPhaseWeight(tmpWght);
-    } else {
-        OCP_ABORT("Wrong Well Type!");
-    }
-}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

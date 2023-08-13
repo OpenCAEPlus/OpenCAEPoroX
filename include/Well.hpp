@@ -62,8 +62,9 @@ public:
 protected:
     /// Setup well operations
     void SetupOpts(const vector<SolventINJ>& sols);
-    void SetupOptsBO_OW(WellOpt& opt);
-    void SetupOptsBO_OGW(WellOpt& opt);
+    void SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols);
+    void SetupOptsProd(WellOpt& opt);
+    
 
     /////////////////////////////////////////////////////////////////////
     // Basic Well information

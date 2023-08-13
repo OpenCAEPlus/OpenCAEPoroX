@@ -88,50 +88,6 @@ OCP_DBL MixtureUnitBlkOil_OW::RhoPhase(const OCP_DBL& Pin,
     return OWM.CalRho(Pin, tarPhase);
 }
 
-void MixtureUnitBlkOil_OW::SetupWellOpt(WellOpt& opt,
-    const vector<SolventINJ>& sols,
-    const OCP_DBL& Psurf,
-    const OCP_DBL& Tsurf)
-{
-    const USI wellType = opt.WellType();
-    if (wellType == INJ) {
-        const string fluidName = opt.InjFluidType();
-        opt.SetInjFactor(1.0);
-
-        if (fluidName == "WAT") {
-            vector<OCP_DBL> tmpZi({ 0, 1 });
-            opt.SetInjZi(tmpZi);
-            opt.SetInjProdPhase(WATER);
-        }
-        else {
-            OCP_ABORT("WRONG Injecting Fluid!");
-        }
-    }
-    else if (wellType == PROD) {
-        vector<OCP_DBL> tmpWght(2, 0);
-        switch (opt.OptMode()) {
-        case BHP_MODE:
-            break;
-        case ORATE_MODE:
-            tmpWght[0] = 1;
-            break;
-        case WRATE_MODE:
-            tmpWght[1] = 1;
-            break;
-        case LRATE_MODE:
-            tmpWght[0] = tmpWght[1] = 1;
-            break;
-        default:
-            OCP_ABORT("WRONG Opt Mode!");
-            break;
-        }
-        opt.SetProdPhaseWeight(tmpWght);
-    }
-    else {
-        OCP_ABORT("Wrong Well Type!");
-    }
-}
-
 
 ///////////////////////////////////////////////
 // MixtureUnitBlkOil_OGW
@@ -213,58 +169,6 @@ MixtureUnitBlkOil_OGW::RhoPhase(const OCP_DBL& Pin,
     return OGWM.CalRho(Pin, Pbbin, tarPhase);
 }
 
-void MixtureUnitBlkOil_OGW::SetupWellOpt(WellOpt& opt,
-    const vector<SolventINJ>& sols,
-    const OCP_DBL& Psurf,
-    const OCP_DBL& Tsurf)
-{
-    const USI wellType = opt.WellType();
-    if (wellType == INJ) {
-        const string fluidName = opt.InjFluidType();
-        opt.SetInjFactor(1.0);
-
-        if (fluidName == "WAT") {
-            vector<OCP_DBL> tmpZi({ 0, 0, 1 });
-            opt.SetInjZi(tmpZi);
-            opt.SetInjProdPhase(WATER);
-        }
-        else if (fluidName == "GAS") {
-            vector<OCP_DBL> tmpZi({ 0, 1, 0 });
-            opt.SetInjZi(tmpZi);
-            opt.SetInjProdPhase(GAS);
-        }
-        else {
-            OCP_ABORT("WRONG Injecting Fluid!");
-        }
-
-    }
-    else if (wellType == PROD) {
-        vector<OCP_DBL> tmpWght(3, 0);
-        switch (opt.OptMode()) {
-        case BHP_MODE:
-            break;
-        case ORATE_MODE:
-            tmpWght[0] = 1;
-            break;
-        case GRATE_MODE:
-            tmpWght[1] = 1;
-            break;
-        case WRATE_MODE:
-            tmpWght[2] = 1;
-            break;
-        case LRATE_MODE:
-            tmpWght[0] = tmpWght[2] = 1;
-            break;
-        default:
-            OCP_ABORT("WRONG Opt Mode!");
-            break;
-        }
-        opt.SetProdPhaseWeight(tmpWght);
-    }
-    else {
-        OCP_ABORT("Wrong Well Type!");
-    }
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

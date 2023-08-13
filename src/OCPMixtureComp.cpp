@@ -763,6 +763,19 @@ OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const 
 }
 
 
+OCP_DBL OCPMixtureCompMethod01::CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase)
+{
+    if (tarPhase == PhaseType::water) {
+        // water phase
+        return 1 / (stdVw * CONV1);
+    }
+    else {
+        // oil phase
+        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
+    }
+}
+
+
 void OCPMixtureCompMethod01::InitNtZ(OCPMixtureVarSet& vs)
 {
     Nt = 0;

@@ -124,16 +124,6 @@ public:
         OCP_ABORT("Not Completed!");
         return 0;
     };
-
-    // for Well
-    void SetupWellOpt(WellOpt&                  opt,
-                      const vector<SolventINJ>& sols,
-                      const OCP_DBL&            Psurf,
-                      const OCP_DBL&            Tsurf) override
-    {
-        OCP_ABORT("Not Completed!");
-    };
-
 };
 
 ///////////////////////////////////////////////
@@ -183,12 +173,6 @@ public:
                      const OCP_DBL& Tin,
                      const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override;
-
-    // for Well
-    void SetupWellOpt(WellOpt&                  opt,
-                      const vector<SolventINJ>& sols,
-                      const OCP_DBL&            Psurf,
-                      const OCP_DBL&            Tsurf) override;
 
 private:
     OCPMixtureBlkOilOW OWM;
@@ -241,12 +225,6 @@ public:
                      const OCP_DBL& Tin,
                      const vector<OCP_DBL>& Ziin,
                      const USI&     tarPhase) override;
-
-    // for Well
-    void SetupWellOpt(WellOpt&                  opt,
-                      const vector<SolventINJ>& sols,
-                      const OCP_DBL&            Psurf,
-                      const OCP_DBL&            Tsurf) override;
 
 protected:
     OCPMixtureBlkOilOGW OGWM;
