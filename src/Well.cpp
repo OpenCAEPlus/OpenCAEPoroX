@@ -121,7 +121,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         opt.injZi.assign(numCom, 0);
         opt.injPhase     =  WATER;
         opt.injZi.back() =  1.0;
-        opt.factorINJ    =  CONV1 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::water);
+        opt.factorINJ    =  CONV1 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::water);
         opt.maxRate      *= opt.factorINJ;
     }
     else if (!sols.empty())
@@ -136,7 +136,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         if (opt.injZi.size() != numCom) {
             OCP_ABORT("Inavailable INJECTED FLUID -- " + opt.fluidType + "!");
         }
-        opt.factorINJ = 1000 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.factorINJ = 1000 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
         opt.maxRate   *= opt.factorINJ;
     }
     else if (opt.fluidType == "GAS") {
@@ -144,7 +144,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         opt.injZi.assign(numCom, 0);
         opt.injPhase  =  GAS;
         opt.injZi[g]  =  1.0;
-        opt.factorINJ =  1000 * mixture->GetXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.factorINJ =  1000 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
         opt.maxRate   *= opt.factorINJ;
     }
     else {
@@ -437,11 +437,20 @@ void Well::CalInjQj(const Bulk& myBulk, const OCP_DBL& dt)
 void Well::CalProdQj(const Bulk& myBulk, const OCP_DBL& dt)
 {
 
-    flashCal[0]->CalProdRate(Psurf, Tsurf, &qi_lbmol[0], prodRate);
-    USI iter = 0;
-    if (myBulk.oil) WOPR = prodRate[iter++];
-    if (myBulk.gas) WGPR = prodRate[iter++];
-    if (myBulk.water) WWPR = prodRate[iter++];
+    //flashCal[0]->CalProdRate(Psurf, Tsurf, &qi_lbmol[0], prodRate);
+    //USI iter = 0;
+    //if (myBulk.oil) WOPR = prodRate[iter++];
+    //if (myBulk.gas) WGPR = prodRate[iter++];
+    //if (myBulk.water) WWPR = prodRate[iter++];
+
+    mixture->CalVStd(Psurf, Tsurf, &qi_lbmol[0]);
+    const auto o = mixture->OilIndex();
+    const auto g = mixture->GasIndex();
+    const auto w = mixture->WatIndex();
+
+    if (o >= 0) WOPR = mixture->GetVarSet().vj[o] / CONV1;
+    if (g >= 0) WGPR = mixture->GetVarSet().vj[g] / 1000;
+    if (w >= 0) WWPR = mixture->GetVarSet().vj[w] / CONV1;
 
     WOPT += WOPR * dt;
     WGPT += WGPR * dt;

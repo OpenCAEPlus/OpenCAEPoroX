@@ -31,15 +31,15 @@ class OCPMixtureUnitThermalOWMethod
 {
 public:
     OCPMixtureUnitThermalOWMethod() = default;
-    virtual OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T) = 0;
-    virtual OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T) = 0;
-    virtual OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) = 0;
-    virtual OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) = 0;
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return eC.CalEnthalpy(T + CONV5, zi); }
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
+    virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
+    virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return eC.CalEnthalpy(T, zi); }
 
 protected:
     EnthalpyCalculation  eC;
@@ -57,14 +57,20 @@ class OCPMixtureUnitThermalOWMethod01 : public OCPMixtureUnitThermalOWMethod
 {
 public:
     OCPMixtureUnitThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
-    OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T) override;
-    OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T) override;
-    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) override;
-    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)override;
     void FlashDer(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override { return CalXi(P, T, pt); }
+
+protected:
+    OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T);
 
 protected:
     /// Reference pressure
@@ -107,7 +113,7 @@ public:
         SetPTS(P, T, Sw);
         pmMethod->InitFlash(Vp, vs);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
@@ -120,19 +126,20 @@ public:
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalXiO(P, T);
-        else if (tarPhase == WATER)  return pmMethod->CalXiW(P, T);
-        else                         OCP_ABORT("WRONG TarPhase");
+        return pmMethod->CalXi(P, T + CONV5, (PhaseType)tarPhase);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalRhoO(P, T);
-        else if (tarPhase == WATER)  return pmMethod->CalRhoW(P, T);
-        else                         OCP_ABORT("WRONG TarPhase");
+        return pmMethod->CalRho(P, T + CONV5, (PhaseType)tarPhase);
     }
-    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return CalXi(P, T, USI(pt));
+    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalXiStd(P, T + CONV5, pt);
     }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T, zi); }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPTN(P, T, Ni);
+        return pmMethod->CalVStd(vs);
+    }
+    
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T + CONV5, zi); }
 
 protected:
     void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {

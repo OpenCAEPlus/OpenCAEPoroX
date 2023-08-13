@@ -31,15 +31,14 @@ class OCPMixtureBlkOilOWMethod
 {
 public:
     OCPMixtureBlkOilOWMethod() = default;
-    virtual OCP_DBL CalRhoO(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalXiO(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalRhoW(const OCP_DBL& P) = 0;
-    virtual OCP_DBL CalXiW(const OCP_DBL& P) = 0;
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_DBL GetXiStd(const PhaseType& pt) = 0;
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) = 0;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) = 0;
+    virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
+    virtual OCP_DBL CalXiStd(const PhaseType& pt) = 0;
 };
 
 
@@ -54,17 +53,22 @@ class OCPMixtureBlkOilOWMethod01 : public OCPMixtureBlkOilOWMethod
 {
 public:
     OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
-    OCP_DBL CalRhoO(const OCP_DBL& P) override { return PVDO.CalRhoO(P); }
-    OCP_DBL CalXiO(const OCP_DBL& P) override { return PVDO.CalXiO(P); }
-    OCP_DBL CalRhoW(const OCP_DBL& P) override { return PVTW.CalRhoW(P); }
-    OCP_DBL CalXiW(const OCP_DBL& P) override { return PVTW.CalXiW(P); }
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs) override;
-    OCP_DBL GetXiStd(const PhaseType& pt) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) override;
+    OCP_DBL CalXiStd(const PhaseType& pt) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
     
-    
+protected:
+    OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO.CalXiO(P); }
+    OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
+    OCP_DBL CalRhoO(const OCP_DBL& P) { return PVDO.CalRhoO(P); }
+    OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }
+
+
 protected:
     /// PVDO table
     OCP_PVDO        PVDO;
@@ -103,20 +107,17 @@ public:
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalXiO(P);
-        else if (tarPhase == WATER)  return pmMethod->CalXiW(P);
-        else                         OCP_ABORT("WRONG TarPhase");
+        return pmMethod->CalXi(P, (PhaseType)tarPhase);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const USI& tarPhase) {
-        if (tarPhase == OIL)         return pmMethod->CalRhoO(P);
-        else if (tarPhase == WATER)  return pmMethod->CalRhoW(P);
-        else                         OCP_ABORT("WRONG TarPhase");
+        return pmMethod->CalRho(P, (PhaseType)tarPhase);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        Flash(P, Ni);
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPN(P, Ni);
+        pmMethod->CalVStd(vs);
     }
-    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->GetXiStd(pt);
+    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalXiStd(pt);
     }
 
 

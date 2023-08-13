@@ -340,12 +340,38 @@ void OCPMixtureBlkOilOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureBlkOilOGWMethod01::GetXiStd(const PhaseType& pt)
+OCP_DBL OCPMixtureBlkOilOGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt)
+{
+	if (pt == PhaseType::oil)         return CalXiO(P, Pb);
+	else if (pt == PhaseType::gas)    return CalXiG(P);
+	else if (pt == PhaseType::water)  return CalXiW(P);
+	else                              OCP_ABORT("WRONG PHASE TYPE");
+}
+
+
+OCP_DBL OCPMixtureBlkOilOGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt)
+{
+	if (pt == PhaseType::oil)         return CalRhoO(P, Pb);
+	else if (pt == PhaseType::gas)    return CalRhoG(P);
+	else if (pt == PhaseType::water)  return CalRhoW(P);
+	else                              OCP_ABORT("WRONG PHASE TYPE");
+}
+
+
+OCP_DBL OCPMixtureBlkOilOGWMethod01::CalXiStd(const PhaseType& pt)
 {
 	if      (pt == PhaseType::oil)    return 1 / (stdVo * CONV1);
     else if (pt == PhaseType::gas)    return 1 / (stdVg * 1000);
     else if (pt == PhaseType::water)  return 1 / (stdVw * CONV1);
     else    OCP_ABORT("Wrong Phase Type!");
+}
+
+
+void OCPMixtureBlkOilOGWMethod01::CalVStd(OCPMixtureVarSet& vs)
+{
+	vs.vj[0] = vs.Ni[0] * stdVo * CONV1;
+	vs.vj[1] = vs.Ni[1] * stdVg * 1000;
+	vs.vj[2] = vs.Ni[2] * stdVw * CONV1;
 }
 
 

@@ -247,8 +247,8 @@ public:
     OCPMixture() = default;
     auto MixtureType() const { return mixtureType; }
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
-    virtual void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
-    virtual OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
+    virtual void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
+    virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
 
 public:
     auto OilIndex() const { return vs.o; }

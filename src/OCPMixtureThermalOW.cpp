@@ -74,17 +74,41 @@ OCPMixtureUnitThermalOWMethod01::OCPMixtureUnitThermalOWMethod01(const Component
 }
 
 
-OCP_DBL OCPMixtureUnitThermalOWMethod01::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
+OCP_DBL OCPMixtureUnitThermalOWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt)
 {
-    return MWp[0] * CalXiO(P, T);
+    if (pt == PhaseType::oil)         return CalRhoO(P, T);
+    else if (pt == PhaseType::water)  return CalRhoW(P, T);
+    else                              OCP_ABORT("WRONG TarPhase");
+}
+
+
+OCP_DBL OCPMixtureUnitThermalOWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt)
+{
+    if (pt == PhaseType::oil)         return CalXiO(P, T);
+    else if (pt == PhaseType::water)  return CalXiW(P, T);
+    else                              OCP_ABORT("WRONG TarPhase");
 }
 
 
 OCP_DBL OCPMixtureUnitThermalOWMethod01::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
 {
     const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref + CONV5;
+    const OCP_DBL dT = T - Tref;
     return xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
+}
+
+
+OCP_DBL OCPMixtureUnitThermalOWMethod01::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
+{
+    const OCP_DBL dP = P - Pref;
+    const OCP_DBL dT = T - Tref;
+    return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
+}
+
+
+OCP_DBL OCPMixtureUnitThermalOWMethod01::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
+{
+    return MWp[0] * CalXiO(P, T);
 }
 
 
@@ -94,18 +118,10 @@ OCP_DBL OCPMixtureUnitThermalOWMethod01::CalRhoW(const OCP_DBL& P, const OCP_DBL
 }
 
 
-OCP_DBL OCPMixtureUnitThermalOWMethod01::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
-{
-    const OCP_DBL dP = P - Pref;
-    const OCP_DBL dT = T - Tref + CONV5;
-	return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
-}
-
-
 void OCPMixtureUnitThermalOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T - CONV5);
-    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T - CONV5);
+    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T);
+    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T);
     Flash(vs);
 }
 
@@ -118,8 +134,8 @@ void OCPMixtureUnitThermalOWMethod01::Flash(OCPMixtureVarSet& vs)
 
 void OCPMixtureUnitThermalOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T - CONV5);
-    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T - CONV5);
+    vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T);
+    vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T);
     FlashDer(vs);
 }
 
@@ -209,6 +225,13 @@ void OCPMixtureUnitThermalOWMethod01::FlashDer(OCPMixtureVarSet& vs)
     // d Uf / d Ni
     vs.Ufi[0] = vs.dXsdXp[1] * vs.xi[0] * vs.H[0] + vs.dXsdXp[5] * vs.xi[1] * vs.H[1];
     vs.Ufi[1] = vs.dXsdXp[2] * vs.xi[0] * vs.H[0] + vs.dXsdXp[6] * vs.xi[1] * vs.H[1];
+}
+
+
+void OCPMixtureUnitThermalOWMethod01::CalVStd(OCPMixtureVarSet& vs)
+{
+    vs.vj[0] = vs.Ni[0] / CalXiO(vs.P, vs.T);
+    vs.vj[1] = vs.Ni[1] / CalXiW(vs.P, vs.T);
 }
 
 

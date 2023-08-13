@@ -758,8 +758,18 @@ OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const 
     }
     else {
         // oil phase
-        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
+        return 1 / eos.CalVm(P, T, &z[0]);
     }
+}
+
+
+void OCPMixtureCompMethod01::CalVStd(OCPMixtureVarSet& vs)
+{
+    InitNtZ(vs);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
+    CalProperty(vs);
+    // Calculate water volume
+    vs.vj[wIdP] = vs.Ni[wIdC] * stdVw * CONV1;
 }
 
 
@@ -771,7 +781,7 @@ OCP_DBL OCPMixtureCompMethod01::CalXiStd(const OCP_DBL& P, const OCP_DBL& T, con
     }
     else {
         // oil phase
-        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
+        return 1 / eos.CalVm(P, T, &z[0]);
     }
 }
 

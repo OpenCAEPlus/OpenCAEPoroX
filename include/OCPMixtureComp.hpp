@@ -49,6 +49,8 @@ public:
     virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
     /// Calculate molar density of target phase
     virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    /// Flash in standard conditions
+    virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
     /// Calculate molar density of target phase in standard conditions
     virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) = 0;
     /// Calculate mass density of target phase
@@ -234,6 +236,7 @@ public:
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
     OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) override;
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
     /// Water is always present
@@ -288,7 +291,7 @@ class OCPMixtureComp : public OCPMixture
 public:
     OCPMixtureComp() { mixtureType = OCPMixtureType::COMP; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
@@ -309,13 +312,17 @@ public:
         pmMethod->FlashDer(vs, ftype, lNP, lx);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        return pmMethod->CalXi(P, T, z, tarPhase);
+        return pmMethod->CalXi(P, T + CONV5, z, tarPhase);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        return pmMethod->CalRho(P, T, z, tarPhase);
+        return pmMethod->CalRho(P, T + CONV5, z, tarPhase);
     }
-    OCP_DBL GetXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXiStd(P, T, z, pt);
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPTN(P, T, Ni);
+        return pmMethod->CalVStd(vs);
+    }
+    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalXiStd(P, T + CONV5, z, pt);
     }
     void OutputIters() const { pmMethod->OutIters(); }
     const auto& GetNCPE() const { return pmMethod->GetNC(); }
