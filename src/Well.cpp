@@ -62,7 +62,6 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
     qi_lbmol.resize(numCom);
     prodWeight.resize(numCom);
-    prodRate.resize(numPhase);
 
     for (auto& opt : optSet) {
         if (!opt.state) continue;
@@ -71,6 +70,7 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
         }
     }
 
+    SetupUnit();
     SetupOpts(sols);
 
     // Perf
@@ -91,6 +91,16 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     CalWI_Peaceman(bk);
     // test
     // ShowPerfStatus(bk);
+}
+
+
+void Well::SetupUnit()
+{
+    if (mixture->OilIndex() >= 0) unitConvert.push_back(CONV1);
+    if (mixture->GasIndex() >= 0) unitConvert.push_back(1000);
+    if (mixture->WatIndex() >= 0) unitConvert.push_back(CONV1);
+
+    OCP_ASSERT(unitConvert.size() == numPhase, "WRONG unitConvert");
 }
 
 
@@ -121,7 +131,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         opt.injZi.assign(numCom, 0);
         opt.injPhase     =  WATER;
         opt.injZi.back() =  1.0;
-        opt.factorINJ    =  CONV1 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::water);
+        opt.factorINJ    =  unitConvert[w] * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::water);
         opt.maxRate      *= opt.factorINJ;
     }
     else if (!sols.empty())
@@ -136,7 +146,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         if (opt.injZi.size() != numCom) {
             OCP_ABORT("Inavailable INJECTED FLUID -- " + opt.fluidType + "!");
         }
-        opt.factorINJ = 1000 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.factorINJ = unitConvert[g] * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
         opt.maxRate   *= opt.factorINJ;
     }
     else if (opt.fluidType == "GAS") {
@@ -144,7 +154,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
         opt.injZi.assign(numCom, 0);
         opt.injPhase  =  GAS;
         opt.injZi[g]  =  1.0;
-        opt.factorINJ =  1000 * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
+        opt.factorINJ = unitConvert[g] * mixture->CalXiStd(Psurf, Tsurf, &opt.injZi[0], PhaseType::gas);
         opt.maxRate   *= opt.factorINJ;
     }
     else {
@@ -408,9 +418,11 @@ OCP_DBL Well::CalProdRateMinBHP(const Bulk& myBulk)
             }
         }
     }
-    flashCal[0]->CalProdRate(Psurf, Tsurf, &tmpQi_lbmol[0], tmpQj);
+
+    qj = 0;
+    mixture->CalVStd(Psurf, Tsurf, &tmpQi_lbmol[0]);
     for (USI j = 0; j < numPhase; j++) {
-        qj += tmpQj[j] * opt.prodPhaseWeight[j];
+        qj += mixture->GetVarSet().vj[j] / unitConvert[j] * opt.prodPhaseWeight[j];
     }
 
     return qj;
@@ -436,21 +448,14 @@ void Well::CalInjQj(const Bulk& myBulk, const OCP_DBL& dt)
 
 void Well::CalProdQj(const Bulk& myBulk, const OCP_DBL& dt)
 {
-
-    //flashCal[0]->CalProdRate(Psurf, Tsurf, &qi_lbmol[0], prodRate);
-    //USI iter = 0;
-    //if (myBulk.oil) WOPR = prodRate[iter++];
-    //if (myBulk.gas) WGPR = prodRate[iter++];
-    //if (myBulk.water) WWPR = prodRate[iter++];
-
     mixture->CalVStd(Psurf, Tsurf, &qi_lbmol[0]);
     const auto o = mixture->OilIndex();
     const auto g = mixture->GasIndex();
     const auto w = mixture->WatIndex();
 
-    if (o >= 0) WOPR = mixture->GetVarSet().vj[o] / CONV1;
-    if (g >= 0) WGPR = mixture->GetVarSet().vj[g] / 1000;
-    if (w >= 0) WWPR = mixture->GetVarSet().vj[w] / CONV1;
+    if (o >= 0) WOPR = mixture->GetVarSet().vj[o] / unitConvert[o];
+    if (g >= 0) WGPR = mixture->GetVarSet().vj[g] / unitConvert[g];
+    if (w >= 0) WWPR = mixture->GetVarSet().vj[w] / unitConvert[w];
 
     WOPT += WOPR * dt;
     WGPT += WGPR * dt;

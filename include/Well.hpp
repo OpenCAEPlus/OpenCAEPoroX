@@ -49,6 +49,7 @@ class Well
 public:
     Well() = default;
 
+
     /////////////////////////////////////////////////////////////////////
     // Input Param and Setup
     /////////////////////////////////////////////////////////////////////
@@ -58,6 +59,12 @@ public:
     void InputPerfo(const WellParam& well, const Domain& domain, const USI& wId);
     /// Setup the well after Grid and Bulk finish setup.
     void Setup(const Bulk& bk, const vector<SolventINJ>& sols);
+
+protected:
+    void SetupUnit();
+protected:
+    /// Unit Convert (m3,stb,Mscf -> m3,ft3)
+    vector<OCP_DBL> unitConvert;
 
 protected:
     /// Setup well operations
@@ -225,7 +232,6 @@ protected:
 
     // PROD/INJ Rate
     vector<OCP_DBL> qi_lbmol; ///< flow rate of moles of component inflowing/outflowing
-    vector<OCP_DBL> prodRate; ///< flow rate of volume of phase outflowing
     mutable vector<OCP_DBL> prodWeight; ///< maybe only a num is needed
 
     OCP_DBL WOPR{0}; ///< well oil production rate.

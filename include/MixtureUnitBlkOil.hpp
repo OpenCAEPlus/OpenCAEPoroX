@@ -36,13 +36,6 @@ public:
         prodWeight = prodPhase;
     }
 
-    void CalProdRate(const OCP_DBL&   Pin,
-                     const OCP_DBL&   Tin,
-                     const OCP_DBL*   Niin,
-                     vector<OCP_DBL>& prodRate) override
-    {
-        prodRate.assign(Niin, Niin + vs->nc);
-    };
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override
     {
         OCP_ABORT("Can not be used in Black Oil Model!");

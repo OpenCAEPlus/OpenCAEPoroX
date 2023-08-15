@@ -114,14 +114,6 @@ void MixtureUnitThermal_OW::CalProdWeight(const OCP_DBL&         Pin,
     fill(prodWeight.begin(), prodWeight.end(), tmp);
 }
 
-void MixtureUnitThermal_OW::CalProdRate(const OCP_DBL&   Pin,
-                                     const OCP_DBL&   Tin,
-                                     const OCP_DBL*   Niin,
-                                     vector<OCP_DBL>& prodRate)
-{
-    prodRate[0] = Niin[0] / OWTM.CalXi(Pin, Tin, OIL) / CONV1; // stb
-    prodRate[1] = Niin[1] / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb
-}
 
 
 /*----------------------------------------------------------------------------*/

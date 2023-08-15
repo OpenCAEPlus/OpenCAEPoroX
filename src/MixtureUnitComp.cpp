@@ -137,17 +137,6 @@ void MixtureUnitComp::CalProdWeight(const OCP_DBL&     Pin,
     fill(prodWeight.begin(), prodWeight.end(), tmp);
 }
 
-void MixtureUnitComp::CalProdRate(const OCP_DBL&   Pin,
-                              const OCP_DBL&   Tin,
-                              const OCP_DBL*   Niin,
-                              vector<OCP_DBL>& prodRate)
-{
-    compM.Flash(Pin, Tin, Niin);
-
-    prodRate[0] = vs->vj[0] / CONV1; // stb
-    prodRate[1] = vs->vj[1] / 1000;  // Mscf
-    prodRate[2] = vs->vj[2] * vs->xi[2]; // stb
-}
 
 
 /*----------------------------------------------------------------------------*/

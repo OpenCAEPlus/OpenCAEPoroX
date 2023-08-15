@@ -95,10 +95,6 @@ public:
                                const vector<OCP_DBL>& prodPhase,
                                vector<OCP_DBL>&       prodWeight) = 0;
     /// Calculate Production rate for PROD well
-    virtual void    CalProdRate(const OCP_DBL&   Pin,
-                                const OCP_DBL&   Tin,
-                                const OCP_DBL*   Niin,
-                                vector<OCP_DBL>& prodRate)                      = 0;
     virtual OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) = 0;
 
     virtual void OutMixtureIters() const = 0;

@@ -93,10 +93,6 @@ public:
                        const vector<OCP_DBL>& prodPhase,
                        vector<OCP_DBL>&       prodWeight) override;
 
-    void CalProdRate(const OCP_DBL&   Pin,
-                     const OCP_DBL&   Tin,
-                     const OCP_DBL*   Niin,
-                     vector<OCP_DBL>& prodRate) override;
 
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override
     {

@@ -107,7 +107,7 @@ void OCPMixtureCompMethod::CalMW(OCPMixtureVarSet& vs)
 void OCPMixtureCompMethod::CalVmVj(OCPMixtureVarSet& vs)
 {
     for (USI j = 0; j < NP; j++) {
-        vm[j] = eos.CalVmDer(vs.P, vs.T, &vs.x[j * vs.nc], vmP[j], &vmx[j][0]);
+        vm[j]    = eos.CalVmDer(vs.P, vs.T, &vs.x[j * vs.nc], vmP[j], &vmx[j][0]);
         vs.vj[j] = vs.nj[j] * vm[j];
     }
 }
