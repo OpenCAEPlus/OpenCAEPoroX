@@ -939,35 +939,54 @@ void Well::CalProddG(const Bulk& myBulk)
 
 void Well::CalProdWeight(const Bulk& myBulk) const
 {
+    if (opt.type == PROD && opt.optMode != BHP_MODE) {
 
-    if (opt.type == PROD) {
-        // in some cases, qi_lbmol may be zero, so use other methods
-        OCP_DBL  qt   = 0;
-        OCP_BOOL flag = OCP_TRUE;
-        for (USI i = 0; i < myBulk.numCom; i++) {
-            qt += qi_lbmol[i];
-            if (qi_lbmol[i] < 0) flag = OCP_FALSE;
+        if (mixture->IfBlkModel()) {
+            // For black oil models
+            vector<OCP_DBL> qitmp(numCom, 1.0);
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI j = 0; j < numPhase; j++) {
+                prodWeight[j] = mixture->GetVarSet().vj[j] / unitConvert[j] * opt.prodPhaseWeight[j];
+            }
         }
-        if (qt > TINY && flag) {
-            flashCal[0]->CalProdWeight(Psurf, Tsurf, &qi_lbmol[0], opt.prodPhaseWeight,
-                                       prodWeight);
-        } else {
-            vector<OCP_DBL> tmpNi(numCom, 0);
-            for (USI p = 0; p < numPerf; p++) {
-                OCP_USI n = perf[p].location;
+        else {
+            // For other models
+            vector<OCP_DBL> qitmp(numCom, 0);
+            OCP_DBL         qt = 0;
+            OCP_BOOL        flag = OCP_TRUE;
+            for (USI i = 0; i < myBulk.numCom; i++) {
+                qt += qi_lbmol[i];
+                if (qi_lbmol[i] < 0) flag = OCP_FALSE;
+            }
+            if (qt > TINY && flag) {
+                qitmp = qi_lbmol;
+            }
+            else {
+                for (USI p = 0; p < numPerf; p++) {
+                    OCP_USI n = perf[p].location;
 
-                for (USI j = 0; j < numPhase; j++) {
-                    OCP_USI id = n * numPhase + j;
-                    if (!myBulk.phaseExist[id]) continue;
-                    for (USI k = 0; k < numCom; k++) {
-                        tmpNi[k] += perf[p].transj[j] * myBulk.xi[id] *
-                                    myBulk.xij[id * numCom + k];
+                    for (USI j = 0; j < numPhase; j++) {
+                        OCP_USI id = n * numPhase + j;
+                        if (!myBulk.phaseExist[id]) continue;
+                        for (USI k = 0; k < numCom; k++) {
+                            qitmp[k] += perf[p].transj[j] * myBulk.xi[id] *
+                                myBulk.xij[id * numCom + k];
+                        }
                     }
                 }
             }
-            qt = Dnorm1(numCom, &tmpNi[0]);
-            flashCal[0]->CalProdWeight(Psurf, Tsurf, &tmpNi[0], opt.prodPhaseWeight,
-                                       prodWeight);
+
+            qt = 0;
+            for (USI i = 0; i < numCom; i++) qt += qitmp[i];
+            OCP_DBL qv = 0;
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI j = 0; j < numPhase; j++) {
+                qv += mixture->GetVarSet().vj[j] / unitConvert[j] * opt.prodPhaseWeight[j];
+            }
+            fill(prodWeight.begin(), prodWeight.end(), qv / qt);
+            if (prodWeight[0] < 1E-12) {
+                OCP_ABORT("Wrong Condition!");
+            }
         }
     }
 }

@@ -93,27 +93,6 @@ MixtureUnitThermal_OW::RhoPhase(const OCP_DBL& Pin,
     return OWTM.CalRho(Pin, Tin, tarPhase);
 }
 
-void MixtureUnitThermal_OW::CalProdWeight(const OCP_DBL&         Pin,
-                                       const OCP_DBL&         Tin,
-                                       const OCP_DBL*         Niin,
-                                       const vector<OCP_DBL>& prodPhase,
-                                       vector<OCP_DBL>&       prodWeight)
-{
-
-    vector<OCP_DBL> factor(vs->np, 0);
-    factor[0] = Niin[0] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, OIL) / CONV1; // stb / lbmol
-    factor[1] = Niin[1] / (Niin[0] + Niin[1]) / OWTM.CalXi(Pin, Tin, WATER) / CONV1; // stb  / lbmol
-
-    OCP_DBL tmp = 0;
-    for (USI i = 0; i < 2; i++) {
-        tmp += factor[i] * prodPhase[i];
-    }
-    if (tmp < 1E-12 || !isfinite(tmp)) {
-        OCP_ABORT("Wrong Condition!");
-    }
-    fill(prodWeight.begin(), prodWeight.end(), tmp);
-}
-
 
 
 /*----------------------------------------------------------------------------*/

@@ -246,6 +246,7 @@ class OCPMixture
 public:
     OCPMixture() = default;
     auto MixtureType() const { return mixtureType; }
+    auto IfBlkModel() const { return (mixtureType >= OCPMixtureType::SP) && (mixtureType < OCPMixtureType::COMP); }
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
     virtual void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
     virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;

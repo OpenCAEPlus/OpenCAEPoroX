@@ -576,7 +576,7 @@ void IsoT_IMPEC::AssembleMatProdWells(LinearSystem&  ls,
     ls.NewDiag(wId, 0.0);
 
     // Set Prod Weight
-    if (wl.OptMode() != BHP_MODE) wl.CalProdWeight(bk);
+    wl.CalProdWeight(bk);
 
     const USI np = bk.numPhase;
     const USI nc = bk.numCom;
@@ -1624,7 +1624,7 @@ void IsoT_FIM::AssembleMatProdWells(LinearSystem&  ls,
     ls.NewDiag(wId, bmat);
 
     // Set Prod Weight
-    if (wl.OptMode() != BHP_MODE) wl.CalProdWeight(bk);
+    wl.CalProdWeight(bk);
 
     for (USI p = 0; p < wl.PerfNum(); p++) {
         const OCP_USI n = wl.PerfLocation(p);

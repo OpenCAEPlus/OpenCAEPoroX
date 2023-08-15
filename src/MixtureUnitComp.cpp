@@ -112,32 +112,6 @@ OCP_DBL MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
 }
 
 
-void MixtureUnitComp::CalProdWeight(const OCP_DBL&     Pin,
-                                const OCP_DBL&         Tin,
-                                const OCP_DBL*         Niin,
-                                const vector<OCP_DBL>& prodPhase,
-                                vector<OCP_DBL>&       prodWeight)
-{
-    compM.Flash(Pin, Tin, Niin);
-
-    const OCP_DBL   qt = vs->Nt;
-    vector<OCP_DBL> factor(vs->np, 0);
-
-    factor[0] = vs->vj[0] / qt / CONV1; // stb / lbmol
-    factor[1] = vs->vj[1] / qt / 1000;  // Mscf / lbmol
-    factor[2] = vs->xi[2] * vs->vj[2] / qt; // stb  / stb
-
-    OCP_DBL tmp = 0;
-    for (USI i = 0; i < 3; i++) {
-        tmp += factor[i] * prodPhase[i];
-    }
-    if (tmp < 1E-12 || !isfinite(tmp)) {
-        OCP_ABORT("Wrong Condition!");
-    }
-    fill(prodWeight.begin(), prodWeight.end(), tmp);
-}
-
-
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

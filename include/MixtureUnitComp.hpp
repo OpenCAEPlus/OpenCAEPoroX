@@ -87,12 +87,6 @@ public:
              const USI&     tarPhase) override;
 
     // For Well
-    void CalProdWeight(const OCP_DBL&         Pin,
-                       const OCP_DBL&         Tin,
-                       const OCP_DBL*         Niin,
-                       const vector<OCP_DBL>& prodPhase,
-                       vector<OCP_DBL>&       prodWeight) override;
-
 
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override
     {
