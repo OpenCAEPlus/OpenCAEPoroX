@@ -29,6 +29,14 @@ enum class WellType
     productor
 };
 
+enum class WellState
+{
+    /// Open
+    open,
+    /// Close
+    close
+};
+
 /// WellOpt describes the operation mode of a well.
 /// usually it changes over time, specifically, each attributes could be changed
 /// including the well type.
@@ -54,7 +62,8 @@ private:
     /// indicate which type of fluids will be injected, water, gas, or other solvent.
     /// it's decided by users and only useful for injection well.
     string   fluidType;
-    OCP_BOOL state{OCP_FALSE}; ///< state of well, close or open.
+    /// state of well
+    WellState state{ WellState::close };
     USI optMode; ///< control mode of well: constant pressure, or constant flow rate of
                  ///< specified fluids.
     USI initOptMode; ///< Init opt mode during current step

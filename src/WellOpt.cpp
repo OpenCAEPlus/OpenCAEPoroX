@@ -30,9 +30,9 @@ WellOpt::WellOpt(const WellOptParam& optParam)
     }
 
     if (optParam.state == "OPEN") {
-        state = OPEN;
+        state = WellState::open;
     } else if (optParam.state == "CLOSE") {
-        state = CLOSE;
+        state = WellState::close;
     } else {
         OCP_ABORT("Wrong state type!");
     }

@@ -107,8 +107,6 @@ const USI PHASE_DOGW            = 52;  ///< Phase type = dead oil-gas-water
 // Well params
 const USI      HORIZONTAL = 1;         ///< Well type = horizontal
 const USI      VERTICAL   = 2;         ///< Well type = vertical
-const OCP_BOOL OPEN       = OCP_TRUE;  ///< Well type = open
-const OCP_BOOL CLOSE      = OCP_FALSE; ///< Well type = closed
 
 // Well option params
 const USI RATE_MODE  = 1; ///< Well option = fixed total rate???

@@ -159,10 +159,10 @@ public:
     OCP_DBL BHP() const { return bhp; }
 
     /// Return the state of the well, Open or Close.
-    OCP_BOOL IsOpen() const { return opt.state; }
+    OCP_BOOL IsOpen() const { return (opt.state == WellState::open); }
     /// Return the type of well, Inj or Prod.
     auto WellType() const { return opt.type; }
-    OCP_BOOL PerfState(const USI& p) const { return perf[p].state; }
+    auto PerfState(const USI& p) const { return perf[p].state; }
     USI      PerfLocation(const USI& p) const { return perf[p].location; }
     OCP_DBL  PerfQi_lbmol(const USI& p, const USI& i) const
     {

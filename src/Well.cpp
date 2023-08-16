@@ -63,7 +63,7 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     factor.resize(nc);
 
     for (auto& opt : optSet) {
-        if (!opt.state) continue;
+        if (opt.state == WellState::close) continue;
         if (!bk.ifThermal) {
             opt.injTemp = bk.rsTemp;
         }
@@ -74,7 +74,7 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
     // Perf
     for (USI p = 0; p < numPerf; p++) {
-        perf[p].state      = OPEN;
+        perf[p].state      = WellState::open;
         perf[p].depth      = bk.depth[perf[p].location];
         perf[p].multiplier = 1;
         perf[p].qi_lbmol.resize(nc);
@@ -106,7 +106,7 @@ void Well::SetupUnit()
 void Well::SetupOpts(const vector<SolventINJ>& sols)
 {
     for (auto& opt : optSet) {
-        if (!opt.state) continue;
+        if (opt.state == WellState::close) continue;
         if (opt.type == WellType::injector) {
             SetupOptsInj(opt, sols);
         }
@@ -800,9 +800,9 @@ void Well::CalProddG(const Bulk& myBulk)
         // Well is higher
 
         // check qi_lbmol   ----   test
-        if (perf[numPerf - 1].state == CLOSE) {
+        if (perf[numPerf - 1].state == WellState::close) {
             for (OCP_INT p = numPerf - 2; p >= 0; p--) {
-                if (perf[p].state == OPEN) {
+                if (perf[p].state == WellState::open) {
                     for (USI i = 0; i < nc; i++) {
                         perf[numPerf - 1].qi_lbmol[i] = perf[p].qi_lbmol[i];
                     }
@@ -872,9 +872,9 @@ void Well::CalProddG(const Bulk& myBulk)
         // Well is lower
 
         // check qi_lbmol   ----   test
-        if (perf[0].state == CLOSE) {
+        if (perf[0].state == WellState::close) {
             for (USI p = 1; p <= numPerf; p++) {
-                if (perf[p].state == OPEN) {
+                if (perf[p].state == WellState::open) {
                     for (USI i = 0; i < nc; i++) {
                         perf[numPerf - 1].qi_lbmol[i] = perf[p].qi_lbmol[i];
                     }
@@ -1099,7 +1099,7 @@ OCP_INT Well::CheckP(const Bulk& myBulk)
         return WELL_NEGATIVE_PRESSURE;
     }
     for (USI p = 0; p < numPerf; p++) {
-        if (perf[p].state == OPEN && perf[p].P < 0) {
+        if (perf[p].state == WellState::open && perf[p].P < 0) {
 #ifdef DEBUG
             cout << "### WARNING: Well " << name << " Perf[" << p
                  << "].P = " << perf[p].P << endl;
@@ -1142,32 +1142,32 @@ OCP_INT Well::CheckCrossFlow(const Bulk& myBulk)
         for (USI p = 0; p < numPerf; p++) {
             k            = perf[p].location;
             OCP_DBL minP = myBulk.P[k];
-            if (perf[p].state == OPEN && minP < perf[p].P) {
+            if (perf[p].state == WellState::open && minP < perf[p].P) {
                 cout << std::left << std::setw(12) << name << "  "
                      << "Well P = " << perf[p].P << ", "
                      << "Bulk P = " << minP << endl;
-                perf[p].state      = CLOSE;
+                perf[p].state      = WellState::close;
                 perf[p].multiplier = 0;
                 flagC              = OCP_FALSE;
                 break;
-            } else if (perf[p].state == CLOSE && minP > perf[p].P) {
-                perf[p].state      = OPEN;
+            } else if (perf[p].state == WellState::close && minP > perf[p].P) {
+                perf[p].state      = WellState::open;
                 perf[p].multiplier = 1;
             }
         }
     } else {
         for (USI p = 0; p < numPerf; p++) {
             k = perf[p].location;
-            if (perf[p].state == OPEN && myBulk.P[k] > perf[p].P) {
+            if (perf[p].state == WellState::open && myBulk.P[k] > perf[p].P) {
                 cout << std::left << std::setw(12) << name << "  "
                      << "Well P = " << perf[p].P << ", "
                      << "Bulk P = " << myBulk.P[k] << endl;
-                perf[p].state      = CLOSE;
+                perf[p].state      = WellState::close;
                 perf[p].multiplier = 0;
                 flagC              = OCP_FALSE;
                 break;
-            } else if (perf[p].state == CLOSE && myBulk.P[k] < perf[p].P) {
-                perf[p].state      = OPEN;
+            } else if (perf[p].state == WellState::close && myBulk.P[k] < perf[p].P) {
+                perf[p].state      = WellState::open;
                 perf[p].multiplier = 1;
             }
         }
@@ -1176,7 +1176,7 @@ OCP_INT Well::CheckCrossFlow(const Bulk& myBulk)
     OCP_BOOL flag = OCP_FALSE;
     // check well --  if all perf are closed, open the depthest perf
     for (USI p = 0; p < numPerf; p++) {
-        if (perf[p].state == OPEN) {
+        if (perf[p].state == WellState::open) {
             flag = OCP_TRUE;
             break;
         }
@@ -1184,7 +1184,7 @@ OCP_INT Well::CheckCrossFlow(const Bulk& myBulk)
 
     if (!flag) {
         // open the deepest perf
-        perf.back().state      = OPEN;
+        perf.back().state      = WellState::open;
         perf.back().multiplier = 1;
         cout << "### WARNING: All perfs of " << name
              << " are closed! Open the last perf!\n";
@@ -1217,7 +1217,7 @@ void Well::ShowPerfStatus(const Bulk& myBulk) const
         vector<OCP_DBL> Qitmp(perf[p].qi_lbmol);
         // OCP_DBL         qt = Dnorm1(nc, &Qitmp[0]);
         OCP_USI n = perf[p].location;
-        cout << setw(3) << p << "   " << perf[p].state << "   " << setw(6)
+        cout << setw(3) << p << "   " << (USI)perf[p].state << "   " << setw(6)
              << perf[p].location << "  " << setw(2) << perf[p].I + 1 << "  " << setw(2)
              << perf[p].J + 1 << "  " << setw(2) << perf[p].K + 1 << "  " << setw(10)
              << setprecision(6) << perf[p].WI << "  "               // ccf
@@ -1237,7 +1237,7 @@ void Well::ShowPerfStatus(const Bulk& myBulk) const
 
 void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const
 {
-    if (opt.state == OPEN) {
+    if (opt.state == WellState::open) {
         const USI len = nc + 1;
         // Well to Bulk
         for (USI p = 0; p < numPerf; p++) {
@@ -1313,7 +1313,7 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
 
 void Well::AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
-    if (opt.state == OPEN) {
+    if (opt.state == WellState::open) {
         if (opt.type == WellType::injector)        AssembleMatInjFIM(ls, bk, dt);
         else if (opt.type == WellType::productor)  AssembleMatProdFIM(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");
@@ -1563,7 +1563,7 @@ void Well::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& d
 
 void Well::AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
-    if (opt.state == OPEN) {
+    if (opt.state == WellState::open) {
         if (opt.type == WellType::injector)        AssembleMatInjIMPEC(ls, bk, dt);
         else if (opt.type == WellType::productor)  AssembleMatProdIMPEC(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");
@@ -1717,7 +1717,7 @@ void Well::AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
 
 void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const
 {
-	if (opt.state == OPEN) {
+	if (opt.state == WellState::open) {
         const USI len = nc + 2;
 
 		// Well to Bulk
@@ -1813,7 +1813,7 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 
 void Well::AssembleMatFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
-    if (opt.state == OPEN) {
+    if (opt.state == WellState::open) {
         if (opt.type == WellType::injector)        AssembleMatInjFIM_T(ls, bk, dt);
         else if (opt.type == WellType::productor)  AssembleMatProdFIM_T(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");

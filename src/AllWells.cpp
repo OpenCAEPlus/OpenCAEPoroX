@@ -438,7 +438,7 @@ void AllWells::SetWellVal() const
     if (!useVTK) return;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].opt.state) {
+        if (wells[w].opt.state == WellState::open) {
             if (wells[w].opt.type == WellType::injector) {
                 if (wells[w].opt.optMode == BHP_MODE)
                     wellVal[w] = wells[w].opt.maxBHP;
