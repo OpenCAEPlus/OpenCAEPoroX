@@ -37,7 +37,7 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_DBL CalXiStd(const PhaseType& pt) = 0;
+    virtual OCP_DBL CalVmStd(const PhaseType& pt) = 0;
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
 };
 
@@ -60,7 +60,7 @@ public:
     void FlashDer(OCPMixtureVarSet& vs) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) override;
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) override;
-    OCP_DBL CalXiStd(const PhaseType& pt) override;
+    OCP_DBL CalVmStd(const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
 
 protected:
@@ -116,18 +116,18 @@ public:
         SetPN(P, Ni);
         pmMethod->FlashDer(vs);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const USI& tarPhase) { 
-        return pmMethod->CalXi(P, Pb, (PhaseType)tarPhase);
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
+        return pmMethod->CalXi(P, Pb, pt);
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const USI& tarPhase) {
-        return pmMethod->CalRho(P, Pb, (PhaseType)tarPhase);
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
+        return pmMethod->CalRho(P, Pb, pt);
     }
     void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPN(P, Ni);
         pmMethod->CalVStd(vs);
     }
-    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXiStd(pt);
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(pt);
     }
 
 protected:

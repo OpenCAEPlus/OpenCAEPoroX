@@ -97,18 +97,18 @@ void MixtureUnitComp::FlashFIM(const OCP_DBL& Pin,
 OCP_DBL MixtureUnitComp::XiPhase(const OCP_DBL& Pin,
                          const OCP_DBL& Tin,
                          const vector<OCP_DBL>& Ziin,
-                         const USI&     tarPhase)
+                         const PhaseType& pt)
 {
-    return compM.CalXi(Pin, Tin, &Ziin[0], tarPhase);
+    return compM.CalXi(Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
                       const OCP_DBL& Pbb,
                       const OCP_DBL& Tin,
                       const vector<OCP_DBL>& Ziin,
-                      const USI&     tarPhase)
+                      const PhaseType& pt)
 {
-    return compM.CalRho(Pin, Tin, &Ziin[0], tarPhase);
+    return compM.CalRho(Pin, Tin, &Ziin[0], pt);
 }
 
 

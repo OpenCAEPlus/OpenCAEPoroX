@@ -38,7 +38,7 @@ public:
     virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
+    virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return eC.CalEnthalpy(T, zi); }
 
 protected:
@@ -64,7 +64,7 @@ public:
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
-    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override { return CalXi(P, T, pt); }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override { return 1 / CalXi(P, T, pt); }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
@@ -125,14 +125,14 @@ public:
         SetPTN(P, T, Ni);
         pmMethod->FlashDer(vs);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const USI& tarPhase) {
-        return pmMethod->CalXi(P, T + CONV5, (PhaseType)tarPhase);
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalXi(P, T + CONV5, pt);
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const USI& tarPhase) {
-        return pmMethod->CalRho(P, T + CONV5, (PhaseType)tarPhase);
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalRho(P, T + CONV5, pt);
     }
-    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXiStd(P, T + CONV5, pt);
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(P, T + CONV5, pt);
     }
     void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPTN(P, T, Ni);

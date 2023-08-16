@@ -48,13 +48,13 @@ public:
     /// With P, Ni, perform flash calculations, and calculate VfP,Vfi,dXsdXp
     virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
     /// Calculate molar density of target phase
-    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Flash in standard conditions
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
     /// Calculate molar density of target phase in standard conditions
-    virtual OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) = 0;
+    virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Calculate mass density of target phase
-    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) = 0;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Input total number of existing phase, return the number of existing phase in PEC
     virtual USI GetNumPhasePE(const USI& np) const = 0;
     /// OutPut total flash iterations during the simulation
@@ -235,10 +235,10 @@ public:
     void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
-    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase) override;
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) override;
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     /// Water is always present
     USI GetNumPhasePE(const USI& np) const override { return np - 1; }
 
@@ -311,18 +311,18 @@ public:
         SetPTN(P, T, Ni);
         pmMethod->FlashDer(vs, ftype, lNP, lx);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        return pmMethod->CalXi(P, T + CONV5, z, tarPhase);
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
+        return pmMethod->CalXi(P, T + CONV5, z, pt);
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase) {
-        return pmMethod->CalRho(P, T + CONV5, z, tarPhase);
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
+        return pmMethod->CalRho(P, T + CONV5, z, pt);
     }
     void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPTN(P, T, Ni);
         return pmMethod->CalVStd(vs);
     }
-    OCP_DBL CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXiStd(P, T + CONV5, z, pt);
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(P, T + CONV5, z, pt);
     }
     void OutputIters() const { pmMethod->OutIters(); }
     const auto& GetNCPE() const { return pmMethod->GetNC(); }

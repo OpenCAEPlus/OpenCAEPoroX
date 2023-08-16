@@ -77,14 +77,14 @@ public:
     XiPhase(const OCP_DBL& Pin,
             const OCP_DBL& Tin,
             const vector<OCP_DBL>& Ziin,
-            const USI&     tarPhase) override;
+            const PhaseType& pt) override;
 
     OCP_DBL
     RhoPhase(const OCP_DBL& Pin,
              const OCP_DBL& Pbb,
              const OCP_DBL& Tin,
              const vector<OCP_DBL>& Ziin,
-             const USI&     tarPhase) override;
+             const PhaseType& pt) override;
 
     // For Well
 

@@ -94,7 +94,7 @@ public:
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const vector<OCP_DBL>& Ziin,
-                    const USI&     tarPhase) override
+                    const PhaseType& pt) override
     {
         OCP_ABORT("Not Completed!");
         return 0;
@@ -103,7 +103,7 @@ public:
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
                      const vector<OCP_DBL>& Ziin,
-                     const USI&     tarPhase) override
+                     const PhaseType& pt) override
     {
         OCP_ABORT("Not Completed!");
         return 0;
@@ -151,12 +151,12 @@ public:
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const vector<OCP_DBL>& Ziin,
-                    const USI&     tarPhase) override;
+                    const PhaseType& pt) override;
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
                      const vector<OCP_DBL>& Ziin,
-                     const USI&     tarPhase) override;
+                     const PhaseType& pt) override;
 
 private:
     OCPMixtureBlkOilOW OWM;
@@ -203,12 +203,12 @@ public:
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const vector<OCP_DBL>& Ziin,
-                    const USI&     tarPhase) override;
+                    const PhaseType& pt) override;
     OCP_DBL RhoPhase(const OCP_DBL& Pin,
                      const OCP_DBL& Pbb,
                      const OCP_DBL& Tin,
                      const vector<OCP_DBL>& Ziin,
-                     const USI&     tarPhase) override;
+                     const PhaseType& pt) override;
 
 protected:
     OCPMixtureBlkOilOGW OGWM;

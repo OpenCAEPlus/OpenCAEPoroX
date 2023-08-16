@@ -89,10 +89,10 @@ protected:
     USI                 numPerf; ///< num of perforations belonging to this well.
     vector<Perforation> perf;    ///< information of perforation belonging to this well.
 
-    vector<MixtureUnit*> flashCal; ///< from bulks's flashCal
-
-    USI numPhase; ///< num of phases
-    USI numCom;   ///< num of components
+    /// num of phases
+    USI np;
+    /// num of components
+    USI nc;
 
     /// Well surface pressure, psia
     OCP_DBL Psurf{PRESSURE_STD};
@@ -135,7 +135,7 @@ public:
     /// Calculate pressure difference between well and perforations for Production.
     void CalProddG02(const Bulk& myBulk);
     /// Calculate the production weight
-    void CalProdWeight(const Bulk& myBulk) const;
+    void CalFactor(const Bulk& myBulk) const;
     /// Calculate the contribution of production well to reinjection defaulted
     void CalReInjFluid(const Bulk& myBulk, vector<OCP_DBL>& myZi);
     /// Correct BHP if opt mode is BHPMode
@@ -157,48 +157,13 @@ public:
     USI     PerfNum() const { return numPerf; }
     void    SetBHP(const OCP_DBL& p) { bhp = p; }
     OCP_DBL BHP() const { return bhp; }
-    OCP_DBL DG(const USI& p) const { return dG[p]; }
-    OCP_DBL ProdWeight(const USI& i) const { return prodWeight[i]; }
 
-    USI OptMode() const { return opt.optMode; }
     /// Return the state of the well, Open or Close.
     OCP_BOOL IsOpen() const { return opt.state; }
     /// Return the type of well, Inj or Prod.
     USI             WellType() const { return opt.type; }
-    vector<OCP_DBL> InjZi() const
-    {
-        OCP_ASSERT(opt.type == INJ, "Wrong Call");
-        return opt.injZi;
-    }
-    OCP_DBL InjZi(const USI& i) const
-    {
-        OCP_ASSERT(opt.type == INJ, "Wrong Call");
-        return opt.injZi[i];
-    }
-    OCP_DBL MaxRate() const { return opt.maxRate; }
-    OCP_DBL MaxBHP() const
-    {
-        OCP_ASSERT(opt.type == INJ, "Wrong Call");
-        return opt.maxBHP;
-    }
-    OCP_DBL MinBHP() const
-    {
-        OCP_ASSERT(opt.type == PROD, "Wrong Call");
-        return opt.minBHP;
-    }
-    OCP_DBL InjTemp() const
-    {
-        OCP_ASSERT(opt.type == INJ, "Wrong Call");
-        return opt.injTemp;
-    }
-
     OCP_BOOL PerfState(const USI& p) const { return perf[p].state; }
     USI      PerfLocation(const USI& p) const { return perf[p].location; }
-    OCP_DBL  PerfWI(const USI& p) const { return perf[p].WI; }
-    OCP_DBL  PerfMultiplier(const USI& p) const { return perf[p].multiplier; }
-    OCP_DBL  PerfTransInj(const USI& p) const { return perf[p].transINJ; }
-    OCP_DBL  PerfXi(const USI& p) const { return perf[p].xi; }
-    OCP_DBL  PerfTransj(const USI& p, const USI& j) const { return perf[p].transj[j]; }
     OCP_DBL  PerfQi_lbmol(const USI& p, const USI& i) const
     {
         return perf[p].qi_lbmol[i];
@@ -208,13 +173,6 @@ public:
         OCP_ASSERT(opt.type == PROD, "Wrong Call");
         return perf[p].qj_ft3[j];
     }
-    OCP_DBL PerfInjQt_ft3(const USI& p) const
-    {
-        OCP_ASSERT(opt.type == INJ, "Wrong Call");
-        return perf[p].qt_ft3;
-    }
-    OCP_DBL  Qi_lbmol(const USI& i) const { return qi_lbmol[i]; }
-    OCP_BOOL IfUseUnweight() const { return ifUseUnweight; }
 
 protected:
     
@@ -232,7 +190,8 @@ protected:
 
     // PROD/INJ Rate
     vector<OCP_DBL> qi_lbmol; ///< flow rate of moles of component inflowing/outflowing
-    mutable vector<OCP_DBL> prodWeight; ///< maybe only a num is needed
+    mutable vector<OCP_DBL> factor;
+
 
     OCP_DBL WOPR{0}; ///< well oil production rate.
     OCP_DBL WOPT{0}; ///< well total oil production.
@@ -264,6 +223,25 @@ public:
     /////////////////////////////////////////////////////////////////////
 
 public:
+    void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const;
+protected:
+    void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
+public:
+    void AssembleMatFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    void CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const;
+protected:
+    void AssembleMatInjFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    void AssembleMatProdFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
+public:
+    void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+protected:
+    void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
     /// Assemble matrix for Reinjection Well, used in production well when injection
     /// well is under RATE control
     //void AssembleMatReinjection_FIM(const Bulk&         myBulk,

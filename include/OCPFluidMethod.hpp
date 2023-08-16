@@ -74,16 +74,6 @@ private:
     /// Assemble linear system for wells
     void
     AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    /// Assemble linear system for injection wells
-    void AssembleMatInjWells(LinearSystem&  ls,
-                             const Bulk&    bk,
-                             const Well&    wl,
-                             const OCP_DBL& dt) const;
-    /// Assemble linear system for production wells
-    void AssembleMatProdWells(LinearSystem&  ls,
-                              const Bulk&    bk,
-                              const Well&    wl,
-                              const OCP_DBL& dt) const;
     /// Update P, Pj, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u);
     /// Reset variables to last time step
@@ -142,16 +132,6 @@ private:
     /// Assemble linear system for bulks
     void
     AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    /// Assemble linear system for injection wells
-    void AssembleMatInjWells(LinearSystem&  ls,
-                             const Bulk&    bk,
-                             const Well&    wl,
-                             const OCP_DBL& dt) const;
-    /// Assemble linear system for production wells
-    void AssembleMatProdWells(LinearSystem&  ls,
-                              const Bulk&    bk,
-                              const Well&    wl,
-                              const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
     GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;

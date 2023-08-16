@@ -344,7 +344,7 @@ OCP_DBL OCPMixtureBlkOilOGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, 
 {
 	if (pt == PhaseType::oil)         return CalXiO(P, Pb);
 	else if (pt == PhaseType::gas)    return CalXiG(P);
-	else if (pt == PhaseType::water)  return CalXiW(P);
+	else if (pt == PhaseType::wat)  return CalXiW(P);
 	else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
@@ -353,16 +353,16 @@ OCP_DBL OCPMixtureBlkOilOGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb,
 {
 	if (pt == PhaseType::oil)         return CalRhoO(P, Pb);
 	else if (pt == PhaseType::gas)    return CalRhoG(P);
-	else if (pt == PhaseType::water)  return CalRhoW(P);
+	else if (pt == PhaseType::wat)  return CalRhoW(P);
 	else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
 
-OCP_DBL OCPMixtureBlkOilOGWMethod01::CalXiStd(const PhaseType& pt)
+OCP_DBL OCPMixtureBlkOilOGWMethod01::CalVmStd(const PhaseType& pt)
 {
-	if      (pt == PhaseType::oil)    return 1 / (stdVo * CONV1);
-    else if (pt == PhaseType::gas)    return 1 / (stdVg * 1000);
-    else if (pt == PhaseType::water)  return 1 / (stdVw * CONV1);
+	if      (pt == PhaseType::oil)  return (stdVo * CONV1);
+    else if (pt == PhaseType::gas)  return (stdVg * 1000);
+    else if (pt == PhaseType::wat)  return (stdVw * CONV1);
     else    OCP_ABORT("Wrong Phase Type!");
 }
 

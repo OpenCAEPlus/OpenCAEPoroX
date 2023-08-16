@@ -78,9 +78,9 @@ OCP_DBL MixtureUnitThermal_OW::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_
 OCP_DBL MixtureUnitThermal_OW::XiPhase(const OCP_DBL& Pin,
                                     const OCP_DBL& Tin,
                                     const vector<OCP_DBL>& Ziin,
-                                    const USI&     tarPhase)
+                                    const PhaseType& pt)
 {
-    return OWTM.CalXi(Pin, Tin, tarPhase);
+    return OWTM.CalXi(Pin, Tin, pt);
 }
 
 OCP_DBL
@@ -88,9 +88,9 @@ MixtureUnitThermal_OW::RhoPhase(const OCP_DBL& Pin,
                              const OCP_DBL& Pbb,
                              const OCP_DBL& Tin,
                              const vector<OCP_DBL>& Ziin,
-                             const USI&     tarPhase)
+                             const PhaseType& pt)
 {
-    return OWTM.CalRho(Pin, Tin, tarPhase);
+    return OWTM.CalRho(Pin, Tin, pt);
 }
 
 

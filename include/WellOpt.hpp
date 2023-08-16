@@ -17,6 +17,7 @@
 
 // OpenCAEPoroX header files
 #include "ParamWell.hpp"
+#include "OCPMixture.hpp"
 
 using namespace std;
 
@@ -67,7 +68,7 @@ private:
     /// for production well, it gives the the components of fluids which we are
     /// interested in.
     vector<OCP_DBL> injZi;
-    USI             injPhase; ///< label the phase of injecting fluid if possible
+    PhaseType       injPhase; ///< label the phase of injecting fluid if possible
     vector<OCP_DBL> prodPhaseWeight;
     OCP_DBL
     factorINJ;       ///< unit factor: Mscf -> lbmol for comps, Mscf -> Mscf in blackoil

@@ -74,7 +74,7 @@ public:
     virtual OCP_DBL XiPhase(const OCP_DBL& Pin,
                             const OCP_DBL& Tin,
                             const vector<OCP_DBL>& Ziin,
-                            const USI&     tarPhase) = 0;
+                            const PhaseType& pt) = 0;
 
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed, if
@@ -85,7 +85,7 @@ public:
                              const OCP_DBL& Pbb,
                              const OCP_DBL& Tin,
                              const vector<OCP_DBL>& Ziin,
-                             const USI&     tarPhase) = 0;
+                             const PhaseType& pt) = 0;
 
     // for well
     /// Calculate Production rate for PROD well

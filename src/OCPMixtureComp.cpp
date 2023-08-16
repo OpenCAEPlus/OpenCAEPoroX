@@ -732,16 +732,16 @@ void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype, co
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase)
+OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     // assume that only single phase exists here
-    if (tarPhase == WATER) {
+    if (pt == PhaseType::wat) {
         // water phase
         return PVTW.CalRhoW(P);
     }
     else {
         // hydrocarbon phase
-        OCP_DBL xitmp = CalXi(P, T, &z[0], tarPhase);
+        OCP_DBL xitmp = CalXi(P, T, &z[0], pt);
         OCP_DBL MWtmp = 0;
         for (USI i = 0; i < NC; i++) MWtmp += z[i] * MWC[i];
         return MWtmp * xitmp;
@@ -749,10 +749,10 @@ OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const USI& tarPhase)
+OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     // assume that only single phase exists here
-    if (tarPhase == WATER) {
+    if (pt == PhaseType::wat) {
         // water phase
         return PVTW.CalXiW(P);
     }
@@ -773,15 +773,15 @@ void OCPMixtureCompMethod01::CalVStd(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalXiStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& tarPhase)
+OCP_DBL OCPMixtureCompMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-    if (tarPhase == PhaseType::water) {
+    if (pt == PhaseType::wat) {
         // water phase
-        return 1 / (stdVw * CONV1);
+        return (stdVw * CONV1);
     }
     else {
         // oil phase
-        return 1 / eos.CalVm(P, T, &z[0]);
+        return eos.CalVm(P, T, &z[0]);
     }
 }
 
