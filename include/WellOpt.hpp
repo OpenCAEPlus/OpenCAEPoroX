@@ -21,6 +21,14 @@
 
 using namespace std;
 
+enum class WellType
+{
+    /// injection well
+    injector,
+    /// production well
+    productor
+};
+
 /// WellOpt describes the operation mode of a well.
 /// usually it changes over time, specifically, each attributes could be changed
 /// including the well type.
@@ -41,7 +49,8 @@ public:
     OCP_BOOL operator!=(const WellOpt& Opt) const;
 
 private:
-    USI type{0}; ///< type of well, Inj or Prod.
+    /// type of well, Injection well or Production well.
+    WellType type;
     /// indicate which type of fluids will be injected, water, gas, or other solvent.
     /// it's decided by users and only useful for injection well.
     string   fluidType;

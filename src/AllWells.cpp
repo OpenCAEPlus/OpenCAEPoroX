@@ -99,7 +99,7 @@ void AllWells::SetupWellGroup(const Bulk& myBulk)
     wellGroup.push_back(WellGroup("Field"));
     for (USI w = 0; w < numWell; w++) {
         wellGroup[0].wId.push_back(w);
-        if (wells[w].WellType() == INJ)
+        if (wells[w].WellType() == WellType::injector)
             wellGroup[0].wIdINJ.push_back(w);
         else
             wellGroup[0].wIdPROD.push_back(w);
@@ -113,7 +113,7 @@ void AllWells::SetupWellGroup(const Bulk& myBulk)
             if (wells[w].group == wellGroup[g].name) {
                 // existing group
                 wellGroup[g].wId.push_back(w);
-                if (wells[w].WellType() == INJ)
+                if (wells[w].WellType() == WellType::injector)
                     wellGroup[g].wIdINJ.push_back(w);
                 else
                     wellGroup[g].wIdPROD.push_back(w);
@@ -124,7 +124,7 @@ void AllWells::SetupWellGroup(const Bulk& myBulk)
             // new group
             wellGroup.push_back(WellGroup(wells[w].group));
             wellGroup[glen].wId.push_back(w);
-            if (wells[w].WellType() == INJ)
+            if (wells[w].WellType() == WellType::injector)
                 wellGroup[glen].wIdINJ.push_back(w);
             else
                 wellGroup[glen].wIdPROD.push_back(w);
@@ -256,7 +256,7 @@ void AllWells::CalIPRT(const Bulk& myBulk, OCP_DBL dt)
         wells[w].WWPR = 0;
 
         if (wells[w].IsOpen()) {
-            if (wells[w].WellType() == PROD) {
+            if (wells[w].WellType() == WellType::productor) {
                 wells[w].CalProdQj(myBulk, dt);
             } else {
                 wells[w].CalInjQj(myBulk, dt);
@@ -439,7 +439,7 @@ void AllWells::SetWellVal() const
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].opt.state) {
-            if (wells[w].opt.type == INJ) {
+            if (wells[w].opt.type == WellType::injector) {
                 if (wells[w].opt.optMode == BHP_MODE)
                     wellVal[w] = wells[w].opt.maxBHP;
                 else

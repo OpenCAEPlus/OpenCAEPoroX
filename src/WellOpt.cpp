@@ -15,14 +15,14 @@
 WellOpt::WellOpt(const WellOptParam& optParam)
 {
     if (optParam.type == "INJ") {
-        type = INJ;
+        type = WellType::injector;
     } else if (optParam.type == "PROD") {
-        type = PROD;
+        type = WellType::productor;
     } else {
         OCP_ABORT("Wrong well type!");
     }
 
-    if (type == INJ) {
+    if (type == WellType::injector) {
         fluidType = optParam.fluidType;
         if (fluidType == "WAT" || fluidType == "WATER") {
             fluidType = "WAT";

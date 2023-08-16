@@ -107,10 +107,10 @@ void Well::SetupOpts(const vector<SolventINJ>& sols)
 {
     for (auto& opt : optSet) {
         if (!opt.state) continue;
-        if (opt.type == INJ) {
+        if (opt.type == WellType::injector) {
             SetupOptsInj(opt, sols);
         }
-        else if (opt.type == PROD) {
+        else if (opt.type == WellType::productor) {
             SetupOptsProd(opt);
         }
         else {
@@ -271,7 +271,7 @@ void Well::CalTrans(const Bulk& myBulk)
 {
     OCP_FUNCNAME;
 
-    if (opt.type == INJ) {
+    if (opt.type == WellType::injector) {
         for (USI p = 0; p < numPerf; p++) {
             perf[p].transINJ = 0;
             OCP_USI k        = perf[p].location;
@@ -314,7 +314,7 @@ void Well::CalFlux(const Bulk& myBulk, const OCP_BOOL ReCalXi)
     // cout << name << endl;
     fill(qi_lbmol.begin(), qi_lbmol.end(), 0.0);
 
-    if (opt.type == INJ) {
+    if (opt.type == WellType::injector) {
 
         for (USI p = 0; p < numPerf; p++) {
             perf[p].P  = bhp + dG[p];
@@ -468,7 +468,7 @@ void Well::CaldG(const Bulk& myBulk)
 {
     OCP_FUNCNAME;
 
-    if (opt.type == INJ)
+    if (opt.type == WellType::injector)
         CalInjdG(myBulk);
     else
         CalProddG01(myBulk);
@@ -940,7 +940,7 @@ void Well::CalFactor(const Bulk& myBulk) const
 {
     if (opt.optMode == BHP_MODE)  return;
 
-    if (opt.type == PROD) {
+    if (opt.type == WellType::productor) {
         if (mixture->IfBlkModel()) {
             // For black oil models -- phase = components
             vector<OCP_DBL> qitmp(nc, 1.0);
@@ -989,7 +989,7 @@ void Well::CalFactor(const Bulk& myBulk) const
             }
         }
     }
-    else if(opt.type == INJ) {
+    else if(opt.type == WellType::injector) {
         //OCP_DBL fac = mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase);
         //if (opt.injPhase == PhaseType::oil)  fac *= unitConvert[mixture->OilIndex()];
         //if (opt.injPhase == PhaseType::gas)  fac *= unitConvert[mixture->GasIndex()];
@@ -1022,9 +1022,9 @@ void Well::CalReInjFluid(const Bulk& myBulk, vector<OCP_DBL>& myZi)
 
 void Well::CorrectBHP()
 {
-    if (opt.type == PROD && opt.optMode == BHP_MODE) {
+    if (opt.type == WellType::productor && opt.optMode == BHP_MODE) {
         bhp = opt.minBHP;
-    } else if (opt.type == INJ && opt.optMode == BHP_MODE) {
+    } else if (opt.type == WellType::injector && opt.optMode == BHP_MODE) {
         bhp = opt.maxBHP;
     }
 }
@@ -1035,7 +1035,7 @@ void Well::CheckOptMode(const Bulk& myBulk)
 {
     OCP_FUNCNAME;
     if (opt.initOptMode == BHP_MODE) {
-        if (opt.type == INJ) {
+        if (opt.type == WellType::injector) {
             OCP_DBL q = CalInjRateMaxBHP(myBulk);
             // for INJ well, maxRate has been switch to lbmols
             OCP_DBL tarRate = opt.maxRate;
@@ -1056,7 +1056,7 @@ void Well::CheckOptMode(const Bulk& myBulk)
             bhp         = opt.minBHP;
         }
     } else {
-        if (opt.type == INJ) {
+        if (opt.type == WellType::injector) {
             OCP_DBL q = CalInjRateMaxBHP(myBulk);
             // for INJ well, maxRate has been switch to lbmols
             OCP_DBL tarRate = opt.maxRate;
@@ -1108,7 +1108,7 @@ OCP_INT Well::CheckP(const Bulk& myBulk)
         }
     }
 
-    if (opt.type == INJ) {
+    if (opt.type == WellType::injector) {
         if (opt.optMode != BHP_MODE && bhp > opt.maxBHP) {
 #if _DEBUG
             cout << "### WARNING: Well " << name << " switch to BHPMode" << endl;
@@ -1138,7 +1138,7 @@ OCP_INT Well::CheckCrossFlow(const Bulk& myBulk)
     OCP_USI  k;
     OCP_BOOL flagC = OCP_TRUE;
 
-    if (opt.type == PROD) {
+    if (opt.type == WellType::productor) {
         for (USI p = 0; p < numPerf; p++) {
             k            = perf[p].location;
             OCP_DBL minP = myBulk.P[k];
@@ -1247,7 +1247,7 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
             }
         }
         // Well Self
-        if (opt.type == INJ) {
+        if (opt.type == WellType::injector) {
             // Injection
             switch (opt.optMode) {
             case BHP_MODE:
@@ -1314,8 +1314,8 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
 void Well::AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
     if (opt.state == OPEN) {
-        if (opt.type == INJ)        AssembleMatInjFIM(ls, bk, dt);
-        else if (opt.type == PROD)  AssembleMatProdFIM(ls, bk, dt);
+        if (opt.type == WellType::injector)        AssembleMatInjFIM(ls, bk, dt);
+        else if (opt.type == WellType::productor)  AssembleMatProdFIM(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");
     }
 }
@@ -1564,8 +1564,8 @@ void Well::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& d
 void Well::AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
     if (opt.state == OPEN) {
-        if (opt.type == INJ)        AssembleMatInjIMPEC(ls, bk, dt);
-        else if (opt.type == PROD)  AssembleMatProdIMPEC(ls, bk, dt);
+        if (opt.type == WellType::injector)        AssembleMatInjIMPEC(ls, bk, dt);
+        else if (opt.type == WellType::productor)  AssembleMatProdIMPEC(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");
     }
 }
@@ -1729,7 +1729,7 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 			}
 		}
 
-		if (opt.type == INJ) {
+		if (opt.type == WellType::injector) {
 			// Energy Conservation -- Well to Bulk
 			const OCP_DBL Hw =
 				bk.flashCal[0]->CalInjWellEnthalpy(opt.injTemp, &opt.injZi[0]);
@@ -1814,8 +1814,8 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 void Well::AssembleMatFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
 {
     if (opt.state == OPEN) {
-        if (opt.type == INJ)        AssembleMatInjFIM_T(ls, bk, dt);
-        else if (opt.type == PROD)  AssembleMatProdFIM_T(ls, bk, dt);
+        if (opt.type == WellType::injector)        AssembleMatInjFIM_T(ls, bk, dt);
+        else if (opt.type == WellType::productor)  AssembleMatProdFIM_T(ls, bk, dt);
         else                        OCP_ABORT("WRONG Well Type!");
     }
 }

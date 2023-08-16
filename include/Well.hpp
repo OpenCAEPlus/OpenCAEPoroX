@@ -161,7 +161,7 @@ public:
     /// Return the state of the well, Open or Close.
     OCP_BOOL IsOpen() const { return opt.state; }
     /// Return the type of well, Inj or Prod.
-    USI             WellType() const { return opt.type; }
+    auto WellType() const { return opt.type; }
     OCP_BOOL PerfState(const USI& p) const { return perf[p].state; }
     USI      PerfLocation(const USI& p) const { return perf[p].location; }
     OCP_DBL  PerfQi_lbmol(const USI& p, const USI& i) const
@@ -170,7 +170,7 @@ public:
     }
     OCP_DBL PerfProdQj_ft3(const USI& p, const USI& j) const
     {
-        OCP_ASSERT(opt.type == PROD, "Wrong Call");
+        OCP_ASSERT(opt.type == WellType::productor, "Wrong Call");
         return perf[p].qj_ft3[j];
     }
 

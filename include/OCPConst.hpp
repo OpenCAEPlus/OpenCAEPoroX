@@ -105,8 +105,6 @@ const USI PHASE_ODGW            = 51;  ///< Phase type = oil-dry gas-water
 const USI PHASE_DOGW            = 52;  ///< Phase type = dead oil-gas-water
 
 // Well params
-const USI      INJ        = 1;         ///< Well type = injector
-const USI      PROD       = 2;         ///< Well type = producer
 const USI      HORIZONTAL = 1;         ///< Well type = horizontal
 const USI      VERTICAL   = 2;         ///< Well type = vertical
 const OCP_BOOL OPEN       = OCP_TRUE;  ///< Well type = open
