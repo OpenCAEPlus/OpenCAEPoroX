@@ -190,6 +190,7 @@ protected:
 
     // PROD/INJ Rate
     vector<OCP_DBL> qi_lbmol; ///< flow rate of moles of component inflowing/outflowing
+    /// moles number -> volume
     mutable vector<OCP_DBL> factor;
 
 
@@ -210,13 +211,6 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
 public:
-    /// Assemble matrix for Reinjection Well, used in production well when injection
-    /// well is under RATE control
-    //void AssembleMatReinjection_IMPEC(const Bulk&         myBulk,
-    //                                  LinearSystem&       myLS,
-    //                                  const OCP_DBL&      dt,
-    //                                  const vector<Well>& allWell,
-    //                                  const vector<USI>&  injId) const;
 
     /////////////////////////////////////////////////////////////////////
     // FIM
@@ -241,14 +235,6 @@ public:
 protected:
     void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
     void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
-
-    /// Assemble matrix for Reinjection Well, used in production well when injection
-    /// well is under RATE control
-    //void AssembleMatReinjection_FIM(const Bulk&         myBulk,
-    //                                LinearSystem&       myLS,
-    //                                const OCP_DBL&      dt,
-    //                                const vector<Well>& allWell,
-    //                                const vector<USI>&  injId) const;
 
     // for output
     //void SetPolyhedronWell(const Grid& myGrid, OCPpolyhedron& mypol);

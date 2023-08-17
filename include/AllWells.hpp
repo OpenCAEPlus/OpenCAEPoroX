@@ -31,29 +31,11 @@ public:
     WellGroup(const string& gname)
         : name(gname){};
 
-    OCP_BOOL IfReInj() const { return reInj; }
-
 private:
     string      name;    ///< name of wellGroup
     vector<USI> wId;     ///< Well index in wellGroup
     vector<USI> wIdINJ;  ///< Inj well index in AllWells
     vector<USI> wIdPROD; ///< Prod well index in AllWells
-
-    // for Reinjection
-    OCP_BOOL reInj{OCP_FALSE}; ///< if reinjection happens
-    USI      reInjPhase;       ///< phase of injected fluid, which decides zi
-
-    /// nominated group which supply reinjection sale rate of current group, after times
-    /// -xi, it will be passed to maxRate in injWell
-    USI     prodGroup{0};
-    OCP_DBL saleRate;
-    /// mole density of reinjection fluid in std, it will be passed to INJxi in opt of
-    /// injection well
-    OCP_DBL reInjXi;
-    /// mole fraction of components for reinjection, it should be passed to injWell
-    vector<OCP_DBL> reInjZi;
-    OCP_DBL
-    reInjFactor; ///< one moles Group production fluid has factor mole reinjection fluid
 
     /*
     OCP_DBL GOPR{0}; ///< Group oil production rate
@@ -125,8 +107,6 @@ public:
     void CaldG(const Bulk& myBulk);
     /// Calculate Injection rate, total Injection, Production rate, total Production
     void CalIPRT(const Bulk& myBulk, OCP_DBL dt);
-    /// Calculate Reinjection fluid
-    void CalReInjFluid(const Bulk& myBulk);
     void UpdateLastTimeStepBHP()
     {
         for (auto& w : wells) w.lbhp = w.bhp;

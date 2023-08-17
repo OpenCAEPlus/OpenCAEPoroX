@@ -501,8 +501,6 @@ void Reservoir::CalIPRT(const OCP_DBL& dt)
     OCP_FUNCNAME;
     // Calculate injection / production rate for current step
     allWells.CalIPRT(bulk, dt);
-    // Calculate Reinjection fluid for next step
-    allWells.CalReInjFluid(bulk);
 }
 
 OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const

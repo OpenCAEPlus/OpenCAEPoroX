@@ -54,10 +54,10 @@ WellOpt::WellOpt(const WellOptParam& optParam)
     }
 
     initMode = mode;
-    maxRate     = optParam.maxRate;
-    maxBHP      = optParam.maxBHP;
-    minBHP      = optParam.minBHP;
-    injTemp     = optParam.injTemp;
+    maxRate  = optParam.maxRate;
+    maxBHP   = optParam.maxBHP;
+    minBHP   = optParam.minBHP;
+    injTemp  = optParam.injTemp;
 }
 
 OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const

@@ -136,16 +136,6 @@ void AllWells::SetupWellGroup(const Bulk& myBulk)
     // relation between wellGroup should be completed if "node groups" exist
 
     // control of group should be update according to input file
-
-    // for test
-    if (OCP_FALSE) {
-        wellGroup[0].reInj      = OCP_TRUE;
-        wellGroup[0].saleRate   = 1500;
-        wellGroup[0].reInjPhase = GAS;
-        wellGroup[0].prodGroup  = 0;
-    }
-    wellGroup[0].reInjZi.resize(myBulk.GetComNum());
-    CalReInjFluid(myBulk);
 }
 
 void AllWells::SetupMixture(const Bulk& myBulk)
@@ -275,47 +265,6 @@ void AllWells::CalIPRT(const Bulk& myBulk, OCP_DBL dt)
     FWPT += FWPR * dt;
 }
 
-void AllWells::CalReInjFluid(const Bulk& myBulk)
-{
-    for (auto& wG : wellGroup) {
-        if (wG.reInj) {
-            const USI nc = myBulk.GetComNum();
-            // const USI np = myBulk.GetPhaseNum();
-            fill(wG.reInjZi.begin(), wG.reInjZi.end(), 0.0);
-            for (auto& prod : wellGroup[wG.prodGroup].wIdPROD) {
-                Daxpy(nc, 1.0, &wells[prod].qi_lbmol[0], &wG.reInjZi[0]);
-            }
-            OCP_DBL qt = Dnorm1(nc, &wG.reInjZi[0]);
-            if (fabs(qt) < 1E-8) {
-                // Recalculate zi
-                fill(wG.reInjZi.begin(), wG.reInjZi.end(), 0.0);
-                for (auto& prod : wellGroup[wG.prodGroup].wIdPROD) {
-                    wells[prod].CalReInjFluid(myBulk, wG.reInjZi);
-                }
-                qt = Dnorm1(nc, &wG.reInjZi[0]);
-            }
-            flashCal[0]->Flash(Psurf, Tsurf, &wG.reInjZi[0]);
-            for (USI i = 0; i < nc; i++)
-                wG.reInjZi[i] = flashCal[0]->GetXij(wG.reInjPhase, i);
-            wG.reInjXi     = flashCal[0]->GetXi(wG.reInjPhase);
-            wG.reInjFactor = wG.reInjXi * flashCal[0]->GetVj(wG.reInjPhase) / qt;
-            // assign to every open injection well in wG
-            for (auto& w : wG.wIdINJ) {
-                if (wells[w].IsOpen()) {
-                    wells[w].opt.reInj      = OCP_TRUE;
-                    wells[w].opt.connWell   = wG.wIdPROD;
-                    wells[w].opt.reInjPhase = wG.reInjPhase;
-                    wells[w].opt.injZi      = wG.reInjZi;
-                    wells[w].opt.factorINJ =
-                        wG.reInjXi * 1000; // Blackoil Model prohibited
-                    wells[w].opt.reInjFactor = wG.reInjFactor;
-                    wells[w].opt.maxRate =
-                        -wG.saleRate * wells[w].opt.factorINJ; // Mscf -> ft3 -> lbmol
-                }
-            }
-        }
-    }
-}
 
 void AllWells::ResetBHP()
 {

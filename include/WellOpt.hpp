@@ -88,32 +88,26 @@ private:
     /// the control of constant pressure. it gives the flow rate of specified fluids if
     /// the well is under the control of constant flow rate.
     OCP_DBL maxRate;
-    /// used for injection well.
-    /// it gives the upper limit of well pressure if the well is under the control of
+    /// it gives the upper limit of injection well pressure if the well is under the control of
     /// constant flow rate. it gives the pressure of well if the well is under the
     /// control of constant pressure.
     OCP_DBL maxBHP;
-    /// used for production well.
-    /// it gives the lower limit of well pressure if the well is under the control of
+    /// it gives the lower limit of production well pressure if the well is under the control of
     /// constant flow rate. it gives the pressure of well if the well is under the
     /// control of constant pressure.
     OCP_DBL minBHP;
-    /// it's decided by users input.
+    /// target injection/production well rate
+    OCP_DBL tarRate;
+    /// target injection/production well BHP
+    OCP_DBL tarBHP;
+
     /// for injection well, it describes the components of injected fluids.
-    /// for production well, it gives the the components of fluids which we are
-    /// interested in.
     vector<OCP_DBL> injZi;
     PhaseType       injPhase; ///< label the phase of injecting fluid if possible
     vector<OCP_DBL> prodPhaseWeight;
-    OCP_DBL
-    factorINJ;       ///< unit factor: Mscf -> lbmol for comps, Mscf -> Mscf in blackoil
+    OCP_DBL factorINJ; ///< unit factor: Mscf -> lbmol for comps, Mscf -> Mscf in blackoil
     OCP_DBL injTemp; ///< temperature of inj fluid F
                      // for Reinjection
-    OCP_BOOL reInj{OCP_FALSE}; ///< if OCP_TRUE, reinjection happens
-    USI      reInjPhase;       ///< phase of Reinjection fluid
-    OCP_DBL  reInjFactor;      ///< one moles Group production fluid has factor mole
-                               ///< reinjection fluid
-    vector<USI> connWell;      ///< Well which connects to current Well
 };
 
 /// Describe the molar fraction of components of fluid injected to reservoir from INJ.
