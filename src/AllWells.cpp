@@ -161,13 +161,8 @@ void AllWells::ApplyControl(const USI& i)
 {
     OCP_FUNCNAME;
     wellChange = OCP_FALSE;
-    USI wId    = 0;
     for (USI w = 0; w < numWell; w++) {
         wells[w].opt = wells[w].optSet[i];
-        if (wells[w].IsOpen()) {
-            wells[w].wOId = wId;
-            wId++;
-        }
         if (i > 0 && wells[w].opt != wells[w].optSet[i - 1]) wellChange = OCP_TRUE;
     }
 }
@@ -387,18 +382,11 @@ void AllWells::SetWellVal() const
     if (!useVTK) return;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].opt.state == WellState::open) {
-            if (wells[w].opt.type == WellType::injector) {
-                if (wells[w].opt.mode == WellOptMode::bhp)
-                    wellVal[w] = wells[w].opt.maxBHP;
-                else
-                    wellVal[w] = wells[w].opt.maxRate;
-            } else {
-                if (wells[w].opt.mode == WellOptMode::bhp)
-                    wellVal[w] = wells[w].opt.minBHP;
-                else
-                    wellVal[w] = wells[w].opt.maxRate;
-            }
+        if (wells[w].opt.state == WellState::open) {          
+            if (wells[w].opt.mode == WellOptMode::bhp)
+                wellVal[w] = wells[w].opt.tarBHP;
+            else
+                wellVal[w] = wells[w].opt.tarRate;
         } else {
             wellVal[w] = 0;
         }

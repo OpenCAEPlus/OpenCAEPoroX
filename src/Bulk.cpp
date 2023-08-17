@@ -127,6 +127,7 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
         InputParamTHERMAL(rs_param, opts);
     }
 
+
     InputSatFunc(rs_param, opts);
 }
 

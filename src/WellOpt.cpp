@@ -58,7 +58,18 @@ WellOpt::WellOpt(const WellOptParam& optParam)
     maxBHP   = optParam.maxBHP;
     minBHP   = optParam.minBHP;
     injTemp  = optParam.injTemp;
+
+
+    if (type == WellType::injector) {
+        tarRate = maxRate;
+        tarBHP  = maxBHP;
+    }
+    else if (type == WellType::productor) {
+        tarRate = maxRate;
+        tarBHP  = minBHP;
+    }
 }
+
 
 OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const
 {
@@ -69,6 +80,8 @@ OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const
     if (fabs(this->maxRate - opt.maxRate) > TINY) return OCP_TRUE;
     if (fabs(this->maxBHP - opt.maxBHP) > TINY) return OCP_TRUE;
     if (fabs(this->minBHP - opt.minBHP) > TINY) return OCP_TRUE;
+    if (fabs(this->tarRate - opt.tarRate) > TINY) return OCP_TRUE;
+    if (fabs(this->tarBHP - opt.tarBHP) > TINY) return OCP_TRUE;
     for (USI i = 0; i < injZi.size(); i++) {
         if (fabs(injZi[i] - opt.injZi[i]) > TINY) return OCP_TRUE;
     }
@@ -80,6 +93,8 @@ OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const
     if (fabs(this->injTemp - opt.injTemp) > TINY) return OCP_TRUE;
     return OCP_FALSE;
 }
+
+
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

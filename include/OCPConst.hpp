@@ -84,11 +84,6 @@ const USI IMPEC = 1; ///< Solution method = IMPEC
 const USI FIM   = 2; ///< Solution method = FIM
 const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
 
-// Linear Solver
-const USI SCALARFASP     = 1; ///< Use scalar linear solver in Fasp
-const USI VECTORFASP     = 2; ///< Use vector linear solver in Fasp
-const USI PARDISOSOLVER  = 3; ///< Use linear solver in Pardiso
-const USI SAMGSOLVER     = 4; ///< Use linear solver in SAMG
 
 // Fluid Index
 const USI OIL     = 0; ///< Fluid type = oil

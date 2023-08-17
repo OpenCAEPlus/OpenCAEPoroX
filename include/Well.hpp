@@ -101,10 +101,6 @@ protected:
     OCP_DBL Psurf{PRESSURE_STD};
     /// Well surface temperature, F
     OCP_DBL Tsurf{TEMPERATURE_STD};
-
-    USI wOId; ///< well index in allWells, closed well is excluded, it's the well index
-              ///< in equations
-
     /// fluid model(where is it from?)
     OCPMixture* mixture;
 
@@ -207,9 +203,6 @@ protected:
     OCP_DBL WWIT{0}; ///< well total water injection.
 
     OCP_BOOL ifUseUnweight{OCP_FALSE};
-    /////////////////////////////////////////////////////////////////////
-    // IMPEC
-    /////////////////////////////////////////////////////////////////////
 
 public:
 

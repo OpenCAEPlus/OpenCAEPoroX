@@ -327,6 +327,7 @@ public:
     }
 
 protected:
+    /// Index of oil, gas, water
     vector<USI> phase2Index;     ///< Location of phase according to its name: numPhase.
                                  // Note: For example, `Oil' is at the i-th location.
     vector<USI>      phaseNum;   ///< Num of hydrocarbon phase in each bulk
