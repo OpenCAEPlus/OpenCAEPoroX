@@ -170,22 +170,22 @@ void Well::SetupOptsProd(WellOpt& opt)
     const auto l = mixture->LiquidIndex();
 
     opt.prodPhaseWeight.assign(np, 0);
-    switch (opt.optMode) {
-    case BHP_MODE:
+    switch (opt.mode) {
+    case WellOptMode::bhp:
         break;
-    case ORATE_MODE:
+    case WellOptMode::orate:
         if (o < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO OIL!");
         opt.prodPhaseWeight[o] = 1.0;
         break;
-    case GRATE_MODE:
+    case WellOptMode::grate:
         if (g < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO GAS!");
         opt.prodPhaseWeight[g] = 1.0;
         break;
-    case WRATE_MODE:
+    case WellOptMode::wrate:
         if (w < 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO WATER!");
         opt.prodPhaseWeight[w] = 1.0;
         break;
-    case LRATE_MODE:
+    case WellOptMode::lrate:
         if (l.size() == 0) OCP_ABORT("WRONG PRODUCTED FLUID -- NO LIQUID!");
         for (auto& i : l)  opt.prodPhaseWeight[i] = 1.0;
         break;
@@ -938,7 +938,7 @@ void Well::CalProddG(const Bulk& myBulk)
 
 void Well::CalFactor(const Bulk& myBulk) const
 {
-    if (opt.optMode == BHP_MODE)  return;
+    if (opt.mode == WellOptMode::bhp)  return;
 
     if (opt.type == WellType::productor) {
         if (mixture->IfBlkModel()) {
@@ -1022,9 +1022,9 @@ void Well::CalReInjFluid(const Bulk& myBulk, vector<OCP_DBL>& myZi)
 
 void Well::CorrectBHP()
 {
-    if (opt.type == WellType::productor && opt.optMode == BHP_MODE) {
+    if (opt.type == WellType::productor && opt.mode == WellOptMode::bhp) {
         bhp = opt.minBHP;
-    } else if (opt.type == WellType::injector && opt.optMode == BHP_MODE) {
+    } else if (opt.type == WellType::injector && opt.mode == WellOptMode::bhp) {
         bhp = opt.maxBHP;
     }
 }
@@ -1034,7 +1034,7 @@ void Well::CorrectBHP()
 void Well::CheckOptMode(const Bulk& myBulk)
 {
     OCP_FUNCNAME;
-    if (opt.initOptMode == BHP_MODE) {
+    if (opt.initMode == WellOptMode::bhp) {
         if (opt.type == WellType::injector) {
             OCP_DBL q = CalInjRateMaxBHP(myBulk);
             // for INJ well, maxRate has been switch to lbmols
@@ -1046,13 +1046,13 @@ void Well::CheckOptMode(const Bulk& myBulk)
                     tarRate = WWIR;
             }
             if (q > tarRate) {
-                opt.optMode = RATE_MODE;
+                opt.mode = WellOptMode::irate;
             } else {
-                opt.optMode = BHP_MODE;
+                opt.mode = WellOptMode::bhp;
                 bhp         = opt.maxBHP;
             }
         } else {
-            opt.optMode = BHP_MODE;
+            opt.mode = WellOptMode::bhp;
             bhp         = opt.minBHP;
         }
     } else {
@@ -1068,18 +1068,18 @@ void Well::CheckOptMode(const Bulk& myBulk)
             }
 
             if (q > tarRate) {
-                opt.optMode = opt.initOptMode;
+                opt.mode = opt.initMode;
             } else {
-                opt.optMode = BHP_MODE;
+                opt.mode = WellOptMode::bhp;
                 bhp         = opt.maxBHP;
             }
         } else {
             OCP_DBL q = CalProdRateMinBHP(myBulk);
             // cout << q << endl;
             if (q > opt.maxRate) {
-                opt.optMode = opt.initOptMode;
+                opt.mode = opt.initMode;
             } else {
-                opt.optMode = BHP_MODE;
+                opt.mode = WellOptMode::bhp;
                 bhp         = opt.minBHP;
             }
         }
@@ -1109,20 +1109,20 @@ OCP_INT Well::CheckP(const Bulk& myBulk)
     }
 
     if (opt.type == WellType::injector) {
-        if (opt.optMode != BHP_MODE && bhp > opt.maxBHP) {
+        if (opt.mode != WellOptMode::bhp && bhp > opt.maxBHP) {
 #if _DEBUG
             cout << "### WARNING: Well " << name << " switch to BHPMode" << endl;
 #endif
-            opt.optMode = BHP_MODE;
+            opt.mode = WellOptMode::bhp;
             bhp         = opt.maxBHP;
             return WELL_SWITCH_TO_BHPMODE;
         }
     } else {
-        if (opt.optMode != BHP_MODE && bhp < opt.minBHP) {
+        if (opt.mode != WellOptMode::bhp && bhp < opt.minBHP) {
 #if _DEBUG
             cout << "### WARNING: Well " << name << " switch to BHPMode" << endl;
 #endif
-            opt.optMode = BHP_MODE;
+            opt.mode = WellOptMode::bhp;
             bhp         = opt.minBHP;
             return WELL_SWITCH_TO_BHPMODE;
         }
@@ -1212,7 +1212,7 @@ void Well::ShowPerfStatus(const Bulk& myBulk) const
 
     cout << fixed;
     cout << "----------------------------" << endl;
-    cout << name << ":    " << opt.optMode << "   " << setprecision(3) << bhp << endl;
+    cout << name << ":    " << (USI)opt.mode << "   " << setprecision(3) << bhp << endl;
     for (USI p = 0; p < numPerf; p++) {
         vector<OCP_DBL> Qitmp(perf[p].qi_lbmol);
         // OCP_DBL         qt = Dnorm1(nc, &Qitmp[0]);
@@ -1249,15 +1249,15 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
         // Well Self
         if (opt.type == WellType::injector) {
             // Injection
-            switch (opt.optMode) {
-            case BHP_MODE:
+            switch (opt.mode) {
+            case WellOptMode::bhp:
                 res.resAbs[wId] = bhp - opt.maxBHP;
                 break;
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 res.resAbs[wId] = opt.maxRate;
                 for (USI i = 0; i < nc; i++) {
                     res.resAbs[wId] += qi_lbmol[i];
@@ -1283,15 +1283,15 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
         }
         else {
             // Production
-            switch (opt.optMode) {
-            case BHP_MODE:
+            switch (opt.mode) {
+            case WellOptMode::bhp:
                 res.resAbs[wId] = bhp - opt.minBHP;
                 break;
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 CalFactor(bk);
                 res.resAbs[wId] = -opt.maxRate;
                 for (USI i = 0; i < nc; i++) {
@@ -1389,12 +1389,12 @@ void Well::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt
         ls.NewOffDiag(n, wId, bmat);
 
         // Well
-        switch (opt.optMode) {
-        case RATE_MODE:
-        case ORATE_MODE:
-        case GRATE_MODE:
-        case WRATE_MODE:
-        case LRATE_MODE:
+        switch (opt.mode) {
+        case WellOptMode::irate:
+        case WellOptMode::orate:
+        case WellOptMode::grate:
+        case WellOptMode::wrate:
+        case WellOptMode::lrate:
             // Well - Well -- add
             fill(bmat.begin(), bmat.end(), 0.0);
             for (USI i = 0; i < nc; i++) {
@@ -1414,7 +1414,7 @@ void Well::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt
             ls.NewOffDiag(wId, n, bmat2);
             break;
 
-        case BHP_MODE:
+        case WellOptMode::bhp:
             // Well - Well -- add
             fill(bmat.begin(), bmat.end(), 0.0);
             for (USI i = 0; i < ncol; i++) {
@@ -1514,12 +1514,12 @@ void Well::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& d
         ls.NewOffDiag(n, wId, bmat);
 
         // Well
-        switch (opt.optMode) {
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+        switch (opt.mode) {
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 // Well - Well -- add
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < nc; i++) {
@@ -1540,7 +1540,7 @@ void Well::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& d
                 ls.NewOffDiag(wId, n, bmat2);
                 break;
 
-            case BHP_MODE:
+            case WellOptMode::bhp:
                 // Well - Well -- add
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < ncol; i++) {
@@ -1597,17 +1597,17 @@ void Well::AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& 
         ls.AddRhs(n, bb);
 
         // Well to Bulk
-        switch (opt.optMode) {
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+        switch (opt.mode) {
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 ls.AddDiag(wId, valw);
                 ls.NewOffDiag(wId, n, -valw);
                 ls.AddRhs(wId, -bw);
                 break;
-            case BHP_MODE:
+            case WellOptMode::bhp:
                 ls.NewOffDiag(wId, n, 0);
                 break;
             default:
@@ -1616,15 +1616,15 @@ void Well::AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& 
     }
 
     // Well Self
-    switch (opt.optMode) {
-        case RATE_MODE:
-        case ORATE_MODE:
-        case GRATE_MODE:
-        case WRATE_MODE:
-        case LRATE_MODE:
+    switch (opt.mode) {
+        case WellOptMode::irate:
+        case WellOptMode::orate:
+        case WellOptMode::grate:
+        case WellOptMode::wrate:
+        case WellOptMode::lrate:
             ls.AddRhs(wId, dt * opt.maxRate);
             break;
-        case BHP_MODE:
+        case WellOptMode::bhp:
             ls.AddDiag(wId, dt);
             ls.AddRhs(wId, dt * opt.maxBHP);
             ls.AssignGuess(wId, opt.maxBHP);
@@ -1677,17 +1677,17 @@ void Well::AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
         ls.AddRhs(n, bb);
 
         // Well to Bulk
-        switch (opt.optMode) {
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+        switch (opt.mode) {
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 ls.AddDiag(wId, -valw);
                 ls.NewOffDiag(wId, n, valw);
                 ls.AddRhs(wId, bw);
                 break;
-            case BHP_MODE:
+            case WellOptMode::bhp:
                 ls.NewOffDiag(wId, n, 0.0);
                 break;
             default:
@@ -1696,15 +1696,15 @@ void Well::AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
     }
 
     // Well Self
-    switch (opt.optMode) {
-        case RATE_MODE:
-        case ORATE_MODE:
-        case GRATE_MODE:
-        case WRATE_MODE:
-        case LRATE_MODE:
+    switch (opt.mode) {
+        case WellOptMode::irate:
+        case WellOptMode::orate:
+        case WellOptMode::grate:
+        case WellOptMode::wrate:
+        case WellOptMode::lrate:
             ls.AddRhs(wId, dt * opt.maxRate);
             break;
-        case BHP_MODE:
+        case WellOptMode::bhp:
             ls.AddDiag(wId, dt);
             ls.AddRhs(wId, dt * opt.minBHP);
             ls.AssignGuess(wId, opt.minBHP);
@@ -1739,15 +1739,15 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 			}
 
 			// Well Self --  Injection
-			switch (opt.optMode) {
-			case BHP_MODE:
+			switch (opt.mode) {
+			case WellOptMode::bhp:
 				res.resAbs[wId] = bhp - opt.maxBHP;
 				break;
-			case RATE_MODE:
-			case ORATE_MODE:
-			case GRATE_MODE:
-			case WRATE_MODE:
-			case LRATE_MODE:
+			case WellOptMode::irate:
+			case WellOptMode::orate:
+			case WellOptMode::grate:
+			case WellOptMode::wrate:
+			case WellOptMode::lrate:
 				res.resAbs[wId] = opt.maxRate;
 				for (USI i = 0; i < nc; i++) {
 					res.resAbs[wId] += qi_lbmol[i];
@@ -1783,15 +1783,15 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 			}
 
 			// Well Self --  Production
-			switch (opt.optMode) {
-			case BHP_MODE:
+			switch (opt.mode) {
+			case WellOptMode::bhp:
 				res.resAbs[wId] = bhp - opt.minBHP;
 				break;
-			case RATE_MODE:
-			case ORATE_MODE:
-			case GRATE_MODE:
-			case WRATE_MODE:
-			case LRATE_MODE:
+			case WellOptMode::irate:
+			case WellOptMode::orate:
+			case WellOptMode::grate:
+			case WellOptMode::wrate:
+			case WellOptMode::lrate:
 				CalFactor(bk);
 				res.resAbs[wId] = -opt.maxRate;
 				for (USI i = 0; i < nc; i++) {
@@ -1939,12 +1939,12 @@ void Well::AssembleMatInjFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& 
         ls.NewOffDiag(n, wId, bmat);
 
         // Well
-        switch (opt.optMode) {
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+        switch (opt.mode) {
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 // Diag
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < nc; i++) {
@@ -1965,7 +1965,7 @@ void Well::AssembleMatInjFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL& 
                 ls.NewOffDiag(wId, n, bmat2);
                 break;
 
-            case BHP_MODE:
+            case WellOptMode::bhp:
                 // Diag
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < ncol; i++) {
@@ -2107,12 +2107,12 @@ void Well::AssembleMatProdFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
         ls.NewOffDiag(n, wId, bmat);
 
         // Well
-        switch (opt.optMode) {
-            case RATE_MODE:
-            case ORATE_MODE:
-            case GRATE_MODE:
-            case WRATE_MODE:
-            case LRATE_MODE:
+        switch (opt.mode) {
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
                 // Diag
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < nc; i++) {
@@ -2134,7 +2134,7 @@ void Well::AssembleMatProdFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
                 ls.NewOffDiag(wId, n, bmat2);
                 break;
 
-            case BHP_MODE:
+            case WellOptMode::bhp:
                 // Diag
                 fill(bmat.begin(), bmat.end(), 0.0);
                 for (USI i = 0; i < ncol; i++) {
@@ -2165,7 +2165,7 @@ void Well::AssembleMatProdFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
 //    // find Open injection well under Rate control
 //    vector<OCP_USI> tarId;
 //    for (auto& w : injId) {
-//        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
+//        if (allWell[w].IsOpen() && allWell[w].opt.mode != WellOptMode::bhp)
 //            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
 //    }
 //
@@ -2214,7 +2214,7 @@ void Well::AssembleMatProdFIM_T(LinearSystem& ls, const Bulk& bk, const OCP_DBL&
 //    // find Open injection well under Rate control
 //    vector<OCP_USI> tarId;
 //    for (auto& w : injId) {
-//        if (allWell[w].IsOpen() && allWell[w].opt.optMode != BHP_MODE)
+//        if (allWell[w].IsOpen() && allWell[w].opt.mode != WellOptMode::bhp)
 //            tarId.push_back(allWell[w].wOId + myBulk.numBulk);
 //    }
 //

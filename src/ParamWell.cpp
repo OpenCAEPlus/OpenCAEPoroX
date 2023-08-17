@@ -17,9 +17,9 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
     if (type == "INJ") {
         fluidType = vbuf[1];
         state     = vbuf[2];
-        optMode   = vbuf[3];
+        mode   = vbuf[3];
         if (vbuf[4] == "DEFAULT") {
-            if (optMode == "BHP")
+            if (mode == "BHP")
                 maxRate = 1E10;
             else {
                 cout << "### ERROR: Inj Rate is missing in WCONINJE!" << endl;
@@ -30,9 +30,9 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
         maxBHP = stod(vbuf[5]);
     } else if (type == "PROD") {
         state   = vbuf[1];
-        optMode = vbuf[2];
+        mode = vbuf[2];
         if (vbuf[3] == "DEFAULT") {
-            if (optMode == "BHP")
+            if (mode == "BHP")
                 maxRate = 1E10;
             else {
                 cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
@@ -274,7 +274,7 @@ void ParamWell::InputWELTARG(ifstream& ifs)
                 }
                 WellOptPair tar = well[w].optParam.back();
                 tar.d           = d;
-                tar.opt.optMode = vbuf[1];
+                tar.opt.mode = vbuf[1];
                 OCP_DBL val     = stod(vbuf[2]);
                 if (vbuf[1] == "BHP") {
                     if (tar.opt.type == "INJ")

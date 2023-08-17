@@ -440,12 +440,12 @@ void AllWells::SetWellVal() const
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].opt.state == WellState::open) {
             if (wells[w].opt.type == WellType::injector) {
-                if (wells[w].opt.optMode == BHP_MODE)
+                if (wells[w].opt.mode == WellOptMode::bhp)
                     wellVal[w] = wells[w].opt.maxBHP;
                 else
                     wellVal[w] = wells[w].opt.maxRate;
             } else {
-                if (wells[w].opt.optMode == BHP_MODE)
+                if (wells[w].opt.mode == WellOptMode::bhp)
                     wellVal[w] = wells[w].opt.minBHP;
                 else
                     wellVal[w] = wells[w].opt.maxRate;

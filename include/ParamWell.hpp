@@ -34,7 +34,7 @@ public:
     string type;      ///< Type of well, injection or production?
     string fluidType; ///< Type of fluid into the injection well. (injection well only)
     string state;     ///< State of well, open or close?
-    string optMode;   ///< Mode of well, Rate or BHP?
+    string mode;   ///< Mode of well, Rate or BHP?
 
     OCP_DBL maxRate; ///< Maximum allowable flow rate into/out the well.
     OCP_DBL maxBHP;  ///< Maximum allowable pressure in the injection well.

@@ -108,14 +108,6 @@ const USI PHASE_DOGW            = 52;  ///< Phase type = dead oil-gas-water
 const USI      HORIZONTAL = 1;         ///< Well type = horizontal
 const USI      VERTICAL   = 2;         ///< Well type = vertical
 
-// Well option params
-const USI RATE_MODE  = 1; ///< Well option = fixed total rate???
-const USI ORATE_MODE = 2; ///< Well option = fixed oil rate
-const USI GRATE_MODE = 3; ///< Well option = fixed gas rate
-const USI WRATE_MODE = 4; ///< Well option = fixed water rate
-const USI LRATE_MODE = 5; ///< Well option = fixed fluid rate???
-const USI BHP_MODE   = 6; ///< Well option = fixed bottom-hole-pressure
-
 // Perforation directions
 const USI X_DIRECTION = 1; ///< x-direction
 const USI Y_DIRECTION = 2; ///< y-direction

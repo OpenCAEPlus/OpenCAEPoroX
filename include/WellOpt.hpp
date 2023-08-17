@@ -37,6 +37,22 @@ enum class WellState
     close
 };
 
+enum class WellOptMode
+{
+    /// injection well rate control
+    irate,
+    /// production well oil rate control
+    orate,
+    /// production well gas rate control
+    grate,
+    /// production well water rate control
+    wrate,
+    /// production well liquid rate control
+    lrate,
+    /// injection/production well bhp control
+    bhp,
+};
+
 /// WellOpt describes the operation mode of a well.
 /// usually it changes over time, specifically, each attributes could be changed
 /// including the well type.
@@ -64,9 +80,10 @@ private:
     string   fluidType;
     /// state of well
     WellState state{ WellState::close };
-    USI optMode; ///< control mode of well: constant pressure, or constant flow rate of
-                 ///< specified fluids.
-    USI initOptMode; ///< Init opt mode during current step
+    /// Well control mode
+    WellOptMode mode;
+    /// Initial control mode
+    WellOptMode initMode;
     /// it gives the upper limit of flow rate of specified fluids if the well is under
     /// the control of constant pressure. it gives the flow rate of specified fluids if
     /// the well is under the control of constant flow rate.

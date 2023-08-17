@@ -37,23 +37,23 @@ WellOpt::WellOpt(const WellOptParam& optParam)
         OCP_ABORT("Wrong state type!");
     }
 
-    if (optParam.optMode == "RATE") {
-        optMode = RATE_MODE;
-    } else if (optParam.optMode == "ORAT") {
-        optMode = ORATE_MODE;
-    } else if (optParam.optMode == "GRAT") {
-        optMode = GRATE_MODE;
-    } else if (optParam.optMode == "WRAT") {
-        optMode = WRATE_MODE;
-    } else if (optParam.optMode == "LRAT") {
-        optMode = LRATE_MODE;
-    } else if (optParam.optMode == "BHP") {
-        optMode = BHP_MODE;
+    if (optParam.mode == "RATE") {
+        mode = WellOptMode::irate;
+    } else if (optParam.mode == "ORAT") {
+        mode = WellOptMode::orate;
+    } else if (optParam.mode == "GRAT") {
+        mode = WellOptMode::grate;
+    } else if (optParam.mode == "WRAT") {
+        mode = WellOptMode::wrate;
+    } else if (optParam.mode == "LRAT") {
+        mode = WellOptMode::lrate;
+    } else if (optParam.mode == "BHP") {
+        mode = WellOptMode::bhp;
     } else {
         OCP_ABORT("Wrong well option mode!");
     }
 
-    initOptMode = optMode;
+    initMode = mode;
     maxRate     = optParam.maxRate;
     maxBHP      = optParam.maxBHP;
     minBHP      = optParam.minBHP;
@@ -64,8 +64,8 @@ OCP_BOOL WellOpt::operator!=(const WellOpt& opt) const
 {
     if (this->type != opt.type) return OCP_TRUE;
     if (this->state != opt.state) return OCP_TRUE;
-    if (this->optMode != opt.optMode) return OCP_TRUE;
-    if (this->initOptMode != opt.initOptMode) return OCP_TRUE;
+    if (this->mode != opt.mode) return OCP_TRUE;
+    if (this->initMode != opt.initMode) return OCP_TRUE;
     if (fabs(this->maxRate - opt.maxRate) > TINY) return OCP_TRUE;
     if (fabs(this->maxBHP - opt.maxBHP) > TINY) return OCP_TRUE;
     if (fabs(this->minBHP - opt.minBHP) > TINY) return OCP_TRUE;
