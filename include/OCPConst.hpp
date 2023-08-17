@@ -103,11 +103,6 @@ const USI PHASE_DOGW            = 52;  ///< Phase type = dead oil-gas-water
 const USI      HORIZONTAL = 1;         ///< Well type = horizontal
 const USI      VERTICAL   = 2;         ///< Well type = vertical
 
-// Perforation directions
-const USI X_DIRECTION = 1; ///< x-direction
-const USI Y_DIRECTION = 2; ///< y-direction
-const USI Z_DIRECTION = 3; ///< z-direction
-
 // Parallel Module
 const USI MASTER_PROCESS = 0; ///< master process
 

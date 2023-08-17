@@ -37,11 +37,11 @@ void Well::InputPerfo(const WellParam& well, const Domain& domain, const USI& wI
         perf[pp].kh         = well.kh[p];
         perf[pp].skinFactor = well.skinFactor[p];
         if (well.direction[p] == "X" || well.direction[p] == "x") {
-            perf[pp].direction = X_DIRECTION;
+            perf[pp].direction = PerfDirection::x;
         } else if (well.direction[p] == "Y" || well.direction[p] == "y") {
-            perf[pp].direction = Y_DIRECTION;
+            perf[pp].direction = PerfDirection::y;
         } else if (well.direction[p] == "Z" || well.direction[p] == "z") {
-            perf[pp].direction = Z_DIRECTION;
+            perf[pp].direction = PerfDirection::z;
         } else {
             OCP_ABORT("Wrong direction of perforations!");
         }
@@ -223,7 +223,7 @@ void Well::CalWI_Peaceman(const Bulk& myBulk)
             const OCP_DBL dz  = myBulk.dz[Idb] * myBulk.ntg[Idb];
             OCP_DBL       ro  = 0;
             switch (perf[p].direction) {
-                case X_DIRECTION:
+                case PerfDirection::x:
                     {
                         const OCP_DBL kykz  = myBulk.rockKy[Idb] * myBulk.rockKz[Idb];
                         const OCP_DBL ky_kz = myBulk.rockKy[Idb] / myBulk.rockKz[Idb];
@@ -238,7 +238,7 @@ void Well::CalWI_Peaceman(const Bulk& myBulk)
                         }
                         break;
                     }
-                case Y_DIRECTION:
+                case PerfDirection::y:
                     {
                         const OCP_DBL kzkx  = myBulk.rockKz[Idb] * myBulk.rockKx[Idb];
                         const OCP_DBL kz_kx = myBulk.rockKz[Idb] / myBulk.rockKx[Idb];
@@ -253,7 +253,7 @@ void Well::CalWI_Peaceman(const Bulk& myBulk)
                         }
                         break;
                     }
-                case Z_DIRECTION:
+                case PerfDirection::z:
                     {
                         const OCP_DBL kxky  = myBulk.rockKx[Idb] * myBulk.rockKy[Idb];
                         const OCP_DBL kx_ky = myBulk.rockKx[Idb] / myBulk.rockKy[Idb];

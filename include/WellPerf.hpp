@@ -21,6 +21,18 @@
 
 using namespace std;
 
+
+enum class PerfDirection
+{
+    /// x-direction
+    x,
+    /// y-direction
+    y,
+    /// z-direction
+    z
+};
+
+
 /// Perforation describe the connections between wells and bulks.
 class Perforation
 {
@@ -48,10 +60,10 @@ private:
 
     OCP_DBL WI;     ///< Connection transmissibility factor, it can be provided directly
                     ///< from the users.
-    OCP_DBL radius; ///< Well radius.
-    OCP_DBL kh;     ///< Effective permeability times net thickness of the connection.
-    OCP_DBL skinFactor; ///< Skin factor.
-    USI     direction;  ///< Direction of the well penetrating the grid block
+    OCP_DBL       radius; ///< Well radius.
+    OCP_DBL       kh;     ///< Effective permeability times net thickness of the connection.
+    OCP_DBL       skinFactor; ///< Skin factor.
+    PerfDirection direction;  ///< Direction of the well penetrating the grid block
 
     /// Multiplier factor for transmissibility of current perforation.
     /// It equals to 0 (close) or 1 (open) now.
