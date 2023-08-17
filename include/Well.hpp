@@ -136,8 +136,6 @@ public:
     void CalProddG02(const Bulk& myBulk);
     /// Calculate the production weight
     void CalFactor(const Bulk& myBulk) const;
-    /// Calculate the contribution of production well to reinjection defaulted
-    void CalReInjFluid(const Bulk& myBulk, vector<OCP_DBL>& myZi);
     /// Correct BHP if opt mode is BHPMode
     void CorrectBHP();
     /// Check if well operation mode would be changed.
@@ -190,7 +188,7 @@ protected:
 
     // PROD/INJ Rate
     vector<OCP_DBL> qi_lbmol; ///< flow rate of moles of component inflowing/outflowing
-    /// moles number -> volume
+    /// components mole number -> target phase volume
     mutable vector<OCP_DBL> factor;
 
 

@@ -105,7 +105,6 @@ private:
     vector<OCP_DBL> injZi;
     PhaseType       injPhase; ///< label the phase of injecting fluid if possible
     vector<OCP_DBL> prodPhaseWeight;
-    OCP_DBL factorINJ; ///< unit factor: Mscf -> lbmol for comps, Mscf -> Mscf in blackoil
     OCP_DBL injTemp; ///< temperature of inj fluid F
                      // for Reinjection
 };
