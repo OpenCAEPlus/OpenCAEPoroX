@@ -23,9 +23,9 @@ WellOpt::WellOpt(const WellOptParam& optParam)
     }
 
     if (type == WellType::injector) {
-        fluidType = optParam.fluidType;
-        if (fluidType == "WAT" || fluidType == "WATER") {
-            fluidType = "WAT";
+        injFluidName = optParam.fluidType;
+        if (injFluidName == "WAT" || injFluidName == "WATER") {
+            injFluidName = "WAT";
         }
     }
 

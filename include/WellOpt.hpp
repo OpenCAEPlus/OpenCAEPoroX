@@ -77,7 +77,7 @@ private:
     WellType type;
     /// indicate which type of fluids will be injected, water, gas, or other solvent.
     /// it's decided by users and only useful for injection well.
-    string   fluidType;
+    string   injFluidName;
     /// state of well
     WellState state{ WellState::close };
     /// Well control mode
@@ -103,10 +103,12 @@ private:
 
     /// for injection well, it describes the components of injected fluids.
     vector<OCP_DBL> injZi;
-    PhaseType       injPhase; ///< label the phase of injecting fluid if possible
+    /// type of injecting fluid
+    PhaseType       injPhase;
+    /// production weight of phase (1.0 or 0.0)
     vector<OCP_DBL> prodPhaseWeight;
-    OCP_DBL injTemp; ///< temperature of inj fluid F
-                     // for Reinjection
+    /// temperature of injected fluid (unit : F)
+    OCP_DBL injTemp;
 };
 
 /// Describe the molar fraction of components of fluid injected to reservoir from INJ.

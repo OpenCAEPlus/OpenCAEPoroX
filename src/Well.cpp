@@ -141,7 +141,7 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
     const auto g = mixture->GasIndex();
     const auto w = mixture->WatIndex();
  
-    if (opt.fluidType == "WAT") {     
+    if (opt.injFluidName == "WAT") {     
         if (w < 0) OCP_ABORT("WRONG INJECTED FLUID -- NO WATER!");
         opt.injZi.assign(nc, 0);
         opt.injPhase     = PhaseType::wat;
@@ -151,16 +151,16 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
     {
         opt.injPhase  = PhaseType::gas;
         for (auto& s : sols) {
-            if (opt.fluidType == s.name) {
+            if (opt.injFluidName == s.name) {
                 opt.injZi = s.data;
                 opt.injZi.resize(nc);
             }
         }
         if (opt.injZi.size() != nc) {
-            OCP_ABORT("Inavailable INJECTED FLUID -- " + opt.fluidType + "!");
+            OCP_ABORT("Inavailable INJECTED FLUID -- " + opt.injFluidName + "!");
         }
     }
-    else if (opt.fluidType == "GAS") {
+    else if (opt.injFluidName == "GAS") {
         if (g < 0) OCP_ABORT("WRONG INJECTED FLUID -- NO GAS!");
         opt.injZi.assign(nc, 0);
         opt.injPhase  = PhaseType::gas;
@@ -328,8 +328,8 @@ void Well::CalFlux(const Bulk& myBulk, const OCP_BOOL ReCalXi)
 
         for (USI p = 0; p < numPerf; p++) {
             perf[p].P  = bhp + dG[p];
-            OCP_USI k  = perf[p].location;
-            OCP_DBL dP = myBulk.P[k] - perf[p].P;
+            const OCP_USI k  = perf[p].location;
+            const OCP_DBL dP = myBulk.P[k] - perf[p].P;
 
             perf[p].qt_ft3 = perf[p].transINJ * dP;
 
@@ -346,8 +346,8 @@ void Well::CalFlux(const Bulk& myBulk, const OCP_BOOL ReCalXi)
     } else {
 
         for (USI p = 0; p < numPerf; p++) {
-            perf[p].P      = bhp + dG[p];
-            OCP_USI k      = perf[p].location;
+            perf[p].P       = bhp + dG[p];
+            const OCP_USI k = perf[p].location;
             perf[p].qt_ft3 = 0;
             fill(perf[p].qi_lbmol.begin(), perf[p].qi_lbmol.end(), 0.0);
             fill(perf[p].qj_ft3.begin(), perf[p].qj_ft3.end(), 0.0);
@@ -1208,9 +1208,8 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
             }
         }
         // Well Self
-        if (opt.type == WellType::injector) {
-            // Injection
-            switch (opt.mode) {
+        switch (opt.mode)
+        {
             case WellOptMode::bhp:
                 res.resAbs[wId] = bhp - opt.tarBHP;
                 break;
@@ -1220,7 +1219,8 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
             case WellOptMode::wrate:
             case WellOptMode::lrate:
                 CalFactor(bk);
-                res.resAbs[wId] = opt.tarRate;
+                if (opt.type == WellType::injector)  res.resAbs[wId] = opt.tarRate;
+                else                                 res.resAbs[wId] = -opt.tarRate;
                 for (USI i = 0; i < nc; i++) {
                     res.resAbs[wId] += qi_lbmol[i] * factor[i];
                 }
@@ -1231,32 +1231,6 @@ void Well::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& d
             default:
                 OCP_ABORT("Wrong well opt mode!");
                 break;
-            }
-        }
-        else {
-            // Production
-            switch (opt.mode) {
-            case WellOptMode::bhp:
-                res.resAbs[wId] = bhp - opt.tarBHP;
-                break;
-            case WellOptMode::irate:
-            case WellOptMode::orate:
-            case WellOptMode::grate:
-            case WellOptMode::wrate:
-            case WellOptMode::lrate:
-                CalFactor(bk);
-                res.resAbs[wId] = -opt.tarRate;
-                for (USI i = 0; i < nc; i++) {
-                    res.resAbs[wId] += qi_lbmol[i] * factor[i];
-                }
-                res.maxWellRelRes_mol =
-                    max(res.maxWellRelRes_mol,
-                        fabs(res.resAbs[wId] / opt.tarRate));
-                break;
-            default:
-                OCP_ABORT("Wrong well opt mode!");
-                break;
-            }
         }
         wId += len;
     }
@@ -1683,74 +1657,48 @@ void Well::CalResFIM_T(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL&
 			}
 		}
 
-		if (opt.type == WellType::injector) {
-			// Energy Conservation -- Well to Bulk
-			const OCP_DBL Hw =
-				bk.flashCal[0]->CalInjWellEnthalpy(opt.injTemp, &opt.injZi[0]);
+        // Energy Conservation
+		if (opt.type == WellType::injector) {	
+			const OCP_DBL Hw = bk.flashCal[0]->CalInjWellEnthalpy(opt.injTemp, &opt.injZi[0]);
 			for (USI p = 0; p < numPerf; p++) {
 				const OCP_USI k = perf[p].location;
 				res.resAbs[k * len + 1 + nc] += perf[p].qt_ft3 * perf[p].xi * Hw * dt;
 			}
-
-			// Well Self --  Injection
-			switch (opt.mode) {
-			case WellOptMode::bhp:
-				res.resAbs[wId] = bhp - opt.tarBHP;
-				break;
-			case WellOptMode::irate:
-			case WellOptMode::orate:
-			case WellOptMode::grate:
-			case WellOptMode::wrate:
-			case WellOptMode::lrate:
-                CalFactor(bk);
-				res.resAbs[wId] = opt.tarRate;
-				for (USI i = 0; i < nc; i++) {
-					res.resAbs[wId] += qi_lbmol[i] * factor[i];
-				}
-				res.maxWellRelRes_mol =
-					max(res.maxWellRelRes_mol,
-						fabs(res.resAbs[wId] / opt.tarRate));
-				break;
-			default:
-				OCP_ABORT("Wrong well opt mode!");
-				break;
-			}
 		}
 		else {
-			// Energy Conservation -- Bulk to Well
 			for (USI p = 0; p < numPerf; p++) {
 				const OCP_USI k = perf[p].location;
-				// Mass Conservation
 				for (USI j = 0; j < np; j++) {
 					res.resAbs[k * len + 1 + nc] += perf[p].qj_ft3[j] *
 						bk.xi[k * np + j] * bk.H[k * np + j] * dt;
 				}
 			}
-
-			// Well Self --  Production
-			switch (opt.mode) {
-			case WellOptMode::bhp:
-				res.resAbs[wId] = bhp - opt.tarBHP;
-				break;
-			case WellOptMode::irate:
-			case WellOptMode::orate:
-			case WellOptMode::grate:
-			case WellOptMode::wrate:
-			case WellOptMode::lrate:
-				CalFactor(bk);
-				res.resAbs[wId] = -opt.tarRate;
-				for (USI i = 0; i < nc; i++) {
-					res.resAbs[wId] += qi_lbmol[i] * factor[i];
-				}
-				res.maxWellRelRes_mol =
-					max(res.maxWellRelRes_mol,
-						fabs(res.resAbs[wId] / opt.tarRate));
-				break;
-			default:
-				OCP_ABORT("Wrong well opt mode!");
-				break;
-			}
 		}
+
+        switch (opt.mode) 
+        {
+            case WellOptMode::bhp:
+                res.resAbs[wId] = bhp - opt.tarBHP;
+                break;
+            case WellOptMode::irate:
+            case WellOptMode::orate:
+            case WellOptMode::grate:
+            case WellOptMode::wrate:
+            case WellOptMode::lrate:
+                CalFactor(bk);
+                if (opt.type == WellType::injector)  res.resAbs[wId] = opt.tarRate;
+                else                                 res.resAbs[wId] = -opt.tarRate;
+                for (USI i = 0; i < nc; i++) {
+                    res.resAbs[wId] += qi_lbmol[i] * factor[i];
+                }
+                res.maxWellRelRes_mol =
+                    max(res.maxWellRelRes_mol,
+                        fabs(res.resAbs[wId] / opt.tarRate));
+                break;
+            default:
+                OCP_ABORT("Wrong well opt mode!");
+                break;
+        }
 		wId += len;
 	}
 }
