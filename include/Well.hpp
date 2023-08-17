@@ -62,8 +62,11 @@ public:
 
 protected:
     void SetupUnit();
+    /// reservoir unit -> surface unit
+    OCP_DBL UnitConvertR2S(const PhaseType& pt, const OCP_DBL& val) const;
+    OCP_DBL UnitConvertR2S(const USI& j, const OCP_DBL& val) const;
 protected:
-    /// Unit Convert (m3,stb,Mscf -> m3,ft3)
+    /// Unit Convert (m3,ft3 -> m3,stb,Mscf)
     vector<OCP_DBL> unitConvert;
 
 protected:

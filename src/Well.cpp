@@ -95,11 +95,27 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
 void Well::SetupUnit()
 {
-    if (mixture->OilIndex() >= 0) unitConvert.push_back(CONV1);
-    if (mixture->GasIndex() >= 0) unitConvert.push_back(1000);
-    if (mixture->WatIndex() >= 0) unitConvert.push_back(CONV1);
+    if (mixture->OilIndex() >= 0) unitConvert.push_back(1.0 / CONV1);
+    if (mixture->GasIndex() >= 0) unitConvert.push_back(1.0 / 1000);
+    if (mixture->WatIndex() >= 0) unitConvert.push_back(1.0 / CONV1);
 
     OCP_ASSERT(unitConvert.size() == np, "WRONG unitConvert");
+}
+
+
+OCP_DBL Well::UnitConvertR2S(const PhaseType& pt, const OCP_DBL& val) const
+{
+    if (opt.injPhase == PhaseType::oil)  return (val * unitConvert[mixture->OilIndex()]);
+    if (opt.injPhase == PhaseType::gas)  return (val * unitConvert[mixture->GasIndex()]);
+    if (opt.injPhase == PhaseType::wat)  return (val * unitConvert[mixture->WatIndex()]);
+    OCP_ABORT("WRONG Phase Type!");
+}
+
+
+OCP_DBL Well::UnitConvertR2S(const USI& j, const OCP_DBL& val) const
+{
+    OCP_ASSERT(j < np, "WRONG PHASE INDEX!");
+    return val * unitConvert[j];
 }
 
 
@@ -380,11 +396,7 @@ OCP_DBL Well::CalInjRateMaxBHP(const Bulk& myBulk)
         qj += perf[p].transINJ * xi * dP;
     }
 
-    OCP_DBL fac = mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase);
-    if (opt.injPhase == PhaseType::oil)  fac /= unitConvert[mixture->OilIndex()];
-    if (opt.injPhase == PhaseType::gas)  fac /= unitConvert[mixture->GasIndex()];
-    if (opt.injPhase == PhaseType::wat)  fac /= unitConvert[mixture->WatIndex()];
-
+    const OCP_DBL fac = UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase));
     return qj * fac;
 }
 
@@ -421,7 +433,7 @@ OCP_DBL Well::CalProdRateMinBHP(const Bulk& myBulk)
     qj = 0;
     mixture->CalVStd(Psurf, Tsurf, &tmpQi_lbmol[0]);
     for (USI j = 0; j < np; j++) {
-        qj += mixture->GetVarSet().vj[j] / unitConvert[j] * opt.prodPhaseWeight[j];
+        qj += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
     }
 
     return qj;
@@ -436,15 +448,13 @@ void Well::CalInjQj(const Bulk& myBulk, const OCP_DBL& dt)
     for (USI i = 0; i < nc; i++) {
         qj += qi_lbmol[i];
     }
-    OCP_DBL fac = mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase);
+    const OCP_DBL fac = UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase));
 
-    if (opt.fluidType == "WAT") {
-        // WWIR = -qj / opt.factorINJ;
-        WWIR = -qj * fac / unitConvert[mixture->WatIndex()];
+    if (opt.injPhase == PhaseType::wat) {
+        WWIR = -qj * fac;
         WWIT += WWIR * dt;
     } else {
-        // WGIR = -qj / opt.factorINJ; // Mscf or lbmol -> Mscf
-        WGIR = -qj * fac / unitConvert[mixture->GasIndex()];
+        WGIR = -qj * fac;
         WGIT += WGIR * dt;
     }
 }
@@ -456,9 +466,9 @@ void Well::CalProdQj(const Bulk& myBulk, const OCP_DBL& dt)
     const auto g = mixture->GasIndex();
     const auto w = mixture->WatIndex();
 
-    if (o >= 0) WOPR = mixture->GetVarSet().vj[o] / unitConvert[o];
-    if (g >= 0) WGPR = mixture->GetVarSet().vj[g] / unitConvert[g];
-    if (w >= 0) WWPR = mixture->GetVarSet().vj[w] / unitConvert[w];
+    if (o >= 0) WOPR = UnitConvertR2S(o, mixture->GetVarSet().vj[o]);
+    if (g >= 0) WGPR = UnitConvertR2S(g, mixture->GetVarSet().vj[g]);
+    if (w >= 0) WWPR = UnitConvertR2S(w, mixture->GetVarSet().vj[w]);
 
     WOPT += WOPR * dt;
     WGPT += WGPR * dt;
@@ -950,7 +960,7 @@ void Well::CalFactor(const Bulk& myBulk) const
             vector<OCP_DBL> qitmp(nc, 1.0);
             mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
             for (USI i = 0; i < nc; i++) {
-                factor[i] = mixture->GetVarSet().vj[i] / unitConvert[i] * opt.prodPhaseWeight[i];
+                factor[i] =  UnitConvertR2S(i, mixture->GetVarSet().vj[i]) * opt.prodPhaseWeight[i];
             }
         }
         else {
@@ -985,7 +995,7 @@ void Well::CalFactor(const Bulk& myBulk) const
             OCP_DBL qv = 0;
             mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
             for (USI j = 0; j < np; j++) {
-                qv += mixture->GetVarSet().vj[j] / unitConvert[j] * opt.prodPhaseWeight[j];
+                qv += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
             }
             fill(factor.begin(), factor.end(), qv / qt);
             if (factor[0] < 1E-12) {
@@ -994,11 +1004,7 @@ void Well::CalFactor(const Bulk& myBulk) const
         }
     }
     else if(opt.type == WellType::injector) {
-        OCP_DBL fac = mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase);
-        if (opt.injPhase == PhaseType::oil)  fac /= unitConvert[mixture->OilIndex()];
-        if (opt.injPhase == PhaseType::gas)  fac /= unitConvert[mixture->GasIndex()];
-        if (opt.injPhase == PhaseType::wat)  fac /= unitConvert[mixture->WatIndex()];
-        fill(factor.begin(), factor.end(), fac);
+        fill(factor.begin(), factor.end(), UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase)));
     }
     else {
         OCP_ABORT("WRONG Well Type!");
