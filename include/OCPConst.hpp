@@ -23,6 +23,7 @@
 typedef unsigned int       USI;      ///< Generic unsigned integer
 typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
 typedef unsigned int       OCP_USI;  ///< Long unsigned integer
+typedef int                INT;      ///< Generic signed integer
 typedef int                OCP_INT;  ///< Long integer
 typedef double             OCP_DBL;  ///< Double precision
 typedef float              OCP_SIN;  ///< Single precision

@@ -184,7 +184,6 @@ protected:
     OCP_USI numBulkInterior; ///< Number of bulks inside
     USI     numPhase; ///< Number of phase.
     USI     numCom;   ///< Number of component.
-    USI     numComH;  ///< Number of HydroCarbon
 
     /////////////////////////////////////////////////////////////////////
     // Initial Properties
@@ -215,12 +214,10 @@ public:
 
 protected:
     USI              NTPVT;    ///< num of PVT regions
-    USI              PVTmodeB; ///< Identify PVT mode in black-oil model.
     vector<USI>      PVTNUM;   ///< Identify PVT region in black-oil model: numBulk.
     vector<MixtureUnit*> flashCal; ///< Flash calculation class.
 
     USI               NTSFUN;  ///< num of SAT regions
-    USI               SATmode; ///< Identify SAT mode.
     vector<USI>       SATNUM;  ///< Identify SAT region: numBulk.
     vector<FlowUnit*> flow;    ///< Vector for capillary pressure, relative perm.
     vector<vector<OCP_DBL>>
@@ -243,14 +240,9 @@ public:
     OCP_BOOL IfUseEoS() const { return ifUseEoS; };
 
 protected:
-    OCP_BOOL ifBlackOil{OCP_FALSE}; ///< If OCP_TRUE, black-oil model will be used.
-    OCP_BOOL ifComps{OCP_FALSE};    ///< If OCP_TRUE, compositional model will be used.
     OCP_BOOL ifThermal{OCP_FALSE};  ///< Id OCP_TRUE, ifThermal model will be used.
     OCP_BOOL ifUseEoS{OCP_FALSE};   ///< If OCP_TRUE, then EoS model is used.
-    OCP_BOOL oil{OCP_FALSE};        ///< If OCP_TRUE, oil phase could exist.
-    OCP_BOOL gas{OCP_FALSE};        ///< If OCP_TRUE, gas phase could exist.
-    OCP_BOOL water{OCP_FALSE};      ///< If OCP_TRUE, water phase could exist.
-    OCP_BOOL disGas{OCP_FALSE}; ///< If OCP_TRUE, dissolve gas in live oil could exist.
+    OCPMixtureType mixType;
 
     /////////////////////////////////////////////////////////////////////
     // Basic Grid and Basic Rock Information
@@ -313,23 +305,24 @@ public:
     /// Return oil saturation of the n-th bulk.
     OCP_DBL GetSOIL(const OCP_USI& n) const
     {
-        return S[n * numPhase + phase2Index[OIL]];
+        return S[n * numPhase + oIndex];
     }
     /// Return gas saturation of the n-th bulk.
     OCP_DBL GetSGAS(const OCP_USI& n) const
     {
-        return S[n * numPhase + phase2Index[GAS]];
+        return S[n * numPhase + gIndex];
     }
     /// Return water saturation of the n-th bulk.
     OCP_DBL GetSWAT(const OCP_USI& n) const
     {
-        return S[n * numPhase + phase2Index[WATER]];
+        return S[n * numPhase + wIndex];
     }
 
 protected:
+
     /// Index of oil, gas, water
-    vector<USI> phase2Index;     ///< Location of phase according to its name: numPhase.
-                                 // Note: For example, `Oil' is at the i-th location.
+    INT     oIndex, gIndex, wIndex;
+
     vector<USI>      phaseNum;   ///< Num of hydrocarbon phase in each bulk
     vector<OCP_DBL>  Nt;         ///< Total moles of components in bulks: numBulk.
     vector<OCP_DBL>  Ni;         ///< Moles of component: numCom*numBulk.
@@ -499,11 +492,7 @@ protected:
     // Error
     /////////////////////////////////////////////////////////////////////
 
-public:
-    void AllocateError();
-
 protected:
-    vector<OCP_DBL> ePEC; ///< error for fugacity balance equations, EoS only now
     mutable OCPRes  res;  ///< Residual for all equations
 
 protected:

@@ -1301,11 +1301,11 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     if (!useVTK)         return;
     if (bgp.bgpnum == 0) return;
 
-    const OCP_USI nb = rs.bulk.numBulkInterior;
-    const USI np     = rs.bulk.numPhase;
-    const USI OIndex = rs.bulk.phase2Index[OIL];
-    const USI GIndex = rs.bulk.phase2Index[GAS];
-    const USI WIndex = rs.bulk.phase2Index[WATER];
+    const auto nb     = rs.bulk.numBulkInterior;
+    const auto np     = rs.bulk.numPhase;
+    const auto OIndex = rs.bulk.oIndex;
+    const auto GIndex = rs.bulk.gIndex;
+    const auto WIndex = rs.bulk.wIndex;
 
     ofstream outF(myFile, ios::app | ios::binary);
     vector<OCP_DBL> tmpV(nb);

@@ -32,13 +32,18 @@ protected:
 
 class PeacemanWellIsoT : public PeacemanWell
 {
+public:
+
+protected:
 
 };
 
 
 class PeacemanWellT : public PeacemanWell
 {
+public:
 
+protected:
 };
 
 #endif /* end if __WELLPEACEMAN_HEADER__ */

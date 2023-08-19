@@ -1345,11 +1345,10 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 					OCP_USI bId = 0;
 					for (USI j = 0; j < 2; j++) {
 						bId = n * np * nc + j * nc;
-						for (USI i = 0; i < bk.numComH; i++) {
+						for (USI i = 0; i < bk.numCom; i++) {
 							bk.xij[bId + i] += chopmin * dtmp[js];
 							js++;
 						}
-						js++;
 					}
 				}
 			}
@@ -2207,11 +2206,10 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
                     OCP_USI bId = 0;
                     for (USI j = 0; j < 2; j++) {
                         bId = n * np * nc + j * nc;
-                        for (USI i = 0; i < bk.numComH; i++) {
+                        for (USI i = 0; i < bk.numCom; i++) {
                             bk.xij[bId + i] += chopmin * dtmp[js];
                             js++;
                         }
-                        js++;
                     }
                 }
             }

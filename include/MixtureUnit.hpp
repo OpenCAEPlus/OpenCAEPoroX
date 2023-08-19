@@ -94,6 +94,7 @@ public:
     virtual void OutMixtureIters() const = 0;
 
 public:
+    const auto GetVs() const { return vs; }
     const auto& GetNt() const { return vs->Nt; }
     const auto& GetNi(const USI& i) const { return vs->Ni[i]; }
     const auto& GetVf() const { return vs->Vf; }

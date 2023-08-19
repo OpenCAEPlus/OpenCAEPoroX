@@ -101,14 +101,7 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
     OCP_FUNCNAME;
 
     // Common input
-    ifBlackOil = rs_param.blackOil;
-    ifComps    = rs_param.comps;
     ifThermal  = rs_param.thermal;
-
-    if (ifThermal) {
-        ifBlackOil = OCP_FALSE;
-        ifComps    = OCP_FALSE;
-    }
 
     NTPVT  = rs_param.NTPVT;
     NTSFUN = rs_param.NTSFUN;
@@ -116,15 +109,17 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
 
     if (rs_param.PBVD_T.data.size() > 0) EQUIL.PBVD.Setup(rs_param.PBVD_T.data[0]);
 
-    if (ifBlackOil) {
-        // Isothermal blackoil model
-        InputParamBLKOIL(rs_param, opts);
-    } else if (ifComps) {
-        // Isothermal compositional model
-        InputParamCOMPS(rs_param, opts);
-    } else if (ifThermal) {
+    if (rs_param.thermal) {
         // ifThermal model
         InputParamTHERMAL(rs_param, opts);
+    }
+    else if (rs_param.blackOil) {
+        // Isothermal blackoil model
+        InputParamBLKOIL(rs_param, opts);
+    } 
+    else if (rs_param.comps) {
+        // Isothermal compositional model
+        InputParamCOMPS(rs_param, opts);
     }
 
 
@@ -133,95 +128,40 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
 
 void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
-    oil    = rs_param.oil;
-    gas    = rs_param.gas;
-    water  = rs_param.water;
-    disGas = rs_param.disGas;
 
-    EQUIL.Dref = rs_param.EQUIL[0];
-    EQUIL.Pref = rs_param.EQUIL[1];
-
-    if (water && !oil && !gas) {
+    if (rs_param.water && !rs_param.oil && !rs_param.gas) {
         // water
-        numPhase = 1;
-        numCom   = 1;
-        SATmode  = PHASE_W;
-        PVTmodeB = PHASE_W;
-    } else if (water && oil && !gas) {
-        // water, dead oil
-        numPhase   = 2;
-        numCom     = 2;
-        EQUIL.DOWC = rs_param.EQUIL[2];
-        EQUIL.PcOW = rs_param.EQUIL[3];
-        SATmode    = PHASE_OW;
-        PVTmodeB   = PHASE_OW;
-    } else if (water && oil && gas && !disGas) {
-        // water, dead oil, dry gas
-        numPhase   = 3;
-        numCom     = 3;
-        EQUIL.DOWC = rs_param.EQUIL[2];
-        EQUIL.PcOW = rs_param.EQUIL[3];
-        EQUIL.DGOC = rs_param.EQUIL[4];
-        EQUIL.PcGO = rs_param.EQUIL[5];
-        SATmode    = PHASE_OGW;
-        PVTmodeB   = PHASE_DOGW; // maybe it should be added later
-    } else if (water && oil && gas && disGas) {
-        // water, live oil, dry gas
-        numPhase = 3;
-        numCom   = 3;
+        OCP_ABORT("NOT COMPLETED!");
+    } 
+    else if (rs_param.water && rs_param.oil && !rs_param.gas) {
+        // oil, water
+        for (USI i = 0; i < NTPVT; i++)
+            flashCal.push_back(new MixtureUnitBlkOil_OW(rs_param, i, opts));
 
+        EQUIL.Dref = rs_param.EQUIL[0];
+        EQUIL.Pref = rs_param.EQUIL[1];
+        EQUIL.DOWC = rs_param.EQUIL[2];
+        EQUIL.PcOW = rs_param.EQUIL[3];
+    } 
+    else if (rs_param.water && rs_param.oil && rs_param.gas) {
+        // oil, gas, water
+        for (USI i = 0; i < NTPVT; i++)
+            flashCal.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
+
+        EQUIL.Dref = rs_param.EQUIL[0];
+        EQUIL.Pref = rs_param.EQUIL[1];
         EQUIL.DOWC = rs_param.EQUIL[2];
         EQUIL.PcOW = rs_param.EQUIL[3];
         EQUIL.DGOC = rs_param.EQUIL[4];
         EQUIL.PcGO = rs_param.EQUIL[5];
-        PVTmodeB   = PHASE_ODGW;
-        SATmode = PHASE_OGW;
-    }
-    numComH = numCom - 1;
-
-    // PVT mode
-    switch (PVTmodeB) {
-        case PHASE_W:
-            OCP_ABORT("Wrong Type!");
-            break;
-        case PHASE_OW:
-            for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new MixtureUnitBlkOil_OW(rs_param, i, opts));
-            break;
-        case PHASE_DOGW:
-            OCP_ABORT("Wrong Type!");
-            break;
-        case PHASE_ODGW:
-            for (USI i = 0; i < NTPVT; i++)
-                flashCal.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
-            break;
-        default:
-            OCP_ABORT("Wrong Type!");
-            break;
     }
 
-    phase2Index.resize(3);
-    switch (flashCal[0]->GetMixtureType()) {
-        case OCPMixtureType::SP:
-            phase2Index[WATER] = 0;
-            break;
-        case OCPMixtureType::BO_OW:
-            phase2Index[OIL]   = 0;
-            phase2Index[WATER] = 1;
-            break;
-        case OCPMixtureType::BO_OG:
-            phase2Index[OIL] = 0;
-            phase2Index[GAS] = 1;
-            break;
-        case OCPMixtureType::BO_OGW:
-        case OCPMixtureType::COMP:
-            phase2Index[OIL]   = 0;
-            phase2Index[GAS]   = 1;
-            phase2Index[WATER] = 2;
-            break;
-        default:
-            OCP_ABORT("WRONG Mixture Type!");
-    }
+    numPhase = flashCal[0]->GetVs()->np;
+    numCom   = flashCal[0]->GetVs()->nc;
+    oIndex   = flashCal[0]->GetVs()->o;
+    gIndex   = flashCal[0]->GetVs()->g;
+    wIndex   = flashCal[0]->GetVs()->w;
+
 
     InputRockFunc(rs_param);
 
@@ -231,16 +171,7 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& op
 
 void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
-
-    // Water exists and is excluded in EoS model NOW!
-    oil      = OCP_TRUE;
-    gas      = OCP_TRUE;
-    water    = OCP_TRUE;
-    ifUseEoS = OCP_TRUE;
-
-    numPhase   = rs_param.comsParam.numPhase + 1;
-    numCom     = rs_param.comsParam.numCom + 1;
-    numComH    = numCom - 1;
+ 
     EQUIL.Dref = rs_param.EQUIL[0];
     EQUIL.Pref = rs_param.EQUIL[1];
     EQUIL.DOWC = rs_param.EQUIL[2];
@@ -270,14 +201,13 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opt
     // PVT mode
     for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureUnitComp(rs_param, i, opts));
 
-    // Saturation mode
-    SATmode = PHASE_OGW;
 
-    // phase index
-    phase2Index.resize(3);
-    phase2Index[OIL]   = 0;
-    phase2Index[GAS]   = 1;
-    phase2Index[WATER] = 2;
+    numPhase = flashCal[0]->GetVs()->np;
+    numCom   = flashCal[0]->GetVs()->nc;
+    oIndex   = flashCal[0]->GetVs()->o;
+    gIndex   = flashCal[0]->GetVs()->g;
+    wIndex   = flashCal[0]->GetVs()->w;
+    ifUseEoS = OCP_TRUE;
 
     InputRockFunc(rs_param);
 
@@ -287,10 +217,6 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opt
 
 void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
-    oil   = rs_param.oil;
-    gas   = rs_param.gas;
-    water = rs_param.water;
-
     // Init T
     rsTemp = rs_param.rsTemp;
     for (auto& v : rs_param.TEMPVD_T.data) {
@@ -309,20 +235,17 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& o
         initT_Tab.push_back(OCPTable(temp));
     }
     // ifThermal conductivity
-    if (oil) {
+    if (rs_param.oil) {
         thconp.push_back(rs_param.thcono);
     }
-    if (gas) {
+    if (rs_param.gas) {
         thconp.push_back(rs_param.thcong);
     }
-    if (water) {
+    if (rs_param.water) {
         thconp.push_back(rs_param.thconw);
     }
 
-    // Only Now
-    SATmode    = PHASE_OW;
-    numPhase   = 2;
-    numCom     = 2;
+
     EQUIL.Dref = rs_param.EQUIL[0];
     EQUIL.Pref = rs_param.EQUIL[1];
     EQUIL.DOWC = rs_param.EQUIL[2];
@@ -334,10 +257,12 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& o
     for (USI i = 0; i < NTPVT; i++)
         flashCal.push_back(new MixtureUnitThermal_OW(rs_param, i, opts));
 
-    // phase index
-    phase2Index.resize(3);
-    phase2Index[OIL]   = 0;
-    phase2Index[WATER] = 1;
+    numPhase = flashCal[0]->GetVs()->np;
+    numCom   = flashCal[0]->GetVs()->nc;
+    oIndex   = flashCal[0]->GetVs()->o;
+    gIndex   = flashCal[0]->GetVs()->g;
+    wIndex   = flashCal[0]->GetVs()->w;
+
 
     InputRockFuncT(rs_param);
 
@@ -349,16 +274,19 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     // Setup Saturation function
     satcm.resize(NTSFUN);
-    switch (SATmode) {
-        case PHASE_W:
+    switch (flashCal[0]->GetMixtureType()) 
+    {
+        case OCPMixtureType::SP:
             for (USI i = 0; i < NTSFUN; i++)
                 flow.push_back(new FlowUnit_SP(rs_param, i, opts));
             break;
-        case PHASE_OW:
+        case OCPMixtureType::BO_OW:
+        case OCPMixtureType::THERMALK_OW:
             for (USI i = 0; i < NTSFUN; i++)
                 flow.push_back(new FlowUnit_OW(rs_param, i, opts));
             break;
-        case PHASE_OGW:
+        case OCPMixtureType::BO_OGW:
+        case OCPMixtureType::COMP:
             for (USI i = 0; i < NTSFUN; i++) {
                 flow.push_back(new FlowUnit_OGW(rs_param, i, opts));
             }
@@ -412,7 +340,6 @@ void Bulk::SetupIsoT(const Domain& domain)
     if (ROCKNUM.empty()) {
         ROCKNUM.resize(numBulk, 0);
     }
-    AllocateError();
 }
 
 /// Allocate memory for fluid grid for Thermal model
@@ -752,7 +679,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
 
-        if (gas) {
+        if (gIndex >= 0) {
             // find the gas pressure in Dref by Poref
             Pgref = 0;
             Ptmp  = Poref;
@@ -850,7 +777,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
 
-        if (gas) {
+        if (gIndex >= 0) {
             // find the gas pressure in Dref by Poref
             Pgref = 0;
             Ptmp  = Poref;
@@ -990,7 +917,7 @@ void Bulk::InitPTSw(const USI& tabrow)
     for (OCP_USI n = 0; n < numBulk; n++) {
         if (initZi_flag) {
             initZi_Tab[0].Eval_All0(depth[n], tmpInitZi);
-            for (USI i = 0; i < numComH; i++) {
+            for (USI i = 0; i < numCom; i++) {
                 Ni[n * numCom + i] = tmpInitZi[i];
             }
         }
@@ -1008,7 +935,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         OCP_DBL Pcow = Po - Pw;
         OCP_DBL Sw   = flow[SATNUM[n]]->CalSwByPcow(Pcow);
         OCP_DBL Sg   = 0;
-        if (gas) {
+        if (gIndex >= 0) {
             Sg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
         }
         if (Sw + Sg > 1) {
@@ -1061,7 +988,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Pcgo = Pg - Po;
             avePcow += Pcow;
             tmpSw = flow[SATNUM[n]]->CalSwByPcow(Pcow);
-            if (gas) {
+            if (gIndex >= 0) {
                 tmpSg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
             }
             if (tmpSw + tmpSg > 1) {
@@ -1285,17 +1212,6 @@ void Bulk::CalMaxChange()
         if (eVmax < tmp) {
             eVmax = tmp;
         }
-    }
-}
-
-/////////////////////////////////////////////////////////////////////
-// Error
-/////////////////////////////////////////////////////////////////////
-
-void Bulk::AllocateError()
-{
-    if (ifUseEoS) {
-        ePEC.resize(numBulk);
     }
 }
 

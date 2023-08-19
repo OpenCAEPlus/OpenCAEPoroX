@@ -128,11 +128,11 @@ public:
     /// Return num of open well
     USI GetNumOpenWell() const { return allWells.GetNumOpenWell(); }
     /// If oil exist
-    OCP_BOOL IfOilExist() const { return bulk.oil; }
+    OCP_BOOL IfOilExist() const { return bulk.oIndex >= 0; }
     /// If gas exist
-    OCP_BOOL IfGasExist() const { return bulk.gas; }
+    OCP_BOOL IfGasExist() const { return bulk.gIndex >= 0; }
     /// If water exist
-    OCP_BOOL IfWatExist() const { return bulk.water; }
+    OCP_BOOL IfWatExist() const { return bulk.wIndex >= 0; }
 
 protected:
     // Grid             grid;        ///< Init Grid info.

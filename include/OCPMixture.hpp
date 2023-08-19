@@ -150,9 +150,9 @@ public:
 public:
     // Index of phases
     /// oil, gas, water
-    OCP_INT                 o, g, w;
-    /// liquid 
-    vector<OCP_INT>         l;
+    INT                     o, g, w;
+    /// liquid              
+    vector<INT>             l;
 
     /// num of phase, components
     USI                     np, nc;
