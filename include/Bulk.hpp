@@ -416,29 +416,6 @@ protected:
     vector<OCP_DBL> lktS;     ///< last ktS
 
     /////////////////////////////////////////////////////////////////////
-    // Newton Iteration Information
-    /////////////////////////////////////////////////////////////////////
-
-public:
-    /// Calculate some auxiliary variable, for example, dSmax
-    OCP_DBL CalNRdSmax(OCP_USI& index);
-    /// Return NRdPmax.
-    OCP_DBL GetNRdPmax() const { return NRdPmax; };
-    /// Return NRdNmax.
-    OCP_DBL GetNRdNmax() const { return NRdNmax; };
-
-protected:
-    vector<OCP_DBL> dSNR;  ///< saturation change between NR steps
-    vector<OCP_DBL> dNNR;  ///< Ni change between NR steps
-    vector<OCP_DBL> dPNR;  ///< P  change between NR steps
-    vector<OCP_DBL> dTNR;  ///< T  change between NR steps
-
-    OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
-    OCP_DBL NRdTmax;         ///< Max temperature difference in an NR step
-    OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
-    OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
-
-    /////////////////////////////////////////////////////////////////////
     // Important Indicator Variable and Check
     /////////////////////////////////////////////////////////////////////
 

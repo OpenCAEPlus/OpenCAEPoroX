@@ -24,7 +24,7 @@ public:
     /// Setup Solver
     void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Initialize the reservoir.
-    void InitReservoir(Reservoir& rs) const;
+    void InitReservoir(Reservoir& rs);
     /// Start simulation.
     void RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output);
 

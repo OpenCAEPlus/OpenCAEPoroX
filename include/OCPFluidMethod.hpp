@@ -91,13 +91,13 @@ public:
     /// Setup FIM
     void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
     /// Init
-    void InitReservoir(Reservoir& rs) const;
+    void InitReservoir(Reservoir& rs);
     /// Prepare for Assembling matrix.
     void Prepare(Reservoir& rs, const OCP_DBL& dt);
     /// Assemble Matrix
     void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Solve the linear system.
-    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl) const;
+    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluids.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish a Newton-Raphson iteration.
@@ -112,7 +112,7 @@ protected:
     void
     AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     /// Pass value needed for FIM from flash to bulk
-    void PassFlashValue(Bulk& bk, const OCP_USI& n) const;
+    void PassFlashValue(Bulk& bk, const OCP_USI& n);
     /// Calculate relative permeability and capillary pressure needed for FIM
     void CalKrPc(Bulk& bk) const;
     /// Calculate residual
@@ -127,7 +127,7 @@ protected:
 
 private:
     /// Perform Flash with Sj and calculate values needed for FIM
-    void InitFlash(Bulk& bk) const;
+    void InitFlash(Bulk& bk);
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Assemble linear system for bulks
@@ -135,9 +135,25 @@ private:
     AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
+
 
 protected:
+
+
+    OCP_DBL CalNRdSmax()
+    {
+        NRdSmax = 0;
+        const OCP_USI len = dSNR.size();
+        for (USI n = 0; n < len; n++) {
+            if (fabs(NRdSmax) < fabs(dSNR[n])) {
+                NRdSmax = dSNR[n];
+            }
+        }
+        return NRdSmax;
+    }
+
+
     /// saturation change between NR steps
     vector<OCP_DBL> dSNR;
     /// Ni change between NR steps
@@ -198,7 +214,7 @@ protected:
     AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for AIMc.

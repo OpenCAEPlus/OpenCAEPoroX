@@ -22,7 +22,7 @@ public:
     /// Setup the fluid solver.
     void SetupMethod(Reservoir& rs, const OCPControl& ctrl);
     /// Initialize the Reservoir and prepare variables for some method.
-    void InitReservoir(Reservoir& rs) const;
+    void InitReservoir(Reservoir& rs);
     /// Prepare for assembling Mat.
     void Prepare(Reservoir& rs, OCPControl& ctrl);
     /// Assemble Mat.

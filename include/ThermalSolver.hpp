@@ -20,7 +20,7 @@ class ThermalSolver
 {
 public:
     void SetupMethod(Reservoir& rs, const OCPControl& ctrl);
-    void InitReservoir(Reservoir& rs) const;
+    void InitReservoir(Reservoir& rs);
     void Prepare(Reservoir& rs, const OCPControl& ctrl);
     void AssembleMat(const Reservoir& rs, OCPControl& ctrl);
     /// Solve the linear system in single problem.

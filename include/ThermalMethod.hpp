@@ -23,13 +23,13 @@ class T_FIM
 {
 public:
     void     Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
-    void     InitReservoir(Reservoir& rs) const;
+    void     InitReservoir(Reservoir& rs);
     void     Prepare(Reservoir& rs, const OCPControl& ctrl);
     void     AssembleMat(LinearSystem&    ls,
                          const Reservoir& rs,
                          const OCP_DBL&   t,
-                         const OCP_DBL&   dt) const;
-    void     SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl) const;
+                         const OCP_DBL&   dt);
+    void     SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     void     FinishStep(Reservoir& rs, OCPControl& ctrl);
@@ -40,9 +40,9 @@ protected:
     AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     void InitRock(Bulk& bk) const;
     void CalRock(Bulk& bk) const;
-    void InitFlash(Bulk& bk) const;
-    void CalFlash(Bulk& bk) const;
-    void PassFlashValue(Bulk& bk, const OCP_USI& n) const;
+    void InitFlash(Bulk& bk);
+    void CalFlash(Bulk& bk);
+    void PassFlashValue(Bulk& bk, const OCP_USI& n);
     void CalKrPc(Bulk& bk) const;
     void CalThermalConduct(BulkConn& conn, Bulk& bk) const;
     void CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const;
@@ -58,10 +58,23 @@ protected:
     void
     AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
+
+    OCP_DBL CalNRdSmax()
+    {
+        NRdSmax = 0;
+        const OCP_USI len = dSNR.size();
+        for (USI n = 0; n < len; n++) {
+            if (fabs(NRdSmax) < fabs(dSNR[n])) {
+                NRdSmax = dSNR[n];
+            }
+        }
+        return NRdSmax;
+    }
+
     vector<OCP_DBL> dSNR;    ///< saturation change between NR steps
     vector<OCP_DBL> dNNR;    ///< Ni change between NR steps
     vector<OCP_DBL> dPNR;    ///< P  change between NR steps

@@ -17,7 +17,7 @@ void T_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateLinearSystem(ls, rs, ctrl);
 }
 
-void T_FIM::InitReservoir(Reservoir& rs) const
+void T_FIM::InitReservoir(Reservoir& rs)
 {
     rs.bulk.InitPTSw(50);
 
@@ -42,14 +42,14 @@ void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 void T_FIM::AssembleMat(LinearSystem&    ls,
                         const Reservoir& rs,
                         const OCP_DBL&   t,
-                        const OCP_DBL&   dt) const
+                        const OCP_DBL&   dt)
 {
     AssembleMatBulks(ls, rs, t, dt);
     AssembleMatWells(ls, rs, dt);
     ls.AssembleRhsCopy(rs.bulk.res.resAbs);
 }
 
-void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl) const
+void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
 #ifdef DEBUG
     ls.CheckEquation();
@@ -121,10 +121,8 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    OCP_USI dSn;
 
-    const OCP_DBL NRdSmax = rs.GetNRdSmax(dSn);
-    const OCP_DBL NRdPmax = rs.GetNRdPmax();
+    NRdSmax = CalNRdSmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
     OCP_INT conflag_loc = -1;
@@ -303,12 +301,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     // Allocate Residual
     bk.res.SetupT(bk.numBulkInterior, rs.allWells.numWell, nc);
 
-    // NR
-    bk.dSNR.resize(nb * np);
-    bk.dNNR.resize(nb * nc);
-    bk.dPNR.resize(nb);
-    bk.dTNR.resize(nb);
-
     // BulkConn
     BulkConn&      conn    = rs.conn;
     const OCP_USI& numConn = conn.numConn;
@@ -316,6 +308,13 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     conn.bcval.upblock.resize(numConn* np);
     conn.bcval.rho.resize(numConn* np);
     conn.bcval.velocity.resize(numConn* np);
+
+
+    // NR
+    dSNR.resize(nb* np);
+    dNNR.resize(nb* nc);
+    dPNR.resize(nb);
+    dTNR.resize(nb);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -362,7 +361,7 @@ void T_FIM::CalRock(Bulk& bk) const
     }
 }
 
-void T_FIM::InitFlash(Bulk& bk) const
+void T_FIM::InitFlash(Bulk& bk)
 {
     const OCP_USI nb = bk.numBulk;
     const OCP_USI np = bk.numPhase;
@@ -381,7 +380,7 @@ void T_FIM::InitFlash(Bulk& bk) const
     }
 }
 
-void T_FIM::CalFlash(Bulk& bk) const
+void T_FIM::CalFlash(Bulk& bk)
 {
     const OCP_USI nb = bk.numBulk;
     const OCP_USI np = bk.numPhase;
@@ -397,7 +396,7 @@ void T_FIM::CalFlash(Bulk& bk) const
     }
 }
 
-void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n) const
+void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
     const USI     np     = bk.numPhase;
     const USI     nc     = bk.numCom;
@@ -414,8 +413,8 @@ void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n) const
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bk.S[bIdp + j]    = bk.flashCal[pvtnum]->GetS(j);
-        bk.dSNR[bIdp + j] = bk.S[bIdp + j] - bk.dSNR[bIdp + j];
+        bk.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        dSNR[bIdp + j] = bk.S[bIdp + j] - dSNR[bIdp + j];
         bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
         if (bk.phaseExist[bIdp + j]) {
             bk.phaseNum[n]++;
@@ -990,7 +989,7 @@ void T_FIM::AssembleMatWells(LinearSystem&    ls,
 
 void T_FIM::GetSolution(Reservoir&             rs,
                         vector<OCP_DBL>& u,
-                        const OCPControl&      ctrl) const
+                        const OCPControl&      ctrl)
 {
 
     const Domain&   domain = rs.domain;
@@ -1037,10 +1036,10 @@ void T_FIM::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    bk.dSNR       = bk.S;
-    bk.NRdPmax    = 0;
-    bk.NRdNmax    = 0;
-    bk.NRdTmax    = 0;
+    dSNR    = bk.S;
+    NRdPmax = 0;
+    NRdNmax = 0;
+    NRdTmax = 0;
 
     OCP_USI bId = 0;
     OCP_USI eId = bk.GetInteriorBulkNum();
@@ -1078,25 +1077,25 @@ void T_FIM::GetSolution(Reservoir&             rs,
 
                 // dP
                 OCP_DBL dP = u[n * col];
-                if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
+                if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
                 bk.P[n] += dP;
-                bk.dPNR[n] = dP;
+                dPNR[n] = dP;
 
                 // dNi
                 for (USI i = 0; i < nc; i++) {
-                    bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-                    if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-                        bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+                    dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+                    if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
+                        NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
 
-                    bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+                    bk.Ni[n * nc + i] += dNNR[n * nc + i];
                 }
             }
 
             // dT
             OCP_DBL dT = u[n * col + col - 1];
-            if (fabs(bk.NRdTmax) < fabs(dT)) bk.NRdTmax = dT;
+            if (fabs(NRdTmax) < fabs(dT)) NRdTmax = dT;
             bk.T[n] += dT;
-            bk.dTNR[n] = dT;
+            dTNR[n] = dT;
         }
 
         if (p == 0) {

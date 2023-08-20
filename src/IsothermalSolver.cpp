@@ -31,7 +31,7 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 }
 
 /// Setup solution methods, including IMPEC and FIM.
-void IsothermalSolver::InitReservoir(Reservoir& rs) const
+void IsothermalSolver::InitReservoir(Reservoir& rs)
 {
     switch (method) {
         case IMPEC:

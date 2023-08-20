@@ -43,7 +43,7 @@ void Solver::SetupT(Reservoir& rs, const OCPControl& ctrl)
 }
 
 /// Initialize the reservoir setting for different solution methods.
-void Solver::InitReservoir(Reservoir& rs) const
+void Solver::InitReservoir(Reservoir& rs)
 {
     switch (OCPModel) {
         case ISOTHERMALMODEL:

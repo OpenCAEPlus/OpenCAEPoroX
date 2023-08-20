@@ -659,7 +659,7 @@ void IsoT_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateLinearSystem(ls, rs, ctrl);
 }
 
-void IsoT_FIM::InitReservoir(Reservoir& rs) const
+void IsoT_FIM::InitReservoir(Reservoir& rs)
 {
     // Calculate initial bulk pressure and temperature and water saturation
     rs.bulk.InitPTSw(50);
@@ -695,7 +695,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
 
 void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
-                                 OCPControl&   ctrl) const
+                                 OCPControl&   ctrl)
 {
 #ifdef DEBUG
     // Check if inf or nan occurs in A and b
@@ -769,10 +769,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    OCP_USI dSn;
-
-    const OCP_DBL NRdSmax = rs.GetNRdSmax(dSn);
-    const OCP_DBL NRdPmax = rs.GetNRdPmax();
+    NRdSmax = CalNRdSmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
    
     OCP_INT conflag_loc = -1;
@@ -906,17 +903,18 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     // Allocate Residual
     bk.res.Setup_IsoT(bk.numBulkInterior, rs.allWells.numWell, nc);
 
-    // NR
-    bk.dSNR.resize(nb * np);
-    bk.dNNR.resize(nb * nc);
-    bk.dPNR.resize(nb);
-
     // BulkConn
     BulkConn& conn = rs.conn;
 
     conn.bcval.upblock.resize(conn.numConn* np);
     conn.bcval.rho.resize(conn.numConn* np);
     conn.bcval.velocity.resize(conn.numConn* np);
+
+
+    // NR
+    dSNR.resize(nb * np);
+    dNNR.resize(nb * nc);
+    dPNR.resize(nb);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -929,7 +927,7 @@ void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupLinearSolver(ISOTHERMALMODEL, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
-void IsoT_FIM::InitFlash(Bulk& bk) const
+void IsoT_FIM::InitFlash(Bulk& bk)
 {
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
         bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bk.P[n], bk.Pb[n], bk.T[n],
@@ -954,7 +952,7 @@ void IsoT_FIM::CalFlash(Bulk& bk)
     }
 }
 
-void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n) const
+void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
     const USI     np     = bk.numPhase;
     const USI     nc     = bk.numCom;
@@ -970,8 +968,8 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n) const
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bk.S[bIdp + j]    = bk.flashCal[pvtnum]->GetS(j);
-        bk.dSNR[bIdp + j] = bk.S[bIdp + j] - bk.dSNR[bIdp + j];
+        bk.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        dSNR[bIdp + j] = bk.S[bIdp + j] - dSNR[bIdp + j];
         bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
         if (bk.phaseExist[bIdp + j]) {
             bk.phaseNum[n]++;
@@ -1157,7 +1155,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         
         bmat = flux[cType]->GetdFdXpB();
         DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2], 1,
-            bmat.data());       
+            bmat.data());
         Dscalar(bsize, dt, bmat.data());
         // Assemble
         // Begin - Begin -- add
@@ -1229,7 +1227,7 @@ void IsoT_FIM::AssembleMatWells(LinearSystem&    ls,
 
 void IsoT_FIM::GetSolution(Reservoir&             rs,
                            vector<OCP_DBL>& u,
-                           const OCPControl&      ctrl) const
+                           const OCPControl&      ctrl)
 {
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
@@ -1281,9 +1279,9 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    bk.dSNR       = bk.S;
-    bk.NRdPmax    = 0;
-    bk.NRdNmax    = 0;
+    dSNR    = bk.S;
+    NRdPmax = 0;
+    NRdNmax = 0;
 
     OCP_USI bId = 0;
     OCP_USI eId = bk.GetInteriorBulkNum();
@@ -1343,17 +1341,17 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 			OCP_DBL dP = u[n * col];
 			// choptmp = dPmaxlim / fabs(dP);
 			// chopmin = min(chopmin, choptmp);
-			if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
+			if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
 			bk.P[n] += dP; // seems better
-			bk.dPNR[n] = dP;
+			dPNR[n] = dP;
 
 			// dNi
 			for (USI i = 0; i < nc; i++) {
-				bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-				if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-					bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+				dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+				if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
+					NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
 
-				bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+				bk.Ni[n * nc + i] += dNNR[n * nc + i];
 
 				// if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
 				//     bk.Ni[n * nc + i] = 1E-20;
@@ -1616,9 +1614,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    OCP_USI       dSn;
-    const OCP_DBL NRdSmax = rs.GetNRdSmax(dSn);
-    const OCP_DBL NRdPmax = rs.GetNRdPmax();
+    NRdSmax = CalNRdSmax();
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
 #ifdef DEBUG
@@ -1736,13 +1732,13 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         // NR Step
         if (!flag && OCP_FALSE) {
             // dP
-            if (fabs(bk.dPNR[n] / bk.P[n]) > 1E-3) {
+            if (fabs(dPNR[n] / bk.P[n]) > 1E-3) {
                 flag = OCP_TRUE;
             }
             // dNi
             if (!flag) {
                 for (USI i = 0; i < bk.numCom; i++) {
-                    if (fabs(bk.dNNR[bIdc + i] / bk.Ni[bIdc + i]) > 1E-3) {
+                    if (fabs(dNNR[bIdc + i] / bk.Ni[bIdc + i]) > 1E-3) {
                         flag = OCP_TRUE;
                         break;
                     }
@@ -2076,7 +2072,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 
 void IsoT_AIMc::GetSolution(Reservoir&             rs,
                             vector<OCP_DBL>& u,
-                            const OCPControl&      ctrl) const
+                            const OCPControl&      ctrl)
 {
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
@@ -2122,9 +2118,9 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    bk.dSNR       = bk.S;
-    bk.NRdPmax    = 0;
-    bk.NRdNmax    = 0;
+    dSNR    = bk.S;
+    NRdPmax = 0;
+    NRdNmax = 0;
 
     OCP_USI bId = 0;
     OCP_USI eId = bk.GetInteriorBulkNum();
@@ -2135,14 +2131,14 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
                 // IMPEC Bulk
                 // Pressure
-                OCP_DBL dP   = u[n * col];
-                bk.NRdPmax   = max(bk.NRdPmax, fabs(dP));
-                bk.P[n]      += dP; // seems better
-                bk.dPNR[n]   = dP;
+                const OCP_DBL dP = u[n * col];
+                NRdPmax          = max(NRdPmax, fabs(dP));
+                bk.P[n]          += dP; // seems better
+                dPNR[n]          = dP;
                 // Ni
                 for (USI i = 0; i < nc; i++) {
-                    bk.dNNR[n * nc + i] = u[n * col + 1 + i];
-                    bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+                    dNNR[n * nc + i] = u[n * col + 1 + i];
+                    bk.Ni[n * nc + i] += dNNR[n * nc + i];
 
                     // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
                     //     bk.Ni[n * nc + i] = 1E-20;
@@ -2199,17 +2195,17 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 
             // dP
             OCP_DBL dP = u[n * col];
-            if (fabs(bk.NRdPmax) < fabs(dP)) bk.NRdPmax = dP;
+            if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
             bk.P[n] += dP; // seems better
-            bk.dPNR[n] = dP;
+            dPNR[n] = dP;
 
             // dNi
             for (USI i = 0; i < nc; i++) {
-                bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-                if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
-                    bk.NRdNmax = bk.dNNR[n * nc + i] / bk.Nt[n];
+                dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
+                if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
+                    NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
 
-                bk.Ni[n * nc + i] += bk.dNNR[n * nc + i];
+                bk.Ni[n * nc + i] += dNNR[n * nc + i];
 
                 // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
                 //     bk.Ni[n * nc + i] = 1E-20;

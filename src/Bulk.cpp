@@ -1060,19 +1060,6 @@ OCP_DBL Bulk::CalFTR(OCP_DBL& vtmp) const
 // Important Indicator Variable and Check
 /////////////////////////////////////////////////////////////////////
 
-OCP_DBL Bulk::CalNRdSmax(OCP_USI& index)
-{
-    NRdSmax     = 0;
-    OCP_USI len = numBulk * numPhase;
-    for (USI n = 0; n < len; n++) {
-        if (fabs(NRdSmax) < fabs(dSNR[n])) {
-            NRdSmax = dSNR[n];
-            index   = n;
-        }
-    }
-    index /= numPhase;
-    return NRdSmax;
-}
 
 /// Return OCP_TRUE if no negative pressure and OCP_FALSE otherwise.
 OCP_INT Bulk::CheckP() const
@@ -1124,9 +1111,9 @@ OCP_INT Bulk::CheckNi()
                 USI                cId = n - bId * numCom;
                 std::ostringstream NiStringSci;
                 NiStringSci << std::scientific << Ni[n];
-                OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
-                            std::to_string(bId) + "] = " + NiStringSci.str() + ",  " +
-                            "dNi = " + std::to_string(dNNR[n]));
+                //OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
+                //            std::to_string(bId) + "] = " + NiStringSci.str() + ",  " +
+                //            "dNi = " + std::to_string(dNNR[n]));
 
                 return BULK_NEGATIVE_COMPONENTS_MOLES;
             }

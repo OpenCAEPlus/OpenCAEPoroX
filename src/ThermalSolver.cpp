@@ -17,7 +17,7 @@ void ThermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
     fim.Setup(rs, LSolver, ctrl);
 }
 
-void ThermalSolver::InitReservoir(Reservoir& rs) const { fim.InitReservoir(rs); }
+void ThermalSolver::InitReservoir(Reservoir& rs) { fim.InitReservoir(rs); }
 
 void ThermalSolver::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
