@@ -12,7 +12,7 @@
 #ifndef __OPTIONALFEATURES_HEADER__
 #define __OPTIONALFEATURES_HEADER__
 
-#include "AcceleratePVT.hpp"
+#include "AcceleratePEC.hpp"
 #include "OCPMiscible.hpp"
 #include "OCPScalePcow.hpp"
 

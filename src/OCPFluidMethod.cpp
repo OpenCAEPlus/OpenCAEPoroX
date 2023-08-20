@@ -907,8 +907,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bk.res.Setup_IsoT(bk.numBulkInterior, rs.allWells.numWell, nc);
 
     // NR
-    bk.NRstep.resize(nb);
-    bk.NRphaseNum.resize(nb);
     bk.dSNR.resize(nb * np);
     bk.dSNRP.resize(nb * np);
     bk.dNNR.resize(nb * nc);
@@ -1294,7 +1292,6 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     OCP_DBL         choptmp = 0;
 
     bk.dSNR       = bk.S;
-    bk.NRphaseNum = bk.phaseNum;
     bk.NRdPmax    = 0;
     bk.NRdNmax    = 0;
 
@@ -1362,7 +1359,6 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 			bk.dPNR[n] = dP;
 
 			// dNi
-			bk.NRstep[n] = chopmin;
 			for (USI i = 0; i < nc; i++) {
 				bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
 				if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])
@@ -2138,7 +2134,6 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     OCP_DBL         choptmp = 0;
 
     bk.dSNR       = bk.S;
-    bk.NRphaseNum = bk.phaseNum;
     bk.NRdPmax    = 0;
     bk.NRdNmax    = 0;
 
@@ -2155,7 +2150,6 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
                 bk.NRdPmax   = max(bk.NRdPmax, fabs(dP));
                 bk.P[n]      += dP; // seems better
                 bk.dPNR[n]   = dP;
-                bk.NRstep[n] = 1;
                 // Ni
                 for (USI i = 0; i < nc; i++) {
                     bk.dNNR[n * nc + i] = u[n * col + 1 + i];
@@ -2221,7 +2215,6 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             bk.dPNR[n] = dP;
 
             // dNi
-            bk.NRstep[n] = chopmin;
             for (USI i = 0; i < nc; i++) {
                 bk.dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
                 if (fabs(bk.NRdNmax) < fabs(bk.dNNR[n * nc + i]) / bk.Nt[n])

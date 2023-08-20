@@ -441,9 +441,6 @@ protected:
     OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
     OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
 
-    vector<OCP_DBL> NRstep;     ///< NRstep for FIM
-    vector<USI>     NRphaseNum; ///< phaseNum in NR step
-
     /////////////////////////////////////////////////////////////////////
     // Important Indicator Variable and Check
     /////////////////////////////////////////////////////////////////////
