@@ -19,6 +19,7 @@
 #include "UtilOutput.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
+#include "OCPStructure.hpp"
 
 class IsothermalMethod
 {
@@ -116,7 +117,7 @@ protected:
     /// Calculate relative permeability and capillary pressure needed for FIM
     void CalKrPc(Bulk& bk) const;
     /// Calculate residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0) const;
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0);
     /// Assemble linear system for wells
     void
     AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
@@ -164,6 +165,8 @@ protected:
     OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
     OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
     OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
+
+    OCPRes  res;  ///< Residual for all equations
 
 };
 

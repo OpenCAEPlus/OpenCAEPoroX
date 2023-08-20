@@ -101,8 +101,6 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
     OCP_FUNCNAME;
 
     // Common input
-    ifThermal  = rs_param.thermal;
-
     NTPVT  = rs_param.NTPVT;
     NTSFUN = rs_param.NTSFUN;
     NTROCC = rs_param.NTROOC;
@@ -121,6 +119,8 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
         // Isothermal compositional model
         InputParamCOMPS(rs_param, opts);
     }
+
+    mixType = flashCal[0]->GetMixtureType();
 
 
     InputSatFunc(rs_param, opts);
@@ -207,7 +207,6 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opt
     oIndex   = flashCal[0]->GetVs()->o;
     gIndex   = flashCal[0]->GetVs()->g;
     wIndex   = flashCal[0]->GetVs()->w;
-    ifUseEoS = OCP_TRUE;
 
     InputRockFunc(rs_param);
 
@@ -274,7 +273,7 @@ void Bulk::InputSatFunc(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     // Setup Saturation function
     satcm.resize(NTSFUN);
-    switch (flashCal[0]->GetMixtureType()) 
+    switch (mixType) 
     {
         case OCPMixtureType::SP:
             for (USI i = 0; i < NTSFUN; i++)
@@ -1111,9 +1110,8 @@ OCP_INT Bulk::CheckNi()
                 USI                cId = n - bId * numCom;
                 std::ostringstream NiStringSci;
                 NiStringSci << std::scientific << Ni[n];
-                //OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
-                //            std::to_string(bId) + "] = " + NiStringSci.str() + ",  " +
-                //            "dNi = " + std::to_string(dNNR[n]));
+                OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
+                            std::to_string(bId) + "] = " + NiStringSci.str());
 
                 return BULK_NEGATIVE_COMPONENTS_MOLES;
             }

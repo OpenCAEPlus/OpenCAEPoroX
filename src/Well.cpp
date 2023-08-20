@@ -58,19 +58,13 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     nc       = bk.numCom;
     np       = bk.numPhase;
     mixture  = bk.flashCal[0]->GetMixture();
+    rsTemp   = bk.rsTemp;
 
     qi_lbmol.resize(nc);
     factor.resize(nc);
 
-    for (auto& opt : optSet) {
-        if (opt.state == WellState::close) continue;
-        if (!bk.ifThermal) {
-            opt.injTemp = bk.rsTemp;
-        }
-    }
-
     SetupUnit();
-    SetupOpts(sols);
+    SetupOpts(sols);  
 
     // Perf
     for (USI p = 0; p < numPerf; p++) {
@@ -169,6 +163,9 @@ void Well::SetupOptsInj(WellOpt& opt, const vector<SolventINJ>& sols)
     else {
         OCP_ABORT("Inavailable INJECTED FLUID!");
     }
+
+    if (mixture->MixtureType() != OCPMixtureType::THERMALK_OW)
+        opt.injTemp = rsTemp;
 }
 
 

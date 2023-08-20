@@ -46,7 +46,7 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
 {
     AssembleMatBulks(ls, rs, t, dt);
     AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(rs.bulk.res.resAbs);
+    ls.AssembleRhsCopy(res.resAbs);
 }
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -126,10 +126,10 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
     OCP_INT conflag_loc = -1;
-    if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
+    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
@@ -298,9 +298,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
 
     bk.ldSec_dPri.resize(nb * bk.maxLendSdP);
 
-    // Allocate Residual
-    bk.res.SetupT(bk.numBulkInterior, rs.allWells.numWell, nc);
-
     // BulkConn
     BulkConn&      conn    = rs.conn;
     const OCP_USI& numConn = conn.numConn;
@@ -315,6 +312,9 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     dNNR.resize(nb* nc);
     dPNR.resize(nb);
     dTNR.resize(nb);
+
+    // Allocate Residual
+    res.SetupT(bk.numBulkInterior, rs.allWells.numWell, nc);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -682,9 +682,8 @@ void T_FIM::CalRes(Reservoir&      rs,
     const USI   np   = bk.numPhase;
     const USI   nc   = bk.numCom;
     const USI   len  = nc + 2;
-    OCPRes&     Res  = bk.res;
     
-    Res.SetZero();
+    res.SetZero();
 
     // Bulk to Bulk
     OCP_USI bId, eId, bIdb;
@@ -695,18 +694,18 @@ void T_FIM::CalRes(Reservoir&      rs,
             bId  = n * len;
             bIdb = n * nc;
             // Volume Conservation
-            Res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
+            res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
             // Mass Conservation
             for (USI i = 0; i < nc; i++) {
-                Res.resAbs[n * len + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
+                res.resAbs[n * len + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
             }
             // Energy Conservation
-            Res.resAbs[n * len + nc + 1] =
+            res.resAbs[n * len + nc + 1] =
                 (bk.vf[n] * bk.Uf[n] + bk.vr[n] * bk.Hr[n]) -
                 (bk.lvf[n] * bk.lUf[n] + bk.lvr[n] * bk.lHr[n]);
         } else {
             // Non fluid bulk
-            Res.resAbs[n * len + nc + 1] = bk.vr[n] * bk.Hr[n] - bk.lvr[n] * bk.lHr[n];
+            res.resAbs[n * len + nc + 1] = bk.vr[n] * bk.Hr[n] - bk.lvr[n] * bk.lHr[n];
         }
 
         // Heat Loss
@@ -714,7 +713,7 @@ void T_FIM::CalRes(Reservoir&      rs,
             const OCP_DBL lambda = bk.bLocation[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
             const OCP_DBL kappa  = bk.bLocation[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
             // dT
-            Res.resAbs[n * len + nc + 1] +=
+            res.resAbs[n * len + nc + 1] +=
                 dt * kappa *
                 (2 * (bk.T[n] - bk.initT[n]) / sqrt(lambda * t) - bk.hLoss.p[n]) *
                 bk.dx[n] * bk.dy[n];
@@ -739,10 +738,10 @@ void T_FIM::CalRes(Reservoir&      rs,
         // Thermal conductive term always exists
         Akdt = flux[cType]->GetAdkt();
         dT   = bk.T[bId] - bk.T[eId];
-        Res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
+        res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
         if (eId < nb) {
             // Interior grid
-            Res.resAbs[eId * len + 1 + nc] -= Akdt * dT * dt;
+            res.resAbs[eId * len + 1 + nc] -= Akdt * dT * dt;
         }
 
         if (cType == 0) {
@@ -754,23 +753,23 @@ void T_FIM::CalRes(Reservoir&      rs,
 			if (eId < nb) {
 				// Interior grid
 				for (USI i = 0; i < nc; i++) {
-					Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
-					Res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
+					res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+					res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    Res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
-                    Res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
                 }
 			}
 			else {
 				// Ghost grid
 				for (USI i = 0; i < nc; i++) {
-					Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+					res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    Res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
                 }				
 			}
         }
@@ -779,7 +778,7 @@ void T_FIM::CalRes(Reservoir&      rs,
     // Well to Bulk
     USI wId = nb * len;
     for (const auto& wl : rs.allWells.wells) {
-        wl.CalResFIM_T(wId, Res, bk, dt);
+        wl.CalResFIM_T(wId, res, bk, dt);
     }
 
     // Calculate RelRes
@@ -788,41 +787,41 @@ void T_FIM::CalRes(Reservoir&      rs,
 
         // Energy equations always exist
         OCP_DBL eT = bk.vf[n] * bk.Uf[n] + bk.vr[n] * bk.Hr[n];
-        tmp        = fabs(Res.resAbs[n * len + nc + 1] / eT);
-        if (Res.maxRelRes_E < tmp) {
-            Res.maxRelRes_E = tmp;
-            Res.maxId_E     = n;
+        tmp        = fabs(res.resAbs[n * len + nc + 1] / eT);
+        if (res.maxRelRes_E < tmp) {
+            res.maxRelRes_E = tmp;
+            res.maxId_E     = n;
         }
 
         if (bk.bType[n] > 0) {
             // Fluid Bulk
             for (USI i = 0; i < len - 1; i++) {
-                tmp = fabs(Res.resAbs[n * len + i] / bk.rockVp[n]);
-                if (Res.maxRelRes_V < tmp) {
-                    Res.maxRelRes_V = tmp;
-                    Res.maxId_V     = n;
+                tmp = fabs(res.resAbs[n * len + i] / bk.rockVp[n]);
+                if (res.maxRelRes_V < tmp) {
+                    res.maxRelRes_V = tmp;
+                    res.maxId_V     = n;
                 }
             }
 
             for (USI i = 1; i < len - 1; i++) {
-                tmp = fabs(Res.resAbs[n * len + i] / bk.Nt[n]);
-                if (Res.maxRelRes_N < tmp) {
-                    Res.maxRelRes_N = tmp;
-                    Res.maxId_N     = n;
+                tmp = fabs(res.resAbs[n * len + i] / bk.Nt[n]);
+                if (res.maxRelRes_N < tmp) {
+                    res.maxRelRes_N = tmp;
+                    res.maxId_N     = n;
                 }
             }
         }
     }
 
-    Dscalar(Res.resAbs.size(), -1.0, Res.resAbs.data());
+    Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
     if (resetRes0) {
-        Res.SetInitRes();
+        res.SetInitRes();
 
         GetWallTime timer;
         timer.Start();
 
-        OCP_DBL tmploc = Res.maxRelRes0_V;
-        MPI_Allreduce(&tmploc, &Res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
+        OCP_DBL tmploc = res.maxRelRes0_V;
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     }

@@ -103,6 +103,7 @@ protected:
     OCP_DBL Tsurf{TEMPERATURE_STD};
     /// fluid model(where is it from?)
     OCPMixture* mixture;
+    OCP_DBL rsTemp;
 
 public:
     /// Initialize the Well BHP

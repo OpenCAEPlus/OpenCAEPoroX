@@ -18,6 +18,7 @@
 #include "UtilOutput.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
+#include "OCPStructure.hpp"
 
 class T_FIM
 {
@@ -84,6 +85,8 @@ protected:
     OCP_DBL NRdTmax;         ///< Max temperature difference in an NR step
     OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
     OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
+
+    OCPRes  res;  ///< Residual for all equations
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

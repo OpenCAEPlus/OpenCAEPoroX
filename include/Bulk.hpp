@@ -235,23 +235,12 @@ protected:
     // Basic PVT Model Information
     /////////////////////////////////////////////////////////////////////
 
-public:
-    /// Return ifUseEoS.
-    OCP_BOOL IfUseEoS() const { return ifUseEoS; };
-
 protected:
-    OCP_BOOL ifThermal{OCP_FALSE};  ///< Id OCP_TRUE, ifThermal model will be used.
-    OCP_BOOL ifUseEoS{OCP_FALSE};   ///< If OCP_TRUE, then EoS model is used.
     OCPMixtureType mixType;
 
     /////////////////////////////////////////////////////////////////////
     // Basic Grid and Basic Rock Information
     /////////////////////////////////////////////////////////////////////
-
-public:
-    /// Allocate memory for Rock properties
-    //void AllocateGridRockIsoT(const Grid& myGrid);
-    //void AllocateGridRockT(const Grid& myGrid);
 
 protected:
     vector<OCP_DBL> dx;    ///< Size of cell in x-direction: activeGridNum.
@@ -459,12 +448,7 @@ protected:
     mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number
     mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
 
-    /////////////////////////////////////////////////////////////////////
-    // Error
-    /////////////////////////////////////////////////////////////////////
 
-protected:
-    mutable OCPRes  res;  ///< Residual for all equations
 
 protected:
     /////////////////////////////////////////////////////////////////////

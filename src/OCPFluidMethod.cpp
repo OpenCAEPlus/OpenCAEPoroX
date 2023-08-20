@@ -690,7 +690,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     // Assemble rhs -- from residual
-    ls.AssembleRhsCopy(rs.bulk.res.resAbs);
+    ls.AssembleRhsCopy(res.resAbs);
 }
 
 void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
@@ -773,10 +773,10 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
    
     OCP_INT conflag_loc = -1;
-    if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
+    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
@@ -900,9 +900,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 
     bk.ldSec_dPri.resize(nb * bk.maxLendSdP);
 
-    // Allocate Residual
-    bk.res.Setup_IsoT(bk.numBulkInterior, rs.allWells.numWell, nc);
-
     // BulkConn
     BulkConn& conn = rs.conn;
 
@@ -915,6 +912,9 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     dSNR.resize(nb * np);
     dNNR.resize(nb * nc);
     dPNR.resize(nb);
+
+    // Allocate Residual
+    res.Setup_IsoT(bk.numBulkInterior, rs.allWells.numWell, nc);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -1013,16 +1013,15 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     }
 }
 
-void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0) const
+void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
 {
     const Bulk&            bk    = rs.bulk;
     const USI              nb    = bk.numBulkInterior;
     const USI              np    = bk.numPhase;
     const USI              nc    = bk.numCom;
     const USI              len   = nc + 1;
-    OCPRes&                Res   = bk.res;
     
-    Res.SetZero();
+    res.SetZero();
 
     // Bulk to Bulk
     OCP_USI bId, eId, bIdb;    
@@ -1030,9 +1029,9 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     for (OCP_USI n = 0; n < nb; n++) {
         bId             = n * len;
         bIdb            = n * nc;
-        Res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
+        res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
         for (USI i = 0; i < nc; i++) {
-            Res.resAbs[bId + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
+            res.resAbs[bId + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
         }
     }
 
@@ -1054,13 +1053,13 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
                
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {               
-                Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
-                Res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
+                res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+                res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
             }
         }
         else {
             for (USI i = 0; i < nc; i++) {
-                Res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+                res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
             }
         }
     }
@@ -1068,7 +1067,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     // Well to Bulk, Well
     USI wId = nb * len;
     for (const auto& wl : rs.allWells.wells) {
-        wl.CalResFIM(wId, Res, bk, dt);
+        wl.CalResFIM(wId, res, bk, dt);
     }
 
     // Calculate RelRes
@@ -1076,35 +1075,35 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     for (OCP_USI n = 0; n < nb; n++) {
 
         for (USI i = 0; i < len; i++) {
-            tmp = fabs(Res.resAbs[n * len + i] / bk.rockVp[n]);
-            if (Res.maxRelRes_V < tmp) {
-                Res.maxRelRes_V = tmp;
-                Res.maxId_V     = n;
+            tmp = fabs(res.resAbs[n * len + i] / bk.rockVp[n]);
+            if (res.maxRelRes_V < tmp) {
+                res.maxRelRes_V = tmp;
+                res.maxId_V     = n;
             }
-            Res.resRelV[n] += tmp * tmp;
+            res.resRelV[n] += tmp * tmp;
         }
-        Res.resRelV[n] = sqrt(Res.resRelV[n]);
+        res.resRelV[n] = sqrt(res.resRelV[n]);
 
         for (USI i = 1; i < len; i++) {
-            tmp = fabs(Res.resAbs[n * len + i] / bk.Nt[n]);
-            if (Res.maxRelRes_N < tmp) {
-                Res.maxRelRes_N = tmp;
-                Res.maxId_N     = n;
+            tmp = fabs(res.resAbs[n * len + i] / bk.Nt[n]);
+            if (res.maxRelRes_N < tmp) {
+                res.maxRelRes_N = tmp;
+                res.maxId_N     = n;
             }
-            Res.resRelN[n] += tmp * tmp;
+            res.resRelN[n] += tmp * tmp;
         }
-        Res.resRelN[n] = sqrt(Res.resRelN[n]);
+        res.resRelN[n] = sqrt(res.resRelN[n]);
     }
 
-    Dscalar(Res.resAbs.size(), -1.0, Res.resAbs.data());
+    Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
     if (resetRes0) {
-        Res.SetInitRes();
+        res.SetInitRes();
 
         GetWallTime timer;
         timer.Start();
 
-        OCP_DBL tmploc = Res.maxRelRes0_V;
-        MPI_Allreduce(&tmploc, &Res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
+        OCP_DBL tmploc = res.maxRelRes0_V;
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     }
@@ -1322,7 +1321,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
 			// dxij   ---- Compositional model only
 
-			if (bk.IfUseEoS()) {
+			if (bk.mixType == OCPMixtureType::COMP) {
 				USI js = np;
 				if (bk.phaseNum[n] >= 3) {
 					// num of Hydroncarbon phase >= 2
@@ -1546,7 +1545,7 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
 {
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(rs.bulk.res.resAbs);
+    ls.AssembleRhsCopy(res.resAbs);
 }
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -1624,10 +1623,10 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 #endif
 
     OCP_INT conflag_loc = -1;
-    if (((rs.bulk.res.maxRelRes_V <= rs.bulk.res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-        rs.bulk.res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-        rs.bulk.res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
+    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
+        res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
+        res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
         (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
             fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
         conflag_loc = 0;
@@ -2179,7 +2178,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             }
 
             // dxij   ---- Compositional model only
-            if (bk.IfUseEoS()) {
+            if (bk.mixType == OCPMixtureType::COMP) {
                 USI js = np;
                 if (bk.phaseNum[n] >= 3) {
                     OCP_USI bId = 0;
