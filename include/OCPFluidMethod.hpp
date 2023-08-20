@@ -24,6 +24,7 @@ class IsothermalMethod
 {
 public:
     void CalRock(Bulk& bk) const;
+
 };
 
 /// IsoT_IMPEC is IMPEC (implicit pressure explict saturation) method.
@@ -135,6 +136,19 @@ private:
     /// Update P, Ni, BHP after linear system is solved
     void
     GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl) const;
+
+protected:
+    /// saturation change between NR steps
+    vector<OCP_DBL> dSNR;
+    /// Ni change between NR steps
+    vector<OCP_DBL> dNNR; 
+    /// P change between NR steps
+    vector<OCP_DBL> dPNR;    
+
+    OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
+    OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
+    OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
+
 };
 
 

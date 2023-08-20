@@ -429,13 +429,10 @@ public:
 
 protected:
     vector<OCP_DBL> dSNR;  ///< saturation change between NR steps
-    vector<OCP_DBL> dSNRP; ///< predicted saturation change between NR steps
     vector<OCP_DBL> dNNR;  ///< Ni change between NR steps
     vector<OCP_DBL> dPNR;  ///< P  change between NR steps
     vector<OCP_DBL> dTNR;  ///< T  change between NR steps
 
-    OCP_DBL maxNRdSSP;       ///< max difference between dSNR and dSNRP
-    OCP_USI index_maxNRdSSP; ///< index of grid which has maxNRdSSP
     OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
     OCP_DBL NRdTmax;         ///< Max temperature difference in an NR step
     OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step

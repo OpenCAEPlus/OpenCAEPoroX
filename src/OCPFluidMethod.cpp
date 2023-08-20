@@ -908,7 +908,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 
     // NR
     bk.dSNR.resize(nb * np);
-    bk.dSNRP.resize(nb * np);
     bk.dNNR.resize(nb * nc);
     bk.dPNR.resize(nb);
 
@@ -945,8 +944,6 @@ void IsoT_FIM::InitFlash(Bulk& bk) const
 
 void IsoT_FIM::CalFlash(Bulk& bk)
 {
-    bk.maxNRdSSP       = 0;
-    bk.index_maxNRdSSP = 0;
 
     for (OCP_USI n = 0; n < bk.numBulk; n++) {
 
@@ -975,13 +972,6 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n) const
         // each step!
         bk.S[bIdp + j]    = bk.flashCal[pvtnum]->GetS(j);
         bk.dSNR[bIdp + j] = bk.S[bIdp + j] - bk.dSNR[bIdp + j];
-        if (bk.phaseExist[bIdp + j]) {
-            if (fabs(bk.maxNRdSSP) < fabs(bk.dSNR[bIdp + j] - bk.dSNRP[bIdp + j])) {
-                bk.maxNRdSSP       = bk.dSNR[bIdp + j] - bk.dSNRP[bIdp + j];
-                bk.index_maxNRdSSP = n;
-            }
-        }
-
         bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
         if (bk.phaseExist[bIdp + j]) {
             bk.phaseNum[n]++;
@@ -1329,8 +1319,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
 			// dS
 			for (USI j = 0; j < np; j++) {
-				bk.dSNRP[n * np + j] = chopmin * dtmp[j];
-				bk.S[n * np + j] += bk.dSNRP[n * np + j];
+				bk.S[n * np + j] += chopmin * dtmp[j];
 			}
 
 			// dxij   ---- Compositional model only
@@ -2190,7 +2179,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 
             // dS
             for (USI j = 0; j < np; j++) {
-                bk.dSNRP[n * np + j] = chopmin * dtmp[j];
+                bk.S[n * np + j] += chopmin * dtmp[j];
             }
 
             // dxij   ---- Compositional model only
