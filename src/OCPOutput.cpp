@@ -1301,8 +1301,8 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     if (!useVTK)         return;
     if (bgp.bgpnum == 0) return;
 
-    const auto nb     = rs.bulk.numBulkInterior;
-    const auto np     = rs.bulk.numPhase;
+    const auto nb     = rs.bulk.nbI;
+    const auto np     = rs.bulk.np;
     const auto OIndex = rs.bulk.oIndex;
     const auto GIndex = rs.bulk.gIndex;
     const auto WIndex = rs.bulk.wIndex;

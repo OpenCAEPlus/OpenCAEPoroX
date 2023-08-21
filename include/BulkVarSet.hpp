@@ -21,28 +21,26 @@ using namespace std;
 
 class BulkVarSet
 {
-	friend class Bulk;
-
 
     /////////////////////////////////////////////////////////////////////
     // General Information
     /////////////////////////////////////////////////////////////////////
 
-protected:
+public:
     /// Number of bulks
-    OCP_USI numBulk;  
+    OCP_USI nb;  
     /// Number of bulks inside
-    OCP_USI numBulkInterior; 
+    OCP_USI nbI; 
     /// Number of phase
-    USI     numPhase;
+    USI     np;
     /// Number of component
-    USI     numCom;          
+    USI     nc;          
 
 	/////////////////////////////////////////////////////////////////////
 	// Basic Grid and Basic Rock Information (numBulk)
 	/////////////////////////////////////////////////////////////////////
 
-protected:
+public:
     /// Size of cell in x-direction
     vector<OCP_DBL> dx;
     /// Size of cell in y-direction
@@ -110,7 +108,7 @@ protected:
     // Basic Fluid Information (numBulk)
     /////////////////////////////////////////////////////////////////////
 
-protected:
+public:
 
     /// Index of oil
     INT              oIndex;
@@ -286,7 +284,14 @@ protected:
     /// last ktT
     vector<OCP_DBL> lktT;
     /// last ktS
-    vector<OCP_DBL> lktS;     
+    vector<OCP_DBL> lktS; 
+
+    /// length of dSec_dPri.
+    USI             maxLendSdP;
+    /// d Secondary variable / d Primary variable.
+    vector<OCP_DBL> dSec_dPri;  
+    /// last dSec_dPri
+    vector<OCP_DBL> ldSec_dPri;    
 
 };
 

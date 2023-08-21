@@ -89,8 +89,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
     // Get grid-based vars from params
     optFeatures.numBulk  = domain.numGridLocal;
-    bulk.numBulk         = domain.numGridLocal;   // Interior + ghost
-    bulk.numBulkInterior = domain.numGridInterior;
+    bulk.nb         = domain.numGridLocal;   // Interior + ghost
+    bulk.nbI = domain.numGridInterior;
 
     MPI_Comm      myComm  = domain.myComm;
     const OCP_INT numproc = domain.numproc;
@@ -252,19 +252,19 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         // set self
         // dbl
         for (auto& s : send_var.var_dbl) {
-            s.dst_ptr->resize(bulk.numBulk);
+            s.dst_ptr->resize(bulk.nb);
             const OCP_DBL* src = s.src_ptr->data();           
             OCP_DBL*       dst = s.dst_ptr->data();
-            for (OCP_USI n = 0; n < bulk.numBulk; n++) {
+            for (OCP_USI n = 0; n < bulk.nb; n++) {
                 dst[n] = src[grid.map_Act2All[domain.grid[n]]];
             }
         }
         // usi
         for (auto& s : send_var.var_usi) {
-            s.dst_ptr->resize(bulk.numBulk);
+            s.dst_ptr->resize(bulk.nb);
             const OCP_USI* src = s.src_ptr->data();
             OCP_USI*       dst = s.dst_ptr->data();
-            for (OCP_USI n = 0; n < bulk.numBulk; n++) {
+            for (OCP_USI n = 0; n < bulk.nb; n++) {
                 dst[n] = src[grid.map_Act2All[domain.grid[n]]];
             }
         }
@@ -276,7 +276,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
-        for (OCP_USI n = 0; n < bulk.numBulkInterior; n++) {
+        for (OCP_USI n = 0; n < bulk.nbI; n++) {
             bId = n;
             domain.neighborNum.push_back(grid.gNeighbor[domain.grid[bId]].size() + 1);
             for (const auto& gn : grid.gNeighbor[domain.grid[bId]]) {
@@ -292,8 +292,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // global index(include inactive grid)
         if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.numBulk);
-            for (OCP_USI n = 0; n < bulk.numBulk; n++) {
+            domain.gridAllIndex.resize(bulk.nb);
+            for (OCP_USI n = 0; n < bulk.nb; n++) {
                 domain.gridAllIndex[n] = grid.map_Act2All[domain.grid[n]];
             }
         }
@@ -369,21 +369,21 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         // dbl
         OCP_DBL* dbl_ptr = (OCP_DBL*)recv_buffer;
         for (USI r = 0; r < recv_var.numvar_dbl; r++) {
-            recv_var.var_dbl[r].dst_ptr->resize(bulk.numBulk);
-            const OCP_DBL* src = dbl_ptr + r * bulk.numBulk;
+            recv_var.var_dbl[r].dst_ptr->resize(bulk.nb);
+            const OCP_DBL* src = dbl_ptr + r * bulk.nb;
             OCP_DBL*       dst = recv_var.var_dbl[r].dst_ptr->data();
-            copy(src, src + bulk.numBulk, dst);
+            copy(src, src + bulk.nb, dst);
         }      
-        dbl_ptr += recv_var.numvar_dbl * bulk.numBulk;
+        dbl_ptr += recv_var.numvar_dbl * bulk.nb;
         // usi
         OCP_USI* usi_ptr = (OCP_USI*)dbl_ptr;
         for (USI r = 0; r < recv_var.numvar_usi; r++) {
-            recv_var.var_usi[r].dst_ptr->resize(bulk.numBulk);
-            const OCP_USI* src = usi_ptr + r * bulk.numBulk;
+            recv_var.var_usi[r].dst_ptr->resize(bulk.nb);
+            const OCP_USI* src = usi_ptr + r * bulk.nb;
             OCP_USI*       dst = recv_var.var_usi[r].dst_ptr->data();
-            copy(src, src + bulk.numBulk, dst);
+            copy(src, src + bulk.nb, dst);
         }
-        usi_ptr += recv_var.numvar_usi * bulk.numBulk;
+        usi_ptr += recv_var.numvar_usi * bulk.nb;
 
         // Get Conn from recv_buffer, only Interior grids' neighbors are passed
         OCP_DBL*     conn_ptr = (OCP_DBL*)usi_ptr;
@@ -429,10 +429,10 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // record global index of grid if inactive grid exist
         if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.numBulk);
+            domain.gridAllIndex.resize(bulk.nb);
             const OCP_USI* src = (OCP_USI*)conn_ptr;
             OCP_USI*       dst = domain.gridAllIndex.data();
-            copy(src, src + bulk.numBulk, dst);
+            copy(src, src + bulk.nb, dst);
         }
 
         delete[] recv_buffer;
@@ -506,7 +506,7 @@ void Reservoir::CalIPRT(const OCP_DBL& dt)
 OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
 {
     fill(bulk.cfl.begin(), bulk.cfl.end(), 0.0);
-    const USI np = bulk.numPhase;
+    const USI np = bulk.np;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         for (USI j = 0; j < np; j++) {
@@ -533,7 +533,7 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
     }
 
     bulk.maxCFL_loc       = 0;
-    const OCP_USI len = bulk.numBulk * np;
+    const OCP_USI len = bulk.nb * np;
     for (OCP_USI n = 0; n < len; n++) {
         if (bulk.phaseExist[n] && bulk.vj[n] > TINY) {
             bulk.cfl[n] /= bulk.vj[n];
@@ -564,8 +564,8 @@ void Reservoir::PrintSolFIM(const string& outfile) const
 {
     ofstream outu(outfile);
     if (!outu.is_open()) cout << "Can not open " << outfile << endl;
-    const OCP_USI nb = bulk.numBulk;
-    const OCP_USI nc = bulk.numCom;
+    const OCP_USI nb = bulk.nb;
+    const OCP_USI nc = bulk.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         // Pressure

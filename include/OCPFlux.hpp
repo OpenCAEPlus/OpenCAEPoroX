@@ -156,7 +156,7 @@ class OCPFlux_IsoT : public OCPFlux
 public:
     OCPFlux_IsoT() = default;
     OCPFlux_IsoT(const Bulk& bk) {
-        Allocate(bk.numPhase, bk.numCom);
+        Allocate(bk.np, bk.nc);
         dFdXpB.resize((numCom + 1) * (numCom + 1));
         dFdXpE.resize((numCom + 1) * (numCom + 1));
         dFdXsB.resize((numCom + 1) * (numCom + 1) * numPhase);
@@ -176,7 +176,7 @@ class OCPFlux_T : public OCPFlux
 public:
     OCPFlux_T() = default;
     OCPFlux_T(const Bulk& bk) {
-        Allocate(bk.numPhase, bk.numCom);
+        Allocate(bk.np, bk.nc);
         dFdXpB.resize((numCom + 2) * (numCom + 2));
         dFdXpE.resize((numCom + 2) * (numCom + 2));
         dFdXsB.resize((numCom + 2) * (numCom + 1) * numPhase);

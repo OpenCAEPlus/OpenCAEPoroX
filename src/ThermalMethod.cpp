@@ -177,9 +177,9 @@ void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 void T_FIM::AllocateReservoir(Reservoir& rs)
 {
     Bulk&         bk = rs.bulk;
-    const OCP_USI nb = bk.numBulk;
-    const USI     np = bk.numPhase;
-    const USI     nc = bk.numCom;
+    const OCP_USI nb = bk.nb;
+    const USI     np = bk.np;
+    const USI     nc = bk.nc;
 
     // Rock
     bk.poro.resize(nb);
@@ -314,7 +314,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     dTNR.resize(nb);
 
     // Allocate Residual
-    res.SetupT(bk.numBulkInterior, rs.allWells.numWell, nc);
+    res.SetupT(bk.nbI, rs.allWells.numWell, nc);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -329,7 +329,7 @@ void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
 
 void T_FIM::InitRock(Bulk& bk) const
 {
-    for (OCP_USI n = 0; n < bk.numBulk; n++) {
+    for (OCP_USI n = 0; n < bk.nb; n++) {
         if (bk.bType[n] == 0) {
             // non fluid bulk
             bk.poroInit[n] = 0;
@@ -342,7 +342,7 @@ void T_FIM::InitRock(Bulk& bk) const
 
 void T_FIM::CalRock(Bulk& bk) const
 {
-    const OCP_USI nb = bk.numBulk;
+    const OCP_USI nb = bk.nb;
 
     for (OCP_USI n = 0; n < nb; n++) {
         bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.T[n], bk.poroInit[n], bk.bType[n]);
@@ -363,9 +363,9 @@ void T_FIM::CalRock(Bulk& bk) const
 
 void T_FIM::InitFlash(Bulk& bk)
 {
-    const OCP_USI nb = bk.numBulk;
-    const OCP_USI np = bk.numPhase;
-    const OCP_USI nc = bk.numCom;
+    const OCP_USI nb = bk.nb;
+    const OCP_USI np = bk.np;
+    const OCP_USI nc = bk.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
@@ -382,9 +382,9 @@ void T_FIM::InitFlash(Bulk& bk)
 
 void T_FIM::CalFlash(Bulk& bk)
 {
-    const OCP_USI nb = bk.numBulk;
-    const OCP_USI np = bk.numPhase;
-    const OCP_USI nc = bk.numCom;
+    const OCP_USI nb = bk.nb;
+    const OCP_USI np = bk.np;
+    const OCP_USI nc = bk.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
@@ -398,8 +398,8 @@ void T_FIM::CalFlash(Bulk& bk)
 
 void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    const USI     np     = bk.numPhase;
-    const USI     nc     = bk.numCom;
+    const USI     np     = bk.np;
+    const USI     nc     = bk.nc;
     const OCP_USI bIdp   = n * np;
     const USI     pvtnum = bk.PVTNUM[n];
 
@@ -457,9 +457,9 @@ void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 
 void T_FIM::CalKrPc(Bulk& bk) const
 {
-    const USI& np = bk.numPhase;
+    const USI& np = bk.np;
 
-    for (OCP_USI n = 0; n < bk.numBulk; n++) {
+    for (OCP_USI n = 0; n < bk.nb; n++) {
         if (bk.bType[n] > 0) {
             OCP_USI bId = n * np;
             bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
@@ -474,8 +474,8 @@ void T_FIM::CalKrPc(Bulk& bk) const
 
 void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
 {
-    const OCP_USI nb = bk.numBulk;
-    const OCP_USI np = bk.numPhase;
+    const OCP_USI nb = bk.nb;
+    const OCP_USI np = bk.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
@@ -678,9 +678,9 @@ void T_FIM::CalRes(Reservoir&      rs,
                    const OCP_BOOL& resetRes0)
 {
     const Bulk& bk   = rs.bulk;
-    const USI   nb   = bk.numBulkInterior;
-    const USI   np   = bk.numPhase;
-    const USI   nc   = bk.numCom;
+    const USI   nb   = bk.nbI;
+    const USI   np   = bk.np;
+    const USI   nc   = bk.nc;
     const USI   len  = nc + 2;
     
     res.SetZero();
@@ -836,9 +836,9 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     const Bulk&     bk     = rs.bulk;
     const BulkConn& conn   = rs.conn;
-    const OCP_USI   nb     = bk.numBulkInterior;
-    const USI       np     = bk.numPhase;
-    const USI       nc     = bk.numCom;
+    const OCP_USI   nb     = bk.nbI;
+    const USI       np     = bk.np;
+    const USI       nc     = bk.nc;
     const USI       ncol   = nc + 2;
     const USI       ncol2  = np * nc + np;
     const USI       bsize  = ncol * ncol;
@@ -993,14 +993,14 @@ void T_FIM::GetSolution(Reservoir&             rs,
 
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
-    const OCP_USI   nb     = bk.numBulk;
-    const USI       np     = bk.numPhase;
-    const USI       nc     = bk.numCom;
+    const OCP_USI   nb     = bk.nb;
+    const USI       np     = bk.np;
+    const USI       nc     = bk.nc;
     const USI       row    = np * (nc + 1);
     const USI       col    = nc + 2;
 
     // Well first
-    USI wId = bk.numBulkInterior * col;
+    USI wId = bk.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
             wl.SetBHP(wl.BHP() + u[wId]);

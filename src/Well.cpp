@@ -55,8 +55,8 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 {
     OCP_FUNCNAME;
 
-    nc       = bk.numCom;
-    np       = bk.numPhase;
+    nc       = bk.nc;
+    np       = bk.np;
     mixture  = bk.flashCal[0]->GetMixture();
     rsTemp   = bk.rsTemp;
 

@@ -30,6 +30,7 @@
 #include "Domain.hpp"
 #include "PreParamGridWell.hpp"
 #include "OCPRock.hpp"
+#include "BulkVarSet.hpp"
 
 using namespace std;
 
@@ -165,25 +166,29 @@ public:
     // General Variables
     /////////////////////////////////////////////////////////////////////
 
+protected:
+    BulkVarSet vs;
+    
+
 public:
     /// Return the number of bulks.
-    OCP_USI GetBulkNum() const { return numBulk; }
+    OCP_USI GetBulkNum() const { return nb; }
     /// Return the number of bulks.
-    OCP_USI GetInteriorBulkNum() const { return numBulkInterior; }
+    OCP_USI GetInteriorBulkNum() const { return nbI; }
     /// Return the number of phases.
-    USI GetPhaseNum() const { return numPhase; }
+    USI GetPhaseNum() const { return np; }
     /// Return the number of components.
-    USI GetComNum() const { return numCom; }
+    USI GetComNum() const { return nc; }
 
 public:
     MPI_Comm  myComm;
     OCP_INT   numproc, myrank;
 
 protected:
-    OCP_USI numBulk;         ///< Number of bulks (active grids).
-    OCP_USI numBulkInterior; ///< Number of bulks inside
-    USI     numPhase; ///< Number of phase.
-    USI     numCom;   ///< Number of component.
+    OCP_USI nb;         ///< Number of bulks (active grids).
+    OCP_USI nbI; ///< Number of bulks inside
+    USI     np; ///< Number of phase.
+    USI     nc;   ///< Number of component.
 
     /////////////////////////////////////////////////////////////////////
     // Initial Properties
@@ -294,17 +299,17 @@ public:
     /// Return oil saturation of the n-th bulk.
     OCP_DBL GetSOIL(const OCP_USI& n) const
     {
-        return S[n * numPhase + oIndex];
+        return S[n * np + oIndex];
     }
     /// Return gas saturation of the n-th bulk.
     OCP_DBL GetSGAS(const OCP_USI& n) const
     {
-        return S[n * numPhase + gIndex];
+        return S[n * np + gIndex];
     }
     /// Return water saturation of the n-th bulk.
     OCP_DBL GetSWAT(const OCP_USI& n) const
     {
-        return S[n * numPhase + wIndex];
+        return S[n * np + wIndex];
     }
 
 protected:
