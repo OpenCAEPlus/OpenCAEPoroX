@@ -37,6 +37,8 @@ void BulkConn::SetupT(const Bulk& bk)
 
 void BulkConn::CalAkd(const Bulk& bk)
 {
+    const BulkVarSet& bcv = bk.vs;
+
     OCP_USI bId, eId;
     OCP_DBL areaB, areaE;
     OCP_DBL T1, T2;
@@ -47,16 +49,16 @@ void BulkConn::CalAkd(const Bulk& bk)
         areaE = iteratorConn[c].areaE;
         switch (iteratorConn[c].direction) {
             case 1:
-                T1 = bk.ntg[bId] * bk.rockKx[bId] * areaB;
-                T2 = bk.ntg[eId] * bk.rockKx[eId] * areaE;
+                T1 = bcv.ntg[bId] * bcv.rockKx[bId] * areaB;
+                T2 = bcv.ntg[eId] * bcv.rockKx[eId] * areaE;
                 break;
             case 2:
-                T1 = bk.ntg[bId] * bk.rockKy[bId] * areaB;
-                T2 = bk.ntg[eId] * bk.rockKy[eId] * areaE;
+                T1 = bcv.ntg[bId] * bcv.rockKy[bId] * areaB;
+                T2 = bcv.ntg[eId] * bcv.rockKy[eId] * areaE;
                 break;
             case 3:
-                T1 = bk.rockKz[bId] * areaB;
-                T2 = bk.rockKz[eId] * areaE;
+                T1 = bcv.rockKz[bId] * areaB;
+                T2 = bcv.rockKz[eId] * areaE;
                 break;
             default:
                 OCP_ABORT("Wrong Direction!");

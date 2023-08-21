@@ -18,11 +18,12 @@
 
 void IsothermalMethod::CalRock(Bulk& bk) const
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
-        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.T[n], bk.poroInit[n], 0);
-        bk.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
-        bk.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
-        bk.rockVp[n] = bk.v[n] * bk.poro[n];
+    BulkVarSet& bvs = bk.vs;
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+        bk.rock[bk.ROCKNUM[n]]->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], 0);
+        bvs.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
+        bvs.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
+        bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
     }
 }
 
@@ -161,64 +162,65 @@ void IsoT_IMPEC::FinishStep(Reservoir& rs, OCPControl& ctrl)
 
 void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 {
-    Bulk&         bk = rs.bulk;
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    Bulk&         bk  = rs.bulk;
+    BulkVarSet&   bvs = bk.vs;
+    const OCP_USI nb  = bvs.nb;
+    const USI     np  = bvs.np;
+    const USI     nc  = bvs.nc;
 
     // Rock
-    bk.poro.resize(nb);
-    bk.rockVp.resize(nb);
+    bvs.poro.resize(nb);
+    bvs.rockVp.resize(nb);
 
-    bk.lporo.resize(nb);
-    bk.lrockVp.resize(nb);
+    bvs.lporo.resize(nb);
+    bvs.lrockVp.resize(nb);
 
     // derivatives
-    bk.poroP.resize(nb);
-    bk.lporoP.resize(nb);
+    bvs.poroP.resize(nb);
+    bvs.lporoP.resize(nb);
 
     // Fluid
-    bk.phaseNum.resize(nb);
-    bk.Nt.resize(nb);
-    bk.Ni.resize(nb * nc);
-    bk.vf.resize(nb);
-    bk.T.resize(nb);
-    bk.P.resize(nb);
-    bk.Pb.resize(nb);
-    bk.Pj.resize(nb * np);
-    bk.Pc.resize(nb * np);
-    bk.phaseExist.resize(nb * np);
-    bk.S.resize(nb * np);
-    bk.vj.resize(nb * np);
-    bk.xij.resize(nb * np * nc);
-    bk.rho.resize(nb * np);
-    bk.xi.resize(nb * np);
-    bk.mu.resize(nb * np);
-    bk.kr.resize(nb * np);
+    bvs.phaseNum.resize(nb);
+    bvs.Nt.resize(nb);
+    bvs.Ni.resize(nb * nc);
+    bvs.vf.resize(nb);
+    bvs.T.resize(nb);
+    bvs.P.resize(nb);
+    bvs.Pb.resize(nb);
+    bvs.Pj.resize(nb * np);
+    bvs.Pc.resize(nb * np);
+    bvs.phaseExist.resize(nb * np);
+    bvs.S.resize(nb * np);
+    bvs.vj.resize(nb * np);
+    bvs.xij.resize(nb * np * nc);
+    bvs.rho.resize(nb * np);
+    bvs.xi.resize(nb * np);
+    bvs.mu.resize(nb * np);
+    bvs.kr.resize(nb * np);
 
-    bk.lphaseNum.resize(nb);
-    bk.lNt.resize(nb);
-    bk.lNi.resize(nb * nc);
-    bk.lvf.resize(nb);
-    bk.lT.resize(nb);
-    bk.lP.resize(nb);
-    bk.lPj.resize(nb * np);
-    bk.lPc.resize(nb * np);
-    bk.lphaseExist.resize(nb * np);
-    bk.lS.resize(nb * np);
-    bk.vj.resize(nb * np);
-    bk.lxij.resize(nb * np * nc);
-    bk.lrho.resize(nb * np);
-    bk.lxi.resize(nb * np);
-    bk.lmu.resize(nb * np);
-    bk.lkr.resize(nb * np);
+    bvs.lphaseNum.resize(nb);
+    bvs.lNt.resize(nb);
+    bvs.lNi.resize(nb * nc);
+    bvs.lvf.resize(nb);
+    bvs.lT.resize(nb);
+    bvs.lP.resize(nb);
+    bvs.lPj.resize(nb * np);
+    bvs.lPc.resize(nb * np);
+    bvs.lphaseExist.resize(nb * np);
+    bvs.lS.resize(nb * np);
+    bvs.vj.resize(nb * np);
+    bvs.lxij.resize(nb * np * nc);
+    bvs.lrho.resize(nb * np);
+    bvs.lxi.resize(nb * np);
+    bvs.lmu.resize(nb * np);
+    bvs.lkr.resize(nb * np);
 
     // derivatives
-    bk.vfP.resize(nb);
-    bk.vfi.resize(nb * nc);
+    bvs.vfP.resize(nb);
+    bvs.vfi.resize(nb * nc);
 
-    bk.lvfP.resize(nb);
-    bk.lvfi.resize(nb * nc);
+    bvs.lvfP.resize(nb);
+    bvs.lvfi.resize(nb * nc);
 
     // others
     bk.cfl.resize(nb * np);
@@ -248,12 +250,14 @@ void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
-        bk.flashCal[bk.PVTNUM[n]]->InitFlashIMPEC(bk.P[n], bk.Pb[n], bk.T[n],
-                                                  &bk.S[n * bk.np], bk.rockVp[n],
-                                                  bk.Ni.data() + n * bk.nc, n);
-        for (USI i = 0; i < bk.nc; i++) {
-            bk.Ni[n * bk.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+    BulkVarSet& bvs = bk.vs;
+
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+        bk.flashCal[bk.PVTNUM[n]]->InitFlashIMPEC(bvs.P[n], bvs.Pb[n], bvs.T[n],
+                                                  &bvs.S[n * bvs.np], bvs.rockVp[n],
+                                                  bvs.Ni.data() + n * bvs.nc, n);
+        for (USI i = 0; i < bvs.nc; i++) {
+            bvs.Ni[n * bvs.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
         }
         PassFlashValue(bk, n);
     }
@@ -261,60 +265,65 @@ void IsoT_IMPEC::InitFlash(Bulk& bk) const
 
 void IsoT_IMPEC::CalFlash(Bulk& bk)
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
+    BulkVarSet& bvs = bk.vs;
 
-        bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bk.P[n], bk.T[n], &bk.Ni[n * bk.nc],
-                                              bk.phaseNum[n],
-                                              &bk.xij[n * bk.np * bk.nc], n);
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+
+        bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
+                                              bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
         PassFlashValue(bk, n);
     }
 }
 
 void IsoT_IMPEC::PassFlashValue(Bulk& bk, const OCP_USI& n) const
 {
-    const USI     np     = bk.np;
-    const USI     nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+
+    const USI     np     = bvs.np;
+    const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
     const USI     pvtnum = bk.PVTNUM[n];
 
-    bk.phaseNum[n] = 0;
-    bk.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bk.vf[n]       = bk.flashCal[pvtnum]->GetVf();
+    bvs.phaseNum[n] = 0;
+    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
+    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
-        bk.S[bIdp + j]          = bk.flashCal[pvtnum]->GetS(j);
-        if (bk.phaseExist[bIdp + j]) {
-            bk.phaseNum[n]++;
+        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
+        bvs.S[bIdp + j]          = bk.flashCal[pvtnum]->GetS(j);
+        if (bvs.phaseExist[bIdp + j]) {
+            bvs.phaseNum[n]++;
             for (USI i = 0; i < nc; i++) {
-                bk.xij[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetXij(j, i);
+                bvs.xij[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetXij(j, i);
             }
-            bk.vj[bIdp + j]  = bk.flashCal[pvtnum]->GetVj(j);
-            bk.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bk.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bk.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
+            bvs.vj[bIdp + j]  = bk.flashCal[pvtnum]->GetVj(j);
+            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
+            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
+            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
         }
     }
 
-    bk.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bk.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
     }
 }
 
 void IsoT_IMPEC::CalKrPc(Bulk& bk) const
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
-        OCP_USI bId = n * bk.np;
-        bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], n);
-        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
-        for (USI j = 0; j < bk.np; j++)
-            bk.Pj[n * bk.np + j] = bk.P[n] + bk.Pc[n * bk.np + j];
+    BulkVarSet& bvs = bk.vs;
+
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+        OCP_USI bId = n * bvs.np;
+        bk.flow[bk.SATNUM[n]]->CalKrPc(&bvs.S[bId], n);
+        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+        for (USI j = 0; j < bvs.np; j++)
+            bvs.Pj[n * bvs.np + j] = bvs.P[n] + bvs.Pc[n * bvs.np + j];
     }
 }
 
@@ -326,10 +335,12 @@ void IsoT_IMPEC::CalFlux(Reservoir& rs) const
 
 void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
 {
-    const Bulk& bk   = rs.bulk;
+    const Bulk&       bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
+
     BulkConn&   conn = rs.conn;
-    const USI   np   = bk.np;
-    const USI   nc   = bk.nc;
+    const USI   np   = bvs.np;
+    const USI   nc   = bvs.nc;
 
     // calculate a step flux using iteratorConn
 
@@ -350,9 +361,10 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
 void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
 {
 
+    BulkVarSet& bvs = rs.bulk.vs;
+
     // Bulk to Bulk
-    Bulk&           bk   = rs.bulk;
-    const USI       nc   = bk.nc;
+    const USI       nc   = bvs.nc;
     const BulkConn& conn = rs.conn;
     
     OCP_USI bId, eId;
@@ -362,8 +374,8 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
         eId = conn.iteratorConn[c].EId();
 
         for (USI i = 0; i < nc; i++) {
-            bk.Ni[eId * nc + i] += dt * conn.bcval.flux_ni[c * nc + i];
-            bk.Ni[bId * nc + i] -= dt * conn.bcval.flux_ni[c * nc + i];
+            bvs.Ni[eId * nc + i] += dt * conn.bcval.flux_ni[c * nc + i];
+            bvs.Ni[bId * nc + i] -= dt * conn.bcval.flux_ni[c * nc + i];
         }
     }
 
@@ -373,7 +385,7 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
             for (USI p = 0; p < wl.PerfNum(); p++) {
                 OCP_USI k = wl.PerfLocation(p);
                 for (USI i = 0; i < nc; i++) {
-                    bk.Ni[k * nc + i] -= wl.PerfQi_lbmol(p, i) * dt;
+                    bvs.Ni[k * nc + i] -= wl.PerfQi_lbmol(p, i) * dt;
                 }
             }
         }
@@ -384,7 +396,7 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bk.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, MPI_DOUBLE, rel[0], 0, domain.myComm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -394,7 +406,7 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
         s.resize(1 + (sel.size() - 1) * nc);
         s[0] = sel[0];
         for (USI j = 1; j < sel.size(); j++) {
-            const OCP_DBL* bId = &bk.Ni[0] + sel[j] * nc;
+            const OCP_DBL* bId = &bvs.Ni[0] + sel[j] * nc;
             copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
         }
         MPI_Isend(s.data() + 1, s.size() - 1, MPI_DOUBLE, s[0], 0, domain.myComm, &domain.send_request[i]);
@@ -408,22 +420,23 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
                                   const Reservoir& rs,
                                   const OCP_DBL&   dt) const
 {
-    const USI numWell = rs.GetNumOpenWell();
+    const Bulk&       bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
 
-    const Bulk&     bk   = rs.bulk;
+    const USI numWell = rs.GetNumOpenWell();
     const BulkConn& conn = rs.conn;
-    const OCP_USI   nb   = bk.nbI;
+    const OCP_USI   nb   = bvs.nbI;
 
     ls.AddDim(nb);
 
     // accumulate term
     OCP_DBL Vpp, Vp, vf, vfP, P;
     for (OCP_USI n = 0; n < nb; n++) {
-        vf  = bk.vf[n];
-        vfP = bk.vfP[n];
-        P   = bk.lP[n];
-        Vpp = bk.v[n] * bk.poroP[n];
-        Vp  = bk.rockVp[n];
+        vf  = bvs.vf[n];
+        vfP = bvs.vfP[n];
+        P   = bvs.lP[n];
+        Vpp = bvs.v[n] * bvs.poroP[n];
+        Vp  = bvs.rockVp[n];
 
         ls.NewDiag(n, Vpp - vfP);
         ls.AddRhs(n, (Vpp - vfP) * P + dt * (vf - Vp));
@@ -490,13 +503,14 @@ void IsoT_IMPEC::AssembleMatWells(LinearSystem&    ls,
 
 void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
 {
-    Bulk&         bk     = rs.bulk;
-    const OCP_USI nb     = bk.nb;
-    const USI     np     = bk.np;
+    Bulk&       bk = rs.bulk;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb     = bvs.nb;
+    const USI     np     = bvs.np;
     const Domain& domain = rs.domain;
 
     // Well first
-    USI wId = bk.nbI;
+    USI wId = bvs.nbI;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
             wl.SetBHP(u[wId]);
@@ -531,9 +545,9 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     for (USI p = 0; p < 2; p++) {
 
         for (OCP_USI n = bId; n < eId; n++) {
-            bk.P[n] = u[n];
+            bvs.P[n] = u[n];
             for (USI j = 0; j < np; j++) {
-                bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+                bvs.Pj[n * np + j] = bvs.P[n] + bvs.Pc[n * np + j];
             }
         }
 
@@ -552,9 +566,10 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
 
 void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
 {
+
     // Bulk
-    rs.bulk.Ni = rs.bulk.lNi;
-    rs.bulk.Pj = rs.bulk.lPj;
+    rs.bulk.vs.Ni = rs.bulk.vs.lNi;
+    rs.bulk.vs.Pj = rs.bulk.vs.lPj;
     // Bulk Conn
 
     rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
@@ -568,29 +583,30 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
 
 void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
 {
-    Bulk& bk = rs.bulk;
+    Bulk&       bk  = rs.bulk;
+    BulkVarSet& bvs = bk.vs;
     // Rock
-    bk.rockVp = bk.lrockVp;
-    bk.poro   = bk.lporo;
-    bk.poroP  = bk.lporoP;
+    bvs.rockVp = bvs.lrockVp;
+    bvs.poro   = bvs.lporo;
+    bvs.poroP  = bvs.lporoP;
 
     // Fluid
-    bk.phaseNum   = bk.lphaseNum;
-    bk.Nt         = bk.lNt;
-    bk.Ni         = bk.lNi;
-    bk.vf         = bk.lvf;
-    bk.Pj         = bk.lPj;
-    bk.phaseExist = bk.lphaseExist;
-    bk.S          = bk.lS;
-    bk.vj         = bk.lvj;
-    bk.xij        = bk.lxij;
-    bk.rho        = bk.lrho;
-    bk.xi         = bk.lxi;
-    bk.mu         = bk.lmu;
+    bvs.phaseNum   = bvs.lphaseNum;
+    bvs.Nt         = bvs.lNt;
+    bvs.Ni         = bvs.lNi;
+    bvs.vf         = bvs.lvf;
+    bvs.Pj         = bvs.lPj;
+    bvs.phaseExist = bvs.lphaseExist;
+    bvs.S          = bvs.lS;
+    bvs.vj         = bvs.lvj;
+    bvs.xij        = bvs.lxij;
+    bvs.rho        = bvs.lrho;
+    bvs.xi         = bvs.lxi;
+    bvs.mu         = bvs.lmu;
 
     // derivatives
-    bk.vfP = bk.lvfP;
-    bk.vfi = bk.lvfi;
+    bvs.vfP = bvs.lvfP;
+    bvs.vfi = bvs.lvfi;
 
     // Bulk Conn
     rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
@@ -608,33 +624,34 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
 void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 {
 
-    Bulk& bk = rs.bulk;
+    Bulk&       bk  = rs.bulk;
+    BulkVarSet& bvs = bk.vs;
 
     // Rock
-    bk.lporo   = bk.poro;
-    bk.lporoP  = bk.poroP;
-    bk.lrockVp = bk.rockVp;
+    bvs.lporo   = bvs.poro;
+    bvs.lporoP  = bvs.poroP;
+    bvs.lrockVp = bvs.rockVp;
 
     // Fluid
-    bk.lphaseNum   = bk.phaseNum;
-    bk.lNt         = bk.Nt;
-    bk.lNi         = bk.Ni;
-    bk.lvf         = bk.vf;
-    bk.lP          = bk.P;
-    bk.lPj         = bk.Pj;
-    bk.lPc         = bk.Pc;
-    bk.lphaseExist = bk.phaseExist;
-    bk.lS          = bk.S;
-    bk.lvj         = bk.vj;
-    bk.lxij        = bk.xij;
-    bk.lrho        = bk.rho;
-    bk.lxi         = bk.xi;
-    bk.lmu         = bk.mu;
-    bk.lkr         = bk.kr;
+    bvs.lphaseNum   = bvs.phaseNum;
+    bvs.lNt         = bvs.Nt;
+    bvs.lNi         = bvs.Ni;
+    bvs.lvf         = bvs.vf;
+    bvs.lP          = bvs.P;
+    bvs.lPj         = bvs.Pj;
+    bvs.lPc         = bvs.Pc;
+    bvs.lphaseExist = bvs.phaseExist;
+    bvs.lS          = bvs.S;
+    bvs.lvj         = bvs.vj;
+    bvs.lxij        = bvs.xij;
+    bvs.lrho        = bvs.rho;
+    bvs.lxi         = bvs.xi;
+    bvs.lmu         = bvs.mu;
+    bvs.lkr         = bvs.kr;
 
     // derivatives
-    bk.lvfP = bk.vfP;
-    bk.lvfi = bk.vfi;
+    bvs.lvfP = bvs.vfP;
+    bvs.lvfi = bvs.vfi;
 
     BulkConn& conn = rs.conn;
 
@@ -821,84 +838,87 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 
 void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 {
-    Bulk&         bk = rs.bulk;
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+
+    Bulk&       bk  = rs.bulk;
+    BulkVarSet& bvs = bk.vs;
+
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
+    const USI     nc = bvs.nc;
 
     // Rock
-    bk.poro.resize(nb);
-    bk.rockVp.resize(nb);
+    bvs.poro.resize(nb);
+    bvs.rockVp.resize(nb);
 
-    bk.lporo.resize(nb);
-    bk.lrockVp.resize(nb);
+    bvs.lporo.resize(nb);
+    bvs.lrockVp.resize(nb);
 
     // derivatives
-    bk.poroP.resize(nb);
-    bk.lporoP.resize(nb);
+    bvs.poroP.resize(nb);
+    bvs.lporoP.resize(nb);
 
     // Fluid
-    bk.phaseNum.resize(nb);
-    bk.Nt.resize(nb);
-    bk.Ni.resize(nb * nc);
-    bk.vf.resize(nb);
-    bk.T.resize(nb);
-    bk.P.resize(nb);
-    bk.Pb.resize(nb);
-    bk.Pj.resize(nb * np);
-    bk.Pc.resize(nb * np);
-    bk.phaseExist.resize(nb * np);
-    bk.S.resize(nb * np);
-    bk.xij.resize(nb * np * nc);
-    bk.rho.resize(nb * np);
-    bk.xi.resize(nb * np);
-    bk.mu.resize(nb * np);
-    bk.kr.resize(nb * np);
+    bvs.phaseNum.resize(nb);
+    bvs.Nt.resize(nb);
+    bvs.Ni.resize(nb * nc);
+    bvs.vf.resize(nb);
+    bvs.T.resize(nb);
+    bvs.P.resize(nb);
+    bvs.Pb.resize(nb);
+    bvs.Pj.resize(nb * np);
+    bvs.Pc.resize(nb * np);
+    bvs.phaseExist.resize(nb * np);
+    bvs.S.resize(nb * np);
+    bvs.xij.resize(nb * np * nc);
+    bvs.rho.resize(nb * np);
+    bvs.xi.resize(nb * np);
+    bvs.mu.resize(nb * np);
+    bvs.kr.resize(nb * np);
 
-    bk.lphaseNum.resize(nb);
-    bk.lNt.resize(nb);
-    bk.lNi.resize(nb * nc);
-    bk.lvf.resize(nb);
-    bk.lT.resize(nb);
-    bk.lP.resize(nb);
-    bk.lPj.resize(nb * np);
-    bk.lPc.resize(nb * np);
-    bk.lphaseExist.resize(nb * np);
-    bk.lS.resize(nb * np);
-    bk.lxij.resize(nb * np * nc);
-    bk.lrho.resize(nb * np);
-    bk.lxi.resize(nb * np);
-    bk.lmu.resize(nb * np);
-    bk.lkr.resize(nb * np);
+    bvs.lphaseNum.resize(nb);
+    bvs.lNt.resize(nb);
+    bvs.lNi.resize(nb * nc);
+    bvs.lvf.resize(nb);
+    bvs.lT.resize(nb);
+    bvs.lP.resize(nb);
+    bvs.lPj.resize(nb * np);
+    bvs.lPc.resize(nb * np);
+    bvs.lphaseExist.resize(nb * np);
+    bvs.lS.resize(nb * np);
+    bvs.lxij.resize(nb * np * nc);
+    bvs.lrho.resize(nb * np);
+    bvs.lxi.resize(nb * np);
+    bvs.lmu.resize(nb * np);
+    bvs.lkr.resize(nb * np);
 
     // derivatives
-    bk.vfP.resize(nb);
-    bk.vfi.resize(nb * nc);
-    bk.rhoP.resize(nb * np);
-    bk.rhox.resize(nb * nc * np);
-    bk.xiP.resize(nb * np);
-    bk.xix.resize(nb * nc * np);
-    bk.muP.resize(nb * np);
-    bk.mux.resize(nb * nc * np);
-    bk.dPcdS.resize(nb * np * np);
-    bk.dKrdS.resize(nb * np * np);
+    bvs.vfP.resize(nb);
+    bvs.vfi.resize(nb * nc);
+    bvs.rhoP.resize(nb * np);
+    bvs.rhox.resize(nb * nc * np);
+    bvs.xiP.resize(nb * np);
+    bvs.xix.resize(nb * nc * np);
+    bvs.muP.resize(nb * np);
+    bvs.mux.resize(nb * nc * np);
+    bvs.dPcdS.resize(nb * np * np);
+    bvs.dKrdS.resize(nb * np * np);
 
-    bk.lvfP.resize(nb);
-    bk.lvfi.resize(nb * nc);
-    bk.lrhoP.resize(nb * np);
-    bk.lrhox.resize(nb * nc * np);
-    bk.lxiP.resize(nb * np);
-    bk.lxix.resize(nb * nc * np);
-    bk.lmuP.resize(nb * np);
-    bk.lmux.resize(nb * nc * np);
-    bk.ldPcdS.resize(nb * np * np);
-    bk.ldKrdS.resize(nb * np * np);
+    bvs.lvfP.resize(nb);
+    bvs.lvfi.resize(nb * nc);
+    bvs.lrhoP.resize(nb * np);
+    bvs.lrhox.resize(nb * nc * np);
+    bvs.lxiP.resize(nb * np);
+    bvs.lxix.resize(nb * nc * np);
+    bvs.lmuP.resize(nb * np);
+    bvs.lmux.resize(nb * nc * np);
+    bvs.ldPcdS.resize(nb * np * np);
+    bvs.ldKrdS.resize(nb * np * np);
 
     // FIM-Specified
-    bk.maxLendSdP = (nc + 1) * (nc + 1) * np;
-    bk.dSec_dPri.resize(nb * bk.maxLendSdP);
+    bvs.maxLendSdP = (nc + 1) * (nc + 1) * np;
+    bvs.dSec_dPri.resize(nb * bvs.maxLendSdP);
 
-    bk.ldSec_dPri.resize(nb * bk.maxLendSdP);
+    bvs.ldSec_dPri.resize(nb * bvs.maxLendSdP);
 
     // BulkConn
     BulkConn& conn = rs.conn;
@@ -914,7 +934,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     dPNR.resize(nb);
 
     // Allocate Residual
-    res.Setup_IsoT(bk.nbI, rs.allWells.numWell, nc);
+    res.Setup_IsoT(bvs.nbI, rs.allWells.numWell, nc);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -929,12 +949,14 @@ void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
 
 void IsoT_FIM::InitFlash(Bulk& bk)
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
-        bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bk.P[n], bk.Pb[n], bk.T[n],
-                                                &bk.S[n * bk.np], bk.rockVp[n],
-                                                bk.Ni.data() + n * bk.nc, n);
-        for (USI i = 0; i < bk.nc; i++) {
-            bk.Ni[n * bk.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+    BulkVarSet& bvs = bk.vs;
+
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+        bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
+                                                &bvs.S[n * bvs.np], bvs.rockVp[n],
+                                                bvs.Ni.data() + n * bvs.nc, n);
+        for (USI i = 0; i < bvs.nc; i++) {
+            bvs.Ni[n * bvs.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
         }
         PassFlashValue(bk, n);
     }
@@ -942,83 +964,89 @@ void IsoT_FIM::InitFlash(Bulk& bk)
 
 void IsoT_FIM::CalFlash(Bulk& bk)
 {
+    BulkVarSet& bvs = bk.vs;
 
-    for (OCP_USI n = 0; n < bk.nb; n++) {
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bk.P[n], bk.T[n], &bk.Ni[n * bk.nc],
-                                            &bk.S[n * bk.np], bk.phaseNum[n],
-                                            &bk.xij[n * bk.np * bk.nc], n);
+        bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
+                                            &bvs.S[n * bvs.np], bvs.phaseNum[n],
+                                            &bvs.xij[n * bvs.np * bvs.nc], n);
         PassFlashValue(bk, n);
     }
 }
 
 void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    const USI     np     = bk.np;
-    const USI     nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+
+    const USI     np     = bvs.np;
+    const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
     const USI     pvtnum = bk.PVTNUM[n];
 
-    bk.phaseNum[n] = 0;
-    bk.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bk.vf[n]       = bk.flashCal[pvtnum]->GetVf();
+    bvs.phaseNum[n] = 0;
+    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
+    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bk.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
-        dSNR[bIdp + j] = bk.S[bIdp + j] - dSNR[bIdp + j];
-        bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
-        if (bk.phaseExist[bIdp + j]) {
-            bk.phaseNum[n]++;
-            bk.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bk.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bk.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
+        bvs.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
+        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
+        if (bvs.phaseExist[bIdp + j]) {
+            bvs.phaseNum[n]++;
+            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
+            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
+            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
 
             // Derivatives
-            bk.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
-            bk.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
-            bk.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
+            bvs.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
+            bvs.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
+            bvs.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
 
             for (USI i = 0; i < nc; i++) {
-                bk.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
-                bk.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
-                bk.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
-                bk.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
+                bvs.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
+                bvs.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
+                bvs.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
+                bvs.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
             }
         }
     }
 
-    bk.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bk.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
     }
 
-    copy(bk.flashCal[pvtnum]->GetDXsDXp().begin(), bk.flashCal[pvtnum]->GetDXsDXp().end(), &bk.dSec_dPri[n * bk.maxLendSdP]);
+    copy(bk.flashCal[pvtnum]->GetDXsDXp().begin(), bk.flashCal[pvtnum]->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.maxLendSdP]);
 }
 
 void IsoT_FIM::CalKrPc(Bulk& bk) const
 {
-    const USI& np = bk.np;
-    for (OCP_USI n = 0; n < bk.nb; n++) {
+    BulkVarSet& bvs = bk.vs;
+    const USI& np = bvs.np;
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
         const OCP_USI bId = n * np;
-        bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
-        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
-        copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
-        for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
+        bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
+        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+        copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+        copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+        for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
     }
 }
 
 void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
 {
-    const Bulk&            bk    = rs.bulk;
-    const USI              nb    = bk.nbI;
-    const USI              np    = bk.np;
-    const USI              nc    = bk.nc;
+    const Bulk& bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
+
+    const USI              nb    = bvs.nbI;
+    const USI              np    = bvs.np;
+    const USI              nc    = bvs.nc;
     const USI              len   = nc + 1;
     
     res.SetZero();
@@ -1029,9 +1057,9 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     for (OCP_USI n = 0; n < nb; n++) {
         bId             = n * len;
         bIdb            = n * nc;
-        res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
+        res.resAbs[bId] = bvs.rockVp[n] - bvs.vf[n];
         for (USI i = 0; i < nc; i++) {
-            res.resAbs[bId + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
+            res.resAbs[bId + 1 + i] = bvs.Ni[bIdb + i] - bvs.lNi[bIdb + i];
         }
     }
 
@@ -1075,7 +1103,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     for (OCP_USI n = 0; n < nb; n++) {
 
         for (USI i = 0; i < len; i++) {
-            tmp = fabs(res.resAbs[n * len + i] / bk.rockVp[n]);
+            tmp = fabs(res.resAbs[n * len + i] / bvs.rockVp[n]);
             if (res.maxRelRes_V < tmp) {
                 res.maxRelRes_V = tmp;
                 res.maxId_V     = n;
@@ -1085,7 +1113,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
         res.resRelV[n] = sqrt(res.resRelV[n]);
 
         for (USI i = 1; i < len; i++) {
-            tmp = fabs(res.resAbs[n * len + i] / bk.Nt[n]);
+            tmp = fabs(res.resAbs[n * len + i] / bvs.Nt[n]);
             if (res.maxRelRes_N < tmp) {
                 res.maxRelRes_N = tmp;
                 res.maxId_N     = n;
@@ -1113,13 +1141,15 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
                                 const Reservoir& rs,
                                 const OCP_DBL&   dt) const
 {
+    const Bulk& bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
+
     const USI numWell = rs.GetNumOpenWell();
 
-    const Bulk&     bk     = rs.bulk;
     const BulkConn& conn   = rs.conn;
-    const OCP_USI   nb     = bk.nbI;
-    const USI       np     = bk.np;
-    const USI       nc     = bk.nc;
+    const OCP_USI   nb     = bvs.nbI;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
     const USI       ncol   = nc + 1;
     const USI       ncol2  = np * nc + np;
     const USI       bsize  = ncol * ncol;
@@ -1133,9 +1163,9 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         bmat[i * ncol + i] = 1;
     }
     for (OCP_USI n = 0; n < nb; n++) {
-        bmat[0] = bk.v[n] * bk.poroP[n] - bk.vfP[n];
+        bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
         for (USI i = 0; i < nc; i++) {
-            bmat[i + 1] = -bk.vfi[n * nc + i];
+            bmat[i + 1] = -bvs.vfi[n * nc + i];
         }
         ls.NewDiag(n, bmat);
     }
@@ -1153,7 +1183,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
         
         bmat = flux[cType]->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
         // Assemble
@@ -1174,7 +1204,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
         // End
         bmat = flux[cType]->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bk.dSec_dPri[eId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
         
@@ -1229,15 +1259,16 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
                            const OCPControl&      ctrl)
 {
     const Domain&   domain = rs.domain;
-    Bulk&           bk     = rs.bulk;
-    const OCP_USI   nb     = bk.nb;
-    const USI       np     = bk.np;
-    const USI       nc     = bk.nc;
+    Bulk&     bk  = rs.bulk;
+    BulkVarSet&     bvs = bk.vs;
+    const OCP_USI   nb     = bvs.nb;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
     const USI       row    = np * (nc + 1);
     const USI       col    = nc + 1;
 
     // Well first
-    USI wId = bk.nbI * col;
+    USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
             wl.SetBHP(wl.BHP() + u[wId]);
@@ -1278,7 +1309,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    dSNR    = bk.S;
+    dSNR    = bvs.S;
     NRdPmax = 0;
     NRdNmax = 0;
 
@@ -1297,7 +1328,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 			// compute the chop
 			fill(dtmp.begin(), dtmp.end(), 0.0);
 
-			DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
+			DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP], u.data() + n * col, 1,
 				dtmp.data());
 
 			for (USI j = 0; j < np; j++) {
@@ -1305,8 +1336,8 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 				if (fabs(dtmp[j]) > dSmaxlim) {
 					choptmp = dSmaxlim / fabs(dtmp[j]);
 				}
-				else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-					choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+				else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
+					choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
 				}
 				// if (fabs(S[n_np_j] - scm[j]) > TINY &&
 				//     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
@@ -1316,20 +1347,20 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
 			// dS
 			for (USI j = 0; j < np; j++) {
-				bk.S[n * np + j] += chopmin * dtmp[j];
+				bvs.S[n * np + j] += chopmin * dtmp[j];
 			}
 
 			// dxij   ---- Compositional model only
 
 			if (bk.mixType == OCPMixtureType::COMP) {
 				USI js = np;
-				if (bk.phaseNum[n] >= 3) {
+				if (bvs.phaseNum[n] >= 3) {
 					// num of Hydroncarbon phase >= 2
 					OCP_USI bId = 0;
 					for (USI j = 0; j < 2; j++) {
 						bId = n * np * nc + j * nc;
-						for (USI i = 0; i < bk.nc; i++) {
-							bk.xij[bId + i] += chopmin * dtmp[js];
+						for (USI i = 0; i < bvs.nc; i++) {
+							bvs.xij[bId + i] += chopmin * dtmp[js];
 							js++;
 						}
 					}
@@ -1341,19 +1372,19 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 			// choptmp = dPmaxlim / fabs(dP);
 			// chopmin = min(chopmin, choptmp);
 			if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
-			bk.P[n] += dP; // seems better
+			bvs.P[n] += dP; // seems better
 			dPNR[n] = dP;
 
 			// dNi
 			for (USI i = 0; i < nc; i++) {
 				dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-				if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
-					NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
+				if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bvs.Nt[n])
+					NRdNmax = dNNR[n * nc + i] / bvs.Nt[n];
 
-				bk.Ni[n * nc + i] += dNNR[n * nc + i];
+				bvs.Ni[n * nc + i] += dNNR[n * nc + i];
 
-				// if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
-				//     bk.Ni[n * nc + i] = 1E-20;
+				// if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
+				//     bvs.Ni[n * nc + i] = 1E-20;
 				// }
 			}
 		}
@@ -1378,40 +1409,41 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
 void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
-    Bulk& bk = rs.bulk;
+    Bulk&       bk = rs.bulk;
+    BulkVarSet& bvs = bk.vs;
 
     // Rock
-    bk.poro   = bk.lporo;
-    bk.poroP  = bk.lporoP;
-    bk.rockVp = bk.lrockVp;
+    bvs.poro   = bvs.lporo;
+    bvs.poroP  = bvs.lporoP;
+    bvs.rockVp = bvs.lrockVp;
     // Fluid
-    bk.phaseNum   = bk.lphaseNum;
-    bk.Nt         = bk.lNt;
-    bk.Ni         = bk.lNi;
-    bk.vf         = bk.lvf;
-    bk.P          = bk.lP;
-    bk.Pj         = bk.lPj;
-    bk.Pc         = bk.lPc;
-    bk.phaseExist = bk.lphaseExist;
-    bk.S          = bk.lS;
-    bk.xij        = bk.lxij;
-    bk.rho        = bk.lrho;
-    bk.xi         = bk.lxi;
-    bk.mu         = bk.lmu;
-    bk.kr         = bk.lkr;
+    bvs.phaseNum   = bvs.lphaseNum;
+    bvs.Nt         = bvs.lNt;
+    bvs.Ni         = bvs.lNi;
+    bvs.vf         = bvs.lvf;
+    bvs.P          = bvs.lP;
+    bvs.Pj         = bvs.lPj;
+    bvs.Pc         = bvs.lPc;
+    bvs.phaseExist = bvs.lphaseExist;
+    bvs.S          = bvs.lS;
+    bvs.xij        = bvs.lxij;
+    bvs.rho        = bvs.lrho;
+    bvs.xi         = bvs.lxi;
+    bvs.mu         = bvs.lmu;
+    bvs.kr         = bvs.lkr;
     // derivatives
-    bk.vfP     = bk.lvfP;
-    bk.vfi     = bk.lvfi;
-    bk.rhoP    = bk.lrhoP;
-    bk.rhox    = bk.lrhox;
-    bk.xiP     = bk.lxiP;
-    bk.xix     = bk.lxix;
-    bk.muP     = bk.lmuP;
-    bk.mux     = bk.lmux;
-    bk.dPcdS   = bk.ldPcdS;
-    bk.dKrdS   = bk.ldKrdS;
+    bvs.vfP     = bvs.lvfP;
+    bvs.vfi     = bvs.lvfi;
+    bvs.rhoP    = bvs.lrhoP;
+    bvs.rhox    = bvs.lrhox;
+    bvs.xiP     = bvs.lxiP;
+    bvs.xix     = bvs.lxix;
+    bvs.muP     = bvs.lmuP;
+    bvs.mux     = bvs.lmux;
+    bvs.dPcdS   = bvs.ldPcdS;
+    bvs.dKrdS   = bvs.ldKrdS;
     // FIM-Specified
-    bk.dSec_dPri    = bk.ldSec_dPri;
+    bvs.dSec_dPri    = bvs.ldSec_dPri;
 
     // Wells
     rs.allWells.ResetBHP();
@@ -1431,43 +1463,42 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 
 void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
 {
-    Bulk& bk = rs.bulk;
-
+    BulkVarSet& bvs = rs.bulk.vs;
     // Rock
-    bk.lporo   = bk.poro;
-    bk.lporoP  = bk.poroP;
-    bk.lrockVp = bk.rockVp;
+    bvs.lporo   = bvs.poro;
+    bvs.lporoP  = bvs.poroP;
+    bvs.lrockVp = bvs.rockVp;
 
     // Fluid
-    bk.lphaseNum   = bk.phaseNum;
-    bk.lNt         = bk.Nt;
-    bk.lNi         = bk.Ni;
-    bk.lvf         = bk.vf;
-    bk.lP          = bk.P;
-    bk.lPj         = bk.Pj;
-    bk.lPc         = bk.Pc;
-    bk.lphaseExist = bk.phaseExist;
-    bk.lS          = bk.S;
-    bk.lxij        = bk.xij;
-    bk.lrho        = bk.rho;
-    bk.lxi         = bk.xi;
-    bk.lmu         = bk.mu;
-    bk.lkr         = bk.kr;
+    bvs.lphaseNum   = bvs.phaseNum;
+    bvs.lNt         = bvs.Nt;
+    bvs.lNi         = bvs.Ni;
+    bvs.lvf         = bvs.vf;
+    bvs.lP          = bvs.P;
+    bvs.lPj         = bvs.Pj;
+    bvs.lPc         = bvs.Pc;
+    bvs.lphaseExist = bvs.phaseExist;
+    bvs.lS          = bvs.S;
+    bvs.lxij        = bvs.xij;
+    bvs.lrho        = bvs.rho;
+    bvs.lxi         = bvs.xi;
+    bvs.lmu         = bvs.mu;
+    bvs.lkr         = bvs.kr;
 
     // derivatives
-    bk.lvfP     = bk.vfP;
-    bk.lvfi     = bk.vfi;
-    bk.lrhoP    = bk.rhoP;
-    bk.lrhox    = bk.rhox;
-    bk.lxiP     = bk.xiP;
-    bk.lxix     = bk.xix;
-    bk.lmuP     = bk.muP;
-    bk.lmux     = bk.mux;
-    bk.ldPcdS = bk.dPcdS;
-    bk.ldKrdS  = bk.dKrdS;
+    bvs.lvfP     = bvs.vfP;
+    bvs.lvfi     = bvs.vfi;
+    bvs.lrhoP    = bvs.rhoP;
+    bvs.lrhox    = bvs.rhox;
+    bvs.lxiP     = bvs.xiP;
+    bvs.lxix     = bvs.xix;
+    bvs.lmuP     = bvs.muP;
+    bvs.lmux     = bvs.mux;
+    bvs.ldPcdS = bvs.dPcdS;
+    bvs.ldKrdS  = bvs.dKrdS;
 
     // FIM-Specified
-    bk.ldSec_dPri    = bk.dSec_dPri;
+    bvs.ldSec_dPri    = bvs.dSec_dPri;
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();
@@ -1677,13 +1708,14 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
 {
     IsoT_FIM::AllocateReservoir(rs);
 
-    Bulk&         bk = rs.bulk;
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    Bulk&         bk  = rs.bulk;
+    BulkVarSet&   bvs = bk.vs;
+    const OCP_USI nb  = bvs.nb;
+    const USI     np  = bvs.np;
+    const USI     nc  = bvs.nc;
 
-    bk.vj.resize(nb * np);
-    bk.lvj.resize(nb * np);
+    bvs.vj.resize(nb * np);
+    bvs.lvj.resize(nb * np);
 
     bk.xijNR.resize(nb * np * nc);
     bk.cfl.resize(nb * np);
@@ -1698,11 +1730,12 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
     // We just consider at most 1 layer neighbor now
 
-    Bulk&           bk   = rs.bulk;
+    Bulk&           bk  = rs.bulk;
+    BulkVarSet&     bvs = bk.vs;
     const BulkConn& conn = rs.conn;
-    const OCP_USI   nb   = bk.nbI;
-    const USI       np   = bk.np;
-    const USI       nc   = bk.nc;
+    const OCP_USI   nb   = bvs.nbI;
+    const USI       np   = bvs.np;
+    const USI       nc   = bvs.nc;
 
     // all impec
     bk.bulkTypeAIM.Init(-1);
@@ -1723,7 +1756,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         }
         // Volume error
         if (!flag) {
-            if ((fabs(bk.vf[n] - bk.rockVp[n]) / bk.rockVp[n]) > 1E-3) {
+            if ((fabs(bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n]) > 1E-3) {
                 flag = OCP_TRUE;
             }
         }
@@ -1731,13 +1764,13 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         // NR Step
         if (!flag && OCP_FALSE) {
             // dP
-            if (fabs(dPNR[n] / bk.P[n]) > 1E-3) {
+            if (fabs(dPNR[n] / bvs.P[n]) > 1E-3) {
                 flag = OCP_TRUE;
             }
             // dNi
             if (!flag) {
-                for (USI i = 0; i < bk.nc; i++) {
-                    if (fabs(dNNR[bIdc + i] / bk.Ni[bIdc + i]) > 1E-3) {
+                for (USI i = 0; i < bvs.nc; i++) {
+                    if (fabs(dNNR[bIdc + i] / bvs.Ni[bIdc + i]) > 1E-3) {
                         flag = OCP_TRUE;
                         break;
                     }
@@ -1822,7 +1855,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 
     if (OCP_TRUE) {
-        cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bk.nb * 100 << "% " << endl;
+        cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bvs.nb * 100 << "% " << endl;
     }
 }
 
@@ -1841,18 +1874,20 @@ void IsoT_AIMc::SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_
 
 void IsoT_AIMc::CalFlashEp(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
+    const USI     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bk.P[n], bk.T[n], &bk.Ni[n * nc],
-                                                  bk.phaseNum[n],
+            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
+                                                  bvs.phaseNum[n],
                                                   &bk.xijNR[n * np * nc], n);
-            // bk.PassFlashValueAIMcEp(n);
+            // bvs.PassFlashValueAIMcEp(n);
             PassFlashValueEp(bk, n);
         }
     }
@@ -1860,18 +1895,20 @@ void IsoT_AIMc::CalFlashEp(Bulk& bk)
 
 void IsoT_AIMc::CalFlashEa(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
+    const USI     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bk.P[n], bk.T[n], &bk.Ni[n * nc],
-                                                  bk.phaseNum[n], &bk.xij[n * np * nc],
+            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
+                                                  bvs.phaseNum[n], &bvs.xij[n * np * nc],
                                                   n);
-            // bk.PassFlashValueAIMcEa(n);
+            // bvs.PassFlashValueAIMcEa(n);
 
             IsoT_IMPEC::PassFlashValue(bk, n);
         }
@@ -1880,20 +1917,21 @@ void IsoT_AIMc::CalFlashEa(Bulk& bk)
 
 void IsoT_AIMc::CalFlashI(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
+    const USI     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bk.P[n], bk.T[n], &bk.Ni[n * nc],
-                                                &bk.S[n * np], bk.phaseNum[n],
-                                                &bk.xij[n * np * nc], n);
+            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
+                                                &bvs.S[n * np], bvs.phaseNum[n],
+                                                &bvs.xij[n * np * nc], n);
             IsoT_FIM::PassFlashValue(bk, n);
             for (USI j = 0; j < np; j++) {
-                bk.vj[n * np + j] = bk.vf[n] * bk.S[n * np + j];
+                bvs.vj[n * np + j] = bvs.vf[n] * bvs.S[n * np + j];
             }
         }
     }
@@ -1903,23 +1941,23 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
 {
     // only var about volume needs, some flash var also
     OCP_FUNCNAME;
-
-    const USI     np     = bk.np;
-    const USI     nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const USI     np     = bvs.np;
+    const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
     const USI     pvtnum = bk.PVTNUM[n];
 
-    bk.Nt[n]  = bk.flashCal[pvtnum]->GetNt();
-    bk.vf[n]  = bk.flashCal[pvtnum]->GetVf();
-    bk.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.Nt[n]  = bk.flashCal[pvtnum]->GetNt();
+    bvs.vf[n]  = bk.flashCal[pvtnum]->GetVf();
+    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bk.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
     }
 
-    bk.phaseNum[n] = 0;
+    bvs.phaseNum[n] = 0;
     for (USI j = 0; j < np; j++) {
         if (bk.flashCal[pvtnum]->GetPhaseExist(j)) {
-            bk.phaseNum[n]++;
+            bvs.phaseNum[n]++;
 
             // IMPORTANT -- need for next Flash
             // But xij in nonlinear equations has been modified
@@ -1932,36 +1970,38 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
 
 void IsoT_AIMc::CalKrPcE(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPc(&bk.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
-            for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
+            bk.flow[bk.SATNUM[n]]->CalKrPc(&bvs.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+            for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
         }
     }
 }
 
 void IsoT_AIMc::CalKrPcI(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
-            for (USI j = 0; j < np; j++) bk.Pj[bId + j] = bk.P[n] + bk.Pc[bId + j];
+            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
         }
     }
 }
@@ -1972,11 +2012,12 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 {
     const USI numWell = rs.GetNumOpenWell();
 
-    const Bulk&     bk      = rs.bulk;
+    const Bulk& bk = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
     const BulkConn& conn    = rs.conn;
-    const OCP_USI   nb      = bk.nbI;
-    const USI       np      = bk.np;
-    const USI       nc      = bk.nc;
+    const OCP_USI   nb      = bvs.nbI;
+    const USI       np      = bvs.np;
+    const USI       nc      = bvs.nc;
     const USI       ncol    = nc + 1;
     const USI       ncol2   = np * nc + np;
     const USI       bsize   = ncol * ncol;
@@ -1990,9 +2031,9 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         bmat[i * ncol + i] = 1;
     }
     for (OCP_USI n = 0; n < nb; n++) {
-        bmat[0] = bk.v[n] * bk.poroP[n] - bk.vfP[n];
+        bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
         for (USI i = 0; i < nc; i++) {
-            bmat[i + 1] = -bk.vfi[n * nc + i];
+            bmat[i + 1] = -bvs.vfi[n * nc + i];
         }
         ls.NewDiag(n, bmat);
     }
@@ -2020,7 +2061,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         // Assemble
         bmat = flux[cType]->GetdFdXpB();
         if (bIdFIM) {
-            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2],
+            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2],
                     1, bmat.data());
         }
         Dscalar(bsize, dt, bmat.data());
@@ -2042,7 +2083,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         // End
         bmat = flux[cType]->GetdFdXpE();
         if (eIdFIM) {
-            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bk.dSec_dPri[eId * bsize2],
+            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2],
                     1, bmat.data());
         }
         Dscalar(bsize, dt, bmat.data());
@@ -2075,14 +2116,15 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 {
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
-    const OCP_USI   nb     = bk.nb;
-    const USI       np     = bk.np;
-    const USI       nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI   nb     = bvs.nb;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
     const USI       row    = np * (nc + 1);
     const USI       col    = nc + 1;
 
     // Well first
-    USI wId = bk.nbI * col;
+    USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
             wl.SetBHP(wl.BHP() + u[wId]);
@@ -2117,7 +2159,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    dSNR    = bk.S;
+    dSNR    = bvs.S;
     NRdPmax = 0;
     NRdNmax = 0;
 
@@ -2132,20 +2174,20 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
                 // Pressure
                 const OCP_DBL dP = u[n * col];
                 NRdPmax          = max(NRdPmax, fabs(dP));
-                bk.P[n]          += dP; // seems better
+                bvs.P[n]          += dP; // seems better
                 dPNR[n]          = dP;
                 // Ni
                 for (USI i = 0; i < nc; i++) {
                     dNNR[n * nc + i] = u[n * col + 1 + i];
-                    bk.Ni[n * nc + i] += dNNR[n * nc + i];
+                    bvs.Ni[n * nc + i] += dNNR[n * nc + i];
 
-                    // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
-                    //     bk.Ni[n * nc + i] = 1E-20;
+                    // if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
+                    //     bvs.Ni[n * nc + i] = 1E-20;
                     // }
                 }
                 // Pj
                 for (USI j = 0; j < np; j++) {
-                    bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+                    bvs.Pj[n * np + j] = bvs.P[n] + bvs.Pc[n * np + j];
                 }
                 continue;
             }
@@ -2153,7 +2195,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             chopmin = 1;
             // compute the chop
             fill(dtmp.begin(), dtmp.end(), 0.0);
-            DaAxpby(row, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP],
+            DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP],
                 u.data() + n * col, 1, dtmp.data());
 
             for (USI j = 0; j < np; j++) {
@@ -2161,8 +2203,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
                 if (fabs(dtmp[j]) > dSmaxlim) {
                     choptmp = dSmaxlim / fabs(dtmp[j]);
                 }
-                else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-                    choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+                else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
+                    choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
                 }
 
                 // if (fabs(S[n * np + j] - scm[j]) > TINY &&
@@ -2174,18 +2216,18 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 
             // dS
             for (USI j = 0; j < np; j++) {
-                bk.S[n * np + j] += chopmin * dtmp[j];
+                bvs.S[n * np + j] += chopmin * dtmp[j];
             }
 
             // dxij   ---- Compositional model only
             if (bk.mixType == OCPMixtureType::COMP) {
                 USI js = np;
-                if (bk.phaseNum[n] >= 3) {
+                if (bvs.phaseNum[n] >= 3) {
                     OCP_USI bId = 0;
                     for (USI j = 0; j < 2; j++) {
                         bId = n * np * nc + j * nc;
-                        for (USI i = 0; i < bk.nc; i++) {
-                            bk.xij[bId + i] += chopmin * dtmp[js];
+                        for (USI i = 0; i < bvs.nc; i++) {
+                            bvs.xij[bId + i] += chopmin * dtmp[js];
                             js++;
                         }
                     }
@@ -2195,19 +2237,19 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             // dP
             OCP_DBL dP = u[n * col];
             if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
-            bk.P[n] += dP; // seems better
+            bvs.P[n] += dP; // seems better
             dPNR[n] = dP;
 
             // dNi
             for (USI i = 0; i < nc; i++) {
                 dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-                if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
-                    NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
+                if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bvs.Nt[n])
+                    NRdNmax = dNNR[n * nc + i] / bvs.Nt[n];
 
-                bk.Ni[n * nc + i] += dNNR[n * nc + i];
+                bvs.Ni[n * nc + i] += dNNR[n * nc + i];
 
-                // if (bk.Ni[n * nc + i] < 0 && bk.Ni[n * nc + i] > -1E-3) {
-                //     bk.Ni[n * nc + i] = 1E-20;
+                // if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
+                //     bvs.Ni[n * nc + i] = 1E-20;
                 // }
             }
         }
@@ -2226,8 +2268,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 
 void IsoT_AIMc::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
-    rs.bulk.vj    = rs.bulk.lvj;
-    rs.bulk.xijNR = rs.bulk.lxij;
+    rs.bulk.vs.vj    = rs.bulk.vs.lvj;
+    rs.bulk.xijNR = rs.bulk.vs.lxij;
     IsoT_FIM::ResetToLastTimeStep(rs, ctrl);
 
     // all FIM
@@ -2244,8 +2286,8 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
 {
     IsoT_FIM::UpdateLastTimeStep(rs);
 
-    rs.bulk.lvj   = rs.bulk.vj;
-    rs.bulk.xijNR = rs.bulk.xij;
+    rs.bulk.vs.lvj   = rs.bulk.vs.vj;
+    rs.bulk.xijNR = rs.bulk.vs.xij;
 }
 
 /*----------------------------------------------------------------------------*/

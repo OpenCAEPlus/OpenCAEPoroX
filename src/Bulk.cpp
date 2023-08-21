@@ -156,11 +156,11 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& op
         EQUIL.PcGO = rs_param.EQUIL[5];
     }
 
-    np = flashCal[0]->GetVs()->np;
-    nc   = flashCal[0]->GetVs()->nc;
-    oIndex   = flashCal[0]->GetVs()->o;
-    gIndex   = flashCal[0]->GetVs()->g;
-    wIndex   = flashCal[0]->GetVs()->w;
+    vs.np = flashCal[0]->GetVs()->np;
+    vs.nc   = flashCal[0]->GetVs()->nc;
+    vs.oIndex   = flashCal[0]->GetVs()->o;
+    vs.gIndex   = flashCal[0]->GetVs()->g;
+    vs.wIndex   = flashCal[0]->GetVs()->w;
 
 
     InputRockFunc(rs_param);
@@ -202,11 +202,11 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opt
     for (USI i = 0; i < NTPVT; i++) flashCal.push_back(new MixtureUnitComp(rs_param, i, opts));
 
 
-    np = flashCal[0]->GetVs()->np;
-    nc   = flashCal[0]->GetVs()->nc;
-    oIndex   = flashCal[0]->GetVs()->o;
-    gIndex   = flashCal[0]->GetVs()->g;
-    wIndex   = flashCal[0]->GetVs()->w;
+    vs.np = flashCal[0]->GetVs()->np;
+    vs.nc   = flashCal[0]->GetVs()->nc;
+    vs.oIndex   = flashCal[0]->GetVs()->o;
+    vs.gIndex   = flashCal[0]->GetVs()->g;
+    vs.wIndex   = flashCal[0]->GetVs()->w;
 
     InputRockFunc(rs_param);
 
@@ -256,11 +256,11 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& o
     for (USI i = 0; i < NTPVT; i++)
         flashCal.push_back(new MixtureUnitThermal_OW(rs_param, i, opts));
 
-    np = flashCal[0]->GetVs()->np;
-    nc   = flashCal[0]->GetVs()->nc;
-    oIndex   = flashCal[0]->GetVs()->o;
-    gIndex   = flashCal[0]->GetVs()->g;
-    wIndex   = flashCal[0]->GetVs()->w;
+    vs.np = flashCal[0]->GetVs()->np;
+    vs.nc   = flashCal[0]->GetVs()->nc;
+    vs.oIndex   = flashCal[0]->GetVs()->o;
+    vs.gIndex   = flashCal[0]->GetVs()->g;
+    vs.wIndex   = flashCal[0]->GetVs()->w;
 
 
     InputRockFuncT(rs_param);
@@ -327,17 +327,17 @@ void Bulk::SetupIsoT(const Domain& domain)
     myrank  = domain.myrank;
     
     // Set defaulted information
-    if (ntg.empty()) {
-        ntg.resize(nb, 1);
+    if (vs.ntg.empty()) {
+        vs.ntg.resize(vs.nb, 1);
     }
     if (PVTNUM.empty()) {
-        PVTNUM.resize(nb, 0);
+        PVTNUM.resize(vs.nb, 0);
     }
     if (SATNUM.empty()) {
-        SATNUM.resize(nb, 0);
+        SATNUM.resize(vs.nb, 0);
     }
     if (ROCKNUM.empty()) {
-        ROCKNUM.resize(nb, 0);
+        ROCKNUM.resize(vs.nb, 0);
     }
 }
 
@@ -349,10 +349,10 @@ void Bulk::SetupT(const Domain& domain)
     const OCP_USI* grid   = domain.allActive ? domain.grid.data() : domain.gridAllIndex.data();
     const OCP_USI uplim   = domain.nx * domain.ny;
     const OCP_USI downlim = domain.nx * domain.ny * (domain.nz - 1) - 1;
-    bLocation.resize(nb, 0);
-    bType.resize(nb, 1);
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (poroInit[n] < 1E-6) {
+    bLocation.resize(vs.nb, 0);
+    bType.resize(vs.nb, 1);
+    for (OCP_USI n = 0; n < vs.nb; n++) {
+        if (vs.poroInit[n] < 1E-6) {
             bType[n] = 0;
         }
         if (grid[n] < uplim) {
@@ -364,7 +364,7 @@ void Bulk::SetupT(const Domain& domain)
     }
 
     // Setup Heat Loss
-    hLoss.Setup(nb);
+    hLoss.Setup(vs.nb);
 }
 
 
@@ -376,7 +376,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 {
     OCP_FUNCNAME;
 
-    initT.resize(nb);
+    initT.resize(vs.nb);
 
     OCP_DBL Dref = EQUIL.Dref;
     OCP_DBL Pref = EQUIL.Pref;
@@ -388,9 +388,9 @@ void Bulk::InitPTSw(const USI& tabrow)
     OCP_DBL zRangeTmp[2] = { 1E8,0 };  // min , max
 
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        OCP_DBL temp1 = depth[n] - dz[n] / 2;
-        OCP_DBL temp2 = depth[n] + dz[n] / 2;
+    for (OCP_USI n = 0; n < vs.nb; n++) {
+        OCP_DBL temp1 = vs.depth[n] - vs.dz[n] / 2;
+        OCP_DBL temp2 = vs.depth[n] + vs.dz[n] / 2;
         zRangeTmp[0]  = zRangeTmp[0] < temp1 ? zRangeTmp[0] : temp1;
         zRangeTmp[1]  = zRangeTmp[1] > temp2 ? zRangeTmp[1] : temp2;
     }
@@ -406,7 +406,7 @@ void Bulk::InitPTSw(const USI& tabrow)
     vector<OCP_DBL> Pgtmp(tabrow, 0);
     vector<OCP_DBL> Pwtmp(tabrow, 0);
 
-    vector<OCP_DBL> tmpInitZi(nc, 0);
+    vector<OCP_DBL> tmpInitZi(vs.nc, 0);
 
     // cal Tab_Ztmp
     Ztmp[0] = Zmin;
@@ -678,7 +678,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
 
-        if (gIndex >= 0) {
+        if (vs.gIndex >= 0) {
             // find the gas pressure in Dref by Poref
             Pgref = 0;
             Ptmp  = Poref;
@@ -776,7 +776,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
 
-        if (gIndex >= 0) {
+        if (vs.gIndex >= 0) {
             // find the gas pressure in Dref by Poref
             Pgref = 0;
             Ptmp  = Poref;
@@ -913,20 +913,20 @@ void Bulk::InitPTSw(const USI& tabrow)
         }
     }
 
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < vs.nb; n++) {
         if (initZi_flag) {
-            initZi_Tab[0].Eval_All0(depth[n], tmpInitZi);
-            for (USI i = 0; i < nc; i++) {
-                Ni[n * nc + i] = tmpInitZi[i];
+            initZi_Tab[0].Eval_All0(vs.depth[n], tmpInitZi);
+            for (USI i = 0; i < vs.nc; i++) {
+                vs.Ni[n * vs.nc + i] = tmpInitZi[i];
             }
         }
         if (initT_flag) {
-            myTemp   = initT_Tab[0].Eval(0, depth[n], 1);
+            myTemp   = initT_Tab[0].Eval(0, vs.depth[n], 1);
             initT[n] = myTemp;
-            T[n]     = myTemp;
+            vs.T[n]     = myTemp;
         }
 
-        DepthP.Eval_All(0, depth[n], data, cdata);
+        DepthP.Eval_All(0, vs.depth[n], data, cdata);
         OCP_DBL Po   = data[1];
         OCP_DBL Pg   = data[2];
         OCP_DBL Pw   = data[3];
@@ -934,7 +934,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         OCP_DBL Pcow = Po - Pw;
         OCP_DBL Sw   = flow[SATNUM[n]]->CalSwByPcow(Pcow);
         OCP_DBL Sg   = 0;
-        if (gIndex >= 0) {
+        if (vs.gIndex >= 0) {
             Sg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
         }
         if (Sw + Sg > 1) {
@@ -954,19 +954,19 @@ void Bulk::InitPTSw(const USI& tabrow)
             // water and gas
             Po = Pg - flow[SATNUM[n]]->CalPcgoBySg(Sg);
         }
-        P[n] = Po;
+        vs.P[n] = Po;
 
-        if (depth[n] < DOGC) {
+        if (vs.depth[n] < DOGC) {
             Pbb = Po;
         } else if (PBVD_flag) {
-            Pbb = EQUIL.PBVD.Eval(0, depth[n], 1);
+            Pbb = EQUIL.PBVD.Eval(0, vs.depth[n], 1);
         }
-        Pb[n] = Pbb;
+        vs.Pb[n] = Pbb;
 
         // cal Sw
         OCP_DBL swco = flow[SATNUM[n]]->GetSwco();
         if (!FlagPcow[SATNUM[n]]) {
-            S[n * np + np - 1] = swco;
+            vs.S[n * vs.np + vs.np - 1] = swco;
             continue;
         }
 
@@ -978,7 +978,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         for (USI k = 0; k < ncut; k++) {
             OCP_DBL tmpSw = 0;
             OCP_DBL tmpSg = 0;
-            OCP_DBL dep   = depth[n] + dz[n] / ncut * (k - (ncut - 1) / 2.0);
+            OCP_DBL dep   = vs.depth[n] + vs.dz[n] / ncut * (k - (ncut - 1) / 2.0);
             DepthP.Eval_All(0, dep, data, cdata);
             Po   = data[1];
             Pg   = data[2];
@@ -987,7 +987,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             Pcgo = Pg - Po;
             avePcow += Pcow;
             tmpSw = flow[SATNUM[n]]->CalSwByPcow(Pcow);
-            if (gIndex >= 0) {
+            if (vs.gIndex >= 0) {
                 tmpSg = flow[SATNUM[n]]->CalSgByPcgo(Pcgo);
             }
             if (tmpSw + tmpSg > 1) {
@@ -1004,7 +1004,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         avePcow /= ncut;
 
         flow[SATNUM[n]]->SetupScale(n, Sw, avePcow);
-        S[n * np + np - 1] = Sw;
+        vs.S[n * vs.np + vs.np - 1] = Sw;
     }
 }
 
@@ -1021,16 +1021,16 @@ OCP_DBL Bulk::CalFPR(OCP_DBL& vtmp) const
     OCP_DBL ptmp = 0;   
     OCP_DBL tmp  = 0;
 
-    if (np == 3) {
-        for (OCP_USI n = 0; n < nbI; n++) {
-            tmp = rockVp[n] * (1 - S[n * np + 2]);
-            ptmp += P[n] * tmp;
+    if (vs.np == 3) {
+        for (OCP_USI n = 0; n < vs.nbI; n++) {
+            tmp = vs.rockVp[n] * (1 - vs.S[n * vs.np + 2]);
+            ptmp += vs.P[n] * tmp;
             vtmp += tmp;
         }
-    } else if (np < 3) {
-        for (OCP_USI n = 0; n < nbI; n++) {
-            tmp = rockVp[n] * (S[n * np]);
-            ptmp += P[n] * tmp;
+    } else if (vs.np < 3) {
+        for (OCP_USI n = 0; n < vs.nbI; n++) {
+            tmp = vs.rockVp[n] * (vs.S[n * vs.np]);
+            ptmp += vs.P[n] * tmp;
             vtmp += tmp;
         }
     } else {
@@ -1047,9 +1047,9 @@ OCP_DBL Bulk::CalFTR(OCP_DBL& vtmp) const
     vtmp = 0;
     OCP_DBL Ttmp = 0;
     
-    for (OCP_USI n = 0; n < nbI; n++) {
-        Ttmp += T[n] * v[n];
-        vtmp += v[n];
+    for (OCP_USI n = 0; n < vs.nbI; n++) {
+        Ttmp += vs.T[n] * vs.v[n];
+        vtmp += vs.v[n];
     }
 
     return Ttmp / vtmp;
@@ -1065,13 +1065,13 @@ OCP_INT Bulk::CheckP() const
 {
     OCP_FUNCNAME;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (P[n] < 0) {
+    for (OCP_USI n = 0; n < vs.nb; n++) {
+        if (vs.P[n] < 0) {
             std::ostringstream PStringSci;
-            PStringSci << std::scientific << P[n];
+            PStringSci << std::scientific << vs.P[n];
             OCP_WARNING("Negative pressure: P[" + std::to_string(n) +
                         "] = " + PStringSci.str());
-            cout << "P = " << P[n] << endl;
+            cout << "P = " << vs.P[n] << endl;
             return BULK_NEGATIVE_PRESSURE;
         }
     }
@@ -1081,13 +1081,13 @@ OCP_INT Bulk::CheckP() const
 
 OCP_INT Bulk::CheckT() const
 {
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (T[n] < 0) {
+    for (OCP_USI n = 0; n < vs.nb; n++) {
+        if (vs.T[n] < 0) {
             std::ostringstream PStringSci;
-            PStringSci << std::scientific << T[n];
+            PStringSci << std::scientific << vs.T[n];
             OCP_WARNING("Negative pressure: T[" + std::to_string(n) +
                         "] = " + PStringSci.str());
-            cout << "T = " << T[n] << endl;
+            cout << "T = " << vs.T[n] << endl;
             return BULK_NEGATIVE_TEMPERATURE;
         }
     }
@@ -1100,16 +1100,16 @@ OCP_INT Bulk::CheckNi()
 {
     OCP_FUNCNAME;
 
-    OCP_USI len = nb * nc;
+    OCP_USI len = vs.nb * vs.nc;
     for (OCP_USI n = 0; n < len; n++) {
-        if (Ni[n] < 0) {
-            OCP_USI bId = n / nc;
-            if (Ni[n] > -1E-3 * Nt[bId] && OCP_FALSE) {
-                Ni[n] = 1E-8 * Nt[bId];
+        if (vs.Ni[n] < 0) {
+            OCP_USI bId = n / vs.nc;
+            if (vs.Ni[n] > -1E-3 * vs.Nt[bId] && OCP_FALSE) {
+                vs.Ni[n] = 1E-8 * vs.Nt[bId];
             } else {
-                USI                cId = n - bId * nc;
+                USI                cId = n - bId * vs.nc;
                 std::ostringstream NiStringSci;
-                NiStringSci << std::scientific << Ni[n];
+                NiStringSci << std::scientific << vs.Ni[n];
                 OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
                             std::to_string(bId) + "] = " + NiStringSci.str());
 
@@ -1126,8 +1126,8 @@ OCP_INT Bulk::CheckVe(const OCP_DBL& Vlim) const
     OCP_FUNCNAME;
 
     OCP_DBL dVe = 0.0;
-    for (OCP_USI n = 0; n < nb; n++) {
-        dVe = fabs(vf[n] - rockVp[n]) / rockVp[n];
+    for (OCP_USI n = 0; n < vs.nb; n++) {
+        dVe = fabs(vs.vf[n] - vs.rockVp[n]) / vs.rockVp[n];
         if (dVe > Vlim) {
             cout << "Volume error at Bulk[" << n << "] = " << setprecision(6) << dVe
                  << " is too big!" << endl;
@@ -1157,35 +1157,35 @@ void Bulk::CalMaxChange()
     OCP_DBL tmp = 0;
     OCP_USI id;
 
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < vs.nb; n++) {
 
         // dP
-        tmp = fabs(P[n] - lP[n]);
+        tmp = fabs(vs.P[n] - vs.lP[n]);
         if (dPmax < tmp) {
             dPmax = tmp;
         }
 
         // dT
-        tmp = fabs(T[n] - lT[n]);
+        tmp = fabs(vs.T[n] - vs.lT[n]);
         if (dTmax < tmp) {
             dTmax = tmp;
         }
 
         // dS
-        for (USI j = 0; j < np; j++) {
-            id  = n * np + j;
-            tmp = fabs(S[id] - lS[id]);
+        for (USI j = 0; j < vs.np; j++) {
+            id  = n * vs.np + j;
+            tmp = fabs(vs.S[id] - vs.lS[id]);
             if (dSmax < tmp) {
                 dSmax = tmp;
             }
         }
 
         // dN
-        for (USI i = 0; i < nc; i++) {
-            id  = n * nc + i;
-            tmp = fabs(max(Ni[id], lNi[id]));
+        for (USI i = 0; i < vs.nc; i++) {
+            id  = n * vs.nc + i;
+            tmp = fabs(max(vs.Ni[id], vs.lNi[id]));
             if (tmp > TINY) {
-                tmp = fabs(Ni[id] - lNi[id]) / tmp;
+                tmp = fabs(vs.Ni[id] - vs.lNi[id]) / tmp;
                 if (dNmax < tmp) {
                     dNmax = tmp;
                 }
@@ -1193,7 +1193,7 @@ void Bulk::CalMaxChange()
         }
 
         // Ve
-        tmp = fabs(vf[n] - rockVp[n]) / rockVp[n];
+        tmp = fabs(vs.vf[n] - vs.rockVp[n]) / vs.rockVp[n];
         if (eVmax < tmp) {
             eVmax = tmp;
         }

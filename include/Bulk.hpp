@@ -172,23 +172,18 @@ protected:
 
 public:
     /// Return the number of bulks.
-    OCP_USI GetBulkNum() const { return nb; }
+    OCP_USI GetBulkNum() const { return vs.nb; }
     /// Return the number of bulks.
-    OCP_USI GetInteriorBulkNum() const { return nbI; }
+    OCP_USI GetInteriorBulkNum() const { return vs.nbI; }
     /// Return the number of phases.
-    USI GetPhaseNum() const { return np; }
+    USI GetPhaseNum() const { return vs.np; }
     /// Return the number of components.
-    USI GetComNum() const { return nc; }
+    USI GetComNum() const { return vs.nc; }
 
 public:
     MPI_Comm  myComm;
     OCP_INT   numproc, myrank;
 
-protected:
-    OCP_USI nb;         ///< Number of bulks (active grids).
-    OCP_USI nbI; ///< Number of bulks inside
-    USI     np; ///< Number of phase.
-    USI     nc;   ///< Number of component.
 
     /////////////////////////////////////////////////////////////////////
     // Initial Properties
@@ -244,48 +239,6 @@ protected:
     OCPMixtureType mixType;
 
     /////////////////////////////////////////////////////////////////////
-    // Basic Grid and Basic Rock Information
-    /////////////////////////////////////////////////////////////////////
-
-protected:
-    vector<OCP_DBL> dx;    ///< Size of cell in x-direction: activeGridNum.
-    vector<OCP_DBL> dy;    ///< Size of cell in y-direction: activeGridNum.
-    vector<OCP_DBL> dz;    ///< Size of cell in z-direction: activeGridNum.
-    vector<OCP_DBL> v;     ///< Volume of grids: activeGridNum.
-    vector<OCP_DBL> depth; ///< Depth of center of grid cells: activeGridNum.
-
-    vector<OCP_DBL> ntg;      ///< net to gross of bulk.
-    vector<OCP_DBL> poroInit; ///< initial rock porosity * ntg.
-    vector<OCP_DBL> poro;     ///< rock porosity * ntg.
-    vector<OCP_DBL> rockVp;   ///< pore volume = Vgrid * ntg * poro.
-    vector<OCP_DBL> rockKx;   ///< current rock permeability along the x direction.
-    vector<OCP_DBL> rockKy;   ///< current rock permeability along the y direction.
-    vector<OCP_DBL> rockKz;   ///< current rock permeability along the z direction.
-    vector<OCP_DBL> thconr;   ///< Rock thermal conductivity: activeGridNum.
-    vector<OCP_DBL> vr;       ///< Volume of rock: activeGridNum.
-    vector<OCP_DBL> Hr;       ///< Enthalpy of rock: activeGridNum.
-
-    // Last time step
-    vector<OCP_DBL> lporo;   ///< last poro.
-    vector<OCP_DBL> lrockVp; ///< Pore volume: numBulk.
-    vector<OCP_DBL> lvr;     ///< Last vr: activeGridNum.
-    vector<OCP_DBL> lHr;     ///< Last Hr: activeGridNum.
-
-    // Derivatives
-    vector<OCP_DBL> poroP; ///< d poro / d P.
-    vector<OCP_DBL> poroT; ///< d poro / d T.
-    vector<OCP_DBL> vrP;   ///< d vr / d p, numbulk
-    vector<OCP_DBL> vrT;   ///< dvr / dT: activeGridNum.
-    vector<OCP_DBL> HrT;   ///< dHr / dT: activeGridNum.
-
-    // Last time step
-    vector<OCP_DBL> lporoP; ///< last poroP.
-    vector<OCP_DBL> lporoT; ///< last poroT.
-    vector<OCP_DBL> lvrP;   ///< last vrp.
-    vector<OCP_DBL> lvrT;   ///< Last vrT.
-    vector<OCP_DBL> lHrT;   ///< Last HrT.
-
-    /////////////////////////////////////////////////////////////////////
     // Basic Fluid Information
     /////////////////////////////////////////////////////////////////////
 
@@ -295,119 +248,23 @@ public:
     /// Calculate average Temperature in reservoir.
     OCP_DBL CalFTR(OCP_DBL& vtmp) const;
     /// Return pressure of the n-th bulk.
-    OCP_DBL GetP(const OCP_USI& n) const { return P[n]; }
+    OCP_DBL GetP(const OCP_USI& n) const { return vs.P[n]; }
     /// Return oil saturation of the n-th bulk.
     OCP_DBL GetSOIL(const OCP_USI& n) const
     {
-        return S[n * np + oIndex];
+        return vs.S[n * vs.np + vs.oIndex];
     }
     /// Return gas saturation of the n-th bulk.
     OCP_DBL GetSGAS(const OCP_USI& n) const
     {
-        return S[n * np + gIndex];
+        return vs.S[n * vs.np + vs.gIndex];
     }
     /// Return water saturation of the n-th bulk.
     OCP_DBL GetSWAT(const OCP_USI& n) const
     {
-        return S[n * np + wIndex];
+        return vs.S[n * vs.np + vs.wIndex];
     }
 
-protected:
-
-    /// Index of oil, gas, water
-    INT     oIndex, gIndex, wIndex;
-
-    vector<USI>      phaseNum;   ///< Num of hydrocarbon phase in each bulk
-    vector<OCP_DBL>  Nt;         ///< Total moles of components in bulks: numBulk.
-    vector<OCP_DBL>  Ni;         ///< Moles of component: numCom*numBulk.
-    vector<OCP_DBL>  vf;         ///< Total fluid volume: numBulk.
-    vector<OCP_DBL>  T;          ///< Temperature: numBulk.
-    vector<OCP_DBL>  P;          ///< Pressure: numBulk.
-    vector<OCP_DBL>  Pb;         ///< Bubble point pressure: numBulk.
-    vector<OCP_DBL>  Pj;         ///< Pressure of phase: numPhase*numBulk.
-    vector<OCP_DBL>  Pc;         ///< Capillary pressure of phase: numPhase*numBulk.
-    vector<OCP_BOOL> phaseExist; ///< Existence of phase: numPhase*numBulk.
-    vector<OCP_DBL>  S;          ///< Saturation of phase: numPhase*numBulk.
-    vector<OCP_DBL>  vj;         ///< Volume of phase: numPhase*numBulk.
-    vector<OCP_DBL>  nj;         ///< moles number of phase: numPhase*numBulk.
-    vector<OCP_DBL>  xij;        ///< Nij / Nj: numPhase*numCom*numBulk.
-    vector<OCP_DBL>  rho;        ///< Mass density of phase: numPhase*numBulk.
-    vector<OCP_DBL>  xi;         ///< Moles density of phase: numPhase*numBulk.
-    vector<OCP_DBL>  mu;         ///< Viscosity of phase: numPhase*numBulk.
-    vector<OCP_DBL>  kr;         ///< Relative permeability of phase: numPhase*numBulk.
-    vector<OCP_DBL>  Uf;         ///< Internal energy of fluid: numBulk
-    vector<OCP_DBL>  H;          ///< Enthalpy of phase: numPhase*numBulk.
-    vector<OCP_DBL>  kt;         ///< Coefficient of thermal diffusivity: activeGridNum.
-
-    // Last time step
-    vector<USI>      lphaseNum;   ///< last phaseNum
-    vector<OCP_DBL>  lNt;         ///< last Nt
-    vector<OCP_DBL>  lNi;         ///< last Ni
-    vector<OCP_DBL>  lvf;         ///< last vf
-    vector<OCP_DBL>  lT;          ///< last T
-    vector<OCP_DBL>  lP;          ///< last P
-    vector<OCP_DBL>  lPj;         ///< last Pj
-    vector<OCP_DBL>  lPc;         ///< last Pc
-    vector<OCP_BOOL> lphaseExist; ///< last phaseExist
-    vector<OCP_DBL>  lS;          ///< last S
-    vector<OCP_DBL>  lvj;         ///< last vj
-    vector<OCP_DBL>  lnj;         ///< last nj
-    vector<OCP_DBL>  lxij;        ///< last xij
-    vector<OCP_DBL>  lrho;        ///< last rho
-    vector<OCP_DBL>  lxi;         ///< last xi
-    vector<OCP_DBL>  lmu;         ///< last mu
-    vector<OCP_DBL>  lkr;         ///< last kr
-    vector<OCP_DBL>  lUf;         ///< last Uf
-    vector<OCP_DBL>  lH;          ///< last H
-    vector<OCP_DBL>  lkt;         ///< last kt
-
-    // Derivatives
-    vector<OCP_DBL> vfP;     ///< d vf   / d P: numBulk.
-    vector<OCP_DBL> vfT;     ///< d vf   / d T, numBulk
-    vector<OCP_DBL> vfi;     ///< d vf   / d Ni: numCom*numBulk.
-    vector<OCP_DBL> rhoP;    ///< d Rho  / d P: numPhase*numBulk.
-    vector<OCP_DBL> rhoT;    ///< d rhoj / d T: numPhase * numbulk
-    vector<OCP_DBL> rhox;    ///< d Rhoj / d xij: numPhase*numCom*numBulk.
-    vector<OCP_DBL> xiP;     ///< d xi   / d P: numPhase*numBulk.
-    vector<OCP_DBL> xiT;     ///< d xij  / d T, numPhase * numbulk
-    vector<OCP_DBL> xix;     ///< d Xi_j / d xij: numPhase*numCom*numBulk.
-    vector<OCP_DBL> muP;     ///< d Mu   / d P: numPhase*numBulk.
-    vector<OCP_DBL> muT;     ///< d muj  / d T: numPhase * numbulk
-    vector<OCP_DBL> mux;     ///< d Muj  / d xij: numPhase*numCom*numBulk.
-    vector<OCP_DBL> dPcdS;   ///< d Pcj  / d Sk: numPhase * numPhase * bulk.
-    vector<OCP_DBL> dKrdS;   ///< d Krj  / d Sk: numPhase * numPhase * bulk.
-    vector<OCP_DBL> UfP;     ///< d Uf   / d P: numbulk
-    vector<OCP_DBL> UfT;     ///< d Uf   / d T: numbulk
-    vector<OCP_DBL> Ufi;     ///< d Uf   / d Ni: numCom * numBulk
-    vector<OCP_DBL> HT;      ///< d Hj   / d T: numPhase * numbulk
-    vector<OCP_DBL> Hx;      ///< d Hj   / d xij: numPhase * numCom * numbulk
-    vector<OCP_DBL> ktP;     ///< d kt   / d P: numbulk
-    vector<OCP_DBL> ktT;     ///< d kt   / d T: activeGridNum.
-    vector<OCP_DBL> ktS;     ///< d kt   / d S: numPhase * numbulk
-
-    // Last time step
-    vector<OCP_DBL> lvfP;     ///< last vfP
-    vector<OCP_DBL> lvfT;     ///< last vfT
-    vector<OCP_DBL> lvfi;     ///< last vfi
-    vector<OCP_DBL> lrhoP;    ///< last rhoP
-    vector<OCP_DBL> lrhoT;    ///< last rhoT
-    vector<OCP_DBL> lrhox;    ///< last rhox
-    vector<OCP_DBL> lxiP;     ///< last xiP
-    vector<OCP_DBL> lxiT;     ///< last xiT
-    vector<OCP_DBL> lxix;     ///< last xix
-    vector<OCP_DBL> lmuP;     ///< last muP
-    vector<OCP_DBL> lmuT;     ///< last muT
-    vector<OCP_DBL> lmux;     ///< last mux
-    vector<OCP_DBL> ldPcdS;   ///< last Pcj_dS
-    vector<OCP_DBL> ldKrdS;   ///< last dKrdS
-    vector<OCP_DBL> lUfP;     ///< last UfP
-    vector<OCP_DBL> lUfT;     ///< last UfT
-    vector<OCP_DBL> lUfi;     ///< last Ufi
-    vector<OCP_DBL> lHT;      ///< last HT
-    vector<OCP_DBL> lHx;      ///< last Hx
-    vector<OCP_DBL> lktP;     ///< last ktP
-    vector<OCP_DBL> lktT;     ///< last ktT
-    vector<OCP_DBL> lktS;     ///< last ktS
 
     /////////////////////////////////////////////////////////////////////
     // Important Indicator Variable and Check
@@ -453,18 +310,6 @@ protected:
     mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number
     mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
 
-
-
-protected:
-    /////////////////////////////////////////////////////////////////////
-    // Method-Specified Variable
-    /////////////////////////////////////////////////////////////////////
-
-    USI              maxLendSdP;   ///< length of dSec_dPri.
-    vector<OCP_DBL>  dSec_dPri;    ///< d Secondary variable / d Primary variable.
-
-    // Last time step
-    vector<OCP_DBL>  ldSec_dPri;    ///< last dSec_dPri
 
 public:
     /// push back an element for wellBulkId

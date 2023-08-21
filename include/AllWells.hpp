@@ -78,15 +78,15 @@ public:
     /// Input param from ParamWell.
     void InputParam(const ParamWell& paramWell, const Domain& domain);
     /// Setup wells
-    void Setup(const Bulk& myBulk);
+    void Setup(const Bulk& bk);
     /// complete the information of well according to Grid and Bulk.
-    void SetupWell(const Bulk& myBulk);
+    void SetupWell(const Bulk& bk);
     /// Setup information of wellGroup
-    void SetupWellGroup(const Bulk& myBulk);
+    void SetupWellGroup(const Bulk& bk);
     /// get the mixture from bulk ---- useless now
-    void SetupMixture(const Bulk& myBulk);
+    void SetupMixture(const Bulk& bk);
     /// Setup bulks which are penetrated by wells at current stage
-    void SetupWellBulk(Bulk& myBulk) const;
+    void SetupWellBulk(Bulk& bk) const;
 
     /////////////////////////////////////////////////////////////////////
     // General
@@ -96,24 +96,24 @@ public:
     /// Apply the operation mode at the ith critical time.
     void ApplyControl(const USI& i);
     /// Set the initial well pressure
-    void InitBHP(const Bulk& myBulk);
+    void InitBHP(const Bulk& bk);
     /// Calculate well properties at the beginning of each time step.
-    void PrepareWell(const Bulk& myBulk);
+    void PrepareWell(const Bulk& bk);
     /// Calculate Transmissibility of Wells
-    void CalTrans(const Bulk& myBulk);
+    void CalTrans(const Bulk& bk);
     /// Calculate volume flow rate and moles flow rate of each perforation.
-    void CalFlux(const Bulk& myBulk);
+    void CalFlux(const Bulk& bk);
     /// Calculate dG.
-    void CaldG(const Bulk& myBulk);
+    void CaldG(const Bulk& bk);
     /// Calculate Injection rate, total Injection, Production rate, total Production
-    void CalIPRT(const Bulk& myBulk, OCP_DBL dt);
+    void CalIPRT(const Bulk& bk, OCP_DBL dt);
     void UpdateLastTimeStepBHP()
     {
         for (auto& w : wells) w.lbhp = w.bhp;
     }
     void ResetBHP();
     /// Check if unreasonable well pressure or perforation pressure occurs.
-    OCP_INT CheckP(const Bulk& myBulk);
+    OCP_INT CheckP(const Bulk& bk);
     /// Return the num of wells.
     USI GetWellNum() const { return numWell; }
     /// Return the name of specified well.
@@ -139,9 +139,9 @@ public:
     }
     /// Return the pth dG of wth well.
     OCP_DBL GetWellDG(const USI& w, const USI& p) const { return wells[w].dG[p]; }
-    void    ShowWellStatus(const Bulk& myBulk)
+    void    ShowWellStatus(const Bulk& bk)
     {
-        for (USI w = 0; w < numWell; w++) wells[w].ShowPerfStatus(myBulk);
+        for (USI w = 0; w < numWell; w++) wells[w].ShowPerfStatus(bk);
     }
     OCP_BOOL    GetWellChange() const { return wellChange; }
     USI GetNumOpenWell()const;

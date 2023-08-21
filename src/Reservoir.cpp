@@ -62,22 +62,23 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
     const PreParamGridWell& grid = mygrid;
     const ParamReservoir& rs     = rsparam;
 
+
     /////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////
 
     const VarInfoGrid varInfo(vector<VarInfo<vector<OCP_DBL>>> {
-            VarInfo<vector<OCP_DBL>>{ "DX", &grid.dx, &bulk.dx },
-            VarInfo<vector<OCP_DBL>>{ "DY", &grid.dy, &bulk.dy },
-            VarInfo<vector<OCP_DBL>>{ "DZ", &grid.dz, &bulk.dz },
-            VarInfo<vector<OCP_DBL>>{ "V", &grid.v, &bulk.v },
-            VarInfo<vector<OCP_DBL>>{ "DEPTH", &grid.depth, &bulk.depth },
-            VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.poroInit },
-            VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.ntg },
-            VarInfo<vector<OCP_DBL>>{ "PERMX", &rs.permX, &bulk.rockKx },
-            VarInfo<vector<OCP_DBL>>{ "PERMY", &rs.permY, &bulk.rockKy },
-            VarInfo<vector<OCP_DBL>>{ "PERMZ", &rs.permZ, &bulk.rockKz },
+            VarInfo<vector<OCP_DBL>>{ "DX", &grid.dx, &bulk.vs.dx },
+            VarInfo<vector<OCP_DBL>>{ "DY", &grid.dy, &bulk.vs.dy },
+            VarInfo<vector<OCP_DBL>>{ "DZ", &grid.dz, &bulk.vs.dz },
+            VarInfo<vector<OCP_DBL>>{ "V", &grid.v, &bulk.vs.v },
+            VarInfo<vector<OCP_DBL>>{ "DEPTH", &grid.depth, &bulk.vs.depth },
+            VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.vs.poroInit },
+            VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.vs.ntg },
+            VarInfo<vector<OCP_DBL>>{ "PERMX", &rs.permX, &bulk.vs.rockKx },
+            VarInfo<vector<OCP_DBL>>{ "PERMY", &rs.permY, &bulk.vs.rockKy },
+            VarInfo<vector<OCP_DBL>>{ "PERMZ", &rs.permZ, &bulk.vs.rockKz },
             VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &optFeatures.scalePcow.swatInit },
-            VarInfo<vector<OCP_DBL>>{ "THCONR", &rs.thconr, &bulk.thconr },
+            VarInfo<vector<OCP_DBL>>{ "THCONR", &rs.thconr, &bulk.vs.thconr },
     }, vector<VarInfo<vector<OCP_USI>>>{
         VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATNUM },
         VarInfo<vector<OCP_USI>>{ "PVTNUM", &rs.PVTNUM, &bulk.PVTNUM },
@@ -89,8 +90,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
     // Get grid-based vars from params
     optFeatures.numBulk  = domain.numGridLocal;
-    bulk.nb         = domain.numGridLocal;   // Interior + ghost
-    bulk.nbI = domain.numGridInterior;
+    bulk.vs.nb         = domain.numGridLocal;   // Interior + ghost
+    bulk.vs.nbI = domain.numGridInterior;
 
     MPI_Comm      myComm  = domain.myComm;
     const OCP_INT numproc = domain.numproc;
@@ -252,19 +253,19 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         // set self
         // dbl
         for (auto& s : send_var.var_dbl) {
-            s.dst_ptr->resize(bulk.nb);
+            s.dst_ptr->resize(bulk.vs.nb);
             const OCP_DBL* src = s.src_ptr->data();           
             OCP_DBL*       dst = s.dst_ptr->data();
-            for (OCP_USI n = 0; n < bulk.nb; n++) {
+            for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
                 dst[n] = src[grid.map_Act2All[domain.grid[n]]];
             }
         }
         // usi
         for (auto& s : send_var.var_usi) {
-            s.dst_ptr->resize(bulk.nb);
+            s.dst_ptr->resize(bulk.vs.nb);
             const OCP_USI* src = s.src_ptr->data();
             OCP_USI*       dst = s.dst_ptr->data();
-            for (OCP_USI n = 0; n < bulk.nb; n++) {
+            for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
                 dst[n] = src[grid.map_Act2All[domain.grid[n]]];
             }
         }
@@ -276,7 +277,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
-        for (OCP_USI n = 0; n < bulk.nbI; n++) {
+        for (OCP_USI n = 0; n < bulk.vs.nbI; n++) {
             bId = n;
             domain.neighborNum.push_back(grid.gNeighbor[domain.grid[bId]].size() + 1);
             for (const auto& gn : grid.gNeighbor[domain.grid[bId]]) {
@@ -292,8 +293,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // global index(include inactive grid)
         if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.nb);
-            for (OCP_USI n = 0; n < bulk.nb; n++) {
+            domain.gridAllIndex.resize(bulk.vs.nb);
+            for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
                 domain.gridAllIndex[n] = grid.map_Act2All[domain.grid[n]];
             }
         }
@@ -369,21 +370,21 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         // dbl
         OCP_DBL* dbl_ptr = (OCP_DBL*)recv_buffer;
         for (USI r = 0; r < recv_var.numvar_dbl; r++) {
-            recv_var.var_dbl[r].dst_ptr->resize(bulk.nb);
-            const OCP_DBL* src = dbl_ptr + r * bulk.nb;
+            recv_var.var_dbl[r].dst_ptr->resize(bulk.vs.nb);
+            const OCP_DBL* src = dbl_ptr + r * bulk.vs.nb;
             OCP_DBL*       dst = recv_var.var_dbl[r].dst_ptr->data();
-            copy(src, src + bulk.nb, dst);
+            copy(src, src + bulk.vs.nb, dst);
         }      
-        dbl_ptr += recv_var.numvar_dbl * bulk.nb;
+        dbl_ptr += recv_var.numvar_dbl * bulk.vs.nb;
         // usi
         OCP_USI* usi_ptr = (OCP_USI*)dbl_ptr;
         for (USI r = 0; r < recv_var.numvar_usi; r++) {
-            recv_var.var_usi[r].dst_ptr->resize(bulk.nb);
-            const OCP_USI* src = usi_ptr + r * bulk.nb;
+            recv_var.var_usi[r].dst_ptr->resize(bulk.vs.nb);
+            const OCP_USI* src = usi_ptr + r * bulk.vs.nb;
             OCP_USI*       dst = recv_var.var_usi[r].dst_ptr->data();
-            copy(src, src + bulk.nb, dst);
+            copy(src, src + bulk.vs.nb, dst);
         }
-        usi_ptr += recv_var.numvar_usi * bulk.nb;
+        usi_ptr += recv_var.numvar_usi * bulk.vs.nb;
 
         // Get Conn from recv_buffer, only Interior grids' neighbors are passed
         OCP_DBL*     conn_ptr = (OCP_DBL*)usi_ptr;
@@ -429,10 +430,10 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // record global index of grid if inactive grid exist
         if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.nb);
+            domain.gridAllIndex.resize(bulk.vs.nb);
             const OCP_USI* src = (OCP_USI*)conn_ptr;
             OCP_USI*       dst = domain.gridAllIndex.data();
-            copy(src, src + bulk.nb, dst);
+            copy(src, src + bulk.vs.nb, dst);
         }
 
         delete[] recv_buffer;
@@ -506,13 +507,13 @@ void Reservoir::CalIPRT(const OCP_DBL& dt)
 OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
 {
     fill(bulk.cfl.begin(), bulk.cfl.end(), 0.0);
-    const USI np = bulk.np;
+    const USI np = bulk.vs.np;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         for (USI j = 0; j < np; j++) {
             const OCP_USI uId = conn.bcval.upblock[c * np + j];
 
-            if (bulk.phaseExist[uId * np + j]) {
+            if (bulk.vs.phaseExist[uId * np + j]) {
                 bulk.cfl[uId * np + j] += fabs(conn.bcval.velocity[c * np + j]) * dt;
             }
         }
@@ -533,10 +534,10 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
     }
 
     bulk.maxCFL_loc       = 0;
-    const OCP_USI len = bulk.nb * np;
+    const OCP_USI len = bulk.vs.nb * np;
     for (OCP_USI n = 0; n < len; n++) {
-        if (bulk.phaseExist[n] && bulk.vj[n] > TINY) {
-            bulk.cfl[n] /= bulk.vj[n];
+        if (bulk.vs.phaseExist[n] && bulk.vs.vj[n] > TINY) {
+            bulk.cfl[n] /= bulk.vs.vj[n];
 #ifdef DEBUG
             if (!isfinite(bulk.cfl[n])) {
                 OCP_ABORT("cfl is nan!");
@@ -564,15 +565,15 @@ void Reservoir::PrintSolFIM(const string& outfile) const
 {
     ofstream outu(outfile);
     if (!outu.is_open()) cout << "Can not open " << outfile << endl;
-    const OCP_USI nb = bulk.nb;
-    const OCP_USI nc = bulk.nc;
+    const OCP_USI nb = bulk.vs.nb;
+    const OCP_USI nc = bulk.vs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         // Pressure
-        outu << bulk.P[n] << "\n";
+        outu << bulk.vs.P[n] << "\n";
         // Ni
         for (USI i = 0; i < nc; i++) {
-            outu << bulk.Ni[n * nc + i] << "\n";
+            outu << bulk.vs.Ni[n * nc + i] << "\n";
         }
     }
     // Well Pressure

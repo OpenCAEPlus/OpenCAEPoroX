@@ -107,50 +107,50 @@ protected:
 
 public:
     /// Initialize the Well BHP
-    void InitBHP(const Bulk& myBulk) { bhp = myBulk.P[perf[0].location]; }
+    void InitBHP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
     /// Calculate Well Index with Peaceman model.
-    void CalWI_Peaceman(const Bulk& myBulk);
+    void CalWI_Peaceman(const Bulk& bk);
     /// Calculate transmissibility for each phase in perforations.
-    void CalTrans(const Bulk& myBulk);
+    void CalTrans(const Bulk& bk);
     /// Calculate the flux for each perforations.
-    void CalFlux(const Bulk& myBulk, const OCP_BOOL ReCalXi = OCP_FALSE);
+    void CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi = OCP_FALSE);
     /// calculate flow rate of moles of phases for injection well with maxBHP.
-    OCP_DBL CalInjRateMaxBHP(const Bulk& myBulk);
+    OCP_DBL CalInjRateMaxBHP(const Bulk& bk);
     /// calculate flow rate of moles of phases for production well with minBHP.
-    OCP_DBL CalProdRateMinBHP(const Bulk& myBulk);
+    OCP_DBL CalProdRateMinBHP(const Bulk& bk);
     /// Calculate flow rate of moles of phases for injection well with calculated
     /// qi_lbmol.
-    void CalInjQj(const Bulk& myBulk, const OCP_DBL& dt);
+    void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
     /// Calculate flow rate of moles of phases for production well with calculated
     /// qi_lbmol.
-    void CalProdQj(const Bulk& myBulk, const OCP_DBL& dt);
+    void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
     /// Calculate pressure difference between well and perforations.
-    void CaldG(const Bulk& myBulk);
+    void CaldG(const Bulk& bk);
     /// Calculate pressure difference between well and perforations for Injection.
-    void CalInjdG(const Bulk& myBulk);
+    void CalInjdG(const Bulk& bk);
     /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG(const Bulk& myBulk);
+    void CalProddG(const Bulk& bk);
     /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG01(const Bulk& myBulk);
+    void CalProddG01(const Bulk& bk);
     /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG02(const Bulk& myBulk);
+    void CalProddG02(const Bulk& bk);
     /// Calculate the production weight
-    void CalFactor(const Bulk& myBulk) const;
+    void CalFactor(const Bulk& bk) const;
     /// Correct BHP if opt mode is BHPMode
     void CorrectBHP();
     /// Check if well operation mode would be changed.
-    void CheckOptMode(const Bulk& myBulk);
+    void CheckOptMode(const Bulk& bk);
     /// Check if abnormal Pressure occurs.
-    OCP_INT CheckP(const Bulk& myBulk);
+    OCP_INT CheckP(const Bulk& bk);
     /// Check if cross flow happens.
-    OCP_INT CheckCrossFlow(const Bulk& myBulk);
+    OCP_INT CheckCrossFlow(const Bulk& bk);
     /// Update pressure in Perforation after well pressure updates.
     void CalPerfP()
     {
         for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p];
     }
     /// Display operation mode of well and state of perforations.
-    void ShowPerfStatus(const Bulk& myBulk) const;
+    void ShowPerfStatus(const Bulk& bk) const;
 
     USI     PerfNum() const { return numPerf; }
     void    SetBHP(const OCP_DBL& p) { bhp = p; }

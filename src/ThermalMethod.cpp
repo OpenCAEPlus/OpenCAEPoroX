@@ -177,126 +177,127 @@ void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 void T_FIM::AllocateReservoir(Reservoir& rs)
 {
     Bulk&         bk = rs.bulk;
-    const OCP_USI nb = bk.nb;
-    const USI     np = bk.np;
-    const USI     nc = bk.nc;
+    BulkVarSet&   bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const USI     np = bvs.np;
+    const USI     nc = bvs.nc;
 
     // Rock
-    bk.poro.resize(nb);
-    bk.rockVp.resize(nb);
-    bk.vr.resize(nb);
-    bk.Hr.resize(nb);
+    bvs.poro.resize(nb);
+    bvs.rockVp.resize(nb);
+    bvs.vr.resize(nb);
+    bvs.Hr.resize(nb);
 
-    bk.lporo.resize(nb);
-    bk.lrockVp.resize(nb);
-    bk.lvr.resize(nb);
-    bk.lHr.resize(nb);
+    bvs.lporo.resize(nb);
+    bvs.lrockVp.resize(nb);
+    bvs.lvr.resize(nb);
+    bvs.lHr.resize(nb);
 
     // derivatives
-    bk.poroP.resize(nb);
-    bk.poroT.resize(nb);
-    bk.vrP.resize(nb);
-    bk.vrT.resize(nb);
-    bk.HrT.resize(nb);
+    bvs.poroP.resize(nb);
+    bvs.poroT.resize(nb);
+    bvs.vrP.resize(nb);
+    bvs.vrT.resize(nb);
+    bvs.HrT.resize(nb);
 
-    bk.lporoP.resize(nb);
-    bk.lporoT.resize(nb);
-    bk.lvrP.resize(nb);
-    bk.lvrT.resize(nb);
-    bk.lHrT.resize(nb);
+    bvs.lporoP.resize(nb);
+    bvs.lporoT.resize(nb);
+    bvs.lvrP.resize(nb);
+    bvs.lvrT.resize(nb);
+    bvs.lHrT.resize(nb);
 
     // Fluid
-    bk.phaseNum.resize(nb);
-    bk.Nt.resize(nb);
-    bk.Ni.resize(nb * nc);
-    bk.vf.resize(nb);
-    bk.T.resize(nb);
-    bk.P.resize(nb);
-    bk.Pb.resize(nb);
-    bk.Pj.resize(nb * np);
-    bk.Pc.resize(nb * np);
-    bk.phaseExist.resize(nb * np);
-    bk.S.resize(nb * np);
-    bk.xij.resize(nb * np * nc);
-    bk.rho.resize(nb * np);
-    bk.xi.resize(nb * np);
-    bk.mu.resize(nb * np);
-    bk.kr.resize(nb * np);
-    bk.Uf.resize(nb);
-    bk.H.resize(nb * np);
-    bk.kt.resize(nb);
+    bvs.phaseNum.resize(nb);
+    bvs.Nt.resize(nb);
+    bvs.Ni.resize(nb * nc);
+    bvs.vf.resize(nb);
+    bvs.T.resize(nb);
+    bvs.P.resize(nb);
+    bvs.Pb.resize(nb);
+    bvs.Pj.resize(nb * np);
+    bvs.Pc.resize(nb * np);
+    bvs.phaseExist.resize(nb * np);
+    bvs.S.resize(nb * np);
+    bvs.xij.resize(nb * np * nc);
+    bvs.rho.resize(nb * np);
+    bvs.xi.resize(nb * np);
+    bvs.mu.resize(nb * np);
+    bvs.kr.resize(nb * np);
+    bvs.Uf.resize(nb);
+    bvs.H.resize(nb * np);
+    bvs.kt.resize(nb);
 
-    bk.lphaseNum.resize(nb);
-    bk.lNt.resize(nb);
-    bk.lNi.resize(nb * nc);
-    bk.lvf.resize(nb);
-    bk.lT.resize(nb);
-    bk.lP.resize(nb);
-    bk.lPj.resize(nb * np);
-    bk.lPc.resize(nb * np);
-    bk.lphaseExist.resize(nb * np);
-    bk.lS.resize(nb * np);
-    bk.lxij.resize(nb * np * nc);
-    bk.lrho.resize(nb * np);
-    bk.lxi.resize(nb * np);
-    bk.lmu.resize(nb * np);
-    bk.lkr.resize(nb * np);
-    bk.lUf.resize(nb);
-    bk.lH.resize(nb * np);
-    bk.lkt.resize(nb);
+    bvs.lphaseNum.resize(nb);
+    bvs.lNt.resize(nb);
+    bvs.lNi.resize(nb * nc);
+    bvs.lvf.resize(nb);
+    bvs.lT.resize(nb);
+    bvs.lP.resize(nb);
+    bvs.lPj.resize(nb * np);
+    bvs.lPc.resize(nb * np);
+    bvs.lphaseExist.resize(nb * np);
+    bvs.lS.resize(nb * np);
+    bvs.lxij.resize(nb * np * nc);
+    bvs.lrho.resize(nb * np);
+    bvs.lxi.resize(nb * np);
+    bvs.lmu.resize(nb * np);
+    bvs.lkr.resize(nb * np);
+    bvs.lUf.resize(nb);
+    bvs.lH.resize(nb * np);
+    bvs.lkt.resize(nb);
 
     // derivatives
-    bk.vfP.resize(nb);
-    bk.vfT.resize(nb);
-    bk.vfi.resize(nb * nc);
-    bk.rhoP.resize(nb * np);
-    bk.rhoT.resize(nb * np);
-    bk.rhox.resize(nb * nc * np);
-    bk.xiP.resize(nb * np);
-    bk.xiT.resize(nb * np);
-    bk.xix.resize(nb * nc * np);
-    bk.muP.resize(nb * np);
-    bk.muT.resize(nb * np);
-    bk.mux.resize(nb * nc * np);
-    bk.dPcdS.resize(nb * np * np);
-    bk.dKrdS.resize(nb * np * np);
-    bk.UfP.resize(nb);
-    bk.UfT.resize(nb);
-    bk.Ufi.resize(nb * nc);
-    bk.HT.resize(nb * np);
-    bk.Hx.resize(nb * np * nc);
-    bk.ktP.resize(nb);
-    bk.ktT.resize(nb);
-    bk.ktS.resize(nb * np);
+    bvs.vfP.resize(nb);
+    bvs.vfT.resize(nb);
+    bvs.vfi.resize(nb * nc);
+    bvs.rhoP.resize(nb * np);
+    bvs.rhoT.resize(nb * np);
+    bvs.rhox.resize(nb * nc * np);
+    bvs.xiP.resize(nb * np);
+    bvs.xiT.resize(nb * np);
+    bvs.xix.resize(nb * nc * np);
+    bvs.muP.resize(nb * np);
+    bvs.muT.resize(nb * np);
+    bvs.mux.resize(nb * nc * np);
+    bvs.dPcdS.resize(nb * np * np);
+    bvs.dKrdS.resize(nb * np * np);
+    bvs.UfP.resize(nb);
+    bvs.UfT.resize(nb);
+    bvs.Ufi.resize(nb * nc);
+    bvs.HT.resize(nb * np);
+    bvs.Hx.resize(nb * np * nc);
+    bvs.ktP.resize(nb);
+    bvs.ktT.resize(nb);
+    bvs.ktS.resize(nb * np);
 
-    bk.lvfP.resize(nb);
-    bk.lvfT.resize(nb);
-    bk.lvfi.resize(nb * nc);
-    bk.lrhoP.resize(nb * np);
-    bk.lrhoT.resize(nb * np);
-    bk.lrhox.resize(nb * nc * np);
-    bk.lxiP.resize(nb * np);
-    bk.lxiT.resize(nb * np);
-    bk.lxix.resize(nb * nc * np);
-    bk.lmuP.resize(nb * np);
-    bk.lmuT.resize(nb * np);
-    bk.lmux.resize(nb * nc * np);
-    bk.ldPcdS.resize(nb * np * np);
-    bk.ldKrdS.resize(nb * np * np);
-    bk.UfP.resize(nb);
-    bk.UfT.resize(nb);
-    bk.Ufi.resize(nb * nc);
-    bk.HT.resize(nb * np);
-    bk.Hx.resize(nb * np * nc);
-    bk.ktP.resize(nb);
-    bk.ktT.resize(nb);
-    bk.ktS.resize(nb * np);
+    bvs.lvfP.resize(nb);
+    bvs.lvfT.resize(nb);
+    bvs.lvfi.resize(nb * nc);
+    bvs.lrhoP.resize(nb * np);
+    bvs.lrhoT.resize(nb * np);
+    bvs.lrhox.resize(nb * nc * np);
+    bvs.lxiP.resize(nb * np);
+    bvs.lxiT.resize(nb * np);
+    bvs.lxix.resize(nb * nc * np);
+    bvs.lmuP.resize(nb * np);
+    bvs.lmuT.resize(nb * np);
+    bvs.lmux.resize(nb * nc * np);
+    bvs.ldPcdS.resize(nb * np * np);
+    bvs.ldKrdS.resize(nb * np * np);
+    bvs.UfP.resize(nb);
+    bvs.UfT.resize(nb);
+    bvs.Ufi.resize(nb * nc);
+    bvs.HT.resize(nb * np);
+    bvs.Hx.resize(nb * np * nc);
+    bvs.ktP.resize(nb);
+    bvs.ktT.resize(nb);
+    bvs.ktS.resize(nb * np);
 
     // FIM-Specified
-    bk.maxLendSdP = (nc + 2) * (nc + 1) * np;
-    bk.dSec_dPri.resize(nb * bk.maxLendSdP);
+    bvs.maxLendSdP = (nc + 2) * (nc + 1) * np;
+    bvs.dSec_dPri.resize(nb * bvs.maxLendSdP);
 
-    bk.ldSec_dPri.resize(nb * bk.maxLendSdP);
+    bvs.ldSec_dPri.resize(nb * bvs.maxLendSdP);
 
     // BulkConn
     BulkConn&      conn    = rs.conn;
@@ -314,7 +315,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     dTNR.resize(nb);
 
     // Allocate Residual
-    res.SetupT(bk.nbI, rs.allWells.numWell, nc);
+    res.SetupT(bvs.nbI, rs.allWells.numWell, nc);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -329,51 +330,54 @@ void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
 
 void T_FIM::InitRock(Bulk& bk) const
 {
-    for (OCP_USI n = 0; n < bk.nb; n++) {
+    BulkVarSet& bvs = bk.vs;
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
         if (bk.bType[n] == 0) {
             // non fluid bulk
-            bk.poroInit[n] = 0;
-            bk.poro[n]     = 0;
-            bk.rockVp[n]   = 0;
-            bk.vr[n]       = bk.v[n];
+            bvs.poroInit[n] = 0;
+            bvs.poro[n]     = 0;
+            bvs.rockVp[n]   = 0;
+            bvs.vr[n]       = bvs.v[n];
         }
     }
 }
 
 void T_FIM::CalRock(Bulk& bk) const
 {
-    const OCP_USI nb = bk.nb;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        bk.rock[bk.ROCKNUM[n]]->CalPoro(bk.P[n], bk.T[n], bk.poroInit[n], bk.bType[n]);
+        bk.rock[bk.ROCKNUM[n]]->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
         if (bk.bType[n] > 0) {
             // with fluid           
-            bk.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
-            bk.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
-            bk.poroT[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodT();           
-            bk.vr[n]     = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_Poro();
-            bk.vrP[n]    = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodP();
-            bk.vrT[n]    = bk.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodT();
-            bk.rockVp[n] = bk.v[n] * bk.poro[n];
+            bvs.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
+            bvs.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
+            bvs.poroT[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodT();           
+            bvs.vr[n]     = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_Poro();
+            bvs.vrP[n]    = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodP();
+            bvs.vrT[n]    = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodT();
+            bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
         }
-        bk.Hr[n]  = bk.rock[bk.ROCKNUM[n]]->GetHr();
-        bk.HrT[n] = bk.rock[bk.ROCKNUM[n]]->GetdHrdT();
+        bvs.Hr[n]  = bk.rock[bk.ROCKNUM[n]]->GetHr();
+        bvs.HrT[n] = bk.rock[bk.ROCKNUM[n]]->GetdHrdT();
     }
 }
 
 void T_FIM::InitFlash(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const OCP_USI np = bk.np;
-    const OCP_USI nc = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const OCP_USI np = bvs.np;
+    const OCP_USI nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
-            bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bk.P[n], bk.Pb[n], bk.T[n],
-                                                    &bk.S[n * np], bk.rockVp[n],
-                                                    &bk.Ni[n * nc], n);
+            bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
+                                                    &bvs.S[n * np], bvs.rockVp[n],
+                                                    &bvs.Ni[n * nc], n);
             for (USI i = 0; i < nc; i++) {
-                bk.Ni[n * nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+                bvs.Ni[n * nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
             }
             PassFlashValue(bk, n);
         }
@@ -382,15 +386,16 @@ void T_FIM::InitFlash(Bulk& bk)
 
 void T_FIM::CalFlash(Bulk& bk)
 {
-    const OCP_USI nb = bk.nb;
-    const OCP_USI np = bk.np;
-    const OCP_USI nc = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const OCP_USI np = bvs.np;
+    const OCP_USI nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
-            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bk.P[n], bk.T[n], &bk.Ni[n * nc],
-                                                &bk.S[n * np], bk.phaseNum[n],
-                                                &bk.xij[n * np * nc], n);
+            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
+                                                &bvs.S[n * np], bvs.phaseNum[n],
+                                                &bvs.xij[n * np * nc], n);
             PassFlashValue(bk, n);
         }
     }
@@ -398,99 +403,102 @@ void T_FIM::CalFlash(Bulk& bk)
 
 void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    const USI     np     = bk.np;
-    const USI     nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const USI     np     = bvs.np;
+    const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
     const USI     pvtnum = bk.PVTNUM[n];
 
-    bk.phaseNum[n] = 0;
-    bk.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bk.vf[n]       = bk.flashCal[pvtnum]->GetVf();
-    bk.Uf[n]       = bk.flashCal[pvtnum]->GetUf();
+    bvs.phaseNum[n] = 0;
+    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
+    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
+    bvs.Uf[n]       = bk.flashCal[pvtnum]->GetUf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bk.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
-        dSNR[bIdp + j] = bk.S[bIdp + j] - dSNR[bIdp + j];
-        bk.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
-        if (bk.phaseExist[bIdp + j]) {
-            bk.phaseNum[n]++;
-            bk.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bk.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bk.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
-            bk.H[bIdp + j]   = bk.flashCal[pvtnum]->GetH(j);
+        bvs.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
+        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
+        if (bvs.phaseExist[bIdp + j]) {
+            bvs.phaseNum[n]++;
+            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
+            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
+            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
+            bvs.H[bIdp + j]   = bk.flashCal[pvtnum]->GetH(j);
 
             // Derivatives
-            bk.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
-            bk.rhoT[bIdp + j] = bk.flashCal[pvtnum]->GetRhoT(j);
-            bk.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
-            bk.xiT[bIdp + j]  = bk.flashCal[pvtnum]->GetXiT(j);
-            bk.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
-            bk.muT[bIdp + j]  = bk.flashCal[pvtnum]->GetMuT(j);
-            bk.HT[bIdp + j]   = bk.flashCal[pvtnum]->GetHT(j);
+            bvs.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
+            bvs.rhoT[bIdp + j] = bk.flashCal[pvtnum]->GetRhoT(j);
+            bvs.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
+            bvs.xiT[bIdp + j]  = bk.flashCal[pvtnum]->GetXiT(j);
+            bvs.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
+            bvs.muT[bIdp + j]  = bk.flashCal[pvtnum]->GetMuT(j);
+            bvs.HT[bIdp + j]   = bk.flashCal[pvtnum]->GetHT(j);
 
             for (USI i = 0; i < nc; i++) {
-                bk.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
-                bk.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
-                bk.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
-                bk.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
-                bk.Hx[bIdp * nc + j * nc + i]   = bk.flashCal[pvtnum]->GetHx(j, i);
+                bvs.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
+                bvs.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
+                bvs.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
+                bvs.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
+                bvs.Hx[bIdp * nc + j * nc + i]   = bk.flashCal[pvtnum]->GetHx(j, i);
             }
         }
     }
-    bk.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
-    bk.vfT[n] = bk.flashCal[pvtnum]->GetVfT();
-    bk.UfP[n] = bk.flashCal[pvtnum]->GetUfP();
-    bk.UfT[n] = bk.flashCal[pvtnum]->GetUfT();
+    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.vfT[n] = bk.flashCal[pvtnum]->GetVfT();
+    bvs.UfP[n] = bk.flashCal[pvtnum]->GetUfP();
+    bvs.UfT[n] = bk.flashCal[pvtnum]->GetUfT();
 
     for (USI i = 0; i < nc; i++) {
-        bk.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
-        bk.Ufi[n * nc + i] = bk.flashCal[pvtnum]->GetUfi(i);
+        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.Ufi[n * nc + i] = bk.flashCal[pvtnum]->GetUfi(i);
     }
 
-    Dcopy(bk.maxLendSdP, &bk.dSec_dPri[n * bk.maxLendSdP],
+    Dcopy(bvs.maxLendSdP, &bvs.dSec_dPri[n * bvs.maxLendSdP],
           &bk.flashCal[pvtnum]->GetDXsDXp()[0]);
 }
 
 void T_FIM::CalKrPc(Bulk& bk) const
 {
-    const USI& np = bk.np;
+    BulkVarSet& bvs = bk.vs;
+    const USI& np = bvs.np;
 
-    for (OCP_USI n = 0; n < bk.nb; n++) {
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
         if (bk.bType[n] > 0) {
             OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bk.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bk.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bk.Pc[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bk.dKrdS[bId * np]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bk.dPcdS[bId * np]);
-            for (USI j = 0; j < np; j++) bk.Pj[n * np + j] = bk.P[n] + bk.Pc[n * np + j];
+            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
+            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            for (USI j = 0; j < np; j++) bvs.Pj[n * np + j] = bvs.P[n] + bvs.Pc[n * np + j];
         }
     }
 }
 
 void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
 {
-    const OCP_USI nb = bk.nb;
-    const OCP_USI np = bk.np;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI nb = bvs.nb;
+    const OCP_USI np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
             // fluid bulk
             OCP_DBL tmp = 0;
             for (USI j = 0; j < np; j++) {
-                tmp += bk.S[n * np + j] * bk.thconp[j];
-                bk.ktS[n * np + j] = bk.poro[n] * bk.thconp[j];
+                tmp += bvs.S[n * np + j] * bk.thconp[j];
+                bvs.ktS[n * np + j] = bvs.poro[n] * bk.thconp[j];
             }
-            bk.kt[n]  = bk.poro[n] * tmp + (1 - bk.poro[n]) * bk.thconr[n];
-            bk.ktP[n] = bk.poroP[n] * (tmp - bk.thconr[n]);
-            bk.ktT[n] = bk.poroT[n] * (tmp - bk.thconr[n]);
+            bvs.kt[n]  = bvs.poro[n] * tmp + (1 - bvs.poro[n]) * bvs.thconr[n];
+            bvs.ktP[n] = bvs.poroP[n] * (tmp - bvs.thconr[n]);
+            bvs.ktT[n] = bvs.poroT[n] * (tmp - bvs.thconr[n]);
         } else {
             // non fluid bulk
-            bk.kt[n] = bk.thconr[n];
+            bvs.kt[n] = bvs.thconr[n];
         }
     }
 
@@ -505,19 +513,19 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
     //        // fluid bulk connections
     //        areaB        = conn.iteratorConn[c].AreaB();
     //        areaE        = conn.iteratorConn[c].AreaE();
-    //        T1           = bk.kt[bId] * areaB;
-    //        T2           = bk.kt[eId] * areaE;
+    //        T1           = bvs.kt[bId] * areaB;
+    //        T2           = bvs.kt[eId] * areaE;
     //        conn.Adkt[c] = 1 / (1 / T1 + 1 / T2);
 
     //        tmpB                  = pow(conn.Adkt[c], 2) / pow(T1, 2) * areaB;
     //        tmpE                  = pow(conn.Adkt[c], 2) / pow(T2, 2) * areaE;
-    //        conn.AdktP[c * 2 + 0] = tmpB * bk.ktP[bId];
-    //        conn.AdktP[c * 2 + 1] = tmpE * bk.ktP[eId];
-    //        conn.AdktT[c * 2 + 0] = tmpB * bk.ktT[bId];
-    //        conn.AdktT[c * 2 + 1] = tmpE * bk.ktT[eId];
+    //        conn.AdktP[c * 2 + 0] = tmpB * bvs.ktP[bId];
+    //        conn.AdktP[c * 2 + 1] = tmpE * bvs.ktP[eId];
+    //        conn.AdktT[c * 2 + 0] = tmpB * bvs.ktT[bId];
+    //        conn.AdktT[c * 2 + 1] = tmpE * bvs.ktT[eId];
     //        for (USI j = 0; j < np; j++) {
-    //            conn.AdktS[c * np * 2 + j]      = tmpB * bk.ktS[bId * np + j];
-    //            conn.AdktS[c * np * 2 + np + j] = tmpE * bk.ktS[eId * np + j];
+    //            conn.AdktS[c * np * 2 + j]      = tmpB * bvs.ktS[bId * np + j];
+    //            conn.AdktS[c * np * 2 + np + j] = tmpE * bvs.ktS[eId * np + j];
     //        }
     //    }
     //}
@@ -525,69 +533,70 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
 
 void T_FIM::CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const
 {
-    bk.hLoss.CalHeatLoss(bk.bLocation, bk.T, bk.lT, bk.initT, t, dt);
+    BulkVarSet& bvs = bk.vs;
+    bk.hLoss.CalHeatLoss(bk.bLocation, bvs.T, bvs.lT, bk.initT, t, dt);
 }
 
 void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
     // Bulk
     Bulk& bk = rs.bulk;
-
+    BulkVarSet& bvs = bk.vs;
     // Rock
-    bk.poro   = bk.lporo;
-    bk.rockVp = bk.lrockVp;
-    bk.vr     = bk.lvr;
-    bk.Hr     = bk.lHr;
+    bvs.poro   = bvs.lporo;
+    bvs.rockVp = bvs.lrockVp;
+    bvs.vr     = bvs.lvr;
+    bvs.Hr     = bvs.lHr;
     // derivatives
-    bk.poroP = bk.lporoP;
-    bk.poroT = bk.lporoT;
-    bk.vrP   = bk.lvrP;
-    bk.vrT   = bk.lvrT;
-    bk.HrT   = bk.lHrT;
+    bvs.poroP = bvs.lporoP;
+    bvs.poroT = bvs.lporoT;
+    bvs.vrP   = bvs.lvrP;
+    bvs.vrT   = bvs.lvrT;
+    bvs.HrT   = bvs.lHrT;
 
     // Fluid
-    bk.phaseNum   = bk.lphaseNum;
-    bk.Nt         = bk.lNt;
-    bk.Ni         = bk.lNi;
-    bk.vf         = bk.lvf;
-    bk.T          = bk.lT;
-    bk.P          = bk.lP;
-    bk.Pj         = bk.lPj;
-    bk.Pc         = bk.lPc;
-    bk.phaseExist = bk.lphaseExist;
-    bk.S          = bk.lS;
-    bk.xij        = bk.lxij;
-    bk.rho        = bk.lrho;
-    bk.xi         = bk.lxi;
-    bk.mu         = bk.lmu;
-    bk.kr         = bk.lkr;
-    bk.Uf         = bk.lUf;
-    bk.H          = bk.lH;
-    bk.kt         = bk.lkt;
+    bvs.phaseNum   = bvs.lphaseNum;
+    bvs.Nt         = bvs.lNt;
+    bvs.Ni         = bvs.lNi;
+    bvs.vf         = bvs.lvf;
+    bvs.T          = bvs.lT;
+    bvs.P          = bvs.lP;
+    bvs.Pj         = bvs.lPj;
+    bvs.Pc         = bvs.lPc;
+    bvs.phaseExist = bvs.lphaseExist;
+    bvs.S          = bvs.lS;
+    bvs.xij        = bvs.lxij;
+    bvs.rho        = bvs.lrho;
+    bvs.xi         = bvs.lxi;
+    bvs.mu         = bvs.lmu;
+    bvs.kr         = bvs.lkr;
+    bvs.Uf         = bvs.lUf;
+    bvs.H          = bvs.lH;
+    bvs.kt         = bvs.lkt;
     // derivatives
-    bk.vfP       = bk.lvfP;
-    bk.vfT       = bk.lvfT;
-    bk.vfi       = bk.lvfi;
-    bk.rhoP      = bk.lrhoP;
-    bk.rhoT      = bk.lrhoT;
-    bk.rhox      = bk.lrhox;
-    bk.xiP       = bk.lxiP;
-    bk.xiT       = bk.lxiT;
-    bk.xix       = bk.lxix;
-    bk.muP       = bk.lmuP;
-    bk.muT       = bk.lmuT;
-    bk.mux       = bk.lmux;
-    bk.dPcdS   = bk.ldPcdS;
-    bk.dKrdS    = bk.ldKrdS;
-    bk.UfP       = bk.lUfP;
-    bk.UfT       = bk.lUfT;
-    bk.Ufi       = bk.lUfi;
-    bk.HT        = bk.lHT;
-    bk.Hx        = bk.lHx;
-    bk.ktP       = bk.lktP;
-    bk.ktT       = bk.lktT;
-    bk.ktS       = bk.lktS;
-    bk.dSec_dPri = bk.ldSec_dPri;
+    bvs.vfP       = bvs.lvfP;
+    bvs.vfT       = bvs.lvfT;
+    bvs.vfi       = bvs.lvfi;
+    bvs.rhoP      = bvs.lrhoP;
+    bvs.rhoT      = bvs.lrhoT;
+    bvs.rhox      = bvs.lrhox;
+    bvs.xiP       = bvs.lxiP;
+    bvs.xiT       = bvs.lxiT;
+    bvs.xix       = bvs.lxix;
+    bvs.muP       = bvs.lmuP;
+    bvs.muT       = bvs.lmuT;
+    bvs.mux       = bvs.lmux;
+    bvs.dPcdS   = bvs.ldPcdS;
+    bvs.dKrdS    = bvs.ldKrdS;
+    bvs.UfP       = bvs.lUfP;
+    bvs.UfT       = bvs.lUfT;
+    bvs.Ufi       = bvs.lUfi;
+    bvs.HT        = bvs.lHT;
+    bvs.Hx        = bvs.lHx;
+    bvs.ktP       = bvs.lktP;
+    bvs.ktT       = bvs.lktT;
+    bvs.ktS       = bvs.lktS;
+    bvs.dSec_dPri = bvs.ldSec_dPri;
 
     bk.hLoss.ResetToLastTimeStep();
 
@@ -609,62 +618,62 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
 {
     // Bulk
     Bulk& bk = rs.bulk;
-
+    BulkVarSet& bvs = bk.vs;
     // Rock
-    bk.lporo   = bk.poro;
-    bk.lrockVp = bk.rockVp;
-    bk.lvr     = bk.vr;
-    bk.lHr     = bk.Hr;
+    bvs.lporo   = bvs.poro;
+    bvs.lrockVp = bvs.rockVp;
+    bvs.lvr     = bvs.vr;
+    bvs.lHr     = bvs.Hr;
     // derivatives
-    bk.lporoP = bk.poroP;
-    bk.lporoT = bk.poroT;
-    bk.lvrP   = bk.vrP;
-    bk.lvrT   = bk.vrT;
-    bk.lHrT   = bk.HrT;
+    bvs.lporoP = bvs.poroP;
+    bvs.lporoT = bvs.poroT;
+    bvs.lvrP   = bvs.vrP;
+    bvs.lvrT   = bvs.vrT;
+    bvs.lHrT   = bvs.HrT;
 
     // Fluid
-    bk.lphaseNum   = bk.phaseNum;
-    bk.lNt         = bk.Nt;
-    bk.lNi         = bk.Ni;
-    bk.lvf         = bk.vf;
-    bk.lT          = bk.T;
-    bk.lP          = bk.P;
-    bk.lPj         = bk.Pj;
-    bk.lPc         = bk.Pc;
-    bk.lphaseExist = bk.phaseExist;
-    bk.lS          = bk.S;
-    bk.lxij        = bk.xij;
-    bk.lrho        = bk.rho;
-    bk.lxi         = bk.xi;
-    bk.lmu         = bk.mu;
-    bk.lkr         = bk.kr;
-    bk.lUf         = bk.Uf;
-    bk.lH          = bk.H;
-    bk.lkt         = bk.kt;
+    bvs.lphaseNum   = bvs.phaseNum;
+    bvs.lNt         = bvs.Nt;
+    bvs.lNi         = bvs.Ni;
+    bvs.lvf         = bvs.vf;
+    bvs.lT          = bvs.T;
+    bvs.lP          = bvs.P;
+    bvs.lPj         = bvs.Pj;
+    bvs.lPc         = bvs.Pc;
+    bvs.lphaseExist = bvs.phaseExist;
+    bvs.lS          = bvs.S;
+    bvs.lxij        = bvs.xij;
+    bvs.lrho        = bvs.rho;
+    bvs.lxi         = bvs.xi;
+    bvs.lmu         = bvs.mu;
+    bvs.lkr         = bvs.kr;
+    bvs.lUf         = bvs.Uf;
+    bvs.lH          = bvs.H;
+    bvs.lkt         = bvs.kt;
     // derivatives
-    bk.lvfP       = bk.vfP;
-    bk.lvfT       = bk.vfT;
-    bk.lvfi       = bk.vfi;
-    bk.lrhoP      = bk.rhoP;
-    bk.lrhoT      = bk.rhoT;
-    bk.lrhox      = bk.rhox;
-    bk.lxiP       = bk.xiP;
-    bk.lxiT       = bk.xiT;
-    bk.lxix       = bk.xix;
-    bk.lmuP       = bk.muP;
-    bk.lmuT       = bk.muT;
-    bk.lmux       = bk.mux;
-    bk.ldPcdS   = bk.dPcdS;
-    bk.ldKrdS    = bk.dKrdS;
-    bk.lUfP       = bk.UfP;
-    bk.lUfT       = bk.UfT;
-    bk.lUfi       = bk.Ufi;
-    bk.lHT        = bk.HT;
-    bk.lHx        = bk.Hx;
-    bk.lktP       = bk.ktP;
-    bk.lktT       = bk.ktT;
-    bk.lktS       = bk.ktS;
-    bk.ldSec_dPri = bk.dSec_dPri;
+    bvs.lvfP       = bvs.vfP;
+    bvs.lvfT       = bvs.vfT;
+    bvs.lvfi       = bvs.vfi;
+    bvs.lrhoP      = bvs.rhoP;
+    bvs.lrhoT      = bvs.rhoT;
+    bvs.lrhox      = bvs.rhox;
+    bvs.lxiP       = bvs.xiP;
+    bvs.lxiT       = bvs.xiT;
+    bvs.lxix       = bvs.xix;
+    bvs.lmuP       = bvs.muP;
+    bvs.lmuT       = bvs.muT;
+    bvs.lmux       = bvs.mux;
+    bvs.ldPcdS   = bvs.dPcdS;
+    bvs.ldKrdS    = bvs.dKrdS;
+    bvs.lUfP       = bvs.UfP;
+    bvs.lUfT       = bvs.UfT;
+    bvs.lUfi       = bvs.Ufi;
+    bvs.lHT        = bvs.HT;
+    bvs.lHx        = bvs.Hx;
+    bvs.lktP       = bvs.ktP;
+    bvs.lktT       = bvs.ktT;
+    bvs.lktS       = bvs.ktS;
+    bvs.ldSec_dPri = bvs.dSec_dPri;
 
     bk.hLoss.UpdateLastTimeStep();
 
@@ -678,9 +687,10 @@ void T_FIM::CalRes(Reservoir&      rs,
                    const OCP_BOOL& resetRes0)
 {
     const Bulk& bk   = rs.bulk;
-    const USI   nb   = bk.nbI;
-    const USI   np   = bk.np;
-    const USI   nc   = bk.nc;
+    const BulkVarSet& bvs = bk.vs;
+    const USI   nb   = bvs.nbI;
+    const USI   np   = bvs.np;
+    const USI   nc   = bvs.nc;
     const USI   len  = nc + 2;
     
     res.SetZero();
@@ -694,18 +704,18 @@ void T_FIM::CalRes(Reservoir&      rs,
             bId  = n * len;
             bIdb = n * nc;
             // Volume Conservation
-            res.resAbs[bId] = bk.rockVp[n] - bk.vf[n];
+            res.resAbs[bId] = bvs.rockVp[n] - bvs.vf[n];
             // Mass Conservation
             for (USI i = 0; i < nc; i++) {
-                res.resAbs[n * len + 1 + i] = bk.Ni[bIdb + i] - bk.lNi[bIdb + i];
+                res.resAbs[n * len + 1 + i] = bvs.Ni[bIdb + i] - bvs.lNi[bIdb + i];
             }
             // Energy Conservation
             res.resAbs[n * len + nc + 1] =
-                (bk.vf[n] * bk.Uf[n] + bk.vr[n] * bk.Hr[n]) -
-                (bk.lvf[n] * bk.lUf[n] + bk.lvr[n] * bk.lHr[n]);
+                (bvs.vf[n] * bvs.Uf[n] + bvs.vr[n] * bvs.Hr[n]) -
+                (bvs.lvf[n] * bvs.lUf[n] + bvs.lvr[n] * bvs.lHr[n]);
         } else {
             // Non fluid bulk
-            res.resAbs[n * len + nc + 1] = bk.vr[n] * bk.Hr[n] - bk.lvr[n] * bk.lHr[n];
+            res.resAbs[n * len + nc + 1] = bvs.vr[n] * bvs.Hr[n] - bvs.lvr[n] * bvs.lHr[n];
         }
 
         // Heat Loss
@@ -715,8 +725,8 @@ void T_FIM::CalRes(Reservoir&      rs,
             // dT
             res.resAbs[n * len + nc + 1] +=
                 dt * kappa *
-                (2 * (bk.T[n] - bk.initT[n]) / sqrt(lambda * t) - bk.hLoss.p[n]) *
-                bk.dx[n] * bk.dy[n];
+                (2 * (bvs.T[n] - bk.initT[n]) / sqrt(lambda * t) - bk.hLoss.p[n]) *
+                bvs.dx[n] * bvs.dy[n];
         }
     }
 
@@ -737,7 +747,7 @@ void T_FIM::CalRes(Reservoir&      rs,
 
         // Thermal conductive term always exists
         Akdt = flux[cType]->GetAdkt();
-        dT   = bk.T[bId] - bk.T[eId];
+        dT   = bvs.T[bId] - bvs.T[eId];
         res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
         if (eId < nb) {
             // Interior grid
@@ -758,8 +768,8 @@ void T_FIM::CalRes(Reservoir&      rs,
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
-                    res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
+                    res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
                 }
 			}
 			else {
@@ -769,7 +779,7 @@ void T_FIM::CalRes(Reservoir&      rs,
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bk.xi[uId_np_j] * bk.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
                 }				
 			}
         }
@@ -786,7 +796,7 @@ void T_FIM::CalRes(Reservoir&      rs,
     for (OCP_USI n = 0; n < nb; n++) {
 
         // Energy equations always exist
-        OCP_DBL eT = bk.vf[n] * bk.Uf[n] + bk.vr[n] * bk.Hr[n];
+        OCP_DBL eT = bvs.vf[n] * bvs.Uf[n] + bvs.vr[n] * bvs.Hr[n];
         tmp        = fabs(res.resAbs[n * len + nc + 1] / eT);
         if (res.maxRelRes_E < tmp) {
             res.maxRelRes_E = tmp;
@@ -796,7 +806,7 @@ void T_FIM::CalRes(Reservoir&      rs,
         if (bk.bType[n] > 0) {
             // Fluid Bulk
             for (USI i = 0; i < len - 1; i++) {
-                tmp = fabs(res.resAbs[n * len + i] / bk.rockVp[n]);
+                tmp = fabs(res.resAbs[n * len + i] / bvs.rockVp[n]);
                 if (res.maxRelRes_V < tmp) {
                     res.maxRelRes_V = tmp;
                     res.maxId_V     = n;
@@ -804,7 +814,7 @@ void T_FIM::CalRes(Reservoir&      rs,
             }
 
             for (USI i = 1; i < len - 1; i++) {
-                tmp = fabs(res.resAbs[n * len + i] / bk.Nt[n]);
+                tmp = fabs(res.resAbs[n * len + i] / bvs.Nt[n]);
                 if (res.maxRelRes_N < tmp) {
                     res.maxRelRes_N = tmp;
                     res.maxId_N     = n;
@@ -835,10 +845,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     const USI numWell = rs.GetNumOpenWell();
 
     const Bulk&     bk     = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
     const BulkConn& conn   = rs.conn;
-    const OCP_USI   nb     = bk.nbI;
-    const USI       np     = bk.np;
-    const USI       nc     = bk.nc;
+    const OCP_USI   nb     = bvs.nbI;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
     const USI       ncol   = nc + 2;
     const USI       ncol2  = np * nc + np;
     const USI       bsize  = ncol * ncol;
@@ -859,25 +870,25 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             // Fluid Bulk
             // Volume consevation
             // dP
-            bmat[0] = bk.v[n] * bk.poroP[n] - bk.vfP[n];
+            bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
             // dNi
             for (USI i = 0; i < nc; i++) {
-                bmat[i + 1] = -bk.vfi[n * nc + i];
+                bmat[i + 1] = -bvs.vfi[n * nc + i];
             }
             // dT
-            bmat[nc + 1] = bk.v[n] * bk.poroT[n] - bk.vfT[n];
+            bmat[nc + 1] = bvs.v[n] * bvs.poroT[n] - bvs.vfT[n];
             // Energy consevation
             // dP
             bmat[ncol * (ncol - 1)] =
-                bk.vfP[n] * bk.Uf[n] + bk.vf[n] * bk.UfP[n] + bk.vrP[n] * bk.Hr[n];
+                bvs.vfP[n] * bvs.Uf[n] + bvs.vf[n] * bvs.UfP[n] + bvs.vrP[n] * bvs.Hr[n];
             // dNi
             for (USI i = 0; i < nc; i++) {
                 bmat[ncol * (ncol - 1) + i + 1] =
-                    bk.vfi[n * nc + i] * bk.Uf[n] + bk.vf[n] * bk.Ufi[n * nc + i];
+                    bvs.vfi[n * nc + i] * bvs.Uf[n] + bvs.vf[n] * bvs.Ufi[n * nc + i];
             }
             // dT
-            bmat[ncol * ncol - 1] = bk.vfT[n] * bk.Uf[n] + bk.vf[n] * bk.UfT[n] +
-                                    bk.vrT[n] * bk.Hr[n] + bk.vr[n] * bk.HrT[n];
+            bmat[ncol * ncol - 1] = bvs.vfT[n] * bvs.Uf[n] + bvs.vf[n] * bvs.UfT[n] +
+                                    bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
             if (bk.hLoss.IfHeatLoss() && bk.bLocation[n] > 0) {
@@ -888,7 +899,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                 // dT
                 bmat[ncol * ncol - 1] += dt * kappa *
                                          (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
-                                         bk.dx[n] * bk.dy[n];
+                                         bvs.dx[n] * bvs.dy[n];
             }
 
             ls.NewDiag(n, bmat);
@@ -896,7 +907,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             // Non Fluid Bulk
             // Energy consevation
             // dT
-            bmatR[ncol * ncol - 1] = bk.vrT[n] * bk.Hr[n] + bk.vr[n] * bk.HrT[n];
+            bmatR[ncol * ncol - 1] = bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
             if (bk.hLoss.IfHeatLoss() && bk.bLocation[n] > 0) {
@@ -907,7 +918,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                 // dT
                 bmatR[ncol * ncol - 1] += dt * kappa *
                                           (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
-                                          bk.dx[n] * bk.dy[n];
+                                          bvs.dx[n] * bvs.dy[n];
             }
 
             ls.NewDiag(n, bmatR);
@@ -928,7 +939,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
         flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
 
         bmat = flux[cType]->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bk.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
             bmat.data());
 
         Dscalar(bsize, dt, bmat.data());
@@ -949,7 +960,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 #endif
 
         bmat = flux[cType]->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bk.dSec_dPri[eId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
             bmat.data());
 
         Dscalar(bsize, dt, bmat.data());
@@ -993,14 +1004,15 @@ void T_FIM::GetSolution(Reservoir&             rs,
 
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
-    const OCP_USI   nb     = bk.nb;
-    const USI       np     = bk.np;
-    const USI       nc     = bk.nc;
+    BulkVarSet& bvs = bk.vs;
+    const OCP_USI   nb     = bvs.nb;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
     const USI       row    = np * (nc + 1);
     const USI       col    = nc + 2;
 
     // Well first
-    USI wId = bk.nbI * col;
+    USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
             wl.SetBHP(wl.BHP() + u[wId]);
@@ -1035,7 +1047,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    dSNR    = bk.S;
+    dSNR    = bvs.S;
     NRdPmax = 0;
     NRdNmax = 0;
     NRdTmax = 0;
@@ -1055,7 +1067,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
                 chopmin = 1;
                 // compute the chop
                 fill(dtmp.begin(), dtmp.end(), 0.0);
-                DaAxpby(np, col, 1, &bk.dSec_dPri[n * bk.maxLendSdP], u.data() + n * col, 1,
+                DaAxpby(np, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP], u.data() + n * col, 1,
                     dtmp.data());
 
                 for (USI j = 0; j < np; j++) {
@@ -1063,37 +1075,37 @@ void T_FIM::GetSolution(Reservoir&             rs,
                     if (fabs(dtmp[j]) > dSmaxlim) {
                         choptmp = dSmaxlim / fabs(dtmp[j]);
                     }
-                    else if (bk.S[n * np + j] + dtmp[j] < 0.0) {
-                        choptmp = 0.9 * bk.S[n * np + j] / fabs(dtmp[j]);
+                    else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
+                        choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
                     }
                     chopmin = min(chopmin, choptmp);
                 }
 
                 // dS
                 for (USI j = 0; j < np; j++) {
-                    bk.S[n * np + j] += chopmin * dtmp[j];
+                    bvs.S[n * np + j] += chopmin * dtmp[j];
                 }
 
                 // dP
                 OCP_DBL dP = u[n * col];
                 if (fabs(NRdPmax) < fabs(dP)) NRdPmax = dP;
-                bk.P[n] += dP;
+                bvs.P[n] += dP;
                 dPNR[n] = dP;
 
                 // dNi
                 for (USI i = 0; i < nc; i++) {
                     dNNR[n * nc + i] = u[n * col + 1 + i] * chopmin;
-                    if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bk.Nt[n])
-                        NRdNmax = dNNR[n * nc + i] / bk.Nt[n];
+                    if (fabs(NRdNmax) < fabs(dNNR[n * nc + i]) / bvs.Nt[n])
+                        NRdNmax = dNNR[n * nc + i] / bvs.Nt[n];
 
-                    bk.Ni[n * nc + i] += dNNR[n * nc + i];
+                    bvs.Ni[n * nc + i] += dNNR[n * nc + i];
                 }
             }
 
             // dT
             OCP_DBL dT = u[n * col + col - 1];
             if (fabs(NRdTmax) < fabs(dT)) NRdTmax = dT;
-            bk.T[n] += dT;
+            bvs.T[n] += dT;
             dTNR[n] = dT;
         }
 

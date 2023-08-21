@@ -74,25 +74,25 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 }
 
 
-void AllWells::Setup(const Bulk& myBulk)
+void AllWells::Setup(const Bulk& bk)
 {
     OCP_FUNCNAME;
-    numproc = myBulk.numproc;
-    SetupWell(myBulk);
-    SetupMixture(myBulk);
+    numproc = bk.numproc;
+    SetupWell(bk);
+    SetupMixture(bk);
 }
 
 
-void AllWells::SetupWell(const Bulk& myBulk)
+void AllWells::SetupWell(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        wells[w].Setup(myBulk, solvents);
+        wells[w].Setup(bk, solvents);
     }
 }
 
-void AllWells::SetupWellGroup(const Bulk& myBulk)
+void AllWells::SetupWellGroup(const Bulk& bk)
 {
     wellGroup.clear();
     // Field Group, contain all wells
@@ -138,19 +138,19 @@ void AllWells::SetupWellGroup(const Bulk& myBulk)
     // control of group should be update according to input file
 }
 
-void AllWells::SetupMixture(const Bulk& myBulk)
+void AllWells::SetupMixture(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
-    flashCal = myBulk.GetMixture();
+    flashCal = bk.GetMixture();
 }
 
-void AllWells::SetupWellBulk(Bulk& myBulk) const
+void AllWells::SetupWellBulk(Bulk& bk) const
 {
     for (auto& w : wells) {
         if (w.IsOpen()) {
             for (auto& p : w.perf) {
-                myBulk.AddWellBulkId(p.Location());
+                bk.AddWellBulkId(p.Location());
             }
         }
     }
@@ -167,64 +167,64 @@ void AllWells::ApplyControl(const USI& i)
     }
 }
 
-void AllWells::InitBHP(const Bulk& myBulk)
+void AllWells::InitBHP(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        wells[w].InitBHP(myBulk);
+        wells[w].InitBHP(bk);
     }
 }
 
-void AllWells::PrepareWell(const Bulk& myBulk)
-{
-    OCP_FUNCNAME;
-
-    for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-
-            wells[w].CalTrans(myBulk);
-            wells[w].CaldG(myBulk);
-            wells[w].CheckOptMode(myBulk);
-            wells[w].CalFlux(myBulk, OCP_TRUE);
-        }
-    }
-}
-
-void AllWells::CalTrans(const Bulk& myBulk)
+void AllWells::PrepareWell(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
-            wells[w].CalTrans(myBulk);
+
+            wells[w].CalTrans(bk);
+            wells[w].CaldG(bk);
+            wells[w].CheckOptMode(bk);
+            wells[w].CalFlux(bk, OCP_TRUE);
         }
     }
 }
 
-void AllWells::CalFlux(const Bulk& myBulk)
+void AllWells::CalTrans(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
-            wells[w].CalFlux(myBulk, OCP_FALSE);
+            wells[w].CalTrans(bk);
         }
     }
 }
 
-void AllWells::CaldG(const Bulk& myBulk)
+void AllWells::CalFlux(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
-            wells[w].CaldG(myBulk);
+            wells[w].CalFlux(bk, OCP_FALSE);
         }
     }
 }
 
-void AllWells::CalIPRT(const Bulk& myBulk, OCP_DBL dt)
+void AllWells::CaldG(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    for (USI w = 0; w < numWell; w++) {
+        if (wells[w].IsOpen()) {
+            wells[w].CaldG(bk);
+        }
+    }
+}
+
+void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
 {
     OCP_FUNCNAME;
 
@@ -242,9 +242,9 @@ void AllWells::CalIPRT(const Bulk& myBulk, OCP_DBL dt)
 
         if (wells[w].IsOpen()) {
             if (wells[w].WellType() == WellType::productor) {
-                wells[w].CalProdQj(myBulk, dt);
+                wells[w].CalProdQj(bk, dt);
             } else {
-                wells[w].CalInjQj(myBulk, dt);
+                wells[w].CalInjQj(bk, dt);
             }
         }
         FGIR += wells[w].WGIR;
@@ -271,7 +271,7 @@ void AllWells::ResetBHP()
     }
 }
 
-OCP_INT AllWells::CheckP(const Bulk& myBulk)
+OCP_INT AllWells::CheckP(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
@@ -281,7 +281,7 @@ OCP_INT AllWells::CheckP(const Bulk& myBulk)
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
 
-            OCP_INT flag = wells[w].CheckP(myBulk);
+            OCP_INT flag = wells[w].CheckP(bk);
 
             switch (flag) {
                 case WELL_NEGATIVE_PRESSURE:

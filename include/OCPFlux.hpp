@@ -156,7 +156,7 @@ class OCPFlux_IsoT : public OCPFlux
 public:
     OCPFlux_IsoT() = default;
     OCPFlux_IsoT(const Bulk& bk) {
-        Allocate(bk.np, bk.nc);
+        Allocate(bk.vs.np, bk.vs.nc);
         dFdXpB.resize((numCom + 1) * (numCom + 1));
         dFdXpE.resize((numCom + 1) * (numCom + 1));
         dFdXsB.resize((numCom + 1) * (numCom + 1) * numPhase);
@@ -176,16 +176,16 @@ class OCPFlux_T : public OCPFlux
 public:
     OCPFlux_T() = default;
     OCPFlux_T(const Bulk& bk) {
-        Allocate(bk.np, bk.nc);
+        Allocate(bk.vs.np, bk.vs.nc);
         dFdXpB.resize((numCom + 2) * (numCom + 2));
         dFdXpE.resize((numCom + 2) * (numCom + 2));
         dFdXsB.resize((numCom + 2) * (numCom + 1) * numPhase);
         dFdXsE.resize((numCom + 2) * (numCom + 1) * numPhase);
     }
-    void CalFlux(const BulkPair & bp, const Bulk & bk) override;
-    void AssembleMatFIM(const BulkPair & bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk & bk) override;
-    void AssembleMatAIM(const BulkPair & bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk & bk) override{}
-    void AssembleMatIMPEC(const BulkPair & bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk & bk) override{}
+    void CalFlux(const BulkPair & bp, const Bulk& bk) override;
+    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override{}
+    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override{}
 };
 
 

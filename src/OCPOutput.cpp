@@ -1301,30 +1301,32 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     if (!useVTK)         return;
     if (bgp.bgpnum == 0) return;
 
-    const auto nb     = rs.bulk.nbI;
-    const auto np     = rs.bulk.np;
-    const auto OIndex = rs.bulk.oIndex;
-    const auto GIndex = rs.bulk.gIndex;
-    const auto WIndex = rs.bulk.wIndex;
+    const BulkVarSet& bcv = rs.bulk.vs;
+
+    const auto nb     = bcv.nbI;
+    const auto np     = bcv.np;
+    const auto OIndex = bcv.oIndex;
+    const auto GIndex = bcv.gIndex;
+    const auto WIndex = bcv.wIndex;
 
     ofstream outF(myFile, ios::app | ios::binary);
     vector<OCP_DBL> tmpV(nb);
     // output    
     if (bgp.PRE)
-        outF.write((const OCP_CHAR*)&rs.bulk.P[0], nb * sizeof(rs.bulk.P[0]));
+        outF.write((const OCP_CHAR*)&bcv.P[0], nb * sizeof(bcv.P[0]));
     if (bgp.SOIL) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = rs.bulk.S[n * np + OIndex];
+            tmpV[n] = bcv.S[n * np + OIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SGAS) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = rs.bulk.S[n * np + GIndex];
+            tmpV[n] = bcv.S[n * np + GIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SWAT) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = rs.bulk.S[n * np + WIndex];
+            tmpV[n] = bcv.S[n * np + WIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
              
