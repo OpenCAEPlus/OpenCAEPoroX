@@ -20,17 +20,14 @@
 #include "DenseMat.hpp"
 #include "FlowUnit.hpp"
 #include "LinearSystem.hpp"
-#include "MixtureUnit.hpp"
-#include "MixtureUnitBlkOil.hpp"
-#include "MixtureUnitComp.hpp"
-#include "MixtureUnitThermal.hpp"
-#include "OCPConst.hpp"
 #include "OCPStructure.hpp"
 #include "ParamReservoir.hpp"
 #include "Domain.hpp"
 #include "PreParamGridWell.hpp"
 #include "OCPRock.hpp"
 #include "BulkVarSet.hpp"
+#include "PVTModule.hpp"
+#include "SATModule.hpp"
 
 using namespace std;
 
@@ -84,7 +81,7 @@ public:
     OCP_DBL  ubC;                ///< Volumetric heat capacity of underburden rock
     OCP_DBL  ubK;                ///< Thermal conductivity of underburden rock
 
-    OCP_USI         numBulk; ///< Num of Bulk
+    OCP_USI         nb; ///< Num of Bulk
     OCP_DBL         obD;     ///< Thermal diffusivity of overburden rock
     OCP_DBL         ubD;     ///< Thermal diffusivity of underburden rock
     vector<OCP_DBL> I;       ///< Auxiliary variable
@@ -153,7 +150,6 @@ public:
     void InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts);
-    void InputSatFunc(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputRockFunc(const ParamReservoir& rs_param);
     void InputRockFuncT(const ParamReservoir& rs_param);
 
@@ -168,6 +164,9 @@ public:
 
 protected:
     BulkVarSet vs;
+    PVTModule  PVTm;
+    SATModule  SATm;
+    
     
 
 public:
@@ -207,21 +206,10 @@ protected:
 
 public:
 
-    /// Return flash.
-    const vector<MixtureUnit*>& GetMixture() const { return flashCal; }
     /// Output iterations in MixtureUnit
-    void OutMixtureIters() const { flashCal[0]->OutMixtureIters(); }
+    void OutMixtureIters() const { PVTm.GetPVT(0)->OutMixtureIters(); }
 
 protected:
-    USI              NTPVT;    ///< num of PVT regions
-    vector<USI>      PVTNUM;   ///< Identify PVT region in black-oil model: numBulk.
-    vector<MixtureUnit*> flashCal; ///< Flash calculation class.
-
-    USI               NTSFUN;  ///< num of SAT regions
-    vector<USI>       SATNUM;  ///< Identify SAT region: numBulk.
-    vector<FlowUnit*> flow;    ///< Vector for capillary pressure, relative perm.
-    vector<vector<OCP_DBL>>
-        satcm; ///< critical saturation when phase becomes mobile / immobile.
 
     USI           NTROCC;  ///< num of Rock regions
     vector<USI>   ROCKNUM; ///< index of Rock table for each bulk

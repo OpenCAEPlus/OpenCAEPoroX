@@ -79,7 +79,6 @@ void AllWells::Setup(const Bulk& bk)
     OCP_FUNCNAME;
     numproc = bk.numproc;
     SetupWell(bk);
-    SetupMixture(bk);
 }
 
 
@@ -138,12 +137,6 @@ void AllWells::SetupWellGroup(const Bulk& bk)
     // control of group should be update according to input file
 }
 
-void AllWells::SetupMixture(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-
-    flashCal = bk.GetMixture();
-}
 
 void AllWells::SetupWellBulk(Bulk& bk) const
 {

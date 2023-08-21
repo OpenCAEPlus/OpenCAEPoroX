@@ -1,7 +1,7 @@
-/*! \file    PVTModule.hpp
- *  \brief   PVTModule class declaration
+/*! \file    SATModule.hpp
+ *  \brief   SATModule class declaration
  *  \author  Shizhe Li
- *  \date    Aug/19/2023
+ *  \date    Aug/21/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -9,51 +9,46 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __PVTMODULE_HEADER__
-#define __PVTMODULE_HEADER__
+#ifndef __SATMODULE_HEADER__
+#define __SATMODULE_HEADER__
 
  // Standard header files
 #include <cassert>
 
 // OpenCAEPoroX header files
-#include "MixtureUnit.hpp"
-#include "MixtureUnitBlkOil.hpp"
-#include "MixtureUnitComp.hpp"
-#include "MixtureUnitThermal.hpp"
+#include "FlowUnit.hpp"
 #include "BulkVarSet.hpp"
 
 using namespace std;
 
 
-class PVTModule
+class SATModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalFeatures& opts);
-    auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
-    auto GetPVT() const {return PVTs[0]->GetMixture();}
-    auto& GetPVTNUM() { return PVTNUM; }
-    auto GetMixtureType() const { return mixType; }
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const OCPMixtureType& mixType, OptionalFeatures& opts);
+    auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
+    auto& GetSATNUM() { return SATNUM; }
+    auto GetNTSFUN() { return NTSFUN; }
 
 protected:
-    OCPMixtureType       mixType;
-    /// number of PVT regions
-    USI                  NTPVT;
-    /// Index of PVT region for each bulk
-    vector<USI>          PVTNUM;
-    /// PVT modules
-    vector<MixtureUnit*> PVTs;
+    /// number of SAT regions
+    USI               NTSFUN;
+    /// Index of SAT region for each bulk
+    vector<USI>       SATNUM;
+    /// SAT modules
+    vector<FlowUnit*> SATs;
 
 };
 
 
 
-#endif /* end if __PVTMODULE_HEADER__ */
+#endif /* end if __SATMODULE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Aug/19/2023      Create file                          */
+/*  Shizhe Li           Aug/21/2023      Create file                          */
 /*----------------------------------------------------------------------------*/

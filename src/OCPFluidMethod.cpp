@@ -253,11 +253,11 @@ void IsoT_IMPEC::InitFlash(Bulk& bk) const
     BulkVarSet& bvs = bk.vs;
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
-        bk.flashCal[bk.PVTNUM[n]]->InitFlashIMPEC(bvs.P[n], bvs.Pb[n], bvs.T[n],
-                                                  &bvs.S[n * bvs.np], bvs.rockVp[n],
-                                                  bvs.Ni.data() + n * bvs.nc, n);
+        bk.PVTm.GetPVT(n)->InitFlashIMPEC(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * bvs.np],
+                                      bvs.rockVp[n], bvs.Ni.data() + n * bvs.nc, n);
+        
         for (USI i = 0; i < bvs.nc; i++) {
-            bvs.Ni[n * bvs.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+            bvs.Ni[n * bvs.nc + i] = bk.PVTm.GetPVT(n)->GetNi(i);
         }
         PassFlashValue(bk, n);
     }
@@ -265,51 +265,51 @@ void IsoT_IMPEC::InitFlash(Bulk& bk) const
 
 void IsoT_IMPEC::CalFlash(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
+    const BulkVarSet& bvs = bk.vs;
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
-                                              bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
+        bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
+                                  bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
         PassFlashValue(bk, n);
     }
 }
 
 void IsoT_IMPEC::PassFlashValue(Bulk& bk, const OCP_USI& n) const
 {
-    BulkVarSet& bvs = bk.vs;
+    BulkVarSet&        bvs = bk.vs;
+    const MixtureUnit* pvt = bk.PVTm.GetPVT(n);
 
     const USI     np     = bvs.np;
     const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
-    const USI     pvtnum = bk.PVTNUM[n];
 
     bvs.phaseNum[n] = 0;
-    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
+    bvs.Nt[n]       = pvt->GetNt();
+    bvs.vf[n]       = pvt->GetVf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
-        bvs.S[bIdp + j]          = bk.flashCal[pvtnum]->GetS(j);
+        bvs.phaseExist[bIdp + j] = pvt->GetPhaseExist(j);
+        bvs.S[bIdp + j]          = pvt->GetS(j);
         if (bvs.phaseExist[bIdp + j]) {
             bvs.phaseNum[n]++;
             for (USI i = 0; i < nc; i++) {
-                bvs.xij[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetXij(j, i);
+                bvs.xij[bIdp * nc + j * nc + i] = pvt->GetXij(j, i);
             }
-            bvs.vj[bIdp + j]  = bk.flashCal[pvtnum]->GetVj(j);
-            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
+            bvs.vj[bIdp + j]  = pvt->GetVj(j);
+            bvs.rho[bIdp + j] = pvt->GetRho(j);
+            bvs.xi[bIdp + j]  = pvt->GetXi(j);
+            bvs.mu[bIdp + j]  = pvt->GetMu(j);
         }
     }
 
-    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.vfP[n] = pvt->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = pvt->GetVfi(i);
     }
 }
 
@@ -319,9 +319,9 @@ void IsoT_IMPEC::CalKrPc(Bulk& bk) const
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         OCP_USI bId = n * bvs.np;
-        bk.flow[bk.SATNUM[n]]->CalKrPc(&bvs.S[bId], n);
-        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+        bk.SATm.GetSAT(n)->CalKrPc(&bvs.S[bId], n);
+        copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
+        copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
         for (USI j = 0; j < bvs.np; j++)
             bvs.Pj[n * bvs.np + j] = bvs.P[n] + bvs.Pc[n * bvs.np + j];
     }
@@ -952,11 +952,11 @@ void IsoT_FIM::InitFlash(Bulk& bk)
     BulkVarSet& bvs = bk.vs;
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
-        bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
+        bk.PVTm.GetPVT(n)->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
                                                 &bvs.S[n * bvs.np], bvs.rockVp[n],
                                                 bvs.Ni.data() + n * bvs.nc, n);
         for (USI i = 0; i < bvs.nc; i++) {
-            bvs.Ni[n * bvs.nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+            bvs.Ni[n * bvs.nc + i] = bk.PVTm.GetPVT(n)->GetNi(i);
         }
         PassFlashValue(bk, n);
     }
@@ -964,64 +964,63 @@ void IsoT_FIM::InitFlash(Bulk& bk)
 
 void IsoT_FIM::CalFlash(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
+    const BulkVarSet& bvs = bk.vs;
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
-                                            &bvs.S[n * bvs.np], bvs.phaseNum[n],
-                                            &bvs.xij[n * bvs.np * bvs.nc], n);
+        bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc], &bvs.S[n * bvs.np], 
+                                    bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
         PassFlashValue(bk, n);
     }
 }
 
 void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    BulkVarSet& bvs = bk.vs;
+    BulkVarSet&        bvs = bk.vs;
+    const MixtureUnit* pvt = bk.PVTm.GetPVT(n);
 
     const USI     np     = bvs.np;
     const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
-    const USI     pvtnum = bk.PVTNUM[n];
 
     bvs.phaseNum[n] = 0;
-    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
+    bvs.Nt[n]       = pvt->GetNt();
+    bvs.vf[n]       = pvt->GetVf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bvs.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        bvs.S[bIdp + j] = pvt->GetS(j);
         dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
-        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
+        bvs.phaseExist[bIdp + j] = pvt->GetPhaseExist(j);
         if (bvs.phaseExist[bIdp + j]) {
             bvs.phaseNum[n]++;
-            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
+            bvs.rho[bIdp + j] = pvt->GetRho(j);
+            bvs.xi[bIdp + j]  = pvt->GetXi(j);
+            bvs.mu[bIdp + j]  = pvt->GetMu(j);
 
             // Derivatives
-            bvs.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
-            bvs.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
-            bvs.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
+            bvs.rhoP[bIdp + j] = pvt->GetRhoP(j);
+            bvs.xiP[bIdp + j]  = pvt->GetXiP(j);
+            bvs.muP[bIdp + j]  = pvt->GetMuP(j);
 
             for (USI i = 0; i < nc; i++) {
-                bvs.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
-                bvs.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
-                bvs.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
-                bvs.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
+                bvs.xij[bIdp * nc + j * nc + i]  = pvt->GetXij(j, i);
+                bvs.rhox[bIdp * nc + j * nc + i] = pvt->GetRhoX(j, i);
+                bvs.xix[bIdp * nc + j * nc + i]  = pvt->GetXiX(j, i);
+                bvs.mux[bIdp * nc + j * nc + i]  = pvt->GetMuX(j, i);
             }
         }
     }
 
-    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.vfP[n] = pvt->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = pvt->GetVfi(i);
     }
 
-    copy(bk.flashCal[pvtnum]->GetDXsDXp().begin(), bk.flashCal[pvtnum]->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.maxLendSdP]);
+    copy(pvt->GetDXsDXp().begin(), pvt->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.maxLendSdP]);
 }
 
 void IsoT_FIM::CalKrPc(Bulk& bk) const
@@ -1030,11 +1029,11 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     const USI& np = bvs.np;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         const OCP_USI bId = n * np;
-        bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
-        copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
-        copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
-        copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+        bk.SATm.GetSAT(n)->CalKrPcFIM(&bvs.S[bId], n);
+        copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
+        copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
+        copy(bk.SATm.GetSAT(n)->GetdKrdS().begin(), bk.SATm.GetSAT(n)->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+        copy(bk.SATm.GetSAT(n)->GetdPcdS().begin(), bk.SATm.GetSAT(n)->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
         for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
     }
 }
@@ -1254,18 +1253,18 @@ void IsoT_FIM::AssembleMatWells(LinearSystem&    ls,
 }
 
 
-void IsoT_FIM::GetSolution(Reservoir&             rs,
-                           vector<OCP_DBL>& u,
-                           const OCPControl&      ctrl)
+void IsoT_FIM::GetSolution(Reservoir&        rs,
+                           vector<OCP_DBL>&  u,
+                           const OCPControl& ctrl)
 {
-    const Domain&   domain = rs.domain;
-    Bulk&     bk  = rs.bulk;
-    BulkVarSet&     bvs = bk.vs;
-    const OCP_USI   nb     = bvs.nb;
-    const USI       np     = bvs.np;
-    const USI       nc     = bvs.nc;
-    const USI       row    = np * (nc + 1);
-    const USI       col    = nc + 1;
+    const auto& domain = rs.domain;
+    auto&       bk     = rs.bulk;
+    auto&       bvs    = bk.vs;
+    const auto  nb     = bvs.nb;
+    const auto  np     = bvs.np;
+    const auto  nc     = bvs.nc;
+    const auto  row    = np * (nc + 1);
+    const auto  col    = nc + 1;
 
     // Well first
     USI wId = bvs.nbI * col;
@@ -1352,7 +1351,7 @@ void IsoT_FIM::GetSolution(Reservoir&             rs,
 
 			// dxij   ---- Compositional model only
 
-			if (bk.mixType == OCPMixtureType::COMP) {
+			if (bk.PVTm.GetMixtureType() == OCPMixtureType::COMP) {
 				USI js = np;
 				if (bvs.phaseNum[n] >= 3) {
 					// num of Hydroncarbon phase >= 2
@@ -1874,19 +1873,17 @@ void IsoT_AIMc::SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_
 
 void IsoT_AIMc::CalFlashEp(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-
-    const OCP_USI nb = bvs.nb;
-    const USI     np = bvs.np;
-    const USI     nc = bvs.nc;
+    const BulkVarSet& bvs = bk.vs;
+    const OCP_USI&    nb  = bvs.nb;
+    const USI&        np  = bvs.np;
+    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
-                                                  bvs.phaseNum[n],
-                                                  &bk.xijNR[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], bvs.phaseNum[n],
+                                          &bk.xijNR[n * np * nc], n);
             // bvs.PassFlashValueAIMcEp(n);
             PassFlashValueEp(bk, n);
         }
@@ -1895,19 +1892,17 @@ void IsoT_AIMc::CalFlashEp(Bulk& bk)
 
 void IsoT_AIMc::CalFlashEa(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-
-    const OCP_USI nb = bvs.nb;
-    const USI     np = bvs.np;
-    const USI     nc = bvs.nc;
+    const BulkVarSet& bvs = bk.vs;
+    const OCP_USI&    nb  = bvs.nb;
+    const USI&        np  = bvs.np;
+    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
-                                                  bvs.phaseNum[n], &bvs.xij[n * np * nc],
-                                                  n);
+            bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], bvs.phaseNum[n], 
+                                          &bvs.xij[n * np * nc], n);
             // bvs.PassFlashValueAIMcEa(n);
 
             IsoT_IMPEC::PassFlashValue(bk, n);
@@ -1917,18 +1912,17 @@ void IsoT_AIMc::CalFlashEa(Bulk& bk)
 
 void IsoT_AIMc::CalFlashI(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const USI     np = bvs.np;
-    const USI     nc = bvs.nc;
+    BulkVarSet&    bvs = bk.vs;
+    const OCP_USI& nb  = bvs.nb;
+    const USI&     np  = bvs.np;
+    const USI&     nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
 
-            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
-                                                &bvs.S[n * np], bvs.phaseNum[n],
-                                                &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], &bvs.S[n * np], 
+                                        bvs.phaseNum[n], &bvs.xij[n * np * nc], n);
             IsoT_FIM::PassFlashValue(bk, n);
             for (USI j = 0; j < np; j++) {
                 bvs.vj[n * np + j] = bvs.vf[n] * bvs.S[n * np + j];
@@ -1941,28 +1935,29 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
 {
     // only var about volume needs, some flash var also
     OCP_FUNCNAME;
-    BulkVarSet& bvs = bk.vs;
+    BulkVarSet&        bvs = bk.vs;
+    const MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+
     const USI     np     = bvs.np;
     const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
-    const USI     pvtnum = bk.PVTNUM[n];
 
-    bvs.Nt[n]  = bk.flashCal[pvtnum]->GetNt();
-    bvs.vf[n]  = bk.flashCal[pvtnum]->GetVf();
-    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
+    bvs.Nt[n]  = pvt->GetNt();
+    bvs.vf[n]  = pvt->GetVf();
+    bvs.vfP[n] = pvt->GetVfP();
     for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
+        bvs.vfi[n * nc + i] = pvt->GetVfi(i);
     }
 
     bvs.phaseNum[n] = 0;
     for (USI j = 0; j < np; j++) {
-        if (bk.flashCal[pvtnum]->GetPhaseExist(j)) {
+        if (pvt->GetPhaseExist(j)) {
             bvs.phaseNum[n]++;
 
             // IMPORTANT -- need for next Flash
             // But xij in nonlinear equations has been modified
             for (USI i = 0; i < nc; i++) {
-                bk.xijNR[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetXij(j, i);
+                bk.xijNR[bIdp * nc + j * nc + i] = pvt->GetXij(j, i);
             }
         }
     }
@@ -1970,17 +1965,17 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
 
 void IsoT_AIMc::CalKrPcE(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const USI     np = bvs.np;
+    BulkVarSet&    bvs = bk.vs;
+    const OCP_USI& nb = bvs.nb;
+    const USI&     np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPc(&bvs.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
+            bk.SATm.GetSAT(n)->CalKrPc(&bvs.S[bId], n);
+            copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
             for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
         }
     }
@@ -1988,19 +1983,19 @@ void IsoT_AIMc::CalKrPcE(Bulk& bk)
 
 void IsoT_AIMc::CalKrPcI(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const USI     np = bvs.np;
+    BulkVarSet&    bvs = bk.vs;
+    const OCP_USI& nb = bvs.nb;
+    const USI&     np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
             const OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            bk.SATm.GetSAT(n)->CalKrPcFIM(&bvs.S[bId], n);
+            copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
+            copy(bk.SATm.GetSAT(n)->GetdKrdS().begin(), bk.SATm.GetSAT(n)->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(bk.SATm.GetSAT(n)->GetdPcdS().begin(), bk.SATm.GetSAT(n)->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
             for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
         }
     }
@@ -2220,7 +2215,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             }
 
             // dxij   ---- Compositional model only
-            if (bk.mixType == OCPMixtureType::COMP) {
+            if (bk.PVTm.GetMixtureType() == OCPMixtureType::COMP) {
                 USI js = np;
                 if (bvs.phaseNum[n] >= 3) {
                     OCP_USI bId = 0;

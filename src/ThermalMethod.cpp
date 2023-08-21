@@ -366,18 +366,17 @@ void T_FIM::CalRock(Bulk& bk) const
 
 void T_FIM::InitFlash(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const OCP_USI np = bvs.np;
-    const OCP_USI nc = bvs.nc;
+    BulkVarSet&    bvs = bk.vs;
+    const OCP_USI& nb = bvs.nb;
+    const USI&     np = bvs.np;
+    const USI&     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
-            bk.flashCal[bk.PVTNUM[n]]->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
-                                                    &bvs.S[n * np], bvs.rockVp[n],
-                                                    &bvs.Ni[n * nc], n);
+            bk.PVTm.GetPVT(n)->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * np], 
+                                            bvs.rockVp[n],&bvs.Ni[n * nc], n);
             for (USI i = 0; i < nc; i++) {
-                bvs.Ni[n * nc + i] = bk.flashCal[bk.PVTNUM[n]]->GetNi(i);
+                bvs.Ni[n * nc + i] = bk.PVTm.GetPVT(n)->GetNi(i);
             }
             PassFlashValue(bk, n);
         }
@@ -386,16 +385,15 @@ void T_FIM::InitFlash(Bulk& bk)
 
 void T_FIM::CalFlash(Bulk& bk)
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const OCP_USI np = bvs.np;
-    const OCP_USI nc = bvs.nc;
+    const BulkVarSet& bvs = bk.vs;
+    const OCP_USI&    nb  = bvs.nb;
+    const USI&        np  = bvs.np;
+    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
-            bk.flashCal[bk.PVTNUM[n]]->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc],
-                                                &bvs.S[n * np], bvs.phaseNum[n],
-                                                &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], &bvs.S[n * np], 
+                                        bvs.phaseNum[n], &bvs.xij[n * np * nc], n);
             PassFlashValue(bk, n);
         }
     }
@@ -403,62 +401,62 @@ void T_FIM::CalFlash(Bulk& bk)
 
 void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    BulkVarSet& bvs = bk.vs;
-    const USI     np     = bvs.np;
-    const USI     nc     = bvs.nc;
-    const OCP_USI bIdp   = n * np;
-    const USI     pvtnum = bk.PVTNUM[n];
+    BulkVarSet&        bvs  = bk.vs;
+    const MixtureUnit* pvt  = bk.PVTm.GetPVT(n);
+    const USI&         np   = bvs.np;
+    const USI&         nc   = bvs.nc;
+    const OCP_USI      bIdp = n * np;
 
     bvs.phaseNum[n] = 0;
-    bvs.Nt[n]       = bk.flashCal[pvtnum]->GetNt();
-    bvs.vf[n]       = bk.flashCal[pvtnum]->GetVf();
-    bvs.Uf[n]       = bk.flashCal[pvtnum]->GetUf();
+    bvs.Nt[n]       = pvt->GetNt();
+    bvs.vf[n]       = pvt->GetVf();
+    bvs.Uf[n]       = pvt->GetUf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bvs.S[bIdp + j] = bk.flashCal[pvtnum]->GetS(j);
+        bvs.S[bIdp + j] = pvt->GetS(j);
         dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
-        bvs.phaseExist[bIdp + j] = bk.flashCal[pvtnum]->GetPhaseExist(j);
+        bvs.phaseExist[bIdp + j] = pvt->GetPhaseExist(j);
         if (bvs.phaseExist[bIdp + j]) {
             bvs.phaseNum[n]++;
-            bvs.rho[bIdp + j] = bk.flashCal[pvtnum]->GetRho(j);
-            bvs.xi[bIdp + j]  = bk.flashCal[pvtnum]->GetXi(j);
-            bvs.mu[bIdp + j]  = bk.flashCal[pvtnum]->GetMu(j);
-            bvs.H[bIdp + j]   = bk.flashCal[pvtnum]->GetH(j);
+            bvs.rho[bIdp + j] = pvt->GetRho(j);
+            bvs.xi[bIdp + j]  = pvt->GetXi(j);
+            bvs.mu[bIdp + j]  = pvt->GetMu(j);
+            bvs.H[bIdp + j]   = pvt->GetH(j);
 
             // Derivatives
-            bvs.rhoP[bIdp + j] = bk.flashCal[pvtnum]->GetRhoP(j);
-            bvs.rhoT[bIdp + j] = bk.flashCal[pvtnum]->GetRhoT(j);
-            bvs.xiP[bIdp + j]  = bk.flashCal[pvtnum]->GetXiP(j);
-            bvs.xiT[bIdp + j]  = bk.flashCal[pvtnum]->GetXiT(j);
-            bvs.muP[bIdp + j]  = bk.flashCal[pvtnum]->GetMuP(j);
-            bvs.muT[bIdp + j]  = bk.flashCal[pvtnum]->GetMuT(j);
-            bvs.HT[bIdp + j]   = bk.flashCal[pvtnum]->GetHT(j);
+            bvs.rhoP[bIdp + j] = pvt->GetRhoP(j);
+            bvs.rhoT[bIdp + j] = pvt->GetRhoT(j);
+            bvs.xiP[bIdp + j]  = pvt->GetXiP(j);
+            bvs.xiT[bIdp + j]  = pvt->GetXiT(j);
+            bvs.muP[bIdp + j]  = pvt->GetMuP(j);
+            bvs.muT[bIdp + j]  = pvt->GetMuT(j);
+            bvs.HT[bIdp + j]   = pvt->GetHT(j);
 
             for (USI i = 0; i < nc; i++) {
-                bvs.xij[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXij(j, i);
-                bvs.rhox[bIdp * nc + j * nc + i] = bk.flashCal[pvtnum]->GetRhoX(j, i);
-                bvs.xix[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetXiX(j, i);
-                bvs.mux[bIdp * nc + j * nc + i]  = bk.flashCal[pvtnum]->GetMuX(j, i);
-                bvs.Hx[bIdp * nc + j * nc + i]   = bk.flashCal[pvtnum]->GetHx(j, i);
+                bvs.xij[bIdp * nc + j * nc + i]  = pvt->GetXij(j, i);
+                bvs.rhox[bIdp * nc + j * nc + i] = pvt->GetRhoX(j, i);
+                bvs.xix[bIdp * nc + j * nc + i]  = pvt->GetXiX(j, i);
+                bvs.mux[bIdp * nc + j * nc + i]  = pvt->GetMuX(j, i);
+                bvs.Hx[bIdp * nc + j * nc + i]   = pvt->GetHx(j, i);
             }
         }
     }
-    bvs.vfP[n] = bk.flashCal[pvtnum]->GetVfP();
-    bvs.vfT[n] = bk.flashCal[pvtnum]->GetVfT();
-    bvs.UfP[n] = bk.flashCal[pvtnum]->GetUfP();
-    bvs.UfT[n] = bk.flashCal[pvtnum]->GetUfT();
+    bvs.vfP[n] = pvt->GetVfP();
+    bvs.vfT[n] = pvt->GetVfT();
+    bvs.UfP[n] = pvt->GetUfP();
+    bvs.UfT[n] = pvt->GetUfT();
 
     for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = bk.flashCal[pvtnum]->GetVfi(i);
-        bvs.Ufi[n * nc + i] = bk.flashCal[pvtnum]->GetUfi(i);
+        bvs.vfi[n * nc + i] = pvt->GetVfi(i);
+        bvs.Ufi[n * nc + i] = pvt->GetUfi(i);
     }
 
     Dcopy(bvs.maxLendSdP, &bvs.dSec_dPri[n * bvs.maxLendSdP],
-          &bk.flashCal[pvtnum]->GetDXsDXp()[0]);
+          &pvt->GetDXsDXp()[0]);
 }
 
 void T_FIM::CalKrPc(Bulk& bk) const
@@ -469,11 +467,11 @@ void T_FIM::CalKrPc(Bulk& bk) const
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         if (bk.bType[n] > 0) {
             OCP_USI bId = n * np;
-            bk.flow[bk.SATNUM[n]]->CalKrPcFIM(&bvs.S[bId], n);
-            copy(bk.flow[bk.SATNUM[n]]->GetKr().begin(), bk.flow[bk.SATNUM[n]]->GetKr().end(), &bvs.kr[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetPc().begin(), bk.flow[bk.SATNUM[n]]->GetPc().end(), &bvs.Pc[bId]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdKrdS().begin(), bk.flow[bk.SATNUM[n]]->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
-            copy(bk.flow[bk.SATNUM[n]]->GetdPcdS().begin(), bk.flow[bk.SATNUM[n]]->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            bk.SATm.GetSAT(n)->CalKrPcFIM(&bvs.S[bId], n);
+            copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
+            copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
+            copy(bk.SATm.GetSAT(n)->GetdKrdS().begin(), bk.SATm.GetSAT(n)->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(bk.SATm.GetSAT(n)->GetdPcdS().begin(), bk.SATm.GetSAT(n)->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
             for (USI j = 0; j < np; j++) bvs.Pj[n * np + j] = bvs.P[n] + bvs.Pc[n * np + j];
         }
     }

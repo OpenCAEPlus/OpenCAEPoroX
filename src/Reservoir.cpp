@@ -80,8 +80,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &optFeatures.scalePcow.swatInit },
             VarInfo<vector<OCP_DBL>>{ "THCONR", &rs.thconr, &bulk.vs.thconr },
     }, vector<VarInfo<vector<OCP_USI>>>{
-        VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATNUM },
-        VarInfo<vector<OCP_USI>>{ "PVTNUM", &rs.PVTNUM, &bulk.PVTNUM },
+        VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATm.GetSATNUM() },
+        VarInfo<vector<OCP_USI>>{ "PVTNUM", &rs.PVTNUM, &bulk.PVTm.GetPVTNUM() },
         VarInfo<vector<OCP_USI>>{ "ROCKNUM", &rs.ROCKNUM, &bulk.ROCKNUM },
     });
 
@@ -89,9 +89,9 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
     /////////////////////////////////////////////////////////////////////////
 
     // Get grid-based vars from params
-    optFeatures.numBulk  = domain.numGridLocal;
-    bulk.vs.nb         = domain.numGridLocal;   // Interior + ghost
-    bulk.vs.nbI = domain.numGridInterior;
+    optFeatures.nb = domain.numGridLocal;
+    bulk.vs.nb     = domain.numGridLocal;   // Interior + ghost
+    bulk.vs.nbI    = domain.numGridInterior;
 
     MPI_Comm      myComm  = domain.myComm;
     const OCP_INT numproc = domain.numproc;

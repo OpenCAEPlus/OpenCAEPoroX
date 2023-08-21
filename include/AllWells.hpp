@@ -83,8 +83,6 @@ public:
     void SetupWell(const Bulk& bk);
     /// Setup information of wellGroup
     void SetupWellGroup(const Bulk& bk);
-    /// get the mixture from bulk ---- useless now
-    void SetupMixture(const Bulk& bk);
     /// Setup bulks which are penetrated by wells at current stage
     void SetupWellBulk(Bulk& bk) const;
 
@@ -159,7 +157,6 @@ protected:
     vector<SolventINJ> solvents;   ///< Sets of Solvent
     OCP_DBL            dPmax{0};   ///< Maximum BHP change
 
-    vector<MixtureUnit*> flashCal;               ///< Useless now.
     OCP_DBL          Psurf{PRESSURE_STD};    ///< well reference pressure
     OCP_DBL          Tsurf{TEMPERATURE_STD}; ///< well reference temperature
 

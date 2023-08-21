@@ -21,13 +21,13 @@ MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, O
     /// Optional Features
     // Skip stability analysis
     skipPSA         = &opts.skipPSA;
-    skipMethodIndex = skipPSA->Setup(opts.numBulk, &compM);
+    skipMethodIndex = skipPSA->Setup(opts.nb, &compM);
     // Calculate surface tension
     surTen          = &opts.surTen;
-    stMethodIndex   = surTen->Setup(rs_param, i, opts.numBulk, &compM);
+    stMethodIndex   = surTen->Setup(rs_param, i, opts.nb, &compM);
     // Miscible Factor
     misFac          = &opts.misFac;
-    mfMethodIndex   = misFac->Setup(rs_param, i, opts.numBulk, surTen);
+    mfMethodIndex   = misFac->Setup(rs_param, i, opts.nb, surTen);
 }
 
 void MixtureUnitComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
