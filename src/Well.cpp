@@ -59,7 +59,7 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
     nc       = bvs.nc;
     np       = bvs.np;
-    mixture  = bk.PVTm.GetPVT();
+    mixture  = bk.PVTm.GetMixture();
     rsTemp   = bk.rsTemp;
 
     qi_lbmol.resize(nc);
@@ -517,11 +517,10 @@ void Well::CalInjdG(const Bulk& bk)
             perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
+            auto    PVT   = bk.PVTm.GetPVT(n);
 
             for (USI i = 0; i < seg_num; i++) {
-                Ptmp -= bk.PVTm.GetPVT(n)->RhoPhase(
-                            Ptmp, 0, opt.injTemp, opt.injZi, opt.injPhase) *
-                        GRAVITY_FACTOR * seg_len;
+                Ptmp -= PVT->RhoPhase( Ptmp, 0, opt.injTemp, opt.injZi, opt.injPhase) * GRAVITY_FACTOR * seg_len;
             }
             dGperf[p] = Pperf - Ptmp;
         }
@@ -546,10 +545,9 @@ void Well::CalInjdG(const Bulk& bk)
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI i = 0; i < seg_num; i++) {
-                Ptmp += bk.PVTm.GetPVT(n)->RhoPhase(
-                            Ptmp, 0, opt.injTemp, opt.injZi, opt.injPhase) *
-                        GRAVITY_FACTOR * seg_len;
+                Ptmp += PVT->RhoPhase( Ptmp, 0, opt.injTemp, opt.injZi, opt.injPhase) * GRAVITY_FACTOR * seg_len;
             }
             dGperf[p] = Ptmp - Pperf;
         }
@@ -607,15 +605,15 @@ void Well::CalProddG01(const Bulk& bk)
                 }
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI i = 0; i < seg_num; i++) {
                 qtacc = rhoacc = 0;
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j);
-                        rhoacc += pvt->GetVj(j) * rhotmp;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j);
+                        rhoacc += PVT->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp -= rhoacc / qtacc * seg_len * GRAVITY_FACTOR;
@@ -659,15 +657,15 @@ void Well::CalProddG01(const Bulk& bk)
                 }
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI i = 0; i < seg_num; i++) {
                 qtacc = rhoacc = 0;
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j);
-                        rhoacc += pvt->GetVj(j) * rhotmp;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j);
+                        rhoacc += PVT->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp += rhoacc / qtacc * seg_len * GRAVITY_FACTOR;
@@ -728,15 +726,15 @@ void Well::CalProddG02(const Bulk& bk)
                 }
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI i = 0; i < seg_num; i++) {
                 qtacc = rhoacc = 0;
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j);
-                        rhoacc += pvt->GetVj(j) * rhotmp;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j);
+                        rhoacc += PVT->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp -= rhoacc / qtacc * seg_len * GRAVITY_FACTOR;
@@ -780,15 +778,15 @@ void Well::CalProddG02(const Bulk& bk)
                 }
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI i = 0; i < seg_num; i++) {
                 qtacc = rhoacc = 0;
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j);
-                        rhoacc += pvt->GetVj(j) * rhotmp;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j);
+                        rhoacc += PVT->GetVj(j) * rhotmp;
                     }
                 }
                 Ptmp += rhoacc / qtacc * seg_len * GRAVITY_FACTOR;
@@ -866,14 +864,14 @@ void Well::CalProddG(const Bulk& bk)
                 v = fabs(v);
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI k = 0; k < seg_num; k++) {
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j) / seg_num;
-                        rhoacc += pvt->GetVj(j) * rhotmp / seg_num;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j) / seg_num;
+                        rhoacc += PVT->GetVj(j) * rhotmp / seg_num;
 #ifdef DEBUG
                         if (rhotmp <= 0 || !isfinite(rhotmp)) {
                             OCP_ABORT("Wrong rho " + to_string(rhotmp));
@@ -933,14 +931,14 @@ void Well::CalProddG(const Bulk& bk)
                 v = fabs(v);
             }
 
-            MixtureUnit* pvt = bk.PVTm.GetPVT(n);
+            auto PVT = bk.PVTm.GetPVT(n);
             for (USI k = 0; k < seg_num; k++) {
-                pvt->Flash(Ptmp, bvs.T[n], tmpNi.data());
+                PVT->Flash(Ptmp, bvs.T[n], tmpNi.data());
                 for (USI j = 0; j < np; j++) {
-                    if (pvt->GetPhaseExist(j)) {
-                        rhotmp  = pvt->GetRho(j);
-                        qtacc  += pvt->GetVj(j) / seg_num;
-                        rhoacc += pvt->GetVj(j) * rhotmp / seg_num;
+                    if (PVT->GetPhaseExist(j)) {
+                        rhotmp  = PVT->GetRho(j);
+                        qtacc  += PVT->GetVj(j) / seg_num;
+                        rhoacc += PVT->GetVj(j) * rhotmp / seg_num;
                     }
                 }
                 Ptmp += rhoacc / qtacc * seg_len * GRAVITY_FACTOR;

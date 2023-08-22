@@ -82,7 +82,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
     }, vector<VarInfo<vector<OCP_USI>>>{
         VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATm.GetSATNUM() },
         VarInfo<vector<OCP_USI>>{ "PVTNUM", &rs.PVTNUM, &bulk.PVTm.GetPVTNUM() },
-        VarInfo<vector<OCP_USI>>{ "ROCKNUM", &rs.ROCKNUM, &bulk.ROCKNUM },
+        VarInfo<vector<OCP_USI>>{ "ROCKNUM", &rs.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
     });
 
     /////////////////////////////////////////////////////////////////////////

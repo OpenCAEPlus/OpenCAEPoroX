@@ -348,19 +348,21 @@ void T_FIM::CalRock(Bulk& bk) const
     const OCP_USI nb = bvs.nb;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        bk.rock[bk.ROCKNUM[n]]->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
+        auto rock = bk.ROCKm.GetROCK(n);
+
+        rock->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
         if (bk.bType[n] > 0) {
             // with fluid           
-            bvs.poro[n]   = bk.rock[bk.ROCKNUM[n]]->GetPoro();
-            bvs.poroP[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodP();
-            bvs.poroT[n]  = bk.rock[bk.ROCKNUM[n]]->GetdPorodT();           
-            bvs.vr[n]     = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_Poro();
-            bvs.vrP[n]    = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodP();
-            bvs.vrT[n]    = bvs.v[n] * bk.rock[bk.ROCKNUM[n]]->Get_dPorodT();
+            bvs.poro[n]   = rock->GetPoro();
+            bvs.poroP[n]  = rock->GetdPorodP();
+            bvs.poroT[n]  = rock->GetdPorodT();           
+            bvs.vr[n]     = bvs.v[n] * rock->Get_Poro();
+            bvs.vrP[n]    = bvs.v[n] * rock->Get_dPorodP();
+            bvs.vrT[n]    = bvs.v[n] * rock->Get_dPorodT();
             bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
         }
-        bvs.Hr[n]  = bk.rock[bk.ROCKNUM[n]]->GetHr();
-        bvs.HrT[n] = bk.rock[bk.ROCKNUM[n]]->GetdHrdT();
+        bvs.Hr[n]  = rock->GetHr();
+        bvs.HrT[n] = rock->GetdHrdT();
     }
 }
 
@@ -373,10 +375,12 @@ void T_FIM::InitFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bType[n] > 0) {
-            bk.PVTm.GetPVT(n)->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * np], 
+            auto PVT = bk.PVTm.GetPVT(n);
+
+            PVT->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * np],
                                             bvs.rockVp[n],&bvs.Ni[n * nc], n);
             for (USI i = 0; i < nc; i++) {
-                bvs.Ni[n * nc + i] = bk.PVTm.GetPVT(n)->GetNi(i);
+                bvs.Ni[n * nc + i] = PVT->GetNi(i);
             }
             PassFlashValue(bk, n);
         }
@@ -401,62 +405,62 @@ void T_FIM::CalFlash(Bulk& bk)
 
 void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 {
-    BulkVarSet&        bvs  = bk.vs;
-    const MixtureUnit* pvt  = bk.PVTm.GetPVT(n);
-    const USI&         np   = bvs.np;
-    const USI&         nc   = bvs.nc;
-    const OCP_USI      bIdp = n * np;
+    auto&         bvs  = bk.vs;
+    const auto    PVT  = bk.PVTm.GetPVT(n);
+    const auto&   np   = bvs.np;
+    const auto&   nc   = bvs.nc;
+    const OCP_USI bIdp = n * np;
 
     bvs.phaseNum[n] = 0;
-    bvs.Nt[n]       = pvt->GetNt();
-    bvs.vf[n]       = pvt->GetVf();
-    bvs.Uf[n]       = pvt->GetUf();
+    bvs.Nt[n]       = PVT->GetNt();
+    bvs.vf[n]       = PVT->GetVf();
+    bvs.Uf[n]       = PVT->GetUf();
 
     for (USI j = 0; j < np; j++) {
         // Important! Saturation must be passed no matter if the phase exists. This is
         // because it will be used to calculate relative permeability and capillary
         // pressure at each time step. Make sure that all saturations are updated at
         // each step!
-        bvs.S[bIdp + j] = pvt->GetS(j);
+        bvs.S[bIdp + j] = PVT->GetS(j);
         dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
-        bvs.phaseExist[bIdp + j] = pvt->GetPhaseExist(j);
+        bvs.phaseExist[bIdp + j] = PVT->GetPhaseExist(j);
         if (bvs.phaseExist[bIdp + j]) {
             bvs.phaseNum[n]++;
-            bvs.rho[bIdp + j] = pvt->GetRho(j);
-            bvs.xi[bIdp + j]  = pvt->GetXi(j);
-            bvs.mu[bIdp + j]  = pvt->GetMu(j);
-            bvs.H[bIdp + j]   = pvt->GetH(j);
+            bvs.rho[bIdp + j] = PVT->GetRho(j);
+            bvs.xi[bIdp + j]  = PVT->GetXi(j);
+            bvs.mu[bIdp + j]  = PVT->GetMu(j);
+            bvs.H[bIdp + j]   = PVT->GetH(j);
 
             // Derivatives
-            bvs.rhoP[bIdp + j] = pvt->GetRhoP(j);
-            bvs.rhoT[bIdp + j] = pvt->GetRhoT(j);
-            bvs.xiP[bIdp + j]  = pvt->GetXiP(j);
-            bvs.xiT[bIdp + j]  = pvt->GetXiT(j);
-            bvs.muP[bIdp + j]  = pvt->GetMuP(j);
-            bvs.muT[bIdp + j]  = pvt->GetMuT(j);
-            bvs.HT[bIdp + j]   = pvt->GetHT(j);
+            bvs.rhoP[bIdp + j] = PVT->GetRhoP(j);
+            bvs.rhoT[bIdp + j] = PVT->GetRhoT(j);
+            bvs.xiP[bIdp + j]  = PVT->GetXiP(j);
+            bvs.xiT[bIdp + j]  = PVT->GetXiT(j);
+            bvs.muP[bIdp + j]  = PVT->GetMuP(j);
+            bvs.muT[bIdp + j]  = PVT->GetMuT(j);
+            bvs.HT[bIdp + j]   = PVT->GetHT(j);
 
             for (USI i = 0; i < nc; i++) {
-                bvs.xij[bIdp * nc + j * nc + i]  = pvt->GetXij(j, i);
-                bvs.rhox[bIdp * nc + j * nc + i] = pvt->GetRhoX(j, i);
-                bvs.xix[bIdp * nc + j * nc + i]  = pvt->GetXiX(j, i);
-                bvs.mux[bIdp * nc + j * nc + i]  = pvt->GetMuX(j, i);
-                bvs.Hx[bIdp * nc + j * nc + i]   = pvt->GetHx(j, i);
+                bvs.xij[bIdp * nc + j * nc + i]  = PVT->GetXij(j, i);
+                bvs.rhox[bIdp * nc + j * nc + i] = PVT->GetRhoX(j, i);
+                bvs.xix[bIdp * nc + j * nc + i]  = PVT->GetXiX(j, i);
+                bvs.mux[bIdp * nc + j * nc + i]  = PVT->GetMuX(j, i);
+                bvs.Hx[bIdp * nc + j * nc + i]   = PVT->GetHx(j, i);
             }
         }
     }
-    bvs.vfP[n] = pvt->GetVfP();
-    bvs.vfT[n] = pvt->GetVfT();
-    bvs.UfP[n] = pvt->GetUfP();
-    bvs.UfT[n] = pvt->GetUfT();
+    bvs.vfP[n] = PVT->GetVfP();
+    bvs.vfT[n] = PVT->GetVfT();
+    bvs.UfP[n] = PVT->GetUfP();
+    bvs.UfT[n] = PVT->GetUfT();
 
     for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = pvt->GetVfi(i);
-        bvs.Ufi[n * nc + i] = pvt->GetUfi(i);
+        bvs.vfi[n * nc + i] = PVT->GetVfi(i);
+        bvs.Ufi[n * nc + i] = PVT->GetUfi(i);
     }
 
     Dcopy(bvs.maxLendSdP, &bvs.dSec_dPri[n * bvs.maxLendSdP],
-          &pvt->GetDXsDXp()[0]);
+          &PVT->GetDXsDXp()[0]);
 }
 
 void T_FIM::CalKrPc(Bulk& bk) const
@@ -466,12 +470,14 @@ void T_FIM::CalKrPc(Bulk& bk) const
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         if (bk.bType[n] > 0) {
+            auto SAT = bk.SATm.GetSAT(n);
+
             OCP_USI bId = n * np;
-            bk.SATm.GetSAT(n)->CalKrPcFIM(&bvs.S[bId], n);
-            copy(bk.SATm.GetSAT(n)->GetKr().begin(), bk.SATm.GetSAT(n)->GetKr().end(), &bvs.kr[bId]);
-            copy(bk.SATm.GetSAT(n)->GetPc().begin(), bk.SATm.GetSAT(n)->GetPc().end(), &bvs.Pc[bId]);
-            copy(bk.SATm.GetSAT(n)->GetdKrdS().begin(), bk.SATm.GetSAT(n)->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
-            copy(bk.SATm.GetSAT(n)->GetdPcdS().begin(), bk.SATm.GetSAT(n)->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            SAT->CalKrPcFIM(&bvs.S[bId], n);
+            copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
+            copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
+            copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(SAT->GetdPcdS().begin(), SAT->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
             for (USI j = 0; j < np; j++) bvs.Pj[n * np + j] = bvs.P[n] + bvs.Pc[n * np + j];
         }
     }

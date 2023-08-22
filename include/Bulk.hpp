@@ -28,6 +28,7 @@
 #include "BulkVarSet.hpp"
 #include "PVTModule.hpp"
 #include "SATModule.hpp"
+#include "ROCKModule.hpp"
 
 using namespace std;
 
@@ -150,8 +151,6 @@ public:
     void InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts);
     void InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts);
-    void InputRockFunc(const ParamReservoir& rs_param);
-    void InputRockFuncT(const ParamReservoir& rs_param);
 
     /// Allocate memory for fluid grid for isothermal model.
     void SetupIsoT(const Domain& domain);
@@ -166,6 +165,7 @@ protected:
     BulkVarSet vs;
     PVTModule  PVTm;
     SATModule  SATm;
+    ROCKModule ROCKm;
     
     
 
@@ -210,10 +210,6 @@ public:
     void OutMixtureIters() const { PVTm.GetPVT(0)->OutMixtureIters(); }
 
 protected:
-
-    USI           NTROCC;  ///< num of Rock regions
-    vector<USI>   ROCKNUM; ///< index of Rock table for each bulk
-    vector<OCPRock*> rock;    ///< rock model
 
     vector<USI> bType;     ///< Indicate bulk type, 0: rock;  1: rock and fluid
     vector<USI> bLocation; ///< Location of bulk: top, bottom, side

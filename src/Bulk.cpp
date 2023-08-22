@@ -100,8 +100,6 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
 {
     OCP_FUNCNAME;
 
-    // Common input
-    NTROCC = rs_param.NTROOC;
 
     if (rs_param.PBVD_T.data.size() > 0) EQUIL.PBVD.Setup(rs_param.PBVD_T.data[0]);
 
@@ -121,6 +119,8 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
 
     PVTm.Setup(rs_param, vs, opts);
     SATm.Setup(rs_param, vs, PVTm.GetMixtureType(), opts);
+    ROCKm.Setup(rs_param, vs, opts);
+    hLoss.InputParam(rs_param.hLoss);
 }
 
 void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts)
@@ -145,9 +145,6 @@ void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& op
         EQUIL.PcGO = rs_param.EQUIL[5];
     }
 
-
-
-    InputRockFunc(rs_param);
 
     if (CURRENT_RANK == MASTER_PROCESS)
         cout << endl << "BLACKOIL model is selected" << endl;
@@ -181,7 +178,6 @@ void Bulk::InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opt
     temp[1].push_back(rsTemp);
     initT_Tab.push_back(OCPTable(temp));
 
-    InputRockFunc(rs_param);
 
     if (CURRENT_RANK == MASTER_PROCESS)
         cout << endl << "COMPOSITIONAL model is selected" << endl;
@@ -225,34 +221,11 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& o
     EQUIL.DGOC = rs_param.EQUIL[4];
     EQUIL.PcGO = rs_param.EQUIL[5];
 
-    InputRockFuncT(rs_param);
 
     if (CURRENT_RANK == MASTER_PROCESS)
         cout << endl << "THERMAL model is selected" << endl;
 }
 
-
-
-void Bulk::InputRockFunc(const ParamReservoir& rs_param)
-{
-    for (USI i = 0; i < NTROCC; i++) {
-        rock.push_back(new OCPRockIsoT_Linear(rs_param.rockSet[i]));
-    }
-}
-
-void Bulk::InputRockFuncT(const ParamReservoir& rs_param)
-{
-    for (USI i = 0; i < NTROCC; i++) {
-        if (rs_param.rockSet[i].type == "LINEAR") {
-            rock.push_back(new OCPRockT_Linear(rs_param.rockSet[i]));
-        } else {
-            rock.push_back(new OCPRockT_Exp(rs_param.rockSet[i]));
-        }
-    }
-
-    // Heat Loss
-    hLoss.InputParam(rs_param.hLoss);
-}
 
 /// Setup bulk information.
 void Bulk::SetupIsoT(const Domain& domain)
@@ -266,9 +239,6 @@ void Bulk::SetupIsoT(const Domain& domain)
     // Set defaulted information
     if (vs.ntg.empty()) {
         vs.ntg.resize(vs.nb, 1);
-    }
-    if (ROCKNUM.empty()) {
-        ROCKNUM.resize(vs.nb, 0);
     }
 }
 
@@ -369,9 +339,11 @@ void Bulk::InitPTSw(const USI& tabrow)
     OCP_DBL Poref, Pgref, Pwref;
     OCP_DBL Pbegin = 0;
 
-    const OCP_BOOL initZi_flag = initZi_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
-    const OCP_BOOL initT_flag  = initT_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
-    const OCP_BOOL PBVD_flag   = EQUIL.PBVD.IsEmpty() ? OCP_FALSE : OCP_TRUE;
+    const auto initZi_flag = initZi_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
+    const auto initT_flag  = initT_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
+    const auto PBVD_flag   = EQUIL.PBVD.IsEmpty() ? OCP_FALSE : OCP_TRUE;
+
+    auto PVT = PVTm.GetPVT(0);
 
     if (Dref < DOGC) {
         // reference pressure is gas pressure
@@ -382,7 +354,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
 
         gammaGtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Pgref, Pbb, myTemp, tmpInitZi, PhaseType::gas);
+                    PVT->RhoPhase(Pgref, Pbb, myTemp, tmpInitZi, PhaseType::gas);
         Pbegin         = Pgref + gammaGtmp * (Ztmp[beginId] - Dref);
         Pgtmp[beginId] = Pbegin;
 
@@ -392,7 +364,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaGtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+            gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::gas);
             Pgtmp[id - 1] = Pgtmp[id] - gammaGtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -402,7 +374,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaGtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+            gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::gas);
             Pgtmp[id + 1] = Pgtmp[id] + gammaGtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -419,7 +391,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
 
             gammaGtmp = GRAVITY_FACTOR *
-                        PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
+                        PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
             Ptmp += gammaGtmp * mydz;
             myz += mydz;
         }
@@ -430,7 +402,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
 
             gammaOtmp = GRAVITY_FACTOR *
-                        PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                        PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
             Ptmp -= gammaOtmp * mydz;
             myz -= mydz;
         }
@@ -442,7 +414,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
 
         gammaOtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                    PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
         Pbegin         = Poref + gammaOtmp * (Ztmp[beginId] - Dref);
         Potmp[beginId] = Pbegin;
 
@@ -451,7 +423,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id - 1] = Potmp[id] - gammaOtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -461,7 +433,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -477,7 +449,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Poref, Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Poref, Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Ptmp += gammaOtmp * mydz;
             myz += mydz;
@@ -487,7 +459,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Ptmp, Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Ptmp -= gammaWtmp * mydz;
             myz -= mydz;
@@ -499,7 +471,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
 
         gammaWtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
+                    PVT->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
         Pbegin         = Pwref + gammaWtmp * (Ztmp[beginId] - Dref);
         Pwtmp[beginId] = Pbegin;
 
@@ -507,7 +479,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id - 1] = Pwtmp[id] - gammaWtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -516,7 +488,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id + 1] = Pwtmp[id] + gammaWtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -529,7 +501,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
         Pwref     = Pref;
         gammaWtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
+                    PVT->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
         Pbegin         = Pwref + gammaWtmp * (Ztmp[beginId] - Dref);
         Pwtmp[beginId] = Pbegin;
 
@@ -538,7 +510,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id - 1] = Pwtmp[id] - gammaWtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -546,7 +518,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id + 1] = Pwtmp[id] + gammaWtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -561,7 +533,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Ptmp, Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Ptmp += gammaWtmp * mydz;
             myz += mydz;
@@ -574,7 +546,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
 
             gammaOtmp = GRAVITY_FACTOR *
-                        PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                        PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
             Ptmp -= gammaOtmp * mydz;
             myz -= mydz;
         }
@@ -586,7 +558,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
 
         gammaOtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                    PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
         Pbegin         = Poref + gammaOtmp * (Ztmp[beginId] - Dref);
         Potmp[beginId] = Pbegin;
 
@@ -595,7 +567,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id - 1] = Potmp[id] - gammaOtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -605,7 +577,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -624,7 +596,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
                 gammaOtmp =
                     GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                    PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
                 Ptmp += gammaOtmp * mydz;
                 myz += mydz;
             }
@@ -636,7 +608,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
                 gammaGtmp =
                     GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
+                    PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
                 Ptmp -= gammaGtmp * mydz;
                 myz -= mydz;
             }
@@ -647,7 +619,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
 
-            gammaGtmp      = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgref, Pbb, myTemp,
+            gammaGtmp      = GRAVITY_FACTOR * PVT->RhoPhase(Pgref, Pbb, myTemp,
                                                                     tmpInitZi, PhaseType::gas);
             Pbegin         = Pgref + gammaGtmp * (Ztmp[beginId] - Dref);
             Pgtmp[beginId] = Pbegin;
@@ -658,7 +630,7 @@ void Bulk::InitPTSw(const USI& tabrow)
                 if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
                 gammaGtmp =
-                    GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+                    GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                            tmpInitZi, PhaseType::gas);
                 Pgtmp[id - 1] = Pgtmp[id] - gammaGtmp * (Ztmp[id] - Ztmp[id - 1]);
             }
@@ -668,7 +640,7 @@ void Bulk::InitPTSw(const USI& tabrow)
                 if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
                 gammaGtmp =
-                    GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+                    GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                            tmpInitZi, PhaseType::gas);
                 Pgtmp[id + 1] = Pgtmp[id] + gammaGtmp * (Ztmp[id + 1] - Ztmp[id]);
             }
@@ -684,7 +656,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
 
         gammaOtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                    PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
         Pbegin         = Poref + gammaOtmp * (Ztmp[beginId] - Dref);
         Potmp[beginId] = Pbegin;
 
@@ -694,7 +666,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id - 1] = Potmp[id] - gammaOtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -703,7 +675,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
-            gammaOtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Potmp[id], Pbb, myTemp,
+            gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::oil);
             Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -722,7 +694,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
                 gammaOtmp =
                     GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                    PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
                 Ptmp += gammaOtmp * mydz;
                 myz += mydz;
             }
@@ -734,7 +706,7 @@ void Bulk::InitPTSw(const USI& tabrow)
 
                 gammaGtmp =
                     GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
+                    PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
                 Ptmp -= gammaGtmp * mydz;
                 myz -= mydz;
             }
@@ -745,7 +717,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
 
-            gammaGtmp      = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgref, Pbb, myTemp,
+            gammaGtmp      = GRAVITY_FACTOR * PVT->RhoPhase(Pgref, Pbb, myTemp,
                                                                     tmpInitZi, PhaseType::gas);
             Pbegin         = Pgref + gammaGtmp * (Ztmp[beginId] - Dref);
             Pgtmp[beginId] = Pbegin;
@@ -756,7 +728,7 @@ void Bulk::InitPTSw(const USI& tabrow)
                 if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
                 gammaGtmp =
-                    GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+                    GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                            tmpInitZi, PhaseType::gas);
                 Pgtmp[id - 1] = Pgtmp[id] - gammaGtmp * (Ztmp[id] - Ztmp[id - 1]);
             }
@@ -767,7 +739,7 @@ void Bulk::InitPTSw(const USI& tabrow)
                 if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
 
                 gammaGtmp =
-                    GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pgtmp[id], Pbb, myTemp,
+                    GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
                                                            tmpInitZi, PhaseType::gas);
                 Pgtmp[id + 1] = Pgtmp[id] + gammaGtmp * (Ztmp[id + 1] - Ztmp[id]);
             }
@@ -785,7 +757,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
 
             gammaOtmp = GRAVITY_FACTOR *
-                        PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
+                        PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
             Ptmp += gammaOtmp * mydz;
             myz += mydz;
         }
@@ -794,7 +766,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Ptmp, Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Ptmp, Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Ptmp -= gammaWtmp * mydz;
             myz -= mydz;
@@ -806,7 +778,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
 
         gammaWtmp = GRAVITY_FACTOR *
-                    PVTm.GetPVT(0)->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
+                    PVT->RhoPhase(Pwref, Pbb, myTemp, tmpInitZi, PhaseType::wat);
         Pbegin         = Pwref + gammaWtmp * (Ztmp[beginId] - Dref);
         Pwtmp[beginId] = Pbegin;
 
@@ -814,7 +786,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id - 1] = Pwtmp[id] - gammaWtmp * (Ztmp[id] - Ztmp[id - 1]);
         }
@@ -823,7 +795,7 @@ void Bulk::InitPTSw(const USI& tabrow)
             if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
             if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
 
-            gammaWtmp = GRAVITY_FACTOR * PVTm.GetPVT(0)->RhoPhase(Pwtmp[id], Pbb, myTemp,
+            gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], Pbb, myTemp,
                                                                tmpInitZi, PhaseType::wat);
             Pwtmp[id + 1] = Pwtmp[id] + gammaWtmp * (Ztmp[id + 1] - Ztmp[id]);
         }
@@ -851,32 +823,33 @@ void Bulk::InitPTSw(const USI& tabrow)
         }
 
         DepthP.Eval_All(0, vs.depth[n], data, cdata);
-        OCP_DBL Po   = data[1];
-        OCP_DBL Pg   = data[2];
-        OCP_DBL Pw   = data[3];
-        OCP_DBL Pcgo = Pg - Po;
-        OCP_DBL Pcow = Po - Pw;
-        OCP_DBL Sw   = SATm.GetSAT(n)->CalSwByPcow(Pcow);
-        OCP_DBL Sg   = 0;
+        const auto SAT  = SATm.GetSAT(n);
+        auto Po   = data[1];
+        auto Pg   = data[2];
+        auto Pw   = data[3];
+        auto Pcgo = Pg - Po;
+        auto Pcow = Po - Pw;
+        auto Sw   = SAT->CalSwByPcow(Pcow);
+        auto Sg   = 0;
         if (vs.gIndex >= 0) {
-            Sg = SATm.GetSAT(n)->CalSgByPcgo(Pcgo);
+            Sg = SAT->CalSgByPcgo(Pcgo);
         }
         if (Sw + Sg > 1) {
             // should be modified
             OCP_DBL Pcgw = Pcow + Pcgo;
-            Sw           = SATm.GetSAT(n)->CalSwByPcgw(Pcgw);
+            Sw           = SAT->CalSwByPcgw(Pcgw);
             Sg           = 1 - Sw;
         }
 
         if (1 - Sw < TINY) {
             // all water
-            Po = Pw + SATm.GetSAT(n)->CalPcowBySw(1.0);
+            Po = Pw + SAT->CalPcowBySw(1.0);
         } else if (1 - Sg < TINY) {
             // all gas
-            Po = Pg - SATm.GetSAT(n)->CalPcgoBySg(1.0);
+            Po = Pg - SAT->CalPcgoBySg(1.0);
         } else if (1 - Sw - Sg < TINY) {
             // water and gas
-            Po = Pg - SATm.GetSAT(n)->CalPcgoBySg(Sg);
+            Po = Pg - SAT->CalPcgoBySg(Sg);
         }
         vs.P[n] = Po;
 
@@ -888,9 +861,9 @@ void Bulk::InitPTSw(const USI& tabrow)
         vs.Pb[n] = Pbb;
 
         // cal Sw
-        const OCP_DBL swco = SATm.GetSAT(n)->GetSwco();
-        if (fabs(SATm.GetSAT(n)->CalPcowBySw(0.0 - TINY)) < TINY &&
-            fabs(SATm.GetSAT(n)->CalPcowBySw(1.0 + TINY) < TINY)) {
+        const OCP_DBL swco = SAT->GetSwco();
+        if (fabs(SAT->CalPcowBySw(0.0 - TINY)) < TINY &&
+            fabs(SAT->CalPcowBySw(1.0 + TINY) < TINY)) {
             vs.S[n * vs.np + vs.np - 1] = swco;
             continue;
         }
@@ -911,14 +884,14 @@ void Bulk::InitPTSw(const USI& tabrow)
             Pcow = Po - Pw;
             Pcgo = Pg - Po;
             avePcow += Pcow;
-            tmpSw = SATm.GetSAT(n)->CalSwByPcow(Pcow);
+            tmpSw = SAT->CalSwByPcow(Pcow);
             if (vs.gIndex >= 0) {
-                tmpSg = SATm.GetSAT(n)->CalSgByPcgo(Pcgo);
+                tmpSg = SAT->CalSgByPcgo(Pcgo);
             }
             if (tmpSw + tmpSg > 1) {
                 // should be modified
                 OCP_DBL Pcgw = Pcow + Pcgo;
-                tmpSw        = SATm.GetSAT(n)->CalSwByPcgw(Pcgw);
+                tmpSw        = SAT->CalSwByPcgw(Pcgw);
                 tmpSg        = 1 - tmpSw;
             }
             Sw += tmpSw;
@@ -928,7 +901,7 @@ void Bulk::InitPTSw(const USI& tabrow)
         // Sg /= ncut;
         avePcow /= ncut;
 
-        SATm.GetSAT(n)->SetupScale(n, Sw, avePcow);
+        SAT->SetupScale(n, Sw, avePcow);
         vs.S[n * vs.np + vs.np - 1] = Sw;
     }
 }

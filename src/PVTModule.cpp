@@ -46,8 +46,6 @@ void PVTModule::Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalF
 	bvs.oIndex  = PVTs[0]->GetVs()->o;
 	bvs.gIndex  = PVTs[0]->GetVs()->g;
 	bvs.wIndex  = PVTs[0]->GetVs()->w;
-
-
 }
 
 

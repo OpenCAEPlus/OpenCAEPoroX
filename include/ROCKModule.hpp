@@ -1,7 +1,7 @@
-/*! \file    PVTModule.hpp
- *  \brief   PVTModule class declaration
+/*! \file    ROCKModule.hpp
+ *  \brief   ROCKModule class declaration
  *  \author  Shizhe Li
- *  \date    Aug/19/2023
+ *  \date    Aug/21/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -9,51 +9,47 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __PVTMODULE_HEADER__
-#define __PVTMODULE_HEADER__
+#ifndef __ROCKMODULE_HEADER__
+#define __ROCKMODULE_HEADER__
 
  // Standard header files
 #include <cassert>
 
 // OpenCAEPoroX header files
-#include "MixtureUnit.hpp"
-#include "MixtureUnitBlkOil.hpp"
-#include "MixtureUnitComp.hpp"
-#include "MixtureUnitThermal.hpp"
+#include "OCPRock.hpp"
 #include "BulkVarSet.hpp"
+#include "OptionalFeatures.hpp"
 
 using namespace std;
 
 
-class PVTModule
+class ROCKModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalFeatures& opts);
-    auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
-    auto GetMixture() const {return PVTs[0]->GetMixture();}
-    auto& GetPVTNUM() { return PVTNUM; }
-    auto GetMixtureType() const { return mixType; }
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, OptionalFeatures& opts);
+    auto GetROCK(const OCP_USI& n) const { return ROCKs[ROCKNUM[n]]; }
+    auto& GetROCKNUM() { return ROCKNUM; }
+    auto GetNTROCK() { return NTROCK; }
 
 protected:
-    OCPMixtureType       mixType;
-    /// number of PVT regions
-    USI                  NTPVT;
-    /// Index of PVT region for each bulk
-    vector<USI>          PVTNUM;
-    /// PVT modules
-    vector<MixtureUnit*> PVTs;
+    /// num of Rock regions
+    USI              NTROCK;
+    /// Index of ROCK region for each bulk
+    vector<USI>      ROCKNUM;
+    /// Rock modules
+    vector<OCPRock*> ROCKs;
 
 };
 
 
 
-#endif /* end if __PVTMODULE_HEADER__ */
+#endif /* end if __ROCKMODULE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Aug/19/2023      Create file                          */
+/*  Shizhe Li           Aug/21/2023      Create file                          */
 /*----------------------------------------------------------------------------*/
