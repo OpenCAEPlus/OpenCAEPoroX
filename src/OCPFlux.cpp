@@ -26,8 +26,6 @@ void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
     const BulkVarSet& bvs = bk.vs;
 
     fill(flux_ni.begin(), flux_ni.end(), 0.0);
-    const USI& np     = numPhase;
-    const USI& nc     = numCom;
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -55,6 +53,7 @@ void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
         else {
             upblock[j] = bId;
             rho[j]     = 0;
+            flux_vj[j] = 0;
             continue;
         }
 
@@ -66,7 +65,10 @@ void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
 
         uId_np_j = upblock[j] * np + j;
 
-        if (!bvs.phaseExist[uId_np_j]) continue;
+        if (!bvs.phaseExist[uId_np_j]) {
+            flux_vj[j] = 0;
+            continue;
+        }
 
         flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP;
        
@@ -82,8 +84,6 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const Bu
 {
     const BulkVarSet& bvs = bk.vs;
 
-    const USI& np     = numPhase;
-    const USI& nc     = numCom;
     const USI  ncol   = nc + 1;
     const USI  ncol2  = np * nc + np;
 
@@ -193,8 +193,6 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
 {
     const BulkVarSet& bvs = bk.vs;
 
-    const USI& np     = numPhase;
-    const USI& nc     = numCom;
     const USI  ncol   = nc + 1;
     const USI  ncol2  = np * nc + np;
 
@@ -459,9 +457,6 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
 void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
-
-    const USI&    np  = numPhase;
-    const USI&    nc  = numCom;
     
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -508,15 +503,12 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
 
     fill(flux_ni.begin(), flux_ni.end(), 0.0);
 
-    const USI&    np  = numPhase;
-    const USI&    nc  = numCom;
-
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
     const OCP_DBL T1  = bvs.kt[bId] * bp.AreaB();
     const OCP_DBL T2  = bvs.kt[eId] * bp.AreaE();
 
-    Adkt              = 1 / (1 / T1 + 1 / T2);
+    conduct_H              = (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
 
     if (bp.Type() == 0) {
         OCP_USI       bId_np_j, eId_np_j, uId_np_j;
@@ -543,7 +535,9 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
             }
             else {
                 upblock[j] = bId;
-                rho[j] = 0;
+                rho[j]     = 0;
+                flux_vj[j] = 0;
+                flux_Hj[j] = 0;
                 continue;
             }
 
@@ -555,9 +549,14 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
 
             uId_np_j = upblock[j] * np + j;
 
-            if (!bvs.phaseExist[uId_np_j]) continue;
+            if (!bvs.phaseExist[uId_np_j]) {
+                flux_vj[j] = 0;
+                flux_Hj[j] = 0;
+                continue;
+            }
 
             flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP;
+            flux_Hj[j] = flux_vj[j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
 
             for (USI i = 0; i < nc; i++) {
                 flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
@@ -577,8 +576,6 @@ void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkC
     fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
     fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
 
-    const USI& np    = numPhase;
-    const USI& nc    = numCom;
     const USI  ncol  = nc + 2;
     const USI  ncol2 = np * nc + np;
 
@@ -588,7 +585,7 @@ void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkC
     const OCP_DBL areaE = bp.AreaE();
     const OCP_DBL T1    = bvs.kt[bId] * areaB;
     const OCP_DBL T2    = bvs.kt[eId] * areaE;
-    Adkt                = 1 / (1 / T1 + 1 / T2);
+    const OCP_DBL Adkt  = 1 / (1 / T1 + 1 / T2);
                         
     const OCP_DBL tmpB  = pow(Adkt, 2) / pow(T1, 2) * areaB;
     const OCP_DBL tmpE  = pow(Adkt, 2) / pow(T2, 2) * areaE;

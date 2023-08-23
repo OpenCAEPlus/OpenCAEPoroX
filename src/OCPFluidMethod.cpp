@@ -236,8 +236,6 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 
     conn.bcval.lupblock.resize(conn.numConn * np);
     conn.bcval.lrho.resize(conn.numConn * np);
-    conn.bcval.lvelocity.resize(conn.numConn * np);
-    conn.bcval.lflux_ni.resize(conn.numConn * nc);
 }
 
 void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
@@ -582,8 +580,6 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
 
     rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
     rs.conn.bcval.rho          = rs.conn.bcval.lrho;
-    rs.conn.bcval.velocity     = rs.conn.bcval.lvelocity;
-    rs.conn.bcval.flux_ni      = rs.conn.bcval.lflux_ni;
 
     // Iters
     ctrl.ResetIterNRLS();
@@ -619,8 +615,6 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     // Bulk Conn
     rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
     rs.conn.bcval.rho          = rs.conn.bcval.lrho;
-    rs.conn.bcval.velocity     = rs.conn.bcval.lvelocity;
-    rs.conn.bcval.flux_ni      = rs.conn.bcval.lflux_ni;
 
     // Optional Features
     rs.optFeatures.ResetToLastTimeStep();
@@ -665,8 +659,6 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 
     conn.bcval.lupblock    = conn.bcval.upblock;
     conn.bcval.lrho        = conn.bcval.rho;
-    conn.bcval.lvelocity   = conn.bcval.velocity;
-    conn.bcval.lflux_ni    = conn.bcval.flux_ni;
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();

@@ -738,7 +738,6 @@ void T_FIM::CalRes(Reservoir&      rs,
     BulkConnValSet&   bcval = conn.bcval;
 
     OCP_USI uId_np_j;
-    OCP_DBL dT, Akdt;
     USI     cType;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
@@ -750,12 +749,11 @@ void T_FIM::CalRes(Reservoir&      rs,
         Flux->CalFlux(conn.iteratorConn[c], bk);
 
         // Thermal conductive term always exists
-        Akdt = Flux->GetAdkt();
-        dT   = bvs.T[bId] - bvs.T[eId];
-        res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
+        const auto conH = Flux->GetConductH();
+        res.resAbs[bId * len + 1 + nc] += conH * dt;
         if (eId < nb) {
             // Interior grid
-            res.resAbs[eId * len + 1 + nc] -= Akdt * dT * dt;
+            res.resAbs[eId * len + 1 + nc] -= conH * dt;
         }
 
         if (cType == 0) {
@@ -772,8 +770,8 @@ void T_FIM::CalRes(Reservoir&      rs,
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
-                    res.resAbs[eId * len + 1 + nc] -= dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
+                    res.resAbs[eId * len + 1 + nc] -= dt * Flux->GetFluxHj()[j];
                 }
 			}
 			else {
@@ -783,7 +781,7 @@ void T_FIM::CalRes(Reservoir&      rs,
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
-                    res.resAbs[bId * len + 1 + nc] += dt * bcval.velocity[c * np + j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
+                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
                 }				
 			}
         }

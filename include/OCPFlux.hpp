@@ -83,8 +83,6 @@ protected:
     // Last time step
     vector<OCP_USI> lupblock;  ///< last upblock
     vector<OCP_DBL> lrho;      ///< last upblock_Rho
-    vector<OCP_DBL> lvelocity; ///< last upblock_Velocity
-    vector<OCP_DBL> lflux_ni;  ///< mole velocity of components
 };
 
 
@@ -94,9 +92,9 @@ class OCPFlux
 
 public:
     OCPFlux() = default;
-    void Allocate(const USI& np, const USI& nc) {
-        numPhase = np;
-        numCom   = nc;
+    void Allocate(const USI& npin, const USI& ncin) {
+        np = npin;
+        nc = ncin;
         upblock.resize(np, 0.0);
         rho.resize(np, 0.0);
         flux_vj.resize(np, 0.0);
@@ -113,7 +111,8 @@ public:
     const vector<OCP_DBL>& GetRho() const { return rho; }
     const vector<OCP_DBL>& GetFluxVj() const { return flux_vj; }
     const vector<OCP_DBL>& GetFluxNi() const { return flux_ni; }
-    OCP_DBL GetAdkt() const { return Adkt; }
+    const vector<OCP_DBL>& GetFluxHj() const { return flux_Hj; }
+    OCP_DBL GetConductH() const { return conduct_H; }
 
     const vector<OCP_DBL>& GetdFdXpB() const { return dFdXpB; }
     const vector<OCP_DBL>& GetdFdXpE() const { return dFdXpE; }
@@ -127,15 +126,16 @@ public:
 protected:
 
     // Common variables 
-    USI              numPhase; ///< num of phase
-    USI              numCom;   ///< num of components
+    USI              np; ///< num of phase
+    USI              nc;   ///< num of components
     vector<OCP_USI>  upblock;  ///< upblock of connections
     vector<OCP_DBL>  rho;      ///< weighted density of phase between bulks
     vector<OCP_DBL>  flux_vj;  ///< volume velocity of phase from upblock
     vector<OCP_DBL>  flux_ni;  ///< mole velocity of components
+    vector<OCP_DBL>  flux_Hj;  ///< enthalpy velocity of phase from upblock
 
     // for thermal
-    OCP_DBL          Adkt;     ///< efficient thermal conduction coefficient
+    OCP_DBL          conduct_H;     ///< efficient thermal conduction coefficient
 
     // for FIM
     vector<OCP_DBL>  dFdXpB;   ///< dF / dXp for bId bulk
@@ -157,10 +157,10 @@ public:
     OCPFlux_IsoT() = default;
     OCPFlux_IsoT(const Bulk& bk) {
         Allocate(bk.vs.np, bk.vs.nc);
-        dFdXpB.resize((numCom + 1) * (numCom + 1));
-        dFdXpE.resize((numCom + 1) * (numCom + 1));
-        dFdXsB.resize((numCom + 1) * (numCom + 1) * numPhase);
-        dFdXsE.resize((numCom + 1) * (numCom + 1) * numPhase);
+        dFdXpB.resize((nc + 1) * (nc + 1));
+        dFdXpE.resize((nc + 1) * (nc + 1));
+        dFdXsB.resize((nc + 1) * (nc + 1) * np);
+        dFdXsE.resize((nc + 1) * (nc + 1) * np);
     }
     void CalFlux(const BulkPair& bp, const Bulk& bk) override;
     void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
@@ -171,16 +171,17 @@ public:
 
 class OCPFlux_T : public OCPFlux
 {
-    // flux for thermal model, flux between connetions with fluid flow
+    // flux for thermal model,
     // fluid flow or heat conduction
 public:
     OCPFlux_T() = default;
     OCPFlux_T(const Bulk& bk) {
         Allocate(bk.vs.np, bk.vs.nc);
-        dFdXpB.resize((numCom + 2) * (numCom + 2));
-        dFdXpE.resize((numCom + 2) * (numCom + 2));
-        dFdXsB.resize((numCom + 2) * (numCom + 1) * numPhase);
-        dFdXsE.resize((numCom + 2) * (numCom + 1) * numPhase);
+        flux_Hj.resize(np);
+        dFdXpB.resize((nc + 2) * (nc + 2));
+        dFdXpE.resize((nc + 2) * (nc + 2));
+        dFdXsB.resize((nc + 2) * (nc + 1) * np);
+        dFdXsE.resize((nc + 2) * (nc + 1) * np);
     }
     void CalFlux(const BulkPair & bp, const Bulk& bk) override;
     void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;

@@ -72,7 +72,6 @@ void OCPRockT_Linear ::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL
 
 void OCPRockT_Exp::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
 {
-
     if (bulkType > 0) {
         // with fluid
         const OCP_DBL dP = P - Pref;
