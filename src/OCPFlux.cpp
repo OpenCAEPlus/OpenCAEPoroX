@@ -78,7 +78,7 @@ void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
 
 
 
-void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -189,7 +189,7 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const Bu
 }
 
 
-void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -456,7 +456,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
 }
 
 
-void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -567,7 +567,7 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
 }
 
 
-void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk)
+void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
 {
 
     const BulkVarSet& bvs = bk.vs;

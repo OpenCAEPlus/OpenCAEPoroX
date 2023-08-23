@@ -599,24 +599,10 @@ void PreParamGridWell::SetupGrid()
 
     OutputBaiscInfo();
 
+    // For structral Gid
+    SetLocationStructral();
 }
 
-
-void PreParamGridWell::SetupInitGrid()
-{
-    switch (gridType) {
-    case ORTHOGONAL_GRID:
-        SetupOrthogonalGrid();
-        break;
-    case CORNER_GRID:
-        SetupCornerGrid();
-        break;
-    default:
-        OCP_ABORT("WRONG Grid Type!");
-    }
-
-    OutputBaiscInfo();
-}
 
 void PreParamGridWell::SetupOrthogonalGrid()
 {
@@ -836,6 +822,20 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
             gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
             gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
         }
+    }
+}
+
+
+void PreParamGridWell::SetLocationStructral()
+{
+    location.resize(numGrid);
+    const OCP_USI uplim   = nx * ny;
+    const OCP_USI downlim = numGrid - nx * ny;
+    for (OCP_USI n = 0; n < uplim; n++) {
+        location[n] = 1;
+    }
+    for (OCP_USI n = downlim; n < numGrid; n++) {
+        location[n] = 2;
     }
 }
 

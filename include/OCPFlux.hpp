@@ -62,7 +62,7 @@ protected:
 };
 
 
-class BulkConnVal
+class BulkConnValSet
 {
     friend class Reservoir;
     friend class OCPFlux_IsoT;
@@ -104,9 +104,9 @@ public:
     }
     // Calculate flux of components and phases
     virtual void CalFlux(const BulkPair& bp, const Bulk& bk) = 0;
-    virtual void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) = 0;
-    virtual void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) = 0;
-    virtual void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) = 0;
+    virtual void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
+    virtual void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
+    virtual void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
 
     
     const vector<OCP_USI>& GetUpblock() const { return upblock; }
@@ -163,9 +163,9 @@ public:
         dFdXsE.resize((numCom + 1) * (numCom + 1) * numPhase);
     }
     void CalFlux(const BulkPair& bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override;
-    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override;
+    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
+    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
 };
 
 
@@ -183,9 +183,9 @@ public:
         dFdXsE.resize((numCom + 2) * (numCom + 1) * numPhase);
     }
     void CalFlux(const BulkPair & bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override{}
-    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnVal& bcv, const Bulk& bk) override{}
+    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override{}
+    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override{}
 };
 
 

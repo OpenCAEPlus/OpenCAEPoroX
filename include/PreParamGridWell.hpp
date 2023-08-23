@@ -178,9 +178,10 @@ protected:
     vector<OCP_DBL> poro;  ///< Porosity for each grid.
     USI             model{ 0 }; ///< if thermal model will be used.
 
-    // Grid activity
-    vector<USI> ACTNUM;    ///< Indicate activity of grid from input file: numGridLocal.
-                           ///< 0 = inactive, 1 = active.
+    /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
+    vector<USI> ACTNUM;    
+    /// Grid Location
+    vector<USI> location;
 
     // Well
     vector<PreParamWell> well;
@@ -196,8 +197,6 @@ public:
 protected:
     /// Setup grids
     void SetupGrid();
-    /// Setup the grid information and calculate the properties.
-    void SetupInitGrid();
     /// Setup orthogonal grid.
     void SetupOrthogonalGrid();
     /// Calculate the depth and volume for orthogonal grid.
@@ -212,6 +211,11 @@ protected:
     void SetupBasicCornerGrid(const OCP_COORD& CoTmp);
     /// Setup the neighboring info for a corner-point grid.
     void SetupActiveConnCornerGrid(const OCP_COORD& CoTmp);
+
+
+    // For Structral Grid
+    /// Set location for grid: top, bottom, side or interior
+    void SetLocationStructral();
     
 
     /// Calculate the activity of grid cells

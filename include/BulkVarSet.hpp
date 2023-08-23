@@ -197,101 +197,104 @@ public:
     vector<OCP_DBL>  lkt;         
 
     /// d vf / d P
-    vector<OCP_DBL> vfP;
-    /// d vf / d T
-    vector<OCP_DBL> vfT;
-    /// d vf / d Ni
-    vector<OCP_DBL> vfi;
-    /// d xi / d P
-    vector<OCP_DBL> xiP;
-    /// d xi / d T
-    vector<OCP_DBL> xiT;
+    vector<OCP_DBL>  vfP;
+    /// d vf / d T   
+    vector<OCP_DBL>  vfT;
+    /// d vf / d Ni  
+    vector<OCP_DBL>  vfi;
+    /// d xi / d P   
+    vector<OCP_DBL>  xiP;
+    /// d xi / d T   
+    vector<OCP_DBL>  xiT;
     /// d Xi / d xij
-    vector<OCP_DBL> xix;     
-    /// d rho  / d P
-    vector<OCP_DBL> rhoP;
-    /// d rho / d T
-    vector<OCP_DBL> rhoT;
+    vector<OCP_DBL>  xix;     
+    /// d rho  / d P 
+    vector<OCP_DBL>  rhoP;
+    /// d rho / d T  
+    vector<OCP_DBL>  rhoT;
     /// d rho / d xij
-    vector<OCP_DBL> rhox;    
-    /// d mu / d P
-    vector<OCP_DBL> muP;
-    /// d mu / d T
-    vector<OCP_DBL> muT;
+    vector<OCP_DBL>  rhox;    
+    /// d mu / d P   
+    vector<OCP_DBL>  muP;
+    /// d mu / d T   
+    vector<OCP_DBL>  muT;
     /// d mu / d xij
-    vector<OCP_DBL> mux;
-    /// d Pc / d S
-    vector<OCP_DBL> dPcdS;
-    /// d Kr / d S
-    vector<OCP_DBL> dKrdS;  
-    /// d Uf / d P
-    vector<OCP_DBL> UfP;
-    /// d Uf / d T
-    vector<OCP_DBL> UfT;
-    /// d Uf / d Ni
-    vector<OCP_DBL> Ufi;
-    /// d H / d T
-    vector<OCP_DBL> HT;
+    vector<OCP_DBL>  mux;
+    /// d Pc / d S   
+    vector<OCP_DBL>  dPcdS;
+    /// d Kr / d S   
+    vector<OCP_DBL>  dKrdS;  
+    /// d Uf / d P   
+    vector<OCP_DBL>  UfP;
+    /// d Uf / d T   
+    vector<OCP_DBL>  UfT;
+    /// d Uf / d Ni  
+    vector<OCP_DBL>  Ufi;
+    /// d H / d T    
+    vector<OCP_DBL>  HT;
     /// d H / d xij
-    vector<OCP_DBL> Hx;
-    /// d kt / d P
-    vector<OCP_DBL> ktP;
-    /// d kt / d T
-    vector<OCP_DBL> ktT;
-    /// d kt / d S
-    vector<OCP_DBL> ktS;     
+    vector<OCP_DBL>  Hx;
+    /// d kt / d P   
+    vector<OCP_DBL>  ktP;
+    /// d kt / d T   
+    vector<OCP_DBL>  ktT;
+    /// d kt / d S   
+    vector<OCP_DBL>  ktS;     
 
     /// last vfP
-    vector<OCP_DBL> lvfP;
-    /// last vfT
-    vector<OCP_DBL> lvfT;
-    /// last vfi
-    vector<OCP_DBL> lvfi;
-    /// last xiP
-    vector<OCP_DBL> lxiP;
-    /// last xiT
-    vector<OCP_DBL> lxiT;
-    /// last xix
-    vector<OCP_DBL> lxix;
-    /// last rhoP
-    vector<OCP_DBL> lrhoP;
-    /// last rhoT
-    vector<OCP_DBL> lrhoT; 
-    /// last rhox
-    vector<OCP_DBL> lrhox;    
+    vector<OCP_DBL>  lvfP;
+    /// last vfT     
+    vector<OCP_DBL>  lvfT;
+    /// last vfi     
+    vector<OCP_DBL>  lvfi;
+    /// last xiP     
+    vector<OCP_DBL>  lxiP;
+    /// last xiT     
+    vector<OCP_DBL>  lxiT;
+    /// last xix     
+    vector<OCP_DBL>  lxix;
+    /// last rhoP    
+    vector<OCP_DBL>  lrhoP;
+    /// last rhoT    
+    vector<OCP_DBL>  lrhoT; 
+    /// last rhox    
+    vector<OCP_DBL>  lrhox;    
     /// last muP
-    vector<OCP_DBL> lmuP; 
-    /// last muT
-    vector<OCP_DBL> lmuT; 
-    /// last mux
-    vector<OCP_DBL> lmux; 
-    /// last dPcdS
-    vector<OCP_DBL> ldPcdS;
-    /// last dKrdS
-    vector<OCP_DBL> ldKrdS; 
-    /// last UfP
-    vector<OCP_DBL> lUfP;
+    vector<OCP_DBL>  lmuP; 
+    /// last muT     
+    vector<OCP_DBL>  lmuT; 
+    /// last mux     
+    vector<OCP_DBL>  lmux; 
+    /// last dPcdS   
+    vector<OCP_DBL>  ldPcdS;
+    /// last dKrdS   
+    vector<OCP_DBL>  ldKrdS; 
+    /// last UfP     
+    vector<OCP_DBL>  lUfP;
     /// last UfT
-    vector<OCP_DBL> lUfT;
-    /// last Ufi
-    vector<OCP_DBL> lUfi;
-    /// last HT
-    vector<OCP_DBL> lHT; 
-    /// last Hx
-    vector<OCP_DBL> lHx; 
-    /// last ktP
-    vector<OCP_DBL> lktP;
-    /// last ktT
-    vector<OCP_DBL> lktT;
-    /// last ktS
-    vector<OCP_DBL> lktS; 
+    vector<OCP_DBL>  lUfT;
+    /// last Ufi     
+    vector<OCP_DBL>  lUfi;
+    /// last HT      
+    vector<OCP_DBL>  lHT; 
+    /// last Hx      
+    vector<OCP_DBL>  lHx; 
+    /// last ktP     
+    vector<OCP_DBL>  lktP;
+    /// last ktT     
+    vector<OCP_DBL>  lktT;
+    /// last ktS     
+    vector<OCP_DBL>  lktS; 
 
     /// length of dSec_dPri.
-    USI             maxLendSdP;
+    USI              lendSdP;
     /// d Secondary variable / d Primary variable.
-    vector<OCP_DBL> dSec_dPri;  
+    vector<OCP_DBL>  dSec_dPri;  
     /// last dSec_dPri
-    vector<OCP_DBL> ldSec_dPri;    
+    vector<OCP_DBL>  ldSec_dPri;    
+
+    /// location of bulk: top, bottom, side
+    vector<USI> location;
 
 };
 

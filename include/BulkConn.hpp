@@ -71,7 +71,7 @@ protected:
     // Physical Variables
     /////////////////////////////////////////////////////////////////////
 
-    BulkConnVal               bcval;   ///< values between connections
+    BulkConnValSet               bcval;   ///< values between connections
 
     /////////////////////////////////////////////////////////////////////
     // Flux

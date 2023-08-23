@@ -294,10 +294,10 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.ktS.resize(nb * np);
 
     // FIM-Specified
-    bvs.maxLendSdP = (nc + 2) * (nc + 1) * np;
-    bvs.dSec_dPri.resize(nb * bvs.maxLendSdP);
+    bvs.lendSdP = (nc + 2) * (nc + 1) * np;
+    bvs.dSec_dPri.resize(nb * bvs.lendSdP);
 
-    bvs.ldSec_dPri.resize(nb * bvs.maxLendSdP);
+    bvs.ldSec_dPri.resize(nb * bvs.lendSdP);
 
     // BulkConn
     BulkConn&      conn    = rs.conn;
@@ -348,21 +348,21 @@ void T_FIM::CalRock(Bulk& bk) const
     const OCP_USI nb = bvs.nb;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        auto rock = bk.ROCKm.GetROCK(n);
+        auto ROCK = bk.ROCKm.GetROCK(n);
 
-        rock->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
+        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
         if (bk.bType[n] > 0) {
             // with fluid           
-            bvs.poro[n]   = rock->GetPoro();
-            bvs.poroP[n]  = rock->GetdPorodP();
-            bvs.poroT[n]  = rock->GetdPorodT();           
-            bvs.vr[n]     = bvs.v[n] * rock->Get_Poro();
-            bvs.vrP[n]    = bvs.v[n] * rock->Get_dPorodP();
-            bvs.vrT[n]    = bvs.v[n] * rock->Get_dPorodT();
+            bvs.poro[n]   = ROCK->GetPoro();
+            bvs.poroP[n]  = ROCK->GetdPorodP();
+            bvs.poroT[n]  = ROCK->GetdPorodT();           
+            bvs.vr[n]     = bvs.v[n] * ROCK->Get_Poro();
+            bvs.vrP[n]    = bvs.v[n] * ROCK->Get_dPorodP();
+            bvs.vrT[n]    = bvs.v[n] * ROCK->Get_dPorodT();
             bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
         }
-        bvs.Hr[n]  = rock->GetHr();
-        bvs.HrT[n] = rock->GetdHrdT();
+        bvs.Hr[n]  = ROCK->GetHr();
+        bvs.HrT[n] = ROCK->GetdHrdT();
     }
 }
 
@@ -459,7 +459,7 @@ void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
         bvs.Ufi[n * nc + i] = PVT->GetUfi(i);
     }
 
-    Dcopy(bvs.maxLendSdP, &bvs.dSec_dPri[n * bvs.maxLendSdP],
+    Dcopy(bvs.lendSdP, &bvs.dSec_dPri[n * bvs.lendSdP],
           &PVT->GetDXsDXp()[0]);
 }
 
@@ -538,7 +538,7 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
 void T_FIM::CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const
 {
     BulkVarSet& bvs = bk.vs;
-    bk.hLoss.CalHeatLoss(bk.bLocation, bvs.T, bvs.lT, bk.initT, t, dt);
+    bk.hLoss.CalHeatLoss(bk.vs.location, bvs.T, bvs.lT, bk.initT, t, dt);
 }
 
 void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -723,9 +723,9 @@ void T_FIM::CalRes(Reservoir&      rs,
         }
 
         // Heat Loss
-        if (bk.hLoss.IfHeatLoss() && bk.bLocation[n] > 0) {
-            const OCP_DBL lambda = bk.bLocation[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
-            const OCP_DBL kappa  = bk.bLocation[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
+        if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
+            const OCP_DBL lambda = bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
+            const OCP_DBL kappa  = bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
             // dT
             res.resAbs[n * len + nc + 1] +=
                 dt * kappa *
@@ -735,8 +735,7 @@ void T_FIM::CalRes(Reservoir&      rs,
     }
 
     BulkConn&         conn  = rs.conn;
-    BulkConnVal&      bcval = conn.bcval;
-    vector<OCPFlux*>& flux  = conn.flux;
+    BulkConnValSet&   bcval = conn.bcval;
 
     OCP_USI uId_np_j;
     OCP_DBL dT, Akdt;
@@ -746,11 +745,12 @@ void T_FIM::CalRes(Reservoir&      rs,
         bId   = conn.iteratorConn[c].BId();
         eId   = conn.iteratorConn[c].EId();
         cType = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
-        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
+        Flux->CalFlux(conn.iteratorConn[c], bk);
 
         // Thermal conductive term always exists
-        Akdt = flux[cType]->GetAdkt();
+        Akdt = Flux->GetAdkt();
         dT   = bvs.T[bId] - bvs.T[eId];
         res.resAbs[bId * len + 1 + nc] += Akdt * dT * dt;
         if (eId < nb) {
@@ -760,15 +760,15 @@ void T_FIM::CalRes(Reservoir&      rs,
 
         if (cType == 0) {
             // with flow
-            copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
-            copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
-            copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
+            copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcval.upblock[c * np]);
+            copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcval.rho[c * np]);
+            copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcval.velocity[c * np]);
 
 			if (eId < nb) {
 				// Interior grid
 				for (USI i = 0; i < nc; i++) {
-					res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
-					res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
+					res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
+					res.resAbs[eId * len + 1 + i] -= dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
@@ -779,7 +779,7 @@ void T_FIM::CalRes(Reservoir&      rs,
 			else {
 				// Ghost grid
 				for (USI i = 0; i < nc; i++) {
-					res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+					res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
                     uId_np_j = bcval.upblock[c * np + j] * np + j;
@@ -895,11 +895,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                                     bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (bk.hLoss.IfHeatLoss() && bk.bLocation[n] > 0) {
+            if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
                 const OCP_DBL lambda =
-                    bk.bLocation[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
+                    bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
                 const OCP_DBL kappa =
-                    bk.bLocation[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
+                    bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
                 // dT
                 bmat[ncol * ncol - 1] += dt * kappa *
                                          (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
@@ -914,11 +914,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             bmatR[ncol * ncol - 1] = bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (bk.hLoss.IfHeatLoss() && bk.bLocation[n] > 0) {
+            if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
                 const OCP_DBL lambda =
-                    bk.bLocation[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
+                    bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
                 const OCP_DBL kappa =
-                    bk.bLocation[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
+                    bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
                 // dT
                 bmatR[ncol * ncol - 1] += dt * kappa *
                                           (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
@@ -932,18 +932,17 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     // flux term
     OCP_USI  bId, eId;
     USI      cType;
-
-    vector<OCPFlux*>& flux = conn.flux;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId   = conn.iteratorConn[c].BId();
         eId   = conn.iteratorConn[c].EId();
         cType = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
-        flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
 
-        bmat = flux[cType]->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        bmat = Flux->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
             bmat.data());
 
         Dscalar(bsize, dt, bmat.data());
@@ -963,8 +962,8 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
         }
 #endif
 
-        bmat = flux[cType]->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+        bmat = Flux->GetdFdXpE();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
             bmat.data());
 
         Dscalar(bsize, dt, bmat.data());
@@ -1071,7 +1070,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
                 chopmin = 1;
                 // compute the chop
                 fill(dtmp.begin(), dtmp.end(), 0.0);
-                DaAxpby(np, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP], u.data() + n * col, 1,
+                DaAxpby(np, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1,
                     dtmp.data());
 
                 for (USI j = 0; j < np; j++) {

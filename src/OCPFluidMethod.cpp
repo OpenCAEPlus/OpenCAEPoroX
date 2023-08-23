@@ -20,11 +20,11 @@ void IsothermalMethod::CalRock(Bulk& bk) const
 {
     auto& bvs = bk.vs;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
-        auto rock = bk.ROCKm.GetROCK(n);
+        auto ROCK = bk.ROCKm.GetROCK(n);
 
-        rock->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], 0);
-        bvs.poro[n]   = rock->GetPoro();
-        bvs.poroP[n]  = rock->GetdPorodP();
+        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], 0);
+        bvs.poro[n]   = ROCK->GetPoro();
+        bvs.poroP[n]  = ROCK->GetdPorodP();
         bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
     }
 }
@@ -350,18 +350,18 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
     const USI   nc   = bvs.nc;
 
     // calculate a step flux using iteratorConn
-
-    vector<OCPFlux*>& flux  = conn.flux;
-    BulkConnVal&      bcval = conn.bcval;
+    BulkConnValSet&   bcvs = conn.bcval;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        const USI cType = conn.iteratorConn[c].Type();
-        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
-        copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
-        copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
-        copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
-        copy(flux[cType]->GetFluxNi().begin(), flux[cType]->GetFluxNi().end(), &bcval.flux_ni[c * nc]);
+        const auto cType = conn.iteratorConn[c].Type();
+        auto       Flux  = conn.flux[cType];
+
+        Flux->CalFlux(conn.iteratorConn[c], bk);
+        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.velocity[c * np]);
+        copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
     }
 }
 
@@ -460,12 +460,13 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
         bId   = conn.iteratorConn[c].BId();
         eId   = conn.iteratorConn[c].EId();
         cType = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
-        conn.flux[cType]->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.bcval, bk);
-        valbb  = dt * conn.flux[cType]->GetValbb();
-        valee  = dt * conn.flux[cType]->GetValee();
-        rhsb   = dt * conn.flux[cType]->GetRhsb();
-        rhse   = dt * conn.flux[cType]->GetRhse();
+        Flux->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.bcval, bk);
+        valbb  = dt * Flux->GetValbb();
+        valee  = dt * Flux->GetValee();
+        rhsb   = dt * Flux->GetRhsb();
+        rhse   = dt * Flux->GetRhse();
 
 
         if (eId < nb) {
@@ -922,10 +923,10 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.ldKrdS.resize(nb * np * np);
 
     // FIM-Specified
-    bvs.maxLendSdP = (nc + 1) * (nc + 1) * np;
-    bvs.dSec_dPri.resize(nb * bvs.maxLendSdP);
+    bvs.lendSdP = (nc + 1) * (nc + 1) * np;
+    bvs.dSec_dPri.resize(nb * bvs.lendSdP);
 
-    bvs.ldSec_dPri.resize(nb * bvs.maxLendSdP);
+    bvs.ldSec_dPri.resize(nb * bvs.lendSdP);
 
     // BulkConn
     BulkConn& conn = rs.conn;
@@ -1029,7 +1030,7 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
         bvs.vfi[n * nc + i] = PVT->GetVfi(i);
     }
 
-    copy(PVT->GetDXsDXp().begin(), PVT->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.maxLendSdP]);
+    copy(PVT->GetDXsDXp().begin(), PVT->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.lendSdP]);
 }
 
 void IsoT_FIM::CalKrPc(Bulk& bk) const
@@ -1074,30 +1075,30 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     }
 
     // Flux Term
-    BulkConn&              conn  = rs.conn;
-    BulkConnVal&           bcval = conn.bcval;
-    vector<OCPFlux*>&      flux  = conn.flux;
+    BulkConn&       conn  = rs.conn;
+    BulkConnValSet& bcval = conn.bcval;
     USI     cType;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId   = conn.iteratorConn[c].BId();
         eId   = conn.iteratorConn[c].EId();
         cType = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
-        flux[cType]->CalFlux(conn.iteratorConn[c], bk);
-        copy(flux[cType]->GetUpblock().begin(), flux[cType]->GetUpblock().end(), &bcval.upblock[c * np]);
-        copy(flux[cType]->GetRho().begin(), flux[cType]->GetRho().end(), &bcval.rho[c * np]);
-        copy(flux[cType]->GetFluxVj().begin(), flux[cType]->GetFluxVj().end(), &bcval.velocity[c * np]);
+        Flux->CalFlux(conn.iteratorConn[c], bk);
+        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcval.upblock[c * np]);
+        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcval.rho[c * np]);
+        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcval.velocity[c * np]);
                
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {               
-                res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
-                res.resAbs[eId * len + 1 + i] -= dt * flux[cType]->GetFluxNi()[i];
+                res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
+                res.resAbs[eId * len + 1 + i] -= dt * Flux->GetFluxNi()[i];
             }
         }
         else {
             for (USI i = 0; i < nc; i++) {
-                res.resAbs[bId * len + 1 + i] += dt * flux[cType]->GetFluxNi()[i];
+                res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
             }
         }
     }
@@ -1181,7 +1182,6 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
     }
 
     // flux term
-    vector<OCPFlux*>& flux = conn.flux;
     OCP_USI  bId, eId;
     USI      cType;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
@@ -1189,11 +1189,12 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         bId   = conn.iteratorConn[c].BId();
         eId   = conn.iteratorConn[c].EId();
         cType = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
-        flux[cType]->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
         
-        bmat = flux[cType]->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        bmat = Flux->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
         // Assemble
@@ -1213,8 +1214,8 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 #endif
 
         // End
-        bmat = flux[cType]->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+        bmat = Flux->GetdFdXpE();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
         
@@ -1338,7 +1339,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 			// compute the chop
 			fill(dtmp.begin(), dtmp.end(), 0.0);
 
-			DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP], u.data() + n * col, 1,
+			DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1,
 				dtmp.data());
 
 			for (USI j = 0; j < np; j++) {
@@ -2048,7 +2049,6 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
     }
 
     // flux term
-    vector<OCPFlux*>& flux = conn.flux;
     OCP_BOOL          bIdFIM, eIdFIM;
     OCP_USI           bId, eId;
     USI               cType;
@@ -2058,6 +2058,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         bId    = conn.iteratorConn[c].BId();
         eId    = conn.iteratorConn[c].EId();
         cType  = conn.iteratorConn[c].Type();
+        auto Flux = conn.flux[cType];
 
         if (bk.bulkTypeAIM.IfFIMbulk(bId))  bIdFIM = OCP_TRUE;
         else                                bIdFIM = OCP_FALSE;
@@ -2065,12 +2066,12 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         if (bk.bulkTypeAIM.IfFIMbulk(eId))  eIdFIM = OCP_TRUE;
         else                                eIdFIM = OCP_FALSE;
 
-        flux[cType]->AssembleMatAIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatAIM(conn.iteratorConn[c], c, conn.bcval, bk);
 
         // Assemble
-        bmat = flux[cType]->GetdFdXpB();
+        bmat = Flux->GetdFdXpB();
         if (bIdFIM) {
-            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2],
+            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2],
                     1, bmat.data());
         }
         Dscalar(bsize, dt, bmat.data());
@@ -2090,9 +2091,9 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 #endif
 
         // End
-        bmat = flux[cType]->GetdFdXpE();
+        bmat = Flux->GetdFdXpE();
         if (eIdFIM) {
-            DaABpbC(ncol, ncol, ncol2, 1, flux[cType]->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2],
+            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2],
                     1, bmat.data());
         }
         Dscalar(bsize, dt, bmat.data());
@@ -2204,7 +2205,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
             chopmin = 1;
             // compute the chop
             fill(dtmp.begin(), dtmp.end(), 0.0);
-            DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.maxLendSdP],
+            DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP],
                 u.data() + n * col, 1, dtmp.data());
 
             for (USI j = 0; j < np; j++) {

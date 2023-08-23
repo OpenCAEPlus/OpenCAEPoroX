@@ -247,20 +247,10 @@ void Bulk::SetupT(const Domain& domain)
 {
     SetupIsoT(domain);
     // Setup bLocation and btype
-    const OCP_USI* grid   = domain.allActive ? domain.grid.data() : domain.gridAllIndex.data();
-    const OCP_USI uplim   = domain.nx * domain.ny;
-    const OCP_USI downlim = domain.nx * domain.ny * (domain.nz - 1) - 1;
-    bLocation.resize(vs.nb, 0);
     bType.resize(vs.nb, 1);
     for (OCP_USI n = 0; n < vs.nb; n++) {
         if (vs.poroInit[n] < 1E-6) {
             bType[n] = 0;
-        }
-        if (grid[n] < uplim) {
-            bLocation[n] = 1;
-        }
-        else if (grid[n] > downlim) {
-            bLocation[n] = 2;
         }
     }
 
