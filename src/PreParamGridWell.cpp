@@ -671,7 +671,7 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 1;
+                        direction = 0;
                         areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
                         areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
                         gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
@@ -684,7 +684,7 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 2;
+                        direction = 1;
                         areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
                         areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
                         gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
@@ -697,7 +697,7 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 3;
+                        direction = 2;
                         areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
                         areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
                         gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));

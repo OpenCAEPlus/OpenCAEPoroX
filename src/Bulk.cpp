@@ -246,11 +246,10 @@ void Bulk::SetupIsoT(const Domain& domain)
 void Bulk::SetupT(const Domain& domain)
 {
     SetupIsoT(domain);
-    // Setup bLocation and btype
-    bType.resize(vs.nb, 1);
+    vs.cType.resize(vs.nb, BulkContent::rf);
     for (OCP_USI n = 0; n < vs.nb; n++) {
         if (vs.poroInit[n] < 1E-6) {
-            bType[n] = 0;
+            vs.cType[n] = BulkContent::r;
         }
     }
 

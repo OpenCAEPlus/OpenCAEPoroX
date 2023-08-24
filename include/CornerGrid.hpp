@@ -123,7 +123,7 @@ public:
     OCP_DBL Ad_dd;
     Point3D d;
     OCP_USI neigh;
-    USI     directionType; // 1 - x, 2 - y, 3 - z, 4 - extension
+    USI     directionType; // 0 - x, 1 - y, 2 - z, 3 - extension
 };
 
 /// ???

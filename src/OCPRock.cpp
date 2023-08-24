@@ -16,7 +16,7 @@
 // OCPRock_Linear
 ///////////////////////////////////////////////
 
-void OCPRockIsoT_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
+void OCPRockIsoT_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType)
 {
     const OCP_DBL dP = (P - Pref);
     poro             = poroInit * (1 + (cp1 + cp2 / 2 * dP) * dP);
@@ -39,9 +39,9 @@ inline void OCPRockT::CalRockHT(const OCP_DBL& T)
 // OCPRockT_Linear
 ///////////////////////////////////////////////
 
-void OCPRockT_Linear ::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
+void OCPRockT_Linear ::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType)
 {
-    if (bulkType > 0) {
+    if (bcType == BulkContent::rf) {
         // with fluid
         // calculate porosity
         const OCP_DBL dP = P - Pref;
@@ -70,9 +70,9 @@ void OCPRockT_Linear ::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL
 // OCPRockT_Exp
 ///////////////////////////////////////////////
 
-void OCPRockT_Exp::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType)
+void OCPRockT_Exp::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType)
 {
-    if (bulkType > 0) {
+    if (bcType == BulkContent::rf) {
         // with fluid
         const OCP_DBL dP = P - Pref;
         const OCP_DBL dT = T - Tref;

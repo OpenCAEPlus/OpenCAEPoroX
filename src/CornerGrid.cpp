@@ -931,6 +931,8 @@ void OCP_COORD::SetupCornerPoints()
     else
         flagForward = -1.0;
 
+    USI direction;
+
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
             for (USI i = 0; i < nx; i++) {
@@ -943,6 +945,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (x-) direction
                 //
+
+                direction = 0;
 
                 Face.p0 = block.p0;
                 Face.p1 = block.p4;
@@ -993,7 +997,7 @@ void OCP_COORD::SetupCornerPoints()
                                 areaV.x = OCP_SIGN(areaV.x) * areaP;
                             }
                         }
-                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                       flagForward);
                         num_conn++;
                     }
@@ -1050,7 +1054,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.x = OCP_SIGN(areaV.x) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1101,7 +1105,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.x = OCP_SIGN(areaV.x) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1117,6 +1121,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (x+) direction
                 //
+                direction = 0;
+
                 Face.p0 = block.p2;
                 Face.p1 = block.p6;
                 Face.p2 = block.p5;
@@ -1166,7 +1172,7 @@ void OCP_COORD::SetupCornerPoints()
                                 areaV.x = OCP_SIGN(areaV.x) * areaP;
                             }
                         }
-                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                       flagForward);
                         num_conn++;
                     }
@@ -1223,7 +1229,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.x = OCP_SIGN(areaV.x) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1276,7 +1282,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.x = OCP_SIGN(areaV.x) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 1,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1292,6 +1298,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (y-) direction
                 //
+                direction = 1;
+
                 Face.p0 = block.p1;
                 Face.p1 = block.p5;
                 Face.p2 = block.p4;
@@ -1341,7 +1349,7 @@ void OCP_COORD::SetupCornerPoints()
                                 areaV.y = OCP_SIGN(areaV.y) * areaP;
                             }
                         }
-                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                       flagForward);
                         num_conn++;
                     }
@@ -1397,7 +1405,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.y = OCP_SIGN(areaV.y) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1449,7 +1457,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.y = OCP_SIGN(areaV.y) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1465,6 +1473,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (y+) direction
                 //
+                direction = 1;
+
                 Face.p0 = block.p3;
                 Face.p1 = block.p7;
                 Face.p2 = block.p6;
@@ -1514,7 +1524,7 @@ void OCP_COORD::SetupCornerPoints()
                                 areaV.y = OCP_SIGN(areaV.y) * areaP;
                             }
                         }
-                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                        blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                       flagForward);
                         num_conn++;
                     }
@@ -1571,7 +1581,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.y = OCP_SIGN(areaV.y) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1624,7 +1634,7 @@ void OCP_COORD::SetupCornerPoints()
                                     areaV.y = OCP_SIGN(areaV.y) * areaP;
                                 }
                             }
-                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 2,
+                            blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction,
                                                           flagForward);
                             num_conn++;
                         }
@@ -1640,6 +1650,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (z-) direction
                 //
+                direction = 2;
+
                 Face.p0 = block.p0;
                 Face.p1 = block.p3;
                 Face.p2 = block.p2;
@@ -1655,7 +1667,7 @@ void OCP_COORD::SetupCornerPoints()
 
                     tmpFace = Face;
                     areaV   = VectorFace(tmpFace);
-                    blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 3, flagForward);
+                    blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction, flagForward);
                     num_conn++;
                 }
 
@@ -1678,7 +1690,7 @@ void OCP_COORD::SetupCornerPoints()
 
                     tmpFace = Face;
                     areaV   = VectorFace(tmpFace);
-                    blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, 3, flagForward);
+                    blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction, flagForward);
                     num_conn++;
                 }
 

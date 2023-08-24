@@ -17,6 +17,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
+#include "BulkVarSet.hpp"
 
 
 class OCPRock
@@ -25,7 +26,7 @@ public:
     OCPRock() = default;
 
     // Calculate porosity and d porosity / d P for isothermal model
-    virtual void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) = 0;
+    virtual void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType) = 0;
 
     OCP_DBL GetPoro() const { return poro; }
     OCP_DBL GetdPorodP() const { return dPorodP; }
@@ -74,7 +75,7 @@ class OCPRockIsoT_Linear : public OCPRockIsoT
 public:
     OCPRockIsoT_Linear() = default;
     OCPRockIsoT_Linear(const RockParam& param) { Assign(param); };
-    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType) override;
 
 };
 
@@ -114,7 +115,7 @@ class OCPRockT_Linear : public OCPRockT
 public:
     OCPRockT_Linear() = default;
     OCPRockT_Linear(const RockParam& param) { Assign(param); };
-    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType) override;
 };
 
 class OCPRockT_Exp : public OCPRockT
@@ -124,7 +125,7 @@ class OCPRockT_Exp : public OCPRockT
 public:
     OCPRockT_Exp() = default;
     OCPRockT_Exp(const RockParam& param) { Assign(param); };
-    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const USI& bulkType) override;
+    void CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& poroInit, const BulkContent& bcType) override;
 };
 
 #endif /* end if __ROCK_HEADER__ */

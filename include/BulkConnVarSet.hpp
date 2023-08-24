@@ -22,6 +22,17 @@
 using namespace std;
 
 
+enum class BulkConnDirect
+{
+    /// x-direction
+    x,
+    /// y-direction
+    y,
+    /// z-direction
+    z
+};
+
+
 /// Connection between two bulks (bId, eId); usually, indices bId > eId.
 //  Note: Bulks are the active grid cells.
 class BulkConnPair
@@ -36,7 +47,7 @@ public:
     /// Setup BulkPair with bId and eId.
     BulkConnPair(const OCP_USI& BId,
         const OCP_USI& EId,
-        const USI& direct,
+        const BulkConnDirect& direct,
         const OCP_DBL& AreaB,
         const OCP_DBL& AreaE)
         : bId(BId)
@@ -45,29 +56,29 @@ public:
         , areaB(AreaB)
         , areaE(AreaE) {};
 
-    OCP_USI BId() const { return bId; }
-    OCP_USI EId() const { return eId; } 
-    OCP_DBL Area() const { return area; }
-    USI Type() const { return type; }
-    OCP_DBL AreaB() const { return areaB; }
-    OCP_DBL AreaE() const { return areaE; }
-    USI     Direction() const { return direction; }
+    const auto& BId() const { return bId; }
+    const auto& EId() const { return eId; } 
+    const auto& Area() const { return area; }
+    const auto& FluxNum() const { return fluxnum; }
+    const auto& AreaB() const { return areaB; }
+    const auto& AreaE() const { return areaE; }
+    const auto& Direction() const { return direction; }
 
 protected:
     /// first index of a pair
-    OCP_USI bId; 
+    OCP_USI        bId; 
     /// second index of a pair.
-    OCP_USI eId;
+    OCP_USI        eId;
     /// Effective area
-    OCP_DBL area;
+    OCP_DBL        area;
     /// Connection type
-    USI     type; 
+    USI            fluxnum{ 0 };
     /// Connection direction
-    USI     direction; 
+    BulkConnDirect direction;
     /// Area of intersecting face from first bulk
-    OCP_DBL areaB;
+    OCP_DBL        areaB;
     /// Area of intersecting face from second bulk
-    OCP_DBL areaE;       
+    OCP_DBL        areaE;       
 };
 
 

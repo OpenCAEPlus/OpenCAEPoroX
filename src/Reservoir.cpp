@@ -209,7 +209,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             OCP_USI conn_size = 0;
             for (OCP_USI n = 0; n < numGridInterior_proc[p]; n++) {
                 for (const auto& gn : grid.gNeighbor[gridIndex[n]]) {
-                    conn_ptr[conn_size++] = gn.direction;
+                    conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.direction);
                     conn_ptr[conn_size++] = gn.areaB;
                     conn_ptr[conn_size++] = gn.areaE;
                 }
@@ -287,7 +287,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
                 eId = init2local.at(gn.id);
                 if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, gn.direction, gn.areaB, gn.areaE));
+                    dst->push_back(BulkConnPair(bId, eId, static_cast<BulkConnDirect>(gn.direction), gn.areaB, gn.areaE));
             }
         }
         conn.numConn = conn.iteratorConn.size();
@@ -305,7 +305,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             //    cout << domain.grid[n] << "  " << bulk.poroInit[n] - 1 << endl;
             //}
             for (const auto& c : conn.iteratorConn) {
-                cout << domain.grid[c.BId()] << "   " << domain.grid[c.EId()] << "   " << c.Direction() << "   "
+                cout << domain.grid[c.BId()] << "   " << domain.grid[c.EId()] << "   " << static_cast<USI>(c.Direction()) << "   "
                     << c.AreaB() << "   " << c.AreaE() << endl;
             }
             cout << conn.numConn << endl;
@@ -417,7 +417,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
                                 // well is exculude
                                 eId = iter->second;
                                 if (eId > bId) {
-                                    dst->push_back(BulkConnPair(bId, eId, conn_ptr[0], conn_ptr[1], conn_ptr[2]));
+                                    dst->push_back(BulkConnPair(bId, eId, static_cast<BulkConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2]));
                                 }
                             }
                             conn_ptr += 3;

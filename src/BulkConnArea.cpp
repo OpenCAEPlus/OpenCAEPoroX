@@ -24,20 +24,20 @@ void BulkConnAreaMethod01::CalArea(BulkConnPair& bp, const Bulk& bk)
 
     switch (bp.direction) 
     {
-    case 1:
+    case BulkConnDirect::x:
         T1 = bcv.ntg[bId] * bcv.rockKx[bId] * areaB;
         T2 = bcv.ntg[eId] * bcv.rockKx[eId] * areaE;
         break;
-    case 2:
+    case BulkConnDirect::y:
         T1 = bcv.ntg[bId] * bcv.rockKy[bId] * areaB;
         T2 = bcv.ntg[eId] * bcv.rockKy[eId] * areaE;
         break;
-    case 3:
+    case BulkConnDirect::z:
         T1 = bcv.rockKz[bId] * areaB;
         T2 = bcv.rockKz[eId] * areaE;
         break;
     default:
-        OCP_ABORT("Wrong Direction!");
+        OCP_ABORT("Wrong BulkConnType!");
     }
     bp.area = 1 / (1 / T1 + 1 / T2);
 }

@@ -71,7 +71,7 @@ public:
 
     OCP_USI id;        ///< Id of a neighboring cell
     OCP_INT wgt;       ///< weight of edge
-    USI     direction; ///< direction: 1-x, 2-y, 3-z
+    USI     direction; ///< direction: 0-x, 1-y, 2-z
     OCP_DBL
         areaB; ///< Effective intersection area between this cell and the neighbor, self
     OCP_DBL areaE; ///< Effective intersection area between this cell and the neighbor,

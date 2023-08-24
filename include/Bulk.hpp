@@ -82,7 +82,7 @@ public:
     OCP_DBL  ubC;                ///< Volumetric heat capacity of underburden rock
     OCP_DBL  ubK;                ///< Thermal conductivity of underburden rock
 
-    OCP_USI         nb; ///< Num of Bulk
+    OCP_USI         nb;      ///< Num of Bulk
     OCP_DBL         obD;     ///< Thermal diffusivity of overburden rock
     OCP_DBL         ubD;     ///< Thermal diffusivity of underburden rock
     vector<OCP_DBL> I;       ///< Auxiliary variable
@@ -213,8 +213,6 @@ public:
     void OutMixtureIters() const { PVTm.GetPVT(0)->OutMixtureIters(); }
 
 protected:
-
-    vector<USI> bType;     ///< Indicate bulk type, 0: rock;  1: rock and fluid
     HeatLoss    hLoss;     ///< Heat loss iterm
 
 

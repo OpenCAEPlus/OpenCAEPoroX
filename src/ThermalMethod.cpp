@@ -332,7 +332,7 @@ void T_FIM::InitRock(Bulk& bk) const
 {
     BulkVarSet& bvs = bk.vs;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
-        if (bk.bType[n] == 0) {
+        if (bvs.cType[n] == BulkContent::r) {
             // non fluid bulk
             bvs.poroInit[n] = 0;
             bvs.poro[n]     = 0;
@@ -344,14 +344,14 @@ void T_FIM::InitRock(Bulk& bk) const
 
 void T_FIM::CalRock(Bulk& bk) const
 {
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
+    BulkVarSet&   bvs = bk.vs;
+    const OCP_USI nb  = bvs.nb;
 
     for (OCP_USI n = 0; n < nb; n++) {
         auto ROCK = bk.ROCKm.GetROCK(n);
 
-        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bk.bType[n]);
-        if (bk.bType[n] > 0) {
+        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], bvs.cType[n]);
+        if (bvs.cType[n] == BulkContent::rf) {
             // with fluid           
             bvs.poro[n]   = ROCK->GetPoro();
             bvs.poroP[n]  = ROCK->GetdPorodP();
@@ -374,7 +374,7 @@ void T_FIM::InitFlash(Bulk& bk)
     const USI&     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             auto PVT = bk.PVTm.GetPVT(n);
 
             PVT->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * np],
@@ -395,7 +395,7 @@ void T_FIM::CalFlash(Bulk& bk)
     const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], &bvs.S[n * np], 
                                         bvs.phaseNum[n], &bvs.xij[n * np * nc], n);
             PassFlashValue(bk, n);
@@ -469,7 +469,7 @@ void T_FIM::CalKrPc(Bulk& bk) const
     const USI& np = bvs.np;
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             auto SAT = bk.SATm.GetSAT(n);
 
             OCP_USI bId = n * np;
@@ -490,7 +490,7 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
     const OCP_USI np = bvs.np;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             // fluid bulk
             OCP_DBL tmp = 0;
             for (USI j = 0; j < np; j++) {
@@ -675,7 +675,7 @@ void T_FIM::CalRes(Reservoir&      rs,
     OCP_USI bId, eId, bIdb;
     // Accumalation Term
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             // Fluid bulk
             bId  = n * len;
             bIdb = n * nc;
@@ -708,13 +708,13 @@ void T_FIM::CalRes(Reservoir&      rs,
 
     BulkConn&         conn = rs.conn;
     BulkConnVarSet&   bcvs = conn.vs;
-    USI     cType;
+    USI     fluxnum;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId   = conn.iteratorConn[c].BId();
-        eId   = conn.iteratorConn[c].EId();
-        cType = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
 
@@ -726,8 +726,8 @@ void T_FIM::CalRes(Reservoir&      rs,
             res.resAbs[eId * len + 1 + nc] -= conH * dt;
         }
 
-        if (cType == 0) {
-            // with flow
+        if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
+            // with fluid flow
             copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
             copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
             copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
@@ -773,7 +773,7 @@ void T_FIM::CalRes(Reservoir&      rs,
             res.maxId_E     = n;
         }
 
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             // Fluid Bulk
             for (USI i = 0; i < len - 1; i++) {
                 tmp = fabs(res.resAbs[n * len + i] / bvs.rockVp[n]);
@@ -836,7 +836,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     vector<OCP_DBL> bmatR(bmat);
     bmatR[0] = 1;
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bType[n] > 0) {
+        if (bvs.cType[n] == BulkContent::rf) {
             // Fluid Bulk
             // Volume consevation
             // dP
@@ -897,13 +897,13 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     // flux term
     OCP_USI  bId, eId;
-    USI      cType;
+    USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        bId   = conn.iteratorConn[c].BId();
-        eId   = conn.iteratorConn[c].EId();
-        cType = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
@@ -1030,7 +1030,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
         for (OCP_USI n = bId; n < eId; n++) {
             // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
 
-            if (bk.bType[n] > 0) {
+            if (bvs.cType[n] == BulkContent::rf) {
                 // Fluid Bulk
 
                 chopmin = 1;

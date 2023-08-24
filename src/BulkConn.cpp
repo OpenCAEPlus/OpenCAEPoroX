@@ -32,7 +32,6 @@ void BulkConn::Setup(const Bulk& bk)
     
     for (auto& iter : iteratorConn) {
         flux[0]->CalBulkConnArea(iter, bk);
-        iter.type = 0;
     }
 }
 

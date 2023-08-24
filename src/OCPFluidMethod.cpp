@@ -22,7 +22,7 @@ void IsothermalMethod::CalRock(Bulk& bk) const
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         auto ROCK = bk.ROCKm.GetROCK(n);
 
-        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], 0);
+        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], BulkContent::rf);
         bvs.poro[n]   = ROCK->GetPoro();
         bvs.poroP[n]  = ROCK->GetdPorodP();
         bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
@@ -352,8 +352,8 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        const auto cType = conn.iteratorConn[c].Type();
-        auto       Flux  = conn.flux[cType];
+        const auto fluxnum = conn.iteratorConn[c].FluxNum();
+        auto       Flux    = conn.flux[fluxnum];
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
@@ -450,15 +450,15 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
 
     // flux term
     OCP_USI bId, eId;
-    USI     cType;
+    USI     fluxnum;
     OCP_DBL valbb, rhsb, valee, rhse;
 
     // Be careful when first bulk has no neighbors!
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId   = conn.iteratorConn[c].BId();
-        eId   = conn.iteratorConn[c].EId();
-        cType = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         Flux->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.vs, bk);
         valbb  = dt * Flux->GetValbb();
@@ -1068,13 +1068,13 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     // Flux Term
     BulkConn&       conn  = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
-    USI     cType;
+    USI     fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        bId   = conn.iteratorConn[c].BId();
-        eId   = conn.iteratorConn[c].EId();
-        cType = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
@@ -1174,13 +1174,13 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     // flux term
     OCP_USI  bId, eId;
-    USI      cType;
+    USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        bId   = conn.iteratorConn[c].BId();
-        eId   = conn.iteratorConn[c].EId();
-        cType = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
@@ -2042,14 +2042,14 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
     // flux term
     OCP_BOOL          bIdFIM, eIdFIM;
     OCP_USI           bId, eId;
-    USI               cType;
+    USI               fluxnum;
     
    
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        bId    = conn.iteratorConn[c].BId();
-        eId    = conn.iteratorConn[c].EId();
-        cType  = conn.iteratorConn[c].Type();
-        auto Flux = conn.flux[cType];
+        bId       = conn.iteratorConn[c].BId();
+        eId       = conn.iteratorConn[c].EId();
+        fluxnum   = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
 
         if (bk.bulkTypeAIM.IfFIMbulk(bId))  bIdFIM = OCP_TRUE;
         else                                bIdFIM = OCP_FALSE;

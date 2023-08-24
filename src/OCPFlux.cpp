@@ -510,7 +510,7 @@ void OCPFlux_T::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 
     conduct_H         = (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
 
-    if (bp.Type() == 0) {
+    if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
         OCP_USI       bId_np_j, eId_np_j, uId_np_j;
         OCP_BOOL      exbegin, exend;
         OCP_DBL       dP;
@@ -604,7 +604,7 @@ void OCPFlux_T::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
         dFdXsE[(nc + 1) * ncol2 + j] += tmpE * bvs.ktS[eId * np + j] * dT;
     }
 
-    if (bp.Type() == 0) {
+    if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
         // Fluid Bulk Connection
         const OCP_DBL Akd = CONV1 * CONV2 * bp.Area();
         const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
