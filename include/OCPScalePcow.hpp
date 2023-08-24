@@ -63,6 +63,8 @@ protected:
     OCP_DBL        maxPcow;
     /// minimum capillary pressure: Po - Pw
     OCP_DBL        minPcow;
+
+    // Dependent modules
     /// flow model
     OCPFlow*       flow;
 };

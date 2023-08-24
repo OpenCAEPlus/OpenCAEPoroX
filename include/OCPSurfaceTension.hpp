@@ -21,6 +21,18 @@
 using namespace std;
 
 
+class SurTenVarSet
+{
+public:
+    void SetNb(const OCP_USI& nbin) { nb = nbin; }
+public:
+    /// num of bulks
+    OCP_USI         nb;
+    /// Surface Tension
+    vector<OCP_DBL> surTen;
+};
+
+
 /// Method uesd to calculate surface tension
 class SurTenMethod
 {
@@ -28,7 +40,7 @@ public:
     /// Default constructor
     SurTenMethod() = default;
     /// Calculate surface tensions
-    virtual OCP_DBL CalSurfaceTension() const = 0;
+    virtual void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs) const = 0;
 };
 
 
@@ -38,18 +50,22 @@ class SurTenMethod01 : public SurTenMethod
 {
 public:
     /// Default constructor
-    SurTenMethod01(const vector<OCP_DBL>& parachorin, OCPMixtureComp* mix) {
+    SurTenMethod01(const vector<OCP_DBL>& parachorin, OCPMixtureComp* mix, SurTenVarSet& stvs) {
         parachor = parachorin;
         NC       = parachor.size();
         mixture  = mix;
+
+        stvs.surTen.resize(stvs.nb);
     }
-    OCP_DBL CalSurfaceTension() const;
+    void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs) const;
 
 protected:
     /// used to calculate oil-gas surface tension by Macleod-Sugden correlation
     vector<OCP_DBL> parachor; 
     /// num of components
     USI             NC;
+
+    // Dependent modules
     /// mixture model
     OCPMixtureComp* mixture;
 };
@@ -65,13 +81,14 @@ public:
     /// Calculate surface tension with specified method
     void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex) {
         if (ifUse) {
-            surTen[bId] = stMethod[mIndex]->CalSurfaceTension();
+            stMethod[mIndex]->CalSurfaceTension(bId, vs);
         }        
     }
+    const auto& GetVS()const { return vs; }
     const auto IfUse() const { return ifUse; }
     const auto GetSurfaceTension(const OCP_USI& bId) const {
         OCP_ASSERT(ifUse, "Surface Tension is not available!");
-        return surTen[bId];
+        return vs.surTen[bId];
     }
     void ResetTolastTimeStep() { }
     void UpdateLastTimeStep()  { }
@@ -79,10 +96,10 @@ public:
 protected:
     /// If calculate surface tension
     OCP_BOOL              ifUse{ OCP_FALSE };
+    /// surface tension variable set
+    SurTenVarSet          vs;
     /// surface tension calculation methods
     vector<SurTenMethod*> stMethod;
-    /// surface tension
-    vector<OCP_DBL>       surTen;
 };
 
 

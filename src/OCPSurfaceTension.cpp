@@ -17,10 +17,10 @@
  /////////////////////////////////////////////////////////////////////
 
 
-OCP_DBL SurTenMethod01::CalSurfaceTension() const
+void SurTenMethod01::CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs) const
 {
     if (mixture->GetNPPE() == 1)
-        return OCP_HUGE;
+        stvs.surTen[bId] = OCP_HUGE;
     else {
         const OCPMixtureVarSet& vs = mixture->GetVarSet();
         const OCP_DBL           Bl = vs.xi[0] * CONV7;
@@ -30,7 +30,7 @@ OCP_DBL SurTenMethod01::CalSurfaceTension() const
         OCP_DBL surTen = 0;
         for (USI i = 0; i < NC; i++)
             surTen += parachor[i] * (Bv * xv[i] - Bl * xl[i]);
-        return pow(surTen, 4.0);
+        stvs.surTen[bId] = pow(surTen, 4.0);
     }
 }
 
@@ -41,13 +41,11 @@ OCP_DBL SurTenMethod01::CalSurfaceTension() const
 
 USI SurfaceTension::Setup(const ParamReservoir& rs_param, const USI& i, const OCP_USI& nb, OCPMixtureComp* mix)
 {
-    if (rs_param.comsParam.parachor.data.size() > 0) {
-        stMethod.push_back(new SurTenMethod01(rs_param.comsParam.parachor.data[i], mix));
-        ifUse = OCP_TRUE;
-    }
 
-    if (ifUse) {
-        surTen.resize(nb);
+    if (rs_param.comsParam.parachor.data.size() > 0) {
+        ifUse = OCP_TRUE;
+        vs.SetNb(nb);
+        stMethod.push_back(new SurTenMethod01(rs_param.comsParam.parachor.data[i], mix, vs));      
     }
 
     return stMethod.size() - 1;
