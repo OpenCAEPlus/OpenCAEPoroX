@@ -15,6 +15,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
+#include <vector>
 
 using namespace std;
 

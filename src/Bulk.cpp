@@ -38,11 +38,11 @@ void HeatLoss::Setup(const OCP_USI& numBulk)
         ubD     = ubK / ubC;
         nb = numBulk;
         I.resize(nb);
-        p.resize(nb);
-        pT.resize(nb);
         lI.resize(nb);
-        lp.resize(nb);
-        lpT.resize(nb);
+        hl.resize(nb);
+        hlT.resize(nb);
+        lhl.resize(nb);
+        lhlT.resize(nb);
     }
 }
 
@@ -54,24 +54,28 @@ void HeatLoss::CalHeatLoss(const vector<USI>&     location,
                            const OCP_DBL&         dt)
 {
     if (ifHLoss) {
-        OCP_DBL lambda, d, dT, theta;
-        OCP_DBL tmp, q;
+        OCP_DBL lambda, kappa, d, dT, theta;
+        OCP_DBL tmp, p, q, pT;
         for (OCP_USI n = 0; n < nb; n++) {
             if (location[n] > 0) {
                 // overburden or underburden
                 lambda = location[n] == 1 ? obD : ubD;
+                kappa  = location[n] == 1 ? obK : ubK;
 
                 dT    = T[n] - lT[n];
                 theta = T[n] - initT[n];
                 d     = sqrt(lambda * t) / 2;
                 tmp   = 3 * pow(d, 2) + lambda * dt;
-                p[n]  = (theta * (lambda * dt / d) + lI[n] -
+                p     = (theta * (lambda * dt / d) + lI[n] -
                         dT * (pow(d, 3) / (lambda * dt))) /
                        tmp;
-                pT[n] = (lambda * dt / d - pow(d, 3) / (lambda * dt)) / tmp;
-                q     = (2 * p[n] * d - theta + pow(d, 2) * dT / (lambda * dt)) /
+                pT    = (lambda * dt / d - pow(d, 3) / (lambda * dt)) / tmp;
+                q     = (2 * p * d - theta + pow(d, 2) * dT / (lambda * dt)) /
                     (2 * pow(d, 2));
-                I[n] = theta * d + p[n] * pow(d, 2) + 2 * q * pow(d, 3);
+                I[n] = theta * d + p * pow(d, 2) + 2 * q * pow(d, 3);
+
+                hl[n]  = kappa * (2 * (T[n] - initT[n]) / sqrt(lambda * t) - p);
+                hlT[n] = kappa * (2 / sqrt(lambda * t) - pT);
             }
         }
     }
@@ -80,15 +84,15 @@ void HeatLoss::CalHeatLoss(const vector<USI>&     location,
 void HeatLoss::ResetToLastTimeStep()
 {
     I  = lI;
-    p  = lp;
-    pT = lpT;
+    hl = lhl;
+    hlT = lhlT;
 }
 
 void HeatLoss::UpdateLastTimeStep()
 {
     lI  = I;
-    lp  = p;
-    lpT = pT;
+    lhl = hl;
+    lhlT = hlT;
 }
 
 /////////////////////////////////////////////////////////////////////

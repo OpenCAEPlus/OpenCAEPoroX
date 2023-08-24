@@ -696,13 +696,8 @@ void T_FIM::CalRes(Reservoir&      rs,
 
         // Heat Loss
         if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
-            const OCP_DBL lambda = bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
-            const OCP_DBL kappa  = bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
             // dT
-            res.resAbs[n * len + nc + 1] +=
-                dt * kappa *
-                (2 * (bvs.T[n] - bk.initT[n]) / sqrt(lambda * t) - bk.hLoss.p[n]) *
-                bvs.dx[n] * bvs.dy[n];
+            res.resAbs[n * len + nc + 1] += dt * bk.hLoss.hl[n] * bvs.dx[n] * bvs.dy[n];
         }
     }
 
@@ -862,14 +857,8 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
             // Heat Loss iterm
             if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
-                const OCP_DBL lambda =
-                    bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
-                const OCP_DBL kappa =
-                    bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
                 // dT
-                bmat[ncol * ncol - 1] += dt * kappa *
-                                         (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
-                                         bvs.dx[n] * bvs.dy[n];
+                bmat[ncol * ncol - 1] += dt * bk.hLoss.hlT[n] * bvs.dx[n] * bvs.dy[n];
             }
 
             ls.NewDiag(n, bmat);
@@ -881,14 +870,8 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
             // Heat Loss iterm
             if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
-                const OCP_DBL lambda =
-                    bk.vs.location[n] == 1 ? bk.hLoss.obD : bk.hLoss.ubD;
-                const OCP_DBL kappa =
-                    bk.vs.location[n] == 1 ? bk.hLoss.obK : bk.hLoss.ubK;
                 // dT
-                bmatR[ncol * ncol - 1] += dt * kappa *
-                                          (2 / sqrt(lambda * t) - bk.hLoss.pT[n]) *
-                                          bvs.dx[n] * bvs.dy[n];
+                bmatR[ncol * ncol - 1] += dt * bk.hLoss.hlT[n] * bvs.dx[n] * bvs.dy[n];
             }
 
             ls.NewDiag(n, bmatR);

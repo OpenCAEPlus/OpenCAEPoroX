@@ -15,6 +15,7 @@
 #include "AcceleratePEC.hpp"
 #include "OCPMiscible.hpp"
 #include "OCPScalePcow.hpp"
+#include "HeatLoss.hpp"
 
 class OptionalFeatures
 {
@@ -71,6 +72,13 @@ protected:
     MiscibleCurve  misCur;
     /// Scale water-oil capillary pressure
     ScalePcow      scalePcow;
+
+
+    /////////////////////////////////////////////////////////////////////
+    // Boundary Condition
+    /////////////////////////////////////////////////////////////////////
+    // HeatLoss       heatLoss;
+
 };
 
 #endif /* end if __OptionalFeatures_HEADER__ */

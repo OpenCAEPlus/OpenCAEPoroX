@@ -29,7 +29,6 @@ public:
     SurTenMethod() = default;
     /// Calculate surface tensions
     virtual OCP_DBL CalSurfaceTension() const = 0;
-
 };
 
 

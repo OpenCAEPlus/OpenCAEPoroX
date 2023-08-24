@@ -86,12 +86,15 @@ public:
     OCP_DBL         obD;     ///< Thermal diffusivity of overburden rock
     OCP_DBL         ubD;     ///< Thermal diffusivity of underburden rock
     vector<OCP_DBL> I;       ///< Auxiliary variable
-    vector<OCP_DBL> p;       ///< Auxiliary variable
-    vector<OCP_DBL> pT;      ///< dP / dT
-
+    /// heat loss
+    vector<OCP_DBL> hl;
+    /// dhl / dT
+    vector<OCP_DBL> hlT;   
     vector<OCP_DBL> lI;      ///< Auxiliary variable
-    vector<OCP_DBL> lp;      ///< Auxiliary variable
-    vector<OCP_DBL> lpT;     ///< last pT
+    /// last hl
+    vector<OCP_DBL> lhl;
+    /// last hlT
+    vector<OCP_DBL> lhlT;
 };
 
 class BulkTypeAIM
