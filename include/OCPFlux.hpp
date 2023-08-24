@@ -17,94 +17,25 @@
 
 // OpenCAEPoroX header files
 #include "Bulk.hpp"
+#include "BulkConnVarSet.hpp"
+#include "BulkConnArea.hpp"
 
 using namespace std;
 
 
-/// Connection between two bulks (bId, eId); usually, indices bId > eId.
-//  Note: Bulks are the active grid cells.
-class BulkPair
-{
-    friend class BulkConn;
-
-public:
-    /// Default constructor.
-    BulkPair() = default;
-
-    /// Setup BulkPair with bId and eId.
-    BulkPair(const OCP_USI& BId,
-        const OCP_USI& EId,
-        const USI& direct,
-        const OCP_DBL& AreaB,
-        const OCP_DBL& AreaE)
-        : bId(BId)
-        , eId(EId)
-        , direction(direct)
-        , areaB(AreaB)
-        , areaE(AreaE) {};
-
-    OCP_USI BId() const { return bId; }   ///< Return beginning index.
-    OCP_USI EId() const { return eId; }   ///< Return ending index.
-    OCP_DBL Area() const { return area; } ///< Return effective area
-    USI Type() const { return type; }     ///< Get connection type
-    OCP_DBL AreaB() const { return areaB; }
-    OCP_DBL AreaE() const { return areaE; }
-    USI     Direction() const { return direction; }
-
-protected:
-    OCP_USI bId;       ///< Beginning index of a pair.
-    OCP_USI eId;       ///< Ending index of a pair.
-    OCP_DBL area;      ///< Effective area
-    USI     type;      ///< connection type
-    USI     direction; ///< 1-x, 2-y, 3-z
-    OCP_DBL areaB;     ///< Area of intersecting faces from Begin grid
-    OCP_DBL areaE;     ///< Area of intersecting faces from End grid   
-};
-
-
-class BulkConnValSet
-{
-    friend class Reservoir;
-    friend class OCPFlux_IsoT;
-    friend class OCPFlux_T;
-    friend class IsoT_FIM;
-    friend class IsoT_IMPEC;
-    friend class IsoT_AIM;
-    friend class T_FIM;
-
-protected:
-
-    //  Note: Upblock is identified by difference of pressure between phases.
-    vector<OCP_USI> upblock;  ///< Index of upwinding bulk of connections : numConn * numPhase.
-    vector<OCP_DBL> rho;      ///< Mass density of phase from upblock: numConn * numPhase.
-    vector<OCP_DBL> velocity; ///< Volume flow rate of phase from upblock: numConn * numsPhase.
-    vector<OCP_DBL> flux_ni;  ///< mole velocity of components 
-
-    // Last time step
-    vector<OCP_USI> lupblock;  ///< last upblock
-    vector<OCP_DBL> lrho;      ///< last upblock_Rho
-};
-
-
 class OCPFlux
 {
-    friend class IsoT_FIM;
 
 public:
     OCPFlux() = default;
-    void Allocate(const USI& npin, const USI& ncin) {
-        np = npin;
-        nc = ncin;
-        upblock.resize(np, 0.0);
-        rho.resize(np, 0.0);
-        flux_vj.resize(np, 0.0);
-        flux_ni.resize(nc, 0.0);
-    }
-    // Calculate flux of components and phases
-    virtual void CalFlux(const BulkPair& bp, const Bulk& bk) = 0;
-    virtual void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
-    virtual void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
-    virtual void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) = 0;
+    /// Calculate flux of components and phases
+    virtual void CalFlux(const BulkConnPair& bp, const Bulk& bk) = 0;
+    /// Assemble matrix for FIM
+    virtual void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
+    /// Assemble matrix for AIM
+    virtual void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
+    /// Assemble matrix for IMPEC
+    virtual void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
 
     
     const vector<OCP_USI>& GetUpblock() const { return upblock; }
@@ -124,30 +55,64 @@ public:
     OCP_DBL GetRhse() const { return  rhse; }
 
 protected:
+    void Setup(const USI& npin, const USI& ncin) {
+        Allocate(npin, ncin);
+        bca.Setup();
+    }
+    void Allocate(const USI& npin, const USI& ncin) {
+        np = npin;
+        nc = ncin;
+        upblock.resize(np, 0.0);
+        rho.resize(np, 0.0);
+        flux_vj.resize(np, 0.0);
+        flux_ni.resize(nc, 0.0);
+    }
 
-    // Common variables 
-    USI              np; ///< num of phase
-    USI              nc;   ///< num of components
-    vector<OCP_USI>  upblock;  ///< upblock of connections
-    vector<OCP_DBL>  rho;      ///< weighted density of phase between bulks
-    vector<OCP_DBL>  flux_vj;  ///< volume velocity of phase from upblock
-    vector<OCP_DBL>  flux_ni;  ///< mole velocity of components
-    vector<OCP_DBL>  flux_Hj;  ///< enthalpy velocity of phase from upblock
+protected:
 
-    // for thermal
-    OCP_DBL          conduct_H;     ///< efficient thermal conduction coefficient
+    /// number of phase
+    USI              np;
+    /// number of components
+    USI              nc;
+    /// Index of upwinding bulk of connections for each phase
+    vector<OCP_USI>  upblock;
+    /// Mass density of phase for connections
+    vector<OCP_DBL>  rho;
+    /// Volume flow rate of phase from upblock
+    vector<OCP_DBL>  flux_vj;
+    /// mole flow rate of components 
+    vector<OCP_DBL>  flux_ni;
+    /// enthalpy flow rate of phase from upblock
+    vector<OCP_DBL>  flux_Hj;  
+
+    // thermal conduction term
+    OCP_DBL          conduct_H;
 
     // for FIM
-    vector<OCP_DBL>  dFdXpB;   ///< dF / dXp for bId bulk
-    vector<OCP_DBL>  dFdXpE;   ///< dF / dXp for eId bulk
-    vector<OCP_DBL>  dFdXsB;   ///< dF / dXs for bId bulk
-    vector<OCP_DBL>  dFdXsE;   ///< dF / dXs for eId bulk
+    /// dF / dXp for bId bulk
+    vector<OCP_DBL>  dFdXpB;
+    /// dF / dXp for eId bulk
+    vector<OCP_DBL>  dFdXpE;
+    /// dF / dXs for bId bulk
+    vector<OCP_DBL>  dFdXsB;
+    /// dF / dXs for eId bulk
+    vector<OCP_DBL>  dFdXsE;   
 
     // for IMPEC
-    OCP_DBL          valbb;    ///< val in b-b, -val in b-e
-    OCP_DBL          valee;    ///< val in e-e, -val in e-b
-    OCP_DBL          rhsb;     ///< rhs in b
-    OCP_DBL          rhse;     ///< rhs in e
+    /// val in b-b, -val in b-e
+    OCP_DBL          valbb;
+    /// val in e-e, -val in e-b
+    OCP_DBL          valee; 
+    /// rhs in b
+    OCP_DBL          rhsb; 
+    /// rhs in e
+    OCP_DBL          rhse;     
+
+public:
+    void CalBulkConnArea(BulkConnPair& bp, const Bulk& bk) { bca.CalArea(bp, bk); }
+protected:
+    /// area calculation of bulk connection
+    BulkConnArea     bca;
 };
 
 
@@ -155,17 +120,17 @@ class OCPFlux_IsoT : public OCPFlux
 {
 public:
     OCPFlux_IsoT() = default;
-    OCPFlux_IsoT(const Bulk& bk) {
-        Allocate(bk.vs.np, bk.vs.nc);
+    OCPFlux_IsoT(const USI& npin, const USI& ncin) {
+        Setup(npin, ncin);
         dFdXpB.resize((nc + 1) * (nc + 1));
         dFdXpE.resize((nc + 1) * (nc + 1));
         dFdXsB.resize((nc + 1) * (nc + 1) * np);
         dFdXsE.resize((nc + 1) * (nc + 1) * np);
     }
-    void CalFlux(const BulkPair& bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
-    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
+    void CalFlux(const BulkConnPair& bp, const Bulk& bk) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
 };
 
 
@@ -175,18 +140,18 @@ class OCPFlux_T : public OCPFlux
     // fluid flow or heat conduction
 public:
     OCPFlux_T() = default;
-    OCPFlux_T(const Bulk& bk) {
-        Allocate(bk.vs.np, bk.vs.nc);
+    OCPFlux_T(const USI& npin, const USI& ncin) {
+        Setup(npin, ncin);
         flux_Hj.resize(np);
         dFdXpB.resize((nc + 2) * (nc + 2));
         dFdXpE.resize((nc + 2) * (nc + 2));
         dFdXsB.resize((nc + 2) * (nc + 1) * np);
         dFdXsE.resize((nc + 2) * (nc + 1) * np);
     }
-    void CalFlux(const BulkPair & bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override{}
-    void AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk) override{}
+    void CalFlux(const BulkConnPair & bp, const Bulk& bk) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override{}
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override{}
 };
 
 

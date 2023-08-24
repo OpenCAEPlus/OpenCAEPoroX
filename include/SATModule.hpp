@@ -26,7 +26,35 @@ class SATModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const OCPMixtureType& mixType, OptionalFeatures& opts);
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const OCPMixtureType& mixType, OptionalFeatures& opts)
+    {
+        NTSFUN = rs_param.NTSFUN;
+
+        // Setup Saturation function
+        switch (mixType)
+        {
+        case OCPMixtureType::SP:
+            for (USI i = 0; i < NTSFUN; i++)
+                SATs.push_back(new FlowUnit_SP(rs_param, i, opts));
+            break;
+        case OCPMixtureType::BO_OW:
+        case OCPMixtureType::THERMALK_OW:
+            for (USI i = 0; i < NTSFUN; i++)
+                SATs.push_back(new FlowUnit_OW(rs_param, i, opts));
+            break;
+        case OCPMixtureType::BO_OGW:
+        case OCPMixtureType::COMP:
+            for (USI i = 0; i < NTSFUN; i++) {
+                SATs.push_back(new FlowUnit_OGW(rs_param, i, opts));
+            }
+            break;
+        default:
+            OCP_ABORT("Wrong Type!");
+            break;
+        }
+
+        if (SATNUM.empty()) SATNUM.resize(bvs.nb, 0);
+    }
     auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }
     auto GetNTSFUN() { return NTSFUN; }

@@ -272,7 +272,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         }
 
         // Get conn-based vars from grid
-        vector<BulkPair>* dst = &conn.iteratorConn;
+        vector<BulkConnPair>* dst = &conn.iteratorConn;
         domain.neighborNum.reserve(domain.numGridInterior);
         const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
         const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
@@ -287,7 +287,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
                 eId = init2local.at(gn.id);
                 if (eId > bId)
-                    dst->push_back(BulkPair(bId, eId, gn.direction, gn.areaB, gn.areaE));
+                    dst->push_back(BulkConnPair(bId, eId, gn.direction, gn.areaB, gn.areaE));
             }
         }
         conn.numConn = conn.iteratorConn.size();
@@ -389,7 +389,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // Get Conn from recv_buffer, only Interior grids' neighbors are passed
         OCP_DBL*     conn_ptr = (OCP_DBL*)usi_ptr;
-        vector<BulkPair>* dst = &conn.iteratorConn;       
+        vector<BulkConnPair>* dst = &conn.iteratorConn;       
         domain.neighborNum.reserve(domain.numGridInterior);
         const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
         const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
@@ -417,7 +417,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
                                 // well is exculude
                                 eId = iter->second;
                                 if (eId > bId) {
-                                    dst->push_back(BulkPair(bId, eId, conn_ptr[0], conn_ptr[1], conn_ptr[2]));
+                                    dst->push_back(BulkConnPair(bId, eId, conn_ptr[0], conn_ptr[1], conn_ptr[2]));
                                 }
                             }
                             conn_ptr += 3;
@@ -471,14 +471,14 @@ void Reservoir::SetupIsoT()
     OCP_FUNCNAME;
 
     bulk.SetupIsoT(domain);
-    conn.SetupIsoT(bulk);
+    conn.Setup(bulk);
     allWells.Setup(bulk);
 }
 
 void Reservoir::SetupT()
 {
     bulk.SetupT(domain);
-    conn.SetupT(bulk);
+    conn.Setup(bulk);
     allWells.Setup(bulk);
 }
 
@@ -512,11 +512,8 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         for (USI j = 0; j < np; j++) {
-            const OCP_USI uId = conn.bcval.upblock[c * np + j];
-
-            if (bulk.vs.phaseExist[uId * np + j]) {
-                bulk.cfl[uId * np + j] += fabs(conn.bcval.velocity[c * np + j]) * dt;
-            }
+            const OCP_USI uId = conn.vs.upblock[c * np + j];
+            bulk.cfl[uId * np + j] += fabs(conn.vs.flux_vj[c * np + j]) * dt;
         }
     }
 

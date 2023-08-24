@@ -29,7 +29,42 @@ class PVTModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalFeatures& opts);
+    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalFeatures& opts) 
+    {
+        NTPVT = rs_param.NTPVT;
+
+        if (rs_param.thermal) {
+            for (USI i = 0; i < NTPVT; i++)
+                PVTs.push_back(new MixtureUnitThermal_OW(rs_param, i, opts));
+        }
+        else if (rs_param.blackOil) {
+            if (rs_param.water && rs_param.oil && !rs_param.gas) {
+                for (USI i = 0; i < NTPVT; i++)
+                    PVTs.push_back(new MixtureUnitBlkOil_OW(rs_param, i, opts));
+            }
+            else if (rs_param.water && rs_param.oil && rs_param.gas) {
+                for (USI i = 0; i < NTPVT; i++)
+                    PVTs.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
+            }
+            else {
+                OCP_ABORT("Inavailable Mixture Type!");
+            }
+        }
+        else if (rs_param.comps) {
+            for (USI i = 0; i < NTPVT; i++)
+                PVTs.push_back(new MixtureUnitComp(rs_param, i, opts));
+        }
+
+        mixType = PVTs[0]->GetMixtureType();
+
+        if (PVTNUM.empty()) PVTNUM.resize(bvs.nb, 0);
+
+        bvs.np     = PVTs[0]->GetVs()->np;
+        bvs.nc     = PVTs[0]->GetVs()->nc;
+        bvs.oIndex = PVTs[0]->GetVs()->o;
+        bvs.gIndex = PVTs[0]->GetVs()->g;
+        bvs.wIndex = PVTs[0]->GetVs()->w;
+    }
     auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
     auto GetMixture() const {return PVTs[0]->GetMixture();}
     auto& GetPVTNUM() { return PVTNUM; }

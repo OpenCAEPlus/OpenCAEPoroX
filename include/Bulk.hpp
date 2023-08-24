@@ -161,6 +161,9 @@ public:
     // General Variables
     /////////////////////////////////////////////////////////////////////
 
+public:
+    auto& GetVarSet() const { return vs; }
+
 protected:
     BulkVarSet vs;
     PVTModule  PVTm;
@@ -214,12 +217,6 @@ protected:
     vector<USI> bType;     ///< Indicate bulk type, 0: rock;  1: rock and fluid
     HeatLoss    hLoss;     ///< Heat loss iterm
 
-    /////////////////////////////////////////////////////////////////////
-    // Basic PVT Model Information
-    /////////////////////////////////////////////////////////////////////
-
-protected:
-    OCPMixtureType mixType;
 
     /////////////////////////////////////////////////////////////////////
     // Basic Fluid Information

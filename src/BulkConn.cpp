@@ -21,70 +21,21 @@
 // General
 /////////////////////////////////////////////////////////////////////
 
-void BulkConn::SetupIsoT(const Bulk& bk)
+void BulkConn::Setup(const Bulk& bk)
 {
-    CalAkd(bk);
-    SetConnTypeIsoT(bk);
-}
-
-
-void BulkConn::SetupT(const Bulk& bk)
-{
-    CalAkd(bk);
-    SetConnTypeT(bk);
-}
-
-
-void BulkConn::CalAkd(const Bulk& bk)
-{
-    const BulkVarSet& bcv = bk.vs;
-
-    OCP_USI bId, eId;
-    OCP_DBL areaB, areaE;
-    OCP_DBL T1, T2;
-    for (OCP_USI c = 0; c < numConn; c++) {
-        bId   = iteratorConn[c].bId;
-        eId   = iteratorConn[c].eId;
-        areaB = iteratorConn[c].areaB;
-        areaE = iteratorConn[c].areaE;
-        switch (iteratorConn[c].direction) {
-            case 1:
-                T1 = bcv.ntg[bId] * bcv.rockKx[bId] * areaB;
-                T2 = bcv.ntg[eId] * bcv.rockKx[eId] * areaE;
-                break;
-            case 2:
-                T1 = bcv.ntg[bId] * bcv.rockKy[bId] * areaB;
-                T2 = bcv.ntg[eId] * bcv.rockKy[eId] * areaE;
-                break;
-            case 3:
-                T1 = bcv.rockKz[bId] * areaB;
-                T2 = bcv.rockKz[eId] * areaE;
-                break;
-            default:
-                OCP_ABORT("Wrong Direction!");
-        }
-        iteratorConn[c].area = 1 / (1 / T1 + 1 / T2);
+    if (bk.PVTm.GetMixtureType() == OCPMixtureType::THERMALK_OW) {
+        flux.push_back(new OCPFlux_T(bk.vs.np, bk.vs.nc));
     }
-}
-
-
-void BulkConn::SetConnTypeIsoT(const Bulk& bk)
-{           
-    flux.push_back(new OCPFlux_IsoT(bk));
+    else {
+        flux.push_back(new OCPFlux_IsoT(bk.vs.np, bk.vs.nc));
+    }
+    
     for (auto& iter : iteratorConn) {
+        flux[0]->CalBulkConnArea(iter, bk);
         iter.type = 0;
     }
 }
 
-
-void BulkConn::SetConnTypeT(const Bulk& bk)
-{   
-    flux.push_back(new OCPFlux_T(bk));
-
-    for (auto& iter : iteratorConn) {
-        iter.type = 0;
-    }
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

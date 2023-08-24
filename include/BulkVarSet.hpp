@@ -294,7 +294,7 @@ public:
     vector<OCP_DBL>  ldSec_dPri;    
 
     /// location of bulk: top, bottom, side
-    vector<USI> location;
+    vector<USI>      location;
 
 };
 

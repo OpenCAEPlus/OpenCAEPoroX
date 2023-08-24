@@ -19,7 +19,7 @@
 ////////////////////////////////////////////
 
 
-void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
+void OCPFlux_IsoT::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
 	// Calculte upblock, rho, flux_vj, flux_ni
 
@@ -80,7 +80,7 @@ void OCPFlux_IsoT::CalFlux(const BulkPair& bp, const Bulk& bk)
 
 
 
-void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -108,7 +108,7 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const Bu
     OCP_DBL* dFdXsD;     // down  bulk: dF / dXs
 
     for (USI j = 0; j < np; j++) {
-        uId_np_j = bcv.upblock[c * np + j] * np + j;
+        uId_np_j = bcvs.upblock[c * np + j] * np + j;
         if (!bvs.phaseExist[uId_np_j]) continue;
         bId_np_j     = bId * np + j;
         eId_np_j     = eId * np + j;
@@ -139,7 +139,7 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const Bu
             rhoWghtD = 0;
         }
 
-        dP      = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcv.rho[c * np + j] * dGamma;
+        dP      = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcvs.rho[c * np + j] * dGamma;
         xi      = bvs.xi[uId_np_j];
         kr      = bvs.kr[uId_np_j];
         mu      = bvs.mu[uId_np_j];
@@ -189,17 +189,17 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const Bu
 }
 
 
-void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
     const USI  ncol   = nc + 1;
     const USI  ncol2  = np * nc + np;
 
-    const OCP_USI& bId    = bp.BId();
-    const OCP_USI& eId    = bp.EId();
-    const OCP_DBL  Akd    = CONV1 * CONV2 * bp.Area();
-    const OCP_DBL  dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
+    const OCP_USI bId    = bp.BId();
+    const OCP_USI eId    = bp.EId();
+    const OCP_DBL Akd    = CONV1 * CONV2 * bp.Area();
+    const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
 
     OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
     OCP_BOOL phaseExistDj;
@@ -222,7 +222,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
         fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
 
         for (USI j = 0; j < np; j++) {
-            uId_np_j = bcv.upblock[c * np + j] * np + j;
+            uId_np_j = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
             xi = bvs.xi[uId_np_j];
             kr = bvs.kr[uId_np_j];
@@ -252,7 +252,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
         OCP_DBL  flag_be;
 
         for (USI j = 0; j < np; j++) {
-            uId_np_j = bcv.upblock[c * np + j] * np + j;
+            uId_np_j = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
             bId_np_j     = bId * np + j;
             eId_np_j     = eId * np + j;
@@ -286,7 +286,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
                 rhoWghtD = 0;
             }
 
-            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcv.rho[c * np + j] * dGamma;
+            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcvs.rho[c * np + j] * dGamma;
             xi     = bvs.xi[uId_np_j];
             kr     = bvs.kr[uId_np_j];
             mu     = bvs.mu[uId_np_j];
@@ -373,7 +373,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
         fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
 
         for (USI j = 0; j < np; j++) {
-            uId_np_j     = bcv.upblock[c * np + j] * np + j;
+            uId_np_j     = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
             bId_np_j     = bId * np + j;
             eId_np_j     = eId * np + j;
@@ -403,7 +403,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
                 rhoWghtD = 0;
             }
 
-            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcv.rho[c * np + j] * dGamma;
+            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcvs.rho[c * np + j] * dGamma;
             xi     = bvs.xi[uId_np_j];
             kr     = bvs.kr[uId_np_j];
             mu     = bvs.mu[uId_np_j];
@@ -454,7 +454,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkPair& bp, const OCP_USI& c, const Bu
 }
 
 
-void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
+void OCPFlux_IsoT::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     
@@ -467,10 +467,10 @@ void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const 
     rhsb  = 0;   rhse  = 0;
 
     for (USI j = 0; j < np; j++) {
-        const OCP_USI uId_np_j = bcv.upblock[c * np + j] * np + j;        
+        const OCP_USI uId_np_j = bcvs.upblock[c * np + j] * np + j;        
         if (!bvs.phaseExist[uId_np_j]) continue;
 
-        const OCP_DBL rho = bcv.rho[c * np + j];
+        const OCP_DBL rho = bcvs.rho[c * np + j];
 
         OCP_DBL valbi = 0;
         OCP_DBL valei = 0;
@@ -495,7 +495,7 @@ void OCPFlux_IsoT::AssembleMatIMPEC(const BulkPair& bp, const OCP_USI& c, const 
 ////////////////////////////////////////////
 
 
-void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
+void OCPFlux_T::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
     // Calculte upblock, rho, flux_vj, flux_ni, Adkt
 
@@ -508,7 +508,7 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
     const OCP_DBL T1  = bvs.kt[bId] * bp.AreaB();
     const OCP_DBL T2  = bvs.kt[eId] * bp.AreaE();
 
-    conduct_H              = (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
+    conduct_H         = (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
 
     if (bp.Type() == 0) {
         OCP_USI       bId_np_j, eId_np_j, uId_np_j;
@@ -566,7 +566,7 @@ void OCPFlux_T::CalFlux(const BulkPair& bp, const Bulk& bk)
 }
 
 
-void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkConnValSet& bcv, const Bulk& bk)
+void OCPFlux_T::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
 
     const BulkVarSet& bvs = bk.vs;
@@ -623,7 +623,7 @@ void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkC
         OCP_DBL* dFdXsD;     // down  bulk: dF / dXs
 
         for (USI j = 0; j < np; j++) {
-            uId_np_j = bcv.upblock[c * np + j] * np + j;
+            uId_np_j = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
             bId_np_j = bId * np + j;
             eId_np_j = eId * np + j;
@@ -653,7 +653,7 @@ void OCPFlux_T::AssembleMatFIM(const BulkPair& bp, const OCP_USI& c, const BulkC
                 rhoWghtD = 0;
             }
 
-            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcv.rho[c * np + j] * dGamma;
+            dP     = bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j] - bcvs.rho[c * np + j] * dGamma;
             xi     = bvs.xi[uId_np_j];
             kr     = bvs.kr[uId_np_j];
             mu     = bvs.mu[uId_np_j];

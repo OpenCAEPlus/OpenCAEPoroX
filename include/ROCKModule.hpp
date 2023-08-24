@@ -27,7 +27,30 @@ class ROCKModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, OptionalFeatures& opts);
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, OptionalFeatures& opts) 
+	{
+	
+		NTROCK = rs_param.NTROOC;
+
+		if (rs_param.thermal) {
+			for (USI i = 0; i < NTROCK; i++) {
+				if (rs_param.rockSet[i].type == "LINEAR") {
+					ROCKs.push_back(new OCPRockT_Linear(rs_param.rockSet[i]));
+				}
+				else {
+					ROCKs.push_back(new OCPRockT_Exp(rs_param.rockSet[i]));
+				}
+			}
+		}
+		else {
+			for (USI i = 0; i < NTROCK; i++) {
+				ROCKs.push_back(new OCPRockIsoT_Linear(rs_param.rockSet[i]));
+			}
+		}
+
+		if (ROCKNUM.empty()) ROCKNUM.resize(bvs.nb, 0);
+	
+    }
     auto GetROCK(const OCP_USI& n) const { return ROCKs[ROCKNUM[n]]; }
     auto& GetROCKNUM() { return ROCKNUM; }
     auto GetNTROCK() { return NTROCK; }

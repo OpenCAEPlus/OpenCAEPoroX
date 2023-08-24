@@ -47,12 +47,7 @@ public:
 
 public:
     /// Setup active connections
-    void SetupIsoT(const Bulk& bk);
-    void SetupT(const Bulk& bk);
-    /// Calculate the effective area used for flow
-    void CalAkd(const Bulk& bk);
-    void SetConnTypeIsoT(const Bulk& bk);
-    void SetConnTypeT(const Bulk& bk);
+    void Setup(const Bulk& bk);
 
 protected:
     OCP_USI numConn; ///< Number of connections between bulks.
@@ -60,7 +55,7 @@ protected:
     /// All connections (pair of indices) between bulks: numConn.
     //  Note: In each pair, the index of first bulk is greater than the second. The data
     //  in iteratorConn is generated from neighbor.
-    vector<BulkPair> iteratorConn;
+    vector<BulkConnPair> iteratorConn;
 
     /// Neighboring information of each bulk: activeGridNum.
     //  Note: The i-th entry stores the i-th bulk's neighbors, which is sorted in an
@@ -71,14 +66,14 @@ protected:
     // Physical Variables
     /////////////////////////////////////////////////////////////////////
 
-    BulkConnValSet               bcval;   ///< values between connections
+    BulkConnVarSet          vs;   ///< values between connections
 
     /////////////////////////////////////////////////////////////////////
     // Flux
     /////////////////////////////////////////////////////////////////////
 
 
-    mutable vector<OCPFlux*>  flux;    ///< flux term
+    vector<OCPFlux*>        flux;    ///< flux term
 };
 
 #endif

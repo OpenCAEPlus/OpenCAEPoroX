@@ -229,13 +229,13 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 
     BulkConn& conn = rs.conn;
 
-    conn.bcval.upblock.resize(conn.numConn * np);
-    conn.bcval.rho.resize(conn.numConn * np);
-    conn.bcval.velocity.resize(conn.numConn * np);
-    conn.bcval.flux_ni.resize(conn.numConn * nc);
+    conn.vs.upblock.resize(conn.numConn * np);
+    conn.vs.rho.resize(conn.numConn * np);
+    conn.vs.flux_vj.resize(conn.numConn * np);
+    conn.vs.flux_ni.resize(conn.numConn * nc);
 
-    conn.bcval.lupblock.resize(conn.numConn * np);
-    conn.bcval.lrho.resize(conn.numConn * np);
+    conn.vs.lupblock.resize(conn.numConn * np);
+    conn.vs.lrho.resize(conn.numConn * np);
 }
 
 void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
@@ -348,7 +348,7 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
     const USI   nc   = bvs.nc;
 
     // calculate a step flux using iteratorConn
-    BulkConnValSet&   bcvs = conn.bcval;
+    BulkConnVarSet&   bcvs = conn.vs;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
@@ -358,7 +358,7 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
-        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.velocity[c * np]);
+        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
         copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
     }
 }
@@ -379,8 +379,8 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
         eId = conn.iteratorConn[c].EId();
 
         for (USI i = 0; i < nc; i++) {
-            bvs.Ni[eId * nc + i] += dt * conn.bcval.flux_ni[c * nc + i];
-            bvs.Ni[bId * nc + i] -= dt * conn.bcval.flux_ni[c * nc + i];
+            bvs.Ni[eId * nc + i] += dt * conn.vs.flux_ni[c * nc + i];
+            bvs.Ni[bId * nc + i] -= dt * conn.vs.flux_ni[c * nc + i];
         }
     }
 
@@ -460,7 +460,7 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
         cType = conn.iteratorConn[c].Type();
         auto Flux = conn.flux[cType];
 
-        Flux->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatIMPEC(conn.iteratorConn[c], c, conn.vs, bk);
         valbb  = dt * Flux->GetValbb();
         valee  = dt * Flux->GetValee();
         rhsb   = dt * Flux->GetRhsb();
@@ -577,9 +577,8 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.vs.Ni = rs.bulk.vs.lNi;
     rs.bulk.vs.Pj = rs.bulk.vs.lPj;
     // Bulk Conn
-
-    rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
-    rs.conn.bcval.rho          = rs.conn.bcval.lrho;
+    rs.conn.vs.upblock      = rs.conn.vs.lupblock;
+    rs.conn.vs.rho          = rs.conn.vs.lrho;
 
     // Iters
     ctrl.ResetIterNRLS();
@@ -613,8 +612,8 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     bvs.vfi = bvs.lvfi;
 
     // Bulk Conn
-    rs.conn.bcval.upblock      = rs.conn.bcval.lupblock;
-    rs.conn.bcval.rho          = rs.conn.bcval.lrho;
+    rs.conn.vs.upblock      = rs.conn.vs.lupblock;
+    rs.conn.vs.rho          = rs.conn.vs.lrho;
 
     // Optional Features
     rs.optFeatures.ResetToLastTimeStep();
@@ -657,8 +656,8 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 
     BulkConn& conn = rs.conn;
 
-    conn.bcval.lupblock    = conn.bcval.upblock;
-    conn.bcval.lrho        = conn.bcval.rho;
+    conn.vs.lupblock    = conn.vs.upblock;
+    conn.vs.lrho        = conn.vs.rho;
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();
@@ -923,9 +922,9 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     // BulkConn
     BulkConn& conn = rs.conn;
 
-    conn.bcval.upblock.resize(conn.numConn* np);
-    conn.bcval.rho.resize(conn.numConn* np);
-    conn.bcval.velocity.resize(conn.numConn* np);
+    conn.vs.upblock.resize(conn.numConn* np);
+    conn.vs.rho.resize(conn.numConn* np);
+    conn.vs.flux_vj.resize(conn.numConn* np);
 
 
     // NR
@@ -1068,7 +1067,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
 
     // Flux Term
     BulkConn&       conn  = rs.conn;
-    BulkConnValSet& bcval = conn.bcval;
+    BulkConnVarSet& bcvs = conn.vs;
     USI     cType;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
@@ -1078,9 +1077,9 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
         auto Flux = conn.flux[cType];
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
-        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcval.upblock[c * np]);
-        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcval.rho[c * np]);
-        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcval.velocity[c * np]);
+        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
                
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {               
@@ -1183,7 +1182,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         cType = conn.iteratorConn[c].Type();
         auto Flux = conn.flux[cType];
 
-        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
         bmat = Flux->GetdFdXpB();
         DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
@@ -2058,7 +2057,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         if (bk.bulkTypeAIM.IfFIMbulk(eId))  eIdFIM = OCP_TRUE;
         else                                eIdFIM = OCP_FALSE;
 
-        Flux->AssembleMatAIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatAIM(conn.iteratorConn[c], c, conn.vs, bk);
 
         // Assemble
         bmat = Flux->GetdFdXpB();

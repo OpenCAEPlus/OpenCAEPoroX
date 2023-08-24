@@ -303,9 +303,9 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     BulkConn&      conn    = rs.conn;
     const OCP_USI& numConn = conn.numConn;
 
-    conn.bcval.upblock.resize(numConn* np);
-    conn.bcval.rho.resize(numConn* np);
-    conn.bcval.velocity.resize(numConn* np);
+    conn.vs.upblock.resize(numConn* np);
+    conn.vs.rho.resize(numConn* np);
+    conn.vs.flux_vj.resize(numConn* np);
 
 
     // NR
@@ -505,34 +505,6 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
             bvs.kt[n] = bvs.thconr[n];
         }
     }
-
-    //OCP_USI bId, eId;
-    //OCP_DBL areaB, areaE, T1, T2;
-    //OCP_DBL tmpB, tmpE;
-
-    //for (OCP_USI c = 0; c < conn.numConn; c++) {
-    //    bId = conn.iteratorConn[c].BId();
-    //    eId = conn.iteratorConn[c].EId();
-    //    if (bk.bType[bId] > 0 && bk.bType[eId] > 0) {
-    //        // fluid bulk connections
-    //        areaB        = conn.iteratorConn[c].AreaB();
-    //        areaE        = conn.iteratorConn[c].AreaE();
-    //        T1           = bvs.kt[bId] * areaB;
-    //        T2           = bvs.kt[eId] * areaE;
-    //        conn.Adkt[c] = 1 / (1 / T1 + 1 / T2);
-
-    //        tmpB                  = pow(conn.Adkt[c], 2) / pow(T1, 2) * areaB;
-    //        tmpE                  = pow(conn.Adkt[c], 2) / pow(T2, 2) * areaE;
-    //        conn.AdktP[c * 2 + 0] = tmpB * bvs.ktP[bId];
-    //        conn.AdktP[c * 2 + 1] = tmpE * bvs.ktP[eId];
-    //        conn.AdktT[c * 2 + 0] = tmpB * bvs.ktT[bId];
-    //        conn.AdktT[c * 2 + 1] = tmpE * bvs.ktT[eId];
-    //        for (USI j = 0; j < np; j++) {
-    //            conn.AdktS[c * np * 2 + j]      = tmpB * bvs.ktS[bId * np + j];
-    //            conn.AdktS[c * np * 2 + np + j] = tmpE * bvs.ktS[eId * np + j];
-    //        }
-    //    }
-    //}
 }
 
 void T_FIM::CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const
@@ -734,10 +706,8 @@ void T_FIM::CalRes(Reservoir&      rs,
         }
     }
 
-    BulkConn&         conn  = rs.conn;
-    BulkConnValSet&   bcval = conn.bcval;
-
-    OCP_USI uId_np_j;
+    BulkConn&         conn = rs.conn;
+    BulkConnVarSet&   bcvs = conn.vs;
     USI     cType;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
@@ -758,9 +728,9 @@ void T_FIM::CalRes(Reservoir&      rs,
 
         if (cType == 0) {
             // with flow
-            copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcval.upblock[c * np]);
-            copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcval.rho[c * np]);
-            copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcval.velocity[c * np]);
+            copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
+            copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+            copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
 
 			if (eId < nb) {
 				// Interior grid
@@ -769,7 +739,6 @@ void T_FIM::CalRes(Reservoir&      rs,
 					res.resAbs[eId * len + 1 + i] -= dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
-                    uId_np_j = bcval.upblock[c * np + j] * np + j;
                     res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
                     res.resAbs[eId * len + 1 + nc] -= dt * Flux->GetFluxHj()[j];
                 }
@@ -780,7 +749,6 @@ void T_FIM::CalRes(Reservoir&      rs,
 					res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
-                    uId_np_j = bcval.upblock[c * np + j] * np + j;
                     res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
                 }				
 			}
@@ -937,7 +905,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
         cType = conn.iteratorConn[c].Type();
         auto Flux = conn.flux[cType];
 
-        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.bcval, bk);
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
         bmat = Flux->GetdFdXpB();
         DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
