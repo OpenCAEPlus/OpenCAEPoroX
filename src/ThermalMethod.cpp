@@ -109,7 +109,8 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalKrPc(rs.bulk);
 
     CalThermalConduct(rs.conn, rs.bulk);
-    CalHeatLoss(rs.bulk, ctrl.GetCurTime() + dt, dt);
+    
+    rs.bulk.BCm.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
 
     rs.allWells.CalTrans(rs.bulk);
     rs.allWells.CalFlux(rs.bulk);
@@ -507,11 +508,6 @@ void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
     }
 }
 
-void T_FIM::CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const
-{
-    BulkVarSet& bvs = bk.vs;
-    bk.hLoss.CalHeatLoss(bk.vs.location, bvs.T, bvs.lT, bk.initT, t, dt);
-}
 
 void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
@@ -574,7 +570,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.ktS       = bvs.lktS;
     bvs.dSec_dPri = bvs.ldSec_dPri;
 
-    bk.hLoss.ResetToLastTimeStep();
+    bk.BCm.ResetToLastTimeStep();
 
     // Wells
     rs.allWells.ResetBHP();
@@ -651,7 +647,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lktS       = bvs.ktS;
     bvs.ldSec_dPri = bvs.dSec_dPri;
 
-    bk.hLoss.UpdateLastTimeStep();
+    bk.BCm.UpdateLastTimeStep();
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.optFeatures.UpdateLastTimeStep();
@@ -695,9 +691,9 @@ void T_FIM::CalRes(Reservoir&      rs,
         }
 
         // Heat Loss
-        if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
+        if (OCP_TRUE && bk.vs.location[n] > 0) {
             // dT
-            res.resAbs[n * len + nc + 1] += dt * bk.hLoss.hl[n] * bvs.dx[n] * bvs.dy[n];
+            res.resAbs[n * len + nc + 1] += dt * bk.BCm.heatLoss.GetHl(n);
         }
     }
 
@@ -856,9 +852,9 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                                     bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
+            if (OCP_TRUE && bk.vs.location[n] > 0) {
                 // dT
-                bmat[ncol * ncol - 1] += dt * bk.hLoss.hlT[n] * bvs.dx[n] * bvs.dy[n];
+                bmat[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
             }
 
             ls.NewDiag(n, bmat);
@@ -869,9 +865,9 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             bmatR[ncol * ncol - 1] = bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (bk.hLoss.IfHeatLoss() && bk.vs.location[n] > 0) {
+            if (OCP_TRUE && bk.vs.location[n] > 0) {
                 // dT
-                bmatR[ncol * ncol - 1] += dt * bk.hLoss.hlT[n] * bvs.dx[n] * bvs.dy[n];
+                bmatR[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
             }
 
             ls.NewDiag(n, bmatR);

@@ -14,6 +14,7 @@
 
 
  // OpenCAEPoroX header files
+#include "ParamReservoir.hpp"
 #include "BulkVarSet.hpp"
 
 
@@ -24,19 +25,39 @@ using namespace std;
 
 class HeatLossVarSet
 {
+    friend class HeatLoss;
+    friend class HeatLossMethod01;
+
 public:
+    void SetNb(const OCP_USI& nbin) { nb = nbin; }
+    void ResetToLastTimeStep()
+    {
+        I   = lI;
+        hl  = lhl;
+        hlT = lhlT;
+    }
+    void UpdateLastTimeStep()
+    {
+        lI   = I;
+        lhl  = hl;
+        lhlT = hlT;
+    }
+
+protected:   
+    /// number of bulks
+    OCP_USI         nb;
     /// Auxiliary variable
     vector<OCP_DBL> I;     
-    /// Auxiliary variable
-    vector<OCP_DBL> p;
-    /// dP / dT
-    vector<OCP_DBL> pT;
+    /// heat loss rate
+    vector<OCP_DBL> hl;
+    /// dhl / dT
+    vector<OCP_DBL> hlT;
     /// last I
     vector<OCP_DBL> lI;
-    /// last p
-    vector<OCP_DBL> lp;
-    /// last pT
-    vector<OCP_DBL> lpT;
+    /// last hl
+    vector<OCP_DBL> lhl;
+    /// last hlT
+    vector<OCP_DBL> lhlT;
 };
 
 
@@ -44,30 +65,46 @@ class HeatLossMethod
 {
 public:
     HeatLossMethod() = default;
-    virtual void CalHeatLoss(const BulkVarSet& bvs) = 0;
+    virtual void CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt) = 0;
 };
 
 
 class HeatLossMethod01 : public HeatLossMethod
 {
 public:
-    HeatLossMethod01() = default;
-    void CalHeatLoss(const BulkVarSet& bvs) override;
+    HeatLossMethod01(const HLoss& param, HeatLossVarSet& hlvs);
+    void CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt) override;
+
+protected:
+    /// Thermal conductivity of overburden rock
+    OCP_DBL         obK;
+    /// Thermal conductivity of underburden rock
+    OCP_DBL         ubK;
+    /// Thermal diffusivity of overburden rock
+    OCP_DBL         obD;
+    /// Thermal diffusivity of underburden rock
+    OCP_DBL         ubD;
 };
 
 
-class HeatLoss01
+class HeatLoss
 {
 public:
-    HeatLoss01() = default;
-    void Setup();
-    void CalHeatLoss(const BulkVarSet& bvs) { hlM->CalHeatLoss(bvs); }
+    HeatLoss() = default;
+    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb);
+    void CalHeatLoss(const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt);
+    const OCP_DBL& GetHl(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!");  return vs.hl[bId]; };
+    const OCP_DBL& GetHlT(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!"); return vs.hlT[bId]; };
+    void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }
+    void UpdateLastTimeStep() { if (ifUse)  vs.UpdateLastTimeStep(); }
 
 protected:
+    /// If use heat loss
+    OCP_BOOL                ifUse;
     /// Heat loss varsets
-    HeatLossVarSet  vs;
+    HeatLossVarSet          vs;
     /// method for heat loss calculation
-    HeatLossMethod* hlM;
+    vector<HeatLossMethod*> hlM;
 };
 
 

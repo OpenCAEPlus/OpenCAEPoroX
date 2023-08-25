@@ -24,11 +24,11 @@
 #include "ParamReservoir.hpp"
 #include "Domain.hpp"
 #include "PreParamGridWell.hpp"
-#include "OCPRock.hpp"
 #include "BulkVarSet.hpp"
 #include "PVTModule.hpp"
 #include "SATModule.hpp"
 #include "ROCKModule.hpp"
+#include "BoundaryCondition.hpp"
 
 using namespace std;
 
@@ -60,42 +60,6 @@ private:
     OCPTable PBVD; ///< PBVD Table: bubble point pressure vs depth
 };
 
-class HeatLoss
-{
-public:
-    void     InputParam(const HLoss& loss);
-    void     Setup(const OCP_USI& nb);
-    OCP_BOOL IfHeatLoss() const { return ifHLoss; }
-    void     CalHeatLoss(const vector<USI>&     location,
-                         const vector<OCP_DBL>& T,
-                         const vector<OCP_DBL>& lT,
-                         const vector<OCP_DBL>& initT,
-                         const OCP_DBL&         t,
-                         const OCP_DBL&         dt);
-    void     ResetToLastTimeStep();
-    void     UpdateLastTimeStep();
-
-public:
-    OCP_BOOL ifHLoss{OCP_FALSE}; ///< If use Heat loss
-    OCP_DBL  obC;                ///< Volumetric heat capacity of overburden rock
-    OCP_DBL  obK;                ///< Thermal conductivity of overburden rock
-    OCP_DBL  ubC;                ///< Volumetric heat capacity of underburden rock
-    OCP_DBL  ubK;                ///< Thermal conductivity of underburden rock
-
-    OCP_USI         nb;      ///< Num of Bulk
-    OCP_DBL         obD;     ///< Thermal diffusivity of overburden rock
-    OCP_DBL         ubD;     ///< Thermal diffusivity of underburden rock
-    vector<OCP_DBL> I;       ///< Auxiliary variable
-    /// heat loss
-    vector<OCP_DBL> hl;
-    /// dhl / dT
-    vector<OCP_DBL> hlT;   
-    vector<OCP_DBL> lI;      ///< Auxiliary variable
-    /// last hl
-    vector<OCP_DBL> lhl;
-    /// last hlT
-    vector<OCP_DBL> lhlT;
-};
 
 class BulkTypeAIM
 {
@@ -168,11 +132,11 @@ public:
     auto& GetVarSet() const { return vs; }
 
 protected:
-    BulkVarSet vs;
-    PVTModule  PVTm;
-    SATModule  SATm;
-    ROCKModule ROCKm;
-    
+    BulkVarSet        vs;
+    PVTModule         PVTm;
+    SATModule         SATm;
+    ROCKModule        ROCKm;
+    BoundaryCondition BCm;
     
 
 public:
@@ -198,10 +162,8 @@ public:
     void InitPTSw(const USI& tabrow);
 
 protected:
-    vector<OCPTable>
-        initZi_Tab; ///< Initial mole ratio of components vs. depth, table set
+    vector<OCPTable> initZi_Tab; ///< Initial mole ratio of components vs. depth, table set
     vector<OCPTable> initT_Tab; ///< Initial temperature vs. depth, table set
-    vector<OCP_DBL>  initT;     ///< Initial temperature of each bulk: numBulk
     ParamEQUIL       EQUIL;     ///< Initial Equilibration.
     OCP_DBL          rsTemp;    ///< Reservoir temperature.
     vector<OCP_DBL>  thconp;    ///< Phase thermal conductivity: numPhase
@@ -214,9 +176,6 @@ public:
 
     /// Output iterations in MixtureUnit
     void OutMixtureIters() const { PVTm.GetPVT(0)->OutMixtureIters(); }
-
-protected:
-    HeatLoss    hLoss;     ///< Heat loss iterm
 
 
     /////////////////////////////////////////////////////////////////////

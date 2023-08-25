@@ -46,7 +46,6 @@ protected:
     void PassFlashValue(Bulk& bk, const OCP_USI& n);
     void CalKrPc(Bulk& bk) const;
     void CalThermalConduct(BulkConn& conn, Bulk& bk) const;
-    void CalHeatLoss(Bulk& bk, const OCP_DBL& t, const OCP_DBL& dt) const;
     void UpdateLastTimeStep(Reservoir& rs) const;
     void CalRes(Reservoir&      rs,
                 const OCP_DBL&  t,

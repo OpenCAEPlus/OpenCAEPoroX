@@ -26,7 +26,7 @@ class SATModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const OCPMixtureType& mixType, OptionalFeatures& opts)
+    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, const OCPMixtureType& mixType, OptionalFeatures& opts)
     {
         NTSFUN = rs_param.NTSFUN;
 
@@ -53,7 +53,7 @@ public:
             break;
         }
 
-        if (SATNUM.empty()) SATNUM.resize(bvs.nb, 0);
+        if (SATNUM.empty()) SATNUM.resize(nb, 0);
     }
     auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }

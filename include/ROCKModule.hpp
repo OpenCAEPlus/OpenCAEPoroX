@@ -27,7 +27,7 @@ class ROCKModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, OptionalFeatures& opts) 
+    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, OptionalFeatures& opts)
 	{
 	
 		NTROCK = rs_param.NTROOC;
@@ -48,7 +48,7 @@ public:
 			}
 		}
 
-		if (ROCKNUM.empty()) ROCKNUM.resize(bvs.nb, 0);
+		if (ROCKNUM.empty()) ROCKNUM.resize(nb, 0);
 	
     }
     auto GetROCK(const OCP_USI& n) const { return ROCKs[ROCKNUM[n]]; }

@@ -73,12 +73,6 @@ protected:
     /// Scale water-oil capillary pressure
     ScalePcow      scalePcow;
 
-
-    /////////////////////////////////////////////////////////////////////
-    // Boundary Condition
-    /////////////////////////////////////////////////////////////////////
-    // HeatLoss       heatLoss;
-
 };
 
 #endif /* end if __OptionalFeatures_HEADER__ */
