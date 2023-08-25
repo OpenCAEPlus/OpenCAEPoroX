@@ -23,11 +23,25 @@
 using namespace std;
 
 
+class MisFacVarSet
+{
+public:
+    void SetNb(const OCP_USI& nbin) { nb = nbin; }
+public:
+    /// number of bulks
+    OCP_USI         nb;
+    /// miscibility factor for permeability
+    vector<OCP_DBL> Fk;
+    /// miscible factor for capillary pressure
+    vector<OCP_DBL> Fp;
+};
+
+
 class MisFacMethod
 {
 public:
     MisFacMethod() = default;
-    virtual void CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const = 0;
+    virtual void CalculateMiscibleFactor(const OCP_USI& bId, const SurTenVarSet& stvs, MisFacVarSet& mfvs) const = 0;
 };
 
 
@@ -35,8 +49,8 @@ public:
 class MisFacMethod01 : public MisFacMethod
 {
 public:
-    MisFacMethod01(const Miscstr& param);
-    void CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const override;
+    MisFacMethod01(const Miscstr& param, MisFacVarSet& mfvs);
+    void CalculateMiscibleFactor(const OCP_USI& bId, const SurTenVarSet& stvs, MisFacVarSet& mfvs) const override;
 
 public:
     OCP_DBL stref;   ///< reference surface tension
@@ -53,22 +67,21 @@ public:
     USI Setup(const ParamReservoir& param, const USI& i, const OCP_USI& nb, const SurfaceTension* st);
     void CalMiscibleFactor(const OCP_USI& bId, const USI& mIndex) {
         if (ifUse) {
-            mfMethod[mIndex]->CalculateMiscibleFactor(surTen->GetSurfaceTension(bId), Fk[bId], Fp[bId]);
+            mfMethod[mIndex]->CalculateMiscibleFactor(bId, surTen->GetVS(), vs);
         }       
     }
+    const auto& GetVarSet() const { return vs; }
     const auto IfUse()const { return ifUse; }
-    const auto GetFk(const OCP_USI& bId) const { return Fk[bId]; }
-    const auto GetFp(const OCP_USI& bId) const { return Fp[bId]; }
+    const auto GetFk(const OCP_USI& bId) const { return vs.Fk[bId]; }
+    const auto GetFp(const OCP_USI& bId) const { return vs.Fp[bId]; }
     void ResetTolastTimeStep() { }
     void UpdateLastTimeStep() { }
 
 protected:
     /// if calculate miscible factor
     OCP_BOOL              ifUse{ OCP_FALSE };
-    /// miscibility factor for permeability
-    vector<OCP_DBL>       Fk;
-    /// miscible factor for capillary pressure
-    vector<OCP_DBL>       Fp;
+    /// miscible factor calculation variable set
+    MisFacVarSet          vs;
     /// method of miscible factor calculation
     vector<MisFacMethod*> mfMethod;
 
@@ -83,8 +96,8 @@ class MisCurveMethod
 {
 public:
     MisCurveMethod() = default;
-    virtual void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) = 0;
-    virtual void CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp) = 0;
+    virtual void CurveCorrect(const OCP_USI& bId, const MisFacVarSet& mfvs) = 0;
+    virtual void CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& mfvs) = 0;
 };
 
 
@@ -106,10 +119,11 @@ public:
 
         flow = flowin;
     }
-    void CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
-    void CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp) override;
+    void CurveCorrect(const OCP_USI& bId, const MisFacVarSet& mfvs) override;
+    void CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& mfvs) override;
 
 protected:
+    // Dependent modules
     OCPFlow* flow;
 };
 
@@ -122,12 +136,12 @@ public:
     USI Setup(OCPFlow* flowin, const MiscibleFactor* misfactor);
     void CorrectCurve(const OCP_USI& bId, const USI& mIndex) {
         if (ifUse) {
-            mcMethod[mIndex]->CurveCorrect(misFac->GetFk(bId), misFac->GetFp(bId));
+            mcMethod[mIndex]->CurveCorrect(bId, misFac->GetVarSet());
         }
     }
     void CorrectCurveDer(const OCP_USI& bId, const USI& mIndex) {
         if (ifUse) {
-            mcMethod[mIndex]->CurveCorrectDer(misFac->GetFk(bId), misFac->GetFp(bId));
+            mcMethod[mIndex]->CurveCorrectDer(bId, misFac->GetVarSet());
         }
     }
     void ResetTolastTimeStep() { }

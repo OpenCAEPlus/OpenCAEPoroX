@@ -26,6 +26,20 @@ using namespace std;
 /////////////////////////////////////////////////////////////////////
 
 
+class ScalePcowVarSet
+{
+public:
+    void SetNb(const OCP_USI& nbin) { nb = nbin; }
+public:
+    /// number of bulks
+    OCP_USI         nb;
+    /// initial water distribution
+    vector<OCP_DBL> swatInit;
+    /// Scale values for Pcow, it will be calculated from swatInit      
+    vector<OCP_DBL> scaleVal;      
+};
+
+
 /// Method used to scale the water permeability curve.
 class ScalePcowMethod
 {
@@ -33,11 +47,11 @@ public:
     /// Default constructor
     ScalePcowMethod() = default;
     /// Setup Scale coefficient
-    virtual OCP_DBL SetScaleVal(const OCP_DBL& Swinit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const = 0;
+    virtual void SetScaleVal(const OCP_USI& bId, ScalePcowVarSet& spvs, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const = 0;
     /// Scale Pcow and dPcowdSw
-    virtual void ScaleDer(const OCP_DBL& sv) const = 0;
+    virtual void ScaleDer(const OCP_USI& bId, const ScalePcowVarSet& spvs) const = 0;
     /// Scale Pcow
-    virtual void Scale(const OCP_DBL& sv) const = 0;
+    virtual void Scale(const OCP_USI& bId, const ScalePcowVarSet& spvs) const = 0;
 };
 
 
@@ -45,16 +59,14 @@ public:
 class ScalePcowMethod01 : public ScalePcowMethod
 {
 public:
-    /// Default constructor
-    ScalePcowMethod01() = default;
     /// Construct with Pmax, Pmin
-    ScalePcowMethod01(OCPFlow* flowin);
+    ScalePcowMethod01(OCPFlow* flowin, ScalePcowVarSet& spvs);
     /// Setup Scale coefficient
-    OCP_DBL SetScaleVal(const OCP_DBL& Swinit, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const override;
+    void SetScaleVal(const OCP_USI& bId, ScalePcowVarSet& spvs, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const override;
     /// Scale Pcow and dPcowdSw
-    void ScaleDer(const OCP_DBL& sv) const override;
+    void ScaleDer(const OCP_USI& bId, const ScalePcowVarSet& spvs) const override;
     /// Scale Pcow
-    void Scale(const OCP_DBL& sv) const override;
+    void Scale(const OCP_USI& bId, const ScalePcowVarSet& spvs) const override;
 
 protected:
     /// saturation of connate water
@@ -78,8 +90,6 @@ class ScalePcow
     friend class Out4RPT;
 
 public:
-    /// Input option param(data was distributed if have) from input file
-    void InputParam(const OCP_BOOL& ifscale) { ifScale = ifscale; }
     /// Setup ScalePcow term
     USI Setup(OCPFlow* flowin);
     /// Setup Scale coefficient
@@ -90,13 +100,12 @@ public:
     void Scale(const OCP_USI& bId, const USI& mIndex) const;
 
 protected:
-    OCP_BOOL ifScale{ OCP_FALSE }; ///< If true, then Scale will be used
-    vector<OCP_DBL> swatInit;      ///< Initial water distribution
-    vector<OCP_DBL> scaleVal;      ///< Scale values for Pcow, it will be calculated from swatInit
-    
-    /// Method
-protected:
-    vector<ScalePcowMethod*> scalePcowMethod; ///< Method for scaling Pcow
+    /// If scale
+    OCP_BOOL ifScale{ OCP_FALSE };
+    /// ScalePcow variable set
+    ScalePcowVarSet vs;
+    /// Method for scaling Pcow
+    vector<ScalePcowMethod*> scalePcowMethod;
 };
 
 #endif /* end if __OCPSCALEPCOW_HEADER__ */

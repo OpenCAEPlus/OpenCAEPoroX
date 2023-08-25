@@ -12,23 +12,27 @@
 #include "OCPMiscible.hpp"
 
 
-MisFacMethod01::MisFacMethod01(const Miscstr& param)
+MisFacMethod01::MisFacMethod01(const Miscstr& param, MisFacVarSet& mfvs)
 {
     stref = param.surTenRef;
     fkExp = param.surTenExp;
     stPcf = param.surTenPc;
     if (stPcf < 0) stPcf = stref;
+
+    mfvs.Fk.resize(mfvs.nb, 0);
+    mfvs.Fp.resize(mfvs.nb, 0);
 }
 
-void MisFacMethod01::CalculateMiscibleFactor(const OCP_DBL& st, OCP_DBL& fk, OCP_DBL& fp) const
+void MisFacMethod01::CalculateMiscibleFactor(const OCP_USI& bId, const SurTenVarSet& stvs, MisFacVarSet& mfvs) const
 {
+    const OCP_DBL& st = stvs.surTen[bId];
     if (st >= stref) {  // InMiscible
-        fk = -1.0;
-        fp = -1.0;
+        mfvs.Fk[bId] = -1.0;
+        mfvs.Fp[bId] = -1.0;
     }
     else {             // Miscible
-        fk = min(1.0, pow(st / stref, fkExp));
-        fp = min(stPcf, st / stref);
+        mfvs.Fk[bId] = min(1.0, pow(st / stref, fkExp));
+        mfvs.Fp[bId] = min(stPcf, st / stref);
     }
 }
 
@@ -43,19 +47,19 @@ USI MiscibleFactor::Setup(const ParamReservoir& param, const USI& i, const OCP_U
             surTen = st;
         }
         ifUse = OCP_TRUE;
-        mfMethod.push_back(new MisFacMethod01(param.miscstr));
+        vs.SetNb(nb);
+        mfMethod.push_back(new MisFacMethod01(param.miscstr, vs));
     }
 
-    if (ifUse) {
-        Fk.resize(nb);
-        Fp.resize(nb);
-    }
     return mfMethod.size() - 1;
 }
 
 
-void MisCurveMethod01::CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp)
+void MisCurveMethod01::CurveCorrect(const OCP_USI& bId, const MisFacVarSet& mfvs)
 {
+    const OCP_DBL& Fk = mfvs.Fk[bId];
+    const OCP_DBL& Fp = mfvs.Fp[bId];
+
     if (Fk > -TINY) {
         // miscible
 
@@ -75,8 +79,11 @@ void MisCurveMethod01::CurveCorrect(const OCP_DBL& Fk, const OCP_DBL& Fp)
 }
 
 
-void MisCurveMethod01::CurveCorrectDer(const OCP_DBL& Fk, const OCP_DBL& Fp)
+void MisCurveMethod01::CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& mfvs)
 {
+    const OCP_DBL& Fk = mfvs.Fk[bId];
+    const OCP_DBL& Fp = mfvs.Fp[bId];
+
     if (Fk > -TINY) {
         // miscible
 
