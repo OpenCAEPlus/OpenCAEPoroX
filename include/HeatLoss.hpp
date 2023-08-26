@@ -100,7 +100,7 @@ public:
 
 protected:
     /// If use heat loss
-    OCP_BOOL                ifUse;
+    OCP_BOOL                ifUse{ OCP_FALSE };
     /// Heat loss varsets
     HeatLossVarSet          vs;
     /// method for heat loss calculation

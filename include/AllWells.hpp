@@ -79,8 +79,6 @@ public:
     void InputParam(const ParamWell& paramWell, const Domain& domain);
     /// Setup wells
     void Setup(const Bulk& bk);
-    /// complete the information of well according to Grid and Bulk.
-    void SetupWell(const Bulk& bk);
     /// Setup information of wellGroup
     void SetupWellGroup(const Bulk& bk);
     /// Setup bulks which are penetrated by wells at current stage

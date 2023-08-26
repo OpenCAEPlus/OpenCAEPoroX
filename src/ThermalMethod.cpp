@@ -27,7 +27,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    CalThermalConduct(rs.conn, rs.bulk);
+    rs.bulk.HCm.CalHeatConduct(rs.bulk.vs);
 
     rs.allWells.InitBHP(rs.bulk);
     UpdateLastTimeStep(rs);
@@ -108,7 +108,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    CalThermalConduct(rs.conn, rs.bulk);
+    rs.bulk.HCm.CalHeatConduct(rs.bulk.vs);
     
     rs.bulk.BCm.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
 
@@ -227,7 +227,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.kr.resize(nb * np);
     bvs.Uf.resize(nb);
     bvs.H.resize(nb * np);
-    bvs.kt.resize(nb);
 
     bvs.lphaseNum.resize(nb);
     bvs.lNt.resize(nb);
@@ -246,7 +245,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.lkr.resize(nb * np);
     bvs.lUf.resize(nb);
     bvs.lH.resize(nb * np);
-    bvs.lkt.resize(nb);
 
     // derivatives
     bvs.vfP.resize(nb);
@@ -268,9 +266,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Ufi.resize(nb * nc);
     bvs.HT.resize(nb * np);
     bvs.Hx.resize(nb * np * nc);
-    bvs.ktP.resize(nb);
-    bvs.ktT.resize(nb);
-    bvs.ktS.resize(nb * np);
 
     bvs.lvfP.resize(nb);
     bvs.lvfT.resize(nb);
@@ -291,9 +286,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Ufi.resize(nb * nc);
     bvs.HT.resize(nb * np);
     bvs.Hx.resize(nb * np * nc);
-    bvs.ktP.resize(nb);
-    bvs.ktT.resize(nb);
-    bvs.ktS.resize(nb * np);
 
     // FIM-Specified
     bvs.lendSdP = (nc + 2) * (nc + 1) * np;
@@ -485,30 +477,6 @@ void T_FIM::CalKrPc(Bulk& bk) const
     }
 }
 
-void T_FIM::CalThermalConduct(BulkConn& conn, Bulk& bk) const
-{
-    BulkVarSet& bvs = bk.vs;
-    const OCP_USI nb = bvs.nb;
-    const OCP_USI np = bvs.np;
-
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (bvs.cType[n] == BulkContent::rf) {
-            // fluid bulk
-            OCP_DBL tmp = 0;
-            for (USI j = 0; j < np; j++) {
-                tmp += bvs.S[n * np + j] * bk.thconp[j];
-                bvs.ktS[n * np + j] = bvs.poro[n] * bk.thconp[j];
-            }
-            bvs.kt[n]  = bvs.poro[n] * tmp + (1 - bvs.poro[n]) * bvs.thconr[n];
-            bvs.ktP[n] = bvs.poroP[n] * (tmp - bvs.thconr[n]);
-            bvs.ktT[n] = bvs.poroT[n] * (tmp - bvs.thconr[n]);
-        } else {
-            // non fluid bulk
-            bvs.kt[n] = bvs.thconr[n];
-        }
-    }
-}
-
 
 void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
@@ -545,7 +513,6 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.kr         = bvs.lkr;
     bvs.Uf         = bvs.lUf;
     bvs.H          = bvs.lH;
-    bvs.kt         = bvs.lkt;
     // derivatives
     bvs.vfP       = bvs.lvfP;
     bvs.vfT       = bvs.lvfT;
@@ -566,11 +533,9 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.Ufi       = bvs.lUfi;
     bvs.HT        = bvs.lHT;
     bvs.Hx        = bvs.lHx;
-    bvs.ktP       = bvs.lktP;
-    bvs.ktT       = bvs.lktT;
-    bvs.ktS       = bvs.lktS;
     bvs.dSec_dPri = bvs.ldSec_dPri;
 
+    bk.HCm.ResetToLastTimeStep();
     bk.BCm.ResetToLastTimeStep();
 
     // Wells
@@ -622,7 +587,6 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lkr         = bvs.kr;
     bvs.lUf         = bvs.Uf;
     bvs.lH          = bvs.H;
-    bvs.lkt         = bvs.kt;
     // derivatives
     bvs.lvfP       = bvs.vfP;
     bvs.lvfT       = bvs.vfT;
@@ -643,11 +607,9 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lUfi       = bvs.Ufi;
     bvs.lHT        = bvs.HT;
     bvs.lHx        = bvs.Hx;
-    bvs.lktP       = bvs.ktP;
-    bvs.lktT       = bvs.ktT;
-    bvs.lktS       = bvs.ktS;
     bvs.ldSec_dPri = bvs.dSec_dPri;
 
+    bk.HCm.UpdateLastTimeStep();
     bk.BCm.UpdateLastTimeStep();
 
     rs.allWells.UpdateLastTimeStepBHP();

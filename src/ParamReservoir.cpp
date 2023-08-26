@@ -67,11 +67,6 @@ vector<OCP_DBL>* ParamReservoir::FindPtr(const string& varName)
             myPtr = &permZ;
             break;
 
-        case Map_Str2Int("THCONR", 6):
-            thconr.reserve(numGrid);
-            myPtr = &thconr;
-            break;
-
         case Map_Str2Int("TOPS", 4):
             tops.reserve(dimens.nx * dimens.ny);
             myPtr = &tops;
@@ -739,9 +734,11 @@ void ParamReservoir::InputDENSITY(ifstream& ifs)
     }
 }
 
-/// Read data from the THCONO, THCONG, THCONW
+/// Read data from the THCONO, THCONG, THCONW, THCONR
 void ParamReservoir::InputTHCON(ifstream& ifs, const string& keyword)
 {
+    ifThcon = OCP_TRUE;
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     if (keyword == "THCONO") {
@@ -750,12 +747,15 @@ void ParamReservoir::InputTHCON(ifstream& ifs, const string& keyword)
         thcong = stod(vbuf[0]);
     } else if (keyword == "THCONW") {
         thconw = stod(vbuf[0]);
+    } else if (keyword == "THCONR") {
+        thconr = stod(vbuf[0]);
     }
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         cout << "THCONO\n" << thcono << endl << endl;
         cout << "THCONG\n" << thcong << endl << endl;
         cout << "THCONW\n" << thconw << endl << endl;
+        cout << "THCONR\n" << thconr << endl << endl;
     }
 }
 
@@ -1500,7 +1500,6 @@ void ParamReservoir::FreeGridMemory()
     vector<OCP_DBL>().swap(permX);
     vector<OCP_DBL>().swap(permY);
     vector<OCP_DBL>().swap(permZ);
-    vector<OCP_DBL>().swap(thconr);
 
     vector<OCP_DBL>().swap(P);
     vector<OCP_DBL>().swap(Ni);

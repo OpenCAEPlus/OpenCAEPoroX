@@ -37,10 +37,10 @@ protected:
     OCP_DBL  Pref;
     /// The depth of oil-water contact surface
     OCP_DBL  DOWC;
-    /// The depth of gas-oil contact surface
-    OCP_DBL  DGOC; 
     /// Capillary pressure at oil-water contact Pcow = Po - Pw
     OCP_DBL  PcOW;
+    /// The depth of gas-oil contact surface
+    OCP_DBL  DGOC; 
     /// capillary pressure at gas-oil contact Pcgo = Pg - Po
     OCP_DBL  PcGO;
     /// PBVD Table: bubble point pressure vs depth

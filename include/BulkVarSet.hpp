@@ -78,8 +78,6 @@ public:
     vector<OCP_DBL>    rockKz;
     /// Volume of rock
     vector<OCP_DBL>    vr;
-    /// Rock thermal conductivity
-    vector<OCP_DBL>    thconr;
     /// Enthalpy of rock
     vector<OCP_DBL>    Hr;
 
@@ -164,8 +162,6 @@ public:
     vector<OCP_DBL>     Uf;
     /// Enthalpy of phase
     vector<OCP_DBL>     H;
-    /// Coefficient of thermal diffusivity
-    vector<OCP_DBL>     kt;
          
     /// last T
     vector<OCP_DBL>     lT;
@@ -202,9 +198,7 @@ public:
     /// last Uf          
     vector<OCP_DBL>     lUf;
     /// last H          
-    vector<OCP_DBL>     lH;
-    /// last kt         
-    vector<OCP_DBL>     lkt;         
+    vector<OCP_DBL>     lH;       
 
     /// d vf / d P
     vector<OCP_DBL>     vfP;
@@ -243,13 +237,7 @@ public:
     /// d H / d T       
     vector<OCP_DBL>     HT;
     /// d H / d xij     
-    vector<OCP_DBL>     Hx;
-    /// d kt / d P      
-    vector<OCP_DBL>     ktP;
-    /// d kt / d T      
-    vector<OCP_DBL>     ktT;
-    /// d kt / d S      
-    vector<OCP_DBL>     ktS;     
+    vector<OCP_DBL>     Hx;    
                         
     /// last vfP        
     vector<OCP_DBL>     lvfP;
@@ -289,12 +277,6 @@ public:
     vector<OCP_DBL>     lHT; 
     /// last Hx         
     vector<OCP_DBL>     lHx; 
-    /// last ktP        
-    vector<OCP_DBL>     lktP;
-    /// last ktT        
-    vector<OCP_DBL>     lktT;
-    /// last ktS        
-    vector<OCP_DBL>     lktS; 
 
     /// length of dSec_dPri.
     USI                 lendSdP;

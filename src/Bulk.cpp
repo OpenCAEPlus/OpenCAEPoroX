@@ -44,6 +44,8 @@ void Bulk::InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts)
     SATm.Setup(rs_param, vs.nb, PVTm.GetMixtureType(), opts);
     ROCKm.Setup(rs_param, vs.nb, opts);
     BCm.Setup(rs_param, vs.nb);
+    HCm.Setup(rs_param, vs);
+    
     INITm.Setup(rs_param, PVTm.GetMixtureType());
 }
 
@@ -65,16 +67,6 @@ void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& o
 {
     // Init T
     rsTemp = rs_param.rsTemp;
-    // ifThermal conductivity
-    if (rs_param.oil) {
-        thconp.push_back(rs_param.thcono);
-    }
-    if (rs_param.gas) {
-        thconp.push_back(rs_param.thcong);
-    }
-    if (rs_param.water) {
-        thconp.push_back(rs_param.thconw);
-    }
 
 
     if (CURRENT_RANK == MASTER_PROCESS)

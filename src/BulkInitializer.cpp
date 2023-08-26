@@ -35,7 +35,6 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 		EQUIL.PcOW = rs_param.EQUIL[3];
 		EQUIL.DGOC = rs_param.EQUIL[4];
 		EQUIL.PcGO = rs_param.EQUIL[5];
-
 		break;
 	default:
 		OCP_ABORT("Wrong Type!");
@@ -90,7 +89,6 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 	OCP_DBL PcGO = EQUIL.PcGO;
 	OCP_DBL zRange[2];
 	OCP_DBL zRangeTmp[2] = { 1E8,0 };  // min , max
-
 
 	for (OCP_USI n = 0; n < bvs.nb; n++) {
 		OCP_DBL temp1 = bvs.depth[n] - bvs.dz[n] / 2;
@@ -150,7 +148,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 
 	const auto PVT = PVTm.GetPVT(0);
 
-	if (Dref < DOGC) {
+	if (Dref < DOGC && bvs.gIndex >= 0) {
 		// reference pressure is gas pressure
 		Pgref = Pref;
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);

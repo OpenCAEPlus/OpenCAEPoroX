@@ -230,7 +230,7 @@ public:
     vector<OCP_DBL>   permX;   ///< Permeability along the x - direction for each grid.
     vector<OCP_DBL>   permY;   ///< Permeability along the y-direction for each grid.
     vector<OCP_DBL>   permZ;   ///< Permeability along the z-direction for each grid.
-    vector<OCP_DBL>   thconr;  ///< Rock ifThermal conductivity.
+    
     OCP_DBL           rsTemp;  ///< Temperature for reservoir.
     vector<RockParam> rockSet; ///< a set of rock
     HLoss             hLoss;   ///< Heat loss property
@@ -245,9 +245,11 @@ public:
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
     Type_A_r<OCP_DBL> gravity; ///< Gravity of oil, water, gas in standard conditions.
+    OCP_BOOL          ifThcon;  
     OCP_DBL           thcono{24}; ///< oil ifThermal conductivity
     OCP_DBL           thcong{24}; ///< gas ifThermal conductivity
     OCP_DBL           thconw{24}; ///< water ifThermal conductivity
+    OCP_DBL           thconr{24}; ///< Rock ifThermal conductivity.
 
     // Models
     OCP_BOOL blackOil{OCP_FALSE}; ///< If ture, blackoil model will be used.

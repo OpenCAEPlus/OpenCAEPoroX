@@ -118,7 +118,6 @@ void ParamRead::ReadFile(const string& filename)
             case Map_Str2Int("PRESSURE", 8):
             case Map_Str2Int("Ni", 2):
             case Map_Str2Int("SWATINIT", 8):
-            case Map_Str2Int("THCONR", 6):
             case Map_Str2Int("SATNUM", 6):
             case Map_Str2Int("PVTNUM", 6):
             case Map_Str2Int("ACTNUM", 6):
@@ -182,6 +181,7 @@ void ParamRead::ReadFile(const string& filename)
             case Map_Str2Int("THCONO", 6):
             case Map_Str2Int("THCONG", 6):
             case Map_Str2Int("THCONW", 6):
+            case Map_Str2Int("THCONR", 6):
                 paramRs.InputTHCON(ifs, keyword);
                 break;
 

@@ -78,18 +78,11 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 void AllWells::Setup(const Bulk& bk)
 {
     OCP_FUNCNAME;
-    SetupWell(bk);
-}
-
-
-void AllWells::SetupWell(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-
     for (USI w = 0; w < numWell; w++) {
         wells[w].Setup(bk, solvents);
     }
 }
+
 
 void AllWells::SetupWellGroup(const Bulk& bk)
 {

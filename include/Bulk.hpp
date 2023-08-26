@@ -28,8 +28,10 @@
 #include "PVTModule.hpp"
 #include "SATModule.hpp"
 #include "ROCKModule.hpp"
+#include "HeatConduct.hpp"
 #include "BoundaryCondition.hpp"
 #include "BulkInitializer.hpp"
+
 
 using namespace std;
 
@@ -43,8 +45,6 @@ const int BULK_NEGATIVE_TEMPERATURE      = -2;
 const int BULK_NEGATIVE_COMPONENTS_MOLES = -3;
 const int BULK_OUTRANGED_VOLUME_ERROR    = -4;
 const int BULK_OUTRANGED_CFL             = -5;
-
-
 
 
 class BulkTypeAIM
@@ -129,8 +129,10 @@ protected:
     ROCKModule        ROCKm;
     /// Boundary condition Module
     BoundaryCondition BCm;
+    /// Heat Conductivity module
+    HeatConduct       HCm;
 
-    /// Initialize
+    /// Initializer
     BulkInitializer   INITm;
 
 public:
@@ -147,7 +149,6 @@ public:
 
 protected:
     OCP_DBL          rsTemp;    ///< Reservoir temperature.
-    vector<OCP_DBL>  thconp;    ///< Phase thermal conductivity: numPhase
 
     /////////////////////////////////////////////////////////////////////
     // Region

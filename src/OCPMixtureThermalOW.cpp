@@ -76,9 +76,9 @@ OCPMixtureUnitThermalOWMethod01::OCPMixtureUnitThermalOWMethod01(const Component
 
 OCP_DBL OCPMixtureUnitThermalOWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt)
 {
-    if (pt == PhaseType::oil)         return CalRhoO(P, T);
+    if (pt == PhaseType::oil)       return CalRhoO(P, T);
     else if (pt == PhaseType::wat)  return CalRhoW(P, T);
-    else                              OCP_ABORT("WRONG TarPhase");
+    else                            OCP_ABORT("WRONG TarPhase");
 }
 
 

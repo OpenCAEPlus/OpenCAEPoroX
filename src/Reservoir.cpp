@@ -78,7 +78,6 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             VarInfo<vector<OCP_DBL>>{ "PERMY", &rs.permY, &bulk.vs.rockKy },
             VarInfo<vector<OCP_DBL>>{ "PERMZ", &rs.permZ, &bulk.vs.rockKz },
             VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &optFeatures.scalePcow.vs.swatInit },
-            VarInfo<vector<OCP_DBL>>{ "THCONR", &rs.thconr, &bulk.vs.thconr },
     }, vector<VarInfo<vector<OCP_USI>>>{
         VarInfo<vector<OCP_USI>>{"LOCATION", &grid.location, &bulk.vs.location },
         VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATm.GetSATNUM() },
