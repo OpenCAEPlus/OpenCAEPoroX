@@ -19,7 +19,7 @@ void T_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 
 void T_FIM::InitReservoir(Reservoir& rs)
 {
-    rs.bulk.InitPTSw(50);
+    rs.bulk.Initialize(rs.domain);
 
     InitRock(rs.bulk);
     CalRock(rs.bulk);
@@ -212,6 +212,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Nt.resize(nb);
     bvs.Ni.resize(nb * nc);
     bvs.vf.resize(nb);
+    bvs.initT.resize(nb);
     bvs.T.resize(nb);
     bvs.P.resize(nb);
     bvs.Pb.resize(nb);
@@ -691,7 +692,7 @@ void T_FIM::CalRes(Reservoir&      rs,
         }
 
         // Heat Loss
-        if (OCP_TRUE && bk.vs.location[n] > 0) {
+        if (OCP_TRUE) {
             // dT
             res.resAbs[n * len + nc + 1] += dt * bk.BCm.heatLoss.GetHl(n);
         }
@@ -852,7 +853,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                                     bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (OCP_TRUE && bk.vs.location[n] > 0) {
+            if (OCP_TRUE) {
                 // dT
                 bmat[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
             }
@@ -865,7 +866,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             bmatR[ncol * ncol - 1] = bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
 
             // Heat Loss iterm
-            if (OCP_TRUE && bk.vs.location[n] > 0) {
+            if (OCP_TRUE) {
                 // dT
                 bmatR[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
             }

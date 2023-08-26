@@ -29,6 +29,7 @@
 #include "SATModule.hpp"
 #include "ROCKModule.hpp"
 #include "BoundaryCondition.hpp"
+#include "BulkInitializer.hpp"
 
 using namespace std;
 
@@ -43,22 +44,7 @@ const int BULK_NEGATIVE_COMPONENTS_MOLES = -3;
 const int BULK_OUTRANGED_VOLUME_ERROR    = -4;
 const int BULK_OUTRANGED_CFL             = -5;
 
-/// Initial reservoir infomation for calculating initial equilibration.
-//  Note: This class includes reference depth and pressure at it, depth of contacts
-//  between phases, and capillary pressure at phase contact surfaces.
-class ParamEQUIL
-{
-    friend class Bulk;
 
-private:
-    OCP_DBL  Dref; ///< The reference depth
-    OCP_DBL  Pref; ///< Pressure at the reference depth
-    OCP_DBL  DOWC; ///< The depth of oil-water contact surface
-    OCP_DBL  DGOC; ///< The depth of gas-oil contact surface
-    OCP_DBL  PcOW; ///< Capillary pressure at oil-water contact Pcow = Po - Pw
-    OCP_DBL  PcGO; ///< capillary pressure at gas-oil contact Pcgo = Pg - Po
-    OCPTable PBVD; ///< PBVD Table: bubble point pressure vs depth
-};
 
 
 class BulkTypeAIM
@@ -130,14 +116,22 @@ public:
 
 public:
     auto& GetVarSet() const { return vs; }
+    void Initialize(const Domain& domain) { INITm.Initialize(vs, PVTm, SATm, domain); }
 
 protected:
+    /// Bsaic variable set
     BulkVarSet        vs;
+    /// PVT Module
     PVTModule         PVTm;
+    /// SAT Module
     SATModule         SATm;
+    /// Rock Module
     ROCKModule        ROCKm;
+    /// Boundary condition Module
     BoundaryCondition BCm;
-    
+
+    /// Initialize
+    BulkInitializer   INITm;
 
 public:
     /// Return the number of bulks.
@@ -149,22 +143,9 @@ public:
     /// Return the number of components.
     USI GetComNum() const { return vs.nc; }
 
-public:
-    MPI_Comm  myComm;
-    OCP_INT   numproc, myrank;
 
-
-    /////////////////////////////////////////////////////////////////////
-    // Initial Properties
-    /////////////////////////////////////////////////////////////////////
-public:
-    /// Calculate initial equilibrium -- hydrostatic equilibration
-    void InitPTSw(const USI& tabrow);
 
 protected:
-    vector<OCPTable> initZi_Tab; ///< Initial mole ratio of components vs. depth, table set
-    vector<OCPTable> initT_Tab; ///< Initial temperature vs. depth, table set
-    ParamEQUIL       EQUIL;     ///< Initial Equilibration.
     OCP_DBL          rsTemp;    ///< Reservoir temperature.
     vector<OCP_DBL>  thconp;    ///< Phase thermal conductivity: numPhase
 

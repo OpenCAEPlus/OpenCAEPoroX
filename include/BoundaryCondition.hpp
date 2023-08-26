@@ -13,8 +13,8 @@
 #define __BOUNDARYCONDITION_HEADER__
 
 
- // OpenCAEPoroX header files
-#include <HeatLoss.hpp>
+// OpenCAEPoroX header files
+#include "HeatLoss.hpp"
 
 
 #include <vector>
@@ -41,7 +41,7 @@ public: // temp
 };
 
 
-#endif /* end if __HeatLoss_HEADER__ */
+#endif /* end if __BOUNDARYCONDITION_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

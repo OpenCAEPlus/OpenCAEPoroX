@@ -44,7 +44,7 @@ void IsoT_IMPEC::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 /// Initialize reservoir
 void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
 {
-    rs.bulk.InitPTSw(50);
+    rs.bulk.Initialize(rs.domain);
 
     CalRock(rs.bulk);
 
@@ -186,6 +186,7 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     bvs.Nt.resize(nb);
     bvs.Ni.resize(nb * nc);
     bvs.vf.resize(nb);
+    bvs.initT.resize(nb);
     bvs.T.resize(nb);
     bvs.P.resize(nb);
     bvs.Pb.resize(nb);
@@ -678,7 +679,7 @@ void IsoT_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 void IsoT_FIM::InitReservoir(Reservoir& rs)
 {
     // Calculate initial bulk pressure and temperature and water saturation
-    rs.bulk.InitPTSw(50);
+    rs.bulk.Initialize(rs.domain);
     // Initialize rock property
     CalRock(rs.bulk);
     // Initialize fluid properties
@@ -861,6 +862,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Nt.resize(nb);
     bvs.Ni.resize(nb * nc);
     bvs.vf.resize(nb);
+    bvs.initT.resize(nb);
     bvs.T.resize(nb);
     bvs.P.resize(nb);
     bvs.Pb.resize(nb);
@@ -1544,7 +1546,7 @@ void IsoT_AIMc::SetupNeighbor(Reservoir& rs)
 
 void IsoT_AIMc::InitReservoir(Reservoir& rs) const
 {
-    rs.bulk.InitPTSw(50);
+    rs.bulk.Initialize(rs.domain);
 
     CalRock(rs.bulk);
 

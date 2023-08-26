@@ -18,6 +18,7 @@
 void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 {
     OCP_FUNCNAME;
+    numproc = domain.numproc;
 
     for (auto& s : paramWell.solSet) {
         solvents.push_back(s);
@@ -77,7 +78,6 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 void AllWells::Setup(const Bulk& bk)
 {
     OCP_FUNCNAME;
-    numproc = bk.numproc;
     SetupWell(bk);
 }
 

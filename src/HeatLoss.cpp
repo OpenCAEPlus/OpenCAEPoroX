@@ -47,6 +47,10 @@ void HeatLossMethod01::CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, con
 		hlvs.hl[bId]  = kappa * (2 * (bvs.T[bId] - bvs.initT[bId]) / sqrt(lambda * t) - p) * (bvs.dx[bId] * bvs.dy[bId]);
 		hlvs.hlT[bId] = kappa * (2 / sqrt(lambda * t) - pT) * (bvs.dx[bId] * bvs.dy[bId]);
 	}
+	else {
+		hlvs.hl[bId]  = 0;
+		hlvs.hlT[bId] = 0;
+	}
 }
 
 
