@@ -102,9 +102,7 @@ public:
     void InputParam(const ParamReservoir& rs_param);
 
     /// Allocate memory for fluid grid for isothermal model.
-    void SetupIsoT(const Domain& domain);
-    /// Allocate memory for fluid grid for ifThermal model.
-    void SetupT(const Domain& domain);
+    void Setup();
 
     /////////////////////////////////////////////////////////////////////
     // General Variables
@@ -167,17 +165,17 @@ public:
     /// Return oil saturation of the n-th bulk.
     OCP_DBL GetSOIL(const OCP_USI& n) const
     {
-        return vs.S[n * vs.np + vs.oIndex];
+        return vs.S[n * vs.np + vs.o];
     }
     /// Return gas saturation of the n-th bulk.
     OCP_DBL GetSGAS(const OCP_USI& n) const
     {
-        return vs.S[n * vs.np + vs.gIndex];
+        return vs.S[n * vs.np + vs.g];
     }
     /// Return water saturation of the n-th bulk.
     OCP_DBL GetSWAT(const OCP_USI& n) const
     {
-        return vs.S[n * vs.np + vs.wIndex];
+        return vs.S[n * vs.np + vs.w];
     }
 
 

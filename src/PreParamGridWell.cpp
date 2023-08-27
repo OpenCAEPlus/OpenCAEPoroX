@@ -104,12 +104,13 @@ void PreParamGridWell::CheckInput()
     if (poro.size() != numGrid)           OCP_ABORT("WRONG PORO!");
     if (ntg.size() != numGrid) {
         OCP_WARNING("NTG will be set to 1 !");
+        ntg.clear();
+        ntg.resize(numGrid, 1.0);
     }
-    else {
-        for (OCP_USI n = 0; n < numGrid; n++) {
-            poro[n] *= ntg[n];
-        }
+    for (OCP_USI n = 0; n < numGrid; n++) {
+        poro[n] *= ntg[n];
     }
+
     if (ACTNUM.size() != numGrid) {
         OCP_WARNING("ACTNUM will be set to 1 !");
         ACTNUM.clear();

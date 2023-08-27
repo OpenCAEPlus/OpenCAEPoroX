@@ -118,12 +118,8 @@ public:
 
 public:
 
-    /// Index of oil
-    INT                 oIndex;
-    /// Index of gas
-    INT                 gIndex;
-    /// Index of water
-    INT                 wIndex;
+    /// Index of oil, gas, water(neigative = inexisting)
+    INT                 o, g, w;
     /// Temperature
     vector<OCP_DBL>     T;
     /// Pressure

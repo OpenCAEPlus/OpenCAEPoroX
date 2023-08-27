@@ -92,7 +92,10 @@ public:
 
 public:
 
-
+    void SetupIndependentModule(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
+        heatLoss.Setup(rs_param, bvs.nb);
+        heatConduct.Setup(rs_param, bvs);
+    }
 
     /////////////////////////////////////////////////////////////////////
     // Thermal

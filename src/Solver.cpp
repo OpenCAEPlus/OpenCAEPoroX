@@ -32,13 +32,13 @@ void Solver::Setup(Reservoir& rs, const OCPControl& ctrl)
 void Solver::SetupIsoT(Reservoir& rs, const OCPControl& ctrl)
 {
     // Setup static infomation for reservoir
-    rs.SetupIsoT();
+    rs.Setup();
     IsoTSolver.SetupMethod(rs, ctrl);
 }
 
 void Solver::SetupT(Reservoir& rs, const OCPControl& ctrl)
 {
-    rs.SetupT();
+    rs.Setup();
     TSolver.SetupMethod(rs, ctrl);
 }
 

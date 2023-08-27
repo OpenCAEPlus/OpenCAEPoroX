@@ -58,6 +58,11 @@ void HeatLoss::Setup(const ParamReservoir& rs_param, const OCP_USI& nb)
 {
 	ifUse = rs_param.hLoss.ifHLoss;
 	if (ifUse) {
+		if (rs_param.thermal == OCP_FALSE) {
+			ifUse = OCP_FALSE;
+			OCP_WARNING("HEATLOSS is IGNORED in ISOTHERMAL MODEL!");
+			return;
+		}
 		vs.SetNb(nb);
 		hlM.push_back(new HeatLossMethod01(rs_param.hLoss, vs));
 	}

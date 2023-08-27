@@ -29,35 +29,25 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
     rsTemp = rs_param.rsTemp;
 
     PVTm.Setup(rs_param, vs, optMs);
-    SATm.Setup(rs_param, vs.nb, PVTm.GetMixtureType(), optMs);
+    SATm.Setup(rs_param, vs, optMs);
     ROCKm.Setup(rs_param, vs.nb, optMs);
 
-    optMs.heatLoss.Setup(rs_param, vs.nb);
-    optMs.heatConduct.Setup(rs_param, vs);
+    optMs.SetupIndependentModule(rs_param, vs);
     
     INITm.Setup(rs_param, PVTm.GetMixtureType());
 }
 
 
 /// Setup bulk information.
-void Bulk::SetupIsoT(const Domain& domain)
+void Bulk::Setup()
 {
     OCP_FUNCNAME;
-    
-    // Set defaulted information
-    if (vs.ntg.empty()) {
-        vs.ntg.resize(vs.nb, 1);
-    }
-}
-
-/// Allocate memory for fluid grid for Thermal model
-void Bulk::SetupT(const Domain& domain)
-{
-    SetupIsoT(domain);
-    vs.cType.resize(vs.nb, BulkContent::rf);
-    for (OCP_USI n = 0; n < vs.nb; n++) {
-        if (vs.poroInit[n] < 1E-6) {
-            vs.cType[n] = BulkContent::r;
+    if (PVTm.GetMixtureType() == OCPMixtureType::THERMALK_OW) {
+        vs.cType.resize(vs.nb, BulkContent::rf);
+        for (OCP_USI n = 0; n < vs.nb; n++) {
+            if (vs.poroInit[n] < 1E-6) {
+                vs.cType[n] = BulkContent::r;
+            }
         }
     }
 }

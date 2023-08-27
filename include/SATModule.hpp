@@ -26,34 +26,26 @@ class SATModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, const OCPMixtureType& mixType, OptionalModules& opts)
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, OptionalModules& opts)
     {
         NTSFUN = rs_param.NTSFUN;
 
         // Setup Saturation function
-        switch (mixType)
-        {
-        case OCPMixtureType::SP:
-            for (USI i = 0; i < NTSFUN; i++)
-                SATs.push_back(new FlowUnit_SP(rs_param, i, opts));
-            break;
-        case OCPMixtureType::BO_OW:
-        case OCPMixtureType::THERMALK_OW:
+        if (bvs.o >= 0 && bvs.g < 0 && bvs.w >= 0) {
             for (USI i = 0; i < NTSFUN; i++)
                 SATs.push_back(new FlowUnit_OW(rs_param, i, opts));
-            break;
-        case OCPMixtureType::BO_OGW:
-        case OCPMixtureType::COMP:
+        }
+        else if (bvs.o >= 0 && bvs.g >= 0 && bvs.w >= 0) {
             for (USI i = 0; i < NTSFUN; i++) {
                 SATs.push_back(new FlowUnit_OGW(rs_param, i, opts));
             }
-            break;
-        default:
-            OCP_ABORT("Wrong Type!");
-            break;
+        }
+        else {
+            OCP_ABORT("Inavilable Mixture Type!");
         }
 
-        if (SATNUM.empty()) SATNUM.resize(nb, 0);
+
+        if (SATNUM.empty()) SATNUM.resize(bvs.nb, 0);
     }
     auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }
@@ -66,7 +58,6 @@ protected:
     vector<USI>       SATNUM;
     /// SAT modules
     vector<FlowUnit*> SATs;
-
 };
 
 

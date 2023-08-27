@@ -61,9 +61,9 @@ public:
 
         bvs.np     = PVTs[0]->GetVs()->np;
         bvs.nc     = PVTs[0]->GetVs()->nc;
-        bvs.oIndex = PVTs[0]->GetVs()->o;
-        bvs.gIndex = PVTs[0]->GetVs()->g;
-        bvs.wIndex = PVTs[0]->GetVs()->w;
+        bvs.o = PVTs[0]->GetVs()->o;
+        bvs.g = PVTs[0]->GetVs()->g;
+        bvs.w = PVTs[0]->GetVs()->w;
     }
     auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
     auto GetMixture() const {return PVTs[0]->GetMixture();}

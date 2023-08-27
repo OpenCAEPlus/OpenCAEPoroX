@@ -437,19 +437,6 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         }
 
         delete[] recv_buffer;
-
-        if (myrank == 0) {
-            //cout << bulk.numBulk << endl;
-            //for (OCP_USI n = 0; n < bulk.numBulk; n++) {
-            //    cout << domain.grid[n] << "  " << bulk.dx[n] << endl;
-            //}
-            //for (const auto& c : conn.iteratorConn) {
-            //    cout << c.BId() << "   " << c.EId() << "   " << c.Direction() << "   "
-            //        << c.AreaB() << "   " << c.AreaE() << endl;
-            //    
-            //}
-            //cout << conn.numConn << endl;
-        }
     }
 
     // Free memory
@@ -465,18 +452,11 @@ void Reservoir::InputDistParamOthers(const ParamRead& param)
 }
 
 
-void Reservoir::SetupIsoT()
+void Reservoir::Setup()
 {
     OCP_FUNCNAME;
 
-    bulk.SetupIsoT(domain);
-    conn.Setup(bulk);
-    allWells.Setup(bulk);
-}
-
-void Reservoir::SetupT()
-{
-    bulk.SetupT(domain);
+    bulk.Setup();
     conn.Setup(bulk);
     allWells.Setup(bulk);
 }

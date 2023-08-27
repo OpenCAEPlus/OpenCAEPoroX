@@ -148,7 +148,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 
 	const auto PVT = PVTm.GetPVT(0);
 
-	if (Dref < DOGC && bvs.gIndex >= 0) {
+	if (Dref < DOGC && bvs.g >= 0) {
 		// reference pressure is gas pressure
 		Pgref = Pref;
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
@@ -385,7 +385,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 			Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
 		}
 
-		if (bvs.gIndex >= 0) {
+		if (bvs.g >= 0) {
 			// find the gas pressure in Dref by Poref
 			Pgref = 0;
 			Ptmp = Poref;
@@ -483,7 +483,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 			Potmp[id + 1] = Potmp[id] + gammaOtmp * (Ztmp[id + 1] - Ztmp[id]);
 		}
 
-		if (bvs.gIndex >= 0) {
+		if (bvs.g >= 0) {
 			// find the gas pressure in Dref by Poref
 			Pgref = 0;
 			Ptmp = Poref;
@@ -635,7 +635,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 		auto Pcow = Po - Pw;
 		auto Sw = SAT->CalSwByPcow(Pcow);
 		auto Sg = 0;
-		if (bvs.gIndex >= 0) {
+		if (bvs.g >= 0) {
 			Sg = SAT->CalSgByPcgo(Pcgo);
 		}
 		if (Sw + Sg > 1) {
@@ -692,7 +692,7 @@ void BulkInitializer::InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, cons
 			Pcgo = Pg - Po;
 			avePcow += Pcow;
 			tmpSw = SAT->CalSwByPcow(Pcow);
-			if (bvs.gIndex >= 0) {
+			if (bvs.g >= 0) {
 				tmpSg = SAT->CalSgByPcgo(Pcgo);
 			}
 			if (tmpSw + tmpSg > 1) {

@@ -1305,9 +1305,9 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
 
     const auto nb     = bcv.nbI;
     const auto np     = bcv.np;
-    const auto OIndex = bcv.oIndex;
-    const auto GIndex = bcv.gIndex;
-    const auto WIndex = bcv.wIndex;
+    const auto OIndex = bcv.o;
+    const auto GIndex = bcv.g;
+    const auto WIndex = bcv.w;
 
     ofstream outF(myFile, ios::app | ios::binary);
     vector<OCP_DBL> tmpV(nb);

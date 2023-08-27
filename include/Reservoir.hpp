@@ -106,10 +106,8 @@ protected:
 
 public:
 
-    /// Setup static information for reservoir with input params for Isothermal model
-    void SetupIsoT();
-    /// Setup static information for reservoir with input params for Thermal model
-    void SetupT();
+    /// Setup static information for reservoir
+    void Setup();
     /// Apply the control of ith critical time point.
     void ApplyControl(const USI& i);
     /// Calculate num of Injection, Production
@@ -127,11 +125,11 @@ public:
     /// Return num of open well
     USI GetNumOpenWell() const { return allWells.GetNumOpenWell(); }
     /// If oil exist
-    OCP_BOOL IfOilExist() const { return bulk.vs.oIndex >= 0; }
+    OCP_BOOL IfOilExist() const { return bulk.vs.o >= 0; }
     /// If gas exist
-    OCP_BOOL IfGasExist() const { return bulk.vs.gIndex >= 0; }
+    OCP_BOOL IfGasExist() const { return bulk.vs.g >= 0; }
     /// If water exist
-    OCP_BOOL IfWatExist() const { return bulk.vs.wIndex >= 0; }
+    OCP_BOOL IfWatExist() const { return bulk.vs.w >= 0; }
 
 protected:
     Bulk             bulk;        ///< Active grid info.

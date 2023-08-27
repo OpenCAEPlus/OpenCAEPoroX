@@ -29,7 +29,7 @@ class HeatConductVarSet
     friend class HeatConductMethod01;
 
 public:
-    void SetNb(const OCP_USI& nbin, const USI& npin, const INT& oIndex, const INT& gIndex, const INT& wIndex) {
+    void SetUp(const OCP_USI& nbin, const USI& npin, const INT& oIndex, const INT& gIndex, const INT& wIndex) {
         nb = nbin; 
         np = npin;
         o  = oIndex;
