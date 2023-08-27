@@ -17,7 +17,6 @@
 #include "AllWells.hpp"
 #include "Bulk.hpp"
 #include "BulkConn.hpp"
-#include "OptionalFeatures.hpp"
 #include "ParamRead.hpp"
 #include "PreProcess.hpp"
 
@@ -135,11 +134,9 @@ public:
     OCP_BOOL IfWatExist() const { return bulk.vs.wIndex >= 0; }
 
 protected:
-    // Grid             grid;        ///< Init Grid info.
     Bulk             bulk;        ///< Active grid info.
     AllWells         allWells;    ///< Wells class info.
     BulkConn         conn;        ///< Bulk's connection info.
-    OptionalFeatures optFeatures; ///< optional features.
     Domain           domain;      ///< domain decomposition
 
 public:

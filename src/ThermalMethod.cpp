@@ -544,7 +544,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CaldG(bk);
     rs.allWells.CalFlux(bk);
 
-    rs.optFeatures.ResetToLastTimeStep();
+    rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
     ctrl.ResetIterNRLS();
@@ -613,7 +613,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bk.BCm.UpdateLastTimeStep();
 
     rs.allWells.UpdateLastTimeStepBHP();
-    rs.optFeatures.UpdateLastTimeStep();
+    rs.bulk.optMs.UpdateLastTimeStep();
 }
 
 void T_FIM::CalRes(Reservoir&      rs,

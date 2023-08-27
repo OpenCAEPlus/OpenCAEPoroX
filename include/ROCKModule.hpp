@@ -18,7 +18,7 @@
 // OpenCAEPoroX header files
 #include "OCPRock.hpp"
 #include "BulkVarSet.hpp"
-#include "OptionalFeatures.hpp"
+#include "OptionalModules.hpp"
 
 using namespace std;
 
@@ -27,7 +27,7 @@ class ROCKModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, OptionalFeatures& opts)
+    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, OptionalModules& opts)
 	{
 	
 		NTROCK = rs_param.NTROOC;

@@ -34,7 +34,7 @@ class MixtureUnitComp : public MixtureUnit
 public:
     MixtureUnitComp() = default;
 
-    MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
+    MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &compM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
 

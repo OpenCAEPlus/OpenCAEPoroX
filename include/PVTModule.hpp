@@ -29,7 +29,7 @@ class PVTModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalFeatures& opts) 
+    void Setup(const ParamReservoir& rs_param, BulkVarSet& bvs, OptionalModules& opts) 
     {
         NTPVT = rs_param.NTPVT;
 

@@ -26,7 +26,7 @@ class SATModule
 {
 
 public:
-    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, const OCPMixtureType& mixType, OptionalFeatures& opts)
+    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb, const OCPMixtureType& mixType, OptionalModules& opts)
     {
         NTSFUN = rs_param.NTSFUN;
 

@@ -18,7 +18,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "OptionalFeatures.hpp"
+#include "OptionalModules.hpp"
 #include "ParamReservoir.hpp"
 #include "WellOpt.hpp"
 #include "OCPMixture.hpp"

@@ -77,7 +77,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             VarInfo<vector<OCP_DBL>>{ "PERMX", &rs.permX, &bulk.vs.rockKx },
             VarInfo<vector<OCP_DBL>>{ "PERMY", &rs.permY, &bulk.vs.rockKy },
             VarInfo<vector<OCP_DBL>>{ "PERMZ", &rs.permZ, &bulk.vs.rockKz },
-            VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &optFeatures.scalePcow.vs.swatInit },
+            VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &bulk.optMs.scalePcow.vs.swatInit },
     }, vector<VarInfo<vector<OCP_USI>>>{
         VarInfo<vector<OCP_USI>>{"LOCATION", &grid.location, &bulk.vs.location },
         VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATm.GetSATNUM() },
@@ -89,7 +89,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
     /////////////////////////////////////////////////////////////////////////
 
     // Get grid-based vars from params
-    optFeatures.nb = domain.numGridLocal;
+    bulk.optMs.nb = domain.numGridLocal;
     bulk.vs.nb     = domain.numGridLocal;   // Interior + ghost
     bulk.vs.nbI    = domain.numGridInterior;
 
@@ -460,7 +460,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 void Reservoir::InputDistParamOthers(const ParamRead& param)
 {
     domain.SetGirdDimens(param.paramRs.dimens.nx, param.paramRs.dimens.ny, param.paramRs.dimens.nz);
-    bulk.InputParam(param.paramRs, optFeatures);
+    bulk.InputParam(param.paramRs);
     allWells.InputParam(param.paramWell, domain);
 }
 

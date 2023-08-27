@@ -12,7 +12,7 @@
 #include "MixtureUnitComp.hpp"
 
 
-MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts)
+MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     compM.Setup(rs_param, i);
     mixtureType = compM.MixtureType();

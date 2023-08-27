@@ -617,7 +617,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     rs.conn.vs.rho          = rs.conn.vs.lrho;
 
     // Optional Features
-    rs.optFeatures.ResetToLastTimeStep();
+    rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
     ctrl.ResetIterNRLS();
@@ -661,7 +661,7 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     conn.vs.lrho        = conn.vs.rho;
 
     rs.allWells.UpdateLastTimeStepBHP();
-    rs.optFeatures.UpdateLastTimeStep();
+    rs.bulk.optMs.UpdateLastTimeStep();
 }
 
 ////////////////////////////////////////////
@@ -1456,7 +1456,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(bk);
 
     // Optional Features
-    rs.optFeatures.ResetToLastTimeStep();
+    rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
     ctrl.ResetIterNRLS();
@@ -1505,7 +1505,7 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.ldSec_dPri    = bvs.dSec_dPri;
 
     rs.allWells.UpdateLastTimeStepBHP();
-    rs.optFeatures.UpdateLastTimeStep();
+    rs.bulk.optMs.UpdateLastTimeStep();
 }
 
 ////////////////////////////////////////////

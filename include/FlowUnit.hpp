@@ -17,7 +17,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "OCPFuncSAT.hpp"
-#include "OptionalFeatures.hpp"
+#include "OptionalModules.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPFlowOGW.hpp"
 #include "OCPFlowOW.hpp"
@@ -73,7 +73,7 @@ protected:
 class FlowUnit_SP : public FlowUnit
 {
 public:
-    FlowUnit_SP(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts){
+    FlowUnit_SP(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts){
         Allocate(1);
         kr[0]    = 1;
         pc[0]    = 0;
@@ -99,7 +99,7 @@ public:
 class FlowUnit_OW : public FlowUnit
 {
 public:
-    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
+    FlowUnit_OW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts) {
         Allocate(2);
         OWF.Setup(rs_param, i);
         // for scalePcow
@@ -142,7 +142,7 @@ protected:
 class FlowUnit_OG : public FlowUnit
 {
 public:
-    FlowUnit_OG(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
+    FlowUnit_OG(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts) {
         Allocate(2);
         OGF.Setup(rs_param, i);
     }
@@ -176,7 +176,7 @@ protected:
 class FlowUnit_OGW : public FlowUnit
 {
 public:
-    FlowUnit_OGW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts) {
+    FlowUnit_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts) {
         Allocate(3);
         OGWF.Setup(rs_param, i);
         // for miscible

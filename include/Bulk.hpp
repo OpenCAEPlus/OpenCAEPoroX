@@ -100,10 +100,10 @@ class Bulk
 
 public:
     /// Input param from internal data structure ParamReservoir.
-    void InputParam(const ParamReservoir& rs_param, OptionalFeatures& opts);
-    void InputParamBLKOIL(const ParamReservoir& rs_param, OptionalFeatures& opts);
-    void InputParamCOMPS(const ParamReservoir& rs_param, OptionalFeatures& opts);
-    void InputParamTHERMAL(const ParamReservoir& rs_param, OptionalFeatures& opts);
+    void InputParam(const ParamReservoir& rs_param);
+    void InputParamBLKOIL(const ParamReservoir& rs_param);
+    void InputParamCOMPS(const ParamReservoir& rs_param);
+    void InputParamTHERMAL(const ParamReservoir& rs_param);
 
     /// Allocate memory for fluid grid for isothermal model.
     void SetupIsoT(const Domain& domain);
@@ -134,6 +134,8 @@ protected:
 
     /// Initializer
     BulkInitializer   INITm;
+    /// optional modules
+    OptionalModules  optMs; 
 
 public:
     /// Return the number of bulks.

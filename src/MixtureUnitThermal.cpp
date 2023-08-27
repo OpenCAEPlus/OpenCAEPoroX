@@ -12,7 +12,7 @@
 // OpenCAEPoroX header files
 #include "MixtureUnitThermal.hpp"
 
-MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalFeatures& opts)
+MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalModules& opts)
 {
     OWTM.Setup(param, tarId);
     mixtureType = OWTM.MixtureType();

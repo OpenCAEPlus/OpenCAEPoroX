@@ -44,7 +44,7 @@ class MixtureUnitBlkOil_SP : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_SP() = default;
-    MixtureUnitBlkOil_SP(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts)
+    MixtureUnitBlkOil_SP(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
     {
         OCP_ABORT("Not Completed!");
     };
@@ -118,7 +118,7 @@ class MixtureUnitBlkOil_OW : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_OW() = default;
-    MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
+    MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &OWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_DBL& Pin,
@@ -170,7 +170,7 @@ class MixtureUnitBlkOil_OGW : public MixtureUnitBlkOil
 {
 public:
     MixtureUnitBlkOil_OGW() = default;
-    MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalFeatures& opts);
+    MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &OGWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_DBL& Pin,
