@@ -27,7 +27,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    rs.bulk.HCm.CalHeatConduct(rs.bulk.vs);
+    rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
 
     rs.allWells.InitBHP(rs.bulk);
     UpdateLastTimeStep(rs);
@@ -108,9 +108,9 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    rs.bulk.HCm.CalHeatConduct(rs.bulk.vs);
+    rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
     
-    rs.bulk.BCm.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
+    rs.bulk.optMs.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
 
     rs.allWells.CalTrans(rs.bulk);
     rs.allWells.CalFlux(rs.bulk);
@@ -535,8 +535,6 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.Hx        = bvs.lHx;
     bvs.dSec_dPri = bvs.ldSec_dPri;
 
-    bk.HCm.ResetToLastTimeStep();
-    bk.BCm.ResetToLastTimeStep();
 
     // Wells
     rs.allWells.ResetBHP();
@@ -609,8 +607,6 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lHx        = bvs.Hx;
     bvs.ldSec_dPri = bvs.dSec_dPri;
 
-    bk.HCm.UpdateLastTimeStep();
-    bk.BCm.UpdateLastTimeStep();
 
     rs.allWells.UpdateLastTimeStepBHP();
     rs.bulk.optMs.UpdateLastTimeStep();
@@ -656,7 +652,7 @@ void T_FIM::CalRes(Reservoir&      rs,
         // Heat Loss
         if (OCP_TRUE) {
             // dT
-            res.resAbs[n * len + nc + 1] += dt * bk.BCm.heatLoss.GetHl(n);
+            res.resAbs[n * len + nc + 1] += dt * bk.optMs.heatLoss.GetHl(n);
         }
     }
 
@@ -817,7 +813,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             // Heat Loss iterm
             if (OCP_TRUE) {
                 // dT
-                bmat[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
+                bmat[ncol * ncol - 1] += dt * bk.optMs.heatLoss.GetHlT(n);
             }
 
             ls.NewDiag(n, bmat);
@@ -830,7 +826,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
             // Heat Loss iterm
             if (OCP_TRUE) {
                 // dT
-                bmatR[ncol * ncol - 1] += dt * bk.BCm.heatLoss.GetHlT(n);
+                bmatR[ncol * ncol - 1] += dt * bk.optMs.heatLoss.GetHlT(n);
             }
 
             ls.NewDiag(n, bmatR);

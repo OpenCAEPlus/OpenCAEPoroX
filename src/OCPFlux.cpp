@@ -500,7 +500,7 @@ void OCPFlux_T::CalFlux(const BulkConnPair& bp, const Bulk& bk)
     // Calculte upblock, rho, flux_vj, flux_ni, Adkt
 
     const BulkVarSet&        bvs = bk.vs;
-    const HeatConductVarSet& hcvs = bk.HCm.GetVarSet();
+    const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
 
     fill(flux_ni.begin(), flux_ni.end(), 0.0);
 
@@ -571,7 +571,7 @@ void OCPFlux_T::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
 {
 
     const BulkVarSet&        bvs  = bk.vs;
-    const HeatConductVarSet& hcvs = bk.HCm.GetVarSet();
+    const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
 
     fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
     fill(dFdXpE.begin(), dFdXpE.end(), 0.0);

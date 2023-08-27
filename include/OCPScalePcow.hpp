@@ -98,6 +98,8 @@ public:
     void ScaleDer(const OCP_USI& bId, const USI& mIndex) const;
     /// Scale Pcow
     void Scale(const OCP_USI& bId, const USI& mIndex) const;
+    void ResetTolastTimeStep() { }
+    void UpdateLastTimeStep() { }
 
 protected:
     /// If scale

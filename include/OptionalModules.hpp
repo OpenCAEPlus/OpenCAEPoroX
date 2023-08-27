@@ -16,6 +16,7 @@
 #include "OCPMiscible.hpp"
 #include "OCPScalePcow.hpp"
 #include "HeatLoss.hpp"
+#include "HeatConduct.hpp"
 
 class OptionalModules
 {
@@ -34,6 +35,9 @@ public:
         surTen.ResetTolastTimeStep();
         misFac.ResetTolastTimeStep();
         misCur.ResetTolastTimeStep();
+        scalePcow.ResetTolastTimeStep();
+        heatLoss.ResetToLastTimeStep();
+        heatConduct.ResetToLastTimeStep();
     }
     void UpdateLastTimeStep()
     {
@@ -41,6 +45,9 @@ public:
         surTen.UpdateLastTimeStep();
         misFac.UpdateLastTimeStep();
         misCur.UpdateLastTimeStep();
+        scalePcow.UpdateLastTimeStep();
+        heatLoss.UpdateLastTimeStep();
+        heatConduct.UpdateLastTimeStep();
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -49,6 +56,10 @@ public:
 protected:
     /// num of bulks
     OCP_USI nb;
+
+/////////////////////////////////////////////////////////////////////
+// Attachment Module
+/////////////////////////////////////////////////////////////////////
 
 
     /////////////////////////////////////////////////////////////////////
@@ -63,7 +74,7 @@ protected:
     // Phase Permeability Curve
     /////////////////////////////////////////////////////////////////////
 
-protected:
+public:
     /// Surface Tension Calculation
     SurfaceTension surTen;
     /// Miscible Factore Calculation
@@ -72,6 +83,26 @@ protected:
     MiscibleCurve  misCur;
     /// Scale water-oil capillary pressure
     ScalePcow      scalePcow;
+
+
+
+/////////////////////////////////////////////////////////////////////
+// Independent Module
+/////////////////////////////////////////////////////////////////////
+
+public:
+
+
+
+    /////////////////////////////////////////////////////////////////////
+    // Thermal
+    /////////////////////////////////////////////////////////////////////
+
+
+    /// Heat Loss
+    HeatLoss       heatLoss;
+    /// Heat Conduct
+    HeatConduct    heatConduct;
 
 };
 

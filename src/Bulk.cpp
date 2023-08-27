@@ -26,51 +26,16 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
 {
     OCP_FUNCNAME;
 
-    if (rs_param.thermal) {
-        // ifThermal model
-        InputParamTHERMAL(rs_param);
-    }
-    else if (rs_param.blackOil) {
-        // Isothermal blackoil model
-        InputParamBLKOIL(rs_param);
-    } 
-    else if (rs_param.comps) {
-        // Isothermal compositional model
-        InputParamCOMPS(rs_param);
-    }
-
+    rsTemp = rs_param.rsTemp;
 
     PVTm.Setup(rs_param, vs, optMs);
     SATm.Setup(rs_param, vs.nb, PVTm.GetMixtureType(), optMs);
     ROCKm.Setup(rs_param, vs.nb, optMs);
-    BCm.Setup(rs_param, vs.nb);
-    HCm.Setup(rs_param, vs);
+
+    optMs.heatLoss.Setup(rs_param, vs.nb);
+    optMs.heatConduct.Setup(rs_param, vs);
     
     INITm.Setup(rs_param, PVTm.GetMixtureType());
-}
-
-void Bulk::InputParamBLKOIL(const ParamReservoir& rs_param)
-{
-    if (CURRENT_RANK == MASTER_PROCESS)
-        cout << endl << "BLACKOIL model is selected" << endl;
-}
-
-void Bulk::InputParamCOMPS(const ParamReservoir& rs_param)
-{
-    rsTemp = rs_param.rsTemp;
-
-    if (CURRENT_RANK == MASTER_PROCESS)
-        cout << endl << "COMPOSITIONAL model is selected" << endl;
-}
-
-void Bulk::InputParamTHERMAL(const ParamReservoir& rs_param)
-{
-    // Init T
-    rsTemp = rs_param.rsTemp;
-
-
-    if (CURRENT_RANK == MASTER_PROCESS)
-        cout << endl << "THERMAL model is selected" << endl;
 }
 
 

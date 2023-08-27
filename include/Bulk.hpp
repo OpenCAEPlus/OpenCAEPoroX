@@ -28,9 +28,8 @@
 #include "PVTModule.hpp"
 #include "SATModule.hpp"
 #include "ROCKModule.hpp"
-#include "HeatConduct.hpp"
-#include "BoundaryCondition.hpp"
 #include "BulkInitializer.hpp"
+#include "OptionalModules.hpp"
 
 
 using namespace std;
@@ -101,9 +100,6 @@ class Bulk
 public:
     /// Input param from internal data structure ParamReservoir.
     void InputParam(const ParamReservoir& rs_param);
-    void InputParamBLKOIL(const ParamReservoir& rs_param);
-    void InputParamCOMPS(const ParamReservoir& rs_param);
-    void InputParamTHERMAL(const ParamReservoir& rs_param);
 
     /// Allocate memory for fluid grid for isothermal model.
     void SetupIsoT(const Domain& domain);
@@ -127,15 +123,10 @@ protected:
     SATModule         SATm;
     /// Rock Module
     ROCKModule        ROCKm;
-    /// Boundary condition Module
-    BoundaryCondition BCm;
-    /// Heat Conductivity module
-    HeatConduct       HCm;
-
     /// Initializer
     BulkInitializer   INITm;
     /// optional modules
-    OptionalModules  optMs; 
+    OptionalModules   optMs; 
 
 public:
     /// Return the number of bulks.
