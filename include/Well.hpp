@@ -108,12 +108,16 @@ protected:
 public:
     /// Initialize the Well BHP
     void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; CalPerfP(); }
-    /// Calculate flow rate of moles of phases for injection well with calculated
-    /// qi_lbmol.
-    void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
-    /// Calculate flow rate of moles of phases for production well with calculated
-    /// qi_lbmol.
-    void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
+
+    /// Calculate flow rate of moles of phases for injection well and production well
+    void CalIPRate(const Bulk& bk, const OCP_DBL& dt) {
+        if (opt.type == WellType::productor) {
+            CalProdQj(bk, dt);
+        }
+        else {
+            CalInjQj(bk, dt);
+        }
+    }
 
     /// Check if well operation mode would be changed.
     void CheckOptMode(const Bulk& bk);
@@ -159,6 +163,10 @@ public:
     void UpdateLastTimeStep() { lbhp = bhp; }
 
 protected:
+    /// Calculate flow rate of moles of phases for injection well with calculated qi_lbmol.
+    void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
+    /// Calculate flow rate of moles of phases for production well with calculated qi_lbmol.
+    void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
     /// Check if cross flow happens.
     OCP_INT CheckCrossFlow(const Bulk& bk);
     /// calculate flow rate of moles of phases for injection well with maxBHP.
@@ -230,6 +238,8 @@ public:
         bhp = u[0]; 
         CalPerfP();
     }
+
+protected:
 
     void CalPerfP(){ for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p]; }
 

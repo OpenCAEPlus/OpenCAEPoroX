@@ -202,11 +202,7 @@ void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
         wells[w].WWPR = 0;
 
         if (wells[w].IsOpen()) {
-            if (wells[w].WellType() == WellType::productor) {
-                wells[w].CalProdQj(bk, dt);
-            } else {
-                wells[w].CalInjQj(bk, dt);
-            }
+            wells[w].CalIPRate(bk, dt);
         }
         FGIR += wells[w].WGIR;
         FWIR += wells[w].WWIR;
