@@ -251,8 +251,7 @@ void AllWells::ResetBHP()
 {
     for (auto& w : wells) {
         if (w.IsOpen()) {
-            w.bhp = w.lbhp;
-            w.CorrectBHP();
+            w.ResetToLastTimeStep();
         }
     }
 }

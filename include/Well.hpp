@@ -107,7 +107,7 @@ protected:
 
 public:
     /// Initialize the Well BHP
-    void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
+    void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; CalPerfP(); }
     /// Calculate transmissibility for each phase in perforations.
     void CalTrans(const Bulk& bk);
     /// Calculate the flux for each perforations.
@@ -124,8 +124,6 @@ public:
     void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
     /// Calculate pressure difference between well and perforations.
     void CaldG(const Bulk& bk);
-    /// Correct BHP if opt mode is BHPMode
-    void CorrectBHP();
     /// Check if well operation mode would be changed.
     void CheckOptMode(const Bulk& bk);
     /// Check if abnormal Pressure occurs.
@@ -151,6 +149,13 @@ public:
         return perf[p].qj_ft3[j];
     }
 
+public:
+    void ResetToLastTimeStep(){
+        bhp = lbhp;
+        if (opt.mode == WellOptMode::bhp) bhp = opt.tarBHP;
+        CalPerfP();
+    }
+    void UpdateLastTimeStep() { lbhp = bhp; }
 
 protected:
     /// Calculate Well Index with Peaceman model.
@@ -204,11 +209,16 @@ public:
     // FIM
     /////////////////////////////////////////////////////////////////////
 
-    void GetSolutionFIM(const OCP_DBL* u) { bhp += u[0]; }
+    void GetSolutionFIM(const OCP_DBL* u) { 
+        bhp += u[0];
+        CalPerfP();
+    }
     void GetSolutionIMPEC(const OCP_DBL* u) { 
         bhp = u[0]; 
-        for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p];
+        CalPerfP();
     }
+
+    void CalPerfP(){ for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p]; }
 
 public:
     void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;

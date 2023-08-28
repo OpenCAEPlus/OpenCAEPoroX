@@ -659,7 +659,7 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     conn.vs.lupblock    = conn.vs.upblock;
     conn.vs.lrho        = conn.vs.rho;
 
-    rs.allWells.UpdateLastTimeStepBHP();
+    rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 
@@ -1503,7 +1503,7 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     // FIM-Specified
     bvs.ldSec_dPri    = bvs.dSec_dPri;
 
-    rs.allWells.UpdateLastTimeStepBHP();
+    rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 

@@ -26,7 +26,7 @@ class PeacemanWell : public Well
 {
 public:
 	/// Initialize Well Pressure
-	void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
+	void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; CalPerfP(); }
 protected:
 	/// Calculate pressure difference between well and perforations.
 	void CaldG(const Bulk& bk);

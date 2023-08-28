@@ -331,7 +331,7 @@ void Well::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
     if (opt.type == WellType::injector) {
 
         for (USI p = 0; p < numPerf; p++) {
-            perf[p].P  = bhp + dG[p];
+            // perf[p].P  = bhp + dG[p];
             const OCP_USI k  = perf[p].location;
             const OCP_DBL dP = bvs.P[k] - perf[p].P;
 
@@ -349,7 +349,7 @@ void Well::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
     } else {
 
         for (USI p = 0; p < numPerf; p++) {
-            perf[p].P       = bhp + dG[p];
+            // perf[p].P       = bhp + dG[p];
             const OCP_USI k = perf[p].location;
             perf[p].qt_ft3 = 0;
             fill(perf[p].qi_lbmol.begin(), perf[p].qi_lbmol.end(), 0.0);
@@ -488,6 +488,8 @@ void Well::CaldG(const Bulk& bk)
     if (opt.state == WellState::open) {
         if (opt.type == WellType::injector) CalInjdG(bk);
         else                                CalProddG01(bk);
+
+        CalPerfP();
     }
 }
 
@@ -513,7 +515,7 @@ void Well::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
             auto    PVT   = bk.PVTm.GetPVT(n);
@@ -540,7 +542,7 @@ void Well::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -584,7 +586,7 @@ void Well::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -636,7 +638,7 @@ void Well::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -705,7 +707,7 @@ void Well::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -757,7 +759,7 @@ void Well::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -843,7 +845,7 @@ void Well::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -913,7 +915,7 @@ void Well::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n     = perf[p].location;
-            perf[p].P     = bhp + dG[p];
+            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -1018,13 +1020,6 @@ void Well::CalFactor(const Bulk& bk) const
 }
 
 
-void Well::CorrectBHP()
-{
-    if (opt.mode == WellOptMode::bhp) {
-        bhp = opt.tarBHP;
-    }
-}
-
 /// Constant well pressure would be applied if flow rate is too large.
 /// Constant flow rate would be applied if well pressure is outranged.
 void Well::CheckOptMode(const Bulk& bk)
@@ -1059,6 +1054,8 @@ void Well::CheckOptMode(const Bulk& bk)
             bhp      = opt.tarBHP;
         }
     }
+
+    CalPerfP();
 }
 
 OCP_INT Well::CheckP(const Bulk& bk)

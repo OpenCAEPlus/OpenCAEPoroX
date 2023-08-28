@@ -103,9 +103,9 @@ public:
     void CaldG(const Bulk& bk);
     /// Calculate Injection rate, total Injection, Production rate, total Production
     void CalIPRT(const Bulk& bk, OCP_DBL dt);
-    void UpdateLastTimeStepBHP()
+    void UpdateLastTimeStep()
     {
-        for (auto& w : wells) w.lbhp = w.bhp;
+        for (auto& w : wells) w.UpdateLastTimeStep();
     }
     void ResetBHP();
     /// Check if unreasonable well pressure or perforation pressure occurs.

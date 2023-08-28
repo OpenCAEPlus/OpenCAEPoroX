@@ -607,7 +607,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.ldSec_dPri = bvs.dSec_dPri;
 
 
-    rs.allWells.UpdateLastTimeStepBHP();
+    rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 
