@@ -1181,7 +1181,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         bId       = conn.iteratorConn[c].BId();
         eId       = conn.iteratorConn[c].EId();
         fluxnum   = conn.iteratorConn[c].FluxNum();
-        auto Flux = conn.flux[fluxnum];
+        auto Flux = conn.flux[fluxnum];     
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
@@ -1241,19 +1241,6 @@ void IsoT_FIM::AssembleMatWells(LinearSystem&    ls,
     for (auto& wl : rs.allWells.wells) {
         wl->AssembleMatFIM(ls, rs.bulk, dt);
     }
-
-    //// for Reinjection
-    // for (auto& wG : rs.allWells.wellGroup) {
-    //     if (wG.IfReInj()) {
-    //         for (auto& prod : rs.allWells.wellGroup[wG.prodGroup].wIdPROD) {
-    //             if (rs.allWells.wells[prod].IsOpen()) {
-    //                 rs.allWells.wells[prod].AssembleMatReinjection_FIM(rs.bulk, ls,
-    //                 dt, rs.allWells.wells,
-    //                     wG.wIdINJ);
-    //             }
-    //         }
-    //     }
-    // }
 }
 
 

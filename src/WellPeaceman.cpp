@@ -94,8 +94,6 @@ void PeacemanWell::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
 void PeacemanWell::InitWellP(const Bulk& bk)
 {
-    if (opt.state != WellState::open)  return;
-
     bhp = bk.vs.P[perf[0].location]; 
     CalPerfP();
 }
