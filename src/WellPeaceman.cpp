@@ -11,18 +11,532 @@
 
 #include "WellPeaceman.hpp"
 
- /// It calculates pressure difference between perforations iteratively.
- /// This function can be used in both black oil model and compositional model.
- /// stability of this method shoule be tested.
+
+void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const USI& wId)
+{
+    OCP_FUNCNAME;
+
+    numPerf = domain.well2Bulk[wId].size();
+    perf.resize(numPerf);
+    USI pp = 0;
+    for (USI p = 0; p < well.I_perf.size(); p++) {
+
+        const OCP_USI tmpI = well.I_perf[p] - 1;
+        const OCP_USI tmpJ = well.J_perf[p] - 1;
+        const OCP_USI tmpK = well.K_perf[p] - 1;
+        const OCP_INT loc = domain.GetPerfLocation(wId, tmpI, tmpJ, tmpK);
+        if (loc < 0) {
+            continue;
+        }
+        perf[pp].location = loc;
+        perf[pp].I = tmpI;
+        perf[pp].J = tmpJ;
+        perf[pp].K = tmpK;
+        perf[pp].WI = well.WI[p];
+        perf[pp].radius = well.diameter[p] / 2.0;
+        perf[pp].kh = well.kh[p];
+        perf[pp].skinFactor = well.skinFactor[p];
+        if (well.direction[p] == "X" || well.direction[p] == "x") {
+            perf[pp].direction = PerfDirection::x;
+        }
+        else if (well.direction[p] == "Y" || well.direction[p] == "y") {
+            perf[pp].direction = PerfDirection::y;
+        }
+        else if (well.direction[p] == "Z" || well.direction[p] == "z") {
+            perf[pp].direction = PerfDirection::z;
+        }
+        else {
+            OCP_ABORT("Wrong direction of perforations!");
+        }
+        pp++;
+    }
+    OCP_ASSERT(pp = numPerf, "Wrong Perf!");
+}
+
+
+void PeacemanWell::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    nc = bvs.nc;
+    np = bvs.np;
+    mixture = bk.PVTm.GetMixture();
+    rsTemp = bk.rsTemp;
+
+    qi_lbmol.resize(nc);
+    factor.resize(nc);
+
+    SetupUnit();
+    SetupOpts(sols);
+
+    // Perf
+    for (USI p = 0; p < numPerf; p++) {
+        perf[p].state = WellState::open;
+        perf[p].depth = bvs.depth[perf[p].location];
+        perf[p].multiplier = 1;
+        perf[p].qi_lbmol.resize(nc);
+        perf[p].transj.resize(np);
+        perf[p].qj_ft3.resize(np);
+    }
+    // dG
+    dG.resize(numPerf, 0);
+
+    if (depth < 0) depth = perf[0].depth;
+
+    CalWI(bk);
+    // test
+    // ShowPerfStatus(bvs);
+}
+
+
+
+void PeacemanWell::InitWellP(const Bulk& bk)
+{
+    if (opt.state != WellState::open)  return;
+
+    bhp = bk.vs.P[perf[0].location]; 
+    CalPerfP();
+}
+
+
+void PeacemanWell::CheckOptMode(const Bulk& bk)
+{
+    if (opt.state != WellState::open)  return;
+
+    CalTrans(bk);
+    CaldG(bk);
+
+    OCP_FUNCNAME;
+    if (opt.initMode == WellOptMode::bhp) {
+        if (opt.type == WellType::injector) {
+            const OCP_DBL q = CalInjRateMaxBHP(bk);
+            if (q > opt.maxRate) {
+                opt.mode = WellOptMode::irate;
+            }
+            else {
+                opt.mode = WellOptMode::bhp;
+                bhp = opt.tarBHP;
+            }
+        }
+        else {
+            opt.mode = WellOptMode::bhp;
+            bhp = opt.tarBHP;
+        }
+    }
+    else {
+        OCP_DBL q;
+        if (opt.type == WellType::injector) {
+            q = CalInjRateMaxBHP(bk);
+        }
+        else {
+            q = CalProdRateMinBHP(bk);
+        }
+        if (q > opt.maxRate) {
+            opt.mode = opt.initMode;
+        }
+        else {
+            opt.mode = WellOptMode::bhp;
+            bhp = opt.tarBHP;
+        }
+    }
+
+    CalPerfP();
+}
+
+
+void PeacemanWell::CalFluxInit(const Bulk& bk) 
+{
+    if (opt.state != WellState::open)  return;
+
+    CalTrans(bk);
+    CaldG(bk);
+    CalFlux(bk, OCP_TRUE);
+}
+
+
+void PeacemanWell::CalFlux(const Bulk& bk) 
+{
+    if (opt.state != WellState::open)  return;
+
+    CalTrans(bk);
+    CalFlux(bk, OCP_FALSE);
+}
+
+
+OCP_INT PeacemanWell::CheckP(const Bulk& bk)
+{
+    if (opt.state != WellState::open)  return WELL_SUCCESS;
+
+    OCP_FUNCNAME;
+    // 0 : all correct
+    // 1 : negative P
+    // 2 : outlimited P
+    // 3 : crossflow happens
+
+    if (bhp < 0) {
+        cout << "### WARNING: Well " << name << " BHP = " << bhp << endl;
+        return WELL_NEGATIVE_PRESSURE;
+    }
+    for (USI p = 0; p < numPerf; p++) {
+        if (perf[p].state == WellState::open && perf[p].P < 0) {
+#ifdef DEBUG
+            cout << "### WARNING: Well " << name << " Perf[" << p
+                << "].P = " << perf[p].P << endl;
+#endif // DEBUG
+            return WELL_NEGATIVE_PRESSURE;
+        }
+    }
+
+
+    if (opt.mode != WellOptMode::bhp &&
+        ((opt.type == WellType::injector && bhp > opt.maxBHP) ||
+            (opt.type == WellType::productor && bhp < opt.minBHP))) {
+#if _DEBUG
+        cout << "### WARNING: Well " << name << " switch to BHPMode" << endl;
+#endif
+        opt.mode = WellOptMode::bhp;
+        bhp = opt.tarBHP;
+        return WELL_SWITCH_TO_BHPMODE;
+    }
+
+    return CheckCrossFlow(bk);
+}
+
+
+
+void PeacemanWell::CalIPRate(const Bulk& bk, const OCP_DBL& dt)
+{
+    WGIR = 0;
+    WWIR = 0;
+    WOPR = 0;
+    WGPR = 0;
+    WWPR = 0;
+
+    if (opt.state != WellState::open)  return;
+
+    if (opt.state == WellState::open) {
+        if (opt.type == WellType::productor)  CalProdQj(bk, dt);
+        else                                  CalInjQj(bk, dt);
+    }
+}
+
+
+void PeacemanWell::ResetToLastTimeStep(const Bulk& bk)
+{
+    if (opt.state != WellState::open)  return;
+
+    bhp = lbhp;
+    if (opt.mode == WellOptMode::bhp) bhp = opt.tarBHP;
+    CalPerfP();
+    CalFluxInit(bk);
+}
+
+
+void PeacemanWell::UpdateLastTimeStep()
+{ 
+    if (opt.state != WellState::open)  return;
+
+    lbhp = bhp; 
+}
+
+
+void PeacemanWell::CalWI(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    // this fomular needs to be carefully checked !
+    // especially the dz
+
+    for (USI p = 0; p < numPerf; p++) {
+        if (perf[p].WI > 0) {
+            break;
+        }
+        else {
+            const OCP_USI Idb = perf[p].location;
+            const OCP_DBL dx = bvs.dx[Idb];
+            const OCP_DBL dy = bvs.dy[Idb];
+            const OCP_DBL dz = bvs.dz[Idb] * bvs.ntg[Idb];
+            OCP_DBL       ro = 0;
+            switch (perf[p].direction) {
+            case PerfDirection::x:
+            {
+                const OCP_DBL kykz = bvs.rockKy[Idb] * bvs.rockKz[Idb];
+                const OCP_DBL ky_kz = bvs.rockKy[Idb] / bvs.rockKz[Idb];
+                assert(kykz > 0);
+                ro = 0.28 * pow((dy * dy * pow(1 / ky_kz, 0.5) +
+                    dz * dz * pow(ky_kz, 0.5)),
+                    0.5);
+                ro /= (pow(ky_kz, 0.25) + pow(1 / ky_kz, 0.25));
+
+                if (perf[p].kh < 0) {
+                    perf[p].kh = (dx * pow(kykz, 0.5));
+                }
+                break;
+            }
+            case PerfDirection::y:
+            {
+                const OCP_DBL kzkx = bvs.rockKz[Idb] * bvs.rockKx[Idb];
+                const OCP_DBL kz_kx = bvs.rockKz[Idb] / bvs.rockKx[Idb];
+                assert(kzkx > 0);
+                ro = 0.28 * pow((dz * dz * pow(1 / kz_kx, 0.5) +
+                    dx * dx * pow(kz_kx, 0.5)),
+                    0.5);
+                ro /= (pow(kz_kx, 0.25) + pow(1 / kz_kx, 0.25));
+
+                if (perf[p].kh < 0) {
+                    perf[p].kh = (dy * pow(kzkx, 0.5));
+                }
+                break;
+            }
+            case PerfDirection::z:
+            {
+                const OCP_DBL kxky = bvs.rockKx[Idb] * bvs.rockKy[Idb];
+                const OCP_DBL kx_ky = bvs.rockKx[Idb] / bvs.rockKy[Idb];
+                assert(kxky > 0);
+                ro = 0.28 * pow((dx * dx * pow(1 / kx_ky, 0.5) +
+                    dy * dy * pow(kx_ky, 0.5)),
+                    0.5);
+                ro /= (pow(kx_ky, 0.25) + pow(1 / kx_ky, 0.25));
+
+                if (perf[p].kh < 0) {
+                    perf[p].kh = (dz * pow(kxky, 0.5));
+                }
+                break;
+            }
+            default:
+                OCP_ABORT("Wrong direction of perforations!");
+            }
+            perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                (log(ro / perf[p].radius) + perf[p].skinFactor);
+        }
+    }
+}
+
+
+void PeacemanWell::CalTrans(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    if (opt.type == WellType::injector) {
+        for (USI p = 0; p < numPerf; p++) {
+            perf[p].transINJ = 0;
+            OCP_USI k = perf[p].location;
+            OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+
+            // single phase
+            for (USI j = 0; j < np; j++) {
+                perf[p].transj[j] = 0;
+                OCP_USI id = k * np + j;
+                if (bvs.phaseExist[id]) {
+                    perf[p].transj[j] = temp * bvs.kr[id] / bvs.mu[id];
+                    perf[p].transINJ += perf[p].transj[j];
+                }
+            }
+            if (ifUseUnweight) {
+                perf[p].transINJ = perf[p].WI;
+            }
+        }
+    }
+    else {
+        for (USI p = 0; p < numPerf; p++) {
+            OCP_USI k = perf[p].location;
+            OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+
+            // multi phase
+            for (USI j = 0; j < np; j++) {
+                perf[p].transj[j] = 0;
+                OCP_USI id = k * np + j;
+                if (bvs.phaseExist[id]) {
+                    perf[p].transj[j] = temp * bvs.kr[id] / bvs.mu[id];
+                }
+            }
+        }
+    }
+}
+
+
+void PeacemanWell::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    // cout << name << endl;
+    fill(qi_lbmol.begin(), qi_lbmol.end(), 0.0);
+
+    if (opt.type == WellType::injector) {
+
+        for (USI p = 0; p < numPerf; p++) {
+            const OCP_USI k = perf[p].location;
+            const OCP_DBL dP = bvs.P[k] - perf[p].P;
+
+            perf[p].qt_ft3 = perf[p].transINJ * dP;
+
+            if (ReCalXi) {
+                perf[p].xi = bk.PVTm.GetPVT(k)->XiPhase(
+                    perf[p].P, opt.injTemp, opt.injZi, opt.injPhase);
+            }
+            for (USI i = 0; i < nc; i++) {
+                perf[p].qi_lbmol[i] = perf[p].qt_ft3 * perf[p].xi * opt.injZi[i];
+                qi_lbmol[i] += perf[p].qi_lbmol[i];
+            }
+        }
+    }
+    else {
+
+        for (USI p = 0; p < numPerf; p++) {
+            const OCP_USI k = perf[p].location;
+            perf[p].qt_ft3 = 0;
+            fill(perf[p].qi_lbmol.begin(), perf[p].qi_lbmol.end(), 0.0);
+            fill(perf[p].qj_ft3.begin(), perf[p].qj_ft3.end(), 0.0);
+
+            for (USI j = 0; j < np; j++) {
+                OCP_USI id = k * np + j;
+                if (bvs.phaseExist[id]) {
+                    OCP_DBL dP = bvs.Pj[id] - perf[p].P;
+
+                    perf[p].qj_ft3[j] = perf[p].transj[j] * dP;
+                    perf[p].qt_ft3 += perf[p].qj_ft3[j];
+
+                    OCP_DBL xi = bvs.xi[id];
+                    OCP_DBL xij;
+                    for (USI i = 0; i < nc; i++) {
+                        xij = bvs.xij[id * nc + i];
+                        perf[p].qi_lbmol[i] += perf[p].qj_ft3[j] * xi * xij;
+                    }
+                }
+            }
+            for (USI i = 0; i < nc; i++) qi_lbmol[i] += perf[p].qi_lbmol[i];
+        }
+    }
+}
+
+
+/// Pressure in injection well equals maximum ones in injection well,
+/// which is input by users. this function is used to check if operation mode of
+/// well shoubld be swtched.
+OCP_DBL PeacemanWell::CalInjRateMaxBHP(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    OCP_DBL qj = 0;
+    const OCP_DBL Pwell = opt.maxBHP;
+
+    for (USI p = 0; p < numPerf; p++) {
+
+        const OCP_DBL Pperf = Pwell + dG[p];
+        const OCP_USI k = perf[p].location;
+        const OCP_DBL xi = bk.PVTm.GetPVT(k)->XiPhase(Pperf, opt.injTemp, opt.injZi, opt.injPhase);
+        const OCP_DBL dP = Pperf - bvs.P[k];
+        qj += perf[p].transINJ * xi * dP;
+    }
+
+    const OCP_DBL fac = UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase));
+    return qj * fac;
+}
+
+/// Pressure in production well equals minial ones in production well,
+/// which is input by users. this function is used to check if operation mode of
+/// well shoubld be swtched.
+OCP_DBL PeacemanWell::CalProdRateMinBHP(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    OCP_DBL qj = 0;
+    const OCP_DBL Pwell = opt.minBHP;
+
+    vector<OCP_DBL> tmpQi_lbmol(nc, 0);
+    vector<OCP_DBL> tmpQj(np, 0);
+
+    for (USI p = 0; p < numPerf; p++) {
+
+        OCP_DBL Pperf = Pwell + dG[p];
+        OCP_USI k = perf[p].location;
+
+        for (USI j = 0; j < np; j++) {
+            OCP_USI id = k * np + j;
+            if (bvs.phaseExist[id]) {
+                OCP_DBL dP = bvs.Pj[id] - Pperf;
+                OCP_DBL temp = perf[p].transj[j] * bvs.xi[id] * dP;
+                for (USI i = 0; i < nc; i++) {
+                    tmpQi_lbmol[i] += bvs.xij[id * nc + i] * temp;
+                }
+            }
+        }
+    }
+
+    qj = 0;
+    mixture->CalVStd(Psurf, Tsurf, &tmpQi_lbmol[0]);
+    for (USI j = 0; j < np; j++) {
+        qj += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
+    }
+
+    return qj;
+}
+
+
+void PeacemanWell::CalInjQj(const Bulk& bvs, const OCP_DBL& dt)
+{
+    OCP_FUNCNAME;
+
+    OCP_DBL qj = 0;
+
+    for (USI i = 0; i < nc; i++) {
+        qj += qi_lbmol[i];
+    }
+    const OCP_DBL fac = UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase));
+
+    if (opt.injPhase == PhaseType::wat) {
+        WWIR = -qj * fac;
+        WWIT += WWIR * dt;
+    }
+    else {
+        WGIR = -qj * fac;
+        WGIT += WGIR * dt;
+    }
+}
+
+void PeacemanWell::CalProdQj(const Bulk& bvs, const OCP_DBL& dt)
+{
+    mixture->CalVStd(Psurf, Tsurf, &qi_lbmol[0]);
+    const auto o = mixture->OilIndex();
+    const auto g = mixture->GasIndex();
+    const auto w = mixture->WatIndex();
+
+    if (o >= 0) WOPR = UnitConvertR2S(o, mixture->GetVarSet().vj[o]);
+    if (g >= 0) WGPR = UnitConvertR2S(g, mixture->GetVarSet().vj[g]);
+    if (w >= 0) WWPR = UnitConvertR2S(w, mixture->GetVarSet().vj[w]);
+
+    WOPT += WOPR * dt;
+    WGPT += WGPR * dt;
+    WWPT += WWPR * dt;
+}
+
+
+/// It calculates pressure difference between perforations iteratively.
+/// This function can be used in both black oil model and compositional model.
+/// stability of this method shoule be tested.
 void PeacemanWell::CaldG(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
-    if (opt.type == WellType::injector)
-        CalInjdG(bk);
-    else
-        CalProddG01(bk);
+    if (opt.state == WellState::open) {
+        if (opt.type == WellType::injector) CalInjdG(bk);
+        else                                CalProddG01(bk);
+        CalPerfP();
+    }
 }
+
 
 void PeacemanWell::CalInjdG(const Bulk& bk)
 {
@@ -34,7 +548,7 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
     vector<OCP_DBL> dGperf(numPerf, 0);
 
     if (depth <= perf.front().depth) {
-        // PeacemanWell is higher
+        // Well is higher
         for (OCP_INT p = numPerf - 1; p >= 0; p--) {
             if (p == 0) {
                 seg_num = ceil(fabs((perf[0].depth - depth) / maxlen));
@@ -47,7 +561,6 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
             auto    PVT = bk.PVTm.GetPVT(n);
@@ -63,7 +576,7 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
         }
     }
     else if (depth >= perf[numPerf - 1].depth) {
-        // PeacemanWell is lower
+        // Well is lower
         for (USI p = 0; p < numPerf; p++) {
             if (p == numPerf - 1) {
                 seg_num = ceil(fabs((depth - perf[numPerf - 1].depth) / maxlen));
@@ -76,7 +589,6 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -93,6 +605,154 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
     }
 }
 
+
+void PeacemanWell::CalFactor(const Bulk& bk) const
+{
+    if (opt.mode == WellOptMode::bhp)  return;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    if (opt.type == WellType::productor) {
+        if (mixture->IfBlkModel()) {
+            // For black oil models -- phase = components
+            vector<OCP_DBL> qitmp(nc, 1.0);
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI i = 0; i < nc; i++) {
+                factor[i] = UnitConvertR2S(i, mixture->GetVarSet().vj[i]) * opt.prodPhaseWeight[i];
+            }
+        }
+        else {
+            // For other models
+            vector<OCP_DBL> qitmp(nc, 0);
+            OCP_DBL         qt = 0;
+            OCP_BOOL        flag = OCP_TRUE;
+            for (USI i = 0; i < nc; i++) {
+                qt += qi_lbmol[i];
+                if (qi_lbmol[i] < 0) flag = OCP_FALSE;
+            }
+            if (qt > TINY && flag) {
+                qitmp = qi_lbmol;
+            }
+            else {
+                for (USI p = 0; p < numPerf; p++) {
+                    OCP_USI n = perf[p].location;
+
+                    for (USI j = 0; j < np; j++) {
+                        const OCP_USI n_np_j = n * np + j;
+                        if (!bvs.phaseExist[n_np_j]) continue;
+                        for (USI k = 0; k < nc; k++) {
+                            qitmp[k] += perf[p].transj[j] * bvs.xi[n_np_j] *
+                                bvs.xij[n_np_j * nc + k];
+                        }
+                    }
+                }
+            }
+
+            qt = 0;
+            for (USI i = 0; i < nc; i++) qt += qitmp[i];
+            OCP_DBL qv = 0;
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI j = 0; j < np; j++) {
+                qv += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
+            }
+            fill(factor.begin(), factor.end(), qv / qt);
+            if (factor[0] < 1E-12) {
+                OCP_ABORT("Wrong Condition!");
+            }
+        }
+    }
+    else if (opt.type == WellType::injector) {
+        fill(factor.begin(), factor.end(), UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase)));
+    }
+    else {
+        OCP_ABORT("WRONG Well Type!");
+    }
+}
+
+
+
+OCP_INT PeacemanWell::CheckCrossFlow(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    OCP_USI  k;
+    OCP_BOOL flagC = OCP_TRUE;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    if (opt.type == WellType::productor) {
+        for (USI p = 0; p < numPerf; p++) {
+            k = perf[p].location;
+            OCP_DBL minP = bvs.P[k];
+            if (perf[p].state == WellState::open && minP < perf[p].P) {
+                cout << std::left << std::setw(12) << name << "  "
+                    << "Well P = " << perf[p].P << ", "
+                    << "Bulk P = " << minP << endl;
+                perf[p].state = WellState::close;
+                perf[p].multiplier = 0;
+                flagC = OCP_FALSE;
+                break;
+            }
+            else if (perf[p].state == WellState::close && minP > perf[p].P) {
+                perf[p].state = WellState::open;
+                perf[p].multiplier = 1;
+            }
+        }
+    }
+    else {
+        for (USI p = 0; p < numPerf; p++) {
+            k = perf[p].location;
+            if (perf[p].state == WellState::open && bvs.P[k] > perf[p].P) {
+                cout << std::left << std::setw(12) << name << "  "
+                    << "Well P = " << perf[p].P << ", "
+                    << "Bulk P = " << bvs.P[k] << endl;
+                perf[p].state = WellState::close;
+                perf[p].multiplier = 0;
+                flagC = OCP_FALSE;
+                break;
+            }
+            else if (perf[p].state == WellState::close && bvs.P[k] < perf[p].P) {
+                perf[p].state = WellState::open;
+                perf[p].multiplier = 1;
+            }
+        }
+    }
+
+    OCP_BOOL flag = OCP_FALSE;
+    // check well --  if all perf are closed, open the depthest perf
+    for (USI p = 0; p < numPerf; p++) {
+        if (perf[p].state == WellState::open) {
+            flag = OCP_TRUE;
+            break;
+        }
+    }
+
+    if (!flag) {
+        // open the deepest perf
+        perf.back().state = WellState::open;
+        perf.back().multiplier = 1;
+        cout << "### WARNING: All perfs of " << name
+            << " are closed! Open the last perf!\n";
+    }
+
+    if (!flagC) {
+        // if crossflow happens, then corresponding perforation will be closed,
+        // the multiplier of perforation will be set to zero, so trans of well
+        // should be recalculated!
+        //
+        // dG = ldG;
+        CalTrans(bk);
+        // CalFlux(bvs);
+        // CaldG(bvs);
+        // CheckOptMode(bvs);
+        return WELL_CROSSFLOW;
+    }
+
+    return WELL_SUCCESS;
+}
+
+
+
 // Use transj
 void PeacemanWell::CalProddG01(const Bulk& bk)
 {
@@ -108,7 +768,7 @@ void PeacemanWell::CalProddG01(const Bulk& bk)
     OCP_DBL         rhotmp, qtacc, rhoacc;
 
     if (depth <= perf.front().depth) {
-        // PeacemanWell is higher
+        // Well is higher
         for (OCP_INT p = numPerf - 1; p >= 0; p--) {
             if (p == 0) {
                 seg_num = ceil(fabs((perf[0].depth - depth) / maxlen));
@@ -121,7 +781,6 @@ void PeacemanWell::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -162,7 +821,7 @@ void PeacemanWell::CalProddG01(const Bulk& bk)
         }
     }
     else if (depth >= perf[numPerf - 1].depth) {
-        // PeacemanWell is lower
+        // Well is lower
         for (USI p = 0; p < numPerf; p++) {
             if (p == numPerf - 1) {
                 seg_num = ceil(fabs((depth - perf[numPerf - 1].depth) / maxlen));
@@ -175,7 +834,6 @@ void PeacemanWell::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -216,6 +874,7 @@ void PeacemanWell::CalProddG01(const Bulk& bk)
         }
     }
 }
+
 
 // Use bulk
 void PeacemanWell::CalProddG02(const Bulk& bk)
@@ -232,7 +891,7 @@ void PeacemanWell::CalProddG02(const Bulk& bk)
     OCP_DBL         rhotmp, qtacc, rhoacc;
 
     if (depth <= perf.front().depth) {
-        // PeacemanWell is higher
+        // Well is higher
         for (OCP_INT p = numPerf - 1; p >= 0; p--) {
             if (p == 0) {
                 seg_num = ceil(fabs((perf[0].depth - depth) / maxlen));
@@ -245,7 +904,6 @@ void PeacemanWell::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -286,7 +944,7 @@ void PeacemanWell::CalProddG02(const Bulk& bk)
         }
     }
     else if (depth >= perf[numPerf - 1].depth) {
-        // PeacemanWell is lower
+        // Well is lower
         for (USI p = 0; p < numPerf; p++) {
             if (p == numPerf - 1) {
                 seg_num = ceil(fabs((depth - perf[numPerf - 1].depth) / maxlen));
@@ -299,7 +957,6 @@ void PeacemanWell::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -340,6 +997,7 @@ void PeacemanWell::CalProddG02(const Bulk& bk)
         }
     }
 }
+
 
 // Use qi_lbmol
 void PeacemanWell::CalProddG(const Bulk& bk)
@@ -358,7 +1016,7 @@ void PeacemanWell::CalProddG(const Bulk& bk)
     OCP_DBL         rhotmp = 0;
 
     if (depth <= perf.front().depth) {
-        // PeacemanWell is higher
+        // Well is higher
 
         // check qi_lbmol   ----   test
         if (perf[numPerf - 1].state == WellState::close) {
@@ -386,16 +1044,8 @@ void PeacemanWell::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
-
-            // tmpNi.assign(nc, 0);
-            // for (OCP_INT p1 = numPerf - 1; p1 >= p; p1--) {
-            //    for (USI i = 0; i < nc; i++) {
-            //        tmpNi[i] += perf[p1].qi_lbmol[i];
-            //    }
-            //}
 
             for (USI i = 0; i < nc; i++) {
                 tmpNi[i] += perf[p].qi_lbmol[i];
@@ -431,7 +1081,7 @@ void PeacemanWell::CalProddG(const Bulk& bk)
         }
     }
     else if (depth >= perf.back().depth) {
-        // PeacemanWell is lower
+        // Well is lower
 
         // check qi_lbmol   ----   test
         if (perf[0].state == WellState::close) {
@@ -458,7 +1108,6 @@ void PeacemanWell::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n = perf[p].location;
-            perf[p].P = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp = Pperf;
 
@@ -498,6 +1147,20 @@ void PeacemanWell::CalProddG(const Bulk& bk)
     else {
         OCP_ABORT("Wrong well position!");
     }
+}
+
+
+void PeacemanWell::GetSolutionFIM(const OCP_DBL* u)
+{
+    bhp += u[0];
+    CalPerfP();
+}
+
+
+void PeacemanWell::GetSolutionIMPEC(const OCP_DBL* u)
+{
+    bhp = u[0];
+    CalPerfP();
 }
 
 

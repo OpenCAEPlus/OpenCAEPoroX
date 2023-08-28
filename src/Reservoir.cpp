@@ -497,13 +497,13 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
     }
 
     for (const auto& wl : allWells.wells) {
-        if (wl.IsOpen() && wl.WellType() == WellType::productor) {
-            for (USI p = 0; p < wl.PerfNum(); p++) {
-                if (wl.PerfState(p) == WellState::open) {
-                    const OCP_USI k = wl.PerfLocation(p);
+        if (wl->IsOpen() && wl->WellType() == WellType::productor) {
+            for (USI p = 0; p < wl->PerfNum(); p++) {
+                if (wl->PerfState(p) == WellState::open) {
+                    const OCP_USI k = wl->PerfLocation(p);
 
                     for (USI j = 0; j < np; j++) {
-                        bulk.cfl[k * np + j] += fabs(wl.PerfProdQj_ft3(p, j)) * dt;
+                        bulk.cfl[k * np + j] += fabs(wl->PerfProdQj_ft3(p, j)) * dt;
                     }
                 }
             }

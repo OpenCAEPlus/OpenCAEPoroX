@@ -387,11 +387,11 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
 
     // Well to Bulk
     for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            for (USI p = 0; p < wl.PerfNum(); p++) {
-                OCP_USI k = wl.PerfLocation(p);
+        if (wl->IsOpen()) {
+            for (USI p = 0; p < wl->PerfNum(); p++) {
+                OCP_USI k = wl->PerfLocation(p);
                 for (USI i = 0; i < nc; i++) {
-                    bvs.Ni[k * nc + i] -= wl.PerfQi_lbmol(p, i) * dt;
+                    bvs.Ni[k * nc + i] -= wl->PerfQi_lbmol(p, i) * dt;
                 }
             }
         }
@@ -491,7 +491,7 @@ void IsoT_IMPEC::AssembleMatWells(LinearSystem&    ls,
                                   const OCP_DBL&   dt) const
 {
     for (auto& wl : rs.allWells.wells) {
-        wl.AssembleMatIMPEC(ls, rs.bulk, dt);
+        wl->AssembleMatIMPEC(ls, rs.bulk, dt);
     }
 
     // for Reinjection
@@ -519,8 +519,8 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     // Well first
     USI wId = bvs.nbI;
     for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.GetSolutionIMPEC(&u[wId]);
+        if (wl->IsOpen()) {
+            wl->GetSolutionIMPEC(&u[wId]);
             wId++;
         }
     }
@@ -1098,7 +1098,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     // Well to Bulk, Well
     USI wId = nb * len;
     for (const auto& wl : rs.allWells.wells) {
-        wl.CalResFIM(wId, res, bk, dt);
+        wl->CalResFIM(wId, res, bk, dt);
     }
 
     // Calculate RelRes
@@ -1239,7 +1239,7 @@ void IsoT_FIM::AssembleMatWells(LinearSystem&    ls,
                                 const OCP_DBL&   dt) const
 {
     for (auto& wl : rs.allWells.wells) {
-        wl.AssembleMatFIM(ls, rs.bulk, dt);
+        wl->AssembleMatFIM(ls, rs.bulk, dt);
     }
 
     //// for Reinjection
@@ -1273,8 +1273,8 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.GetSolutionFIM(&u[wId]);
+        if (wl->IsOpen()) {
+            wl->GetSolutionFIM(&u[wId]);
             wId += col;
         }
     }
@@ -2114,7 +2114,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 {
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
-    BulkVarSet& bvs = bk.vs;
+    BulkVarSet&     bvs    = bk.vs;
     const OCP_USI   nb     = bvs.nb;
     const USI       np     = bvs.np;
     const USI       nc     = bvs.nc;
@@ -2124,8 +2124,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.GetSolutionFIM(&u[wId]);
+        if (wl->IsOpen()) {
+            wl->GetSolutionFIM(&u[wId]);
             wId += col;
         }
     }

@@ -33,6 +33,7 @@ class Domain
 	friend class Reservoir;
 	friend class Bulk;
 	friend class Well;
+	friend class PeacemanWell;
 	friend class LinearSystem;
 
 	// Method(tmp)

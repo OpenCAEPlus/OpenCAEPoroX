@@ -15,6 +15,7 @@
 // OpenCAEPoroX header files
 #include "ParamWell.hpp"
 #include "Well.hpp"
+#include "WellPeaceman.hpp"
 
 using namespace std;
 
@@ -99,27 +100,22 @@ public:
     void CalFlux(const Bulk& bk);
     /// Calculate Injection rate, total Injection, Production rate, total Production
     void CalIPRT(const Bulk& bk, OCP_DBL dt);
-    void UpdateLastTimeStep()
-    {
-        for (auto& w : wells) w.UpdateLastTimeStep();
+    void UpdateLastTimeStep() {
+        for (auto& w : wells) w->UpdateLastTimeStep();
     }
     void ResetToLastTimeStep(const Bulk& bk) {
-        for (auto& w : wells) {
-            if (w.IsOpen()) {
-                w.ResetToLastTimeStep(bk);
-            }
-        }
+        for (auto& w : wells) w->ResetToLastTimeStep(bk);
     }
     /// Check if unreasonable well pressure or perforation pressure occurs.
     OCP_INT CheckP(const Bulk& bk);
     /// Return the num of wells.
     USI GetWellNum() const { return numWell; }
     /// Return the name of specified well.
-    string GetWellName(const USI& i) const { return wells[i].name; }
+    string GetWellName(const USI& i) const { return wells[i]->name; }
     /// Return the index of specified well.
     USI GetIndex(const string& name) const;
     /// Return the num of perforations of well i.
-    USI GetWellPerfNum(const USI& i) const { return wells[i].numPerf; }
+    USI GetWellPerfNum(const USI& i) const { return wells[i]->numPerf; }
     /// Return the num of perforations of all wells
     USI GetWellPerfNum() const;
     /// Calculate maximum num of perforations of all Wells.
@@ -130,12 +126,12 @@ public:
     /// Return the BHP of wth well.
     OCP_DBL GetWBHP(const USI& w) const
     {
-        if (wells[w].IsOpen()) return wells[w].bhp;
+        if (wells[w]->IsOpen()) return wells[w]->bhp;
         else                   return 0;
     }
     void    ShowWellStatus(const Bulk& bk)
     {
-        for (USI w = 0; w < numWell; w++) wells[w].ShowPerfStatus(bk);
+        for (USI w = 0; w < numWell; w++) wells[w]->ShowPerfStatus(bk);
     }
     OCP_BOOL    GetWellChange() const { return wellChange; }
     USI GetNumOpenWell()const;
@@ -145,7 +141,7 @@ protected:
 
 protected:
     USI                     numWell;   ///< num of wells.
-    vector<Well>            wells;     ///< well set.
+    vector<Well*>           wells;     ///< well set.
     USI                     numGroup;  ///< num of groups
     vector<WellGroup>       wellGroup; ///< wellGroup set
 
@@ -183,25 +179,25 @@ public:
     OCP_DBL GetFGIR() const { return FGIR; }
 
     /// Return gas injection rate of the wth well.
-    OCP_DBL GetWGIR(const USI& w) const { return wells[w].WGIR; }
+    OCP_DBL GetWGIR(const USI& w) const { return wells[w]->WGIR; }
     /// Return total gas injection of the wth well.
-    OCP_DBL GetWGIT(const USI& w) const { return wells[w].WGIT; }
+    OCP_DBL GetWGIT(const USI& w) const { return wells[w]->WGIT; }
     /// Return water injection rate of the wth well.
-    OCP_DBL GetWWIR(const USI& w) const { return wells[w].WWIR; }
+    OCP_DBL GetWWIR(const USI& w) const { return wells[w]->WWIR; }
     /// Return total water injection of the wth well.
-    OCP_DBL GetWWIT(const USI& w) const { return wells[w].WWIT; }
+    OCP_DBL GetWWIT(const USI& w) const { return wells[w]->WWIT; }
     /// Return oil production rate of the wth well.
-    OCP_DBL GetWOPR(const USI& w) const { return wells[w].WOPR; }
+    OCP_DBL GetWOPR(const USI& w) const { return wells[w]->WOPR; }
     /// Return total oil production of the wth well.
-    OCP_DBL GetWOPT(const USI& w) const { return wells[w].WOPT; }
+    OCP_DBL GetWOPT(const USI& w) const { return wells[w]->WOPT; }
     /// Return gas production rate of the wth well.
-    OCP_DBL GetWGPR(const USI& w) const { return wells[w].WGPR; }
+    OCP_DBL GetWGPR(const USI& w) const { return wells[w]->WGPR; }
     /// Return total gas production of the wth well.
-    OCP_DBL GetWGPT(const USI& w) const { return wells[w].WGPT; }
+    OCP_DBL GetWGPT(const USI& w) const { return wells[w]->WGPT; }
     /// Return water production rate of the wth well.
-    OCP_DBL GetWWPR(const USI& w) const { return wells[w].WWPR; }
+    OCP_DBL GetWWPR(const USI& w) const { return wells[w]->WWPR; }
     /// Return total water production of the wth well.
-    OCP_DBL GetWWPT(const USI& w) const { return wells[w].WWPT; }
+    OCP_DBL GetWWPT(const USI& w) const { return wells[w]->WWPT; }
 
 protected:
     OCP_DBL FGIR{0}; ///< gas injection rate in field.

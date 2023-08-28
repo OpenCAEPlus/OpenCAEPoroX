@@ -703,7 +703,7 @@ void T_FIM::CalRes(Reservoir&      rs,
     // Well to Bulk
     USI wId = nb * len;
     for (const auto& wl : rs.allWells.wells) {
-        wl.CalResFIM_T(wId, res, bk, dt);
+        wl->CalResFIM(wId, res, bk, dt);
     }
 
     // Calculate RelRes
@@ -894,7 +894,7 @@ void T_FIM::AssembleMatWells(LinearSystem&    ls,
                              const OCP_DBL&   dt) const
 {
     for (auto& wl : rs.allWells.wells) {
-        wl.AssembleMatFIM_T(ls, rs.bulk, dt);
+        wl->AssembleMatFIM(ls, rs.bulk, dt);
     }
 }
 
@@ -916,8 +916,8 @@ void T_FIM::GetSolution(Reservoir&             rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl.IsOpen()) {
-            wl.GetSolutionFIM(&u[wId]);
+        if (wl->IsOpen()) {
+            wl->GetSolutionFIM(&u[wId]);
             wId += col;
         }
     }

@@ -245,7 +245,7 @@ public:
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
     Type_A_r<OCP_DBL> gravity; ///< Gravity of oil, water, gas in standard conditions.
-    OCP_BOOL          ifThcon;  
+    OCP_BOOL          ifThcon{ OCP_FALSE };
     OCP_DBL           thcono{24}; ///< oil ifThermal conductivity
     OCP_DBL           thcong{24}; ///< gas ifThermal conductivity
     OCP_DBL           thconw{24}; ///< water ifThermal conductivity

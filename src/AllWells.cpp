@@ -29,24 +29,28 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
  
     const vector<OCP_USI> my_well = domain.GetWell();
     numWell                       = my_well.size();
-    wells.resize(numWell);
+
+
+    for (USI w = 0; w < numWell; w++) {
+        wells.push_back(new PeacemanWellIsoT());
+    }
     
     USI         t = paramWell.criticalTime.size();
     vector<USI>         wellOptTime;
     vector<WellOptPair> tmpOptParam;
     for (USI wdst = 0; wdst < numWell; wdst++) {
         const OCP_USI wsrc = my_well[wdst];
-        wells[wdst].name  = paramWell.well[wsrc].name;
-        wells[wdst].group = paramWell.well[wsrc].group;
-        wells[wdst].depth = paramWell.well[wsrc].depth;
-        wells[wdst].I     = paramWell.well[wsrc].I - 1;
-        wells[wdst].J     = paramWell.well[wsrc].J - 1;
-        wells[wdst].InputPerfo(paramWell.well[wsrc], domain, wdst);
-        wells[wdst].Psurf         = Psurf;
-        wells[wdst].Tsurf         = Tsurf;
-        wells[wdst].ifUseUnweight = paramWell.well[wsrc].ifUseUnweight;
+        wells[wdst]->name  = paramWell.well[wsrc].name;
+        wells[wdst]->group = paramWell.well[wsrc].group;
+        wells[wdst]->depth = paramWell.well[wsrc].depth;
+        wells[wdst]->I     = paramWell.well[wsrc].I - 1;
+        wells[wdst]->J     = paramWell.well[wsrc].J - 1;
+        wells[wdst]->InputPerfo(paramWell.well[wsrc], domain, wdst);
+        wells[wdst]->Psurf         = Psurf;
+        wells[wdst]->Tsurf         = Tsurf;
+        wells[wdst]->ifUseUnweight = paramWell.well[wsrc].ifUseUnweight;
         // opt
-        wells[wdst].optSet.resize(t);
+        wells[wdst]->optSet.resize(t);
 
         // If identical optParam.d occurs, use the last one
         tmpOptParam.clear();
@@ -68,7 +72,7 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
         wellOptTime.back() = t;
         for (USI i = 0; i < n; i++) {
             for (USI d = wellOptTime[i]; d < wellOptTime[i + 1]; d++) {
-                wells[wdst].optSet[d] = WellOpt(tmpOptParam[i].opt);
+                wells[wdst]->optSet[d] = WellOpt(tmpOptParam[i].opt);
             }
         }
     }
@@ -79,7 +83,7 @@ void AllWells::Setup(const Bulk& bk)
 {
     OCP_FUNCNAME;
     for (USI w = 0; w < numWell; w++) {
-        wells[w].Setup(bk, solvents);
+        wells[w]->Setup(bk, solvents);
     }
 }
 
@@ -91,7 +95,7 @@ void AllWells::SetupWellGroup(const Bulk& bk)
     wellGroup.push_back(WellGroup("Field"));
     for (USI w = 0; w < numWell; w++) {
         wellGroup[0].wId.push_back(w);
-        if (wells[w].WellType() == WellType::injector)
+        if (wells[w]->WellType() == WellType::injector)
             wellGroup[0].wIdINJ.push_back(w);
         else
             wellGroup[0].wIdPROD.push_back(w);
@@ -102,21 +106,21 @@ void AllWells::SetupWellGroup(const Bulk& bk)
     USI g    = 1;
     for (USI w = 0; w < numWell; w++) {
         for (g = 1; g < glen; g++) {
-            if (wells[w].group == wellGroup[g].name) {
+            if (wells[w]->group == wellGroup[g].name) {
                 // existing group
                 wellGroup[g].wId.push_back(w);
-                if (wells[w].WellType() == WellType::injector)
+                if (wells[w]->WellType() == WellType::injector)
                     wellGroup[g].wIdINJ.push_back(w);
                 else
                     wellGroup[g].wIdPROD.push_back(w);
                 break;
             }
         }
-        if (g == glen && wells[w].group != "Field") {
+        if (g == glen && wells[w]->group != "Field") {
             // new group
-            wellGroup.push_back(WellGroup(wells[w].group));
+            wellGroup.push_back(WellGroup(wells[w]->group));
             wellGroup[glen].wId.push_back(w);
-            if (wells[w].WellType() == WellType::injector)
+            if (wells[w]->WellType() == WellType::injector)
                 wellGroup[glen].wIdINJ.push_back(w);
             else
                 wellGroup[glen].wIdPROD.push_back(w);
@@ -131,8 +135,8 @@ void AllWells::SetupWellGroup(const Bulk& bk)
 void AllWells::SetupWellBulk(Bulk& bk) const
 {
     for (auto& w : wells) {
-        if (w.IsOpen()) {
-            for (auto& p : w.perf) {
+        if (w->IsOpen()) {
+            for (auto& p : w->perf) {
                 bk.AddWellBulkId(p.Location());
             }
         }
@@ -145,8 +149,8 @@ void AllWells::ApplyControl(const USI& i)
     OCP_FUNCNAME;
     wellChange = OCP_FALSE;
     for (USI w = 0; w < numWell; w++) {
-        wells[w].opt = wells[w].optSet[i];
-        if (i > 0 && wells[w].opt != wells[w].optSet[i - 1]) wellChange = OCP_TRUE;
+        wells[w]->opt = wells[w]->optSet[i];
+        if (i > 0 && wells[w]->opt != wells[w]->optSet[i - 1]) wellChange = OCP_TRUE;
     }
 }
 
@@ -155,7 +159,7 @@ void AllWells::InitBHP(const Bulk& bk)
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        wells[w].InitWellP(bk);
+        wells[w]->InitWellP(bk);
     }
 }
 
@@ -164,11 +168,8 @@ void AllWells::PrepareWell(const Bulk& bk)
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-
-            wells[w].CheckOptMode(bk);
-            wells[w].InitFlux(bk);
-        }
+        wells[w]->CheckOptMode(bk);
+        wells[w]->CalFluxInit(bk);
     }
 }
 
@@ -178,9 +179,7 @@ void AllWells::CalFlux(const Bulk& bk)
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-            wells[w].CalFlux(bk);
-        }
+        wells[w]->CalFlux(bk);
     }
 }
 
@@ -195,20 +194,14 @@ void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
     FGPR = 0;
     FWPR = 0;
     for (USI w = 0; w < numWell; w++) {
-        wells[w].WGIR = 0;
-        wells[w].WWIR = 0;
-        wells[w].WOPR = 0;
-        wells[w].WGPR = 0;
-        wells[w].WWPR = 0;
-
-        if (wells[w].IsOpen()) {
-            wells[w].CalIPRate(bk, dt);
-        }
-        FGIR += wells[w].WGIR;
-        FWIR += wells[w].WWIR;
-        FOPR += wells[w].WOPR;
-        FGPR += wells[w].WGPR;
-        FWPR += wells[w].WWPR;       
+     
+        wells[w]->CalIPRate(bk, dt);
+        
+        FGIR += wells[w]->WGIR;
+        FWIR += wells[w]->WWIR;
+        FOPR += wells[w]->WOPR;
+        FGPR += wells[w]->WGPR;
+        FWPR += wells[w]->WWPR;       
     }
     FGIT += FGIR * dt;
     FWIT += FWIR * dt;
@@ -226,26 +219,25 @@ OCP_INT AllWells::CheckP(const Bulk& bk)
     OCP_BOOL flagCrossf = OCP_FALSE;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
 
-            OCP_INT flag = wells[w].CheckP(bk);
+        OCP_INT flag = wells[w]->CheckP(bk);
 
-            switch (flag) {
-                case WELL_NEGATIVE_PRESSURE:
-                    return WELL_NEGATIVE_PRESSURE;
+        switch (flag) 
+        {
+        case WELL_NEGATIVE_PRESSURE:
+            return WELL_NEGATIVE_PRESSURE;
 
-                case WELL_SWITCH_TO_BHPMODE:
-                    flagSwitch = OCP_TRUE;
-                    break;
+        case WELL_SWITCH_TO_BHPMODE:
+            flagSwitch = OCP_TRUE;
+            break;
 
-                case WELL_CROSSFLOW:
-                    flagCrossf = OCP_TRUE;
-                    break;
+        case WELL_CROSSFLOW:
+            flagCrossf = OCP_TRUE;
+            break;
 
-                case WELL_SUCCESS:
-                default:
-                    break;
-            }
+        case WELL_SUCCESS:
+        default:
+            break;
         }
     }
 
@@ -260,7 +252,7 @@ USI AllWells::GetIndex(const string& name) const
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].name == name) {
+        if (wells[w]->name == name) {
             return w;    
         }
     }
@@ -276,7 +268,7 @@ USI AllWells::GetWellPerfNum() const
 {
     USI numPerf = 0;
     for (USI w = 0; w < numWell; w++) {
-        numPerf += wells[w].numPerf;
+        numPerf += wells[w]->numPerf;
     }
     return numPerf;
 }
@@ -287,7 +279,7 @@ USI AllWells::GetMaxWellPerNum() const
 
     USI m = 0;
     for (USI w = 0; w < numWell; w++) {
-        m = max(m, wells[w].numPerf);
+        m = max(m, wells[w]->numPerf);
     }
     return m;
 }
@@ -296,8 +288,8 @@ void AllWells::CalMaxBHPChange()
 {
     dPmax = 0;
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-            dPmax = max(dPmax, fabs(wells[w].bhp - wells[w].lbhp));
+        if (wells[w]->IsOpen()) {
+            dPmax = max(dPmax, fabs(wells[w]->bhp - wells[w]->lbhp));
         }
     }
 }
@@ -306,7 +298,7 @@ USI AllWells::GetNumOpenWell() const
 {
     USI nw = 0;
     for (const auto& w : wells) {
-        if (w.IsOpen()) {
+        if (w->IsOpen()) {
             nw++;
         }
     }
@@ -319,11 +311,11 @@ void AllWells::SetWellVal() const
     if (!useVTK) return;
 
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w].opt.state == WellState::open) {          
-            if (wells[w].opt.mode == WellOptMode::bhp)
-                wellVal[w] = wells[w].opt.tarBHP;
+        if (wells[w]->opt.state == WellState::open) {          
+            if (wells[w]->opt.mode == WellOptMode::bhp)
+                wellVal[w] = wells[w]->opt.tarBHP;
             else
-                wellVal[w] = wells[w].opt.tarRate;
+                wellVal[w] = wells[w]->opt.tarRate;
         } else {
             wellVal[w] = 0;
         }
