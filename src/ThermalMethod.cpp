@@ -921,7 +921,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         if (wl.IsOpen()) {
-            wl.SetBHP(wl.BHP() + u[wId]);
+            wl.GetSolutionFIM(&u[wId]);
             wId += col;
         }
     }

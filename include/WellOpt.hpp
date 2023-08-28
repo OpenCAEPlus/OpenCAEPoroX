@@ -72,7 +72,7 @@ public:
     /// overload inequality
     OCP_BOOL operator!=(const WellOpt& Opt) const;
 
-private:
+public:
     /// type of well, Injection well or Production well.
     WellType type;
     /// indicate which type of fluids will be injected, water, gas, or other solvent.

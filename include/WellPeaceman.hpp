@@ -17,6 +17,7 @@
 
 // OpenCAEPoroX header files
 #include "Well.hpp"
+#include "WellPerf.hpp"
 
 using namespace std;
 
@@ -24,17 +25,43 @@ using namespace std;
 class PeacemanWell : public Well
 {
 public:
+	/// Initialize Well Pressure
+	void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
+protected:
+	/// Calculate pressure difference between well and perforations.
+	void CaldG(const Bulk& bk);
+	/// Calculate pressure difference between well and perforations for Injection.
+	void CalInjdG(const Bulk& bk);
+	/// Calculate pressure difference between well and perforations for Production.
+	void CalProddG(const Bulk& bk);
+	/// Calculate pressure difference between well and perforations for Production.
+	void CalProddG01(const Bulk& bk);
+	/// Calculate pressure difference between well and perforations for Production.
+	void CalProddG02(const Bulk& bk);
 
 protected:
 
+	/// difference of pressure between well and perforation: numPerf.
+	vector<OCP_DBL> dG;
+	/// Last dG
+	vector<OCP_DBL> ldG;
 };
 
 
 class PeacemanWellIsoT : public PeacemanWell
 {
 public:
-
+	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const;
+	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 protected:
+	void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+	void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
+public:
+	void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+protected:
+	void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+	void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 };
 
@@ -42,8 +69,17 @@ protected:
 class PeacemanWellT : public PeacemanWell
 {
 public:
-
+	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const;
+	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;	
 protected:
+	void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+	void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
+public:
+	void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const { OCP_ABORT("NOT USED!"); }
+protected:
+	void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const { OCP_ABORT("NOT USED!"); }
+	void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const { OCP_ABORT("NOT USED!"); }
 };
 
 #endif /* end if __WELLPEACEMAN_HEADER__ */

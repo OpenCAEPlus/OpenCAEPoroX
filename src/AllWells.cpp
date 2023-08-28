@@ -158,7 +158,7 @@ void AllWells::InitBHP(const Bulk& bk)
     OCP_FUNCNAME;
 
     for (USI w = 0; w < numWell; w++) {
-        wells[w].InitBHP(bk);
+        wells[w].InitWellP(bk);
     }
 }
 

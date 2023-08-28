@@ -36,8 +36,6 @@ enum class PerfDirection
 /// Perforation describe the connections between wells and bulks.
 class Perforation
 {
-    friend class Well;
-    friend class Out4RPT;
 
 public:
     /// Default constructor.
@@ -48,7 +46,7 @@ public:
     /// Return the location of perf: index of bulk
     OCP_USI Location() const { return location; }
 
-private:
+public:
     USI      I;        ///< I-index of Perforation in grid.
     USI      J;        ///< J-index of Perforation in grid.
     USI      K;        ///< K-index of Perforation in grid.

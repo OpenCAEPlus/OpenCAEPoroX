@@ -67,7 +67,7 @@ void HeatConduct::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs)
     if (ifUse) {
         if (rs_param.thermal == OCP_FALSE) {
             ifUse = OCP_FALSE;
-            OCP_WARNING("HEATLOSS is IGNORED in ISOTHERMAL MODEL!");
+            OCP_WARNING("HEATCONDUCT is IGNORED in ISOTHERMAL MODEL!");
             return;
         }
         vs.SetUp(bvs.nb, bvs.np, bvs.o, bvs.g, bvs.w);

@@ -107,9 +107,7 @@ protected:
 
 public:
     /// Initialize the Well BHP
-    void InitBHP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
-    /// Calculate Well Index with Peaceman model.
-    void CalWI_Peaceman(const Bulk& bk);
+    void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; }
     /// Calculate transmissibility for each phase in perforations.
     void CalTrans(const Bulk& bk);
     /// Calculate the flux for each perforations.
@@ -126,16 +124,6 @@ public:
     void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
     /// Calculate pressure difference between well and perforations.
     void CaldG(const Bulk& bk);
-    /// Calculate pressure difference between well and perforations for Injection.
-    void CalInjdG(const Bulk& bk);
-    /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG(const Bulk& bk);
-    /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG01(const Bulk& bk);
-    /// Calculate pressure difference between well and perforations for Production.
-    void CalProddG02(const Bulk& bk);
-    /// Calculate the production weight
-    void CalFactor(const Bulk& bk) const;
     /// Correct BHP if opt mode is BHPMode
     void CorrectBHP();
     /// Check if well operation mode would be changed.
@@ -144,18 +132,9 @@ public:
     OCP_INT CheckP(const Bulk& bk);
     /// Check if cross flow happens.
     OCP_INT CheckCrossFlow(const Bulk& bk);
-    /// Update pressure in Perforation after well pressure updates.
-    void CalPerfP()
-    {
-        for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p];
-    }
     /// Display operation mode of well and state of perforations.
     void ShowPerfStatus(const Bulk& bk) const;
-
     USI     PerfNum() const { return numPerf; }
-    void    SetBHP(const OCP_DBL& p) { bhp = p; }
-    OCP_DBL BHP() const { return bhp; }
-
     /// Return the state of the well, Open or Close.
     OCP_BOOL IsOpen() const { return (opt.state == WellState::open); }
     /// Return the type of well, Inj or Prod.
@@ -172,6 +151,22 @@ public:
         return perf[p].qj_ft3[j];
     }
 
+
+protected:
+    /// Calculate Well Index with Peaceman model.
+    void CalWI_Peaceman(const Bulk& bk);
+    /// Calculate the production weight
+    void CalFactor(const Bulk& bk) const;
+    /// Calculate pressure difference between well and perforations for Injection.
+    void CalInjdG(const Bulk& bk);
+    /// Calculate pressure difference between well and perforations for Production.
+    void CalProddG(const Bulk& bk);
+    /// Calculate pressure difference between well and perforations for Production.
+    void CalProddG01(const Bulk& bk);
+    /// Calculate pressure difference between well and perforations for Production.
+    void CalProddG02(const Bulk& bk);
+
+
 protected:
     
     /////////////////////////////////////////////////////////////////////
@@ -179,12 +174,10 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
     mutable OCP_DBL bhp; ///< Well pressure in reference depth.
-    vector<OCP_DBL>
-        dG; ///< difference of pressure between well and perforation: numPerf.
+    vector<OCP_DBL> dG;  ///< difference of pressure between well and perforation: numPerf.
 
     // Last time step
     OCP_DBL         lbhp; ///< Last BHP
-    vector<OCP_DBL> ldG;  ///< Last dG
 
     // PROD/INJ Rate
     vector<OCP_DBL> qi_lbmol; ///< flow rate of moles of component inflowing/outflowing
@@ -210,6 +203,12 @@ public:
     /////////////////////////////////////////////////////////////////////
     // FIM
     /////////////////////////////////////////////////////////////////////
+
+    void GetSolutionFIM(const OCP_DBL* u) { bhp += u[0]; }
+    void GetSolutionIMPEC(const OCP_DBL* u) { 
+        bhp = u[0]; 
+        for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p];
+    }
 
 public:
     void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;

@@ -128,13 +128,9 @@ public:
     /// Return the BHP of wth well.
     OCP_DBL GetWBHP(const USI& w) const
     {
-        if (wells[w].IsOpen())
-            return wells[w].bhp;
-        else
-            return 0;
+        if (wells[w].IsOpen()) return wells[w].bhp;
+        else                   return 0;
     }
-    /// Return the pth dG of wth well.
-    OCP_DBL GetWellDG(const USI& w, const USI& p) const { return wells[w].dG[p]; }
     void    ShowWellStatus(const Bulk& bk)
     {
         for (USI w = 0; w < numWell; w++) wells[w].ShowPerfStatus(bk);

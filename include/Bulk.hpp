@@ -79,11 +79,15 @@ class Bulk
 {
     friend class BulkConn;
     friend class Well;
+    friend class PeacemanWell;
+    friend class PeacemanWellIsoT;
+    friend class PeacemanWellT;
+ 
     friend class Out4RPT;
     friend class Out4VTK;
     friend class OCPFlux_IsoT;
     friend class OCPFlux_T;
-    friend class OCPFlux_T_NF;
+    
 
     // temp
     friend class Reservoir;

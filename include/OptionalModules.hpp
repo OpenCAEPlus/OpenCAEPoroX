@@ -74,7 +74,7 @@ protected:
     // Phase Permeability Curve
     /////////////////////////////////////////////////////////////////////
 
-public:
+protected:
     /// Surface Tension Calculation
     SurfaceTension surTen;
     /// Miscible Factore Calculation
@@ -101,6 +101,7 @@ public:
     // Thermal
     /////////////////////////////////////////////////////////////////////
 
+public:
 
     /// Heat Loss
     HeatLoss       heatLoss;

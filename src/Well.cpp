@@ -79,7 +79,6 @@ void Well::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
     }
     // dG
     dG.resize(numPerf, 0);
-    ldG = dG;
 
     if (depth < 0) depth = perf[0].depth;
 
@@ -486,10 +485,10 @@ void Well::CaldG(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
-    if (opt.type == WellType::injector)
-        CalInjdG(bk);
-    else
-        CalProddG01(bk);
+    if (opt.state == WellState::open) {
+        if (opt.type == WellType::injector) CalInjdG(bk);
+        else                                CalProddG01(bk);
+    }
 }
 
 void Well::CalInjdG(const Bulk& bk)
