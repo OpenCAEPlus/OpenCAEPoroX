@@ -125,9 +125,6 @@ void AllWells::SetupWellGroup(const Bulk& bk)
     }
 
     numGroup = wellGroup.size();
-    // relation between wellGroup should be completed if "node groups" exist
-
-    // control of group should be update according to input file
 }
 
 
@@ -169,24 +166,12 @@ void AllWells::PrepareWell(const Bulk& bk)
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
 
-            wells[w].CalTrans(bk);
-            wells[w].CaldG(bk);
             wells[w].CheckOptMode(bk);
-            wells[w].CalFlux(bk, OCP_TRUE);
+            wells[w].InitFlux(bk);
         }
     }
 }
 
-void AllWells::CalTrans(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-
-    for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-            wells[w].CalTrans(bk);
-        }
-    }
-}
 
 void AllWells::CalFlux(const Bulk& bk)
 {
@@ -194,21 +179,11 @@ void AllWells::CalFlux(const Bulk& bk)
 
     for (USI w = 0; w < numWell; w++) {
         if (wells[w].IsOpen()) {
-            wells[w].CalFlux(bk, OCP_FALSE);
+            wells[w].CalFlux(bk);
         }
     }
 }
 
-void AllWells::CaldG(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-
-    for (USI w = 0; w < numWell; w++) {
-        if (wells[w].IsOpen()) {
-            wells[w].CaldG(bk);
-        }
-    }
-}
 
 void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
 {
@@ -246,15 +221,6 @@ void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
     FWPT += FWPR * dt;
 }
 
-
-void AllWells::ResetBHP()
-{
-    for (auto& w : wells) {
-        if (w.IsOpen()) {
-            w.ResetToLastTimeStep();
-        }
-    }
-}
 
 OCP_INT AllWells::CheckP(const Bulk& bk)
 {
@@ -351,16 +317,6 @@ USI AllWells::GetNumOpenWell() const
     return nw;
 }
 
-//void AllWells::SetPolyhedronWell(const Grid& myGrid)
-//{
-//    if (!useVTK) return;
-//
-//    wellVal.resize(numWell);
-//    polyhedronWell.resize(numWell);
-//    for (USI w = 0; w < numWell; w++) {
-//        wells[w].SetPolyhedronWell(myGrid, polyhedronWell[w]);
-//    }
-//}
 
 void AllWells::SetWellVal() const
 {

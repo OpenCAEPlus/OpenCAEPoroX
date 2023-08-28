@@ -331,7 +331,6 @@ void Well::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
     if (opt.type == WellType::injector) {
 
         for (USI p = 0; p < numPerf; p++) {
-            // perf[p].P  = bhp + dG[p];
             const OCP_USI k  = perf[p].location;
             const OCP_DBL dP = bvs.P[k] - perf[p].P;
 
@@ -349,7 +348,6 @@ void Well::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
     } else {
 
         for (USI p = 0; p < numPerf; p++) {
-            // perf[p].P       = bhp + dG[p];
             const OCP_USI k = perf[p].location;
             perf[p].qt_ft3 = 0;
             fill(perf[p].qi_lbmol.begin(), perf[p].qi_lbmol.end(), 0.0);
@@ -515,7 +513,6 @@ void Well::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
             auto    PVT   = bk.PVTm.GetPVT(n);
@@ -542,7 +539,6 @@ void Well::CalInjdG(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -586,7 +582,6 @@ void Well::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -638,7 +633,6 @@ void Well::CalProddG01(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -707,7 +701,6 @@ void Well::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p].depth - perf[p - 1].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -759,7 +752,6 @@ void Well::CalProddG02(const Bulk& bk)
                 seg_len = (perf[p + 1].depth - perf[p].depth) / seg_num;
             }
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -845,16 +837,8 @@ void Well::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
-
-            // tmpNi.assign(nc, 0);
-            // for (OCP_INT p1 = numPerf - 1; p1 >= p; p1--) {
-            //    for (USI i = 0; i < nc; i++) {
-            //        tmpNi[i] += perf[p1].qi_lbmol[i];
-            //    }
-            //}
 
             for (USI i = 0; i < nc; i++) {
                 tmpNi[i] += perf[p].qi_lbmol[i];
@@ -915,7 +899,6 @@ void Well::CalProddG(const Bulk& bk)
             }
 
             OCP_USI n     = perf[p].location;
-            // perf[p].P     = bhp + dG[p];
             OCP_DBL Pperf = perf[p].P;
             OCP_DBL Ptmp  = Pperf;
 
@@ -1024,6 +1007,9 @@ void Well::CalFactor(const Bulk& bk) const
 /// Constant flow rate would be applied if well pressure is outranged.
 void Well::CheckOptMode(const Bulk& bk)
 {
+    CalTrans(bk);
+    CaldG(bk);
+
     OCP_FUNCNAME;
     if (opt.initMode == WellOptMode::bhp) {
         if (opt.type == WellType::injector) {

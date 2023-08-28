@@ -108,28 +108,18 @@ protected:
 public:
     /// Initialize the Well BHP
     void InitWellP(const Bulk& bk) { bhp = bk.vs.P[perf[0].location]; CalPerfP(); }
-    /// Calculate transmissibility for each phase in perforations.
-    void CalTrans(const Bulk& bk);
-    /// Calculate the flux for each perforations.
-    void CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi = OCP_FALSE);
-    /// calculate flow rate of moles of phases for injection well with maxBHP.
-    OCP_DBL CalInjRateMaxBHP(const Bulk& bk);
-    /// calculate flow rate of moles of phases for production well with minBHP.
-    OCP_DBL CalProdRateMinBHP(const Bulk& bk);
     /// Calculate flow rate of moles of phases for injection well with calculated
     /// qi_lbmol.
     void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
     /// Calculate flow rate of moles of phases for production well with calculated
     /// qi_lbmol.
     void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
-    /// Calculate pressure difference between well and perforations.
-    void CaldG(const Bulk& bk);
+
     /// Check if well operation mode would be changed.
     void CheckOptMode(const Bulk& bk);
     /// Check if abnormal Pressure occurs.
     OCP_INT CheckP(const Bulk& bk);
-    /// Check if cross flow happens.
-    OCP_INT CheckCrossFlow(const Bulk& bk);
+
     /// Display operation mode of well and state of perforations.
     void ShowPerfStatus(const Bulk& bk) const;
     USI     PerfNum() const { return numPerf; }
@@ -149,15 +139,38 @@ public:
         return perf[p].qj_ft3[j];
     }
 
-public:
-    void ResetToLastTimeStep(){
+    /// Calculate Flux and initialize values which will not be changed during this time step
+    void InitFlux(const Bulk& bk) {
+        CalTrans(bk);
+        CaldG(bk);
+        CalFlux(bk, OCP_TRUE);
+    }
+    /// Calculate Flux
+    void CalFlux(const Bulk& bk) {
+        CalTrans(bk);
+        CalFlux(bk, OCP_FALSE);
+    }
+    void ResetToLastTimeStep(const Bulk& bk){
         bhp = lbhp;
         if (opt.mode == WellOptMode::bhp) bhp = opt.tarBHP;
         CalPerfP();
+        InitFlux(bk);
     }
     void UpdateLastTimeStep() { lbhp = bhp; }
 
 protected:
+    /// Check if cross flow happens.
+    OCP_INT CheckCrossFlow(const Bulk& bk);
+    /// calculate flow rate of moles of phases for injection well with maxBHP.
+    OCP_DBL CalInjRateMaxBHP(const Bulk& bk);
+    /// calculate flow rate of moles of phases for production well with minBHP.
+    OCP_DBL CalProdRateMinBHP(const Bulk& bk);
+    /// Calculate pressure difference between well and perforations.
+    void CaldG(const Bulk& bk);
+    /// Calculate transmissibility for each phase in perforations.
+    void CalTrans(const Bulk& bk);
+    /// Calculate the flux for each perforations.
+    void CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi);
     /// Calculate Well Index with Peaceman model.
     void CalWI_Peaceman(const Bulk& bk);
     /// Calculate the production weight

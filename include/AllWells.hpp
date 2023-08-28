@@ -95,19 +95,21 @@ public:
     void InitBHP(const Bulk& bk);
     /// Calculate well properties at the beginning of each time step.
     void PrepareWell(const Bulk& bk);
-    /// Calculate Transmissibility of Wells
-    void CalTrans(const Bulk& bk);
     /// Calculate volume flow rate and moles flow rate of each perforation.
     void CalFlux(const Bulk& bk);
-    /// Calculate dG.
-    void CaldG(const Bulk& bk);
     /// Calculate Injection rate, total Injection, Production rate, total Production
     void CalIPRT(const Bulk& bk, OCP_DBL dt);
     void UpdateLastTimeStep()
     {
         for (auto& w : wells) w.UpdateLastTimeStep();
     }
-    void ResetBHP();
+    void ResetToLastTimeStep(const Bulk& bk) {
+        for (auto& w : wells) {
+            if (w.IsOpen()) {
+                w.ResetToLastTimeStep(bk);
+            }
+        }
+    }
     /// Check if unreasonable well pressure or perforation pressure occurs.
     OCP_INT CheckP(const Bulk& bk);
     /// Return the num of wells.

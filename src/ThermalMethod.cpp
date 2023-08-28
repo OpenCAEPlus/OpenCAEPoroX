@@ -111,7 +111,6 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
     rs.bulk.optMs.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
 
-    rs.allWells.CalTrans(rs.bulk);
     rs.allWells.CalFlux(rs.bulk);
 
     CalRes(rs, ctrl.GetCurTime() + dt, dt, OCP_FALSE);
@@ -536,10 +535,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 
 
     // Wells
-    rs.allWells.ResetBHP();
-    rs.allWells.CalTrans(bk);
-    rs.allWells.CaldG(bk);
-    rs.allWells.CalFlux(bk);
+    rs.allWells.ResetToLastTimeStep(bk);
 
     rs.bulk.optMs.ResetToLastTimeStep();
 

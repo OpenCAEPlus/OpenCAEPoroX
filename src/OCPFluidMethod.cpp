@@ -775,8 +775,8 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     // Update rock property
     CalRock(rs.bulk);
     // Update well property
-    rs.allWells.CalTrans(rs.bulk);
     rs.allWells.CalFlux(rs.bulk);
+
     // Update residual
     CalRes(rs, dt, OCP_FALSE);
 
@@ -1449,10 +1449,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.dSec_dPri    = bvs.ldSec_dPri;
 
     // Wells
-    rs.allWells.ResetBHP();
-    rs.allWells.CalTrans(bk);
-    rs.allWells.CaldG(bk);
-    rs.allWells.CalFlux(bk);
+    rs.allWells.ResetToLastTimeStep(bk);
 
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
@@ -1638,7 +1635,6 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     CalRock(rs.bulk);
 
-    rs.allWells.CalTrans(rs.bulk);
     rs.allWells.CalFlux(rs.bulk);
 
     CalRes(rs, dt, OCP_FALSE);
