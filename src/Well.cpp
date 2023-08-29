@@ -39,6 +39,14 @@ OCP_DBL Well::UnitConvertR2S(const USI& j, const OCP_DBL& val) const
 }
 
 
+OCP_BOOL Well::ApplyOpt(const USI& i)
+{
+    opt = optSet[i];
+    if (i > 0 && opt != optSet[i - 1]) return OCP_TRUE;
+    else                               return OCP_FALSE;
+}
+
+
 void Well::SetupOpts(const vector<SolventINJ>& sols)
 {
     for (auto& opt : optSet) {

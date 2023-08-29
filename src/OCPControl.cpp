@@ -166,8 +166,8 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
     GetWallTime timer;
     timer.Start();
 
-    const OCP_BOOL wellChange_loc  = rs.allWells.GetWellChange();
-    MPI_Allreduce(&wellChange_loc, &wellChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
+    const OCP_BOOL wellChange_loc  = rs.allWells.GetWellOptChange();
+    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
 
     timer.Stop();
 
@@ -180,11 +180,11 @@ void OCPControl::InitTime(const USI& i)
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;
-    if (wellChange || firstflag) {
+    if (wellOptChange || firstflag) {
         current_dt = min(dt, ctrlTime.timeInit);
         firstflag  = OCP_FALSE;
     } else {
-        current_dt = min(dt, init_dt);
+        current_dt = min(dt, predict_dt);
     }
 }
 
@@ -371,7 +371,7 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-    init_dt = current_dt;
+    predict_dt = current_dt;
 
     const OCP_DBL dt = end_time - current_time;
     if (current_dt > dt) current_dt = dt;   

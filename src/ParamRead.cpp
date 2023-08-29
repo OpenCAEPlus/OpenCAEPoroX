@@ -71,6 +71,7 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("THERMAL", 7):
                 paramRs.thermal    = OCP_TRUE;
+                paramWell.thermal  = OCP_TRUE;
                 paramControl.model = THERMALMODEL;
                 break;
 

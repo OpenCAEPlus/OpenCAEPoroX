@@ -17,6 +17,7 @@
 
 void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 {
+
     OCP_FUNCNAME;
     numproc = domain.numproc;
 
@@ -30,10 +31,17 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
     const vector<OCP_USI> my_well = domain.GetWell();
     numWell                       = my_well.size();
 
-
-    for (USI w = 0; w < numWell; w++) {
-        wells.push_back(new PeacemanWellIsoT());
+    if (paramWell.thermal) {
+        for (USI w = 0; w < numWell; w++) {
+            wells.push_back(new PeacemanWellT());
+        }
     }
+    else {
+        for (USI w = 0; w < numWell; w++) {
+            wells.push_back(new PeacemanWellIsoT());
+        }
+    }
+
     
     USI         t = paramWell.criticalTime.size();
     vector<USI>         wellOptTime;
@@ -147,10 +155,9 @@ void AllWells::SetupWellBulk(Bulk& bk) const
 void AllWells::ApplyControl(const USI& i)
 {
     OCP_FUNCNAME;
-    wellChange = OCP_FALSE;
+    wellOptChange = OCP_FALSE;
     for (USI w = 0; w < numWell; w++) {
-        wells[w]->opt = wells[w]->optSet[i];
-        if (i > 0 && wells[w]->opt != wells[w]->optSet[i - 1]) wellChange = OCP_TRUE;
+        if (wells[w]->ApplyOpt(i)) wellOptChange = OCP_TRUE;
     }
 }
 
@@ -288,9 +295,7 @@ void AllWells::CalMaxBHPChange()
 {
     dPmax = 0;
     for (USI w = 0; w < numWell; w++) {
-        if (wells[w]->IsOpen()) {
-            dPmax = max(dPmax, fabs(wells[w]->bhp - wells[w]->lbhp));
-        }
+        dPmax = max(dPmax, wells[w]->CalMaxChangeP());
     }
 }
 

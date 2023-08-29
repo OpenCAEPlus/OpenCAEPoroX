@@ -44,6 +44,8 @@ public:
 	OCP_INT CheckP(const Bulk& bk) override;
 	/// Calculate flow rate of moles of phases for injection well and production well
 	void CalIPRate(const Bulk& bk, const OCP_DBL& dt) override;
+	/// Calculate max change of well pressure between two time step
+	OCP_DBL CalMaxChangeP() const override;
 	/// Reset to last time step
 	void ResetToLastTimeStep(const Bulk& bk) override;
 	/// Update last time step
@@ -81,10 +83,6 @@ protected:
 	/// Calculate pressure of perforations
 	void CalPerfP() { for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p]; }
 
-public:
-	void GetSolutionFIM(const OCP_DBL* u) override;
-	void GetSolutionIMPEC(const OCP_DBL* u) override; 
-
 protected:
 	/// difference of pressure between well and perforation: numPerf.
 	vector<OCP_DBL>         dG;
@@ -97,12 +95,14 @@ class PeacemanWellIsoT : public PeacemanWell
 {
 public:
 	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const override;
+	void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
 	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
 	void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 	void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 public:
+	void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override;
 	void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
 	void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
@@ -115,12 +115,14 @@ class PeacemanWellT : public PeacemanWell
 {
 public:
 	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const override;
+	void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
 	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
 	void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 	void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 public:
+	void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override { OCP_ABORT("NOT USED!"); }
 	void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override { OCP_ABORT("NOT USED!"); }
 };
 

@@ -916,10 +916,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl->IsOpen()) {
-            wl->GetSolutionFIM(&u[wId]);
-            wId += col;
-        }
+        wl->GetSolutionFIM(u, wId);
     }
 
     // Exchange Solution for ghost grid

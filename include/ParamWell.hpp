@@ -100,11 +100,18 @@ public:
 class ParamWell
 {
 public:
-    vector<WellParam> well;         ///< Contains all the information of wells.
-    vector<OCP_DBL>   criticalTime; ///< Records the critical time given by users.
-    vector<Solvent>   solSet;       ///< Sets of Solvent.
-    OCP_DBL           Psurf{PRESSURE_STD};    ///< Pressure in surface condition.
-    OCP_DBL           Tsurf{TEMPERATURE_STD}; ///< Temperature in surface condition.
+    /// if thermal model is used
+    OCP_BOOL          thermal{ OCP_FALSE };
+    /// Contains all the information of wells.
+    vector<WellParam> well;    
+    /// Records the critical time given by users.
+    vector<OCP_DBL>   criticalTime; 
+    /// Sets of Solvent.
+    vector<Solvent>   solSet;
+    /// Pressure in surface condition.
+    OCP_DBL           Psurf{PRESSURE_STD}; 
+    /// Temperature in surface condition.
+    OCP_DBL           Tsurf{TEMPERATURE_STD}; 
 
     /// Initialize the inputting the params of wells.
     void Init() { InitTime(); };

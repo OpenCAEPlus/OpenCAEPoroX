@@ -221,6 +221,13 @@ void PeacemanWell::CalIPRate(const Bulk& bk, const OCP_DBL& dt)
 }
 
 
+OCP_DBL PeacemanWell::CalMaxChangeP() const
+{ 
+    if (opt.state != WellState::open)  return 0;
+    else                               return fabs(bhp - lbhp); 
+}
+
+
 void PeacemanWell::ResetToLastTimeStep(const Bulk& bk)
 {
     if (opt.state != WellState::open)  return;
@@ -369,7 +376,7 @@ void PeacemanWell::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
     if (opt.type == WellType::injector) {
 
         for (USI p = 0; p < numPerf; p++) {
-            const OCP_USI k = perf[p].location;
+            const OCP_USI k  = perf[p].location;
             const OCP_DBL dP = bvs.P[k] - perf[p].P;
 
             perf[p].qt_ft3 = perf[p].transINJ * dP;
@@ -519,6 +526,154 @@ void PeacemanWell::CalProdQj(const Bulk& bvs, const OCP_DBL& dt)
 }
 
 
+OCP_INT PeacemanWell::CheckCrossFlow(const Bulk& bk)
+{
+    OCP_FUNCNAME;
+
+    OCP_USI  k;
+    OCP_BOOL flagC = OCP_TRUE;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    if (opt.type == WellType::productor) {
+        for (USI p = 0; p < numPerf; p++) {
+            k = perf[p].location;
+            OCP_DBL minP = bvs.P[k];
+            if (perf[p].state == WellState::open && minP < perf[p].P) {
+                cout << std::left << std::setw(12) << name << "  "
+                    << "Well P = " << perf[p].P << ", "
+                    << "Bulk P = " << minP << endl;
+                perf[p].state = WellState::close;
+                perf[p].multiplier = 0;
+                flagC = OCP_FALSE;
+                break;
+            }
+            else if (perf[p].state == WellState::close && minP > perf[p].P) {
+                perf[p].state = WellState::open;
+                perf[p].multiplier = 1;
+            }
+        }
+    }
+    else {
+        for (USI p = 0; p < numPerf; p++) {
+            k = perf[p].location;
+            if (perf[p].state == WellState::open && bvs.P[k] > perf[p].P) {
+                cout << std::left << std::setw(12) << name << "  "
+                    << "Well P = " << perf[p].P << ", "
+                    << "Bulk P = " << bvs.P[k] << endl;
+                perf[p].state = WellState::close;
+                perf[p].multiplier = 0;
+                flagC = OCP_FALSE;
+                break;
+            }
+            else if (perf[p].state == WellState::close && bvs.P[k] < perf[p].P) {
+                perf[p].state = WellState::open;
+                perf[p].multiplier = 1;
+            }
+        }
+    }
+
+    OCP_BOOL flag = OCP_FALSE;
+    // check well --  if all perf are closed, open the depthest perf
+    for (USI p = 0; p < numPerf; p++) {
+        if (perf[p].state == WellState::open) {
+            flag = OCP_TRUE;
+            break;
+        }
+    }
+
+    if (!flag) {
+        // open the deepest perf
+        perf.back().state = WellState::open;
+        perf.back().multiplier = 1;
+        cout << "### WARNING: All perfs of " << name
+            << " are closed! Open the last perf!\n";
+    }
+
+    if (!flagC) {
+        // if crossflow happens, then corresponding perforation will be closed,
+        // the multiplier of perforation will be set to zero, so trans of well
+        // should be recalculated!
+        //
+        // dG = ldG;
+        CalTrans(bk);
+        // CalFlux(bvs);
+        // CaldG(bvs);
+        // CheckOptMode(bvs);
+        return WELL_CROSSFLOW;
+    }
+
+    return WELL_SUCCESS;
+}
+
+
+void PeacemanWell::CalFactor(const Bulk& bk) const
+{
+    if (opt.mode == WellOptMode::bhp)  return;
+
+    const BulkVarSet& bvs = bk.vs;
+
+    if (opt.type == WellType::productor) {
+        if (mixture->IfBlkModel()) {
+            // For black oil models -- phase = components
+            vector<OCP_DBL> qitmp(nc, 1.0);
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI i = 0; i < nc; i++) {
+                factor[i] = UnitConvertR2S(i, mixture->GetVarSet().vj[i]) * opt.prodPhaseWeight[i];
+            }
+        }
+        else {
+            // For other models
+            vector<OCP_DBL> qitmp(nc, 0);
+            OCP_DBL         qt = 0;
+            OCP_BOOL        flag = OCP_TRUE;
+            for (USI i = 0; i < nc; i++) {
+                qt += qi_lbmol[i];
+                if (qi_lbmol[i] < 0) flag = OCP_FALSE;
+            }
+            if (qt > TINY && flag) {
+                qitmp = qi_lbmol;
+            }
+            else {
+                for (USI p = 0; p < numPerf; p++) {
+                    OCP_USI n = perf[p].location;
+
+                    for (USI j = 0; j < np; j++) {
+                        const OCP_USI n_np_j = n * np + j;
+                        if (!bvs.phaseExist[n_np_j]) continue;
+                        for (USI k = 0; k < nc; k++) {
+                            qitmp[k] += perf[p].transj[j] * bvs.xi[n_np_j] *
+                                bvs.xij[n_np_j * nc + k];
+                        }
+                    }
+                }
+            }
+
+            qt = 0;
+            for (USI i = 0; i < nc; i++) qt += qitmp[i];
+            OCP_DBL qv = 0;
+            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
+            for (USI j = 0; j < np; j++) {
+                qv += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
+            }
+            fill(factor.begin(), factor.end(), qv / qt);
+            if (factor[0] < 1E-12) {
+                OCP_ABORT("Wrong Condition!");
+            }
+        }
+    }
+    else if (opt.type == WellType::injector) {
+        fill(factor.begin(), factor.end(), UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase)));
+    }
+    else {
+        OCP_ABORT("WRONG Well Type!");
+    }
+}
+
+
+
+
+
 /// It calculates pressure difference between perforations iteratively.
 /// This function can be used in both black oil model and compositional model.
 /// stability of this method shoule be tested.
@@ -600,153 +755,6 @@ void PeacemanWell::CalInjdG(const Bulk& bk)
         }
     }
 }
-
-
-void PeacemanWell::CalFactor(const Bulk& bk) const
-{
-    if (opt.mode == WellOptMode::bhp)  return;
-
-    const BulkVarSet& bvs = bk.vs;
-
-    if (opt.type == WellType::productor) {
-        if (mixture->IfBlkModel()) {
-            // For black oil models -- phase = components
-            vector<OCP_DBL> qitmp(nc, 1.0);
-            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
-            for (USI i = 0; i < nc; i++) {
-                factor[i] = UnitConvertR2S(i, mixture->GetVarSet().vj[i]) * opt.prodPhaseWeight[i];
-            }
-        }
-        else {
-            // For other models
-            vector<OCP_DBL> qitmp(nc, 0);
-            OCP_DBL         qt = 0;
-            OCP_BOOL        flag = OCP_TRUE;
-            for (USI i = 0; i < nc; i++) {
-                qt += qi_lbmol[i];
-                if (qi_lbmol[i] < 0) flag = OCP_FALSE;
-            }
-            if (qt > TINY && flag) {
-                qitmp = qi_lbmol;
-            }
-            else {
-                for (USI p = 0; p < numPerf; p++) {
-                    OCP_USI n = perf[p].location;
-
-                    for (USI j = 0; j < np; j++) {
-                        const OCP_USI n_np_j = n * np + j;
-                        if (!bvs.phaseExist[n_np_j]) continue;
-                        for (USI k = 0; k < nc; k++) {
-                            qitmp[k] += perf[p].transj[j] * bvs.xi[n_np_j] *
-                                bvs.xij[n_np_j * nc + k];
-                        }
-                    }
-                }
-            }
-
-            qt = 0;
-            for (USI i = 0; i < nc; i++) qt += qitmp[i];
-            OCP_DBL qv = 0;
-            mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);
-            for (USI j = 0; j < np; j++) {
-                qv += UnitConvertR2S(j, mixture->GetVarSet().vj[j]) * opt.prodPhaseWeight[j];
-            }
-            fill(factor.begin(), factor.end(), qv / qt);
-            if (factor[0] < 1E-12) {
-                OCP_ABORT("Wrong Condition!");
-            }
-        }
-    }
-    else if (opt.type == WellType::injector) {
-        fill(factor.begin(), factor.end(), UnitConvertR2S(opt.injPhase, mixture->CalVmStd(Psurf, Tsurf, &opt.injZi[0], opt.injPhase)));
-    }
-    else {
-        OCP_ABORT("WRONG Well Type!");
-    }
-}
-
-
-
-OCP_INT PeacemanWell::CheckCrossFlow(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-
-    OCP_USI  k;
-    OCP_BOOL flagC = OCP_TRUE;
-
-    const BulkVarSet& bvs = bk.vs;
-
-    if (opt.type == WellType::productor) {
-        for (USI p = 0; p < numPerf; p++) {
-            k = perf[p].location;
-            OCP_DBL minP = bvs.P[k];
-            if (perf[p].state == WellState::open && minP < perf[p].P) {
-                cout << std::left << std::setw(12) << name << "  "
-                    << "Well P = " << perf[p].P << ", "
-                    << "Bulk P = " << minP << endl;
-                perf[p].state = WellState::close;
-                perf[p].multiplier = 0;
-                flagC = OCP_FALSE;
-                break;
-            }
-            else if (perf[p].state == WellState::close && minP > perf[p].P) {
-                perf[p].state = WellState::open;
-                perf[p].multiplier = 1;
-            }
-        }
-    }
-    else {
-        for (USI p = 0; p < numPerf; p++) {
-            k = perf[p].location;
-            if (perf[p].state == WellState::open && bvs.P[k] > perf[p].P) {
-                cout << std::left << std::setw(12) << name << "  "
-                    << "Well P = " << perf[p].P << ", "
-                    << "Bulk P = " << bvs.P[k] << endl;
-                perf[p].state = WellState::close;
-                perf[p].multiplier = 0;
-                flagC = OCP_FALSE;
-                break;
-            }
-            else if (perf[p].state == WellState::close && bvs.P[k] < perf[p].P) {
-                perf[p].state = WellState::open;
-                perf[p].multiplier = 1;
-            }
-        }
-    }
-
-    OCP_BOOL flag = OCP_FALSE;
-    // check well --  if all perf are closed, open the depthest perf
-    for (USI p = 0; p < numPerf; p++) {
-        if (perf[p].state == WellState::open) {
-            flag = OCP_TRUE;
-            break;
-        }
-    }
-
-    if (!flag) {
-        // open the deepest perf
-        perf.back().state = WellState::open;
-        perf.back().multiplier = 1;
-        cout << "### WARNING: All perfs of " << name
-            << " are closed! Open the last perf!\n";
-    }
-
-    if (!flagC) {
-        // if crossflow happens, then corresponding perforation will be closed,
-        // the multiplier of perforation will be set to zero, so trans of well
-        // should be recalculated!
-        //
-        // dG = ldG;
-        CalTrans(bk);
-        // CalFlux(bvs);
-        // CaldG(bvs);
-        // CheckOptMode(bvs);
-        return WELL_CROSSFLOW;
-    }
-
-    return WELL_SUCCESS;
-}
-
 
 
 // Use transj
@@ -1146,17 +1154,21 @@ void PeacemanWell::CalProddG(const Bulk& bk)
 }
 
 
-void PeacemanWell::GetSolutionFIM(const OCP_DBL* u)
+void PeacemanWellIsoT::GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId)
 {
-    bhp += u[0];
+    if (opt.state != WellState::open)  return;
+    bhp += u[wId];
     CalPerfP();
+    wId += nc + 1;
 }
 
 
-void PeacemanWell::GetSolutionIMPEC(const OCP_DBL* u)
+void PeacemanWellIsoT::GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId)
 {
-    bhp = u[0];
+    if (opt.state != WellState::open)  return;
+    bhp = u[wId];
     CalPerfP();
+    wId++;
 }
 
 
@@ -1677,6 +1689,15 @@ void PeacemanWellT::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const O
         }
         wId += len;
     }
+}
+
+
+void PeacemanWellT::GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId)
+{
+    if (opt.state != WellState::open)  return;
+    bhp += u[wId];
+    CalPerfP();
+    wId += nc + 2;
 }
 
 

@@ -59,6 +59,8 @@ public:
     virtual void InputPerfo(const WellParam& well, const Domain& domain, const USI& wId) = 0;
     /// Setup the well after Grid and Bulk finish setup.
     virtual void Setup(const Bulk& bk, const vector<SolventINJ>& sols) = 0;
+    /// Apply ith operations
+    OCP_BOOL ApplyOpt(const USI& i);
 
 protected:
     /// Setup well operations
@@ -82,6 +84,8 @@ public:
     virtual OCP_INT CheckP(const Bulk& bk) = 0;
     /// Calculate flow rate of moles of phases for injection well and production well
     virtual void CalIPRate(const Bulk& bk, const OCP_DBL& dt) = 0;
+    /// Calculate max change of well pressure between two time step
+    virtual OCP_DBL CalMaxChangeP() const = 0;
     /// Reset to last time step
     virtual void ResetToLastTimeStep(const Bulk& bk) = 0;
     /// Update last time step
@@ -141,8 +145,11 @@ protected:
     OCP_DBL             rsTemp;
     /// flow rate of moles of component inflowing/outflowing
     vector<OCP_DBL>     qi_lbmol;
+    /// ifUse unweighted permeability.
+    OCP_BOOL            ifUseUnweight{ OCP_FALSE };
     /// Last bhp
     OCP_DBL             lbhp;
+
     /// well oil production rate.
     OCP_DBL             WOPR{0};
     /// well total oil production.
@@ -163,8 +170,7 @@ protected:
     OCP_DBL             WWIR{0}; 
     /// well total water injection.
     OCP_DBL             WWIT{0}; 
-    /// ifUse unweighted permeability.
-    OCP_BOOL ifUseUnweight{ OCP_FALSE };
+
 
 
     /////////////////////////////////////////////////////////////////////
@@ -192,11 +198,11 @@ public:
     /// Assemble matrix for FIM method
     virtual void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const = 0;
     /// Get solution for FIM method
-    virtual void GetSolutionFIM(const OCP_DBL* u) = 0;
+    virtual void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) = 0;
     /// Assemble matrix for IMPEC method
     virtual void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const = 0;
     /// Get solution for IMPEC method
-    virtual void GetSolutionIMPEC(const OCP_DBL* u) = 0;
+    virtual void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) = 0;
 };
 
 #endif /* end if __WELL_HEADER__ */

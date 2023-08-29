@@ -13,7 +13,7 @@
 #define __WELLGROUP_HEADER__
 
 // OpenCAEPoroX header files
-#include "ParamWell.hpp"
+#include "ParamReservoir.hpp"
 #include "Well.hpp"
 #include "WellPeaceman.hpp"
 
@@ -76,7 +76,7 @@ public:
     /////////////////////////////////////////////////////////////////////
 
 public:
-    /// Input param from ParamWell.
+    /// Input well param
     void InputParam(const ParamWell& paramWell, const Domain& domain);
     /// Setup wells
     void Setup(const Bulk& bk);
@@ -133,7 +133,7 @@ public:
     {
         for (USI w = 0; w < numWell; w++) wells[w]->ShowPerfStatus(bk);
     }
-    OCP_BOOL    GetWellChange() const { return wellChange; }
+    OCP_BOOL    GetWellOptChange() const { return wellOptChange; }
     USI GetNumOpenWell()const;
 
 protected:
@@ -145,7 +145,7 @@ protected:
     USI                     numGroup;  ///< num of groups
     vector<WellGroup>       wellGroup; ///< wellGroup set
 
-    OCP_BOOL           wellChange; ///< if wells change, then OCP_TRUE
+    OCP_BOOL           wellOptChange; ///< if wells change, then OCP_TRUE
     vector<SolventINJ> solvents;   ///< Sets of Solvent
     OCP_DBL            dPmax{0};   ///< Maximum BHP change
 

@@ -519,10 +519,7 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     // Well first
     USI wId = bvs.nbI;
     for (auto& wl : rs.allWells.wells) {
-        if (wl->IsOpen()) {
-            wl->GetSolutionIMPEC(&u[wId]);
-            wId++;
-        }
+        wl->GetSolutionIMPEC(u, wId);
     }
 
     // Exchange Solution
@@ -1260,10 +1257,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl->IsOpen()) {
-            wl->GetSolutionFIM(&u[wId]);
-            wId += col;
-        }
+        wl->GetSolutionFIM(u, wId);
     }
 
     GetWallTime timerT;         ///< total timer
@@ -2111,10 +2105,7 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     // Well first
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
-        if (wl->IsOpen()) {
-            wl->GetSolutionFIM(&u[wId]);
-            wId += col;
-        }
+        wl->GetSolutionFIM(u, wId);
     }
 
     // Exchange Solution for ghost grid

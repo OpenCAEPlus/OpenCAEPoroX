@@ -202,7 +202,7 @@ protected:
     vector<OCP_DBL> criticalTime; ///< Set of Critical time by user
 
     // Record time information
-    OCP_DBL init_dt;         ///< from prediction for next TSTEP
+    OCP_DBL predict_dt;         ///< from prediction for next TSTEP
     OCP_DBL current_dt;      ///< Current time step
     OCP_DBL current_dt_loc;  ///< Local Current time step
     OCP_DBL last_dt;         ///< last time step
@@ -233,8 +233,8 @@ protected:
     // Receive directly from command lines, which will overwrite others
     FastControl ctrlFast;
 
-    // Well
-    OCP_BOOL wellChange; ///< if wells change, then OCP_FALSE
+    // Well operation change
+    OCP_BOOL wellOptChange;
 };
 
 #endif /* end if __OCP_Control_HEADER__ */
