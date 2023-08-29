@@ -234,8 +234,6 @@ void PeacemanWell::ResetToLastTimeStep(const Bulk& bk)
 
 void PeacemanWell::UpdateLastTimeStep()
 { 
-    if (opt.state != WellState::open)  return;
-
     lbhp = bhp; 
 }
 
