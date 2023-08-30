@@ -1,5 +1,5 @@
-/*! \file    BulkConnArea.hpp
- *  \brief   BulkConnArea class declaration
+/*! \file    BulkConnTrans.hpp
+ *  \brief   BulkConnTrans class declaration
  *  \author  Shizhe Li
  *  \date    Aug/24/2023
  *
@@ -23,37 +23,37 @@
 using namespace std;
 
 
-class BulkConnAreaMethod
+class BulkConnTransMethod
 {
 public:
-    BulkConnAreaMethod() = default;
-    virtual void CalArea(BulkConnPair& bp, const Bulk& bk) = 0;
+    BulkConnTransMethod() = default;
+    virtual void CalTrans(BulkConnPair& bp, const Bulk& bk) = 0;
 };
 
 
-class BulkConnAreaMethod01 : public BulkConnAreaMethod
+class BulkConnTransMethod01 : public BulkConnTransMethod
 {
 public:
-    BulkConnAreaMethod01() = default;
-    void CalArea(BulkConnPair& bp, const Bulk& bk) override;
+    BulkConnTransMethod01() = default;
+    void CalTrans(BulkConnPair& bp, const Bulk& bk) override;
 };
 
 
 
-class BulkConnArea
+class BulkConnTrans
 {
 public:
-    BulkConnArea() = default;
+    BulkConnTrans() = default;
     void Setup();
-    void CalArea(BulkConnPair& bp, const Bulk& bk) { bcaM->CalArea(bp, bk); }
+    void CalTrans(BulkConnPair& bp, const Bulk& bk) { bcaM->CalTrans(bp, bk); }
 
 protected:
     /// method for area calculation of bulk connection
-    BulkConnAreaMethod* bcaM;
+    BulkConnTransMethod* bcaM;
 };
 
 
-#endif /* end if __BulkConnArea_HEADER__ */
+#endif /* end if __BulkConnTrans_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

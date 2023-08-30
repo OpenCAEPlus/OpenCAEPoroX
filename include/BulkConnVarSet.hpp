@@ -38,7 +38,7 @@ enum class BulkConnDirect
 class BulkConnPair
 {
     friend class BulkConn;
-    friend class BulkConnAreaMethod01;
+    friend class BulkConnTransMethod01;
 
 public:
     /// Default constructor.
@@ -103,7 +103,6 @@ public:
     vector<OCP_USI> lupblock;
     /// last rho
     vector<OCP_DBL> lrho;      
-
 
 };
 

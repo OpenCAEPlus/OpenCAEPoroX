@@ -53,7 +53,7 @@ protected:
     OCP_USI numConn; ///< Number of connections between bulks.
 
     /// All connections (pair of indices) between bulks: numConn.
-    //  Note: In each pair, the index of first bulk is greater than the second. The data
+    //  Note: In each pair, the index of first bulk is less than the second. The data
     //  in iteratorConn is generated from neighbor.
     vector<BulkConnPair> iteratorConn;
 

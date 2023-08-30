@@ -127,6 +127,8 @@ protected:
     ROCKModule        ROCKm;
     /// Initializer
     BulkInitializer   INITm;
+
+
     /// optional modules
     OptionalModules   optMs; 
 

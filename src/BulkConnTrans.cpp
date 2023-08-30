@@ -1,5 +1,5 @@
-/*! \file    BulkConnArea.cpp
- *  \brief   BulkConnArea class definition
+/*! \file    BulkConnTrans.cpp
+ *  \brief   BulkConnTrans class definition
  *  \author  Shizhe Li
  *  \date    Aug/24/2023
  *
@@ -9,10 +9,10 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "BulkConnArea.hpp"
+#include "BulkConnTrans.hpp"
 
 
-void BulkConnAreaMethod01::CalArea(BulkConnPair& bp, const Bulk& bk)
+void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
 {
     const BulkVarSet& bcv = bk.GetVarSet();
 
@@ -43,9 +43,9 @@ void BulkConnAreaMethod01::CalArea(BulkConnPair& bp, const Bulk& bk)
 }
 
 
-void BulkConnArea::Setup()
+void BulkConnTrans::Setup()
 {
-    bcaM = new BulkConnAreaMethod01();
+    bcaM = new BulkConnTransMethod01();
 }
 
 

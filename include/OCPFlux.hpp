@@ -18,7 +18,7 @@
 // OpenCAEPoroX header files
 #include "Bulk.hpp"
 #include "BulkConnVarSet.hpp"
-#include "BulkConnArea.hpp"
+#include "BulkConnTrans.hpp"
 
 using namespace std;
 
@@ -57,7 +57,7 @@ public:
 protected:
     void Setup(const USI& npin, const USI& ncin) {
         Allocate(npin, ncin);
-        bca.Setup();
+        bcT.Setup();
     }
     void Allocate(const USI& npin, const USI& ncin) {
         np = npin;
@@ -109,10 +109,10 @@ protected:
     OCP_DBL          rhse;     
 
 public:
-    void CalBulkConnArea(BulkConnPair& bp, const Bulk& bk) { bca.CalArea(bp, bk); }
+    void CalBulkConnArea(BulkConnPair& bp, const Bulk& bk) { bcT.CalTrans(bp, bk); }
 protected:
     /// area calculation of bulk connection
-    BulkConnArea     bca;
+    BulkConnTrans     bcT;
 };
 
 

@@ -370,7 +370,6 @@ void PeacemanWell::CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi)
 
     const BulkVarSet& bvs = bk.vs;
 
-    // cout << name << endl;
     fill(qi_lbmol.begin(), qi_lbmol.end(), 0.0);
 
     if (opt.type == WellType::injector) {

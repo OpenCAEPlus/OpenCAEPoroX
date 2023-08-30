@@ -68,7 +68,7 @@ protected:
 
 protected:
     /// Skip Stability Analysis
-    SkipPSA skipPSA;
+    SkipPSA        skipPSA;
 
     /////////////////////////////////////////////////////////////////////
     // Phase Permeability Curve
