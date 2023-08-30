@@ -24,15 +24,15 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
 
     switch (bp.direction) 
     {
-    case BulkConnDirect::x:
+    case ConnDirect::x:
         T1 = bcv.ntg[bId] * bcv.rockKx[bId] * areaB;
         T2 = bcv.ntg[eId] * bcv.rockKx[eId] * areaE;
         break;
-    case BulkConnDirect::y:
+    case ConnDirect::y:
         T1 = bcv.ntg[bId] * bcv.rockKy[bId] * areaB;
         T2 = bcv.ntg[eId] * bcv.rockKy[eId] * areaE;
         break;
-    case BulkConnDirect::z:
+    case ConnDirect::z:
         T1 = bcv.rockKz[bId] * areaB;
         T2 = bcv.rockKz[eId] * areaE;
         break;

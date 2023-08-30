@@ -22,17 +22,6 @@
 using namespace std;
 
 
-enum class BulkConnDirect
-{
-    /// x-direction
-    x,
-    /// y-direction
-    y,
-    /// z-direction
-    z
-};
-
-
 /// Connection between two bulks (bId, eId); usually, indices bId > eId.
 //  Note: Bulks are the active grid cells.
 class BulkConnPair
@@ -47,7 +36,7 @@ public:
     /// Setup BulkPair with bId and eId.
     BulkConnPair(const OCP_USI& BId,
         const OCP_USI& EId,
-        const BulkConnDirect& direct,
+        const ConnDirect& direct,
         const OCP_DBL& AreaB,
         const OCP_DBL& AreaE)
         : bId(BId)
@@ -74,7 +63,7 @@ protected:
     /// Connection type
     USI            fluxnum{ 0 };
     /// Connection direction
-    BulkConnDirect direction;
+    ConnDirect direction;
     /// Area of intersecting face from first bulk
     OCP_DBL        areaB;
     /// Area of intersecting face from second bulk

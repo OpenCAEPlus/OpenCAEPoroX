@@ -51,7 +51,6 @@ private:
 };
 
 
-
 /// Effective area of intersection surfaces with neighboring cells.
 class GPair
 {
@@ -69,13 +68,17 @@ public:
         , areaE(AreaE) {};
     static OCP_BOOL lessG(const GPair& G1, const GPair& G2) { return G1.id < G2.id; }
 
-    OCP_USI id;        ///< Id of a neighboring cell
-    OCP_INT wgt;       ///< weight of edge
-    USI     direction; ///< direction: 0-x, 1-y, 2-z
-    OCP_DBL
-        areaB; ///< Effective intersection area between this cell and the neighbor, self
-    OCP_DBL areaE; ///< Effective intersection area between this cell and the neighbor,
-                   ///< neighbor
+public:
+    /// index of a neighboring cell
+    OCP_USI id;
+    /// weight of edge
+    OCP_INT wgt;   
+    /// direction of connection
+    USI     direction;
+    /// Effective intersection area between this cell and the neighbor, self
+    OCP_DBL areaB; 
+    /// Effective intersection area between this cell and the neighbor, neighbor
+    OCP_DBL areaE; 
 };
 
 

@@ -185,40 +185,39 @@ void OCPMixtureCompMethod::IdentifyPhase(OCPMixtureVarSet& vs)
         }
         OCP_DBL Tc = A / B;
         if (vs.T > Tc) {
-            phaseLabel[0]      = GAS;
-            vs.phaseExist[GAS] = OCP_TRUE;
+            phaseLabel[0]       = PhaseType::gas;
+            vs.phaseExist[vs.g] = OCP_TRUE;
         }
         else {
-            phaseLabel[0]      = OIL;
-            vs.phaseExist[OIL] = OCP_TRUE;
+            phaseLabel[0]       = PhaseType::oil;
+            vs.phaseExist[vs.o] = OCP_TRUE;
         }
     }
     else {
         // Compare MW
         if (MW[0] > MW[1]) {
-            phaseLabel[0] = OIL;
-            phaseLabel[1] = GAS;
+            phaseLabel[0] = PhaseType::oil;
+            phaseLabel[1] = PhaseType::gas;
         }
         else {
-            phaseLabel[0] = GAS;
-            phaseLabel[1] = OIL;
+            phaseLabel[0] = PhaseType::gas;
+            phaseLabel[1] = PhaseType::oil;
         }
-        vs.phaseExist[OIL] = OCP_TRUE;
-        vs.phaseExist[GAS] = OCP_TRUE;
+        vs.phaseExist[vs.o] = OCP_TRUE;
+        vs.phaseExist[vs.g] = OCP_TRUE;
     }
 
     epIndex.clear();
-    for (USI j = 0; j < NP; j++) {
-        epIndex.push_back(phaseLabel[j]);
+    for (USI j = 0; j < NPmax; j++) {
+        if (vs.phaseExist[j]) epIndex.push_back(j);
     }
-    sort(epIndex.begin(), epIndex.end());
 }
 
 
 void OCPMixtureCompMethod::ReOrderPhase(OCPMixtureVarSet& vs)
 {
     // for NP <= 2 Now
-    if (phaseLabel[0] != OIL) {
+    if (phaseLabel[0] != PhaseType::oil) {
         OCPSwap(&vs.nj[0], &vs.nj[1], 1, &rowork[0]);
         OCPSwap(&vs.x[0 * vs.nc], &vs.x[1 * vs.nc], NC, &rowork[0]);
         OCPSwap(&MW[0], &MW[1], 1, &rowork[0]);
@@ -236,7 +235,7 @@ void OCPMixtureCompMethod::ReOrderPhase(OCPMixtureVarSet& vs)
 void OCPMixtureCompMethod::ReOrderPhaseDer(OCPMixtureVarSet& vs)
 {
     // for NP <= 2 Now
-    if (phaseLabel[0] != OIL) {
+    if (phaseLabel[0] != PhaseType::oil) {
         OCPSwap(&vs.nj[0], &vs.nj[1], 1, &rowork[0]);
         OCPSwap(&vs.x[0 * vs.nc], &vs.x[1 * vs.nc], NC, &rowork[0]);
         OCPSwap(&MW[0], &MW[1], 1, &rowork[0]);

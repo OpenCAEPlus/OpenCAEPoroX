@@ -86,23 +86,16 @@ const USI FIM   = 2; ///< Solution method = FIM
 const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
 
 
-// Fluid Index
-const USI OIL     = 0; ///< Fluid type = oil
-const USI GAS     = 1; ///< Fluid type = gas
-const USI WATER   = 2; ///< Fluid type = water
+enum class ConnDirect
+{
+    /// x-direction
+    x,
+    /// y-direction
+    y,
+    /// z-direction
+    z
+};
 
-// Phase types
-const USI PHASE_W               = 1;   ///< Phase type = water only
-const USI PHASE_GW              = 2;   ///< Phase type = gas-water
-const USI PHASE_OW              = 3;   ///< Phase type = oil-water
-const USI PHASE_OG              = 4;   ///< Phase type = oil-gas
-const USI PHASE_OGW             = 5;   ///< Phase type = oil-gas-water
-const USI PHASE_ODGW            = 51;  ///< Phase type = oil-dry gas-water
-const USI PHASE_DOGW            = 52;  ///< Phase type = dead oil-gas-water
-
-// Well params
-const USI      HORIZONTAL = 1;         ///< Well type = horizontal
-const USI      VERTICAL   = 2;         ///< Well type = vertical
 
 // Parallel Module
 const USI MASTER_PROCESS = 0; ///< master process

@@ -172,11 +172,11 @@ protected:
 
 protected:
     /// phase labels, used to identify phase
-    vector<USI>     phaseLabel;
+    vector<PhaseType> phaseLabel;
     /// Index of all existing phases 
-    vector<USI>     epIndex;
+    vector<USI>       epIndex;
     /// work space for reorder
-    vector<OCP_DBL> rowork;
+    vector<OCP_DBL>   rowork;
 
 
 ////////////////////////////////////////////////////////////////

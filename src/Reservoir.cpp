@@ -286,7 +286,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
                 eId = init2local.at(gn.id);
                 if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, static_cast<BulkConnDirect>(gn.direction), gn.areaB, gn.areaE));
+                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(gn.direction), gn.areaB, gn.areaE));
             }
         }
         conn.numConn = conn.iteratorConn.size();
@@ -416,7 +416,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
                                 // well is exculude
                                 eId = iter->second;
                                 if (eId > bId) {
-                                    dst->push_back(BulkConnPair(bId, eId, static_cast<BulkConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2]));
+                                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2]));
                                 }
                             }
                             conn_ptr += 3;
