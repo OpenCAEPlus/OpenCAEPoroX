@@ -67,8 +67,13 @@ public:
         , areaB(AreaB)
         , areaE(AreaE) {};
     static OCP_BOOL lessG(const GPair& G1, const GPair& G2) { return G1.id < G2.id; }
+    const auto& ID() const { return id; }
+    const auto& WGT() const { return wgt; }
+    const auto& Direct() const { return direction; }
+    const auto& AreaB() const { return areaB; }
+    const auto& AreaE() const { return areaE; }
 
-public:
+protected:
     /// index of a neighboring cell
     OCP_USI id;
     /// weight of edge

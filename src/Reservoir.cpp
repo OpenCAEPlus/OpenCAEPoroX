@@ -208,9 +208,9 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             OCP_USI conn_size = 0;
             for (OCP_USI n = 0; n < numGridInterior_proc[p]; n++) {
                 for (const auto& gn : grid.gNeighbor[gridIndex[n]]) {
-                    conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.direction);
-                    conn_ptr[conn_size++] = gn.areaB;
-                    conn_ptr[conn_size++] = gn.areaE;
+                    conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.Direct());
+                    conn_ptr[conn_size++] = gn.AreaB();
+                    conn_ptr[conn_size++] = gn.AreaE();
                 }
             }        
             send_size += conn_size * sizeof(OCP_DBL);
@@ -281,12 +281,12 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             bId = n;
             domain.neighborNum.push_back(grid.gNeighbor[domain.grid[bId]].size() + 1);
             for (const auto& gn : grid.gNeighbor[domain.grid[bId]]) {
-                if (gn.id >= global_well_start)
+                if (gn.ID() >= global_well_start)
                     continue; // well is exculude
 
-                eId = init2local.at(gn.id);
+                eId = init2local.at(gn.ID());
                 if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(gn.direction), gn.areaB, gn.areaE));
+                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(gn.Direct()), gn.AreaB(), gn.AreaE()));
             }
         }
         conn.numConn = conn.iteratorConn.size();
