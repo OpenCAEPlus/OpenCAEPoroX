@@ -286,7 +286,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
                 eId = init2local.at(gn.ID());
                 if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(gn.Direct()), gn.AreaB(), gn.AreaE()));
+                    dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE()));
             }
         }
         conn.numConn = conn.iteratorConn.size();

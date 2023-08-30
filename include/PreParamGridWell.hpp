@@ -58,15 +58,30 @@ public:
     GPair() = default;
     GPair(const OCP_USI& Id,
         const OCP_INT& Wgt,
-        const USI& Direct,
+        const USI& direct,
         const OCP_DBL& AreaB,
         const OCP_DBL& AreaE)
         : id(Id)
         , wgt(Wgt)
-        , direction(Direct)
         , areaB(AreaB)
-        , areaE(AreaE) {};
-    static OCP_BOOL lessG(const GPair& G1, const GPair& G2) { return G1.id < G2.id; }
+        , areaE(AreaE) 
+    {
+        switch (direct)
+        {
+        case 0:
+            direction = ConnDirect::x;
+            break;
+        case 1:
+            direction = ConnDirect::y;
+            break;
+        case 2:
+            direction = ConnDirect::z;
+            break;
+        default:
+            OCP_ABORT("WRONG CONNECTION DIRECTION!");
+            break;
+        }
+    };
     const auto& ID() const { return id; }
     const auto& WGT() const { return wgt; }
     const auto& Direct() const { return direction; }
@@ -75,15 +90,15 @@ public:
 
 protected:
     /// index of a neighboring cell
-    OCP_USI id;
+    OCP_USI    id;
     /// weight of edge
-    OCP_INT wgt;   
+    OCP_INT    wgt;   
     /// direction of connection
-    USI     direction;
+    ConnDirect direction;
     /// Effective intersection area between this cell and the neighbor, self
-    OCP_DBL areaB; 
+    OCP_DBL    areaB; 
     /// Effective intersection area between this cell and the neighbor, neighbor
-    OCP_DBL areaE; 
+    OCP_DBL    areaE; 
 };
 
 
