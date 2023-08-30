@@ -39,7 +39,7 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
     default:
         OCP_ABORT("Wrong BulkConnType!");
     }
-    bp.area = 1 / (1 / T1 + 1 / T2);
+    bp.trans = 1 / (1 / T1 + 1 / T2);
 }
 
 

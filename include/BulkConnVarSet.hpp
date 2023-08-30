@@ -58,7 +58,7 @@ public:
 
     const auto& BId() const { return bId; }
     const auto& EId() const { return eId; } 
-    const auto& Area() const { return area; }
+    const auto& Trans() const { return trans; }
     const auto& FluxNum() const { return fluxnum; }
     const auto& AreaB() const { return areaB; }
     const auto& AreaE() const { return areaE; }
@@ -70,7 +70,7 @@ protected:
     /// second index of a pair.
     OCP_USI        eId;
     /// Effective area
-    OCP_DBL        area;
+    OCP_DBL        trans;
     /// Connection type
     USI            fluxnum{ 0 };
     /// Connection direction
