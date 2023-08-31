@@ -274,7 +274,6 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         vector<BulkConnPair>* dst = &conn.iteratorConn;
         domain.neighborNum.reserve(domain.numGridInterior);
         const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
-        const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
         for (OCP_USI n = 0; n < bulk.vs.nbI; n++) {
@@ -284,7 +283,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
                 if (gn.ID() >= global_well_start)
                     continue; // well is exculude
 
-                eId = init2local.at(gn.ID());
+                eId = gn.ID();
                 if (eId > bId)
                     dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE()));
             }

@@ -33,7 +33,6 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		grid.resize(numGridInterior);
 		for (OCP_USI n = 0; n < numGridInterior; n++) {
 			grid[n] = n;
-			init_global_to_local.insert(make_pair(n, n));
 		}
 		well.resize(numWellTotal);
 		for (OCP_USI w = 0; w < numWellTotal; w++) {
