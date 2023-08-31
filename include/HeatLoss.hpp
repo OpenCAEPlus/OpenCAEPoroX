@@ -91,6 +91,7 @@ class HeatLoss
 {
 public:
     HeatLoss() = default;
+    auto IfUse() const { return ifUse; }
     void Setup(const ParamReservoir& rs_param, const OCP_USI& nb);
     void CalHeatLoss(const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt);
     const OCP_DBL& GetHl(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!");  return vs.hl[bId]; };

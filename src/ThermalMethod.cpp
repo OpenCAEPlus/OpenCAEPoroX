@@ -622,38 +622,17 @@ void T_FIM::CalRes(Reservoir&      rs,
     res.SetZero();
 
     // Bulk to Bulk
-    OCP_USI bId, eId, bIdb;
+    
     // Accumalation Term
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bvs.cType[n] == BulkContent::rf) {
-            // Fluid bulk
-            bId  = n * len;
-            bIdb = n * nc;
-            // Volume Conservation
-            res.resAbs[bId] = bvs.rockVp[n] - bvs.vf[n];
-            // Mass Conservation
-            for (USI i = 0; i < nc; i++) {
-                res.resAbs[n * len + 1 + i] = bvs.Ni[bIdb + i] - bvs.lNi[bIdb + i];
-            }
-            // Energy Conservation
-            res.resAbs[n * len + nc + 1] =
-                (bvs.vf[n] * bvs.Uf[n] + bvs.vr[n] * bvs.Hr[n]) -
-                (bvs.lvf[n] * bvs.lUf[n] + bvs.lvr[n] * bvs.lHr[n]);
-        } else {
-            // Non fluid bulk
-            res.resAbs[n * len + nc + 1] = bvs.vr[n] * bvs.Hr[n] - bvs.lvr[n] * bvs.lHr[n];
-        }
-
-        // Heat Loss
-        if (OCP_TRUE) {
-            // dT
-            res.resAbs[n * len + nc + 1] += dt * bk.optMs.heatLoss.GetHl(n);
-        }
+        const vector<OCP_DBL>& r = bk.ACCm.GetAccumuTerm()->CalResFIM(n, bvs, dt);
+        copy(r.begin(), r.end(), &res.resAbs[n * len]);
     }
 
     BulkConn&         conn = rs.conn;
     BulkConnVarSet&   bcvs = conn.vs;
-    USI     fluxnum;
+    USI               fluxnum;
+    OCP_USI           bId, eId;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         bId       = conn.iteratorConn[c].BId();
@@ -772,63 +751,14 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     ls.AddDim(nb);
 
-    vector<OCP_DBL> bmat(bsize, 0);
+   
     // Accumulation term
-    for (USI i = 1; i < nc + 1; i++) {
-        // Mass consevation
-        bmat[i * ncol + i] = 1;
-    }
-    vector<OCP_DBL> bmatR(bmat);
-    bmatR[0] = 1;
     for (OCP_USI n = 0; n < nb; n++) {
-        if (bvs.cType[n] == BulkContent::rf) {
-            // Fluid Bulk
-            // Volume consevation
-            // dP
-            bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
-            // dNi
-            for (USI i = 0; i < nc; i++) {
-                bmat[i + 1] = -bvs.vfi[n * nc + i];
-            }
-            // dT
-            bmat[nc + 1] = bvs.v[n] * bvs.poroT[n] - bvs.vfT[n];
-            // Energy consevation
-            // dP
-            bmat[ncol * (ncol - 1)] =
-                bvs.vfP[n] * bvs.Uf[n] + bvs.vf[n] * bvs.UfP[n] + bvs.vrP[n] * bvs.Hr[n];
-            // dNi
-            for (USI i = 0; i < nc; i++) {
-                bmat[ncol * (ncol - 1) + i + 1] =
-                    bvs.vfi[n * nc + i] * bvs.Uf[n] + bvs.vf[n] * bvs.Ufi[n * nc + i];
-            }
-            // dT
-            bmat[ncol * ncol - 1] = bvs.vfT[n] * bvs.Uf[n] + bvs.vf[n] * bvs.UfT[n] +
-                                    bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
-
-            // Heat Loss iterm
-            if (OCP_TRUE) {
-                // dT
-                bmat[ncol * ncol - 1] += dt * bk.optMs.heatLoss.GetHlT(n);
-            }
-
-            ls.NewDiag(n, bmat);
-        } else {
-            // Non Fluid Bulk
-            // Energy consevation
-            // dT
-            bmatR[ncol * ncol - 1] = bvs.vrT[n] * bvs.Hr[n] + bvs.vr[n] * bvs.HrT[n];
-
-            // Heat Loss iterm
-            if (OCP_TRUE) {
-                // dT
-                bmatR[ncol * ncol - 1] += dt * bk.optMs.heatLoss.GetHlT(n);
-            }
-
-            ls.NewDiag(n, bmatR);
-        }
+        ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
     // flux term
+    vector<OCP_DBL> bmat(bsize, 0);
     OCP_USI  bId, eId;
     USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {

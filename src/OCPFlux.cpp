@@ -15,11 +15,11 @@
 
 
 ////////////////////////////////////////////
-// OCPFlux_IsoT
+// OCPFlux01
 ////////////////////////////////////////////
 
 
-void OCPFlux_IsoT::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
 	// Calculte upblock, rho, flux_vj, flux_ni
 
@@ -80,7 +80,7 @@ void OCPFlux_IsoT::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 
 
 
-void OCPFlux_IsoT::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPFlux01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -189,7 +189,7 @@ void OCPFlux_IsoT::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, cons
 }
 
 
-void OCPFlux_IsoT::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPFlux01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -454,7 +454,7 @@ void OCPFlux_IsoT::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, cons
 }
 
 
-void OCPFlux_IsoT::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPFlux01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     
@@ -491,11 +491,11 @@ void OCPFlux_IsoT::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, co
 
 
 ////////////////////////////////////////////
-// OCPFlux_T
+// OCPFluxT01
 ////////////////////////////////////////////
 
 
-void OCPFlux_T::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPFluxT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
     // Calculte upblock, rho, flux_vj, flux_ni, Adkt
 
@@ -567,7 +567,7 @@ void OCPFlux_T::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 }
 
 
-void OCPFlux_T::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPFluxT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
 
     const BulkVarSet&        bvs  = bk.vs;

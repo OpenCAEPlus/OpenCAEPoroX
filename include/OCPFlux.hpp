@@ -116,11 +116,12 @@ protected:
 };
 
 
-class OCPFlux_IsoT : public OCPFlux
+/// For Isothermal darcy flux
+class OCPFlux01 : public OCPFlux
 {
 public:
-    OCPFlux_IsoT() = default;
-    OCPFlux_IsoT(const USI& npin, const USI& ncin) {
+    OCPFlux01() = default;
+    OCPFlux01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
         dFdXpB.resize((nc + 1) * (nc + 1));
         dFdXpE.resize((nc + 1) * (nc + 1));
@@ -134,13 +135,12 @@ public:
 };
 
 
-class OCPFlux_T : public OCPFlux
+/// For thermal darcy flux
+class OCPFluxT01 : public OCPFlux
 {
-    // flux for thermal model,
-    // fluid flow or heat conduction
 public:
-    OCPFlux_T() = default;
-    OCPFlux_T(const USI& npin, const USI& ncin) {
+    OCPFluxT01() = default;
+    OCPFluxT01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
         flux_Hj.resize(np);
         dFdXpB.resize((nc + 2) * (nc + 2));

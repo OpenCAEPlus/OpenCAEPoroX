@@ -110,8 +110,7 @@ protected:
     /// Allocate memory for reservoir
     void AllocateReservoir(Reservoir& rs);
     /// Allocate memory for linear system
-    void
-    AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
+    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     /// Pass value needed for FIM from flash to bulk
     void PassFlashValue(Bulk& bk, const OCP_USI& n);
     /// Calculate relative permeability and capillary pressure needed for FIM
@@ -119,14 +118,13 @@ protected:
     /// Calculate residual
     void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0);
     /// Assemble linear system for wells
-    void
-    AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for FIM.
     void UpdateLastTimeStep(Reservoir& rs) const;
 
-private:
+protected:
     /// Perform Flash with Sj and calculate values needed for FIM
     void InitFlash(Bulk& bk);
     /// Perform Flash with Ni and calculate values needed for FIM

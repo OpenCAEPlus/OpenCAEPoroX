@@ -33,8 +33,10 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
     ROCKm.Setup(rs_param, vs.nb, optMs);
 
     optMs.SetupIndependentModule(rs_param, vs);
-    
+
     INITm.Setup(rs_param, PVTm.GetMixtureType());
+
+    ACCm.Setup(rs_param, vs, optMs);
 }
 
 

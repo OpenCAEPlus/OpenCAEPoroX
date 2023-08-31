@@ -29,6 +29,7 @@
 #include "SATModule.hpp"
 #include "ROCKModule.hpp"
 #include "BulkInitializer.hpp"
+#include "BulkAccumuModule.hpp"
 #include "OptionalModules.hpp"
 
 
@@ -85,8 +86,8 @@ class Bulk
  
     friend class Out4RPT;
     friend class Out4VTK;
-    friend class OCPFlux_IsoT;
-    friend class OCPFlux_T;
+    friend class OCPFlux01;
+    friend class OCPFluxT01;
     
 
     // temp
@@ -127,7 +128,8 @@ protected:
     ROCKModule        ROCKm;
     /// Initializer
     BulkInitializer   INITm;
-
+    /// Accumulation term
+    BulkAccumuModule  ACCm;
 
     /// optional modules
     OptionalModules   optMs; 

@@ -121,6 +121,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     // First check : Pressure check
     if (!ctrl.Check(rs, {"BulkP", "WellP"})) {
+        rs.bulk.vs.P = rs.bulk.vs.lP;
         return OCP_FALSE;
     }
 
@@ -436,16 +437,11 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
     ls.AddDim(nb);
 
     // accumulate term
-    OCP_DBL Vpp, Vp, vf, vfP, P;
+    OCP_DBL val, rhs;
     for (OCP_USI n = 0; n < nb; n++) {
-        vf  = bvs.vf[n];
-        vfP = bvs.vfP[n];
-        P   = bvs.lP[n];
-        Vpp = bvs.v[n] * bvs.poroP[n];
-        Vp  = bvs.rockVp[n];
-
-        ls.NewDiag(n, Vpp - vfP);
-        ls.AddRhs(n, (Vpp - vfP) * P + dt * (vf - Vp));
+        bk.ACCm.GetAccumuTerm()->CalValRhsIMPEC(n, bvs, dt, val, rhs);
+        ls.NewDiag(n, val);
+        ls.AddRhs(n, rhs);
     }
 
 
@@ -571,6 +567,7 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
 {
 
     // Bulk
+    rs.bulk.vs.P  = rs.bulk.vs.lP;
     rs.bulk.vs.Ni = rs.bulk.vs.lNi;
     rs.bulk.vs.Pj = rs.bulk.vs.lPj;
     // Bulk Conn
@@ -592,6 +589,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
 
     // Fluid
     bvs.phaseNum   = bvs.lphaseNum;
+    bvs.P          = bvs.lP;
     bvs.Nt         = bvs.lNt;
     bvs.Ni         = bvs.lNi;
     bvs.vf         = bvs.lvf;
@@ -1050,20 +1048,15 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     const USI              len   = nc + 1;
     
     res.SetZero();
-
-    // Bulk to Bulk
-    OCP_USI bId, eId, bIdb;    
+  
     // Accumalation Term
     for (OCP_USI n = 0; n < nb; n++) {
-        bId             = n * len;
-        bIdb            = n * nc;
-        res.resAbs[bId] = bvs.rockVp[n] - bvs.vf[n];
-        for (USI i = 0; i < nc; i++) {
-            res.resAbs[bId + 1 + i] = bvs.Ni[bIdb + i] - bvs.lNi[bIdb + i];
-        }
+        const vector<OCP_DBL>& r = bk.ACCm.GetAccumuTerm()->CalResFIM(n, bvs, dt);
+        copy(r.begin(), r.end(), &res.resAbs[n * len]);
     }
 
     // Flux Term
+    OCP_USI bId, eId;
     BulkConn&       conn  = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
     USI     fluxnum;
@@ -1157,20 +1150,14 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     ls.AddDim(nb);
 
-    vector<OCP_DBL> bmat(bsize, 0);
+
     // Accumulation term
-    for (USI i = 1; i < ncol; i++) {
-        bmat[i * ncol + i] = 1;
-    }
     for (OCP_USI n = 0; n < nb; n++) {
-        bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
-        for (USI i = 0; i < nc; i++) {
-            bmat[i + 1] = -bvs.vfi[n * nc + i];
-        }
-        ls.NewDiag(n, bmat);
+        ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
     // flux term
+    vector<OCP_DBL> bmat(bsize, 0);
     OCP_USI  bId, eId;
     USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {

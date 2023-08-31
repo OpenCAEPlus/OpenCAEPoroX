@@ -24,10 +24,10 @@
 void BulkConn::Setup(const Bulk& bk)
 {
     if (bk.PVTm.GetMixtureType() == OCPMixtureType::THERMALK_OW) {
-        flux.push_back(new OCPFlux_T(bk.vs.np, bk.vs.nc));
+        flux.push_back(new OCPFluxT01(bk.vs.np, bk.vs.nc));
     }
     else {
-        flux.push_back(new OCPFlux_IsoT(bk.vs.np, bk.vs.nc));
+        flux.push_back(new OCPFlux01(bk.vs.np, bk.vs.nc));
     }
     
     for (auto& iter : iteratorConn) {

@@ -217,7 +217,7 @@ TUNING
 
 
 METHOD
-FIM  bsr.fasp
+IMPEC  csr.fasp
 /
 
 TSTEP
