@@ -23,8 +23,6 @@ PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm com
         preParamGridWell.Setup();
     }
 
-    MPI_Barrier(comm);
-
     partition.InitMPI(comm);
     partition.SetPartition(preParamGridWell);
     partition.SetDistribution();

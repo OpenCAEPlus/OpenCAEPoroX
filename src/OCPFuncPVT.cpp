@@ -226,6 +226,38 @@ void OCP_PVDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL&
 
 
 /////////////////////////////////////////////////////
+// PVCDO
+/////////////////////////////////////////////////////
+
+
+void OCP_PVCDO::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const
+{
+	OCP_DBL b, bp;
+	CalBoMuoDer(P, b, mu, bp, muP);
+	xi   = 1 / CONV1 / (b * stdVo);
+	xiP  = -1 / CONV1 * bp / ((b * b) * stdVo);
+
+	rho  = stdRhoO / b;
+	rhoP = -stdRhoO * bp / (b * b);
+}
+
+
+OCP_DBL OCP_PVCDO::CalBo(const OCP_DBL& P) const
+{
+	return Bref * exp(-Cb * (P - Pref));
+}
+
+
+void OCP_PVCDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const
+{
+	bo     = Bref * exp(-Cb * (P - Pref));
+	dBodP  = -bo * Cb;
+	muo    = muref * exp(Cmu * (P - Pref));
+	dMuodP = muref * Cmu;
+}
+
+
+/////////////////////////////////////////////////////
 // ViscosityCalculation
 /////////////////////////////////////////////////////
 

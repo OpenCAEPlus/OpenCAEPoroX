@@ -198,6 +198,61 @@ protected:
 
 
 /////////////////////////////////////////////////////
+// PVCDO
+/////////////////////////////////////////////////////
+
+/// PVT properties of dead oil (with constant compressibility)
+class OCP_PVCDO
+{
+	// only 1 row is included
+	/// 0th column: The reference pressure (Pref) for items 1 and 3. (Pref), (barsa (METRIC), psia (FIELD))
+	/// 1th column: The oil formation volume factor at the reference pressure. (Bo), (rm3/sm3 (METRIC), rb/stb(FIELD))
+	/// 2th column: The oil compressibility. (C),  1/bars (METRIC), 1/psi (FIELD)
+	/// 3th column: The oil viscosity at the reference pressure. (¦Ìo), (cP (METRIC), cP (FIELD)))
+	/// 4th column: The oil ¡°viscosibility¡±. (C¦Ìo), 1/bars (METRIC), 1/psi (FIELD),
+
+public:
+	/// default constructor
+	OCP_PVCDO() = default;
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
+		Pref  = src[0][0];
+		Bref  = src[1][0];
+		Cb    = src[2][0];
+		muref = src[3][0];
+		Cmu   = src[4][0];
+		stdRhoO = stdRhoOin;
+		stdVo   = stdVoin;
+	}
+	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
+	OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
+	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
+
+protected:
+	OCP_DBL CalBo(const OCP_DBL& P) const;
+	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
+
+protected:
+	/// reference pressure
+	OCP_DBL Pref;
+	/// oil formation volume factor at the reference pressure
+	OCP_DBL Bref;
+	/// The oil compressibility
+	OCP_DBL Cb;
+	/// The oil viscosity at the reference pressure
+	OCP_DBL muref;
+	/// The oil ¡°viscosibility¡±
+	OCP_DBL Cmu;
+	/// mass density of oil phase in standard conditions
+	OCP_DBL stdRhoO;
+	/// molar volume of oil phase in standard conditions (stb/lbmol)
+	OCP_DBL stdVo;
+};
+
+
+
+
+/////////////////////////////////////////////////////
 // Viscosity Calculation
 /////////////////////////////////////////////////////
 

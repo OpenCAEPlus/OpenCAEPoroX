@@ -194,7 +194,7 @@ protected:
     USI             model{ 0 };
     /// If use dual porosity option. (matrix is in the front and followed by fracture grid)
     OCP_BOOL        DUALPORO{ OCP_FALSE };
-    /// if true, then the default property of fracture will be copied from matrix
+    /// if true, then the default property of fracture will be copied from matrix(think of it)
     OCP_BOOL        DPGRID{ OCP_FALSE };
 
     // Orthogonal grid

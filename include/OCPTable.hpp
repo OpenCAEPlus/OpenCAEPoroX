@@ -52,6 +52,7 @@ public:
     /// return the jth column in table to modify or use.
     vector<OCP_DBL>& GetCol(const USI& j) { return data[j]; }
     const vector<OCP_DBL>& GetCol(const USI& j) const { return data[j]; }
+    const auto& GetVal(const USI& row, const USI& col) { return data[col][row]; }
 
     /// interpolate the specified monotonically increasing column in table to evaluate
     /// all columns and return slope
