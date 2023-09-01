@@ -83,10 +83,6 @@ protected:
 public:
 	const vector<OCP_USI>* CalGlobalIndex(const USI& nw) const;
 
-protected:
-
-	mutable USI             numActWell;  ///< num of active well
-
 	////////////////////////////////////////
 	// Tacit Communication (Prefered)
 	////////////////////////////////////////

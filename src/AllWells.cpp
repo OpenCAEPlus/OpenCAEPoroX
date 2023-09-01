@@ -19,7 +19,6 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
 {
 
     OCP_FUNCNAME;
-    numproc = domain.numproc;
 
     for (auto& s : paramWell.solSet) {
         solvents.push_back(s);
@@ -263,12 +262,7 @@ USI AllWells::GetIndex(const string& name) const
             return w;    
         }
     }
-    if (numproc == 1) {
-        OCP_ABORT("Well " + name + " not found!");
-    }
-    else {
-        return -1;
-    }   
+    return -1; 
 }
 
 USI AllWells::GetWellPerfNum() const

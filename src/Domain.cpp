@@ -70,7 +70,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 				for (USI i = 0; i < e[1]; i++) {
 					if (my_vtx[i] >= global_well_start) {
 						// well
-						well.push_back(my_vtx[i] - (numElementTotal - numWellTotal));
+						well.push_back(my_vtx[i] - global_well_start);
 						well2Bulk.push_back(vector<OCP_USI>(my_edge + my_xadj[i], my_edge + my_xadj[i + 1]));
 						sort(well2Bulk.back().begin(), well2Bulk.back().end());
 						continue;
@@ -262,10 +262,9 @@ OCP_INT Domain::GetPerfLocation(const OCP_USI& wId, const OCP_USI& tmpI, const O
 
 const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 {
-	numActWell = nw;
-	global_index.resize(numGridLocal + numActWell);
+	global_index.resize(numGridLocal + nw);
 
-	const OCP_INT numElementLoc = numGridInterior + numActWell;
+	const OCP_INT numElementLoc = numGridInterior + nw;
 	OCP_INT       global_begin;
 	OCP_INT       global_end;
 
@@ -288,7 +287,7 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 	// Get Ghost grid's global index by communication	
 	for (USI i = 0; i < numRecvProc; i++) {
 		const vector<OCP_USI>& rel = recv_element_loc[i];
-		const OCP_USI bId = rel[1] + numActWell;
+		const OCP_USI bId = rel[1] + nw;
 		MPI_Irecv(&global_index[bId], rel[2] - rel[1], MPI_INT, rel[0], 0, myComm, &recv_request[i]);
 	}
 	vector<vector<OCP_INT>> send_buffer(numSendProc);

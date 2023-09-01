@@ -137,9 +137,6 @@ public:
     USI GetNumOpenWell()const;
 
 protected:
-    OCP_INT                 numproc;
-
-protected:
     USI                     numWell;   ///< num of wells.
     vector<Well*>           wells;     ///< well set.
     USI                     numGroup;  ///< num of groups

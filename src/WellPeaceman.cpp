@@ -50,7 +50,9 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
         }
         pp++;
     }
-    OCP_ASSERT(pp = numPerf, "Wrong Perf!");
+    if (pp != numPerf) {
+        OCP_ABORT("Wrong Perf Setup!");
+    }  
 }
 
 
