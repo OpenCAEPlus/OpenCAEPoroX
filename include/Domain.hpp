@@ -28,6 +28,8 @@
 using namespace std;
 
 /// Domain is the new distribution after the partition
+// all elements(well) are active, all connections(perforations) are active
+// dead elements are excluded, so global index is also for active elements
 class Domain
 {
 	friend class Reservoir;
@@ -57,24 +59,33 @@ public:
 	OCP_INT                      numproc, myrank;
 
 protected:
+	/// Num of Total Elements(grids + wells)
+	OCP_USI numElementTotal; 
+	/// Num of Total Wells
+	OCP_USI numWellTotal; 
+	/// Num of local Elements: numGridInterior + numWellLocal
+	OCP_USI numElementLocal; 
+	/// Num of interior grid stored in current process
+	OCP_USI numGridInterior; 
+	/// Num of ghost grid stored in current process
+	OCP_USI numGridGhost;   
+	/// numGridInterior + numGridGhost
+	OCP_USI numGridLocal; 
+	/// Num of well stored in current process
+	USI     numWellLocal;    
 
-	OCP_USI numElementTotal; ///< Num of Total Elements
-	OCP_USI numWellTotal;    ///< Num of Total Wells
-	OCP_USI numElementLocal; ///< Num of local Elements: numGridInterior + numWellLocal
-
-	OCP_USI numGridInterior; ///< Num of interior grid stored in current process
-	OCP_USI numGridGhost;    ///< Num of ghost grid stored in current process
-	OCP_USI numGridLocal;    ///< numGridInterior + numGridGhost
-	USI     numWellLocal;    ///< Num of well stored in current process, static
-
-
-	vector<vector<idx_t>>   elementCSR;  ///< elements received from other process in CSR
-	vector<OCP_USI>         grid;        ///< interior grid & ghost grid
-	vector<OCP_USI>         well;        ///< well's index(index starts from zero)
-	vector<vector<OCP_USI>> well2Bulk;   ///< wells' bulk neighbor, init global active index, ascending order
-	vector<USI>             neighborNum; ///< num of neighbor of grids: well-included, self-included
-
-	map<OCP_USI, OCP_USI>   init_global_to_local; ///< interior grid & ghost grid
+	/// elements received from other process in CSR
+	vector<vector<idx_t>>   elementCSR;  
+	///< global index of interior grid & ghost grid
+	vector<OCP_USI>         grid;        
+	/// well's global index(index starts from zero)
+	vector<OCP_USI>         well; 
+	/// wells' bulk neighbor, init global index, ascending order
+	vector<vector<OCP_USI>> well2Bulk;  
+	/// num of all neighbor of grids: well-included, self-included
+	vector<USI>             neighborNum; 
+	/// global index -> local index (interior grid & ghost grid)
+	map<OCP_USI, OCP_USI>   init_global_to_local; 
 
 	////////////////////////////////////////
 	// Communication
@@ -104,7 +115,7 @@ public:
 	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid in equations
 
 
-	// If all grids are active, if not, record their global index(include inactive grid)
+	// If all grids are active. if not, record their global index(include inactive grid)
 	OCP_BOOL          allActive{ OCP_TRUE };
 	vector<OCP_USI>   gridAllIndex;
 
