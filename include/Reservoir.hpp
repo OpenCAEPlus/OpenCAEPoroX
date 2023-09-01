@@ -89,7 +89,7 @@ public:
     /// Setup Domain
     void SetupDomain(Domain& myDomain) { swap(domain, myDomain); }
     /// Grid-based, Conn-based
-    void InputDistParamGrid(ParamReservoir& param, PreParamGridWell& prepro);
+    void InputDistParamGrid(PreParamGridWell& prepro);
     /// Well-based
     void InputDistParamOthers(const ParamRead& param);
 

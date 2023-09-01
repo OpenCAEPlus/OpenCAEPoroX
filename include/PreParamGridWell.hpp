@@ -155,18 +155,23 @@ protected:
     void CheckInput();
     /// Input the problem model: isothermal or thermal
     void InputMODEL(ifstream& ifs);
+    /// Input DUALPORO
+    void InputDUALPORO() { DUALPORO = OCP_TRUE; }
+    /// Input DPGRID
+    void InputDPGRID() { DPGRID = OCP_TRUE; }
     void InputDIMENS(ifstream& ifs);
     void InputEQUALS(ifstream& ifs);
     void InputCOPY(ifstream& ifs);
     void InputMULTIPLY(ifstream& ifs);
-    void InputBasic(ifstream& ifs, string& keyword);
-    void InputRegion(ifstream& ifs, const string& keyword);
+    /// Input grid property
+    void InputGrid(ifstream& ifs, string& keyword);
     void InputWELSPECS(ifstream& ifs);
     void InputCOMPDAT(ifstream& ifs);
     void InputINCLUDE(ifstream& ifs);
     // Input tools
     /// Find pointer to the specified variable.
-    vector<OCP_DBL>* FindPtr(const string& varName);
+    vector<OCP_DBL>* FindPtr(const string& varName, const OCP_DBL&);
+    vector<USI>* FindPtr(const string& varName, const USI&);
     /// It's used in InputEQUALS, assigning values in batches.
     template <typename T>
     void setVal(vector<T>& obj, const T& val, const vector<USI>& index);
@@ -176,35 +181,76 @@ protected:
     /// It's used in InputMULTIPLY, multipling the value of a certain range of a
     /// variable by a coefficient.
     void MultiplyVal(vector<OCP_DBL>& obj, const OCP_DBL& val, const vector<USI>& index);
+
 protected:
 
-    string  workdir;  ///< current work directory
-
-    USI     gridType{ ORTHOGONAL_GRID }; ///< Orthogonal or Corner grid
-    OCP_USI numGrid;  ///< Num of grids.
+    /// current work directory
+    string          workdir;
+    /// Orthogonal or Corner grid              
+    USI             gridType{ ORTHOGONAL_GRID };
+    /// Num of grids.
+    OCP_USI         numGrid;
+    /// thermal model or isothermal model
+    USI             model{ 0 };
+    /// If use dual porosity option. (matrix is in the front and followed by fracture grid)
+    OCP_BOOL        DUALPORO{ OCP_FALSE };
+    /// if true, then the default property of fracture will be copied from matrix
+    OCP_BOOL        DPGRID{ OCP_FALSE };
 
     // Orthogonal grid
-    USI             nx;    ///< Num of grids along x-direction.
-    USI             ny;    ///< Num of grids along y-direction.
-    USI             nz;    ///< Num of grids along z-direction.  
-    vector<OCP_DBL> dx;    ///< Size along the x - direction for each grid.
-    vector<OCP_DBL> dy;    ///< Size along the y - direction for each grid.
-    vector<OCP_DBL> dz;    ///< Size along the z - direction for each grid.
-    vector<OCP_DBL> tops;  ///< Depth of the top surface of the uppermost grids.
+    /// Num of grids along x-direction.
+    USI             nx;
+    /// Num of grids along y-direction.
+    USI             ny;
+    /// Num of grids along z-direction. 
+    USI             nz; 
+    /// Size along the x - direction for each grid.
+    vector<OCP_DBL> dx;   
+    /// Size along the y - direction for each grid.
+    vector<OCP_DBL> dy;
+    /// Size along the z - direction for each grid.
+    vector<OCP_DBL> dz; 
+    /// Depth of the top surface of the uppermost grids.
+    vector<OCP_DBL> tops;  
 
     // Corner point grid
-    vector<OCP_DBL> coord; ///< Lines of a corner-point grid.
-    vector<OCP_DBL> zcorn; ///< ZValues of a corner-point grid.
+    /// Lines of a corner-point grid.   
+    vector<OCP_DBL> coord; 
+    /// Z-values of a corner-point grid.
+    vector<OCP_DBL> zcorn; 
 
     // Rock param
-    vector<OCP_DBL> ntg;   ///< Net to gross for each grid.
-    vector<OCP_DBL> poro;  ///< Porosity for each grid.
-    USI             model{ 0 }; ///< if thermal model will be used.
+    /// Net to gross
+    vector<OCP_DBL> ntg; 
+    /// Porosity
+    vector<OCP_DBL> poro; 
+    /// permeability for x-direction
+    vector<OCP_DBL> kx;
+    /// permeability for y-direction
+    vector<OCP_DBL> ky;
+    /// permeability for z-direction
+    vector<OCP_DBL> kz;
 
+    // Region
     /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
-    vector<USI> ACTNUM;    
+    vector<USI>     ACTNUM; 
+    /// Records the index of SAT region for each grid.  
+    vector<USI>     SATNUM;  
+    /// Records the index of PVT region for each grid.
+    vector<USI>     PVTNUM;
+    /// Records the index of ROCK region for each grid.
+    vector<USI>     ROCKNUM;   
+
+    // Initial Condition
+    /// Initial water saturation in each grid.
+    vector<OCP_DBL> Swat; 
+    /// if Pcow should be scaled.
+    OCP_BOOL        scalePcow{ OCP_FALSE }; 
+
+
     /// Grid Location
-    vector<USI> location;
+    vector<USI>     location;
+
 
     // Well
     vector<PreParamWell> well;

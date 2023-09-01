@@ -42,7 +42,6 @@ void ParamRead::ReadInputFile(const string& filename)
     GetDirAndName();
     Init();
     ReadFile(inputFile);
-    PostPrecess();
     CheckParam();  
 }
 
@@ -97,47 +96,6 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("RTEMP", 5):
                 paramRs.InputRTEMP(ifs);
-                break;
-
-            case Map_Str2Int("EQUALS", 6):
-                if (disable_grid)
-                    break;
-                paramRs.InputEQUALS(ifs);
-                break;
-
-            case Map_Str2Int("DX", 2):
-            case Map_Str2Int("DY", 2):
-            case Map_Str2Int("DZ", 2):
-            case Map_Str2Int("COORD", 5):
-            case Map_Str2Int("ZCORN", 5):
-            case Map_Str2Int("NTG", 3):
-            case Map_Str2Int("PORO", 4):
-            case Map_Str2Int("TOPS", 4):
-            case Map_Str2Int("PERMX", 5):
-            case Map_Str2Int("PERMY", 5):
-            case Map_Str2Int("PERMZ", 5):
-            case Map_Str2Int("PRESSURE", 8):
-            case Map_Str2Int("Ni", 2):
-            case Map_Str2Int("SWATINIT", 8):
-            case Map_Str2Int("SATNUM", 6):
-            case Map_Str2Int("PVTNUM", 6):
-            case Map_Str2Int("ACTNUM", 6):
-            case Map_Str2Int("ROCKNUM", 7):
-                if (disable_grid)
-                    break;
-                paramRs.InputGRID(ifs, keyword);
-                break;
-
-            case Map_Str2Int("COPY", 4):
-                if (disable_grid)
-                    break;
-                paramRs.InputCOPY(ifs);
-                break;
-
-            case Map_Str2Int("MULTIPLY", 8):
-                if (disable_grid)
-                    break;
-                paramRs.InputMULTIPLY(ifs);
                 break;
 
             case Map_Str2Int("SWFN", 4):
@@ -358,11 +316,6 @@ void ParamRead::ReadINCLUDE(ifstream& ifs)
         cout << "finish reading " + workDir + vbuf[0] << endl;
 }
 
-
-void ParamRead::PostPrecess()
-{
-    paramRs.PostProcess();
-}
 
 
 /// Check parameters in paramRs and paramWell.

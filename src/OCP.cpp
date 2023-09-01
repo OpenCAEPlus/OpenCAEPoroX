@@ -18,11 +18,7 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
     GetWallTime timer;
     timer.Start();
 
-    OCP_BOOL disable_grid = OCP_FALSE;
-    if (myRank != MASTER_PROCESS)
-        disable_grid = OCP_TRUE;
-
-    ParamRead rp(disable_grid);
+    ParamRead rp;
     rp.ReadInputFile(filename);
 
     reservoir.InputParam(prepro, rp);

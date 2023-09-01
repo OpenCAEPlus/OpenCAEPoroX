@@ -210,37 +210,13 @@ class ParamReservoir
 {
 
 public:
-    // Grid
-    OCP_BOOL disable_grid{OCP_FALSE}; ///< grid-based grids are ignored
     // Cartesian
     Dimens  dimens;  ///< Dimension of grid: the number of grids along x,y,z direction.
-    OCP_USI numGrid; ///< Num of grids.
-    vector<OCP_DBL> tops; ///< Depth of the top surface of the uppermost grids.
-    vector<OCP_DBL> dx;   ///< Size along the x - direction for each grid.
-    vector<OCP_DBL> dy;   ///< Size along the y - direction for each grid.
-    vector<OCP_DBL> dz;   ///< Size along the z - direction for each grid.
-
-    // Corner point geometry
-    vector<OCP_DBL> coord; ///< TODO: Add Doxygen.
-    vector<OCP_DBL> zcorn; ///< TODO: Add Doxygen.
-
-    // RockParam
-    vector<OCP_DBL>   ntg;     ///< Net to gross for each grid.
-    vector<OCP_DBL>   poro;    ///< Porosity for each grid.
-    vector<OCP_DBL>   permX;   ///< Permeability along the x - direction for each grid.
-    vector<OCP_DBL>   permY;   ///< Permeability along the y-direction for each grid.
-    vector<OCP_DBL>   permZ;   ///< Permeability along the z-direction for each grid.
     
     OCP_DBL           rsTemp;  ///< Temperature for reservoir.
     vector<RockParam> rockSet; ///< a set of rock
     HLoss             hLoss;   ///< Heat loss property
     Miscstr           miscstr; ///< reference Miscibility surface tension
-
-    // If P and Ni are given, then calculation of initial equilibration is unneeded.
-    vector<OCP_DBL> P;    ///< Initial pressure of components in each grid.
-    vector<OCP_DBL> Ni;   ///< Initial moles of components in each grid.
-    vector<OCP_DBL> Swat; ///< Initial water saturation in each grid.
-    OCP_BOOL        scalePcow{OCP_FALSE}; ///< whether Pcow should be scaled.
 
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
@@ -266,14 +242,6 @@ public:
     USI               NTSFUN{1}; ///< Num of SAT regions.
     USI               NTPVT{1};  ///< Num of PVT regions.
     USI               NTROOC{1}; ///< Num of Rock regions.
-    vector<USI>       SATNUM;    ///< Records the index of SAT region for each grid.
-    vector<USI>       PVTNUM;    ///< Records the index of PVT region for each grid.
-    vector<USI>       ACTNUM;    ///< Records the index of Active region for each grid.
-    vector<USI>       ROCKNUM;   ///< Records the index of ROCK region for each grid.
-    vector<OCP_DBL>   bufferSATNUM;   ///< temporary buffer for SATNUM
-    vector<OCP_DBL>   bufferPVTNUM;   ///< temporary buffer for PVTNUM
-    vector<OCP_DBL>   bufferACTNUM;   ///< temporary buffer for ACTNUM
-    vector<OCP_DBL>   bufferROCKNUM;  ///< temporary buffer for ROCKNUM
 
     // Saturation tables & bubble point pressure
     TableSet SWFN_T; ///< Table set of SWFN.
@@ -297,12 +265,8 @@ public:
     TableSet PVTW_T; ///< Table set of PVTW.
 
     /// Find corresponding variable according to the name of variable.
-    /// It is used for the basic properties of reservoir such as DX.
-    vector<OCP_DBL>* FindPtr(const string& varName);
-
-    /// Find corresponding variable according to the name of variable.
     /// It is used for the scope of the table.
-    TableSet* FindPtr_T(const string& varName);
+    TableSet* FindPtrTable(const string& varName);
 
     /// Initialize the default value in reservoir, such as temperature, density, table.
     void Init();
@@ -336,22 +300,6 @@ public:
 
     /// Input the keyword: RTEMP. RTEMP gives the temperature of reservoir.
     void InputRTEMP(ifstream& ifs);
-
-    /// Input the keyword: EQUALS. EQUALS contains many keywords about grids which has
-    /// special input format. These keywords contains DX, TOPS, PORO and so on. You can
-    /// assign values to them in batches
-    void InputEQUALS(ifstream& ifs);
-
-    /// Input the keyword about grids, actually, it's a supplement for EQUALS.
-    /// It supplies another way to input the params in EQUALS.
-    void InputGRID(ifstream& ifs, string& keyword);
-
-    /// Input the keyword: COPY. COPY could copy the value of one variable to another.
-    void InputCOPY(ifstream& ifs);
-
-    /// Input the keyword: MULTIPLY. MULTIIPLY could multiply the value of a certain
-    /// range of a variable by a coefficient.
-    void InputMULTIPLY(ifstream& ifs);
 
     /// Input PVTtable and SATtable such as SWOF, PVCO.
     void InputTABLE(ifstream& ifs, const string& tabName);
@@ -406,15 +354,9 @@ public:
     void InputRR(ifstream& ifs) { comsParam.InputRR(ifs); };
 
 
-    // Post-process
-    void PostProcess();
-
     // check
     /// Check the reservoir param from input file.
     void CheckParam();
-
-    /// Check the size of properties of grids.
-    void CheckGrid();
 
     /// Check Rock
     void CheckRock();
@@ -431,9 +373,6 @@ public:
     /// Check existence of PVTtable and SATtable.
     void CheckPhaseTab() const;
 
-    /// Check if each grid is assigned to an area or all defaulted.
-    void CheckRegion() const;
-
     /// (Todo) Initialization of equilibration of only one region is realized.
     void CheckEqlRegion() const;
 
@@ -442,11 +381,6 @@ public:
 
     /// Check cpg1, cpg2, cpg3, cpg4
     void CheckCPG();
-
-public:
-
-    /// Free grid-based memory
-    void FreeGridMemory();
 };
 
 #endif /* end if __PARAMRESERVOIR_HEADER__ */

@@ -35,7 +35,6 @@ public:
     string   inputFile; ///< Input file with its path (absolute or relative).
     string   workDir;   ///< Current work directory.
     string   fileName;  ///< File name of input file.
-    OCP_BOOL disable_grid{ OCP_FALSE }; ///< grid-based params are ignored
 
     // Main workloads for ParamRead: read reservoir params, read well params,
     // read control params, and read output param. These workloads are assigned
@@ -46,11 +45,6 @@ public:
     ParamOutput    paramOutput;  ///< Read the output params.
 
 public:
-
-    ParamRead(const OCP_BOOL& disableGrid = OCP_FALSE) {
-        disable_grid         = disableGrid;
-        paramRs.disable_grid = disable_grid;
-    };
 
     /// Get current work dir and input file name from the full file path.
     void GetDirAndName();
@@ -66,9 +60,6 @@ public:
 
     /// Handle the INCLUDE keyword, which contains other input files.
     void ReadINCLUDE(ifstream& ifs);
-
-    /// Post-processing
-    void PostPrecess();
 
     /// Check whether the params contain error.
     void CheckParam();

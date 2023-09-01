@@ -19,7 +19,7 @@
 void Reservoir::InputParam(PreProcess& prepro, ParamRead& param)
 {
     SetupDomain(prepro.domain);
-    InputDistParamGrid(param.paramRs, prepro.preParamGridWell);
+    InputDistParamGrid(prepro.preParamGridWell);
     InputDistParamOthers(param);
 }
 
@@ -56,12 +56,10 @@ OCP_INT Reservoir::GetSendVarInfo(const VarInfoGrid& varInfo, VarInfoGrid& send_
 }
 
 
-void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& mygrid)
+void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 {
 
     const PreParamGridWell& grid = mygrid;
-    const ParamReservoir& rs     = rsparam;
-
 
     /////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////
@@ -74,15 +72,15 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
             VarInfo<vector<OCP_DBL>>{ "DEPTH", &grid.depth, &bulk.vs.depth },
             VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.vs.poroInit },
             VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.vs.ntg },
-            VarInfo<vector<OCP_DBL>>{ "PERMX", &rs.permX, &bulk.vs.rockKx },
-            VarInfo<vector<OCP_DBL>>{ "PERMY", &rs.permY, &bulk.vs.rockKy },
-            VarInfo<vector<OCP_DBL>>{ "PERMZ", &rs.permZ, &bulk.vs.rockKz },
-            VarInfo<vector<OCP_DBL>>{ "SWAT", &rs.Swat, &bulk.optMs.scalePcow.vs.swatInit },
+            VarInfo<vector<OCP_DBL>>{ "PERMX", &grid.kx, &bulk.vs.rockKx },
+            VarInfo<vector<OCP_DBL>>{ "PERMY", &grid.ky, &bulk.vs.rockKy },
+            VarInfo<vector<OCP_DBL>>{ "PERMZ", &grid.kz, &bulk.vs.rockKz },
+            VarInfo<vector<OCP_DBL>>{ "SWAT", &grid.Swat, &bulk.optMs.scalePcow.vs.swatInit },
     }, vector<VarInfo<vector<OCP_USI>>>{
         VarInfo<vector<OCP_USI>>{"LOCATION", &grid.location, &bulk.vs.location },
-        VarInfo<vector<OCP_USI>>{ "SATNUM", &rs.SATNUM, &bulk.SATm.GetSATNUM() },
-        VarInfo<vector<OCP_USI>>{ "PVTNUM", &rs.PVTNUM, &bulk.PVTm.GetPVTNUM() },
-        VarInfo<vector<OCP_USI>>{ "ROCKNUM", &rs.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
+        VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM() },
+        VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM() },
+        VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
     });
 
     /////////////////////////////////////////////////////////////////////////
@@ -90,8 +88,8 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
     // Get grid-based vars from params
     bulk.optMs.nb = domain.numGridLocal;
-    bulk.vs.nb     = domain.numGridLocal;   // Interior + ghost
-    bulk.vs.nbI    = domain.numGridInterior;
+    bulk.vs.nb    = domain.numGridLocal;   // Interior + ghost
+    bulk.vs.nbI   = domain.numGridInterior;
 
     MPI_Comm      myComm  = domain.myComm;
     const OCP_INT numproc = domain.numproc;
@@ -274,6 +272,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
         vector<BulkConnPair>* dst = &conn.iteratorConn;
         domain.neighborNum.reserve(domain.numGridInterior);
         const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
+        const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
         for (OCP_USI n = 0; n < bulk.vs.nbI; n++) {
@@ -283,7 +282,7 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
                 if (gn.ID() >= global_well_start)
                     continue; // well is exculude
 
-                eId = gn.ID();
+                eId = init2local.at(gn.ID());
                 if (eId > bId)
                     dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE()));
             }
@@ -311,7 +310,6 @@ void Reservoir::InputDistParamGrid(ParamReservoir& rsparam, PreParamGridWell& my
 
         // Free grid Memory
         mygrid.FreeMemory();
-        rsparam.FreeGridMemory();
 
         // wait   
         MPI_Waitall(numproc - 1, request, MPI_STATUS_IGNORE);

@@ -39,6 +39,14 @@ void PreParamGridWell::Input(const string& myFilename)
                 InputMODEL(ifs);
                 break;
 
+            case Map_Str2Int("DUALPORO", 8):
+                InputDUALPORO();
+                break;
+
+            case Map_Str2Int("DPGRID", 6):
+                InputDPGRID();
+                break;
+
             case Map_Str2Int("DIMENS", 6):
                 InputDIMENS(ifs);
                 break;
@@ -62,12 +70,16 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("COORD", 5):
             case Map_Str2Int("ZCORN", 5):
             case Map_Str2Int("NTG", 3):
-            case Map_Str2Int("PORO", 4):           
-                InputBasic(ifs, keyword);
-                break;
-
+            case Map_Str2Int("PORO", 4): 
+            case Map_Str2Int("PERMX", 5):
+            case Map_Str2Int("PERMY", 5):
+            case Map_Str2Int("PERMZ", 5):
             case Map_Str2Int("ACTNUM", 6):
-                InputRegion(ifs, keyword);
+            case Map_Str2Int("SATNUM", 6):
+            case Map_Str2Int("PVTNUM", 6):           
+            case Map_Str2Int("ROCKNUM", 7):
+            case Map_Str2Int("SWATINIT", 8):
+                InputGrid(ifs, keyword);
                 break;
 
             case Map_Str2Int("INCLUDE", 7):
@@ -165,6 +177,12 @@ void PreParamGridWell::InputDIMENS(ifstream& ifs)
     nz = stoi(vbuf[2]);
     numGrid = nx * ny * nz;
 
+    if (DUALPORO) {
+        // two-layer grids
+        nz      *= 2;
+        numGrid *= 2;
+    }
+
     cout << setw(6) << nx << setw(6) << ny << setw(6) << nz << endl << endl;
 }
 
@@ -185,8 +203,8 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
         index[2] = 0, index[3] = ny - 1;
         index[4] = 0, index[5] = nz - 1;
 
-        string  objName = vbuf[0];
-        OCP_DBL val = stod(vbuf[1]);
+        const string  objName = vbuf[0];
+        const OCP_DBL val     = stod(vbuf[1]);
 
         DealDefault(vbuf);
 
@@ -199,29 +217,36 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
             OCP_ABORT("WRONG Range in " + objName + " in EQUALS!");
         }
 
-        vector<OCP_DBL>* objPtr = FindPtr(objName);
-
-        if (objPtr != nullptr) {
-            objPtr->resize(objPtr->capacity());
-            if (objName == "TOPS") {
-                // objPtr->resize(nx * ny);               
-                index[4] = index[5] = 0;
-            }
-            else {
-                // objPtr->resize(numGrid);
-            }
-            setVal(*objPtr, val, index);
-        }
-        else {
-            continue;
-            // OCP_ABORT("Wrong object name: " + objName);
-        }
-
         cout << setw(8) << vbuf[0] << setw(16) << vbuf[1];
         for (USI i = 0; i < 6; i++) {
             cout << setw(6) << index[i] + 1;
         }
         cout << endl;
+
+        
+        {
+            auto objPtr = FindPtr(objName, (OCP_DBL)0);
+            if (objPtr != nullptr) {
+                objPtr->resize(objPtr->capacity());
+                if (objName == "TOPS") {
+                    index[4] = index[5] = 0;
+                }
+                setVal(*objPtr, val, index);
+                continue;
+            }
+        }
+
+        {
+            auto objPtr = FindPtr(objName, (USI)0);
+            if (objPtr != nullptr) {
+                objPtr->resize(objPtr->capacity());
+                setVal(*objPtr, (USI)val, index);
+                continue;
+            }
+        }
+
+
+        OCP_ABORT("WRONG Item " + objName + " in EQUALS!");
     }
 
     cout << "/" << endl;
@@ -251,22 +276,33 @@ void PreParamGridWell::InputCOPY(ifstream& ifs)
             if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
         }
 
-        auto srcPtr = FindPtr(srcName);
-        auto objPtr = FindPtr(objName);
-        if (srcPtr != nullptr && objPtr != nullptr) {
-            objPtr->resize(srcPtr->size());
-            CopyVal(*objPtr, *srcPtr, index);
-        }
-        else {
-            continue;
-            // OCP_ABORT("Wrong object names: " + srcName + ", " + objName);
-        }
-
         cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
         for (USI i = 0; i < 6; i++) {
             cout << setw(6) << index[i] + 1;
         }
         cout << endl;
+
+        {
+            auto srcPtr = FindPtr(srcName, (OCP_DBL)0);
+            auto objPtr = FindPtr(objName, (OCP_DBL)0);
+            if (srcPtr != nullptr && objPtr != nullptr) {
+                objPtr->resize(srcPtr->size());
+                CopyVal(*objPtr, *srcPtr, index);
+                continue;
+            }
+        }
+
+        {
+            auto srcPtr = FindPtr(srcName, (USI)0);
+            auto objPtr = FindPtr(objName, (USI)0);
+            if (srcPtr != nullptr && objPtr != nullptr) {
+                objPtr->resize(srcPtr->size());
+                CopyVal(*objPtr, *srcPtr, index);
+                continue;
+            }
+        }
+
+        OCP_ABORT("WRONG Item " + srcName + "  " + objName + " in EQUALS!");
     }
 }
 
@@ -296,7 +332,7 @@ void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
             if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
         }
 
-        auto objPtr = FindPtr(objName);
+        auto objPtr = FindPtr(objName, (OCP_DBL)0);
         if (objPtr != nullptr) {
             if (objName == "TOPS") {
                 index[4] = index[5] = 0;
@@ -304,8 +340,7 @@ void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
             MultiplyVal(*objPtr, val, index);
         }
         else {
-            continue;
-            // OCP_ABORT("Wrong object name: " + objName);
+            OCP_ABORT("Wrong object name: " + objName);
         }
 
         cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
@@ -317,60 +352,61 @@ void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
 }
 
 
-void PreParamGridWell::InputBasic(ifstream& ifs, string& keyword)
+void PreParamGridWell::InputGrid(ifstream& ifs, string& keyword)
 {
-    auto objPtr = FindPtr(keyword);
-    if (objPtr == nullptr) {
-        OCP_ABORT("Unknown keyword!");
-    }
-
     vector<string> vbuf;
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
 
-        for (auto& str : vbuf) {
-            // if m*n occurs, then push back n  m times
-            auto pos = str.find('*');
-            if (pos == string::npos) {
-                objPtr->push_back(stod(str));
+    {
+        auto objPtr = FindPtr(keyword, (OCP_DBL)0);
+        if (objPtr != nullptr) {
+            while (ReadLine(ifs, vbuf)) {
+                if (vbuf[0] == "/") break;
+
+                for (auto& str : vbuf) {
+                    // if m*n occurs, then push back n  m times
+                    auto pos = str.find('*');
+                    if (pos == string::npos) {
+                        objPtr->push_back(stod(str));
+                    }
+                    else {
+                        USI     len = str.size();
+                        OCP_USI num = stoi(str.substr(0, pos));
+                        OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
+                        for (USI i = 0; i < num; i++) objPtr->push_back(val);
+                    }
+                }
             }
-            else {
-                USI     len = str.size();
-                OCP_USI num = stoi(str.substr(0, pos));
-                OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
-                for (USI i = 0; i < num; i++) objPtr->push_back(val);
+            return;
+        }        
+    }
+
+    {
+        auto objPtr = FindPtr(keyword, (USI)0);
+        if (objPtr != nullptr) {
+            while (ReadLine(ifs, vbuf)) {
+                if (vbuf[0] == "/") break;
+
+                for (auto& str : vbuf) {
+                    // if m*n occurs, then push back n  m times
+                    auto pos = str.find('*');
+                    if (pos == string::npos) {
+                        objPtr->push_back(stod(str));
+                    }
+                    else {
+                        USI     len = str.size();
+                        OCP_USI num = stoi(str.substr(0, pos));
+                        USI val = stoi(str.substr(pos + 1, len - (pos + 1)));
+                        for (USI i = 0; i < num; i++) objPtr->push_back(val);
+                    }
+                }
             }
+            return;
         }
     }
-}
 
 
-void PreParamGridWell::InputRegion(ifstream& ifs, const string& keyword)
-{
-    auto ptr = &ACTNUM;
 
-    ptr->reserve(numGrid);
-    vector<string>  vbuf;
-    vector<OCP_USI> obj;
-    vector<USI>     region;
-
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
-
-        for (auto& str : vbuf) {
-            // if m*n occurs, then push back n m times
-            auto pos = str.find('*');
-            if (pos == string::npos) {
-                ptr->push_back(stod(str));
-            }
-            else {
-                USI     len = str.size();
-                OCP_USI num = stoi(str.substr(0, pos));
-                OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
-                for (USI i = 0; i < num; i++) ptr->push_back(val);
-            }
-        }
-    }
+    OCP_ABORT("Unknown keyword!");
 }
 
 
@@ -464,12 +500,12 @@ void PreParamGridWell::InputCOMPDAT(ifstream& ifs)
 }
 
 
-/// Find pointer to the specified variable.
-vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName)
+vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&)
 {
     vector<OCP_DBL>* myPtr = nullptr;
 
-    switch (Map_Str2Int(&varName[0], varName.size())) {
+    switch (Map_Str2Int(&varName[0], varName.size())) 
+    {
     case Map_Str2Int("DX", 2):
         dx.reserve(numGrid);
         myPtr = &dx;
@@ -483,6 +519,11 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName)
     case Map_Str2Int("DZ", 2):
         dz.reserve(numGrid);
         myPtr = &dz;
+        break;
+
+    case Map_Str2Int("TOPS", 4):
+        tops.reserve(nx * ny);
+        myPtr = &tops;
         break;
 
     case Map_Str2Int("COORD", 5):
@@ -507,12 +548,58 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName)
         myPtr = &ntg;
         break;
 
-    case Map_Str2Int("TOPS", 4):
-        tops.reserve(nx * ny);
-        myPtr = &tops;
+    case Map_Str2Int("PERMX", 5):
+        kx.reserve(numGrid);
+        myPtr = &kx;
+        break;
+
+    case Map_Str2Int("PERMY", 5):
+        ky.reserve(numGrid);
+        myPtr = &ky;
+        break;
+
+    case Map_Str2Int("PERMZ", 5):
+        kz.reserve(numGrid);
+        myPtr = &kz;
+        break;
+
+    case Map_Str2Int("SWATINIT", 8):
+        Swat.reserve(numGrid);
+        myPtr = &Swat;
+        scalePcow = OCP_TRUE;
         break;
     }
 
+    return myPtr;
+}
+
+
+vector<USI>* PreParamGridWell::FindPtr(const string& varName, const USI&)
+{
+    vector<USI>* myPtr = nullptr;
+
+    switch (Map_Str2Int(&varName[0], varName.size())) 
+    {
+    case Map_Str2Int("ACTNUM", 6):
+        ACTNUM.reserve(numGrid);
+        myPtr = &ACTNUM;
+        break;
+
+    case Map_Str2Int("SATNUM", 6):
+        SATNUM.reserve(numGrid);
+        myPtr = &SATNUM;
+        break;
+
+    case Map_Str2Int("PVTNUM", 6):
+        PVTNUM.reserve(numGrid);
+        myPtr = &PVTNUM;
+        break;
+
+    case Map_Str2Int("ROCKNUM", 7):
+        ROCKNUM.reserve(numGrid);
+        myPtr = &ROCKNUM;
+        break;
+    }
     return myPtr;
 }
 
@@ -1087,7 +1174,16 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(zcorn);
     vector<OCP_DBL>().swap(ntg);
     vector<OCP_DBL>().swap(poro);
+    vector<OCP_DBL>().swap(kx);
+    vector<OCP_DBL>().swap(ky);
+    vector<OCP_DBL>().swap(kz);
     vector<USI>().swap(ACTNUM);
+    vector<USI>().swap(SATNUM);
+    vector<USI>().swap(PVTNUM);
+    vector<USI>().swap(ROCKNUM);
+    vector<OCP_DBL>().swap(Swat);
+
+
     vector<PreParamWell>().swap(well);
 
     vector<OCP_DBL>().swap(v);

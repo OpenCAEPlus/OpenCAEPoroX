@@ -11,109 +11,9 @@
 
 #include "ParamReservoir.hpp"
 
-/// Find pointer to the specified variable.
-vector<OCP_DBL>* ParamReservoir::FindPtr(const string& varName)
-{
-    vector<OCP_DBL>* myPtr = nullptr;
-
-    switch (Map_Str2Int(&varName[0], varName.size())) {
-        case Map_Str2Int("DX", 2):
-            dx.reserve(numGrid);
-            myPtr = &dx;
-            break;
-
-        case Map_Str2Int("DY", 2):
-            dy.reserve(numGrid);
-            myPtr = &dy;
-            break;
-
-        case Map_Str2Int("DZ", 2):
-            dz.reserve(numGrid);
-            myPtr = &dz;
-            break;
-
-        case Map_Str2Int("COORD", 5):
-            coord.reserve((dimens.nx + 1) * (dimens.ny + 1) * 6);
-            myPtr = &coord;
-            break;
-
-        case Map_Str2Int("ZCORN", 5):
-            zcorn.reserve(numGrid * 8);
-            myPtr = &zcorn;
-            break;
-
-        case Map_Str2Int("PORO", 4):
-            poro.reserve(numGrid);
-            myPtr = &poro;
-            break;
-
-        case Map_Str2Int("NTG", 3):
-            ntg.reserve(numGrid);
-            myPtr = &ntg;
-            break;
-
-        case Map_Str2Int("PERMX", 5):
-            permX.reserve(numGrid);
-            myPtr = &permX;
-            break;
-
-        case Map_Str2Int("PERMY", 5):
-            permY.reserve(numGrid);
-            myPtr = &permY;
-            break;
-
-        case Map_Str2Int("PERMZ", 5):
-            permZ.reserve(numGrid);
-            myPtr = &permZ;
-            break;
-
-        case Map_Str2Int("TOPS", 4):
-            tops.reserve(dimens.nx * dimens.ny);
-            myPtr = &tops;
-            break;
-
-        case Map_Str2Int("PRESSURE", 8):
-            P.reserve(numGrid);
-            myPtr = &P;
-            break;
-
-        case Map_Str2Int("Ni", 2):
-            Ni.reserve(numGrid);
-            myPtr = &Ni;
-            break;
-
-        case Map_Str2Int("SWATINIT", 8):
-            Swat.reserve(numGrid);
-            myPtr     = &Swat;
-            scalePcow = OCP_TRUE;
-            break;
-
-        case Map_Str2Int("SATNUM", 6):
-            bufferSATNUM.reserve(numGrid);
-            myPtr = &bufferSATNUM;
-            break;
-
-        case Map_Str2Int("PVTNUM", 6):
-            bufferPVTNUM.reserve(numGrid);
-            myPtr = &bufferPVTNUM;
-            break;
-
-        case Map_Str2Int("ACTNUM", 6):
-            bufferACTNUM.reserve(numGrid);
-            myPtr = &bufferACTNUM;
-            break;
-
-        case Map_Str2Int("ROCKNUM", 7):
-            bufferROCKNUM.reserve(numGrid);
-            myPtr = &bufferROCKNUM;
-            break;
-    }
-
-    return myPtr;
-}
 
 /// Find pointer to the specified table.
-TableSet* ParamReservoir::FindPtr_T(const string& varName)
+TableSet* ParamReservoir::FindPtrTable(const string& varName)
 {
     TableSet* myPtr = nullptr;
 
@@ -300,7 +200,6 @@ void ParamReservoir::InputDIMENS(ifstream& ifs)
     dimens.nx = stoi(vbuf[0]);
     dimens.ny = stoi(vbuf[1]);
     dimens.nz = stoi(vbuf[2]);
-    numGrid   = dimens.nx * dimens.ny * dimens.nz;
 
     if (CURRENT_RANK == MASTER_PROCESS)
         DisplayDIMENS();
@@ -327,172 +226,12 @@ void ParamReservoir::InputRTEMP(ifstream& ifs)
         cout << "RTEMP\n" << rsTemp << endl << endl;
 }
 
-/// TODO: Add Doxygen
-void ParamReservoir::InputEQUALS(ifstream& ifs)
-{
-    if (CURRENT_RANK == MASTER_PROCESS)
-        cout << "\n---------------------" << endl
-            << "EQUALS"
-            << "\n---------------------" << endl;
-
-    vector<USI>    index(6, 0);
-    vector<string> vbuf;
-
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
-
-        if (CURRENT_RANK == MASTER_PROCESS) {
-            for (auto v : vbuf) {
-                if (v != "/") cout << setw(10) << v;
-            }
-            cout << "\n";
-        }
-
-        index[0] = 0, index[1] = dimens.nx - 1;
-        index[2] = 0, index[3] = dimens.ny - 1;
-        index[4] = 0, index[5] = dimens.nz - 1;
-
-        string  objName = vbuf[0];
-        OCP_DBL val     = stod(vbuf[1]);
-
-        DealDefault(vbuf);
-
-        for (USI n = 2; n < 8; n++) {
-            if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
-        }
-        if (index[0] < 0 || index[2] < 0 || index[4] < 0 || index[1] > dimens.nx - 1 ||
-            index[3] > dimens.ny - 1 || index[5] > dimens.nz - 1) {
-            OCP_ABORT("WRONG Range in " + objName + " in EQUALS!");
-        }
-
-        vector<OCP_DBL>* objPtr = FindPtr(objName);
-
-        if (objPtr != nullptr) {
-            if (objName == "TOPS") {
-                // objPtr->resize(dimens.nx * dimens.ny);
-                objPtr->resize(objPtr->capacity());
-                index[4] = index[5] = 0;
-            } else {
-                // objPtr->resize(numGrid);
-                objPtr->resize(objPtr->capacity());
-            }
-            setVal(*objPtr, val, index);
-        } else {
-            OCP_ABORT("Wrong object name: " + objName);
-        }
-    }
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::InputGRID(ifstream& ifs, string& keyword)
-{
-    vector<OCP_DBL>* objPtr = nullptr;
-
-    objPtr = FindPtr(keyword);
-    if (objPtr == nullptr) {
-        OCP_ABORT("Unknown keyword!");
-    }
-
-    vector<string> vbuf;
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
-
-        for (auto& str : vbuf) {
-            // if m*n occurs, then push back n  m times
-            auto pos = str.find('*');
-            if (pos == string::npos) {
-                objPtr->push_back(stod(str));
-            } else {
-                USI     len = str.size();
-                OCP_USI num = stoi(str.substr(0, pos));
-                OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
-                for (USI i = 0; i < num; i++) objPtr->push_back(val);
-            }
-        }
-    }
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::InputCOPY(ifstream& ifs)
-{
-    if (CURRENT_RANK == MASTER_PROCESS)
-        cout << "\n---------------------" << endl
-            << "COPY"
-            << "\n---------------------" << endl;
-
-    vector<string> vbuf;
-    vector<USI>    index(6, 0);
-
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
-
-        if (CURRENT_RANK == MASTER_PROCESS) {
-            for (auto v : vbuf) {
-                if (v != "/") cout << setw(10) << v;
-            }
-            cout << "\n";
-        }
-        
-        index[0] = 0, index[1] = dimens.nx - 1;
-        index[2] = 0, index[3] = dimens.ny - 1;
-        index[4] = 0, index[5] = dimens.nz - 1;
-
-        string srcName = vbuf[0];
-        string objName = vbuf[1];
-        DealDefault(vbuf);
-        for (USI n = 2; n < 8; n++) {
-            if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
-        }
-
-        vector<OCP_DBL>* srcPtr = FindPtr(srcName);
-        vector<OCP_DBL>* objPtr = FindPtr(objName);
-        if (srcPtr != nullptr && objPtr != nullptr) {
-            objPtr->resize(srcPtr->size());
-            CopyVal(*objPtr, *srcPtr, index);
-        } else {
-            OCP_ABORT("Wrong object names: " + srcName + ", " + objName);
-        }
-    }
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::InputMULTIPLY(ifstream& ifs)
-{
-    vector<string> vbuf;
-    vector<USI>    index(6, 0);
-
-    while (ReadLine(ifs, vbuf)) {
-        if (vbuf[0] == "/") break;
-
-        index[0] = 0, index[1] = dimens.nx - 1;
-        index[2] = 0, index[3] = dimens.ny - 1;
-        index[4] = 0, index[5] = dimens.nz - 1;
-
-        string  objName = vbuf[0];
-        OCP_DBL val     = stod(vbuf[1]);
-
-        DealDefault(vbuf);
-        for (USI n = 2; n < 8; n++) {
-            if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
-        }
-
-        vector<OCP_DBL>* objPtr = FindPtr(objName);
-        if (objPtr != nullptr) {
-            if (objName == "TOPS") {
-                index[4] = index[5] = 0;
-            }
-            MultiplyVal(*objPtr, val, index);
-        } else {
-            OCP_ABORT("Wrong object name: " + objName);
-        }
-    }
-}
 
 /// TODO: Add Doxygen
 void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
 {
     TableSet* obj;
-    obj = FindPtr_T(tabName);
+    obj = FindPtrTable(tabName);
     if (obj == nullptr) {
         OCP_ABORT("Wrong table name :" + tabName);
     }
@@ -806,47 +545,9 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
 }
 
 
-void ParamReservoir::PostProcess()
-{
-    if (bufferSATNUM.size() > 0) {
-        SATNUM.resize(numGrid);
-        for (OCP_USI n = 0; n < numGrid; n++) {
-            SATNUM[n] = static_cast<OCP_USI>(bufferSATNUM[n]);
-        }
-        vector<OCP_DBL>().swap(bufferSATNUM);
-    }
-    if (bufferPVTNUM.size() > 0) {
-        PVTNUM.resize(numGrid);
-        for (OCP_USI n = 0; n < numGrid; n++) {
-            PVTNUM[n] = static_cast<OCP_USI>(bufferPVTNUM[n]);
-        }
-        vector<OCP_DBL>().swap(bufferPVTNUM);
-    }
-    if (bufferACTNUM.size() > 0) {
-        ACTNUM.resize(numGrid);
-        for (OCP_USI n = 0; n < numGrid; n++) {
-            ACTNUM[n] = static_cast<OCP_USI>(bufferACTNUM[n]);
-        }
-        vector<OCP_DBL>().swap(bufferACTNUM);
-    }
-    if (bufferROCKNUM.size() > 0) {
-        ROCKNUM.resize(numGrid);
-        for (OCP_USI n = 0; n < numGrid; n++) {
-            ROCKNUM[n] = static_cast<OCP_USI>(bufferROCKNUM[n]);
-        }
-        vector<OCP_DBL>().swap(bufferROCKNUM);
-    }
-}
-
-
 /// Check consistency of input parameters.
 void ParamReservoir::CheckParam()
 {
-    if (!disable_grid) {
-        CheckGrid();
-        CheckRegion();
-    }
-
     CheckEQUIL();
     CheckDenGrav();
     CheckPhase();
@@ -855,34 +556,6 @@ void ParamReservoir::CheckParam()
     CheckCPG();
 }
 
-/// Check data dimension for potential problems.
-void ParamReservoir::CheckGrid()
-{
-    if (coord.size() == 0) {
-        if (tops.size() != dimens.nx * dimens.ny) OCP_ABORT("Wrong TOPS size!");
-        if (dx.size() != numGrid) OCP_ABORT("Wrong DX size!");
-        if (dy.size() != numGrid) OCP_ABORT("Wrong DY size!");
-        if (dz.size() != numGrid) OCP_ABORT("Wrong DZ size!");
-    } else {
-        if (coord.size() != (dimens.nx + 1) * (dimens.ny + 1) * 6)
-            OCP_ABORT("Wrong COORD size!");
-        if (zcorn.size() != numGrid * 8) OCP_ABORT("Wrong ZCORN size!");
-    }
-
-    if (poro.size() < numGrid) OCP_ABORT("PORO size is too small!");
-    else if (poro.size() > numGrid) OCP_WARNING("too many entries in PORO! Ignored redundant entries!");
-    if (permX.size() < numGrid) OCP_ABORT("PERMX size is too small!");
-    else if (permX.size() > numGrid) OCP_WARNING("too many entries in PERMX! Ignored redundant entries!");
-    if (permY.size() < numGrid) OCP_ABORT("PERMY size is too small!");
-    else if (permY.size() > numGrid) OCP_WARNING("too many entries in PERMY! Ignored redundant entries!");
-    if (permZ.size() < numGrid) OCP_ABORT("PERMZ size is too small!");
-    else if (permZ.size() > numGrid) OCP_WARNING("too many entries in PERMZ! Ignored redundant entries!");
-
-    if (ntg.size() != numGrid) {
-        ntg.resize(numGrid, 1);
-        cout << "Set net-to-gross ratio to 1.0!" << endl;
-    }
-}
 
 /// Check rock keyword.
 void ParamReservoir::CheckRock()
@@ -930,22 +603,6 @@ void ParamReservoir::CheckPhaseTab() const
     }
 }
 
-/// TODO: Add Doxygen
-void ParamReservoir::CheckRegion() const
-{
-    if (SATNUM.size() > 0 && SATNUM.size() != numGrid) {
-        OCP_ABORT("Missing data in SATNUM!");
-    }
-    if (PVTNUM.size() > 0 && PVTNUM.size() != numGrid) {
-        OCP_ABORT("Missing data in PVTNUM!");
-    }
-    if (ACTNUM.size() > 0 && ACTNUM.size() != numGrid) {
-        OCP_ABORT("Missing data in ACTNUM!");
-    }
-    if (ROCKNUM.size() > 0 && ROCKNUM.size() != numGrid) {
-        OCP_ABORT("Missing data in ROCKNUM!");
-    }
-}
 
 /// TODO: Add Doxygen
 void ParamReservoir::CheckEqlRegion() const
@@ -1483,32 +1140,6 @@ void ComponentParam::InputRR(ifstream& ifs)
         }
         cout << endl << endl;
     }
-}
-
-
-
-void ParamReservoir::FreeGridMemory()
-{
-    vector<OCP_DBL>().swap(tops);
-    vector<OCP_DBL>().swap(dx);
-    vector<OCP_DBL>().swap(dy);
-    vector<OCP_DBL>().swap(dz);
-    vector<OCP_DBL>().swap(coord);
-    vector<OCP_DBL>().swap(zcorn);
-    vector<OCP_DBL>().swap(ntg);
-    vector<OCP_DBL>().swap(poro);
-    vector<OCP_DBL>().swap(permX);
-    vector<OCP_DBL>().swap(permY);
-    vector<OCP_DBL>().swap(permZ);
-
-    vector<OCP_DBL>().swap(P);
-    vector<OCP_DBL>().swap(Ni);
-    vector<OCP_DBL>().swap(Swat);
-
-    vector<USI>().swap(SATNUM);
-    vector<USI>().swap(PVTNUM);
-    vector<USI>().swap(ACTNUM);
-    vector<USI>().swap(ROCKNUM);
 }
 
 
