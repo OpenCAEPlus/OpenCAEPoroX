@@ -50,6 +50,10 @@ TableSet* ParamReservoir::FindPtrTable(const string& varName)
             myPtr = &PVDO_T;
             break;
 
+        case Map_Str2Int("PVCDO", 5):
+            myPtr = &PVCDO_T;
+            break;
+
         case Map_Str2Int("PVDG", 4):
             myPtr = &PVDG_T;
             break;
@@ -107,6 +111,8 @@ void ParamReservoir::InitTable()
     PVCO_T.colNum   = 6;
     PVDO_T.name     = "PVDO";
     PVDO_T.colNum   = 3;
+    PVCDO_T.name    = "PVCDO";
+    PVCDO_T.colNum  = 5;
     PVDG_T.name     = "PVDG";
     PVDG_T.colNum   = 3;
     PVTW_T.name     = "PVTW";
@@ -584,22 +590,6 @@ void ParamReservoir::CheckPhase() const
 {
     if (blackOil && disGas && (!gas && !oil)) {
         OCP_ABORT("DISGAS can only be used only if OIL and GAS are both present!");
-    }
-}
-
-/// Check tables: Different tables will be used under different conditions.
-void ParamReservoir::CheckPhaseTab() const
-{
-    if (!blackOil && !comps) OCP_ABORT("Unknown model: Use BLACKOIL or COMPS!");
-
-    if (water && oil && SWOF_T.data.empty()) OCP_ABORT("SWOF is missing!");
-    if (gas && oil && SGOF_T.data.empty()) OCP_ABORT("SGOF is missing!");
-    if (water && PVTW_T.data.empty()) OCP_ABORT("PVTW is missing!");
-
-    if (blackOil) {
-        if (oil && disGas && PVCO_T.data.empty()) OCP_ABORT("PVCO is missing!");
-        if (oil && (!disGas) && PVDO_T.data.empty()) OCP_ABORT("PVDO is missing!");
-        if (gas && PVDG_T.data.empty()) OCP_ABORT("PVDG is missing!");
     }
 }
 

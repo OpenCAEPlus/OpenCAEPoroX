@@ -28,8 +28,18 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_
         stdRhoO = (141.5 * RHOW_STD) / (rs_param.gravity.data[0] + 131.5);
         stdRhoW = RHOW_STD * rs_param.gravity.data[1];
     }
-
-    PVDO.Setup(rs_param.PVDO_T.data[i], stdRhoO, stdVo);
+    if (rs_param.PVDO_T.data.size() > 0) {
+        PVDO = new OCP_PVDO();
+        PVDO->Setup(rs_param.PVDO_T.data[i], stdRhoO, stdVo);
+    }
+    else if (rs_param.PVCDO_T.data.size() > 0) {
+        PVDO = new OCP_PVCDO();
+        PVDO->Setup(rs_param.PVCDO_T.data[i], stdRhoO, stdVo);
+    }
+    else {
+        OCP_ABORT("PARAMS are not enough!");
+    }
+    
     PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW, stdVw);
 
     vs.phaseExist[0]  = OCP_TRUE;
@@ -44,7 +54,7 @@ OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_
 
 void OCPMixtureBlkOilOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * vs.S[0] * PVDO.CalXiO(vs.P);
+    vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
 
     Flash(vs);
@@ -55,7 +65,7 @@ void OCPMixtureBlkOilOWMethod01::Flash(OCPMixtureVarSet& vs)
 {
 
     // Oil Properties
-    PVDO.CalRhoXiMuDer(vs.P, vs.rho[0], vs.xi[0], vs.mu[0], vs.rhoP[0], vs.xiP[0], vs.muP[0]);
+    PVDO->CalRhoXiMuDer(vs.P, vs.rho[0], vs.xi[0], vs.mu[0], vs.rhoP[0], vs.xiP[0], vs.muP[0]);
 
     // Water Properties
     PVTW.CalRhoXiMuDer(vs.P, vs.rho[1], vs.xi[1], vs.mu[1], vs.rhoP[1], vs.xiP[1], vs.muP[1]); 
@@ -80,7 +90,7 @@ void OCPMixtureBlkOilOWMethod01::Flash(OCPMixtureVarSet& vs)
 
 void OCPMixtureBlkOilOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-    vs.Ni[0] = Vp * vs.S[0] * PVDO.CalXiO(vs.P);
+    vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
     
     FlashDer(vs);
@@ -104,7 +114,7 @@ void OCPMixtureBlkOilOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 OCP_DBL OCPMixtureBlkOilOWMethod01::CalXi(const OCP_DBL& P, const PhaseType& pt)
 {
     if (pt == PhaseType::oil)         return CalXiO(P);
-    else if (pt == PhaseType::wat)  return CalXiW(P);
+    else if (pt == PhaseType::wat)    return CalXiW(P);
     else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
@@ -112,7 +122,7 @@ OCP_DBL OCPMixtureBlkOilOWMethod01::CalXi(const OCP_DBL& P, const PhaseType& pt)
 OCP_DBL OCPMixtureBlkOilOWMethod01::CalRho(const OCP_DBL& P, const PhaseType& pt)
 {
     if (pt == PhaseType::oil)         return CalRhoO(P);
-    else if (pt == PhaseType::wat)  return CalRhoW(P);
+    else if (pt == PhaseType::wat)    return CalRhoW(P);
     else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
@@ -139,7 +149,8 @@ void OCPMixtureBlkOilOWMethod01::CalVStd(OCPMixtureVarSet& vs)
 void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {  
     vs.Init(2, 2, mixtureType);
-	if (rs_param.PVTW_T.data.size() > 0 && rs_param.PVDO_T.data.size() > 0) {
+	if (rs_param.PVTW_T.data.size() > 0 && 
+       (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
 		pmMethod = new OCPMixtureBlkOilOWMethod01(rs_param, i, vs);
 	}
 }

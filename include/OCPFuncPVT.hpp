@@ -175,14 +175,14 @@ class OCP_PVDO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDO() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
+	virtual void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
 		OCPFuncTable::Setup(src);
 		stdRhoO = stdRhoOin;
 		stdVo   = stdVoin;
 	}
-	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
-	OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
-	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
+	virtual OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
+	virtual OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
+	virtual void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 	
 protected:
@@ -202,7 +202,7 @@ protected:
 /////////////////////////////////////////////////////
 
 /// PVT properties of dead oil (with constant compressibility)
-class OCP_PVCDO
+class OCP_PVCDO : public OCP_PVDO
 {
 	// only 1 row is included
 	/// 0th column: The reference pressure (Pref) for items 1 and 3. (Pref), (barsa (METRIC), psia (FIELD))
@@ -214,7 +214,7 @@ class OCP_PVCDO
 public:
 	/// default constructor
 	OCP_PVCDO() = default;
-	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
+	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) override {
 		Pref  = src[0][0];
 		Bref  = src[1][0];
 		Cb    = src[2][0];
@@ -223,10 +223,10 @@ public:
 		stdRhoO = stdRhoOin;
 		stdVo   = stdVoin;
 	}
-	OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
-	OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
+	OCP_DBL CalXiO(const OCP_DBL& P) const override { return 1 / CONV1 / (CalBo(P) * stdVo); }
+	OCP_DBL CalRhoO(const OCP_DBL& P) const override { return stdRhoO / CalBo(P); }
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
-		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
+		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const override;
 
 protected:
 	OCP_DBL CalBo(const OCP_DBL& P) const;
@@ -243,13 +243,7 @@ protected:
 	OCP_DBL muref;
 	/// The oil ¡°viscosibility¡±
 	OCP_DBL Cmu;
-	/// mass density of oil phase in standard conditions
-	OCP_DBL stdRhoO;
-	/// molar volume of oil phase in standard conditions (stb/lbmol)
-	OCP_DBL stdVo;
 };
-
-
 
 
 /////////////////////////////////////////////////////

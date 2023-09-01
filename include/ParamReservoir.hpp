@@ -261,6 +261,7 @@ public:
                 ///< Model when input
     TableSet PVCO_T; ///< Table set of PVCO.
     TableSet PVDO_T; ///< Table set of PVDO.
+    TableSet PVCDO_T; ///< Table set of PVCDO.
     TableSet PVDG_T; ///< Table set of PVDG.
     TableSet PVTW_T; ///< Table set of PVTW.
 
@@ -369,9 +370,6 @@ public:
 
     /// Check existence of disgas, it could only exist when both oil and gas exist.
     void CheckPhase() const;
-
-    /// Check existence of PVTtable and SATtable.
-    void CheckPhaseTab() const;
 
     /// (Todo) Initialization of equilibration of only one region is realized.
     void CheckEqlRegion() const;

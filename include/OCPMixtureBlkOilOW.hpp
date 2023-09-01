@@ -63,15 +63,15 @@ public:
     void CalVStd(OCPMixtureVarSet& vs) override;
     
 protected:
-    OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO.CalXiO(P); }
+    OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO->CalXiO(P); }
     OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
-    OCP_DBL CalRhoO(const OCP_DBL& P) { return PVDO.CalRhoO(P); }
+    OCP_DBL CalRhoO(const OCP_DBL& P) { return PVDO->CalRhoO(P); }
     OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }
 
 
 protected:
     /// PVDO table
-    OCP_PVDO        PVDO;
+    OCP_PVDO*       PVDO;
     /// PVTW table
     OCP_PVTW        PVTW;
     /// molar volume of oil phase in standard conditions (stb/lbmol)
