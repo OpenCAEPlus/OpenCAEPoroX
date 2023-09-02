@@ -122,7 +122,7 @@ public:
     void PrintInfo(const string& dir, const string& filename, const OCP_INT& rank) const;
 
     /// Combine all files into 1 by Master process
-    void PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const;
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
 protected:
     vector<SumItem> Sumdata; ///< Contains all information to be printed.
@@ -173,7 +173,7 @@ public:
     void PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const;
 
     /// Combine all files into 1 by Master process
-    void PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const;
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
 private:
     vector<SumItem> Sumdata;
@@ -305,7 +305,7 @@ public:
     /// Input coordinates of points
     OCP_USI InputPoints(const string& dir, vector<OCP_DBL>& points_xyz) const;
     /// Combine all files into 1 by Master process
-    void PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const;
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
     void PostProcessP(const string& dir, const string& filename, const OCP_INT& numproc) const;
     void PostProcessS(const string& dir, const string& filename) const;
 
@@ -341,7 +341,7 @@ public:
                             const OCPControl& ctrl,
                             const OCP_DBL&    time) const;
     /// Post-process the output file
-    void PostProcessInput() const;
+    void PostProcess() const;
 
 protected:
     MPI_Comm  myComm;

@@ -128,7 +128,7 @@ void OpenCAEPoroX::OutputResults() const
     GetWallTime timer;
     timer.Start();
     output.PrintInfo();
-    output.PostProcessInput();
+    output.PostProcess();
     OCPTIME_TOTAL += timer.Stop() / 1000;
       
     OutputTimeMain(cout.rdbuf());
