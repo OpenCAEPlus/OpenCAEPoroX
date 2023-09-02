@@ -148,25 +148,36 @@ class PreParamGridWell
     /////////////////////////////////////////////////////////////////////
 
 public:
+    /// Input params files
     void InputFile(const string& myFile, const string& myWorkdir);
 
 protected:
     void Input(const string& myFilename);
+    /// Check Input
     void CheckInput();
+    /// Post-process input param 
+    void PostProcessInput();
     /// Input the problem model: isothermal or thermal
     void InputMODEL(ifstream& ifs);
     /// Input DUALPORO
     void InputDUALPORO() { DUALPORO = OCP_TRUE; }
     /// Input DPGRID
     void InputDPGRID() { DPGRID = OCP_TRUE; }
+    /// Input dimensions
     void InputDIMENS(ifstream& ifs);
+    /// Input EQUALS
     void InputEQUALS(ifstream& ifs);
+    /// Input COPY
     void InputCOPY(ifstream& ifs);
+    /// Input MULTIPLY
     void InputMULTIPLY(ifstream& ifs);
     /// Input grid property
     void InputGrid(ifstream& ifs, string& keyword);
+    /// Input WELSPECS
     void InputWELSPECS(ifstream& ifs);
+    /// Input COMPDAT
     void InputCOMPDAT(ifstream& ifs);
+    /// Input INCLUDE
     void InputINCLUDE(ifstream& ifs);
     // Input tools
     /// Find pointer to the specified variable.
@@ -181,6 +192,7 @@ protected:
     /// It's used in InputMULTIPLY, multipling the value of a certain range of a
     /// variable by a coefficient.
     void MultiplyVal(vector<OCP_DBL>& obj, const OCP_DBL& val, const vector<USI>& index);
+
 
 protected:
 
@@ -230,6 +242,8 @@ protected:
     vector<OCP_DBL> ky;
     /// permeability for z-direction
     vector<OCP_DBL> kz;
+    /// sigma factor used in dual porosity matrix-fracture coupling term
+    vector<OCP_DBL> sigma;
 
     // Region
     /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
@@ -294,24 +308,32 @@ protected:
     /// Calculate the activity of grid cells for Thermal model
     void CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2);
 
+    // For DP,DPDP
+    void SetupDP();
+
 
 protected:
-
-    vector<OCP_DBL> v;     ///< Volume of cells: numGridLocal.
-    vector<OCP_DBL> depth; ///< Depth of center of grid cells: numGridLocal.
+    /// Volume of cells
+    vector<OCP_DBL> v; 
+    /// Depth of center of grid cells
+    vector<OCP_DBL> depth;
 
     // Connections
-    vector<vector<GPair>> gNeighbor;    ///< Neighboring information of active grid.
-    vector<USI>           numNeighbor;  ///< Num of neighbor
+    /// Neighboring information of active grid.
+    vector<vector<GPair>> gNeighbor; 
+    /// Num of neighbor
+    vector<USI>           numNeighbor; 
 
-    // Active grid cells
-    OCP_USI activeGridNum; ///< Num of active grid.
-    vector<OCP_USI>
-        map_Act2All; ///< Mapping from active grid to all grid: activeGridNum.
-    vector<GB_Pair> map_All2Act; ///< Mapping from grid to active all grid: numGridLocal.
-    // Fluid grid cells
-    OCP_USI         fluidGridNum; ///< Num of fluid grids.
-    vector<GB_Pair> map_All2Flu;  ///< Mapping from all grid to fluid grid: numGridLocal.
+    /// Num of active grid.
+    OCP_USI         activeGridNum; 
+    /// Index mapping from active grid to all grid
+    vector<OCP_USI> map_Act2All;
+    /// Mapping from grid to active all grid
+    vector<GB_Pair> map_All2Act; 
+    /// Num of fluid grids.
+    OCP_USI         fluidGridNum; 
+    /// Mapping from all grid to fluid grid
+    vector<GB_Pair> map_All2Flu;
 
 
     /////////////////////////////////////////////////////////////////////
@@ -323,9 +345,10 @@ protected:
     void SetupConnWellGrid();
 
 protected:
-
-    USI                     numWell;      ///< Num of wells
-    vector<vector<OCP_USI>> connWellGrid; ///< Connections between wells and active grids
+    /// Num of wells
+    USI                     numWell;  
+    /// Connections between wells and active grids
+    vector<vector<OCP_USI>> connWellGrid; 
 
 
     /////////////////////////////////////////////////////////////////////

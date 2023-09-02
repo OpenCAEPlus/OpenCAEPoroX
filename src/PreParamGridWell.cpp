@@ -17,6 +17,7 @@ void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
     workdir = myWorkdir;
     Input(myFile);
     CheckInput();
+    PostProcessInput();
 }
 
 
@@ -79,6 +80,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("PVTNUM", 6):           
             case Map_Str2Int("ROCKNUM", 7):
             case Map_Str2Int("SWATINIT", 8):
+            case Map_Str2Int("SIGMAV", 6):
                 InputGrid(ifs, keyword);
                 break;
 
@@ -114,20 +116,7 @@ void PreParamGridWell::CheckInput()
     if (model == 0)                       OCP_ABORT("WRONG MODEL!");
     if (nx == 0 || ny == 0 || nz == 0)    OCP_ABORT("WRONG DIMENS!");
     if (poro.size() != numGrid)           OCP_ABORT("WRONG PORO!");
-    if (ntg.size() != numGrid) {
-        OCP_WARNING("NTG will be set to 1 !");
-        ntg.clear();
-        ntg.resize(numGrid, 1.0);
-    }
-    for (OCP_USI n = 0; n < numGrid; n++) {
-        poro[n] *= ntg[n];
-    }
 
-    if (ACTNUM.size() != numGrid) {
-        OCP_WARNING("ACTNUM will be set to 1 !");
-        ACTNUM.clear();
-        ACTNUM.resize(numGrid, 1);
-    }
     if (gridType == CORNER_GRID) {
         if (zcorn.empty())                OCP_ABORT("WRONG ZCORN!");
         if (coord.empty())                OCP_ABORT("WRONG ZCORN!");
@@ -142,6 +131,27 @@ void PreParamGridWell::CheckInput()
 
     cout << "Check Grid param ... done";
     cout << endl << "-------------------------------------" << endl;
+}
+
+
+
+void PreParamGridWell::PostProcessInput()
+{
+    if (ntg.size() != numGrid) {
+        OCP_WARNING("NTG will be set to 1 !");
+        ntg.clear();
+        ntg.resize(numGrid, 1.0);
+    }
+    for (OCP_USI n = 0; n < numGrid; n++) {
+        poro[n] *= ntg[n];
+    }
+
+    if (ACTNUM.size() != numGrid) {
+        OCP_WARNING("ACTNUM will be set to 1 !");
+        ACTNUM.clear();
+        ACTNUM.resize(numGrid, 1);
+    }
+    if (!sigma.empty())  sigma.resize(numGrid, 0);
 }
 
 
@@ -568,6 +578,11 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         myPtr = &Swat;
         scalePcow = OCP_TRUE;
         break;
+
+    case Map_Str2Int("SIGMAV", 6):
+        sigma.reserve(numGrid);
+        myPtr = &sigma;
+        break;
     }
 
     return myPtr;
@@ -658,6 +673,7 @@ void PreParamGridWell::MultiplyVal(vector<OCP_DBL>& obj,
         }
     }
 }
+
 
 
 /////////////////////////////////////////////////////////////////////

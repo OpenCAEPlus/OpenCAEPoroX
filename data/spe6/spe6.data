@@ -105,17 +105,15 @@ SWOF
 
 /
 
-
-
 -- Data from SPE9305
 PVTW
 6000.0      1.0700     0.3500E-05       0.3500    0.0  /
 /
 
 -- Mimic oil using the dead oil model
-PVDO
-6000.00  1.84850  0.2178
-/ 
+PVCDO
+6000 1.84850 0.0 0.2178 0.0
+/
 
 --SIGMAV
 --10*0.0192

@@ -608,7 +608,7 @@ void Summary::PrintInfo(const string& dir, const string& filename, const OCP_INT
 }
 
 
-void Summary::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+void Summary::PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
     vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
     sumdata->clear();
@@ -822,7 +822,7 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
 
 
 /// Combine all files into 1 by Master process
-void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+void CriticalInfo::PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
 
     vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
@@ -1334,7 +1334,7 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
 }
 
 
-void Out4VTK::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+void Out4VTK::PostProcessInput(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
     if (numproc > 1)  PostProcessP(dir, filename, numproc);
     else              PostProcessS(dir, filename);
@@ -1626,17 +1626,17 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 }
 
 
-void OCPOutput::PostProcess() const
+void OCPOutput::PostProcessInput() const
 {
     MPI_Barrier(myComm);
     GetWallTime timer;
     timer.Start();
     if (numproc > 1 && myrank == MASTER_PROCESS) {
-        summary.PostProcess(workDir, fileName, numproc);
-        crtInfo.PostProcess(workDir, fileName, numproc);           
+        summary.PostProcessInput(workDir, fileName, numproc);
+        crtInfo.PostProcessInput(workDir, fileName, numproc);           
     }
     if (myrank == MASTER_PROCESS) {
-        out4VTK.PostProcess(workDir, fileName, numproc);
+        out4VTK.PostProcessInput(workDir, fileName, numproc);
     }
     
     
