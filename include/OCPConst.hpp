@@ -93,7 +93,9 @@ enum class ConnDirect
     /// y-direction
     y,
     /// z-direction
-    z
+    z,
+    /// martrix -> fracture
+    mf
 };
 
 

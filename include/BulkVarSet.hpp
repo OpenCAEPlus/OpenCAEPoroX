@@ -76,6 +76,8 @@ public:
     vector<OCP_DBL>    rockKy;
     /// rock permeability along the z direction
     vector<OCP_DBL>    rockKz;
+    /// sigma factor used in dual porosity matrix-fracture coupling term
+    vector<OCP_DBL>    sigma;
     /// Volume of rock
     vector<OCP_DBL>    vr;
     /// Enthalpy of rock

@@ -133,10 +133,11 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	send_request.resize(numSendProc);
 	recv_request.resize(numRecvProc);
 
+	grid.shrink_to_fit();
 
 	//////////////////////////////////////////////////////////////
 	// Output partition information
-	if (true && false) {
+	if (false) {
 		ofstream myFile;
 		myFile.open("test/process" + to_string(myrank) + ".txt");
 		ios::sync_with_stdio(false);

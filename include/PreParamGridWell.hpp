@@ -77,6 +77,9 @@ public:
         case 2:
             direction = ConnDirect::z;
             break;
+        case 3:
+            direction = ConnDirect::mf;
+            break;
         default:
             OCP_ABORT("WRONG CONNECTION DIRECTION!");
             break;
@@ -200,14 +203,14 @@ protected:
     string          workdir;
     /// Orthogonal or Corner grid              
     USI             gridType{ ORTHOGONAL_GRID };
-    /// Num of grids.
-    OCP_USI         numGrid;
+    /// Num of grids(numGridM + numGridF)
+    OCP_USI         numGrid{ 0 };
+    /// Num of matrix grid
+    OCP_USI         numGridM{ 0 };
+    /// Num of fracture grid
+    OCP_USI         numGridF{ 0 };
     /// thermal model or isothermal model
     USI             model{ 0 };
-    /// If use dual porosity option. (matrix is in the front and followed by fracture grid)
-    OCP_BOOL        DUALPORO{ OCP_FALSE };
-    /// if true, then the default property of fracture will be copied from matrix(think of it)
-    OCP_BOOL        DPGRID{ OCP_FALSE };
 
     // Orthogonal grid
     /// Num of grids along x-direction.
@@ -242,8 +245,6 @@ protected:
     vector<OCP_DBL> ky;
     /// permeability for z-direction
     vector<OCP_DBL> kz;
-    /// sigma factor used in dual porosity matrix-fracture coupling term
-    vector<OCP_DBL> sigma;
 
     // Region
     /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
@@ -308,15 +309,12 @@ protected:
     /// Calculate the activity of grid cells for Thermal model
     void CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2);
 
-    // For DP,DPDP
-    void SetupDP();
-
 
 protected:
     /// Volume of cells
-    vector<OCP_DBL> v; 
+    vector<OCP_DBL>       v; 
     /// Depth of center of grid cells
-    vector<OCP_DBL> depth;
+    vector<OCP_DBL>       depth;
 
     // Connections
     /// Neighboring information of active grid.
@@ -325,16 +323,31 @@ protected:
     vector<USI>           numNeighbor; 
 
     /// Num of active grid.
-    OCP_USI         activeGridNum; 
+    OCP_USI               activeGridNum; 
     /// Index mapping from active grid to all grid
-    vector<OCP_USI> map_Act2All;
+    vector<OCP_USI>       map_Act2All;
     /// Mapping from grid to active all grid
-    vector<GB_Pair> map_All2Act; 
+    vector<GB_Pair>       map_All2Act; 
     /// Num of fluid grids.
-    OCP_USI         fluidGridNum; 
+    OCP_USI               fluidGridNum; 
     /// Mapping from all grid to fluid grid
-    vector<GB_Pair> map_All2Flu;
+    vector<GB_Pair>       map_All2Flu;
 
+
+    /////////////////////////////////////////////////////////////////////
+    // Dual Porosity Option
+    /////////////////////////////////////////////////////////////////////
+
+protected:
+    void SetupConnDP();
+
+protected:
+    /// If use dual porosity option. (matrix is in the front and followed by fracture grid)
+    OCP_BOOL        DUALPORO{ OCP_FALSE };
+    /// if true, then the default property of fracture will be copied from matrix(think of it)
+    OCP_BOOL        DPGRID{ OCP_FALSE };
+    /// sigma factor used in dual porosity matrix-fracture coupling term
+    vector<OCP_DBL> sigma;
 
     /////////////////////////////////////////////////////////////////////
     // Generate connections between active grids and wells

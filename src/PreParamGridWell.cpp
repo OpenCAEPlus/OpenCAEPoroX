@@ -185,13 +185,11 @@ void PreParamGridWell::InputDIMENS(ifstream& ifs)
     nx = stoi(vbuf[0]);
     ny = stoi(vbuf[1]);
     nz = stoi(vbuf[2]);
-    numGrid = nx * ny * nz;
+    numGridM = nx * ny * nz;
 
-    if (DUALPORO) {
-        // two-layer grids
-        nz      *= 2;
-        numGrid *= 2;
-    }
+    if (DUALPORO) numGridF = numGridM;
+
+    numGrid = numGridM + numGridF;
 
     cout << setw(6) << nx << setw(6) << ny << setw(6) << nz << endl << endl;
 }
@@ -206,12 +204,15 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
     vector<USI>    index(6, 0);
     vector<string> vbuf;
 
+    USI nzTmp = nz;
+    if (DUALPORO) nzTmp *= 2;
+
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
         index[0] = 0, index[1] = nx - 1;
         index[2] = 0, index[3] = ny - 1;
-        index[4] = 0, index[5] = nz - 1;
+        index[4] = 0, index[5] = nzTmp - 1;
 
         const string  objName = vbuf[0];
         const OCP_DBL val     = stod(vbuf[1]);
@@ -223,7 +224,7 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
         }
 
         if (index[0] < 0 || index[2] < 0 || index[4] < 0 || index[1] > nx - 1 ||
-            index[3] > ny - 1 || index[5] > nz - 1) {
+            index[3] > ny - 1 || index[5] > nzTmp - 1) {
             OCP_ABORT("WRONG Range in " + objName + " in EQUALS!");
         }
 
@@ -544,7 +545,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
 
     case Map_Str2Int("ZCORN", 5):
         gridType = CORNER_GRID;
-        zcorn.reserve(numGrid * 8);
+        zcorn.reserve(numGridM * 8);
         myPtr = &zcorn;
         break;
 
@@ -693,13 +694,17 @@ void PreParamGridWell::SetupGrid()
     {
     case ORTHOGONAL_GRID:
         SetupOrthogonalGrid();
+        SetupConnDP();
         break;
     case CORNER_GRID:
         SetupCornerGrid();
+        SetupConnDP();
         break;
     default:
         OCP_ABORT("WRONG Grid Type!");
     }
+
+    
 
     OutputBaiscInfo();
 
@@ -738,6 +743,10 @@ void PreParamGridWell::CalDepthVOrthogonalGrid()
                 depth[id] = depth[id - nxny] + dz[id - nxny] / 2 + dz[id] / 2;
             }
         }
+    }
+
+    if (DUALPORO) {
+        copy(&depth[0], &depth[numGridM], &depth[numGridM]);
     }
 
     v.resize(numGrid);
@@ -866,12 +875,15 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
             tmpY += dy[id];
         }
     }
+
     const string myFile = workdir + "points.out";
     ofstream outF(myFile, ios::out | ios::binary);
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
-    outF.write((const char*)&activeGridNum, sizeof(activeGridNum));
+    
+    const OCP_USI len = points_xyz.size() / (3 * 8);
+    outF.write((const char*)&len, sizeof(len));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
     outF.close();
 }
@@ -892,11 +904,35 @@ void PreParamGridWell::SetupCornerGrid()
 
 void PreParamGridWell::SetupBasicCornerGrid(const OCP_COORD& CoTmp)
 {
-    dx = CoTmp.dx;
-    dy = CoTmp.dy;
-    dz = CoTmp.dz;
-    v = CoTmp.v;
-    depth = CoTmp.depth;
+    if (DUALPORO) {
+                                  
+        dx.resize(numGrid);
+        copy(CoTmp.dx.begin(), CoTmp.dx.end(), &dx[0]);
+        copy(CoTmp.dx.begin(), CoTmp.dx.end(), &dx[numGridM]);
+
+        dy.resize(numGrid);
+        copy(CoTmp.dy.begin(), CoTmp.dy.end(), &dy[0]);
+        copy(CoTmp.dy.begin(), CoTmp.dy.end(), &dy[numGridM]);
+
+        dz.resize(numGrid);
+        copy(CoTmp.dz.begin(), CoTmp.dz.end(), &dz[0]);
+        copy(CoTmp.dz.begin(), CoTmp.dz.end(), &dz[numGridM]);
+
+        v.resize(numGrid);
+        copy(CoTmp.v.begin(), CoTmp.v.end(), &v[0]);
+        copy(CoTmp.v.begin(), CoTmp.v.end(), &v[numGridM]);
+
+        depth.resize(numGrid);
+        copy(CoTmp.depth.begin(), CoTmp.depth.end(), &depth[0]);
+        copy(CoTmp.depth.begin(), CoTmp.depth.end(), &depth[numGridM]);
+    }
+    else {
+        dx    = CoTmp.dx;
+        dy    = CoTmp.dy;
+        dz    = CoTmp.dz;
+        v     = CoTmp.v;
+        depth = CoTmp.depth;
+    }
 }
 
 void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
@@ -930,15 +966,39 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 }
 
 
+void PreParamGridWell::SetupConnDP()
+{
+    OCP_USI bIdg, bIdb, eIdg, eIdb;
+    USI     direction;
+    if (DUALPORO) {
+        for (bIdg = numGridM; bIdg < numGrid; bIdg++) {
+            if (!map_All2Act[bIdg].IsAct()) {
+                continue;
+            }
+            bIdb = map_All2Act[bIdg].GetId();
+
+            eIdg = bIdg - numGridM;
+            if (map_All2Act[eIdg].IsAct()) {
+                eIdb = map_All2Act[eIdg].GetId();
+
+                direction = 3;
+                gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, 0.0, 0.0));
+                gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, 0.0, 0.0));
+            }
+        }
+    }
+}
+
+
 void PreParamGridWell::SetLocationStructral()
 {
     location.resize(numGrid);
     const OCP_USI uplim   = nx * ny;
-    const OCP_USI downlim = numGrid - nx * ny;
+    const OCP_USI downlim = nx * ny * (nz - 1);
     for (OCP_USI n = 0; n < uplim; n++) {
         location[n] = 1;
     }
-    for (OCP_USI n = downlim; n < numGrid; n++) {
+    for (OCP_USI n = downlim; n < nx * ny * nz; n++) {
         location[n] = 2;
     }
 }
@@ -997,7 +1057,8 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
-    outF.write((const char*)&activeGridNum, sizeof(activeGridNum));
+    const OCP_USI len = points_xyz.size() / (3 * 8);
+    outF.write((const char*)&len, sizeof(len));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
     outF.close();
 }
@@ -1086,13 +1147,16 @@ void PreParamGridWell::CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2)
 void PreParamGridWell::SetupConnWellGrid()
 {
 
+    OCP_USI offset = 0;
+    if (DUALPORO) offset = numGridM;
+
     // Attention that all wells should be active -- own at least one connections to active grid
     numWell = well.size();
     connWellGrid.resize(numWell);
     for (USI w = 0; w < numWell; w++) {
         const USI numPerf = well[w].I_perf.size();
         for (USI p = 0; p < numPerf; p++) {
-            const OCP_USI pId = (well[w].K_perf[p] - 1) * (nx * ny) + (well[w].J_perf[p] - 1) * nx + (well[w].I_perf[p] - 1);
+            const OCP_USI pId = (well[w].K_perf[p] - 1) * (nx * ny) + (well[w].J_perf[p] - 1) * nx + (well[w].I_perf[p] - 1) + offset;
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
                 gNeighbor[map_All2Act[pId].GetId()].push_back(GPair(w + activeGridNum, WEIGHT_GW, 0, 0, 0));
@@ -1193,6 +1257,7 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(kx);
     vector<OCP_DBL>().swap(ky);
     vector<OCP_DBL>().swap(kz);
+    vector<OCP_DBL>().swap(sigma);
     vector<USI>().swap(ACTNUM);
     vector<USI>().swap(SATNUM);
     vector<USI>().swap(PVTNUM);
