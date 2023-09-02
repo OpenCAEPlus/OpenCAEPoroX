@@ -16,7 +16,7 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
 {
     OCP_FUNCNAME;
 
-    numPerf = domain.well2Bulk[wId].size();
+    numPerf = domain.GetPerfNum(wId);
     perf.resize(numPerf);
     USI pp = 0;
     for (USI p = 0; p < well.I_perf.size(); p++) {
@@ -24,7 +24,7 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
         const OCP_USI tmpI = well.I_perf[p] - 1;
         const OCP_USI tmpJ = well.J_perf[p] - 1;
         const OCP_USI tmpK = well.K_perf[p] - 1;
-        const OCP_INT loc = domain.GetPerfLocation(wId, tmpI, tmpJ, tmpK);
+        const OCP_INT loc = domain.GetPerfLocation(wId, p);       
         if (loc < 0) {
             continue;
         }
@@ -51,7 +51,7 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
         pp++;
     }
     if (pp != numPerf) {
-        OCP_ABORT("Wrong Perf Setup!");
+        OCP_ABORT(to_string(numPerf) + "  " + to_string(pp) +  " -- Wrong Perf Setup! Rank : " + to_string(domain.myrank));
     }  
 }
 

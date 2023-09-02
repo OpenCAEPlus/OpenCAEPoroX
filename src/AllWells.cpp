@@ -52,7 +52,7 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
         wells[wdst]->depth = paramWell.well[wsrc].depth;
         wells[wdst]->I     = paramWell.well[wsrc].I - 1;
         wells[wdst]->J     = paramWell.well[wsrc].J - 1;
-        wells[wdst]->InputPerfo(paramWell.well[wsrc], domain, wdst);
+        wells[wdst]->InputPerfo(paramWell.well[wsrc], domain, wsrc);
         wells[wdst]->Psurf         = Psurf;
         wells[wdst]->Tsurf         = Tsurf;
         wells[wdst]->ifUseUnweight = paramWell.well[wsrc].ifUseUnweight;

@@ -82,6 +82,9 @@ protected:
 	vector<OCP_USI>         well; 
 	/// wells' bulk neighbor, init global index, ascending order
 	vector<vector<OCP_USI>> well2Bulk;  
+
+	/// Well's global index(start from zero), perfortions' index(start from zero) and location(bulks' local index) of perforation
+	vector<vector<OCP_USI>> wellWPB;
 	/// num of all neighbor of grids: well-included, self-included
 	vector<USI>             neighborNum; 
 	/// global index -> local index (interior grid & ghost grid)
@@ -133,7 +136,8 @@ protected:
 
 	// well perf
 public:
-	OCP_INT GetPerfLocation(const OCP_USI& wId, const OCP_USI& tmpI, const OCP_USI& tmpJ, const OCP_USI& tmpK) const;
+	OCP_INT GetPerfLocation(const OCP_USI& wId, const USI& p) const;
+	USI     GetPerfNum(const OCP_USI& wId) const;
 };
 
 

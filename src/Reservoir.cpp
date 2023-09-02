@@ -280,9 +280,24 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             bId = n;
             domain.neighborNum.push_back(grid.gNeighbor[domain.grid[bId]].size() + 1);
             for (const auto& gn : grid.gNeighbor[domain.grid[bId]]) {
-                if (gn.ID() >= global_well_start)
-                    continue; // well is exculude
-
+                if (gn.ID() >= global_well_start) {
+                    // well connection
+                    const USI len = domain.wellWPB.size();
+                    USI w = 0;
+                    for (w = 0; w < len; w++) {
+                        if (static_cast<OCP_USI>(gn.AreaB()) == domain.wellWPB[w][0]) {
+                            domain.wellWPB[w].push_back(static_cast<OCP_USI>(gn.AreaE()));
+                            domain.wellWPB[w].push_back(bId);
+                            break;
+                        }
+                    }
+                    if (w == len) {
+                        domain.wellWPB.push_back(vector<OCP_USI>{
+                            static_cast<OCP_USI>(gn.AreaB()),
+                            static_cast<OCP_USI>(gn.AreaE()), bId});
+                    }
+                    continue; 
+                }
                 eId = init2local.at(gn.ID());
                 if (eId > bId)
                     dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE()));
@@ -411,10 +426,27 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                         for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
                             const auto& iter = init2local.find(my_edge[j]);
                             if (iter != init2local.end()) {
-                                // well is exculude
+                                // bulk connection
                                 eId = iter->second;
                                 if (eId > bId) {
                                     dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2]));
+                                }
+                            }
+                            else {
+                                // well connection
+                                const USI len = domain.wellWPB.size();
+                                USI w = 0;
+                                for (w = 0; w < len; w++) {
+                                    if (static_cast<OCP_USI>(conn_ptr[1]) == domain.wellWPB[w][0]) {
+                                        domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[2]));
+                                        domain.wellWPB[w].push_back(bId);
+                                        break;
+                                    }
+                                }
+                                if (w == len) {
+                                    domain.wellWPB.push_back(vector<OCP_USI>{
+                                        static_cast<OCP_USI>(conn_ptr[1]),
+                                        static_cast<OCP_USI>(conn_ptr[2]), bId});
                                 }
                             }
                             conn_ptr += 3;
@@ -439,6 +471,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
     // Free memory
     vector<vector<idx_t>>().swap(domain.elementCSR);
+
+    MPI_Barrier(myComm);
 }
 
 

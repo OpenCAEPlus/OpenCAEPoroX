@@ -1159,7 +1159,8 @@ void PreParamGridWell::SetupConnWellGrid()
             const OCP_USI pId = (well[w].K_perf[p] - 1) * (nx * ny) + (well[w].J_perf[p] - 1) * nx + (well[w].I_perf[p] - 1) + offset;
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
-                gNeighbor[map_All2Act[pId].GetId()].push_back(GPair(w + activeGridNum, WEIGHT_GW, 0, 0, 0));
+                // for well-connection, areaB and areaE contains well index of its perforation index
+                gNeighbor[map_All2Act[pId].GetId()].push_back(GPair(w + activeGridNum, WEIGHT_GW, 0, w, p));
             }
         }
         if (connWellGrid[w].empty()) {

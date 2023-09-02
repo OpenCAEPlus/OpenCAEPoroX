@@ -222,42 +222,29 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 }
 
 
-OCP_INT Domain::GetPerfLocation(const OCP_USI& wId, const OCP_USI& tmpI, const OCP_USI& tmpJ, const OCP_USI& tmpK) const
+OCP_INT Domain::GetPerfLocation(const OCP_USI& wId, const USI& p) const
 {
-	auto myFind = [](const OCP_USI pId, const OCP_USI* grid, OCP_USI lp, OCP_USI rp) {
-		OCP_USI cp = (lp + rp) / 2;
-		OCP_USI lcp = 0;
-		while (lcp != cp) {
-			lcp = cp;
-			if (pId < grid[cp])   rp = cp;
-			else                  lp = cp;
-			cp = (lp + rp) / 2;
-		}
-		return cp;
-	};
-
-	// find if pid is in gridAllIndex
-	const OCP_USI*    grid_range;
-	if (allActive)    grid_range = grid.data();
-	else              grid_range = gridAllIndex.data();
-
-
-	OCP_USI pId = tmpK * nx * ny + tmpJ * nx + tmpI;
-	const OCP_USI loc = myFind(pId, grid_range, 0, numGridInterior);
-
-	if (pId != grid_range[loc]) {
-		// this perf is in inactive bulk
-		return -1;
-	}
-	else {
-		// determine if this perf is in fluid bulk
-		pId = grid[loc]; // active idex
-		OCP_USI tmploc = myFind(pId, well2Bulk[wId].data(), 0, well2Bulk[wId].size());
-		if (pId != well2Bulk[wId][tmploc]) {
-			return -1;
+	for (const auto& w : wellWPB) {
+		if (w[0] == wId) {
+			for (USI i = 1; i < w.size(); i += 2) {
+				if (w[i] == p) {
+					return w[i + 1];
+				}
+			}
 		}
 	}
-	return loc;
+	return -1;
+}
+
+
+USI Domain::GetPerfNum(const OCP_USI& wId) const
+{
+	for (const auto& w : wellWPB) {
+		if (w[0] == wId) {
+			return (w.size() - 1) / 2;
+		}
+	}
+	OCP_ABORT("WRONG WELL SETUP!");
 }
 
 
