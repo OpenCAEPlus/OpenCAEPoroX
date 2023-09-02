@@ -65,7 +65,7 @@ PERMX     1.     4* 1 5 /
 PERMY     1.     4* 1 5 /
 PERMZ     1.     4* 1 5 /
 PORO      .29    4* 1 5 /
-'SATNUM'  1      4* 1 5 /
+'SATNUM'  0      4* 1 5 /
 
 PORO      .01    4* 6 10 / -- Fracture
 PERMX      10.   4* 6 7 /
@@ -77,7 +77,7 @@ PERMZ      90.   4* 8 8 /
 PERMX      20.   4* 9 10 /
 PERMY      20.   4* 9 10 /
 PERMZ      20.   4* 9 10 /
-'SATNUM'   2     4* 6 10 /
+'SATNUM'   1     4* 6 10 /
 /
 
 PROPS       ==================================
@@ -217,7 +217,7 @@ WCONPROD
 /
 
 METHOD
-FIM
+FIM  bsr.fasp
 /
 
  
