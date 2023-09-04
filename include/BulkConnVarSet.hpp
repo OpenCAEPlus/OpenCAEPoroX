@@ -55,19 +55,21 @@ public:
 
 protected:
     /// first index of a pair
-    OCP_USI        bId; 
+    OCP_USI    bId; 
     /// second index of a pair.
-    OCP_USI        eId;
+    OCP_USI    eId;
     /// Effective area
-    OCP_DBL        trans;
+    OCP_DBL    trans;
     /// Connection type
-    USI            fluxnum{ 0 };
+    USI        fluxnum{ 0 };
     /// Connection direction
     ConnDirect direction;
     /// Area of intersecting face from first bulk
     OCP_DBL        areaB;
     /// Area of intersecting face from second bulk
-    OCP_DBL        areaE;       
+    OCP_DBL    areaE;
+    /// Transmissibility multipliers
+    OCP_DBL    transMulti{ 1.0 };
 };
 
 

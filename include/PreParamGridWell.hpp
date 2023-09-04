@@ -52,11 +52,11 @@ private:
 
 
 /// Effective area of intersection surfaces with neighboring cells.
-class GPair
+class ConnPair
 {
 public:
-    GPair() = default;
-    GPair(const OCP_USI& Id,
+    ConnPair() = default;
+    ConnPair(const OCP_USI& Id,
         const OCP_INT& Wgt,
         const USI& direct,
         const OCP_DBL& AreaB,
@@ -80,6 +80,9 @@ public:
         case 3:
             direction = ConnDirect::mf;
             break;
+        case 4:
+            direction = ConnDirect::zp;
+            break;
         default:
             OCP_ABORT("WRONG CONNECTION DIRECTION!");
             break;
@@ -102,6 +105,8 @@ protected:
     OCP_DBL    areaB; 
     /// Effective intersection area between this cell and the neighbor, neighbor
     OCP_DBL    areaE; 
+    /// Transmissibility multipliers
+    OCP_DBL    transMulti{ 1.0 };
 };
 
 
@@ -245,6 +250,8 @@ protected:
     vector<OCP_DBL> ky;
     /// permeability for z-direction
     vector<OCP_DBL> kz;
+    /// transmissibility multipliers in Z-direction
+    vector<OCP_DBL> multZ;
 
     // Region
     /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
@@ -318,7 +325,7 @@ protected:
 
     // Connections
     /// Neighboring information of active grid.
-    vector<vector<GPair>> gNeighbor; 
+    vector<vector<ConnPair>> gNeighbor; 
     /// Num of neighbor
     vector<USI>           numNeighbor; 
 

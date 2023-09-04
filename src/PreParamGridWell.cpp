@@ -81,6 +81,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("ROCKNUM", 7):
             case Map_Str2Int("SWATINIT", 8):
             case Map_Str2Int("SIGMAV", 6):
+            case Map_Str2Int("MULTZ", 5):
                 InputGrid(ifs, keyword);
                 break;
 
@@ -380,9 +381,9 @@ void PreParamGridWell::InputGrid(ifstream& ifs, string& keyword)
                         objPtr->push_back(stod(str));
                     }
                     else {
-                        USI     len = str.size();
-                        OCP_USI num = stoi(str.substr(0, pos));
-                        OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
+                        const USI     len = str.size();
+                        const OCP_USI num = stoi(str.substr(0, pos));
+                        const OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
                         for (USI i = 0; i < num; i++) objPtr->push_back(val);
                     }
                 }
@@ -583,6 +584,11 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
     case Map_Str2Int("SIGMAV", 6):
         sigma.reserve(numGrid);
         myPtr = &sigma;
+        break;
+
+    case Map_Str2Int("MULTZ", 5):
+        multZ.reserve(numGrid);
+        myPtr = &multZ;
         break;
     }
 
@@ -787,8 +793,8 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                         direction = 0;
                         areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
                         areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
-                        gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
                     }
                 }
                 // front  --  y-direction
@@ -800,8 +806,8 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                         direction = 1;
                         areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
                         areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
-                        gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
                     }
                 }
                 // down --   z-direction
@@ -813,8 +819,8 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                         direction = 2;
                         areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
                         areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
-                        gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
                     }
                 }
             }
@@ -959,8 +965,8 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
             direction = ConnTmp.directionType;
             areaB = ConnTmp.Ad_dd_begin;
             areaE = ConnTmp.Ad_dd_end;
-            gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-            gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
         }
     }
 }
@@ -982,8 +988,8 @@ void PreParamGridWell::SetupConnDP()
                 eIdb = map_All2Act[eIdg].GetId();
 
                 direction = 3;
-                gNeighbor[bIdb].push_back(GPair(eIdb, WEIGHT_GG, direction, 0.0, 0.0));
-                gNeighbor[eIdb].push_back(GPair(bIdb, WEIGHT_GG, direction, 0.0, 0.0));
+                gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, 0.0, 0.0));
+                gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, 0.0, 0.0));
             }
         }
     }
@@ -1160,7 +1166,7 @@ void PreParamGridWell::SetupConnWellGrid()
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
                 // for well-connection, areaB and areaE contains its active perforation index and trans if necessary
-                gNeighbor[map_All2Act[pId].GetId()].push_back(GPair(w + activeGridNum, WEIGHT_GW, 0, p, 0));
+                gNeighbor[map_All2Act[pId].GetId()].push_back(ConnPair(w + activeGridNum, WEIGHT_GW, 0, p, 0));
             }
         }
         if (connWellGrid[w].empty()) {
@@ -1174,7 +1180,7 @@ void PreParamGridWell::SetupConnWellGrid()
     gNeighbor.resize(numTotal);
     for (USI w = 0; w < numWell; w++) {
         for (const auto& p : connWellGrid[w]) {
-            gNeighbor[w + activeGridNum].push_back(GPair(p, WEIGHT_GW, 0, 0, 0));
+            gNeighbor[w + activeGridNum].push_back(ConnPair(p, WEIGHT_GW, 0, 0, 0));
         }
     }
 
@@ -1259,18 +1265,20 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(ky);
     vector<OCP_DBL>().swap(kz);
     vector<OCP_DBL>().swap(sigma);
+    vector<OCP_DBL>().swap(Swat);
+    vector<OCP_DBL>().swap(multZ);
     vector<USI>().swap(ACTNUM);
     vector<USI>().swap(SATNUM);
     vector<USI>().swap(PVTNUM);
     vector<USI>().swap(ROCKNUM);
-    vector<OCP_DBL>().swap(Swat);
+
 
 
     vector<PreParamWell>().swap(well);
 
     vector<OCP_DBL>().swap(v);
     vector<OCP_DBL>().swap(depth);
-    vector<vector<GPair>>().swap(gNeighbor);
+    vector<vector<ConnPair>>().swap(gNeighbor);
     vector<USI>().swap(numNeighbor);
     vector<OCP_USI>().swap(map_Act2All);
     vector<GB_Pair>().swap(map_All2Act);

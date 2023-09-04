@@ -95,7 +95,19 @@ enum class ConnDirect
     /// z-direction
     z,
     /// martrix -> fracture
-    mf
+    mf,
+    /// (i,j,k) -> (i+1,j,k),  structural grid only
+    xp,
+    /// (i,j,k) -> (i-1,j,k),  structural grid only
+    xm,
+    /// (i,j,k) -> (i,j+1,k),  structural grid only
+    yp,
+    /// (i,j,k) -> (i,j-1,k),  structural grid only
+    ym,
+    /// (i,j,k) -> (i,j,k+1),  structural grid only
+    zp,
+    /// (i,j,k) -> (i,j,k-1),  structural grid only
+    zm,
 };
 
 

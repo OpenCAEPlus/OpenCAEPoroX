@@ -499,7 +499,7 @@ void OCPFluxT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
     // Calculte upblock, rho, flux_vj, flux_ni, Adkt
 
-    const BulkVarSet&        bvs = bk.vs;
+    const BulkVarSet&        bvs  = bk.vs;
     const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
 
     fill(flux_ni.begin(), flux_ni.end(), 0.0);

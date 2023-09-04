@@ -87,7 +87,7 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 			adjwgt = adjncy + numEdges[p];
 
 			for (OCP_INT n = 0; n < vtxdist[p + 1] - vtxdist[p]; n++) {
-				const vector<GPair>& gNeigh = grid.gNeighbor[vtxdist[p] + n];
+				const vector<ConnPair>& gNeigh = grid.gNeighbor[vtxdist[p] + n];
 				xadj[n + 1] = xadj[n] + gNeigh.size();
 				for (OCP_INT i = 0; i < gNeigh.size(); i++) {
 					adjncy[xadj[n] + i] = gNeigh[i].ID();
@@ -103,7 +103,7 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 		adjncy = xadj + numElementLocal + 1;
 		adjwgt = adjncy + numEdgesLocal;
 		for (OCP_INT n = 0; n < numElementLocal; n++) {
-			const vector<GPair>& gNeigh = grid.gNeighbor[n];
+			const vector<ConnPair>& gNeigh = grid.gNeighbor[n];
 			xadj[n + 1] = xadj[n] + gNeigh.size();
 			for (OCP_INT i = 0; i < gNeigh.size(); i++) {
 				adjncy[xadj[n] + i] = gNeigh[i].ID();
