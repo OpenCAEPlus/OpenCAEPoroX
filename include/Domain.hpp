@@ -78,9 +78,9 @@ protected:
 	vector<vector<idx_t>>   elementCSR;  
 	///< global index of interior grid & ghost grid
 	vector<OCP_USI>         grid;        
-	/// well's global index(index starts from zero)
+	/// well's global index(index starts from zero) (useless now)
 	vector<OCP_USI>         well; 
-	/// wells' bulk neighbor, init global index, ascending order
+	/// wells' bulk neighbor, init global index, ascending order (useless now)
 	vector<vector<OCP_USI>> well2Bulk;  
 
 	/// Well's global index(start from zero), perfortions' index(start from zero) and location(bulks' local index) of perforation
@@ -118,25 +118,15 @@ public:
 	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid in equations
 
 
-	// If all grids are active. if not, record their global index(include inactive grid)
+	// If all grids are active. if not, record their global index(include inactive grid) (useless now)
 	OCP_BOOL          allActive{ OCP_TRUE };
 	vector<OCP_USI>   gridAllIndex;
 
 
-	// Grid Info
-public:
-	void SetGirdDimens(const OCP_USI& NX, const OCP_USI& NY, const OCP_USI& NZ) {
-		nx = NX; 
-		ny = NY;
-		nz = NZ;
-	}
-
-protected:
-	OCP_USI nx, ny, nz;      ///< Dimensions of Grid (Orthogonal only)
-
-	// well perf
+	// Well perforations
 public:
 	OCP_INT GetPerfLocation(const OCP_USI& wId, const USI& p) const;
+	/// Return number of perforations of specific well(given well global index)
 	USI     GetPerfNum(const OCP_USI& wId) const;
 };
 

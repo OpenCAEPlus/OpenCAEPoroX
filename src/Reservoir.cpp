@@ -282,19 +282,20 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             for (const auto& gn : grid.gNeighbor[domain.grid[bId]]) {
                 if (gn.ID() >= global_well_start) {
                     // well connection
-                    const USI len = domain.wellWPB.size();
+                    const USI wIndex = gn.ID() - global_well_start;
+                    const USI len    = domain.wellWPB.size();
                     USI w = 0;
                     for (w = 0; w < len; w++) {
-                        if (static_cast<OCP_USI>(gn.AreaB()) == domain.wellWPB[w][0]) {
-                            domain.wellWPB[w].push_back(static_cast<OCP_USI>(gn.AreaE()));
+                        if (wIndex == domain.wellWPB[w][0]) {
+                            domain.wellWPB[w].push_back(static_cast<OCP_USI>(gn.AreaB()));
                             domain.wellWPB[w].push_back(bId);
                             break;
                         }
                     }
                     if (w == len) {
                         domain.wellWPB.push_back(vector<OCP_USI>{
-                            static_cast<OCP_USI>(gn.AreaB()),
-                            static_cast<OCP_USI>(gn.AreaE()), bId});
+                            wIndex,
+                            static_cast<OCP_USI>(gn.AreaB()), bId});
                     }
                     continue; 
                 }
@@ -434,19 +435,20 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                             }
                             else {
                                 // well connection
-                                const USI len = domain.wellWPB.size();
+                                const USI wIndex = my_edge[j] - global_well_start;
+                                const USI len    = domain.wellWPB.size();
                                 USI w = 0;
                                 for (w = 0; w < len; w++) {
-                                    if (static_cast<OCP_USI>(conn_ptr[1]) == domain.wellWPB[w][0]) {
-                                        domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[2]));
+                                    if (wIndex == domain.wellWPB[w][0]) {
+                                        domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[1]));
                                         domain.wellWPB[w].push_back(bId);
                                         break;
                                     }
                                 }
                                 if (w == len) {
                                     domain.wellWPB.push_back(vector<OCP_USI>{
-                                        static_cast<OCP_USI>(conn_ptr[1]),
-                                        static_cast<OCP_USI>(conn_ptr[2]), bId});
+                                        wIndex,
+                                        static_cast<OCP_USI>(conn_ptr[1]), bId});
                                 }
                             }
                             conn_ptr += 3;
@@ -478,7 +480,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
 void Reservoir::InputDistParamOthers(const ParamRead& param)
 {
-    domain.SetGirdDimens(param.paramRs.dimens.nx, param.paramRs.dimens.ny, param.paramRs.dimens.nz);
     bulk.InputParam(param.paramRs);
     allWells.InputParam(param.paramWell, domain);
 }
