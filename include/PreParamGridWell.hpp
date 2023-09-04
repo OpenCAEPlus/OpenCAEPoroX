@@ -57,37 +57,15 @@ class ConnPair
 public:
     ConnPair() = default;
     ConnPair(const OCP_USI& Id,
-        const OCP_INT& Wgt,
-        const USI& direct,
-        const OCP_DBL& AreaB,
-        const OCP_DBL& AreaE)
+        const OCP_INT&      Wgt,
+        const ConnDirect&   direct,
+        const OCP_DBL&      AreaB,
+        const OCP_DBL&      AreaE)
         : id(Id)
         , wgt(Wgt)
+        , direction(direct)
         , areaB(AreaB)
-        , areaE(AreaE) 
-    {
-        switch (direct)
-        {
-        case 0:
-            direction = ConnDirect::x;
-            break;
-        case 1:
-            direction = ConnDirect::y;
-            break;
-        case 2:
-            direction = ConnDirect::z;
-            break;
-        case 3:
-            direction = ConnDirect::mf;
-            break;
-        case 4:
-            direction = ConnDirect::zp;
-            break;
-        default:
-            OCP_ABORT("WRONG CONNECTION DIRECTION!");
-            break;
-        }
-    };
+        , areaE(AreaE) {};
     const auto& ID() const { return id; }
     const auto& WGT() const { return wgt; }
     const auto& Direct() const { return direction; }

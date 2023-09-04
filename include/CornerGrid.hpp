@@ -123,7 +123,7 @@ public:
     OCP_DBL Ad_dd;
     Point3D d;
     OCP_USI neigh;
-    USI     directionType; // 0 - x, 1 - y, 2 - z, 3 - extension
+    ConnDirect     directionType; 
 };
 
 /// ???
@@ -136,7 +136,7 @@ public:
     void             AddHalfConn(const OCP_USI& n,
                                  const Point3D& area,
                                  const Point3D& d,
-                                 const USI&     direction,
+                                 const ConnDirect&     direction,
                                  const OCP_DBL& flag = 1);
 };
 
@@ -145,7 +145,7 @@ class GeneralConnect
 {
 public:
     OCP_USI begin, end;
-    USI     directionType; // 1 - x, 2 - y, 3 - z, 4 - extension
+    ConnDirect     directionType; // 1 - x, 2 - y, 3 - z, 4 - extension
     OCP_DBL Ad_dd_begin;
     OCP_DBL Ad_dd_end;
 };

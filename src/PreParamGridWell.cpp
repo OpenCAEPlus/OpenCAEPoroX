@@ -770,7 +770,6 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
     // Begin Id and End Id in Grid, bIdg < eIdg
     OCP_USI       bIdg, eIdg, bIdb, eIdb;
     OCP_DBL       areaB, areaE;
-    USI           direction;
     const OCP_USI nxny = nx * ny;
 
     for (USI k = 0; k < nz; k++) {
@@ -790,11 +789,10 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 0;
                         areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
                         areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
-                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
                     }
                 }
                 // front  --  y-direction
@@ -803,11 +801,10 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 1;
                         areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
                         areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
-                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
                     }
                 }
                 // down --   z-direction
@@ -816,11 +813,10 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     if (map_All2Act[eIdg].IsAct()) {
                         eIdb = map_All2Act[eIdg].GetId();
 
-                        direction = 2;
                         areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
                         areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
-                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
                     }
                 }
             }
@@ -951,7 +947,6 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 
     OCP_USI bIdg, eIdg, bIdb, eIdb;
     OCP_DBL areaB, areaE;
-    USI     direction;
     for (OCP_USI n = 0; n < CoTmp.numConn; n++) {
         const GeneralConnect& ConnTmp = CoTmp.connect[n];
 
@@ -961,12 +956,9 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
         if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
             bIdb = map_All2Act[bIdg].GetId();
             eIdb = map_All2Act[eIdg].GetId();
-
-            direction = ConnTmp.directionType;
             areaB = ConnTmp.Ad_dd_begin;
             areaE = ConnTmp.Ad_dd_end;
-            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, areaB, areaE));
-            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, areaE, areaB));
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnTmp.directionType, areaB, areaE));
         }
     }
 }
@@ -975,7 +967,6 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 void PreParamGridWell::SetupConnDP()
 {
     OCP_USI bIdg, bIdb, eIdg, eIdb;
-    USI     direction;
     if (DUALPORO) {
         for (bIdg = numGridM; bIdg < numGrid; bIdg++) {
             if (!map_All2Act[bIdg].IsAct()) {
@@ -987,9 +978,8 @@ void PreParamGridWell::SetupConnDP()
             if (map_All2Act[eIdg].IsAct()) {
                 eIdb = map_All2Act[eIdg].GetId();
 
-                direction = 3;
-                gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, direction, 0.0, 0.0));
-                gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, direction, 0.0, 0.0));
+                gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
+                gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
             }
         }
     }
@@ -1166,7 +1156,7 @@ void PreParamGridWell::SetupConnWellGrid()
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
                 // for well-connection, areaB and areaE contains its active perforation index and trans if necessary
-                gNeighbor[map_All2Act[pId].GetId()].push_back(ConnPair(w + activeGridNum, WEIGHT_GW, 0, p, 0));
+                gNeighbor[map_All2Act[pId].GetId()].push_back(ConnPair(w + activeGridNum, WEIGHT_GW, ConnDirect::n, p, 0));
             }
         }
         if (connWellGrid[w].empty()) {
@@ -1180,7 +1170,7 @@ void PreParamGridWell::SetupConnWellGrid()
     gNeighbor.resize(numTotal);
     for (USI w = 0; w < numWell; w++) {
         for (const auto& p : connWellGrid[w]) {
-            gNeighbor[w + activeGridNum].push_back(ConnPair(p, WEIGHT_GW, 0, 0, 0));
+            gNeighbor[w + activeGridNum].push_back(ConnPair(p, WEIGHT_GW, ConnDirect::n, 0, 0));
         }
     }
 

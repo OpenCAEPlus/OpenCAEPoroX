@@ -574,7 +574,7 @@ void ConnGrid::Allocate(const USI& max_neighbor)
 void ConnGrid::AddHalfConn(const OCP_USI& n,
                            const Point3D& area,
                            const Point3D& d,
-                           const USI&     direction,
+                           const ConnDirect&     direction,
                            const OCP_DBL& flag)
 {
     if (nConn >= maxConn) {
@@ -931,7 +931,7 @@ void OCP_COORD::SetupCornerPoints()
     else
         flagForward = -1.0;
 
-    USI direction;
+    ConnDirect direction;
 
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
@@ -946,7 +946,7 @@ void OCP_COORD::SetupCornerPoints()
                 // (x-) direction
                 //
 
-                direction = 0;
+                direction = ConnDirect::xm;
 
                 Face.p0 = block.p0;
                 Face.p1 = block.p4;
@@ -1004,6 +1004,9 @@ void OCP_COORD::SetupCornerPoints()
 
                     // then find all NNC for current block
                     // check if upNNC and downNNC exist
+
+                    direction = ConnDirect::x;
+
                     if ((flagp0 > 0) || (flagp3 > 0))
                         upNNC = OCP_TRUE;
                     else
@@ -1121,7 +1124,7 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (x+) direction
                 //
-                direction = 0;
+                direction = ConnDirect::xp;
 
                 Face.p0 = block.p2;
                 Face.p1 = block.p6;
@@ -1178,6 +1181,8 @@ void OCP_COORD::SetupCornerPoints()
                     }
 
                     // then find all NNC for current block
+                    direction = ConnDirect::x;
+
                     if ((flagp0 > 0) || (flagp3 > 0))
                         upNNC = OCP_TRUE;
                     else
@@ -1298,7 +1303,7 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (y-) direction
                 //
-                direction = 1;
+                direction = ConnDirect::ym;
 
                 Face.p0 = block.p1;
                 Face.p1 = block.p5;
@@ -1355,6 +1360,8 @@ void OCP_COORD::SetupCornerPoints()
                     }
 
                     // then find all NNC for current block
+                    direction = ConnDirect::y;
+
                     if ((flagp0 > 0) || (flagp3 > 0))
                         upNNC = OCP_TRUE;
                     else
@@ -1473,7 +1480,7 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (y+) direction
                 //
-                direction = 1;
+                direction = ConnDirect::yp;
 
                 Face.p0 = block.p3;
                 Face.p1 = block.p7;
@@ -1530,6 +1537,8 @@ void OCP_COORD::SetupCornerPoints()
                     }
 
                     // then find all NNC for current block
+                    direction = ConnDirect::y;
+
                     if ((flagp0 > 0) || (flagp3 > 0))
                         upNNC = OCP_TRUE;
                     else
@@ -1650,7 +1659,7 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (z-) direction
                 //
-                direction = 2;
+                direction = ConnDirect::zm;
 
                 Face.p0 = block.p0;
                 Face.p1 = block.p3;
@@ -1674,6 +1683,8 @@ void OCP_COORD::SetupCornerPoints()
                 //
                 // (z+) direction
                 //
+                direction = ConnDirect::zp;
+
                 Face.p0 = block.p5;
                 Face.p1 = block.p6;
                 Face.p2 = block.p7;
@@ -1710,7 +1721,7 @@ void OCP_COORD::SetupCornerPoints()
     }
 
     OCP_ASSERT(num_conn % 2 == 0, "Wrong Conn!");
-    numConnMax = num_conn / 2;
+    numConnMax = num_conn;
     connect.resize(numConnMax);
     //
     //    calculate the x,y,z direction transmissibilities of each block and save them
@@ -1720,7 +1731,6 @@ void OCP_COORD::SetupCornerPoints()
     for (OCP_USI n = 0; n < numGrid; n++) {
         for (USI j = 0; j < blockconn[n].nConn; j++) {
             OCP_USI nn = blockconn[n].halfConn[j].neigh;
-            if (nn < n) continue;
             USI jj;
             for (jj = 0; jj < blockconn[nn].nConn; jj++) {
                 if (blockconn[nn].halfConn[jj].neigh == n) {
@@ -1740,6 +1750,7 @@ void OCP_COORD::SetupCornerPoints()
             // now, blockconn[n].halfConn[j]
             //     blockconn[nn].halfConn[jj]
             //     are a pair of connections
+
             connect[iter_conn].begin         = n;
             connect[iter_conn].Ad_dd_begin   = blockconn[n].halfConn[j].Ad_dd;
             connect[iter_conn].end           = nn;

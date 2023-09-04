@@ -88,6 +88,8 @@ const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
 
 enum class ConnDirect
 {
+    /// none
+    n,
     /// x-direction
     x,
     /// y-direction
@@ -96,6 +98,8 @@ enum class ConnDirect
     z,
     /// martrix -> fracture
     mf,
+    /// fracture -> matrix
+    fm,
     /// (i,j,k) -> (i+1,j,k),  structural grid only
     xp,
     /// (i,j,k) -> (i-1,j,k),  structural grid only
