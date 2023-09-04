@@ -82,6 +82,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("SWATINIT", 8):
             case Map_Str2Int("SIGMAV", 6):
             case Map_Str2Int("MULTZ", 5):
+            case Map_Str2Int("DZMTRXV", 7):
                 InputGrid(ifs, keyword);
                 break;
 
@@ -153,6 +154,7 @@ void PreParamGridWell::PostProcessInput()
         ACTNUM.resize(numGrid, 1);
     }
     if (!sigma.empty())  sigma.resize(numGrid, 0);
+    if (!dzMtrx.empty())  dzMtrx.resize(numGrid, 0);
 }
 
 
@@ -589,6 +591,11 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
     case Map_Str2Int("MULTZ", 5):
         multZ.reserve(numGrid);
         myPtr = &multZ;
+        break;
+
+    case Map_Str2Int("DZMTRXV", 7):
+        dzMtrx.reserve(numGrid);
+        myPtr = &dzMtrx;
         break;
     }
 

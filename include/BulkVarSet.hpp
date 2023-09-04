@@ -78,6 +78,8 @@ public:
     vector<OCP_DBL>    rockKz;
     /// sigma factor used in dual porosity matrix-fracture coupling term
     vector<OCP_DBL>    sigma;
+    /// vertical dimension of a block of matrix material
+    vector<OCP_DBL>    dzMtrx;
     /// Volume of rock
     vector<OCP_DBL>    vr;
     /// Enthalpy of rock
