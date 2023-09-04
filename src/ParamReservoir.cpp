@@ -123,66 +123,6 @@ void ParamReservoir::InitTable()
 }
 
 /// TODO: Add Doxygen
-template <typename T>
-void ParamReservoir::setVal(vector<T>& obj, const T& val, const vector<USI>& index)
-{
-    USI     Nx   = dimens.nx;
-    USI     Ny   = dimens.ny;
-    OCP_USI NxNy = Nx * Ny;
-    OCP_USI id   = 0;
-
-    for (USI k = index[4]; k <= index[5]; k++) {
-        for (USI j = index[2]; j <= index[3]; j++) {
-            for (USI i = index[0]; i <= index[1]; i++) {
-                id      = k * NxNy + j * Nx + i;
-                obj[id] = val;
-            }
-        }
-    }
-}
-
-/// TODO: Add Doxygen
-template <typename T>
-void ParamReservoir::CopyVal(vector<T>&         obj,
-                             const vector<T>&   src,
-                             const vector<USI>& index)
-{
-    USI     Nx   = dimens.nx;
-    USI     Ny   = dimens.ny;
-    OCP_USI NxNy = Nx * Ny;
-    OCP_USI id   = 0;
-
-    for (USI k = index[4]; k <= index[5]; k++) {
-        for (USI j = index[2]; j <= index[3]; j++) {
-            for (USI i = index[0]; i <= index[1]; i++) {
-                id      = k * NxNy + j * Nx + i;
-                obj[id] = src[id];
-            }
-        }
-    }
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::MultiplyVal(vector<OCP_DBL>&   obj,
-                                 const OCP_DBL&     val,
-                                 const vector<USI>& index)
-{
-    USI     Nx   = dimens.nx;
-    USI     Ny   = dimens.ny;
-    OCP_USI NxNy = Nx * Ny;
-    OCP_USI id   = 0;
-
-    for (USI k = index[4]; k <= index[5]; k++) {
-        for (USI j = index[2]; j <= index[3]; j++) {
-            for (USI i = index[0]; i <= index[1]; i++) {
-                id = k * NxNy + j * Nx + i;
-                obj[id] *= val;
-            }
-        }
-    }
-}
-
-/// TODO: Add Doxygen
 void ParamReservoir::InputCOMPS(ifstream& ifs)
 {
     comps = OCP_TRUE;
@@ -198,27 +138,6 @@ void ParamReservoir::InputCOMPS(ifstream& ifs)
     }
 }
 
-/// TODO: Add Doxygen
-void ParamReservoir::InputDIMENS(ifstream& ifs)
-{
-    vector<string> vbuf;
-    ReadLine(ifs, vbuf);
-    dimens.nx = stoi(vbuf[0]);
-    dimens.ny = stoi(vbuf[1]);
-    dimens.nz = stoi(vbuf[2]);
-
-    if (CURRENT_RANK == MASTER_PROCESS)
-        DisplayDIMENS();
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::DisplayDIMENS()
-{
-    cout << "\n---------------------" << endl
-         << "DIMENS"
-         << "\n---------------------" << endl;
-    cout << "   " << dimens.nx << "  " << dimens.ny << "  " << dimens.nz << endl;
-}
 
 /// TODO: Add Doxygen
 void ParamReservoir::InputRTEMP(ifstream& ifs)

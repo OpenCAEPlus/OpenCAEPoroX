@@ -38,14 +38,6 @@ public:
     vector<vector<vector<OCP_DBL>>> data;    ///< All table with the same name.
 };
 
-/// Dimens contains the dimensions of grids.
-class Dimens
-{
-public:
-    USI nx; ///< Num of bulks along x-direction.
-    USI ny; ///< Num of bulks along y-direction.
-    USI nz; ///< Num of bulks along z-direction.
-};
 
 class HLoss
 {
@@ -210,9 +202,7 @@ class ParamReservoir
 {
 
 public:
-    // Cartesian
-    Dimens  dimens;  ///< Dimension of grid: the number of grids along x,y,z direction.
-    
+
     OCP_DBL           rsTemp;  ///< Temperature for reservoir.
     vector<RockParam> rockSet; ///< a set of rock
     HLoss             hLoss;   ///< Heat loss property
@@ -274,19 +264,6 @@ public:
 
     /// Initialize the tables' name and num of colum.
     void InitTable();
-
-    /// It's used in InputEQUALS, assigning values in batches.
-    template <typename T>
-    void setVal(vector<T>& obj, const T& val, const vector<USI>& index);
-
-    /// It's used in InputCOPY, copying the value of one variable to another.
-    template <typename T>
-    void CopyVal(vector<T>& obj, const vector<T>& src, const vector<USI>& index);
-
-    /// It's used in InputMULTIPLY, multipling the value of a certain range of a
-    /// variable by a coefficient.
-    void
-    MultiplyVal(vector<OCP_DBL>& obj, const OCP_DBL& val, const vector<USI>& index);
 
     /// Input the keyword: COMPS. COMPS is used in compositional model, which gives the
     /// num of components.

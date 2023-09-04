@@ -90,10 +90,6 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.disGas = OCP_TRUE;
                 break;
 
-            case Map_Str2Int("DIMENS", 6):
-                paramRs.InputDIMENS(ifs);
-                break;
-
             case Map_Str2Int("RTEMP", 5):
                 paramRs.InputRTEMP(ifs);
                 break;
