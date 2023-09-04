@@ -46,6 +46,7 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
         bp.trans = bp.transMult / (1 / T1 + 1 / T2);
         break;
     case ConnDirect::mf:
+    case ConnDirect::fm:
         bp.trans = bp.transMult * bcv.rockKx[bId] * bcv.v[bId] * bcv.sigma[bId];
         break;
     default:

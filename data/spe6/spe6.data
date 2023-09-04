@@ -200,15 +200,20 @@ PRES
 -- Data from SPE18741
 WELSPECS
 --name	group	 I	  J   depth_ref   phase_ref
-'INJE'   'G'   1    1     1*    'WATER'   /
 'PROD'   'G'   10   1     1*    'OIL'   /
+'INJE'   'G'   1    1     1*    'WATER'   /
 /
 
 -- Data from SPE18741
 COMPDAT
 --name    I    J    K1   K2   trans_factor diameter skin_factor  direction
-'INJE'   1   1   1   5     2   0.5   3*   /
-'PROD'   10  1   1   3     2   0.5   3*   /
+'PROD'   10  1   6   8      2   0.5   3*   /
+'INJE'   1   1   6   10     2   0.5   3*   /
+/
+
+
+WCONPROD
+'PROD'   'OPEN'    'LRAT'   1000.0    1000    /
 /
 
 -- Data from SPE18741
@@ -217,12 +222,10 @@ WCONINJE
 'INJE'   'WATER'   'OPEN'     'RATE'     1750.0    6100.0    /
 /
 
-WCONPROD
-'PROD'   'OPEN'    'LRAT'   1000.0    1000    /
-/
+
 
 METHOD
-FIM  bsr.fasp
+FIM  pardiso
 /
 
  

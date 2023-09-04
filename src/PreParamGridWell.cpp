@@ -699,12 +699,10 @@ void PreParamGridWell::SetupGrid()
     switch (gridType) 
     {
     case ORTHOGONAL_GRID:
-        SetupOrthogonalGrid();
-        SetupConnDP();
+        SetupOrthogonalGrid();     
         break;
     case CORNER_GRID:
         SetupCornerGrid();
-        SetupConnDP();
         break;
     default:
         OCP_ABORT("WRONG Grid Type!");
@@ -760,6 +758,17 @@ void PreParamGridWell::CalDepthVOrthogonalGrid()
 }
 
 void PreParamGridWell::SetupActiveConnOrthogonalGrid()
+{
+    if (DUALPORO) {
+        SetupActiveConnOrthogonalGridDP();
+    }
+    else {
+        SetupActiveConnOrthogonalGridSM();
+    }
+}
+
+
+void PreParamGridWell::SetupActiveConnOrthogonalGridSM()
 {
     gNeighbor.resize(activeGridNum);
     // PreAllocate
@@ -820,6 +829,91 @@ void PreParamGridWell::SetupActiveConnOrthogonalGrid()
                     }
                 }
             }
+        }
+    }
+}
+
+
+void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
+{
+
+    // for fractures connection
+
+    gNeighbor.resize(activeGridNum);
+    // PreAllocate
+    for (OCP_USI n = 0; n < activeGridNum; n++) {
+        gNeighbor[n].reserve(6);
+    }
+
+    // Begin Id and End Id in Grid, bIdg < eIdg
+    OCP_USI       bIdg, eIdg, bIdb, eIdb;
+    OCP_DBL       areaB, areaE;
+    const OCP_USI nxny = nx * ny;
+
+    for (USI k = nz; k < 2 * nz; k++) {
+        for (USI j = 0; j < ny; j++) {
+            for (USI i = 0; i < nx; i++) {
+
+                bIdg = k * nxny + j * nx + i;
+
+                if (!map_All2Act[bIdg].IsAct()) {
+                    continue;
+                }
+                bIdb = map_All2Act[bIdg].GetId();
+
+                // right  --  x-direction
+                if (i < nx - 1) {
+                    eIdg = bIdg + 1;
+                    if (map_All2Act[eIdg].IsAct()) {
+                        eIdb = map_All2Act[eIdg].GetId();
+
+                        areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
+                        areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
+                    }
+                }
+                // front  --  y-direction
+                if (j < ny - 1) {
+                    eIdg = bIdg + nx;
+                    if (map_All2Act[eIdg].IsAct()) {
+                        eIdb = map_All2Act[eIdg].GetId();
+
+                        areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
+                        areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
+                    }
+                }
+                // down --   z-direction
+                if (k < 2*nz - 1) {
+                    eIdg = bIdg + nxny;
+                    if (map_All2Act[eIdg].IsAct()) {
+                        eIdb = map_All2Act[eIdg].GetId();
+
+                        areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
+                        areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
+                        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
+                        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
+                    }
+                }
+            }
+        }
+    }
+
+    // for fracture-matrix connection
+    for (bIdg = 0; bIdg < numGridM; bIdg++) {
+        if (!map_All2Act[bIdg].IsAct()) {
+            continue;
+        }
+        bIdb = map_All2Act[bIdg].GetId();
+    
+        eIdg = bIdg + numGridM;
+        if (map_All2Act[eIdg].IsAct()) {
+            eIdb = map_All2Act[eIdg].GetId();
+    
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
         }
     }
 }
@@ -939,6 +1033,17 @@ void PreParamGridWell::SetupBasicCornerGrid(const OCP_COORD& CoTmp)
 
 void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 {
+    if (DUALPORO) {
+        SetupActiveConnCornerGridDP(CoTmp);
+    }
+    else {
+        SetupActiveConnCornerGridSM(CoTmp);
+    }
+}
+
+
+void PreParamGridWell::SetupActiveConnCornerGridSM(const OCP_COORD& CoTmp)
+{
     gNeighbor.resize(activeGridNum);
     // PreAllocate
     for (OCP_USI n = 0; n < activeGridNum; n++) {
@@ -964,23 +1069,45 @@ void PreParamGridWell::SetupActiveConnCornerGrid(const OCP_COORD& CoTmp)
 }
 
 
-void PreParamGridWell::SetupConnDP()
+void PreParamGridWell::SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp)
 {
-    OCP_USI bIdg, bIdb, eIdg, eIdb;
-    if (DUALPORO) {
-        for (bIdg = numGridM; bIdg < numGrid; bIdg++) {
-            if (!map_All2Act[bIdg].IsAct()) {
-                continue;
-            }
+    // for fracture connections
+    gNeighbor.resize(activeGridNum);
+    // PreAllocate
+    for (OCP_USI n = 0; n < activeGridNum; n++) {
+        gNeighbor[n].reserve(10);
+    }
+
+    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_DBL areaB, areaE;
+    for (OCP_USI n = 0; n < CoTmp.numConn; n++) {
+        const GeneralConnect& ConnTmp = CoTmp.connect[n];
+
+        bIdg = ConnTmp.begin + numGridM;
+        eIdg = ConnTmp.end + numGridM;
+
+        if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
             bIdb = map_All2Act[bIdg].GetId();
+            eIdb = map_All2Act[eIdg].GetId();
+            areaB = ConnTmp.Ad_dd_begin;
+            areaE = ConnTmp.Ad_dd_end;
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnTmp.directionType, areaB, areaE));
+        }
+    }
 
-            eIdg = bIdg - numGridM;
-            if (map_All2Act[eIdg].IsAct()) {
-                eIdb = map_All2Act[eIdg].GetId();
+    // for fracture-matrix connection
+    for (bIdg = 0; bIdg < numGridM; bIdg++) {
+        if (!map_All2Act[bIdg].IsAct()) {
+            continue;
+        }
+        bIdb = map_All2Act[bIdg].GetId();
 
-                gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
-                gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
-            }
+        eIdg = bIdg + numGridM;
+        if (map_All2Act[eIdg].IsAct()) {
+            eIdb = map_All2Act[eIdg].GetId();
+
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
         }
     }
 }
@@ -1164,16 +1291,13 @@ void PreParamGridWell::SetupTransMult()
 void PreParamGridWell::SetupConnWellGrid()
 {
 
-    OCP_USI offset = 0;
-    if (DUALPORO) offset = numGridM;
-
     // Attention that all wells should be active -- own at least one connections to active grid
     numWell = well.size();
     connWellGrid.resize(numWell);
     for (USI w = 0; w < numWell; w++) {
         const USI numPerf = well[w].I_perf.size();
         for (USI p = 0; p < numPerf; p++) {
-            const OCP_USI pId = (well[w].K_perf[p] - 1) * (nx * ny) + (well[w].J_perf[p] - 1) * nx + (well[w].I_perf[p] - 1) + offset;
+            const OCP_USI pId = (well[w].K_perf[p] - 1) * (nx * ny) + (well[w].J_perf[p] - 1) * nx + (well[w].I_perf[p] - 1);
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
                 // for well-connection, areaB and areaE contains its active perforation index and trans if necessary

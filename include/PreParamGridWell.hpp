@@ -274,6 +274,10 @@ protected:
     void CalDepthVOrthogonalGrid();
     /// Setup the neighboring info for an orthogonal grid.
     void SetupActiveConnOrthogonalGrid();
+    /// Setup connections for single media in orthogonal grid.
+    void SetupActiveConnOrthogonalGridSM();
+    /// Setup connections for dual pororsity in orthogonal grid.
+    void SetupActiveConnOrthogonalGridDP();
     
 
     /// Setup corner-point grid.
@@ -282,7 +286,10 @@ protected:
     void SetupBasicCornerGrid(const OCP_COORD& CoTmp);
     /// Setup the neighboring info for a corner-point grid.
     void SetupActiveConnCornerGrid(const OCP_COORD& CoTmp);
-
+    /// Setup connections for single media in corner-point grid.
+    void SetupActiveConnCornerGridSM(const OCP_COORD& CoTmp);
+    /// Setup connections for dual pororsity in corner-point grid.
+    void SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp);
 
     // For Structral Grid
     /// Set location for grid: top, bottom, side or interior
@@ -327,9 +334,6 @@ protected:
     /////////////////////////////////////////////////////////////////////
     // Dual Porosity Option
     /////////////////////////////////////////////////////////////////////
-
-protected:
-    void SetupConnDP();
 
 protected:
     /// If use dual porosity option. (matrix is in the front and followed by fracture grid)
