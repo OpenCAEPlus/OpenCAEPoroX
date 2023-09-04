@@ -141,8 +141,9 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
         // Send vars and conns to other process      
         vector<vector<OCP_CHAR>> send_buffer(1);
-        // send_var_value, send_edge(direction, areaB, areaE)
-        OCP_USI maxSendSize = maxNumElement * send_var.numByte_total + maxNumEdge * 3 * sizeof(OCP_DBL);
+        // send_var_value, send_edge(direction, areaB, areaE, transmult)
+        const USI varNumEdge = 4;
+        OCP_USI maxSendSize = maxNumElement * send_var.numByte_total + maxNumEdge * varNumEdge * sizeof(OCP_DBL);
         if (!domain.allActive) {
             maxSendSize += maxNumElement * sizeof(OCP_USI);
         }
@@ -210,6 +211,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                     conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.Direct());
                     conn_ptr[conn_size++] = gn.AreaB();
                     conn_ptr[conn_size++] = gn.AreaE();
+                    conn_ptr[conn_size++] = gn.TransMult();
                 }
             }        
             send_size += conn_size * sizeof(OCP_DBL);
@@ -301,7 +303,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                 }
                 eId = init2local.at(gn.ID());
                 if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE()));
+                    dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE(), gn.TransMult()));
             }
         }
         conn.numConn = conn.iteratorConn.size();
@@ -370,8 +372,9 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         }
         recv_var.CalNumByte();
 
+        const USI varNumEdge = 4;
         MPI_Status status;
-        OCP_USI   recv_size   = numIgridEdge[0] * recv_var.numByte_total + numIgridEdge[2] * 3 * sizeof(OCP_DBL);
+        OCP_USI   recv_size   = numIgridEdge[0] * recv_var.numByte_total + numIgridEdge[2] * varNumEdge * sizeof(OCP_DBL);
         if (!domain.allActive) {
             // recv global index(include inactive grid)
             recv_size += numIgridEdge[0] * sizeof(OCP_USI);
@@ -430,7 +433,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                                 // bulk connection
                                 eId = iter->second;
                                 if (eId > bId) {
-                                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2]));
+                                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2], conn_ptr[3]));
                                 }
                             }
                             else {
@@ -451,7 +454,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                                         static_cast<OCP_USI>(conn_ptr[1]), bId});
                                 }
                             }
-                            conn_ptr += 3;
+                            conn_ptr += varNumEdge;
                         }
                     }
                 }

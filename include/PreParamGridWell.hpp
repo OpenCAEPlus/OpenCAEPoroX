@@ -71,6 +71,8 @@ public:
     const auto& Direct() const { return direction; }
     const auto& AreaB() const { return areaB; }
     const auto& AreaE() const { return areaE; }
+    void SetTransMult(const OCP_DBL& var) { transMult *= var; }
+    const auto& TransMult() const { return transMult; }
 
 protected:
     /// index of a neighboring cell
@@ -83,8 +85,8 @@ protected:
     OCP_DBL    areaB; 
     /// Effective intersection area between this cell and the neighbor, neighbor
     OCP_DBL    areaE; 
-    /// Transmissibility multipliers
-    OCP_DBL    transMulti{ 1.0 };
+    /// Transmissibility multipliers,
+    OCP_DBL    transMult{ 1.0 };
 };
 
 
@@ -287,12 +289,15 @@ protected:
     void SetLocationStructral();
     
 
+    /// For General Grid
     /// Calculate the activity of grid cells
     void CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2);
     /// Calculate the activity of grid cells for isothermal model
     void CalActiveGridIsoT(const OCP_DBL& e1, const OCP_DBL& e2);
     /// Calculate the activity of grid cells for Thermal model
     void CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2);
+    /// Setup Transmissibility multipliers
+    void SetupTransMult();
 
 
 protected:

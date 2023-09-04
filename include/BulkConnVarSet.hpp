@@ -38,12 +38,14 @@ public:
         const OCP_USI& EId,
         const ConnDirect& direct,
         const OCP_DBL& AreaB,
-        const OCP_DBL& AreaE)
+        const OCP_DBL& AreaE, 
+        const OCP_DBL& transM)
         : bId(BId)
         , eId(EId)
         , direction(direct)
         , areaB(AreaB)
-        , areaE(AreaE) {};
+        , areaE(AreaE)
+        , transMult(transM) {};
 
     const auto& BId() const { return bId; }
     const auto& EId() const { return eId; } 
@@ -65,11 +67,11 @@ protected:
     /// Connection direction
     ConnDirect direction;
     /// Area of intersecting face from first bulk
-    OCP_DBL        areaB;
+    OCP_DBL    areaB;
     /// Area of intersecting face from second bulk
     OCP_DBL    areaE;
     /// Transmissibility multipliers
-    OCP_DBL    transMulti{ 1.0 };
+    OCP_DBL    transMult{ 1.0 };
 };
 
 

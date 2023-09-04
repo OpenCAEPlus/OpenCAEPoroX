@@ -710,7 +710,7 @@ void PreParamGridWell::SetupGrid()
         OCP_ABORT("WRONG Grid Type!");
     }
 
-    
+    SetupTransMult();
 
     OutputBaiscInfo();
 
@@ -1133,6 +1133,27 @@ void PreParamGridWell::CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2)
 
     cout << "  Number of inactive cells is " << (numGrid - activeGridNum) << " ("
         << (numGrid - activeGridNum) * 100.0 / numGrid << "%)" << endl;
+}
+
+
+void PreParamGridWell::SetupTransMult()
+{
+    if (!multZ.empty()) {
+        for (OCP_USI n = 0; n < numGrid; n++) {
+            for (auto& c : gNeighbor[n]) {
+                if (c.ID() < n) continue;
+                if (c.Direct() == ConnDirect::zp) {
+                    c.SetTransMult(multZ[n]);
+                    for (auto& c1 : gNeighbor[c.ID()]) {
+                        if (c1.ID() == n) {
+                            c1.SetTransMult(multZ[n]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////
