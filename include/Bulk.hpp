@@ -87,6 +87,7 @@ class Bulk
     friend class Out4RPT;
     friend class Out4VTK;
     friend class OCPFlux01;
+    friend class OCPFlux02;
     friend class OCPFluxT01;
     
 

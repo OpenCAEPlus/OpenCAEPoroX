@@ -90,6 +90,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.disGas = OCP_TRUE;
                 break;
 
+            case Map_Str2Int("GRAVDR", 6):
+                paramRs.GRAVDR = OCP_TRUE;
+                break;
+
             case Map_Str2Int("RTEMP", 5):
                 paramRs.InputRTEMP(ifs);
                 break;

@@ -217,14 +217,18 @@ public:
     OCP_DBL           thconw{24}; ///< water ifThermal conductivity
     OCP_DBL           thconr{24}; ///< Rock ifThermal conductivity.
 
-    // Models
+    // mixture Models
     OCP_BOOL blackOil{OCP_FALSE}; ///< If ture, blackoil model will be used.
     OCP_BOOL comps{OCP_FALSE};    ///< If OCP_TRUE, compositional model will be used.
     OCP_BOOL thermal{OCP_FALSE};  ///< If OCP_TRUE, ifThermal model will be used.
     OCP_BOOL oil{OCP_FALSE};      ///< If OCP_TRUE, oil phase could exist.
     OCP_BOOL gas{OCP_FALSE};      ///< If OCP_TRUE, gas phase could exist.
     OCP_BOOL water{OCP_FALSE};    ///< If OCP_TRUE, water phase could exist.
-    OCP_BOOL disGas{OCP_FALSE}; ///< If OCP_TRUE, dissolve gas could exist in oil phase.
+    OCP_BOOL disGas{OCP_FALSE};   ///< If OCP_TRUE, dissolve gas could exist in oil phase.
+
+    // flow model
+    /// Use gravity drainage for dual porosity runs
+    OCP_BOOL GRAVDR{ OCP_FALSE };
 
     ComponentParam comsParam; ///< information for components
 
@@ -268,13 +272,6 @@ public:
     /// Input the keyword: COMPS. COMPS is used in compositional model, which gives the
     /// num of components.
     void InputCOMPS(ifstream& ifs);
-
-    /// Input the keyword: DIMENS. DIMENS contain the dimension of grids of reservoir.
-    /// It gives the num of grids along the x,y,z direction.
-    void InputDIMENS(ifstream& ifs);
-
-    /// Display the dimens, it's used to chech input.
-    void DisplayDIMENS();
 
     /// Input the keyword: RTEMP. RTEMP gives the temperature of reservoir.
     void InputRTEMP(ifstream& ifs);

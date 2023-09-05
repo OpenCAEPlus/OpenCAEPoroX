@@ -46,8 +46,8 @@ public:
     /////////////////////////////////////////////////////////////////////
 
 public:
-    /// Setup active connections
-    void Setup(const Bulk& bk);
+    /// Input params
+    void InputParam(const ParamReservoir& rs_param, const Bulk& bk);
 
 protected:
     OCP_USI numConn; ///< Number of connections between bulks.

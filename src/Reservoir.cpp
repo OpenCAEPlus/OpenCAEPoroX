@@ -485,6 +485,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 void Reservoir::InputDistParamOthers(const ParamRead& param)
 {
     bulk.InputParam(param.paramRs);
+    conn.InputParam(param.paramRs, bulk);
     allWells.InputParam(param.paramWell, domain);
 }
 
@@ -494,7 +495,6 @@ void Reservoir::Setup()
     OCP_FUNCNAME;
 
     bulk.Setup();
-    conn.Setup(bulk);
     allWells.Setup(bulk);
 }
 

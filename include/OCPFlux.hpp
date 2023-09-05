@@ -135,6 +135,25 @@ public:
 };
 
 
+/// For Isothermal darcy flux with standard gravity drainage model
+class OCPFlux02 : public OCPFlux
+{
+public:
+    OCPFlux02() = default;
+    OCPFlux02(const USI& npin, const USI& ncin) {
+        Setup(npin, ncin);
+        dFdXpB.resize((nc + 1) * (nc + 1));
+        dFdXpE.resize((nc + 1) * (nc + 1));
+        dFdXsB.resize((nc + 1) * (nc + 1) * np);
+        dFdXsE.resize((nc + 1) * (nc + 1) * np);
+    }
+    void CalFlux(const BulkConnPair& bp, const Bulk& bk) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override { OCP_ABORT("NOT USED!"); }
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override { OCP_ABORT("NOT USED!"); }
+};
+
+
 /// For thermal darcy flux
 class OCPFluxT01 : public OCPFlux
 {

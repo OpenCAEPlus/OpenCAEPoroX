@@ -21,18 +21,41 @@
 // General
 /////////////////////////////////////////////////////////////////////
 
-void BulkConn::Setup(const Bulk& bk)
+
+void BulkConn::InputParam(const ParamReservoir& rs_param, const Bulk& bk)
 {
-    if (bk.PVTm.GetMixtureType() == OCPMixtureType::THERMALK_OW) {
+    if (rs_param.thermal) {
         flux.push_back(new OCPFluxT01(bk.vs.np, bk.vs.nc));
+        for (auto& iter : iteratorConn) {
+            iter.SetFluxNum(0);
+            flux[iter.FluxNum()]->CalBulkConnArea(iter, bk);
+        }
     }
     else {
-        flux.push_back(new OCPFlux01(bk.vs.np, bk.vs.nc));
+        if (rs_param.GRAVDR) {
+            flux.push_back(new OCPFlux01(bk.vs.np, bk.vs.nc));
+            flux.push_back(new OCPFlux02(bk.vs.np, bk.vs.nc));
+            for (auto& iter : iteratorConn) {
+                if (iter.Direction() == ConnDirect::mf ||
+                    iter.Direction() == ConnDirect::fm) {
+                    iter.SetFluxNum(1);
+                }
+                else {
+                    iter.SetFluxNum(0);
+                }             
+                flux[iter.FluxNum()]->CalBulkConnArea(iter, bk);
+            }
+        }
+        else {
+            flux.push_back(new OCPFlux01(bk.vs.np, bk.vs.nc));
+            for (auto& iter : iteratorConn) {
+                iter.SetFluxNum(0);
+                flux[iter.FluxNum()]->CalBulkConnArea(iter, bk);
+            }
+        }
     }
+
     
-    for (auto& iter : iteratorConn) {
-        flux[0]->CalBulkConnArea(iter, bk);
-    }
 }
 
 

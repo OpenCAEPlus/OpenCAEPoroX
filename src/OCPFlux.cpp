@@ -79,7 +79,6 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 }
 
 
-
 void OCPFlux01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
@@ -486,6 +485,207 @@ void OCPFlux01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const
         tmp   *= rho * dD - (bvs.Pc[bId * np + j] - bvs.Pc[eId * np + j]);
         rhsb  += tmp * valbi;
         rhse  -= tmp * valei;
+    }
+}
+
+
+////////////////////////////////////////////
+// OCPFlux02
+////////////////////////////////////////////
+
+
+void OCPFlux02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+{
+    // Calculte upblock, rho, flux_vj, flux_ni
+
+    const BulkVarSet& bvs = bk.vs;
+
+    fill(flux_ni.begin(), flux_ni.end(), 0.0);
+
+    const OCP_USI bId = bp.BId();
+    const OCP_USI eId = bp.EId();
+    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+    OCP_USI       bId_np_j, eId_np_j, uId_np_j;
+    OCP_BOOL      exbegin, exend;
+    OCP_DBL       dP;
+
+    for (USI j = 0; j < np; j++) {
+        bId_np_j = bId * np + j;
+        eId_np_j = eId * np + j;
+
+        exbegin = bvs.phaseExist[bId_np_j];
+        exend = bvs.phaseExist[eId_np_j];
+
+        if ((exbegin) && (exend)) {
+            rho[j] = (bvs.rho[bId_np_j] + bvs.rho[eId_np_j]) / 2;
+        }
+        else if (exbegin && (!exend)) {
+            rho[j] = bvs.rho[bId_np_j];
+        }
+        else if ((!exbegin) && (exend)) {
+            rho[j] = bvs.rho[eId_np_j];
+        }
+        else {
+            upblock[j] = bId;
+            rho[j] = 0;
+            flux_vj[j] = 0;
+            continue;
+        }
+
+        upblock[j] = bId;
+
+
+        if (j == 0) {
+            dP = (bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j])
+                - bvs.dzMtrx[bId] * (bvs.S[bId_np_j + 1] - bvs.S[eId_np_j + 1])
+                * (bvs.rho[bId_np_j + 1] - bvs.rho[bId_np_j]) * GRAVITY_FACTOR * 0.5;
+        }
+        else if (j == 1) {
+            dP = (bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j])
+                + bvs.dzMtrx[bId] * (bvs.S[bId_np_j] - bvs.S[eId_np_j])
+                * (bvs.rho[bId_np_j] - bvs.rho[bId_np_j - 1]) * GRAVITY_FACTOR * 0.5;
+        }
+        else {
+            OCP_ABORT("Inavailable!");
+        }
+
+        
+
+        if (dP < 0)  upblock[j] = eId;
+
+        uId_np_j = upblock[j] * np + j;
+
+        if (!bvs.phaseExist[uId_np_j]) {
+            flux_vj[j] = 0;
+            continue;
+        }
+
+        flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP;
+
+        for (USI i = 0; i < nc; i++) {
+            flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
+        }
+    }
+}
+
+void OCPFlux02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+{
+    const BulkVarSet& bvs = bk.vs;
+
+    const USI  ncol = nc + 1;
+    const USI  ncol2 = np * nc + np;
+
+    fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
+    fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
+    fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
+    fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
+
+    const OCP_USI bId = bp.BId();
+    const OCP_USI eId = bp.EId();
+    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
+
+    OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
+    OCP_BOOL phaseExistDj;
+    OCP_DBL  rhoWghtU, rhoWghtD;
+    OCP_DBL  dP, transJ, transIJ, kr, mu, xi, xij, xiP, muP, rhox, xix, mux, tmp;
+
+    OCP_DBL* dFdXpU;     // up    bulk: dF / dXp
+    OCP_DBL* dFdXpD;     // down  bulk: dF / dXp
+    OCP_DBL* dFdXsU;     // up    bulk: dF / dXs
+    OCP_DBL* dFdXsD;     // down  bulk: dF / dXs
+
+    for (USI j = 0; j < np; j++) {
+        uId_np_j = bcvs.upblock[c * np + j] * np + j;
+        if (!bvs.phaseExist[uId_np_j]) continue;
+        bId_np_j = bId * np + j;
+        eId_np_j = eId * np + j;
+
+        if (bId_np_j == uId_np_j) {
+            dId_np_j = eId_np_j;
+            phaseExistDj = bvs.phaseExist[dId_np_j];
+            dFdXpU = &dFdXpB[0];
+            dFdXpD = &dFdXpE[0];
+            dFdXsU = &dFdXsB[0];
+            dFdXsD = &dFdXsE[0];
+        }
+        else {
+            dId_np_j = bId_np_j;
+            phaseExistDj = bvs.phaseExist[dId_np_j];
+
+            dFdXpU = &dFdXpE[0];
+            dFdXpD = &dFdXpB[0];
+            dFdXsU = &dFdXsE[0];
+            dFdXsD = &dFdXsB[0];
+        }
+        if (phaseExistDj) {
+            rhoWghtU = 0.5;
+            rhoWghtD = 0.5;
+        }
+        else {
+            rhoWghtU = 1;
+            rhoWghtD = 0;
+        }
+
+        if (j == 0) {
+            dP = (bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j])
+                - bvs.dzMtrx[bId] * (bvs.S[bId_np_j + 1] - bvs.S[eId_np_j + 1])
+                * (bvs.rho[bId_np_j + 1] - bvs.rho[bId_np_j]) * GRAVITY_FACTOR * 0.5;
+        }
+        else if (j == 1) {
+            dP = (bvs.Pj[bId_np_j] - bvs.Pj[eId_np_j])
+                + bvs.dzMtrx[bId] * (bvs.S[bId_np_j] - bvs.S[eId_np_j])
+                * (bvs.rho[bId_np_j] - bvs.rho[bId_np_j - 1]) * GRAVITY_FACTOR * 0.5;
+        }
+        else {
+            OCP_ABORT("Inavailable!");
+        }
+
+        xi = bvs.xi[uId_np_j];
+        kr = bvs.kr[uId_np_j];
+        mu = bvs.mu[uId_np_j];
+        muP = bvs.muP[uId_np_j];
+        xiP = bvs.xiP[uId_np_j];
+        transJ = Akd * kr / mu;
+
+        for (USI i = 0; i < nc; i++) {
+            xij = bvs.xij[uId_np_j * nc + i];
+            transIJ = xij * xi * transJ;
+
+            // dP
+            dFdXpB[(i + 1) * ncol] += transIJ;
+            dFdXpE[(i + 1) * ncol] -= transIJ;
+
+            tmp = transJ * xiP * xij * dP;
+            tmp += -transIJ * muP / mu * dP;
+            dFdXpU[(i + 1) * ncol] +=
+                (tmp - transIJ * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
+            dFdXpD[(i + 1) * ncol] +=
+                -transIJ * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
+
+            // dS
+            for (USI k = 0; k < np; k++) {
+                dFdXsB[(i + 1) * ncol2 + k] +=
+                    transIJ * bvs.dPcdS[bId_np_j * np + k];
+                dFdXsE[(i + 1) * ncol2 + k] -=
+                    transIJ * bvs.dPcdS[eId_np_j * np + k];
+                dFdXsU[(i + 1) * ncol2 + k] +=
+                    Akd * bvs.dKrdS[uId_np_j * np + k] / mu * xi * xij * dP;
+            }
+            // dxij
+            for (USI k = 0; k < nc; k++) {
+                rhox = bvs.rhox[uId_np_j * nc + k];
+                xix = bvs.xix[uId_np_j * nc + k];
+                mux = bvs.mux[uId_np_j * nc + k];
+                tmp = -transIJ * rhoWghtU * rhox * dGamma;
+                tmp += transJ * xix * xij * dP;
+                tmp += -transIJ * mux / mu * dP;
+                dFdXsU[(i + 1) * ncol2 + np + j * nc + k] += tmp;
+                dFdXsD[(i + 1) * ncol2 + np + j * nc + k] +=
+                    -transIJ * rhoWghtD * bvs.rhox[dId_np_j * nc + k] * dGamma;
+            }
+            dFdXsU[(i + 1) * ncol2 + np + j * nc + i] += transJ * xi * dP;
+        }
     }
 }
 

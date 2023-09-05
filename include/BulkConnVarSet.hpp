@@ -26,7 +26,6 @@ using namespace std;
 //  Note: Bulks are the active grid cells.
 class BulkConnPair
 {
-    friend class BulkConn;
     friend class BulkConnTransMethod01;
 
 public:
@@ -46,7 +45,7 @@ public:
         , areaB(AreaB)
         , areaE(AreaE)
         , transMult(transM) {};
-
+    void SetFluxNum(const USI& i) { fluxnum = i; }
     const auto& BId() const { return bId; }
     const auto& EId() const { return eId; } 
     const auto& Trans() const { return trans; }
