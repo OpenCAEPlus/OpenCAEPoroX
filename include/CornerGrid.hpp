@@ -12,109 +12,15 @@
 #ifndef __CORNERGRID_HEADER__
 #define __CORNERGRID_HEADER__
 
-// Standard header files
-#include <math.h>
-#include <stdlib.h>
-#include <vector>
-
 // OpenCAEPoroX header files
-#include "OCPConst.hpp"
+#include "UtilMesh.hpp"
 
 using namespace std;
 
 // Constants used by corner-point grid code
-const OCP_DBL SMALL_REAL   = 1E-10; ///< Used for checking determinate of a small matrix
 const OCP_DBL TEENY        = 1E-3;  ///< Used for checking distance b/w center to face
-const OCP_DBL SMALL        = 1E-3;  ///< Small number as tolerance
 const USI     MAX_NEIGHBOR = 80;    ///< Max number of  neighbors allowed
 
-/// A point in 2D.
-class Point2D
-{
-public:
-    OCP_DBL x;
-    OCP_DBL y;
-
-public:
-    Point2D() = default;
-    Point2D(OCP_DBL x0, OCP_DBL y0)
-        : x(x0)
-        , y(y0){};
-};
-
-/// A point in 3D.
-class Point3D
-{
-public:
-    OCP_DBL x;
-    OCP_DBL y;
-    OCP_DBL z;
-
-public:
-    Point3D() = default;
-    Point3D(OCP_DBL x0, OCP_DBL y0, OCP_DBL z0)
-        : x(x0)
-        , y(y0)
-        , z(z0){};
-
-    Point3D& operator=(const Point3D& other);       ///< equal
-    Point3D  operator+(const Point3D& other) const; ///< Addition
-    Point3D  operator-(const Point3D& other) const; ///< Subtraction
-    OCP_DBL  operator*(const Point3D& other) const; ///< Multiplication
-    Point3D& operator+=(const Point3D& other);
-    Point3D& operator*=(const OCP_DBL& a);
-    Point3D& operator/=(const OCP_DBL& a);
-    void     Reset()
-    {
-        x = 0;
-        y = 0;
-        z = 0;
-    };
-};
-
-Point3D operator*(const Point3D& p, const OCP_DBL& a);      ///< Point * a
-Point3D operator*(const OCP_DBL& a, const Point3D& p);      ///< a * Point
-Point3D CrossProduct(const Point3D& p1, const Point3D& p2); ///< Cross product
-
-/// A hexahedron cell.
-class Hexahedron
-{
-public:
-    Point3D p0, p1, p2, p3, p4, p5, p6, p7;
-};
-
-/// A face of a hexahedron cell.
-class HexahedronFace
-{
-public:
-    Point3D p0, p1, p2, p3;
-};
-
-/// 3 by 3 matrix.
-class Matrix3
-{
-public:
-    OCP_DBL M[3][3];
-    Point3D operator*(const Point3D& v) const;
-};
-
-/// Get the volume of a hexahedron.
-OCP_DBL VolumHexahedron(const Hexahedron& h);
-
-/// Find the center of a hexahedron.
-Point3D CenterHexahedron(const Hexahedron& h);
-
-/// Find the normal vector of a face.
-Point3D VectorFace(const HexahedronFace& f);
-
-/// Find the center of a face.
-Point3D CenterFace(const HexahedronFace& f);
-
-/// ???
-Point2D CalCrossingPoint(const Point2D Line1[2], const Point2D Line2[2]);
-
-/// ???
-OCP_DBL CalAreaNotQuadr(const HexahedronFace& FACE1, const HexahedronFace& FACE2);
 
 /// ???
 class HalfConn
