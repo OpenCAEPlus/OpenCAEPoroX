@@ -22,7 +22,7 @@ const OCP_DBL TEENY        = 1E-3;  ///< Used for checking distance b/w center t
 const USI     MAX_NEIGHBOR = 80;    ///< Max number of  neighbors allowed
 
 
-/// ???
+/// half-connections
 class HalfConn
 {
 public:
@@ -32,7 +32,7 @@ public:
     ConnDirect     directionType; 
 };
 
-/// ???
+/// all connections
 class ConnGrid
 {
 public:
@@ -46,17 +46,17 @@ public:
                                  const OCP_DBL& flag = 1);
 };
 
-/// ???
+/// General connection
 class GeneralConnect
 {
 public:
     OCP_USI begin, end;
-    ConnDirect     directionType; // 1 - x, 2 - y, 3 - z, 4 - extension
+    ConnDirect     directionType;
     OCP_DBL Ad_dd_begin;
     OCP_DBL Ad_dd_end;
 };
 
-/// ???
+/// corner grid
 class OCP_COORD
 {
     friend class PreParamGridWell;

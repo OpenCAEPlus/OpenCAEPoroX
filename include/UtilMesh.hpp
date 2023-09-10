@@ -1,5 +1,5 @@
 /*! \file    UtilMesh.hpp
- *  \brief   UtilMes class declaration
+ *  \brief   UtilMesh class declaration
  *  \author  Shizhe Li
  *  \date    Sep/10/2023
  *

@@ -90,6 +90,10 @@ void PreParamGridWell::Input(const string& myFilename)
                 InputINCLUDE(ifs);
                 break;
 
+            case Map_Str2Int("GMSH", 4):
+                InputGMSH(ifs);
+                break;
+
             case Map_Str2Int("WELSPECS", 8):
                 InputWELSPECS(ifs);
                 break;
@@ -432,6 +436,13 @@ void PreParamGridWell::InputINCLUDE(ifstream& ifs)
     Input(vbuf[0]);
 }
 
+void PreParamGridWell::InputGMSH(ifstream& ifs)
+{
+    vector<string> vbuf;
+    ReadLine(ifs, vbuf);
+    DealDefault(vbuf);
+    gmshGrid.Input(workdir + vbuf[0]);
+}
 
 void PreParamGridWell::InputWELSPECS(ifstream& ifs)
 {

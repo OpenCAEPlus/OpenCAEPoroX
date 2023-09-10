@@ -24,6 +24,7 @@
 #include "OCPConst.hpp"
 #include "UtilInput.hpp"
 #include "CornerGrid.hpp"
+#include "GmshGrid.hpp"
 
 using namespace std;
 
@@ -167,6 +168,8 @@ protected:
     void InputCOMPDAT(ifstream& ifs);
     /// Input INCLUDE
     void InputINCLUDE(ifstream& ifs);
+    /// Input GMSH
+    void InputGMSH(ifstream& ifs);
     // Input tools
     /// Find pointer to the specified variable.
     vector<OCP_DBL>* FindPtr(const string& varName, const OCP_DBL&);
@@ -218,6 +221,9 @@ protected:
     vector<OCP_DBL> coord; 
     /// Z-values of a corner-point grid.
     vector<OCP_DBL> zcorn; 
+
+    // General grid
+    GMSHGrid        gmshGrid;
 
     // Rock param
     /// Net to gross
