@@ -82,6 +82,7 @@ void GMSHGrid::Input(const string& file)
 						else {
 							iter->faceTag.push_back(elemTags[t][l]);
 						}
+
 						iter = edges.find(Edge(elemNodeTags[t][3 * l + 1], elemNodeTags[t][3 * l + 2]));
 						if (iter == edges.end()) {
 							edges.insert(Edge(elemNodeTags[t][3 * l + 1], elemNodeTags[t][3 * l + 2], lineTag++, elemTags[t][l]));
@@ -89,6 +90,7 @@ void GMSHGrid::Input(const string& file)
 						else {
 							iter->faceTag.push_back(elemTags[t][l]);
 						}
+
 						iter = edges.find(Edge(elemNodeTags[t][3 * l + 2], elemNodeTags[t][3 * l + 0]));
 						if (iter == edges.end()) {
 							edges.insert((Edge(elemNodeTags[t][3 * l + 2], elemNodeTags[t][3 * l + 0], lineTag++, elemTags[t][l])));
@@ -96,10 +98,52 @@ void GMSHGrid::Input(const string& file)
 						else {
 							iter->faceTag.push_back(elemTags[t][l]);
 						}
+
+						elements.push_back(Polygon(&nodeCoords[3 * (elemNodeTags[t][3 * l + 0] - 1)],
+												   &nodeCoords[3 * (elemNodeTags[t][3 * l + 1] - 1)],
+												   &nodeCoords[3 * (elemNodeTags[t][3 * l + 2] - 1)], elemTags[t][l]));
 					}
 				}
 				else {
 					// for quadrangle
+					for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
+						auto iter = edges.find(Edge(elemNodeTags[t][4 * l + 0], elemNodeTags[t][4 * l + 1]));
+						if (iter == edges.end()) {
+							edges.insert(Edge(elemNodeTags[t][4 * l + 0], elemNodeTags[t][4 * l + 1], lineTag++, elemTags[t][l]));
+						}
+						else {
+							iter->faceTag.push_back(elemTags[t][l]);
+						}
+
+						iter = edges.find(Edge(elemNodeTags[t][4 * l + 1], elemNodeTags[t][4 * l + 2]));
+						if (iter == edges.end()) {
+							edges.insert(Edge(elemNodeTags[t][4 * l + 1], elemNodeTags[t][4 * l + 2], lineTag++, elemTags[t][l]));
+						}
+						else {
+							iter->faceTag.push_back(elemTags[t][l]);
+						}
+
+						iter = edges.find(Edge(elemNodeTags[t][4 * l + 2], elemNodeTags[t][4 * l + 3]));
+						if (iter == edges.end()) {
+							edges.insert((Edge(elemNodeTags[t][4 * l + 2], elemNodeTags[t][4 * l + 3], lineTag++, elemTags[t][l])));
+						}
+						else {
+							iter->faceTag.push_back(elemTags[t][l]);
+						}
+
+						iter = edges.find(Edge(elemNodeTags[t][4 * l + 3], elemNodeTags[t][4 * l + 0]));
+						if (iter == edges.end()) {
+							edges.insert((Edge(elemNodeTags[t][4 * l + 3], elemNodeTags[t][4 * l + 0], lineTag++, elemTags[t][l])));
+						}
+						else {
+							iter->faceTag.push_back(elemTags[t][l]);
+						}
+
+						elements.push_back(Polygon(&nodeCoords[3 * (elemNodeTags[t][4 * l + 0] - 1)],
+							&nodeCoords[3 * (elemNodeTags[t][4 * l + 1] - 1)],
+							&nodeCoords[3 * (elemNodeTags[t][4 * l + 2] - 1)],
+							&nodeCoords[3 * (elemNodeTags[t][4 * l + 3] - 1)], elemTags[t][l]));
+					}
 				}
 				
 			}

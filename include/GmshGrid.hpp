@@ -61,7 +61,7 @@ public:
     OCP_USI         bId;
     /// index of end node
     OCP_USI         eId;
-    /// tag of edge(tmp) 
+    /// tag of edge(for debug)
     OCP_USI         tag;
     /// tag of connected face
     mutable vector<OCP_USI> faceTag;
@@ -73,23 +73,23 @@ public:
 class Polygon
 {
 public:
-    Polygon(const Point3D& p0, const Point3D& p1, const Point3D& p2, const OCP_USI& tag_in) {
-        p.push_back(p0);
-        p.push_back(p1);
-        p.push_back(p2);
+    Polygon(const double* p0, const double* p1, const double* p2, const OCP_USI& tag_in) {
+        p.push_back(Point3D(*p0, *(p0 + 1), *(p0 + 2)));
+        p.push_back(Point3D(*p1, *(p1 + 1), *(p1 + 2)));
+        p.push_back(Point3D(*p2, *(p2 + 1), *(p2 + 2)));
         tag = tag_in;
     }
-    Polygon(const Point3D& p0, const Point3D& p1, const Point3D& p2, const Point3D& p3, const OCP_USI& tag_in) {
-        p.push_back(p0);
-        p.push_back(p1);
-        p.push_back(p2);
-        p.push_back(p3);
+    Polygon(const double* p0, const double* p1, const double* p2, const double* p3, const OCP_USI& tag_in) {
+        p.push_back(Point3D(*p0, *(p0 + 1), *(p0 + 2)));
+        p.push_back(Point3D(*p1, *(p1 + 1), *(p1 + 2)));
+        p.push_back(Point3D(*p2, *(p2 + 1), *(p2 + 2)));
+        p.push_back(Point3D(*p3, *(p3 + 1), *(p3 + 2)));
         tag = tag_in;
     }
 public:
     /// points(Store in order or reverse order)
     vector<Point3D> p;
-    /// tag of face(tmp) 
+    /// tag of face(for debug)
     OCP_USI         tag;
     /// physical info
     string          physical;
