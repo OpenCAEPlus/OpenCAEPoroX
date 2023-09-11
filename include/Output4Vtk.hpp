@@ -68,12 +68,18 @@ public:
                                  const OCP_USI&   bId,
                                  const OCP_USI&   nb,
                                  const USI&       digits) const;
+
+public:
+    static void OutputGridInfo(const string& dir, const OCP_USI& nG, const OCP_USI& nP, const vector<OCP_DBL>& points_xyz,
+                               const vector<OCP_USI>& cell_points, const vector<USI>& cell_type);
+
 protected:
-    /// number of grids
-    mutable OCP_USI numGrid;
-    /// number of points
-    mutable OCP_USI numPoints;
+    void InputGridInfo(const string& dir, OCP_USI& nG, OCP_USI& nP, vector<OCP_DBL>& points_xyz, vector<OCP_USI>& cell_points, vector<USI>& cell_type) const;
+
+protected:
+    static const string tmpFile;
 };
+
 
 template <typename T>
 void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,

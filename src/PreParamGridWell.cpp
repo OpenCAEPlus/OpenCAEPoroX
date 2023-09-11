@@ -1039,22 +1039,7 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 
     OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
 
-    const string myFile = workdir + "points.out";
-    ofstream outF(myFile, ios::out | ios::binary);
-    if (!outF.is_open()) {
-        OCP_ABORT("Can not open " + myFile);
-    }
-    
-    const OCP_USI nG = activeGridNum;
-    const OCP_USI nP = activeGridNum * 8;
-    outF.write((const char*)&nG, sizeof(nG));
-    outF.write((const char*)&nP, sizeof(nP));
-    outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
-    const OCP_USI len_cell_points = cell_points.size();
-    outF.write((const char*)&len_cell_points, sizeof(len_cell_points));
-    outF.write((const char*)&cell_points[0], cell_points.size() * sizeof(cell_points[0]));
-    outF.write((const char*)&cell_type[0], cell_type.size() * sizeof(cell_type[0]));
-    outF.close();
+    Output4Vtk::OutputGridInfo(workdir, activeGridNum, activeGridNum * 8, points_xyz, cell_points, cell_type);
 }
 
 
@@ -1320,22 +1305,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     }
     OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
 
-    const string myFile = workdir + "points.out";
-    ofstream outF(myFile, ios::out | ios::binary);
-    if (!outF.is_open()) {
-        OCP_ABORT("Can not open " + myFile);
-    }
-
-    const OCP_USI nG = activeGridNum;
-    const OCP_USI nP = activeGridNum * 8;
-    outF.write((const char*)&nG, sizeof(nG));
-    outF.write((const char*)&nP, sizeof(nP));
-    outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
-    const OCP_USI len_cell_points = cell_points.size();
-    outF.write((const char*)&len_cell_points, sizeof(len_cell_points));
-    outF.write((const char*)&cell_points[0], cell_points.size() * sizeof(cell_points[0]));
-    outF.write((const char*)&cell_type[0], cell_type.size() * sizeof(cell_type[0]));
-    outF.close();
+    Output4Vtk::OutputGridInfo(workdir, activeGridNum, activeGridNum * 8, points_xyz, cell_points, cell_type);
 }
 
 
