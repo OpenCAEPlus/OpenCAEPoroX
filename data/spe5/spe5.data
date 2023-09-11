@@ -18,7 +18,7 @@ TITLE
    SPE Fifth Comparison Test Problem - Scenario One
    
 GMSH
-test.msh
+spe11a.msh
 /
    
 MODEL

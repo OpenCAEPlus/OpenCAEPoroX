@@ -123,15 +123,19 @@ void PreParamGridWell::CheckInput()
     if (nx == 0 || ny == 0 || nz == 0)    OCP_ABORT("WRONG DIMENS!");
     if (poro.size() != numGrid)           OCP_ABORT("WRONG PORO!");
 
-    if (gridType == CORNER_GRID) {
+    if (gridType == GridType::corner) {
         if (zcorn.empty())                OCP_ABORT("WRONG ZCORN!");
         if (coord.empty())                OCP_ABORT("WRONG ZCORN!");
     }
-    else if (gridType == ORTHOGONAL_GRID) {
+    else if (gridType == GridType::orthogonal) {
         if (dx.size() != numGrid)         OCP_ABORT("WRONG DX!");
         if (dy.size() != numGrid)         OCP_ABORT("WRONG DY!");
         if (dz.size() != numGrid)         OCP_ABORT("WRONG DZ!");
         if (tops.size() != nx * ny)       OCP_ABORT("WRONG TOPS!");
+    }
+    else if (gridType == GridType::gmsh) {
+        if (gmshGrid.edges.empty())       OCP_ABORT("WRONG GMSH!");
+        if (gmshGrid.elements.empty())    OCP_ABORT("WRONG GMSH!");
     }
     else                                  OCP_ABORT("WRONG Grid Type!");
 
@@ -438,6 +442,7 @@ void PreParamGridWell::InputINCLUDE(ifstream& ifs)
 
 void PreParamGridWell::InputGMSH(ifstream& ifs)
 {
+    gridType = GridType::gmsh;
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     DealDefault(vbuf);
@@ -552,13 +557,13 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         break;
 
     case Map_Str2Int("COORD", 5):
-        gridType = CORNER_GRID;
+        gridType = GridType::corner;
         coord.reserve((nx + 1) * (ny + 1) * 6);
         myPtr = &coord;
         break;
 
     case Map_Str2Int("ZCORN", 5):
-        gridType = CORNER_GRID;
+        gridType = GridType::corner;
         zcorn.reserve(numGridM * 8);
         myPtr = &zcorn;
         break;
@@ -716,10 +721,10 @@ void PreParamGridWell::SetupGrid()
 {
     switch (gridType) 
     {
-    case ORTHOGONAL_GRID:
+    case GridType::orthogonal:
         SetupOrthogonalGrid();     
         break;
-    case CORNER_GRID:
+    case GridType::corner:
         SetupCornerGrid();
         break;
     default:

@@ -52,6 +52,11 @@ public:
         : x(x0)
         , y(y0)
         , z(z0) {};
+    Point3D(const OCP_DBL* points) {
+        x = points[0];
+        y = points[1];
+        z = points[2];
+    }
 
     Point3D& operator=(const Point3D& other);       ///< equal
     Point3D  operator+(const Point3D& other) const; ///< Addition

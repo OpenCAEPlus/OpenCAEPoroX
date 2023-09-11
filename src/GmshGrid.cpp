@@ -41,8 +41,8 @@ void GMSHGrid::Input2D(const string& file)
 {
 	// Get all mesh nodes
 	std::vector<std::size_t> nodeTags;
-	std::vector<double> nodeCoords, nodeParams;
-	gmsh::model::mesh::getNodes(nodeTags, nodeCoords, nodeParams, -1, -1);
+	std::vector<double> nodeParams;
+	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
 
 	// Get all the elementary entities in the model, as a vector of (dimension, tag) pairs:
 	std::vector<std::pair<int, int> > entities;
@@ -77,95 +77,46 @@ void GMSHGrid::Input2D(const string& file)
 			// for boundary lines
 			for (USI t = 0; t < elemTypes.size(); t++) {
 				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
-					edges.insert(Edge(elemNodeTags[t][2 * l], elemNodeTags[t][2 * l + 1], elemTags[t][l], physicalName));
+					const OCP_USI bId = elemNodeTags[t][2 * l];
+					const OCP_USI eId = elemNodeTags[t][2 * l + 1];
+					edges.insert(Edge(bId, eId, elemTags[t][l], physicalName));
 					lineTag++;
 				}
 			}			
 		}
 		else if (dim == 2) {
 			// for triangle and quadrangle
+			USI np = 0;
 			for (USI t = 0; t < elemTypes.size(); t++) {
 				if (elemTypes[t] == 2) {
-					for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
-						auto iter = edges.find(Edge(elemNodeTags[t][3 * l + 0], elemNodeTags[t][3 * l + 1]));
-						if (iter == edges.end()) {
-							edges.insert(Edge(elemNodeTags[t][3 * l + 0], elemNodeTags[t][3 * l + 1], lineTag++, faceIndex, 0));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(0);
-						}
-
-						iter = edges.find(Edge(elemNodeTags[t][3 * l + 1], elemNodeTags[t][3 * l + 2]));
-						if (iter == edges.end()) {
-							edges.insert(Edge(elemNodeTags[t][3 * l + 1], elemNodeTags[t][3 * l + 2], lineTag++, faceIndex, 1));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(1);
-						}
-
-						iter = edges.find(Edge(elemNodeTags[t][3 * l + 2], elemNodeTags[t][3 * l + 0]));
-						if (iter == edges.end()) {
-							edges.insert((Edge(elemNodeTags[t][3 * l + 2], elemNodeTags[t][3 * l + 0], lineTag++, faceIndex, 2)));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(2);
-						}
-						faceIndex++;
-						elements.push_back(Polygon(&nodeCoords[3 * (elemNodeTags[t][3 * l + 0] - 1)],
-												   &nodeCoords[3 * (elemNodeTags[t][3 * l + 1] - 1)],
-												   &nodeCoords[3 * (elemNodeTags[t][3 * l + 2] - 1)], elemTags[t][l], physicalName));
-					}
+					np = 3;  // for triangle
 				}
 				else {
-					// for quadrangle
-					for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
-						auto iter = edges.find(Edge(elemNodeTags[t][4 * l + 0], elemNodeTags[t][4 * l + 1]));
-						if (iter == edges.end()) {
-							edges.insert(Edge(elemNodeTags[t][4 * l + 0], elemNodeTags[t][4 * l + 1], lineTag++, faceIndex, 0));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(0);
-						}
-
-						iter = edges.find(Edge(elemNodeTags[t][4 * l + 1], elemNodeTags[t][4 * l + 2]));
-						if (iter == edges.end()) {
-							edges.insert(Edge(elemNodeTags[t][4 * l + 1], elemNodeTags[t][4 * l + 2], lineTag++, faceIndex, 1));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(1);
-						}
-
-						iter = edges.find(Edge(elemNodeTags[t][4 * l + 2], elemNodeTags[t][4 * l + 3]));
-						if (iter == edges.end()) {
-							edges.insert((Edge(elemNodeTags[t][4 * l + 2], elemNodeTags[t][4 * l + 3], lineTag++, faceIndex, 2)));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(2);
-						}
-
-						iter = edges.find(Edge(elemNodeTags[t][4 * l + 3], elemNodeTags[t][4 * l + 0]));
-						if (iter == edges.end()) {
-							edges.insert((Edge(elemNodeTags[t][4 * l + 3], elemNodeTags[t][4 * l + 0], lineTag++, faceIndex, 3)));
-						}
-						else {
-							iter->faceIndex.push_back(faceIndex);
-							iter->faceIndex.push_back(3);
-						}
-
-						faceIndex++;
-						elements.push_back(Polygon(&nodeCoords[3 * (elemNodeTags[t][4 * l + 0] - 1)],
-							&nodeCoords[3 * (elemNodeTags[t][4 * l + 1] - 1)],
-							&nodeCoords[3 * (elemNodeTags[t][4 * l + 2] - 1)],
-							&nodeCoords[3 * (elemNodeTags[t][4 * l + 3] - 1)], elemTags[t][l], physicalName));
-					}
+					np = 4;  // for quadrangle
 				}
-				
+
+				vector<OCP_USI> indexFace(np);
+				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
+					indexFace.clear();					
+
+					for (USI i = 0; i < np; i++) {
+						const OCP_USI bId = elemNodeTags[t][np * l + (i % np)];
+						const OCP_USI eId = elemNodeTags[t][np * l + (i + 1) % np];
+
+						auto iter = edges.find(Edge(bId, eId));
+						if (iter == edges.end()) {
+							edges.insert(Edge(bId, eId, lineTag++, faceIndex, i));
+						}
+						else {
+							iter->faceIndex.push_back(faceIndex);
+							iter->faceIndex.push_back(i);
+						}
+
+						indexFace.push_back(elemNodeTags[t][np * l + i]);
+					}
+					faceIndex++;
+					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName));
+				}
 			}
 		}
 	}
@@ -176,10 +127,19 @@ void GMSHGrid::Input2D(const string& file)
 void GMSHGrid::Setup()
 {
 	if (dimen == 2) {
+		CalAreaCenter2D();
 		SetupConnAreaAndBoundary2D();
 	}
 }
 
+
+void GMSHGrid::CalAreaCenter2D()
+{
+	for (auto& e : elements) {
+		e.CalCenter(points);
+		e.CalArea(points);
+	}
+}
 
 
 void GMSHGrid::SetupConnAreaAndBoundary2D()
@@ -191,10 +151,12 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			Polygon& element = elements[e.faceIndex[0]];
 			element.location += (e.physical) + " & ";
 			// Calculate effective area
-			const Point3D& edgeNode0 = element.p[e.faceIndex[1]];
-			const Point3D& edgeNode1 = element.p[(e.faceIndex[1] + 1) % (element.p.size())];
-			Point3D        edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
-			Point3D        center2edge = 0.5 * (edgeNode0 + edgeNode1) - element.center;
+			const OCP_USI   bId       = element.p[e.faceIndex[1]];
+			const OCP_USI   eId       = element.p[(e.faceIndex[1] + 1) % (element.p.size())];
+			const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
+			const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
+			const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
+			const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - Point3D(element.center.data());
 			e.area.push_back(abs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
 		}
 		else {
@@ -202,10 +164,12 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			for (USI i = 0; i < 2; i++) {
 				const Polygon& element = elements[e.faceIndex[2 * i]];
 				// Calculate effective area
-				const Point3D& edgeNode0 = element.p[e.faceIndex[2 * i + 1]];
-				const Point3D& edgeNode1 = element.p[(e.faceIndex[2 * i + 1] + 1) % (element.p.size())];
-				Point3D        edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
-				Point3D        center2edge = 0.5 * (edgeNode0 + edgeNode1) - element.center;
+				const OCP_USI   bId       = element.p[e.faceIndex[2 * i + 1]];
+				const OCP_USI   eId       = element.p[(e.faceIndex[2 * i + 1] + 1) % (element.p.size())];
+				const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
+				const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
+				const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
+				const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - Point3D(element.center.data());
 				e.area.push_back(abs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
 			}
 		}

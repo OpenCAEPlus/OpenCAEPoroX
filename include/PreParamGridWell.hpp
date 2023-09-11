@@ -28,6 +28,17 @@
 
 using namespace std;
 
+
+enum class GridType
+{
+    /// Orthogonal Grid
+    orthogonal,
+    /// Cornerpoint Grid
+    corner,
+    /// Gmsh Grid
+    gmsh
+};
+
 /// Active cell indicator and its index among active cells.
 //  Note: GB_Pair contains two variables, which indicates if a grid cell is active or
 //  not and its index among active cells if it is active.
@@ -190,7 +201,7 @@ protected:
     /// current work directory
     string          workdir;
     /// Orthogonal or Corner grid              
-    USI             gridType{ ORTHOGONAL_GRID };
+    GridType        gridType{ GridType::orthogonal };
     /// Num of grids(numGridM + numGridF)
     OCP_USI         numGrid{ 0 };
     /// Num of matrix grid

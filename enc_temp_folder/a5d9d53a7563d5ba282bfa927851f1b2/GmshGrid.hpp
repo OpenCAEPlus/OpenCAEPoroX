@@ -59,17 +59,17 @@ public:
 
 public:
     /// index of begin node, bId < eId
-    OCP_USI                 bId;
+    OCP_USI                  bId;
     /// index of end node
-    OCP_USI                 eId;
+    OCP_USI                  eId;
     /// tag of edge(for debug)
-    OCP_USI                 tag;
+    OCP_USI                  tag;
     /// physical info
-    string                  physical;
+    string                   physical;
     /// index of connected face and local index of edge
-    mutable vector<OCP_USI> faceIndex;
+    mutable vector<OCP_USI>  faceIndex;
     /// effective area from bId
-    mutable vector<OCP_DBL> area;
+    mutable vector <OCP_DBL> area;
 };
 
 
