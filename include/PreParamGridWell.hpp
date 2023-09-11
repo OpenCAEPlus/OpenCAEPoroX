@@ -319,8 +319,10 @@ protected:
     void SetupGmshGrid();
     /// Setup depth, v for a gmsh grid
     void SetupBasicGmshGrid();
-    /// Setup the neighboring info for a corner-point grid.
+    /// Setup the neighboring info for a gmsh grid
     void SetupActiveConnGmshGrid();
+    /// Output grid points for a gmsh grid
+    void OutputPointsGmshGrid();
 
     // For Structral Grid
     /// Set location for grid: top, bottom, side or interior

@@ -464,6 +464,15 @@ void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
     ReadLine(ifs, vbuf);
     DealDefault(vbuf);
     gmshGrid.InputProperty(workdir + vbuf[0]);
+
+    // input params
+    numGridM = gmshGrid.elements.size();
+    numGrid  = numGridM;
+
+    poro.resize(gmshGrid.elements.size());
+    for (OCP_USI n = 0; n < gmshGrid.elements.size(); n++) {
+        poro[n] = gmshGrid.facies[gmshGrid.faciesNum[n]].poro;
+    }
 }
 
 
@@ -1161,6 +1170,7 @@ void PreParamGridWell::SetupGmshGrid()
 {
     SetupBasicGmshGrid();
     CalActiveGrid(1E-6, 1E-6);
+    SetupActiveConnGmshGrid();
 }
 
 
@@ -1177,14 +1187,40 @@ void PreParamGridWell::SetupBasicGmshGrid()
             depth[n] = gmshGrid.elements[n].center[1]; /// Use y-coordinate
         }
     }
-
-    for (OCP_USI n = 0; n < numGridM; n++) {
-        poro[n] = gmshGrid.facies[gmshGrid.faciesNum[n]].poro;
-    }
 }
 
 
 void PreParamGridWell::SetupActiveConnGmshGrid()
+{
+    gNeighbor.resize(activeGridNum);
+    // PreAllocate
+    for (OCP_USI n = 0; n < activeGridNum; n++) {
+        gNeighbor[n].reserve(10);
+    }
+
+    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_DBL areaB, areaE;
+    for (const auto& e : gmshGrid.edges) {
+       
+        if (e.faceIndex.size() <= 2)  continue;  // boundary
+
+        bIdg = e.faceIndex[0];
+        eIdg = e.faceIndex[2];
+
+        if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
+            bIdb  = map_All2Act[bIdg].GetId();
+            eIdb  = map_All2Act[eIdg].GetId();
+            areaB = e.area[0];
+            areaE = e.area[1];
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::n, areaB, areaE));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::n, areaE, areaB));
+        }
+    }
+}
+
+
+/// Output grid points for a gmsh grid
+void PreParamGridWell::OutputPointsGmshGrid()
 {
 
 }

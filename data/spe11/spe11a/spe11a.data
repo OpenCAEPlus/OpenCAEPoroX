@@ -1,10 +1,10 @@
 -- for spe11a -- test
 
 MODEL
-ISOTHERMAL
+THERMAL
 
 GMSH
-spe11a.msh
+test.msh
 /
 
 GMSHPRO

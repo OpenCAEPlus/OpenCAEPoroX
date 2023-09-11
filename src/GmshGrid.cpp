@@ -96,9 +96,8 @@ void GMSHGrid::InputGrid2D(const string& file)
 			}
 			if (faciesIndex == -1) {
 				facies.push_back(Facies(physicalName));
+				faciesIndex = facies.size() - 1;
 			}
-			faciesIndex = facies.size() - 1;
-
 
 			// for triangle and quadrangle
 			USI np = 0;
@@ -191,6 +190,10 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 
 void GMSHGrid::InputProperty(const string& file)
 {
+	if (elements.empty()) {
+		OCP_ABORT("INPUT KEYWORD GMSH FIRST!");
+	}
+
 	ifstream ifs(file, ios::in);
 	if (!ifs) {
 		OCP_MESSAGE("Trying to open file: " << (file));
