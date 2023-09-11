@@ -163,10 +163,10 @@ WBHP
 WPI 
 /
 
---VTKSCHED
---PRESSURE
---SOIL  SGAS  SWAT
---/
+VTKSCHED
+PRESSURE
+SOIL  SGAS  SWAT
+/
 
 
 SCHEDULE    ==========================================================

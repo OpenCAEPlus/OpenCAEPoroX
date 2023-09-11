@@ -976,8 +976,12 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 {
     if (!ifUseVtk)  return;
 
-    vector<OCP_DBL> points_xyz;
+    vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
+    vector<OCP_USI> cell_points; ///< numpoints, points index
+    vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
+    cell_points.reserve(activeGridNum * 9);
+    cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
     OCP_DBL         tmpX, tmpY;
     OCP_USI         id;
     for (USI k = 0; k < nz; k++) {
@@ -1025,14 +1029,18 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
         }
     }
 
+    OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
+
     const string myFile = workdir + "points.out";
     ofstream outF(myFile, ios::out | ios::binary);
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
     
-    const OCP_USI len = points_xyz.size() / (3 * 8);
-    outF.write((const char*)&len, sizeof(len));
+    const OCP_USI nG = activeGridNum;
+    const OCP_USI nP = activeGridNum * 8;
+    outF.write((const char*)&nG, sizeof(nG));
+    outF.write((const char*)&nP, sizeof(nP));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
     outF.close();
 }
@@ -1244,10 +1252,14 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 {
     if (!ifUseVtk)  return;
 
-    vector<OCP_DBL> points_xyz;
+    vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
+    vector<OCP_USI> cell_points; ///< numpoints, points index
+    vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
-    OCP_USI id;
+    cell_points.reserve(activeGridNum * 9);
+    cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
+    OCP_USI id;
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
             for (USI i = 0; i < nx; i++) {
@@ -1288,13 +1300,18 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
             }
         }
     }
+    OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
+
     const string myFile = workdir + "points.out";
     ofstream outF(myFile, ios::out | ios::binary);
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
-    const OCP_USI len = points_xyz.size() / (3 * 8);
-    outF.write((const char*)&len, sizeof(len));
+
+    const OCP_USI nG = activeGridNum;
+    const OCP_USI nP = activeGridNum * 8;
+    outF.write((const char*)&nG, sizeof(nG));
+    outF.write((const char*)&nP, sizeof(nP));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
     outF.close();
 }

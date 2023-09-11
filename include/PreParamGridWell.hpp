@@ -25,6 +25,7 @@
 #include "UtilInput.hpp"
 #include "CornerGrid.hpp"
 #include "GmshGrid.hpp"
+#include "Output4Vtk.hpp"
 
 using namespace std;
 

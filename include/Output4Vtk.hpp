@@ -42,8 +42,11 @@ const string  VTK_DEFAULT           = "default";
 const string  VTK_SCALARS           = "SCALARS";
 
 // Basic Cell Type
-const VTK_USI VTK_HEXAHEDRON = 12;
 const VTK_USI VTK_POLY_LINE  = 4;
+const VTK_USI VTK_TRIANGLE   = 5;
+const VTK_USI VTK_QUAD       = 9;
+const VTK_USI VTK_HEXAHEDRON = 12;
+
 
 const string VTK_FLOAT        = "float";
 const string VTK_UNSIGNED_INT = "unsigned_int";
@@ -54,9 +57,9 @@ class Output4Vtk
 
 public:
     /// create a new file and write common information
-    void InitASCII(const string&          myFile,
-                   const string&          shortInfo,
-                   const vector<OCP_DBL>& point_xyz) const;
+    OCP_USI InitASCII(const string& dir, 
+                      const string& myFile,
+                      const string& shortInfo) const;
     template <typename T>
     void OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                  const string&    dataName,
@@ -65,6 +68,11 @@ public:
                                  const OCP_USI&   bId,
                                  const OCP_USI&   nb,
                                  const USI&       digits) const;
+protected:
+    /// number of grids
+    mutable OCP_USI numGrid;
+    /// number of points
+    mutable OCP_USI numPoints;
 };
 
 template <typename T>

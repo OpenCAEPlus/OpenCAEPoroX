@@ -302,8 +302,6 @@ public:
     void Setup(const string& dir, const Reservoir& rs);
     /// Output info with the vtk format
     void PrintVTK(const Reservoir& rs) const;
-    /// Input coordinates of points
-    OCP_USI InputPoints(const string& dir, vector<OCP_DBL>& points_xyz) const;
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
     void PostProcessP(const string& dir, const string& filename, const OCP_INT& numproc) const;
@@ -315,6 +313,8 @@ private:
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
 
+    /// number of grids
+    mutable OCP_USI   numGrid;
 };
 
 /// The OCPOutput class manages different kinds of ways to output information.
