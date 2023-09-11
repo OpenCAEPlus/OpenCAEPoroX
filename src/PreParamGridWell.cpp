@@ -727,6 +727,9 @@ void PreParamGridWell::SetupGrid()
     case GridType::corner:
         SetupCornerGrid();
         break;
+    case GridType::gmsh:
+        SetupGmshGrid();
+        break;
     default:
         OCP_ABORT("WRONG Grid Type!");
     }
@@ -1133,6 +1136,35 @@ void PreParamGridWell::SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp)
             gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
         }
     }
+}
+
+
+void PreParamGridWell::SetupGmshGrid()
+{
+    SetupBasicGmshGrid();
+    CalActiveGrid(1E-6, 1E-6);
+}
+
+
+void PreParamGridWell::SetupBasicGmshGrid()
+{
+    numGridM = gmshGrid.elements.size();
+    numGrid  = numGridM;
+    v.resize(numGrid);
+    depth.resize(numGrid);
+
+    if (gmshGrid.dimen == 2) {
+        for (OCP_USI n = 0; n < numGridM; n++) {
+            v[n]     = gmshGrid.elements[n].area;      /// let thickness be 1
+            depth[n] = gmshGrid.elements[n].center[1]; /// Use y-coordinate
+        }
+    }  
+}
+
+
+void PreParamGridWell::SetupActiveConnGmshGrid()
+{
+
 }
 
 

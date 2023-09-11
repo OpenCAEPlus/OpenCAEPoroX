@@ -1,0 +1,8 @@
+-- for spe11a -- test
+
+MODEL
+ISOTHERMAL
+
+GMSH
+test.msh
+

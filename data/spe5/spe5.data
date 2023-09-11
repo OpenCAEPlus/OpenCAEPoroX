@@ -17,9 +17,6 @@ RUNSPEC   ==============================================================
 TITLE
    SPE Fifth Comparison Test Problem - Scenario One
    
-GMSH
-spe11a.msh
-/
    
 MODEL
 ISOTHERMAL

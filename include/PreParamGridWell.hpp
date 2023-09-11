@@ -234,6 +234,7 @@ protected:
     vector<OCP_DBL> zcorn; 
 
     // General grid
+    /// GMSH Grid
     GMSHGrid        gmshGrid;
 
     // Rock param
@@ -295,6 +296,8 @@ protected:
     void SetupActiveConnOrthogonalGridSM();
     /// Setup connections for dual pororsity in orthogonal grid.
     void SetupActiveConnOrthogonalGridDP();
+    /// Output grid points for orthogonal grid.
+    void OutputPointsOrthogonalGrid();
     
 
     /// Setup corner-point grid.
@@ -307,6 +310,15 @@ protected:
     void SetupActiveConnCornerGridSM(const OCP_COORD& CoTmp);
     /// Setup connections for dual pororsity in corner-point grid.
     void SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp);
+    /// Output grid points for corner-point grid.
+    void OutputPointsCornerGrid(const OCP_COORD& mycord);
+
+    /// Setup gmsh grid.
+    void SetupGmshGrid();
+    /// Setup depth, v for a gmsh grid
+    void SetupBasicGmshGrid();
+    /// Setup the neighboring info for a corner-point grid.
+    void SetupActiveConnGmshGrid();
 
     // For Structral Grid
     /// Set location for grid: top, bottom, side or interior
@@ -326,26 +338,26 @@ protected:
 
 protected:
     /// Volume of cells
-    vector<OCP_DBL>       v; 
+    vector<OCP_DBL>          v; 
     /// Depth of center of grid cells
-    vector<OCP_DBL>       depth;
+    vector<OCP_DBL>          depth;
 
     // Connections
     /// Neighboring information of active grid.
     vector<vector<ConnPair>> gNeighbor; 
     /// Num of neighbor
-    vector<USI>           numNeighbor; 
+    vector<USI>              numNeighbor; 
 
     /// Num of active grid.
-    OCP_USI               activeGridNum; 
+    OCP_USI                  activeGridNum; 
     /// Index mapping from active grid to all grid
-    vector<OCP_USI>       map_Act2All;
+    vector<OCP_USI>          map_Act2All;
     /// Mapping from grid to active all grid
-    vector<GB_Pair>       map_All2Act; 
+    vector<GB_Pair>          map_All2Act; 
     /// Num of fluid grids.
-    OCP_USI               fluidGridNum; 
+    OCP_USI                  fluidGridNum; 
     /// Mapping from all grid to fluid grid
-    vector<GB_Pair>       map_All2Flu;
+    vector<GB_Pair>          map_All2Flu;
 
 
     /////////////////////////////////////////////////////////////////////
@@ -391,10 +403,8 @@ protected:
 
 public:
     void OutputBaiscInfo() const;   ///< Calculate and return basic informations for grid
-    /// Output grid points for orthogonal grid.
-    void OutputPointsOrthogonalGrid();
-    /// Output grid points for corner-point grid.
-    void OutputPointsCornerGrid(const OCP_COORD& mycord);
+
+
 
 protected:
     OCP_BOOL ifUseVtk{ OCP_FALSE };
