@@ -982,6 +982,8 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     points_xyz.reserve(activeGridNum * 8 * 3);
     cell_points.reserve(activeGridNum * 9);
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
+
+    OCP_USI         pIndex = 0;
     OCP_DBL         tmpX, tmpY;
     OCP_USI         id;
     for (USI k = 0; k < nz; k++) {
@@ -1022,6 +1024,12 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
                     points_xyz.push_back(tmpX);
                     points_xyz.push_back(tmpY + dy[id]);
                     points_xyz.push_back(depth[id] - dz[id] / 2);
+
+
+                    cell_points.push_back(8);
+                    for (USI p = 0; p < 8; p++) {
+                        cell_points.push_back(pIndex++);
+                    }
                 }
                 tmpX += dx[id];
             }
@@ -1042,6 +1050,10 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     outF.write((const char*)&nG, sizeof(nG));
     outF.write((const char*)&nP, sizeof(nP));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
+    const OCP_USI len_cell_points = cell_points.size();
+    outF.write((const char*)&len_cell_points, sizeof(len_cell_points));
+    outF.write((const char*)&cell_points[0], cell_points.size() * sizeof(cell_points[0]));
+    outF.write((const char*)&cell_type[0], cell_type.size() * sizeof(cell_type[0]));
     outF.close();
 }
 
@@ -1259,6 +1271,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     cell_points.reserve(activeGridNum * 9);
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
+    OCP_USI pIndex = 0;
     OCP_USI id;
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
@@ -1296,6 +1309,11 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
                     points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.x);
                     points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.y);
                     points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.z);
+
+                    cell_points.push_back(8);
+                    for (USI p = 0; p < 8; p++) {
+                        cell_points.push_back(pIndex++);
+                    }
                 }
             }
         }
@@ -1313,6 +1331,10 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     outF.write((const char*)&nG, sizeof(nG));
     outF.write((const char*)&nP, sizeof(nP));
     outF.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
+    const OCP_USI len_cell_points = cell_points.size();
+    outF.write((const char*)&len_cell_points, sizeof(len_cell_points));
+    outF.write((const char*)&cell_points[0], cell_points.size() * sizeof(cell_points[0]));
+    outF.write((const char*)&cell_type[0], cell_type.size() * sizeof(cell_type[0]));
     outF.close();
 }
 
