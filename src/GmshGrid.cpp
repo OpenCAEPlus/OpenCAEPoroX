@@ -17,7 +17,7 @@
 #include "GmshGrid.hpp"
 
 
-void GMSHGrid::Input(const string& file)
+void GMSHGrid::InputGrid(const string& file)
 {
 
 	gmsh::initialize();
@@ -30,22 +30,23 @@ void GMSHGrid::Input(const string& file)
 	dimen = gmsh::model::getDimension();
 
 	if (dimen == 2) {
-		Input2D(file);
+		InputGrid2D(file);
 	}
 	gmsh::finalize();
 
 	Setup();
 }
 
-void GMSHGrid::Input2D(const string& file)
+void GMSHGrid::InputGrid2D(const string& file)
 {
+
 	// Get all mesh nodes
 	std::vector<std::size_t> nodeTags;
 	std::vector<double> nodeParams;
 	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
 
 	// Get all the elementary entities in the model, as a vector of (dimension, tag) pairs:
-	std::vector<std::pair<int, int> > entities;
+	std::vector<std::pair<int, int>> entities;
 	gmsh::model::getEntities(entities);
 
 
@@ -85,15 +86,25 @@ void GMSHGrid::Input2D(const string& file)
 			}			
 		}
 		else if (dim == 2) {
+
+			INT faciesIndex = -1;
+			for (INT f = 0; f < facies.size(); f++) {
+				if (facies[f].name == physicalName) {
+					faciesIndex = f;
+					break;
+				}				
+			}
+			if (faciesIndex == -1) {
+				facies.push_back(Facies(physicalName));
+			}
+			faciesIndex = facies.size() - 1;
+
+
 			// for triangle and quadrangle
 			USI np = 0;
 			for (USI t = 0; t < elemTypes.size(); t++) {
-				if (elemTypes[t] == 2) {
-					np = 3;  // for triangle
-				}
-				else {
-					np = 4;  // for quadrangle
-				}
+				if (elemTypes[t] == 2)  np = 3;  // for triangle
+				else                    np = 4;  // for quadrangle
 
 				vector<OCP_USI> indexFace(np);
 				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
@@ -116,6 +127,7 @@ void GMSHGrid::Input2D(const string& file)
 					}
 					faceIndex++;
 					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName));
+					faciesNum.push_back(faciesIndex);
 				}
 			}
 		}
@@ -171,6 +183,35 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 				const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
 				const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - Point3D(element.center.data());
 				e.area.push_back(abs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
+			}
+		}
+	}
+}
+
+
+void GMSHGrid::InputProperty(const string& file)
+{
+	ifstream ifs(file, ios::in);
+	if (!ifs) {
+		OCP_MESSAGE("Trying to open file: " << (file));
+		OCP_ABORT("Failed to open the input file!");
+	}
+
+	while (!ifs.eof()) {
+
+		string fbuf;
+		getline(ifs, fbuf);
+		vector<string> vbuf;
+		for (auto& f : facies) {
+			if (fbuf == f.name) {
+				// Input for current facies
+				while (true) {
+					ReadLine(ifs, vbuf);
+					if (vbuf[0] == "/") break;
+
+					if (vbuf[0] == "PORO")      f.poro = stod(vbuf[1]);
+					else if (vbuf[0] == "PERM") f.k    = stod(vbuf[1]);
+				}
 			}
 		}
 	}

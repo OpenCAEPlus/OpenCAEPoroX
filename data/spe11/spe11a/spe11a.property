@@ -1,0 +1,35 @@
+Facies 1
+PORO 0.44
+PERM 4E-11
+/
+
+Facies 2
+PORO 0.43
+PERM 5E-10
+/
+
+Facies 3
+PORO 0.44
+PERM 1E-9
+/
+
+Facies 4
+PORO 0.45
+PERM 2E-9
+/
+
+Facies 5
+PORO 0.43
+PERM 4E-9
+/
+
+Facies 6
+PORO 0.46
+PERM 1E-8
+/
+
+Facies 7
+PORO 0
+PERM 0
+/
+

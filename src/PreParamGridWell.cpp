@@ -94,6 +94,10 @@ void PreParamGridWell::Input(const string& myFilename)
                 InputGMSH(ifs);
                 break;
 
+            case Map_Str2Int("GMSHPRO", 7):
+                InputGMSHPRO(ifs);
+                break;
+
             case Map_Str2Int("WELSPECS", 8):
                 InputWELSPECS(ifs);
                 break;
@@ -119,19 +123,23 @@ void PreParamGridWell::CheckInput()
 {
     cout << endl << "-------------------------------------" << endl;
     cout << "Check Grid param ... begin" << endl;
+
     if (model == 0)                       OCP_ABORT("WRONG MODEL!");
-    if (nx == 0 || ny == 0 || nz == 0)    OCP_ABORT("WRONG DIMENS!");
-    if (poro.size() != numGrid)           OCP_ABORT("WRONG PORO!");
+
 
     if (gridType == GridType::corner) {
-        if (zcorn.empty())                OCP_ABORT("WRONG ZCORN!");
-        if (coord.empty())                OCP_ABORT("WRONG ZCORN!");
+        if (nx == 0 || ny == 0 || nz == 0) OCP_ABORT("WRONG DIMENS!");
+        if (poro.size() != numGrid)        OCP_ABORT("WRONG PORO!");
+        if (zcorn.empty())                 OCP_ABORT("WRONG ZCORN!");
+        if (coord.empty())                 OCP_ABORT("WRONG ZCORN!");
     }
     else if (gridType == GridType::orthogonal) {
-        if (dx.size() != numGrid)         OCP_ABORT("WRONG DX!");
-        if (dy.size() != numGrid)         OCP_ABORT("WRONG DY!");
-        if (dz.size() != numGrid)         OCP_ABORT("WRONG DZ!");
-        if (tops.size() != nx * ny)       OCP_ABORT("WRONG TOPS!");
+        if (nx == 0 || ny == 0 || nz == 0) OCP_ABORT("WRONG DIMENS!");
+        if (poro.size() != numGrid)        OCP_ABORT("WRONG PORO!");
+        if (dx.size() != numGrid)          OCP_ABORT("WRONG DX!");
+        if (dy.size() != numGrid)          OCP_ABORT("WRONG DY!");
+        if (dz.size() != numGrid)          OCP_ABORT("WRONG DZ!");
+        if (tops.size() != nx * ny)        OCP_ABORT("WRONG TOPS!");
     }
     else if (gridType == GridType::gmsh) {
         if (gmshGrid.edges.empty())       OCP_ABORT("WRONG GMSH!");
@@ -152,6 +160,7 @@ void PreParamGridWell::PostProcessInput()
         ntg.clear();
         ntg.resize(numGrid, 1.0);
     }
+
     for (OCP_USI n = 0; n < numGrid; n++) {
         poro[n] *= ntg[n];
     }
@@ -162,7 +171,7 @@ void PreParamGridWell::PostProcessInput()
         ACTNUM.resize(numGrid, 1);
     }
     if (!sigma.empty())  sigma.resize(numGrid, 0);
-    if (!dzMtrx.empty())  dzMtrx.resize(numGrid, 0);
+    if (!dzMtrx.empty()) dzMtrx.resize(numGrid, 0);
 }
 
 
@@ -446,8 +455,17 @@ void PreParamGridWell::InputGMSH(ifstream& ifs)
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     DealDefault(vbuf);
-    gmshGrid.Input(workdir + vbuf[0]);
+    gmshGrid.InputGrid(workdir + vbuf[0]);
 }
+
+void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
+{
+    vector<string> vbuf;
+    ReadLine(ifs, vbuf);
+    DealDefault(vbuf);
+    gmshGrid.InputProperty(workdir + vbuf[0]);
+}
+
 
 void PreParamGridWell::InputWELSPECS(ifstream& ifs)
 {
@@ -1158,7 +1176,11 @@ void PreParamGridWell::SetupBasicGmshGrid()
             v[n]     = gmshGrid.elements[n].area;      /// let thickness be 1
             depth[n] = gmshGrid.elements[n].center[1]; /// Use y-coordinate
         }
-    }  
+    }
+
+    for (OCP_USI n = 0; n < numGridM; n++) {
+        poro[n] = gmshGrid.facies[gmshGrid.faciesNum[n]].poro;
+    }
 }
 
 

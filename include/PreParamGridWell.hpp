@@ -181,6 +181,8 @@ protected:
     void InputINCLUDE(ifstream& ifs);
     /// Input GMSH
     void InputGMSH(ifstream& ifs);
+    /// Input Physical Property
+    void InputGMSHPRO(ifstream& ifs);
     // Input tools
     /// Find pointer to the specified variable.
     vector<OCP_DBL>* FindPtr(const string& varName, const OCP_DBL&);

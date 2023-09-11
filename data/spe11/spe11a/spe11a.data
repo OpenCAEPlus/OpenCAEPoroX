@@ -4,5 +4,9 @@ MODEL
 ISOTHERMAL
 
 GMSH
-test.msh
+spe11a.msh
+/
 
+GMSHPRO
+spe11a.property
+/

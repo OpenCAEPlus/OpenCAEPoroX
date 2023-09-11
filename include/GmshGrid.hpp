@@ -15,14 +15,18 @@
 #define __GMSHGRID_HEADER__
 
 
- // Standard header files
-#include <gmsh.h>
+// Standard header files
+#include <fstream>
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
 #include <set>
 
+// Gmsh header files
+#include <gmsh.h>
+
 // OpenCAEPoroX header files
+#include "UtilInput.hpp"
 #include "UtilMesh.hpp"
 
 using namespace std;
@@ -134,25 +138,48 @@ public:
 };
 
 
+class Facies
+{
+public:
+    Facies(const string& faciesname) : name(faciesname) {};
+public:
+    /// name of Facies
+    string  name;
+    /// porosity of current facies
+    OCP_DBL poro{ -1 };
+    /// permeability of current facies
+    OCP_DBL k{ -1 };
+};
+
 
 class GMSHGrid
 {
 public:
     /// for 2-dimension now
-    void Input(const string& file);
+    void InputGrid(const string& file);
+    /// input property for each region
+    void InputProperty(const string& file);
 
 protected:
-    void Input2D(const string& file);
+    void InputGrid2D(const string& file);
     void Setup();
     void CalAreaCenter2D();
     void SetupConnAreaAndBoundary2D();
 
 
 public:
+    /// dimension
     USI             dimen;
+    /// coordinates of points 
     vector<OCP_DBL> points;
+    /// edges (for 2d now)
     set<Edge>       edges;
+    /// elements (for 2d now)
     vector<Polygon> elements;
+    /// Facies
+    vector<Facies>  facies;
+    /// element region index(facies)
+    vector<INT>     faciesNum;
 };
 
 
