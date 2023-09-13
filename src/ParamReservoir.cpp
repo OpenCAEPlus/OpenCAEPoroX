@@ -310,6 +310,49 @@ void ParamReservoir::InputHLOSS(ifstream& ifs)
     }
 }
 
+
+void ParamReservoir::InputBrooksCorey(ifstream& ifs)
+{
+    BrooksCoreyParam bc;
+    vector<string>   vbuf;
+    while (true) {
+        ReadLine(ifs, vbuf);
+        if (vbuf[0] == "/") break;
+
+        USI     index = 0;
+        USI     len   = vbuf.size();
+        OCP_DBL val   = -1;
+        while (index < len) {
+            if (vbuf[index + 1] != "N/A")  val = stod(vbuf[index + 1]);
+            else                           val = -1;
+                
+            if (vbuf[index] == "*SWIMM") {
+                bc.sw_imm = val;
+            }
+            else if (vbuf[index] == "*SNIMM") {
+                bc.sn_imm = val;
+            }
+            else if (vbuf[index] == "*PENTRY") {
+                bc.Pentry = val;
+            }
+            else if (vbuf[index] == "PCMAX") {
+                bc.Pcmax = val;
+            }
+            else if (vbuf[index] == "*CWREPERM") {
+                bc.Cw_rp = val;
+            }
+            else if (vbuf[index] == "*CNREPERM") {
+                bc.Cn_rp = val;
+            }
+            else if (vbuf[index] == "*CPC") {
+                bc.C_pc = val;
+            }
+            index += 2;
+        }
+    }
+    BCparam.push_back(bc);
+}
+
 /// Read data from the MISCSTR keyword.
 void ParamReservoir::InputMISCSTR(ifstream& ifs)
 {
@@ -595,6 +638,7 @@ void TableSet::DisplayTable() const
         }
     }
 }
+
 
 void ComponentParam::Init()
 {

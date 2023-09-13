@@ -49,10 +49,8 @@ void GMSHGrid::InputGrid2D(const string& file)
 	std::vector<std::pair<int, int>> entities;
 	gmsh::model::getEntities(entities);
 
-
 	OCP_USI lineTag   = 1;
 	OCP_USI faceIndex = 0;
-
 
 	for (const auto& e : entities) {
 		// Dimension and tag of the entity:
@@ -134,7 +132,6 @@ void GMSHGrid::InputGrid2D(const string& file)
 }
 
 
-
 void GMSHGrid::Setup()
 {
 	if (dimen == 2) {
@@ -188,32 +185,34 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 }
 
 
-void GMSHGrid::InputProperty(const string& file)
+void GMSHGrid::InputProperty(ifstream& ifs)
 {
 	if (elements.empty()) {
 		OCP_ABORT("INPUT KEYWORD GMSH FIRST!");
-	}
-
-	ifstream ifs(file, ios::in);
-	if (!ifs) {
-		OCP_MESSAGE("Trying to open file: " << (file));
-		OCP_ABORT("Failed to open the input file!");
 	}
 
 	while (!ifs.eof()) {
 
 		string fbuf;
 		getline(ifs, fbuf);
+
+		if (fbuf == "GMSHPROEND") break;
+
 		vector<string> vbuf;
-		for (auto& f : facies) {
-			if (fbuf == f.name) {
+		for (USI f = 0; f < facies.size(); f++) {
+			if (fbuf == facies[f].name) {
+				mapF2F.push_back(f);
 				// Input for current facies
 				while (true) {
 					ReadLine(ifs, vbuf);
-					if (vbuf[0] == "/") break;
+					if (vbuf[0] == "END") break;
 
-					if (vbuf[0] == "PORO")      f.poro = stod(vbuf[1]);
-					else if (vbuf[0] == "PERM") f.k    = stod(vbuf[1]);
+					if (vbuf[0] == "*PORO")      facies[f].poro = stod(vbuf[1]);
+					else if (vbuf[0] == "*PERM") {
+						facies[f].kx = stod(vbuf[1]);
+						facies[f].ky = stod(vbuf[1]);
+						facies[f].kz = stod(vbuf[1]);
+					}
 				}
 			}
 		}

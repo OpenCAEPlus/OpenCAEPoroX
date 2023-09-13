@@ -137,7 +137,7 @@ public:
     OCP_DBL         area;
 };
 
-
+/// Facies property
 class Facies
 {
 public:
@@ -148,7 +148,9 @@ public:
     /// porosity of current facies
     OCP_DBL poro{ -1 };
     /// permeability of current facies
-    OCP_DBL k{ -1 };
+    OCP_DBL kx{ -1 };
+    OCP_DBL ky{ -1 };
+    OCP_DBL kz{ -1 };
 };
 
 
@@ -158,14 +160,13 @@ public:
     /// for 2-dimension now
     void InputGrid(const string& file);
     /// input property for each region
-    void InputProperty(const string& file);
+    void InputProperty(ifstream& ifs);
 
 protected:
     void InputGrid2D(const string& file);
     void Setup();
     void CalAreaCenter2D();
     void SetupConnAreaAndBoundary2D();
-
 
 public:
     /// dimension
@@ -180,6 +181,8 @@ public:
     vector<Facies>  facies;
     /// element region index(facies)
     vector<INT>     faciesNum;
+    /// map from facies (the order in which appear in GMSHPRO) to facies(the order in which appear in grids)
+    vector<USI>     mapF2F;
 };
 
 

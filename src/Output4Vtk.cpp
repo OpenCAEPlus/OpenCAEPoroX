@@ -68,7 +68,7 @@ OCP_USI Output4Vtk::InitASCII(const string& dir,
 }
 
 
-void Output4Vtk::OutputGridInfo(const string& dir, const OCP_USI& nG, const OCP_USI& nP, const vector<OCP_DBL>& points_xyz,
+void Output4Vtk::OutputGridInfo(const string& dir, const OCP_USI& nG, const vector<OCP_DBL>& points_xyz,
     const vector<OCP_USI>& cell_points, const vector<USI>& cell_type)
 {
     const string myFile = dir + tmpFile;
@@ -76,6 +76,8 @@ void Output4Vtk::OutputGridInfo(const string& dir, const OCP_USI& nG, const OCP_
     if (!outF.is_open()) {
         OCP_ABORT("Can not open " + myFile);
     }
+
+    const OCP_USI nP = points_xyz.size() / 3;
 
     outF.write((const char*)&nG, sizeof(nG));
     outF.write((const char*)&nP, sizeof(nP));

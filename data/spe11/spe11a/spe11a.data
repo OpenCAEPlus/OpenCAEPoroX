@@ -4,9 +4,22 @@ MODEL
 THERMAL
 
 GMSH
-test.msh
+spe11a.msh
 /
 
-GMSHPRO
+INCLUDE
 spe11a.property
+/
+
+
+VTKSCHED
+/
+
+
+METHOD
+FIM
+/
+
+TSTEP
+0
 /

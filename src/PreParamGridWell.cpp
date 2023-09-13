@@ -460,18 +460,21 @@ void PreParamGridWell::InputGMSH(ifstream& ifs)
 
 void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
 {
-    vector<string> vbuf;
-    ReadLine(ifs, vbuf);
-    DealDefault(vbuf);
-    gmshGrid.InputProperty(workdir + vbuf[0]);
+    gmshGrid.InputProperty(ifs);
 
     // input params
     numGridM = gmshGrid.elements.size();
     numGrid  = numGridM;
 
-    poro.resize(gmshGrid.elements.size());
-    for (OCP_USI n = 0; n < gmshGrid.elements.size(); n++) {
+    poro.resize(numGrid);
+    kx.resize(numGrid);
+    ky.resize(numGrid);
+    kz.resize(numGrid);
+    for (OCP_USI n = 0; n < numGrid; n++) {
         poro[n] = gmshGrid.facies[gmshGrid.faciesNum[n]].poro;
+        kx[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].kx;
+        ky[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].ky;
+        kz[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].kz;
     }
 }
 
@@ -749,10 +752,14 @@ void PreParamGridWell::SetupGrid()
     switch (gridType) 
     {
     case GridType::orthogonal:
-        SetupOrthogonalGrid();     
+        SetupOrthogonalGrid();    
+        OutputBaiscInfo();
+        SetLocationStructral();
         break;
     case GridType::corner:
         SetupCornerGrid();
+        OutputBaiscInfo();
+        SetLocationStructral();
         break;
     case GridType::gmsh:
         SetupGmshGrid();
@@ -762,11 +769,6 @@ void PreParamGridWell::SetupGrid()
     }
 
     SetupTransMult();
-
-    OutputBaiscInfo();
-
-    // For structral Gid
-    SetLocationStructral();
 }
 
 
@@ -1039,7 +1041,7 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 
     OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
 
-    Output4Vtk::OutputGridInfo(workdir, activeGridNum, activeGridNum * 8, points_xyz, cell_points, cell_type);
+    Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
 }
 
 
@@ -1171,80 +1173,6 @@ void PreParamGridWell::SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp)
 }
 
 
-void PreParamGridWell::SetupGmshGrid()
-{
-    SetupBasicGmshGrid();
-    CalActiveGrid(1E-6, 1E-6);
-    SetupActiveConnGmshGrid();
-}
-
-
-void PreParamGridWell::SetupBasicGmshGrid()
-{
-    numGridM = gmshGrid.elements.size();
-    numGrid  = numGridM;
-    v.resize(numGrid);
-    depth.resize(numGrid);
-
-    if (gmshGrid.dimen == 2) {
-        for (OCP_USI n = 0; n < numGridM; n++) {
-            v[n]     = gmshGrid.elements[n].area;      /// let thickness be 1
-            depth[n] = gmshGrid.elements[n].center[1]; /// Use y-coordinate
-        }
-    }
-}
-
-
-void PreParamGridWell::SetupActiveConnGmshGrid()
-{
-    gNeighbor.resize(activeGridNum);
-    // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
-        gNeighbor[n].reserve(10);
-    }
-
-    OCP_USI bIdg, eIdg, bIdb, eIdb;
-    OCP_DBL areaB, areaE;
-    for (const auto& e : gmshGrid.edges) {
-       
-        if (e.faceIndex.size() <= 2)  continue;  // boundary
-
-        bIdg = e.faceIndex[0];
-        eIdg = e.faceIndex[2];
-
-        if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
-            bIdb  = map_All2Act[bIdg].GetId();
-            eIdb  = map_All2Act[eIdg].GetId();
-            areaB = e.area[0];
-            areaE = e.area[1];
-            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::n, areaB, areaE));
-            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::n, areaE, areaB));
-        }
-    }
-}
-
-
-/// Output grid points for a gmsh grid
-void PreParamGridWell::OutputPointsGmshGrid()
-{
-
-}
-
-
-void PreParamGridWell::SetLocationStructral()
-{
-    location.resize(numGrid);
-    const OCP_USI uplim   = nx * ny;
-    const OCP_USI downlim = nx * ny * (nz - 1);
-    for (OCP_USI n = 0; n < uplim; n++) {
-        location[n] = 1;
-    }
-    for (OCP_USI n = downlim; n < nx * ny * nz; n++) {
-        location[n] = 2;
-    }
-}
-
-
 void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 {
     if (!ifUseVtk)  return;
@@ -1305,7 +1233,112 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     }
     OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
 
-    Output4Vtk::OutputGridInfo(workdir, activeGridNum, activeGridNum * 8, points_xyz, cell_points, cell_type);
+    Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
+}
+
+
+
+void PreParamGridWell::SetupGmshGrid()
+{
+    SetupBasicGmshGrid();
+    CalActiveGrid(1E-6, 1E-6);
+    SetupActiveConnGmshGrid();
+
+    OutputPointsGmshGrid();
+}
+
+
+void PreParamGridWell::SetupBasicGmshGrid()
+{
+    numGridM = gmshGrid.elements.size();
+    numGrid  = numGridM;
+    v.resize(numGrid);
+    depth.resize(numGrid);
+
+    if (gmshGrid.dimen == 2) {
+        for (OCP_USI n = 0; n < numGridM; n++) {
+            v[n]     = gmshGrid.elements[n].area;      /// let thickness be 1
+            depth[n] = gmshGrid.elements[n].center[1]; /// Use y-coordinate
+        }
+    }
+}
+
+
+void PreParamGridWell::SetupActiveConnGmshGrid()
+{
+    gNeighbor.resize(activeGridNum);
+    // PreAllocate
+    for (OCP_USI n = 0; n < activeGridNum; n++) {
+        gNeighbor[n].reserve(10);
+    }
+
+    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_DBL areaB, areaE;
+    for (const auto& e : gmshGrid.edges) {
+       
+        if (e.faceIndex.size() <= 2)  continue;  // boundary
+
+        bIdg = e.faceIndex[0];
+        eIdg = e.faceIndex[2];
+
+        if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
+            bIdb  = map_All2Act[bIdg].GetId();
+            eIdb  = map_All2Act[eIdg].GetId();
+            areaB = e.area[0];
+            areaE = e.area[1];
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::n, areaB, areaE));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::n, areaE, areaB));
+        }
+    }
+}
+
+
+/// Output grid points for a gmsh grid
+void PreParamGridWell::OutputPointsGmshGrid()
+{
+    if (!ifUseVtk)  return;
+
+    const vector<OCP_DBL>& points_xyz = gmshGrid.points;  ///< x,y,z coordinates
+    vector<OCP_USI>        cell_points;                   ///< numpoints, points index
+    vector<USI>            cell_type;                     ///< type of cell
+    cell_points.reserve(activeGridNum * 5);
+    cell_type.reserve(activeGridNum);
+
+    for (OCP_USI n = 0; n < numGrid; n++) {
+        if (map_All2Act[n].IsAct()) {
+
+            const auto& ep = gmshGrid.elements[n].p;
+
+            if (ep.size() == 3) {
+                cell_type.push_back(VTK_TRIANGLE);
+                cell_points.push_back(3);
+            }
+            else if (ep.size() == 4) {
+                cell_type.push_back(VTK_QUAD);
+                cell_points.push_back(4);
+            }
+            for (const auto& p : ep) {
+                cell_points.push_back(p);
+            }
+        }
+    }
+
+
+    Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
+}
+
+
+void PreParamGridWell::SetLocationStructral()
+{
+    location.resize(numGrid);
+    const OCP_USI uplim   = nx * ny;
+    const OCP_USI downlim = nx * ny * (nz - 1);
+    for (OCP_USI n = 0; n < uplim; n++) {
+        location[n] = 1;
+    }
+    for (OCP_USI n = downlim; n < nx * ny * nz; n++) {
+        location[n] = 2;
+    }
 }
 
 

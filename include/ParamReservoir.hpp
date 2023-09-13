@@ -66,6 +66,28 @@ public:
     OCP_DBL HCP2{0};  ///< coefficients of the rock enthalpy formula, Btu/ft^3 - F
 };
 
+
+/// Brooks-Corey type relative permeability and capillary pressure
+class BrooksCoreyParam
+{
+public:
+    /// Immobile wetting phase saturation
+    OCP_DBL sw_imm;
+    /// Immobile nonwetting phase(gas) saturation
+    OCP_DBL sn_imm;
+    /// Gas entry pressure
+    OCP_DBL Pentry;
+    /// Max capillary pressure
+    OCP_DBL Pcmax;
+    /// Shape exponents for relative permeability of wetting phase
+    OCP_DBL Cw_rp;
+    /// Shape exponents for relative permeability of nonwetting phase
+    OCP_DBL Cn_rp;
+    /// Shape exponents for capillary pressure
+    OCP_DBL C_pc;
+};
+
+
 /// A internal structure used to store some params for reservoir, it can tell
 /// if these params are given by users.
 template <typename T>
@@ -203,10 +225,11 @@ class ParamReservoir
 
 public:
 
-    OCP_DBL           rsTemp;  ///< Temperature for reservoir.
-    vector<RockParam> rockSet; ///< a set of rock
-    HLoss             hLoss;   ///< Heat loss property
-    Miscstr           miscstr; ///< reference Miscibility surface tension
+    OCP_DBL                  rsTemp;  ///< Temperature for reservoir.
+    vector<RockParam>        rockSet; ///< a set of rock
+    HLoss                    hLoss;   ///< Heat loss property
+    Miscstr                  miscstr; ///< reference Miscibility surface tension
+    vector<BrooksCoreyParam> BCparam; ///< params for Brooks-Corey model
 
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
@@ -286,6 +309,8 @@ public:
     void InputROCKT(ifstream& ifs);
     /// Input heat loss property for overburden rock and underburden rock
     void InputHLOSS(ifstream& ifs);
+    /// Input params for Brooks-Corey model
+    void InputBrooksCorey(ifstream& ifs);
 
     /// Input the Miscibility information
     void InputMISCSTR(ifstream& ifs);

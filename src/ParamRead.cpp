@@ -97,7 +97,7 @@ void ParamRead::ReadFile(const string& filename)
             case Map_Str2Int("RTEMP", 5):
                 paramRs.InputRTEMP(ifs);
                 break;
-
+                
             case Map_Str2Int("SWFN", 4):
             case Map_Str2Int("SWOF", 4):
             case Map_Str2Int("SGFN", 4):
@@ -120,6 +120,10 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("ROCKT", 5):
                 paramRs.InputROCKT(ifs);
+                break;
+
+            case Map_Str2Int("BCPERM", 6):
+                paramRs.InputBrooksCorey(ifs);
                 break;
 
             case Map_Str2Int("HLOSS", 5):

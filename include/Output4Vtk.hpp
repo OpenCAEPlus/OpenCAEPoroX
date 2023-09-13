@@ -70,7 +70,7 @@ public:
                                  const USI&       digits) const;
 
 public:
-    static void OutputGridInfo(const string& dir, const OCP_USI& nG, const OCP_USI& nP, const vector<OCP_DBL>& points_xyz,
+    static void OutputGridInfo(const string& dir, const OCP_USI& nG, const vector<OCP_DBL>& points_xyz,
                                const vector<OCP_USI>& cell_points, const vector<USI>& cell_type);
 
 protected:
