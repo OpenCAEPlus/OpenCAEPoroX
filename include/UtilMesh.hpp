@@ -78,10 +78,18 @@ Point3D operator*(const OCP_DBL& a, const Point3D& p);      ///< a * Point
 Point3D CrossProduct(const Point3D& p1, const Point3D& p2); ///< Cross product
 
 /// A hexahedron cell.
+//      p3-------p2
+//      / |      /|
+//      p0------p1|
+//      | |     | |
+//      | p7----|-p6
+//      |/      |/
+//     p4------p5   
+//
 class Hexahedron
 {
 public:
-    /// Calculate volume of hexahedron
+    /// Calculate volume of hexahedron, only for convex polyhedron!!!
     OCP_DBL CalVolum() const;
     /// Calculate center of hexahedron
     Point3D CalCenter() const;

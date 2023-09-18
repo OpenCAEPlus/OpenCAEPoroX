@@ -89,7 +89,7 @@ Point3D Matrix3::operator*(const Point3D& v) const
 
 
 OCP_DBL Hexahedron::CalVolum() const
-{
+{           
     const OCP_DBL v =
         (p0.x * (p1.y * (-p2.z - p3.z + p4.z + p5.z) +
             p2.y * (p1.z - p3.z) +
@@ -133,6 +133,7 @@ OCP_DBL Hexahedron::CalVolum() const
                 p4.y * (-p0.z - p3.z + p5.z + p6.z) +
                 p5.y * (-p4.z + p6.z) +
                 p6.y * (p2.z + p3.z - p4.z - p5.z))) / 12;
+
     return v;
 }
 

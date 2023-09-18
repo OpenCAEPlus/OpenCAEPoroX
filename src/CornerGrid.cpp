@@ -378,8 +378,7 @@ void OCP_COORD::SetupCornerPoints()
                 // NOTE: if there are several points not well ordered, the calculated
                 // volume will be negative.
                 //
-                v[cindex]      = cornerPoints[i][j][k].CalVolum();
-                v[cindex]      = fabs(v[cindex]);
+                v[cindex]      = fabs(cornerPoints[i][j][k].CalVolum());
                 center[cindex] = cornerPoints[i][j][k].CalCenter();
                 depth[cindex]  = center[cindex].z;
             }
