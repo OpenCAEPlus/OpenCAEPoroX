@@ -35,9 +35,10 @@ void ConnGrid::AddHalfConn(const OCP_USI& n,
     }
 
     const OCP_DBL areaE = area * d / (d * d) * flag;
+
     if (!isfinite(areaE)) {
         if (d * d < TINY) {
-            OCP_ABORT("Hexahedron reduces to a face!");
+            OCP_WARNING("Hexahedron reduces to a face!");
         }
         else {
             OCP_ABORT("Effective Area is NAN");
@@ -267,20 +268,28 @@ void OCP_COORD::SetupCornerPoints()
                 ybottom = COORDDATA[1][1][j * (nx + 1) + i];
                 zbottom = COORDDATA[2][1][j * (nx + 1) + i];
 
-                zvalue = ZCORNDATA[i][j][k][0];
-                xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p0 = Point3D(xvalue, yvalue, zvalue);
+                if (fabs(xtop - xbottom) < TINY && fabs(ytop - ybottom) < TINY) {
+                    xvalue = xtop;
+                    yvalue = ytop;
+                    cornerPoints[i][j][k].p0 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][0]);
+                    cornerPoints[i][j][k].p4 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][4]);
+                }
+                else {
+                    zvalue = ZCORNDATA[i][j][k][0];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p0 = Point3D(xvalue, yvalue, zvalue);
 
-                zvalue = ZCORNDATA[i][j][k][4];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p4 = Point3D(xvalue, yvalue, zvalue);
+                    zvalue = ZCORNDATA[i][j][k][4];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p4 = Point3D(xvalue, yvalue, zvalue);
+                }
+
                 //
                 //    corner point 1 and 5
                 //
+
                 xtop    = COORDDATA[0][0][j * (nx + 1) + i + 1];
                 ytop    = COORDDATA[1][0][j * (nx + 1) + i + 1];
                 ztop    = COORDDATA[2][0][j * (nx + 1) + i + 1];
@@ -288,19 +297,25 @@ void OCP_COORD::SetupCornerPoints()
                 ybottom = COORDDATA[1][1][j * (nx + 1) + i + 1];
                 zbottom = COORDDATA[2][1][j * (nx + 1) + i + 1];
 
-                zvalue = ZCORNDATA[i][j][k][1];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p1 = Point3D(xvalue, yvalue, zvalue);
+                if (fabs(xtop - xbottom) < TINY && fabs(ytop - ybottom) < TINY) {
+                    xvalue = xtop;
+                    yvalue = ytop;
+                    cornerPoints[i][j][k].p1 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][1]);
+                    cornerPoints[i][j][k].p5 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][5]);
+                }
+                else {
+                    zvalue = ZCORNDATA[i][j][k][1];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p1 = Point3D(xvalue, yvalue, zvalue);
 
-                zvalue = ZCORNDATA[i][j][k][5];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p5 = Point3D(xvalue, yvalue, zvalue);
+                    zvalue = ZCORNDATA[i][j][k][5];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p5 = Point3D(xvalue, yvalue, zvalue);
+                }
+
+
                 //
                 //    corner point 2 and 6
                 //
@@ -311,19 +326,24 @@ void OCP_COORD::SetupCornerPoints()
                 ybottom = COORDDATA[1][1][(j + 1) * (nx + 1) + i + 1];
                 zbottom = COORDDATA[2][1][(j + 1) * (nx + 1) + i + 1];
 
-                zvalue = ZCORNDATA[i][j][k][2];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p2 = Point3D(xvalue, yvalue, zvalue);
+                if (fabs(xtop - xbottom) < TINY && fabs(ytop - ybottom) < TINY) {
+                    xvalue = xtop;
+                    yvalue = ytop;
+                    cornerPoints[i][j][k].p2 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][2]);
+                    cornerPoints[i][j][k].p6 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][6]);
+                }
+                else {
+                    zvalue = ZCORNDATA[i][j][k][2];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p2 = Point3D(xvalue, yvalue, zvalue);
 
-                zvalue = ZCORNDATA[i][j][k][6];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p6 = Point3D(xvalue, yvalue, zvalue);
+                    zvalue = ZCORNDATA[i][j][k][6];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p6 = Point3D(xvalue, yvalue, zvalue);
+                }
+
                 //
                 //    corner point 3 and 7
                 //
@@ -334,19 +354,23 @@ void OCP_COORD::SetupCornerPoints()
                 ybottom = COORDDATA[1][1][(j + 1) * (nx + 1) + i];
                 zbottom = COORDDATA[2][1][(j + 1) * (nx + 1) + i];
 
-                zvalue = ZCORNDATA[i][j][k][3];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p3 = Point3D(xvalue, yvalue, zvalue);
+                if (fabs(xtop - xbottom) < TINY && fabs(ytop - ybottom) < TINY) {
+                    xvalue = xtop;
+                    yvalue = ytop;
+                    cornerPoints[i][j][k].p3 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][3]);
+                    cornerPoints[i][j][k].p7 = Point3D(xvalue, yvalue, ZCORNDATA[i][j][k][7]);
+                }
+                else {
+                    zvalue = ZCORNDATA[i][j][k][3];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p3 = Point3D(xvalue, yvalue, zvalue);
 
-                zvalue = ZCORNDATA[i][j][k][7];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
-                cornerPoints[i][j][k].p7 = Point3D(xvalue, yvalue, zvalue);
+                    zvalue = ZCORNDATA[i][j][k][7];
+                    xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                    yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                    cornerPoints[i][j][k].p7 = Point3D(xvalue, yvalue, zvalue);
+                }
 
                 //    calculate volumes and pore volumes
                 cindex = k * nxny + j * nx + i;
@@ -354,7 +378,7 @@ void OCP_COORD::SetupCornerPoints()
                 // NOTE: if there are several points not well ordered, the calculated
                 // volume will be negative.
                 //
-                v[cindex]      = cornerPoints[i][j][k].CalVolum(); // NTG
+                v[cindex]      = cornerPoints[i][j][k].CalVolum();
                 v[cindex]      = fabs(v[cindex]);
                 center[cindex] = cornerPoints[i][j][k].CalCenter();
                 depth[cindex]  = center[cindex].z;
@@ -1102,6 +1126,7 @@ void OCP_COORD::SetupCornerPoints()
                 OCP_ASSERT(isfinite(dx[cindex]), "Wrong dx!");
                 OCP_ASSERT(isfinite(dy[cindex]), "Wrong dy!");
                 OCP_ASSERT(isfinite(dz[cindex]), "Wrong dz!");
+
             }
         }
     }
