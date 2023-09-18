@@ -93,14 +93,10 @@ private:
     vector<GeneralConnect> connect;
 
     // Auxiliary variables
-    // if the i th point of oFace is deeper than the one of Face, then flagpi = 1;
-    // if the i th point of oFace is higher than the one of Face, then flagpi = -1;
-    // if the i th point of oFace is very close to the one of Face, then flagpi = 0;
-    OCP_INT        flagp0, flagp1, flagp2, flagp3;
     OCP_BOOL       flagQuad;
     OCP_BOOL       upNNC, downNNC;
     OCP_BOOL       flagJump;
-    HexahedronFace tmpFace;
+    HexahedronFace interFace;
     // after the Axes are determined, blocks will be placed along the y+, or along the
     // y- if y+, then flagForward equals 1.0, else -1.0, this relates to calculation of
     // area normal vector

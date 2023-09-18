@@ -1,40 +1,59 @@
 target_sources(
   OpenCAEPoroX
-  PUBLIC AcceleratePVT.hpp
+  PUBLIC AcceleratePEC.hpp
 		 AllWells.hpp
 		 Bulk.hpp
+		 BulkAccumuModule.hpp
 		 BulkConn.hpp
-		 CMakeLists.txt
+		 BulkConnTrans.hpp
+		 BulkConnVarSet.hpp
+		 BulkInitializer.hpp
+		 BulkVarSet.hpp
 		 CornerGrid.hpp
 		 DenseMat.hpp
 		 Domain.hpp
 		 FaspSolver.hpp
 		 FlowUnit.hpp
+		 GmshGrid.hpp
+		 HeatConduct.hpp
+		 HeatLoss.hpp
 		 IsothermalSolver.hpp
 		 LinearSolver.hpp
 		 LinearSystem.hpp
-		 Mixture.hpp
-		 MixtureBO.hpp
-		 MixtureComp.hpp
-		 MixtureThermal.hpp
+		 MixtureUnit.hpp
+		 MixtureUnitBlkOil.hpp
+		 MixtureUnitComp.hpp
+		 MixtureUnitThermal.hpp
 		 OCP.hpp
-		 OCP3PhaseFlow.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
+		 OCPEoS.hpp
+		 OCPFlow.hpp
+		 OCPFlowOG.hpp
+		 OCPFlowOGW.hpp
+		 OCPFlowOW.hpp
 		 OCPFluidMethod.hpp
 		 OCPFlux.hpp
+		 OCPFuncPVT.hpp
+		 OCPFuncSAT.hpp
+		 OCPFuncTable.hpp
 		 OCPMiscible.hpp
+		 OCPMixture.hpp
+		 OCPMixtureBlkOilOGW.h
+		 OCPMixtureBlkOilOW.hp
+		 OCPMixtureComp.hpp
+		 OCPMixtureThermalOW.h
 		 OCPOutput.hpp
-		 OCPPVTFunc.hpp
+		 OCPPhaseEquilibrium.h
 		 OCPRock.hpp
-		 OCPSATFunc.hpp
 		 OCPScalePcow.hpp
 		 OCPStructure.hpp
 		 OCPSurfaceTension.hpp
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
-		 OptionalFeatures.hpp
+		 OptionalModules.hpp
 		 Output4Vtk.hpp
+		 PVTModule.hpp
 		 ParamControl.hpp
 		 ParamOutput.hpp
 		 ParamRead.hpp
@@ -45,17 +64,22 @@ target_sources(
 		 PetscSolver.hpp
 		 PreParamGridWell.hpp
 		 PreProcess.hpp
+		 ROCKModule.hpp
 		 Reservoir.hpp
+		 SATModule.hpp
 		 SamgSolver.hpp
 		 Solver.hpp
 		 ThermalMethod.hpp
 		 ThermalSolver.hpp
 		 UtilError.hpp
 		 UtilInput.hpp
+		 UtilMath.hpp
+		 UtilMesh.hpp
 		 UtilOutput.hpp
 		 UtilTiming.hpp
 		 Well.hpp
 		 WellOpt.hpp
+		 WellPeaceman.hpp
 		 WellPerf.hpp)
          
          

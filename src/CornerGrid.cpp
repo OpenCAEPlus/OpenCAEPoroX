@@ -162,55 +162,72 @@ OCP_BOOL OCP_COORD::InputZCORNDATA(const vector<OCP_DBL>& zcorn)
 
 void OCP_COORD::SetAllFlags(const HexahedronFace& oFace, const HexahedronFace& Face)
 {
-    tmpFace = Face;
+    upNNC   = OCP_FALSE;
+    downNNC = OCP_FALSE;
 
-    if (oFace.p0.z > Face.p0.z + TEENY) {
-        tmpFace.p0 = oFace.p0;
-        flagp0     = 1;
-    } else if (oFace.p0.z < Face.p0.z - TEENY)
-        flagp0 = -1;
-    else
-        flagp0 = 0;
+    // if the face reduce to a line
+    if (sqrt((Face.p0 - Face.p1) * (Face.p0 - Face.p1)) <= TEENY && 
+        sqrt((Face.p3 - Face.p2) * (Face.p3 - Face.p2)) <= TEENY && false) {
+        interFace = Face;
+        flagJump  = OCP_TRUE;     
+    }
+    else {
+        // if the i th point of oFace is deeper than the one of Face, then flagpi = 1;
+        // if the i th point of oFace is higher than the one of Face, then flagpi = -1;
+        // if the i th point of oFace is very close to the one of Face, then flagpi = 0;
+        OCP_INT flagp0, flagp1, flagp2, flagp3;
 
-    if (oFace.p1.z > Face.p1.z + TEENY)
-        flagp1 = 1;
-    else if (oFace.p1.z < Face.p1.z - TEENY) {
-        tmpFace.p1 = oFace.p1;
-        flagp1     = -1;
-    } else
-        flagp1 = 0;
+        interFace = Face;
+        if (oFace.p0.z > Face.p0.z + TEENY) {
+            interFace.p0 = oFace.p0;
+            flagp0       = 1;
+            upNNC        = OCP_TRUE;
+        }
+        else if (oFace.p0.z < Face.p0.z - TEENY)  flagp0 = -1;
+        else                                      flagp0 = 0;
+    
+        if (oFace.p1.z < Face.p1.z - TEENY) {
+            interFace.p1 = oFace.p1;
+            flagp1       = -1;
+            downNNC      = OCP_TRUE;
+        }
+        else if (oFace.p1.z > Face.p1.z + TEENY)  flagp1 = 1;
+        else                                      flagp1 = 0;
+       
+        if (oFace.p2.z < Face.p2.z - TEENY) {
+            interFace.p2 = oFace.p2;
+            flagp2       = -1;
+            downNNC      = OCP_TRUE;
+        }
+        else if (oFace.p2.z > Face.p2.z + TEENY)  flagp2 = 1;
+        else                                      flagp2 = 0;
 
-    if (oFace.p2.z > Face.p2.z + TEENY)
-        flagp2 = 1;
-    else if (oFace.p2.z < Face.p2.z - TEENY) {
-        tmpFace.p2 = oFace.p2;
-        flagp2     = -1;
-    } else
-        flagp2 = 0;
+        if (oFace.p3.z > Face.p3.z + TEENY) {
+            interFace.p3 = oFace.p3;
+            flagp3       = 1;
+            upNNC        = OCP_TRUE;
+        }
+        else if (oFace.p3.z < Face.p3.z - TEENY)  flagp3 = -1;
+        else                                      flagp3 = 0;
 
-    if (oFace.p3.z > Face.p3.z + TEENY) {
-        tmpFace.p3 = oFace.p3;
-        flagp3     = 1;
-    } else if (oFace.p3.z < Face.p3.z - TEENY)
-        flagp3 = -1;
-    else
-        flagp3 = 0;
+        // check if interface is empty set
+        // check if interface is quadrilateral
+        // check if the one contains the other one
 
-    // check if interface is empty set
-    // check if interface is quadrilateral
-    // check if the one contains the other one
-
-    if (((oFace.p1.z <= Face.p0.z) && (oFace.p2.z <= Face.p3.z)) ||
-        ((oFace.p0.z >= Face.p1.z) && (oFace.p3.z >= Face.p2.z))) {
-        flagJump = OCP_TRUE;
-    } else {
-        flagJump = OCP_FALSE;
-        if ((flagp0 * flagp3 >= 0) && (oFace.p0.z <= Face.p1.z) &&
-            (oFace.p3.z <= Face.p2.z) && (flagp1 * flagp2 >= 0) &&
-            (oFace.p1.z >= Face.p0.z) && (oFace.p2.z >= Face.p3.z)) {
-            flagQuad = OCP_TRUE;
-        } else {
-            flagQuad = OCP_FALSE;
+        if (((oFace.p1.z <= Face.p0.z) && (oFace.p2.z <= Face.p3.z)) ||
+            ((oFace.p0.z >= Face.p1.z) && (oFace.p3.z >= Face.p2.z))) {
+            flagJump = OCP_TRUE;
+        }
+        else {
+            flagJump = OCP_FALSE;
+            if ((flagp0 * flagp3 >= 0) && (oFace.p0.z <= Face.p1.z) &&
+                (oFace.p3.z <= Face.p2.z) && (flagp1 * flagp2 >= 0) &&
+                (oFace.p1.z >= Face.p0.z) && (oFace.p2.z >= Face.p3.z)) {
+                flagQuad = OCP_TRUE;
+            }
+            else {
+                flagQuad = OCP_FALSE;
+            }
         }
     }
 }
@@ -242,10 +259,8 @@ void OCP_COORD::SetupCornerPoints()
                 zbottom = COORDDATA[2][1][j * (nx + 1) + i];
 
                 zvalue = ZCORNDATA[i][j][k][0];
-                xvalue =
-                    xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
-                yvalue =
-                    ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
+                xvalue = xbottom - (zbottom - zvalue) / (zbottom - ztop) * (xbottom - xtop);
+                yvalue = ybottom - (zbottom - zvalue) / (zbottom - ztop) * (ybottom - ytop);
                 cornerPoints[i][j][k].p0 = Point3D(xvalue, yvalue, zvalue);
 
                 zvalue = ZCORNDATA[i][j][k][4];
@@ -348,17 +363,6 @@ void OCP_COORD::SetupCornerPoints()
     OCP_INT        iznnc;
     Point3D        dxpoint, dypoint, dzpoint;
 
-    // test
-    // cornerPoints[13][1][72].p0; cornerPoints[13][1][72].p1;
-    // cornerPoints[13][1][72].p2; cornerPoints[13][1][72].p3;
-    // cornerPoints[13][1][72].p4; cornerPoints[13][1][72].p5;
-    // cornerPoints[13][1][72].p6; cornerPoints[13][1][72].p7;
-
-    // cornerPoints[13][2][74].p0; cornerPoints[13][2][74].p1;
-    // cornerPoints[13][2][74].p2; cornerPoints[13][2][74].p3;
-    // cornerPoints[13][2][74].p4; cornerPoints[13][2][74].p5;
-    // cornerPoints[13][2][74].p6; cornerPoints[13][2][74].p7;
-
     /////////////////////////////////////////////////////////////////////
     // Attention that The coordinate axis follows the right-hand rule ! //
     /////////////////////////////////////////////////////////////////////
@@ -423,7 +427,7 @@ void OCP_COORD::SetupCornerPoints()
                         // nothing to do
                     } else {
                         if (flagQuad) {
-                            areaV = tmpFace.CalAreaVector();
+                            areaV = interFace.CalAreaVector();
                         } else {
                             FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                             FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -455,15 +459,6 @@ void OCP_COORD::SetupCornerPoints()
 
                     direction = ConnDirect::x;
 
-                    if ((flagp0 > 0) || (flagp3 > 0))
-                        upNNC = OCP_TRUE;
-                    else
-                        upNNC = OCP_FALSE;
-                    if ((flagp1 < 0) || (flagp2 < 0))
-                        downNNC = OCP_TRUE;
-                    else
-                        downNNC = OCP_FALSE;
-
                     iznnc = -1;
                     while (upNNC) {
                         // if (-iznnc > k) break;
@@ -483,7 +478,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                                 FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -510,10 +505,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc--;
-                        if ((flagp0 > 0) || (flagp3 > 0))
-                            upNNC = OCP_TRUE;
-                        else
-                            upNNC = OCP_FALSE;
                     }
 
                     iznnc = 1;
@@ -534,7 +525,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                                 FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -561,11 +552,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc++;
-
-                        if ((flagp1 < 0) || (flagp2 < 0))
-                            downNNC = OCP_TRUE;
-                        else
-                            downNNC = OCP_FALSE;
                     }
                 }
 
@@ -601,7 +587,7 @@ void OCP_COORD::SetupCornerPoints()
                         // nothing to do
                     } else {
                         if (flagQuad) {
-                            areaV = tmpFace.CalAreaVector();
+                            areaV = interFace.CalAreaVector();
                         } else {
                             FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                             FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -631,15 +617,6 @@ void OCP_COORD::SetupCornerPoints()
                     // then find all NNC for current block
                     direction = ConnDirect::x;
 
-                    if ((flagp0 > 0) || (flagp3 > 0))
-                        upNNC = OCP_TRUE;
-                    else
-                        upNNC = OCP_FALSE;
-                    if ((flagp1 < 0) || (flagp2 < 0))
-                        downNNC = OCP_TRUE;
-                    else
-                        downNNC = OCP_FALSE;
-
                     iznnc = -1;
                     while (upNNC) {
                         // if (-iznnc > k) break;
@@ -660,7 +637,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                                 FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -687,11 +664,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc--;
-
-                        if ((flagp0 > 0) || (flagp3 > 0))
-                            upNNC = OCP_TRUE;
-                        else
-                            upNNC = OCP_FALSE;
                     }
 
                     iznnc = 1;
@@ -713,7 +685,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p3.y, Face.p3.z, 0);
                                 FaceP.p1  = Point3D(Face.p0.y, Face.p0.z, 0);
@@ -740,11 +712,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc++;
-
-                        if ((flagp1 < 0) || (flagp2 < 0))
-                            downNNC = OCP_TRUE;
-                        else
-                            downNNC = OCP_FALSE;
                     }
                 }
 
@@ -780,7 +747,7 @@ void OCP_COORD::SetupCornerPoints()
                         // nothing to do
                     } else {
                         if (flagQuad) {
-                            areaV = tmpFace.CalAreaVector();
+                            areaV = interFace.CalAreaVector();
                         } else {
                             FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                             FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -810,15 +777,6 @@ void OCP_COORD::SetupCornerPoints()
                     // then find all NNC for current block
                     direction = ConnDirect::y;
 
-                    if ((flagp0 > 0) || (flagp3 > 0))
-                        upNNC = OCP_TRUE;
-                    else
-                        upNNC = OCP_FALSE;
-                    if ((flagp1 < 0) || (flagp2 < 0))
-                        downNNC = OCP_TRUE;
-                    else
-                        downNNC = OCP_FALSE;
-
                     iznnc = -1;
                     while (upNNC) {
                         // if (-iznnc > k) break;
@@ -838,7 +796,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                                 FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -865,11 +823,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc--;
-
-                        if ((flagp0 > 0) || (flagp3 > 0))
-                            upNNC = OCP_TRUE;
-                        else
-                            upNNC = OCP_FALSE;
                     }
 
                     iznnc = 1;
@@ -890,7 +843,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                                 FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -917,11 +870,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc++;
-
-                        if ((flagp1 < 0) || (flagp2 < 0))
-                            downNNC = OCP_TRUE;
-                        else
-                            downNNC = OCP_FALSE;
                     }
                 }
 
@@ -957,7 +905,7 @@ void OCP_COORD::SetupCornerPoints()
                         // nothing to do
                     } else {
                         if (flagQuad) {
-                            areaV = tmpFace.CalAreaVector();
+                            areaV = interFace.CalAreaVector();
                         } else {
                             FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                             FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -987,15 +935,6 @@ void OCP_COORD::SetupCornerPoints()
                     // then find all NNC for current block
                     direction = ConnDirect::y;
 
-                    if ((flagp0 > 0) || (flagp3 > 0))
-                        upNNC = OCP_TRUE;
-                    else
-                        upNNC = OCP_FALSE;
-                    if ((flagp1 < 0) || (flagp2 < 0))
-                        downNNC = OCP_TRUE;
-                    else
-                        downNNC = OCP_FALSE;
-
                     iznnc = -1;
                     while (upNNC) {
                         // if (-iznnc > k) break;
@@ -1016,7 +955,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                                 FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -1043,11 +982,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc--;
-
-                        if ((flagp0 > 0) || (flagp3 > 0))
-                            upNNC = OCP_TRUE;
-                        else
-                            upNNC = OCP_FALSE;
                     }
 
                     iznnc = 1;
@@ -1069,7 +1003,7 @@ void OCP_COORD::SetupCornerPoints()
                             // nothing to do
                         } else {
                             if (flagQuad) {
-                                areaV = tmpFace.CalAreaVector();
+                                areaV = interFace.CalAreaVector();
                             } else {
                                 FaceP.p0  = Point3D(Face.p0.x, Face.p0.z, 0);
                                 FaceP.p1  = Point3D(Face.p3.x, Face.p3.z, 0);
@@ -1096,11 +1030,6 @@ void OCP_COORD::SetupCornerPoints()
                             num_conn++;
                         }
                         iznnc++;
-
-                        if ((flagp1 < 0) || (flagp2 < 0))
-                            downNNC = OCP_TRUE;
-                        else
-                            downNNC = OCP_FALSE;
                     }
                 }
 
@@ -1122,8 +1051,8 @@ void OCP_COORD::SetupCornerPoints()
                     // upblock
                     oindex = (k - 1) * nxny + j * nx + i;
 
-                    tmpFace = Face;
-                    areaV   = tmpFace.CalAreaVector();
+                    interFace = Face;
+                    areaV   = interFace.CalAreaVector();
                     blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction, flagForward);
                     num_conn++;
                 }
@@ -1147,8 +1076,8 @@ void OCP_COORD::SetupCornerPoints()
                     // downblock
                     oindex = (k + 1) * nxny + j * nx + i;
 
-                    tmpFace = Face;
-                    areaV   = tmpFace.CalAreaVector();
+                    interFace = Face;
+                    areaV   = interFace.CalAreaVector();
                     blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction, flagForward);
                     num_conn++;
                 }
