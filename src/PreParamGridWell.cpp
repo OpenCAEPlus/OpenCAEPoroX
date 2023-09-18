@@ -1460,7 +1460,7 @@ void PreParamGridWell::SetupConnWellGrid()
             }
         }
         if (connWellGrid[w].empty()) {
-            OCP_ABORT("All perforations of Well " + to_string(w) + " are in Inactive grid!");
+            OCP_ABORT("All perforations of Well " + well[w].name + " are in Inactive grid!");
         }
     }
 

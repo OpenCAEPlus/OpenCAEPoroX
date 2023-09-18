@@ -98,7 +98,7 @@ private:
     OCP_BOOL       flagJump;
     HexahedronFace interFace;
     // after the Axes are determined, blocks will be placed along the y+, or along the
-    // y- if y+, then flagForward equals 1.0, else -1.0, this relates to calculation of
+    // y-. if y+, then flagForward equals 1.0, else -1.0, this relates to calculation of
     // area normal vector
     OCP_DBL flagForward;
 };

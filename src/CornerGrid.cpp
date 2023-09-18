@@ -45,7 +45,7 @@ void ConnGrid::AddHalfConn(const OCP_USI& n,
         }
     }
 
-    halfConn[nConn].Ad_dd = areaE;
+    halfConn[nConn].Ad_dd         = areaE;
     halfConn[nConn].d             = d;
     halfConn[nConn].neigh         = n;
     halfConn[nConn].directionType = direction;
@@ -1150,9 +1150,10 @@ void OCP_COORD::SetupCornerPoints()
             if (jj == blockconn[nn].nConn) {
                 continue;
             }
+
             if (blockconn[n].halfConn[j].Ad_dd <= 0 ||
                 blockconn[nn].halfConn[jj].Ad_dd <= 0) {
-                // OCP_FALSE connection
+                // false connection
                 continue;
             }
 

@@ -37,9 +37,9 @@ OCP_USI Output4Vtk::InitASCII(const string& dir,
     outVtk << VTK_POINTS << " " << nP << " " << VTK_FLOAT << "\n";
     OCP_USI iterP = 0;
     for (OCP_USI n = 0; n < nP; n++) {
-        outVtk << setw(6) << points_xyz[iterP]
-            << setw(10) << points_xyz[iterP + 1]
-            << setw(10) << points_xyz[iterP + 2] << "\n";
+        outVtk << setw(12) << points_xyz[iterP]
+            << setw(12) << points_xyz[iterP + 1]
+            << setw(12) << points_xyz[iterP + 2] << "\n";
         iterP += 3;
     }
     
