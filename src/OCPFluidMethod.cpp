@@ -357,10 +357,6 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
         const auto fluxnum = conn.iteratorConn[c].FluxNum();
         auto       Flux    = conn.flux[fluxnum];
 
-        if (c == 2813) {
-            cout << endl;
-        }
-
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
