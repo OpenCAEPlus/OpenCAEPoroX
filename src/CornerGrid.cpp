@@ -33,13 +33,22 @@ void ConnGrid::AddHalfConn(const OCP_USI& n,
             // OCP_ABORT("Too many Neighbors!");
         }
     }
-    halfConn[nConn].Ad_dd         = area * d / (d * d) * flag;
+
+    const OCP_DBL areaE = area * d / (d * d) * flag;
+    if (!isfinite(areaE)) {
+        if (d * d < TINY) {
+            OCP_ABORT("Hexahedron reduces to a face!");
+        }
+        else {
+            OCP_ABORT("Effective Area is NAN");
+        }
+    }
+
+    halfConn[nConn].Ad_dd = areaE;
     halfConn[nConn].d             = d;
     halfConn[nConn].neigh         = n;
     halfConn[nConn].directionType = direction;
     nConn++;
-
-    // cout << n << "   " << direction << "   " << halfConn[nConn-1].Ad_dd << endl;
 }
 
 void OCP_COORD::Allocate(const USI& Nx, const USI& Ny, const USI& Nz)
@@ -167,7 +176,7 @@ void OCP_COORD::SetAllFlags(const HexahedronFace& oFace, const HexahedronFace& F
 
     // if the face reduce to a line
     if (sqrt((Face.p0 - Face.p1) * (Face.p0 - Face.p1)) <= TEENY && 
-        sqrt((Face.p3 - Face.p2) * (Face.p3 - Face.p2)) <= TEENY && false) {
+        sqrt((Face.p3 - Face.p2) * (Face.p3 - Face.p2)) <= TEENY) {
         interFace = Face;
         flagJump  = OCP_TRUE;     
     }
@@ -1054,7 +1063,7 @@ void OCP_COORD::SetupCornerPoints()
                     interFace = Face;
                     areaV   = interFace.CalAreaVector();
                     blockconn[cindex].AddHalfConn(oindex, areaV, Pc2f, direction, flagForward);
-                    num_conn++;
+                    num_conn++;                   
                 }
 
                 //

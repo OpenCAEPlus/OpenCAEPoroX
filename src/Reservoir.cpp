@@ -527,7 +527,7 @@ OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
     const USI np = bulk.vs.np;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
-        for (USI j = 0; j < np; j++) {
+        for (USI j = 0; j < np; j++) {           
             const OCP_USI uId = conn.vs.upblock[c * np + j];
             bulk.cfl[uId * np + j] += fabs(conn.vs.flux_vj[c * np + j]) * dt;
         }

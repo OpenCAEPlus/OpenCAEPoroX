@@ -52,6 +52,10 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
     default:
         OCP_ABORT("Wrong BulkConnType!");
     }
+
+    if (!isfinite(bp.trans)) {
+        OCP_ABORT("Transmissbility is NAN!");
+    }
     
 }
 
