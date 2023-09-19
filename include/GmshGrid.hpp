@@ -36,12 +36,12 @@ class Edge
 public:
     Edge(const OCP_USI& b, const OCP_USI& e) {
         if (b < e) {
-            bId = b - 1;
-            eId = e - 1;
+            bId = b;
+            eId = e;
         }
         else {
-            bId = e - 1;
-            eId = b - 1;
+            bId = e;
+            eId = b;
         }
     }
     Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in) : Edge(b, e) {
@@ -80,47 +80,14 @@ public:
 class Polygon
 {
 public:
-    Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo) {
-        p.clear();
-        for (USI n = 0; n < pIndex.size(); n++) {
-            p.push_back(pIndex[n] - 1);
-        }    
-        tag      = tag_in;
-        physical = phyinfo;
-    }
-
-    void CalCenter(const vector<OCP_DBL>& points) {
-        const USI np = p.size();
-        center.resize(3);
-        for (USI i = 0; i < np; i++) {
-            center[0] += points[3 * p[i] + 0];
-            center[1] += points[3 * p[i] + 1];
-            center[2] += points[3 * p[i] + 2];
-        }
-        center[0] /= np;
-        center[1] /= np;
-        center[2] /= np;
-    }
-    void CalArea(const vector<OCP_DBL>& points) {
-        if (p.size() == 3) {
-            const OCP_DBL* p0 = &points[3 * p[0]];
-            const OCP_DBL* p1 = &points[3 * p[1]];
-            const OCP_DBL* p2 = &points[3 * p[2]];
-            const USI      x  = 0;
-            const USI      y  = 1;
-            area = 0.5 * abs((p2[x] - p1[x]) * (p0[y] - p1[y]) - (p2[y] - p1[y]) * (p0[x] - p1[x]));
-        }
-        else {
-            const OCP_DBL* p0 = &points[3 * p[0]];
-            const OCP_DBL* p1 = &points[3 * p[1]];
-            const OCP_DBL* p2 = &points[3 * p[2]];
-            const OCP_DBL* p3 = &points[3 * p[3]];
-            const USI      x  = 0;
-            const USI      y  = 1;
-            area = 0.5 * (abs((p2[x] - p1[x]) * (p0[y] - p1[y]) - (p2[y] - p1[y]) * (p0[x] - p1[x])) 
-                 + abs((p0[x] - p3[x]) * (p2[y] - p3[y]) - (p0[y] - p3[y]) * (p2[x] - p3[x])));
-        }
-    }
+    /// constructor
+    Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo);
+    /// Calculate the center
+    void CalCenter(const vector<OCP_DBL>& points);
+    /// Calculate the area
+    void CalArea(const vector<OCP_DBL>& points);
+    /// judge if a point is in the element
+    OCP_BOOL IfPointInElement(const Point3D& objP, const vector<OCP_DBL>& points);
 
 public:   
     /// index of points(Store in order or reverse order)
@@ -132,7 +99,7 @@ public:
     /// location
     string          location;
     /// center
-    vector<OCP_DBL> center;
+    Point3D         center;
     /// area
     OCP_DBL         area;
 };

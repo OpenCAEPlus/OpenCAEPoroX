@@ -32,10 +32,14 @@ using namespace std;
 
 enum class GridType
 {
+    /// Structured Grid
+    structured,
     /// Orthogonal Grid
     orthogonal,
     /// Cornerpoint Grid
     corner,
+    /// Unstructured Grid
+    unstructured,
     /// Gmsh Grid
     gmsh
 };
@@ -107,30 +111,62 @@ class PreParamWell
 {
    
 public:
-    PreParamWell(vector<string>& info) {
-        name = info[0];
-        if (info[1] != "DEFAULT") group = info[1];
-        I = stoi(info[2]);
-        J = stoi(info[3]);
-        if (info[4] != "DEFAULT") depth = stod(info[4]);
-    }
+    /// Input well in structured grid
+    PreParamWell(vector<string>& info);
+    /// Input well in unstructured grid
+    PreParamWell(vector<string>& info, const string& unstructured);
+    /// Input perforations
+    void InputCOMPDAT(vector<string>& vbuf);
+    /// Input perforations in structured grid
+    void InputCOMPDATS(vector<string>& vbuf);
+    /// Input perforations in unstructured grid
+    void InputCOMPDATUS(vector<string>& vbuf);
+    /// Get number of perforations
+    USI GetPerfNum() { return max(I_perf.size(), X_perf.size()); }
     // static infomation
+    /// Grid type
+    GridType gridType;
     // WELSPECS
-    string  name;             ///< Name of Well
-    string  group{ "FEILD" }; ///< Group the well belongs to.
-    USI     I;                ///< I index of well.
-    USI     J;                ///< J index of well.
-    OCP_DBL depth{ -1.0 };    ///< Depth of well.
+    /// Name of Well
+    string   name;
+    /// Group the well belongs to.
+    string   group{ "FEILD" }; 
+    /// I index of well header, for structured grid
+    USI      I;
+    /// J index of well header, for structured grid
+    USI      J; 
+    /// Depth of well header
+    OCP_DBL  depth{ -1.0 };
+    /// x-coordinate of well header, for unstructured grid
+    OCP_DBL  X;
+    /// y-coordinate of well header, for unstructured grid
+    OCP_DBL  Y;
+    /// z-coordinate of well header, for unstructured grid
+    OCP_DBL  Z;
 
     // COMPDAT ---- for all perforation.
-    vector<USI>     I_perf;   ///< I-index of perforation in grid.
-    vector<USI>     J_perf;   ///< J-index of perforation in grid.
-    vector<USI>     K_perf;   ///< K-index of perforation in grid.
-    vector<OCP_DBL> WI;       ///< Transmissibility connection factor.
-    vector<OCP_DBL> diameter; ///< Diameter of perforations.
+    /// I-index of perforation, for structured grid
+    vector<USI>     I_perf;  
+    /// J-index of perforation, for structured grid
+    vector<USI>     J_perf;
+    /// K-index of perforation, for structured grid
+    vector<USI>     K_perf; 
+    /// x-coordinate of perforation, for unstructured grid
+    vector<OCP_DBL> X_perf;
+    /// y-coordinate of perforation, for unstructured grid
+    vector<OCP_DBL> Y_perf;
+    /// z-coordinate of perforation, for unstructured grid
+    vector<OCP_DBL> Z_perf;
+    /// Transmissibility connection factor
+    vector<OCP_DBL> WI; 
+    /// Diameter of perforations
+    vector<OCP_DBL> diameter; 
+    ///  Effective Kh
     vector<OCP_DBL> kh;
-    vector<OCP_DBL> skinFactor; ///< Skin factor.
-    vector<string>  direction;  ///< Direction of perforations.
+    /// Skin factor
+    vector<OCP_DBL> skinFactor; 
+    /// Direction of perforations, for structured grid
+    vector<string>  direction;  
 };
 
 
@@ -386,6 +422,8 @@ protected:
 protected:
     /// Setup connections between wells and active grids
     void SetupConnWellGrid();
+    /// Return the index of bulk perforated by well
+    OCP_USI GetPerfLocation(const PreParamWell& well, const USI& p);
 
 protected:
     /// Num of wells

@@ -3,7 +3,6 @@ TABDIMS
 1 7 1
 
 GMSHPRO
-
 Facies 1
 *PORO 0.44
 *PERM 4E-11
@@ -101,5 +100,14 @@ BCPERM
 *CPC      NAN
 /
 END
-
 GMSHPROEND
+
+
+WELSPECS
+I1 Field 0.9 0.3 0 GAS COORDINATE 
+I2 Field 1.7 0.7 0 GAS COORDINATE 
+/
+
+COMPDAT
+'I*'   3*  1*   0.5   3*   /
+/

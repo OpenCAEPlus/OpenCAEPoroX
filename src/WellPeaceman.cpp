@@ -331,13 +331,13 @@ void PeacemanWell::CalTrans(const Bulk& bk)
     if (opt.type == WellType::injector) {
         for (USI p = 0; p < numPerf; p++) {
             perf[p].transINJ = 0;
-            OCP_USI k = perf[p].location;
-            OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+            const OCP_USI k    = perf[p].location;
+            const OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
 
             // single phase
             for (USI j = 0; j < np; j++) {
                 perf[p].transj[j] = 0;
-                OCP_USI id = k * np + j;
+                const OCP_USI id = k * np + j;
                 if (bvs.phaseExist[id]) {
                     perf[p].transj[j] = temp * bvs.kr[id] / bvs.mu[id];
                     perf[p].transINJ += perf[p].transj[j];
@@ -350,8 +350,8 @@ void PeacemanWell::CalTrans(const Bulk& bk)
     }
     else {
         for (USI p = 0; p < numPerf; p++) {
-            OCP_USI k = perf[p].location;
-            OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+            const OCP_USI k    = perf[p].location;
+            const OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
 
             // multi phase
             for (USI j = 0; j < np; j++) {

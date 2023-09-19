@@ -16,6 +16,69 @@
 
 #include "GmshGrid.hpp"
 
+Polygon::Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo) 
+{
+	p        = pIndex;
+	tag      = tag_in;
+	physical = phyinfo;
+}
+
+
+void Polygon::CalCenter(const vector<OCP_DBL>& points) 
+{
+	const USI np = p.size();
+	center.Reset();
+	for (USI i = 0; i < np; i++) {
+		center.x += points[3 * p[i] + 0];
+		center.y += points[3 * p[i] + 1];
+		center.z += points[3 * p[i] + 2];
+	}
+	center *= 1.0 / np;
+}
+
+
+void Polygon::CalArea(const vector<OCP_DBL>& points) 
+{
+	if (p.size() == 3) {
+		const OCP_DBL* p0 = &points[3 * p[0]];
+		const OCP_DBL* p1 = &points[3 * p[1]];
+		const OCP_DBL* p2 = &points[3 * p[2]];
+		const USI      x = 0;
+		const USI      y = 1;
+		area = 0.5 * fabs((p2[x] - p1[x]) * (p0[y] - p1[y]) - (p2[y] - p1[y]) * (p0[x] - p1[x]));
+	}
+	else {
+		const OCP_DBL* p0 = &points[3 * p[0]];
+		const OCP_DBL* p1 = &points[3 * p[1]];
+		const OCP_DBL* p2 = &points[3 * p[2]];
+		const OCP_DBL* p3 = &points[3 * p[3]];
+		const USI      x = 0;
+		const USI      y = 1;
+		area = 0.5 * (fabs((p2[x] - p1[x]) * (p0[y] - p1[y]) - (p2[y] - p1[y]) * (p0[x] - p1[x]))
+			+ fabs((p0[x] - p3[x]) * (p2[y] - p3[y]) - (p0[y] - p3[y]) * (p2[x] - p3[x])));
+	}
+}
+
+
+OCP_BOOL Polygon::IfPointInElement(const Point3D& objP, const vector<OCP_DBL>& points)
+{
+	OCP_DBL   tmpArea = 0;
+	const USI numP    = p.size();
+	for (USI i = 0; i < numP; i++) {
+		const Point3D tmpPoint = CrossProduct(objP - Point3D(&points[3 * p[i % numP]]), 
+			                                  objP - Point3D(&points[3 * p[(i + 1) % numP]]));
+		tmpArea += sqrt(tmpPoint * tmpPoint);
+	}
+	tmpArea *= 0.5;
+
+	if (fabs(area - tmpArea) < TINY) {
+		return OCP_TRUE;
+	}
+	else {
+		return OCP_FALSE;
+	}
+}
+
 
 void GMSHGrid::InputGrid(const string& file)
 {
@@ -78,7 +141,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
 					const OCP_USI bId = elemNodeTags[t][2 * l];
 					const OCP_USI eId = elemNodeTags[t][2 * l + 1];
-					edges.insert(Edge(bId, eId, elemTags[t][l], physicalName));
+					edges.insert(Edge(bId - 1, eId - 1, elemTags[t][l], physicalName));
 					lineTag++;
 				}
 			}			
@@ -111,16 +174,16 @@ void GMSHGrid::InputGrid2D(const string& file)
 						const OCP_USI bId = elemNodeTags[t][np * l + (i % np)];
 						const OCP_USI eId = elemNodeTags[t][np * l + (i + 1) % np];
 
-						auto iter = edges.find(Edge(bId, eId));
+						auto iter = edges.find(Edge(bId - 1, eId - 1));
 						if (iter == edges.end()) {
-							edges.insert(Edge(bId, eId, lineTag++, faceIndex, i));
+							edges.insert(Edge(bId - 1, eId - 1, lineTag++, faceIndex, i));
 						}
 						else {
 							iter->faceIndex.push_back(faceIndex);
 							iter->faceIndex.push_back(i);
 						}
 
-						indexFace.push_back(elemNodeTags[t][np * l + i]);
+						indexFace.push_back(elemNodeTags[t][np * l + i] - 1);
 					}
 					faceIndex++;
 					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName));
@@ -164,8 +227,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
 			const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
 			const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
-			const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - Point3D(element.center.data());
-			e.area.push_back(abs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
+			const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - element.center;
+			e.area.push_back(fabs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
 		}
 		else {
 			// internal edge
@@ -177,8 +240,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 				const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
 				const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
 				const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
-				const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - Point3D(element.center.data());
-				e.area.push_back(abs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
+				const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - element.center;
+				e.area.push_back(fabs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
 			}
 		}
 	}

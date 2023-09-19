@@ -4,7 +4,7 @@ MODEL
 THERMAL
 
 GMSH
-spe11a.msh
+test.msh
 /
 
 INCLUDE
@@ -17,9 +17,9 @@ VTKSCHED
 
 
 METHOD
-FIM
+FIM  bsr.fasp
 /
 
 TSTEP
-0
+0.001
 /
