@@ -277,7 +277,17 @@ void GMSHGrid::InputProperty(ifstream& ifs)
 						facies[f].kz = stod(vbuf[1]);
 					}
 				}
+				break;
 			}
+		}
+
+		// other params
+		vbuf.clear();
+		istringstream tmp(fbuf);
+		while (tmp >> fbuf)  vbuf.push_back(fbuf);
+		
+		if (!vbuf.empty() && vbuf[0] == "THICKNESS") {
+			thickness = stod(vbuf[1]);
 		}
 	}
 }

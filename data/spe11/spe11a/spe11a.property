@@ -14,7 +14,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 2
@@ -28,7 +27,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 3
@@ -42,7 +40,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 4
@@ -56,7 +53,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 5
@@ -70,7 +66,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 6
@@ -84,7 +79,6 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
-/
 END
 
 Facies 7
@@ -98,10 +92,11 @@ BCPERM
 *CWREPERM NAN
 *CNREPERM NAN
 *CPC      NAN
-/
 END
-GMSHPROEND
 
+THICKNESS  0.01
+
+GMSHPROEND
 
 WELSPECS
 I1 Field 0.9 0.3 0 GAS COORDINATE 
@@ -109,5 +104,5 @@ I2 Field 1.7 0.7 0 GAS COORDINATE
 /
 
 COMPDAT
-'I*'   3*  1*   0.5   3*   /
+'I*'   3*  1*   1.8E-3   3*   /
 /

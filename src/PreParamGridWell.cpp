@@ -12,109 +12,6 @@
 #include "PreParamGridWell.hpp"
 
 
-PreParamWell::PreParamWell(vector<string>& info) 
-{
-    gridType = GridType::structured;
-    name = info[0];
-    if (info[1] != "DEFAULT") group = info[1];
-    I = stoi(info[2]);
-    J = stoi(info[3]);
-    if (info[4] != "DEFAULT") depth = stod(info[4]);
-}
-
-
-PreParamWell::PreParamWell(vector<string>& info, const string& unstructured) 
-{
-    gridType = GridType::unstructured;
-    name = info[0];
-    if (info[1] != "DEFAULT") group = info[1];
-    X = stod(info[2]);
-    Y = stod(info[3]);
-    Z = stod(info[4]);
-}
-
-
-void PreParamWell::InputCOMPDAT(vector<string>& vbuf)
-{
-    if (gridType == GridType::structured) {
-        InputCOMPDATS(vbuf);
-    }
-    else if (gridType == GridType::unstructured) {
-        InputCOMPDATUS(vbuf);
-    }
-    else {
-        OCP_ABORT("INAVAILABLE GRID TYPE!");
-    }
-}
-
-
-void PreParamWell::InputCOMPDATS(vector<string>& vbuf)
-{
-    const USI k1 = stoi(vbuf[3]);
-    const USI k2 = stoi(vbuf[4]);
-
-    for (USI k = k1; k <= k2; k++) {
-        if (vbuf[1] == "DEFAULT" || vbuf[2] == "DEFAULT") {
-            I_perf.push_back(I);
-            J_perf.push_back(J);
-        }
-        else {
-            I_perf.push_back(stoi(vbuf[1]));
-            J_perf.push_back(stoi(vbuf[2]));
-        }
-        K_perf.push_back(k);
-
-        if (vbuf[5] != "DEFAULT")
-            WI.push_back(stod(vbuf[5]));
-        else
-            WI.push_back(-1.0);
-
-        if (vbuf[6] != "DEFAULT")
-            diameter.push_back(stod(vbuf[6]));
-        else
-            diameter.push_back(1.0);
-
-        if (vbuf[7] != "DEFAULT")
-            kh.push_back(stod(vbuf[7]));
-        else
-            kh.push_back(-1.0);
-
-        if (vbuf[8] != "DEFAULT")
-            skinFactor.push_back(stod(vbuf[8]));
-        else
-            skinFactor.push_back(0.0);
-
-        if (vbuf[9] != "DEFAULT")
-            direction.push_back(vbuf[9]);
-        else
-            direction.push_back("z");
-    }
-}
-
-
-void PreParamWell::InputCOMPDATUS(vector<string>& vbuf)
-{
-    if (vbuf[1] == "DEFAULT")  X_perf.push_back(X); 
-    else                       X_perf.push_back(stod(vbuf[1])); 
-    if (vbuf[2] == "DEFAULT")  Y_perf.push_back(Y);
-    else                       Y_perf.push_back(stod(vbuf[2]));
-    if (vbuf[3] == "DEFAULT")  Z_perf.push_back(Z);
-    else                       Z_perf.push_back(stod(vbuf[3]));
-
-    if (vbuf[4] != "DEFAULT")  WI.push_back(stod(vbuf[4]));
-    else                       WI.push_back(-1.0);
-
-    if (vbuf[5] != "DEFAULT")  diameter.push_back(stod(vbuf[5]));
-    else                       diameter.push_back(1.0);
-
-    if (vbuf[6] != "DEFAULT")  kh.push_back(stod(vbuf[6]));
-    else                       kh.push_back(-1.0);
-
-    if (vbuf[7] != "DEFAULT")  skinFactor.push_back(stod(vbuf[7]));
-    else                       skinFactor.push_back(0.0);
-}
-
-
 void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
 {
     workdir = myWorkdir;
@@ -592,10 +489,10 @@ void PreParamGridWell::InputWELSPECS(ifstream& ifs)
         const USI len = vbuf.size();
 
         if (vbuf[len - 1] == "COORDINATE" || vbuf[len - 2] == "COORDINATE") {
-            well.push_back(PreParamWell(vbuf, "unstructrued"));
+            well.push_back(WellParam(vbuf, "unstructrued"));
         }
         else {
-            well.push_back(PreParamWell(vbuf));
+            well.push_back(WellParam(vbuf));
         }     
     }
 }
@@ -1312,7 +1209,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 void PreParamGridWell::SetupGmshGrid()
 {
     SetupBasicGmshGrid();
-    CalActiveGrid(1E-6, 1E-6);
+    CalActiveGrid(1E-10, 1E-10);
     SetupActiveConnGmshGrid();
 
     OutputPointsGmshGrid();
@@ -1328,7 +1225,7 @@ void PreParamGridWell::SetupBasicGmshGrid()
 
     if (gmshGrid.dimen == 2) {
         for (OCP_USI n = 0; n < numGridM; n++) {
-            v[n]     = gmshGrid.elements[n].area;     /// let thickness be 1
+            v[n]     = gmshGrid.elements[n].area * gmshGrid.thickness;
             depth[n] = gmshGrid.elements[n].center.y; /// Use y-coordinate
         }
     }
@@ -1554,7 +1451,7 @@ void PreParamGridWell::SetupConnWellGrid()
 }
 
 
-OCP_USI PreParamGridWell::GetPerfLocation(const PreParamWell& well, const USI& p)
+OCP_USI PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
 {
     if (gridType >= GridType::structured && gridType < GridType::unstructured) {
         return (well.K_perf[p] - 1) * (nx * ny) + (well.J_perf[p] - 1) * nx + (well.I_perf[p] - 1);
@@ -1666,7 +1563,7 @@ void PreParamGridWell::FreeMemory()
 
 
 
-    vector<PreParamWell>().swap(well);
+    vector<WellParam>().swap(well);
 
     vector<OCP_DBL>().swap(v);
     vector<OCP_DBL>().swap(depth);

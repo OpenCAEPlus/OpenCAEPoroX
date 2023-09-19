@@ -72,6 +72,20 @@ const OCP_DBL CONV6 = 778.172448;            ///<
 const OCP_DBL CONV7 = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
 
 
+enum class GridType
+{
+    /// Structured Grid
+    structured,
+    /// Orthogonal Grid
+    orthogonal,
+    /// Cornerpoint Grid
+    corner,
+    /// Unstructured Grid
+    unstructured,
+    /// Gmsh Grid
+    gmsh
+};
+
 enum class OCPModel
 {
     /// none

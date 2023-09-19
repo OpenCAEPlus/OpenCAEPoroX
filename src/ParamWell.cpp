@@ -46,14 +46,109 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
     }
 }
 
+
 WellParam::WellParam(vector<string>& info)
 {
+    gridType = GridType::structured;
     name = info[0];
     if (info[1] != "DEFAULT") group = info[1];
     I = stoi(info[2]);
     J = stoi(info[3]);
     if (info[4] != "DEFAULT") depth = stod(info[4]);
 }
+
+
+WellParam::WellParam(vector<string>& info, const string& unstructured)
+{
+    gridType = GridType::unstructured;
+    name = info[0];
+    if (info[1] != "DEFAULT") group = info[1];
+    X = stod(info[2]);
+    Y = stod(info[3]);
+    Z = stod(info[4]);
+}
+
+
+void WellParam::InputCOMPDAT(vector<string>& vbuf)
+{
+    if (gridType == GridType::structured) {
+        InputCOMPDATS(vbuf);
+    }
+    else if (gridType == GridType::unstructured) {
+        InputCOMPDATUS(vbuf);
+    }
+    else {
+        OCP_ABORT("INAVAILABLE GRID TYPE!");
+    }
+}
+
+
+void WellParam::InputCOMPDATS(vector<string>& vbuf)
+{
+    const USI k1 = stoi(vbuf[3]);
+    const USI k2 = stoi(vbuf[4]);
+
+    for (USI k = k1; k <= k2; k++) {
+        if (vbuf[1] == "DEFAULT" || vbuf[2] == "DEFAULT") {
+            I_perf.push_back(I);
+            J_perf.push_back(J);
+        }
+        else {
+            I_perf.push_back(stoi(vbuf[1]));
+            J_perf.push_back(stoi(vbuf[2]));
+        }
+        K_perf.push_back(k);
+
+        if (vbuf[5] != "DEFAULT")
+            WI.push_back(stod(vbuf[5]));
+        else
+            WI.push_back(-1.0);
+
+        if (vbuf[6] != "DEFAULT")
+            diameter.push_back(stod(vbuf[6]));
+        else
+            diameter.push_back(1.0);
+
+        if (vbuf[7] != "DEFAULT")
+            kh.push_back(stod(vbuf[7]));
+        else
+            kh.push_back(-1.0);
+
+        if (vbuf[8] != "DEFAULT")
+            skinFactor.push_back(stod(vbuf[8]));
+        else
+            skinFactor.push_back(0.0);
+
+        if (vbuf[9] != "DEFAULT")
+            direction.push_back(vbuf[9]);
+        else
+            direction.push_back("z");
+    }
+}
+
+
+void WellParam::InputCOMPDATUS(vector<string>& vbuf)
+{
+    if (vbuf[1] == "DEFAULT")  X_perf.push_back(X);
+    else                       X_perf.push_back(stod(vbuf[1]));
+    if (vbuf[2] == "DEFAULT")  Y_perf.push_back(Y);
+    else                       Y_perf.push_back(stod(vbuf[2]));
+    if (vbuf[3] == "DEFAULT")  Z_perf.push_back(Z);
+    else                       Z_perf.push_back(stod(vbuf[3]));
+
+    if (vbuf[4] != "DEFAULT")  WI.push_back(stod(vbuf[4]));
+    else                       WI.push_back(-1.0);
+
+    if (vbuf[5] != "DEFAULT")  diameter.push_back(stod(vbuf[5]));
+    else                       diameter.push_back(1.0);
+
+    if (vbuf[6] != "DEFAULT")  kh.push_back(stod(vbuf[6]));
+    else                       kh.push_back(-1.0);
+
+    if (vbuf[7] != "DEFAULT")  skinFactor.push_back(stod(vbuf[7]));
+    else                       skinFactor.push_back(0.0);
+}
+
 
 Solvent::Solvent(const vector<string>& vbuf)
 {
@@ -72,9 +167,15 @@ void ParamWell::InputWELSPECS(ifstream& ifs)
         if (vbuf[0] == "/") break;
 
         DealDefault(vbuf);
-        well.push_back(WellParam(vbuf));
+        const USI len = vbuf.size();
+
+        if (vbuf[len - 1] == "COORDINATE" || vbuf[len - 2] == "COORDINATE") {
+            well.push_back(WellParam(vbuf, "unstructrued"));
+        }
+        else {
+            well.push_back(WellParam(vbuf));
+        }
     }
-    // cout << "WELSPECS" << endl;
 }
 
 void ParamWell::InputCOMPDAT(ifstream& ifs)
@@ -100,49 +201,10 @@ void ParamWell::InputCOMPDAT(ifstream& ifs)
                 tmp = (well[w].name == src);
 
             if (tmp) {
-
-                USI k1 = stoi(vbuf[3]);
-                USI k2 = stoi(vbuf[4]);
-
-                for (USI k = k1; k <= k2; k++) {
-                    if (vbuf[1] == "DEFAULT" || vbuf[2] == "DEFAULT") {
-                        well[w].I_perf.push_back(well[w].I);
-                        well[w].J_perf.push_back(well[w].J);
-                    } else {
-                        well[w].I_perf.push_back(stoi(vbuf[1]));
-                        well[w].J_perf.push_back(stoi(vbuf[2]));
-                    }
-                    well[w].K_perf.push_back(k);
-
-                    if (vbuf[5] != "DEFAULT")
-                        well[w].WI.push_back(stod(vbuf[5]));
-                    else
-                        well[w].WI.push_back(-1.0);
-
-                    if (vbuf[6] != "DEFAULT")
-                        well[w].diameter.push_back(stod(vbuf[6]));
-                    else
-                        well[w].diameter.push_back(1.0);
-
-                    if (vbuf[7] != "DEFAULT")
-                        well[w].kh.push_back(stod(vbuf[7]));
-                    else
-                        well[w].kh.push_back(-1.0);
-
-                    if (vbuf[8] != "DEFAULT")
-                        well[w].skinFactor.push_back(stod(vbuf[8]));
-                    else
-                        well[w].skinFactor.push_back(0.0);
-
-                    if (vbuf[9] != "DEFAULT")
-                        well[w].direction.push_back(vbuf[9]);
-                    else
-                        well[w].direction.push_back("z");
-                }
+                well[w].InputCOMPDAT(vbuf);
             }
         }
     }
-    // cout << "COMPDAT" << endl;
 }
 
 void ParamWell::InputWCONINJE(ifstream& ifs)
