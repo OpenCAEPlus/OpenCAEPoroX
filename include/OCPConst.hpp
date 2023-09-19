@@ -71,14 +71,16 @@ const OCP_DBL CONV5 = 459.67;                ///< 0 F = CONV5 R
 const OCP_DBL CONV6 = 778.172448;            ///<
 const OCP_DBL CONV7 = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
 
-// Model Type
-const USI ISOTHERMALMODEL = 1;
-const USI THERMALMODEL    = 2;
 
-// Grid Type
-const USI ORTHOGONAL_GRID = 1; ///< Grid type = orthogonal
-const USI CORNER_GRID     = 2; ///< Grid type = corner-point
-const USI GENERAL_GRID    = 3; ///< Grid type = general
+enum class OCPModel
+{
+    /// none
+    none,
+    /// thermal model
+    isothermal,
+    /// thermal model
+    thermal
+};
 
 // Solution methods
 const USI IMPEC = 1; ///< Solution method = IMPEC

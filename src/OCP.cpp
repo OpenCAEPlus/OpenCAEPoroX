@@ -42,12 +42,12 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         switch (control.GetModel()) {
-        case ISOTHERMALMODEL:
+        case OCPModel::isothermal:
             if (control.printLevel >= PRINT_MIN) {
                 cout << endl << "Dynamic simulation for isothermal models" << endl;
             }
             break;
-        case THERMALMODEL:
+        case OCPModel::thermal:
             if (control.printLevel >= PRINT_MIN) {
                 cout << endl << "Dynamic simulation for thermal models" << endl;
             }

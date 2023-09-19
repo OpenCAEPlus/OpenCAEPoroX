@@ -118,7 +118,7 @@ public:
     void Setup(const Domain& domain);
 
     /// Get model
-    USI GetModel() const { return model; }
+    auto GetModel() const { return model; }
 
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
@@ -193,11 +193,16 @@ protected:
     OCP_INT          workState_loc;       ///< work state of current process
 
 protected:
-    USI    model;            ///< model: ifThermal, isothermal
-    USI    method;           ///< Discrete method
-    string workDir;          ///< Current work directory
-    string fileName;         ///< Current file name
-    string linearSolverFile; ///< File name of linear Solver
+    /// model: ifThermal, isothermal
+    OCPModel model{ OCPModel::none };
+    /// Discrete method
+    USI      method;  
+    /// Current work directory
+    string   workDir; 
+    /// Current file name
+    string   fileName;  
+    /// File name of linear Solver
+    string   linearSolverFile; 
 
     vector<OCP_DBL> criticalTime; ///< Set of Critical time by user
 

@@ -113,7 +113,7 @@ protected:
 class ScalarSamgSolver : public SamgSolver
 {
 public:
-    ScalarSamgSolver(const USI& model) {
+    ScalarSamgSolver(const OCPModel& model) {
         blockdim = 1;
         nsys     = 1;
         ndiu     = 1;
@@ -133,17 +133,17 @@ public:
 class VectorSamgSolver : public SamgSolver
 {
 public:
-    VectorSamgSolver(const USI& blockDim, const USI& model) {
+    VectorSamgSolver(const USI& blockDim, const OCPModel& model) {
         blockdim = blockDim;
         nsys     = blockdim;
         iu_tmp.resize(blockdim);
         ifirst   = 1;   // zero solution as initial guess
         for (USI i = 0; i < blockdim; i++)  iu_tmp[i] = i + 1;
-        if (model == ISOTHERMALMODEL) {
+        if (model == OCPModel::isothermal) {
             nunknown_description.resize(nsys, 2);
             nunknown_description[0] = 0;          // Pressure
         }
-        else if (model == THERMALMODEL) {
+        else if (model == OCPModel::thermal) {
             nunknown_description.resize(nsys, 2); // Concentration(init)
             nunknown_description.front() = 0;     // Pressure
             nunknown_description.back()  = 100;   // Temperature           

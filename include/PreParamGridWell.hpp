@@ -248,7 +248,7 @@ protected:
     /// Num of fracture grid
     OCP_USI         numGridF{ 0 };
     /// thermal model or isothermal model
-    USI             model{ 0 };
+    OCPModel        model{ OCPModel::none };
 
     // Orthogonal grid
     /// Num of grids along x-direction.

@@ -170,9 +170,9 @@ void LinearSystem::CheckSolution() const
 }
 
 /// Setup LinearSolver
-void LinearSystem::SetupLinearSolver(const USI& model,
-                                     const string& dir,
-                                     const string& file)
+void LinearSystem::SetupLinearSolver(const OCPModel& model,
+                                     const string&   dir,
+                                     const string&   file)
 {
     solveDir = dir;
     string lsMethod = file;

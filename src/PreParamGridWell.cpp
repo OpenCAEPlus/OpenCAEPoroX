@@ -227,7 +227,7 @@ void PreParamGridWell::CheckInput()
     cout << endl << "-------------------------------------" << endl;
     cout << "Check Grid param ... begin" << endl;
 
-    if (model == 0)                       OCP_ABORT("WRONG MODEL!");
+    if (model == OCPModel::none)           OCP_ABORT("WRONG MODEL!");
 
 
     if (gridType == GridType::corner) {
@@ -285,11 +285,11 @@ void PreParamGridWell::InputMODEL(ifstream& ifs)
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     if (vbuf[0] == "THERMAL") {
-        model = THERMALMODEL;
+        model = OCPModel::thermal;
     }
     else if (vbuf[0] == "ISOTHERMAL")
     {
-        model = ISOTHERMALMODEL;
+        model = OCPModel::isothermal;
     }
     else {
         OCP_ABORT("WRONG MODEL in keyword MODEL!");
@@ -1417,10 +1417,10 @@ void PreParamGridWell::CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2)
 {
     switch (model)
     {
-    case ISOTHERMALMODEL:
+    case OCPModel::isothermal:
         CalActiveGridIsoT(e1, e2);
         break;
-    case THERMALMODEL:
+    case OCPModel::thermal:
         CalActiveGridT(e1, e2);
         break;
     default:

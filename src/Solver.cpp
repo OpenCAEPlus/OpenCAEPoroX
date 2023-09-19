@@ -15,12 +15,13 @@
 void Solver::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
 
-    OCPModel = ctrl.GetModel();
-    switch (OCPModel) {
-        case ISOTHERMALMODEL:
+    model = ctrl.GetModel();
+    switch (model) 
+    {
+        case OCPModel::isothermal:
             SetupIsoT(rs, ctrl);
             break;
-        case THERMALMODEL:
+        case OCPModel::thermal:
             SetupT(rs, ctrl);
             break;
         default:
@@ -45,11 +46,12 @@ void Solver::SetupT(Reservoir& rs, const OCPControl& ctrl)
 /// Initialize the reservoir setting for different solution methods.
 void Solver::InitReservoir(Reservoir& rs)
 {
-    switch (OCPModel) {
-        case ISOTHERMALMODEL:
+    switch (model) 
+    {
+        case OCPModel::isothermal:
             IsoTSolver.InitReservoir(rs);
             break;
-        case THERMALMODEL:
+        case OCPModel::thermal:
             TSolver.InitReservoir(rs);
             break;
         default:
@@ -94,11 +96,12 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
              << ",  Last dt: " << ctrl.last_dt << " Days" << endl;
     }
 
-    switch (OCPModel) {
-        case ISOTHERMALMODEL:
+    switch (model) 
+    {
+        case OCPModel::isothermal:
             GoOneStepIsoT(rs, ctrl);
             break;
-        case THERMALMODEL:
+        case OCPModel::thermal:
             GoOneStepT(rs, ctrl);
             break;
         default:

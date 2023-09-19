@@ -247,7 +247,7 @@ void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(1);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(ISOTHERMALMODEL, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
@@ -939,7 +939,7 @@ void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 1);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(ISOTHERMALMODEL, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void IsoT_FIM::InitFlash(Bulk& bk)

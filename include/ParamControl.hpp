@@ -46,14 +46,20 @@ public:
 class ParamControl
 {
 public:
-    USI    model{ISOTHERMALMODEL}; ///< model: thermal or isothermal.
-    string workDir;                ///< Current work directory.
-    string fileName;               ///< Current file name
-
-    string             method;      ///< Discretization method for fluid equations.
-    string             linearSolve; ///< Fasp file.
-    vector<TuningPair> tuning_T;    ///< Tuning set.
-    TUNING             tuning;      ///< Tuning.
+    /// model: thermal or isothermal.
+    OCPModel           model{OCPModel::isothermal };
+    /// Current work directory.
+    string             workDir;   
+    /// Current file name
+    string             fileName;               
+    /// Discretization method for fluid equations.
+    string             method;    
+    /// linear solver input file.
+    string             linearSolve; 
+    /// Tuning set.
+    vector<TuningPair> tuning_T;  
+    /// Tuning.
+    TUNING             tuning;      
 
     /// Critical time records the important time points, at those times, the process of
     /// simulation should be carefully treated, for example, the boundary conditions

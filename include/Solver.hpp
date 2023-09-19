@@ -44,11 +44,11 @@ private:
 
 protected:
     /// Model
-    USI OCPModel{ISOTHERMALMODEL};
+    OCPModel         model{ OCPModel::none };
     /// Solver for isothermal models with fixed T
     IsothermalSolver IsoTSolver;
     /// Solver for ifThermal models with varied T
-    ThermalSolver TSolver;
+    ThermalSolver    TSolver;
 };
 
 #endif /* end if __SOLVER_HEADER__ */

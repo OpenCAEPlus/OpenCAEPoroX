@@ -56,7 +56,7 @@ public:
 
     // Linear Solver
     /// Setup LinearSolver.
-    void SetupLinearSolver(const USI& model, const string& dir, const string& file);
+    void SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
     /// Assemble Mat for Linear Solver.
     void AssembleMatLinearSolver() { LS->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
