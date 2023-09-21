@@ -1,7 +1,13 @@
 -- for spe11a -- test
 
+
 MODEL
-THERMAL
+ISOTHERMAL
+
+TABDIMS
+1 7 1
+
+METRIC
 
 GMSH
 spe11a.msh
@@ -10,6 +16,11 @@ spe11a.msh
 INCLUDE
 spe11a.property
 /
+
+
+
+
+
 
 
 VTKSCHED

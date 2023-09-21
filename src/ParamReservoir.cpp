@@ -323,7 +323,7 @@ void ParamReservoir::InputBrooksCorey(ifstream& ifs)
         USI     len   = vbuf.size();
         OCP_DBL val   = -1;
         while (index < len) {
-            if (vbuf[index + 1] != "N/A")  val = stod(vbuf[index + 1]);
+            if (vbuf[index + 1] != "NAN")  val = stod(vbuf[index + 1]);
             else                           val = -1;
                 
             if (vbuf[index] == "*SWIMM") {

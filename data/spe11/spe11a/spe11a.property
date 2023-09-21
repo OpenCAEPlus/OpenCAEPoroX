@@ -1,7 +1,4 @@
 
-TABDIMS
-1 7 1
-
 GMSHPRO
 Facies 1
 *PORO 0.44
@@ -14,6 +11,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 2
@@ -27,6 +25,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 3
@@ -40,6 +39,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 4
@@ -53,6 +53,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 5
@@ -66,6 +67,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 6
@@ -79,6 +81,7 @@ BCPERM
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
+/
 END
 
 Facies 7
@@ -92,6 +95,7 @@ BCPERM
 *CWREPERM NAN
 *CNREPERM NAN
 *CPC      NAN
+/
 END
 
 THICKNESS  0.01

@@ -286,8 +286,10 @@ void GMSHGrid::InputProperty(ifstream& ifs)
 		istringstream tmp(fbuf);
 		while (tmp >> fbuf)  vbuf.push_back(fbuf);
 		
-		if (!vbuf.empty() && vbuf[0] == "THICKNESS") {
-			thickness = stod(vbuf[1]);
+		if (dimen == 2) {
+			if (!vbuf.empty() && vbuf[0] == "THICKNESS") {
+				thickness = stod(vbuf[1]);
+			}
 		}
 	}
 }

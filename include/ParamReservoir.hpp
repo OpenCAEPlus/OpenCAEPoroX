@@ -130,77 +130,105 @@ public:
     void InputRR(ifstream& ifs);
 
 public:
-    USI            NTPVT;          ///< num of EoS region.
-    USI            numCom{0};      ///< num of components, water is excluded.
-    USI            numPhase{2};    ///< num of phase, water is excluded, constant now.
-    vector<string> Cname;          ///< Name of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Tc;  ///< Critical temperature of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Pc;  ///< Critical pressure of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Vc;  ///< Critical volume of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Zc;  ///< Critical Z-factor of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> MW;  ///< Molecular Weight of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Acf; ///< Acentric factor of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> OmegaA;   ///< OMEGA_A of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> OmegaB;   ///< OMEGA_B of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> Vshift;   ///< Volume shift of hydrocarbon components
-    Type_A_r<vector<OCP_DBL>> parachor; ///< PARACHOR of hydrocarbon components
+    /// num of EOS region.
+    USI            NTPVT;   
+    /// num of components who will be in EOS calculations
+    USI            numCom{0}; 
+    /// num of phase who will be in EOS calculations
+    USI            numPhase{2}; 
+    /// Name of components
+    vector<string> Cname; 
+    /// Critical temperature of components
+    Type_A_r<vector<OCP_DBL>> Tc;
+    /// Critical pressure of components
+    Type_A_r<vector<OCP_DBL>> Pc; 
+    /// Critical volume of components
+    Type_A_r<vector<OCP_DBL>> Vc;
+    /// Critical Z-factor of components
+    Type_A_r<vector<OCP_DBL>> Zc; 
+    /// Molecular Weight of components
+    Type_A_r<vector<OCP_DBL>> MW;
+    /// Acentric factor of components
+    Type_A_r<vector<OCP_DBL>> Acf; 
+    /// OMEGA_A of components
+    Type_A_r<vector<OCP_DBL>> OmegaA; 
+    /// OMEGA_B of components
+    Type_A_r<vector<OCP_DBL>> OmegaB; 
+    /// Volume shift of components
+    Type_A_r<vector<OCP_DBL>> Vshift;  
+    /// PARACHOR of components
+    Type_A_r<vector<OCP_DBL>> parachor; 
+
     // for viscosity calculation
-    Type_A_r<vector<OCP_DBL>>
-        Vcvis; ///< Critical volume used for viscosity calculations only.
-    Type_A_r<vector<OCP_DBL>>
-                    Zcvis; ///< Critical Z-factor used for viscosity calculations only.
-    vector<OCP_DBL> LBCcoef;     ///< LBC coefficients for viscosity calculation
-    vector<vector<OCP_DBL>> BIC; ///< Binary interaction
-    // ifThermal only
-    Type_A_r<vector<OCP_DBL>> molden; ///< component molar density at reference
-                                      ///< temperature and reference pressure, lb/ft3
-    Type_A_r<vector<OCP_DBL>> cp;     ///< component compressibility, 1/psi
-    Type_A_r<vector<OCP_DBL>> ct1;  ///< the first ifThermal expansion coefficient, 1/F
-    Type_A_r<vector<OCP_DBL>> ct2;  ///< the second ifThermal expansion coefficient, 1/F
-    Type_A_r<vector<OCP_DBL>> cpt;  ///< the coefficient of density dependence on
-                                    ///< temperature and pressure, 1/psi-F
-    Type_A_r<vector<OCP_DBL>> cpl1; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F
-    Type_A_r<vector<OCP_DBL>> cpl2; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^2
-    Type_A_r<vector<OCP_DBL>> cpl3; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^3
-    Type_A_r<vector<OCP_DBL>> cpl4; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^4
-    Type_A_r<vector<OCP_DBL>> cpg1; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F
-    Type_A_r<vector<OCP_DBL>> cpg2; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^2
-    Type_A_r<vector<OCP_DBL>> cpg3; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^3
-    Type_A_r<vector<OCP_DBL>> cpg4; ///< coefficients in the component liquid enthalpy
-                                    ///< calculations, Btu/lbmol/F^4
-    Type_A_r<vector<OCP_DBL>>
-        hvapr; ///< coefficients in the component gas enthalpy calculations, Btu/lbmol
-    Type_A_r<vector<OCP_DBL>>
-        hvr; ///< coefficients in the vaporization enthalpy calculations
-    Type_A_r<vector<OCP_DBL>>
-        ev; ///< coefficients in the vaporization enthalpy calculations
-    Type_A_r<vector<OCP_DBL>>
-        avisc; ///< coefficients in water and oil viscosity correlation formulae
-    Type_A_r<vector<OCP_DBL>>
-        bvisc; ///< coefficients in water and oil viscosity correlation formulae
-    Type_A_r<vector<OCP_DBL>>
-        avg; ///< coefficients Ak in gas viscosity correlation formulae
-    Type_A_r<vector<OCP_DBL>>
-        bvg; ///< coefficients Bk in gas viscosity correlation formulae
-    /// viscosity-versus-temperature dependence,  This table can specify the
+    ///< Critical volume used for viscosity calculations only.
+    Type_A_r<vector<OCP_DBL>> Vcvis; 
+    /// Critical Z-factor used for viscosity calculations only.
+    Type_A_r<vector<OCP_DBL>> Zcvis; 
+    /// LBC coefficients for viscosity calculation
+    vector<OCP_DBL>           LBCcoef;     
+    /// Binary interaction
+    vector<vector<OCP_DBL>>   BIC;
+
+    // Thermal only
+    /// component molar density at reference temperature and reference pressure, lb/ft3
+    Type_A_r<vector<OCP_DBL>> molden; 
+    /// component compressibility, 1/psi
+    Type_A_r<vector<OCP_DBL>> cp;     
+    /// the first ifThermal expansion coefficient, 1/F
+    Type_A_r<vector<OCP_DBL>> ct1;  
+    /// the second ifThermal expansion coefficient, 1/F
+    Type_A_r<vector<OCP_DBL>> ct2;  
+    /// the coefficient of density dependence on temperature and pressure, 1/psi-F
+    Type_A_r<vector<OCP_DBL>> cpt;  
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F
+    Type_A_r<vector<OCP_DBL>> cpl1; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^2
+    Type_A_r<vector<OCP_DBL>> cpl2; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^3
+    Type_A_r<vector<OCP_DBL>> cpl3; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^4
+    Type_A_r<vector<OCP_DBL>> cpl4; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F
+    Type_A_r<vector<OCP_DBL>> cpg1; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^2
+    Type_A_r<vector<OCP_DBL>> cpg2; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^3
+    Type_A_r<vector<OCP_DBL>> cpg3; 
+    /// coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^4
+    Type_A_r<vector<OCP_DBL>> cpg4; 
+    /// coefficients in the component gas enthalpy calculations, Btu/lbmol
+    Type_A_r<vector<OCP_DBL>> hvapr; 
+    /// coefficients in the vaporization enthalpy calculations
+    Type_A_r<vector<OCP_DBL>> hvr; 
+    /// coefficients in the vaporization enthalpy calculations
+    Type_A_r<vector<OCP_DBL>> ev; 
+    /// coefficients in water and oil viscosity correlation formulae
+    Type_A_r<vector<OCP_DBL>> avisc;
+    /// coefficients in water and oil viscosity correlation formulae
+    Type_A_r<vector<OCP_DBL>> bvisc;
+    /// coefficients Ak in gas viscosity correlation formulae
+    Type_A_r<vector<OCP_DBL>> avg;
+    /// coefficients Bk in gas viscosity correlation formulae
+    Type_A_r<vector<OCP_DBL>> bvg; 
+
+    /// viscosity-versus-temperature dependence, This table can specify the
     /// viscosity-versus-temperature-pressure dependence.
     TableSet viscTab;
 
-    vector<OCP_DBL> Pref; ///< reference pressure
-    vector<OCP_DBL> Tref; ///< reference temperature
-
-    vector<string> SSMparamSTA; ///< Params for Solving Phase Spliting with SSM
-    vector<string> NRparamSTA;  ///< Params for Solving Phase Spliting with NR
-    vector<string> SSMparamSP;  ///< Params for Solving Phase Spliting with SSM
-    vector<string> NRparamSP;   ///< Params for Solving Phase Spliting with NR
-    vector<string> RRparam;     ///< Params for Solving Rachford-Rice equations
+    /// reference pressure
+    vector<OCP_DBL> Pref; 
+    /// reference temperature
+    vector<OCP_DBL> Tref;
+    /// Params for Solving Phase Spliting with SSM
+    vector<string> SSMparamSTA; 
+    /// Params for Solving Phase Spliting with NR
+    vector<string> NRparamSTA;  
+    /// Params for Solving Phase Spliting with SSM
+    vector<string> SSMparamSP;  
+    /// Params for Solving Phase Spliting with NR
+    vector<string> NRparamSP; 
+    /// Params for Solving Rachford-Rice equations
+    vector<string> RRparam;     
 };
 
 
