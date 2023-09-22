@@ -217,7 +217,7 @@ void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
 void ParamReservoir::InputTABLE2(ifstream& ifs, const string& tabName)
 {
     Table2Set*      obj = FindPtrTable2(tabName);
-    Table2          tmpTab;
+    Table2          tmpTab(1);
     vector<string>  vbuf;
 
     while (ReadLine(ifs, vbuf)) {
@@ -225,11 +225,20 @@ void ParamReservoir::InputTABLE2(ifstream& ifs, const string& tabName)
         if (vbuf[0][0] == '*') {
             // there is reference data
             tmpTab.refName = vbuf[0];
+            tmpTab.refData.push_back(stod(vbuf[0]));
+            tmpTab.data.resize(tmpTab.refData.size());
+            continue;
         }
-        else {
-            // no reference data
+        auto& data = tmpTab.data.back();
+
+        if (vbuf.back() == "/")        vbuf.pop_back();
+        if (data.size() < vbuf.size()) data.resize(vbuf.size());
+        for (USI i = 0; i < vbuf.size(); i++) {
+            data[i].push_back(stod(vbuf[i]));
         }
     }
+    tmpTab.SetColNum();
+    obj->data.push_back(tmpTab);
 }
 
 

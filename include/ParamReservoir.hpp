@@ -30,15 +30,21 @@ public:
     void DisplayTable() const; ///< Print table
 
 public:
-    string                          name;    ///< Name of table.
-    USI                             colNum;  ///< Number of columns of table.
-    vector<vector<vector<OCP_DBL>>> data;    ///< All table with the same name.
+    /// Name of table.
+    string                          name;  
+    /// Number of columns of table.
+    USI                             colNum; 
+    /// All table with the same name.
+    vector<vector<vector<OCP_DBL>>> data;    
 };
 
 /// 2D table, which means the table values usually depend on two variable, 
 /// eg. pressure and temperature
 class Table2
 {
+public:
+    Table2(const USI& n) { data.resize(n); }
+    void SetColNum() { colNum = data[0].size(); }
 public:
     /// name of refData
     string                          refName;

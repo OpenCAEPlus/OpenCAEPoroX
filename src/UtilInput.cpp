@@ -50,6 +50,7 @@ OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slas
     return OCP_TRUE;
 }
 
+
 void DealDefault(vector<string>& result)
 {
     vector<string> tmp;

@@ -42,6 +42,7 @@ constexpr inline long long Map_Str2Int(const char* mystr, const USI& len)
     return res;
 }
 
+
 /// ReadLine is the core function while inputting the file. It will capture the next
 /// line which is meanningful, for example, not blank line or comments, and then gets
 /// rid of some useless characters such as space, commas. Finally, the segments of rest
