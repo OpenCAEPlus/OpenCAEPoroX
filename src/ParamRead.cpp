@@ -120,6 +120,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputTABLE2(ifs, keyword);
                 break;
 
+            case Map_Str2Int("GARCIAW", 7):
+                paramRs.GARCIAW = OCP_TRUE;
+                break;
+
             case Map_Str2Int("ROCK", 4):
                 paramRs.InputROCK(ifs);
                 break;
@@ -228,6 +232,10 @@ void ParamRead::ReadFile(const string& filename)
             case Map_Str2Int("RPTSCHED", 8):
             case Map_Str2Int("VTKSCHED", 8):
                 paramOutput.InputRPTSCHED(ifs, keyword);
+                break;
+
+            case Map_Str2Int("NCOMPS", 6):
+                paramRs.InputNCOMPS(ifs);
                 break;
 
             case Map_Str2Int("CNAMES", 6):

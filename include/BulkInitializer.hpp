@@ -53,9 +53,11 @@ class BulkInitializer
 public:
 	void Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType);
     void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
+    auto& GetSwat() { return swat; }
 
 protected:
-    void InitHydroEqui(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
+    /// initialize reservoir with hydrostatic equilibrium only
+    void InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
 
 protected:
     /// Equilibration data specification
@@ -66,6 +68,9 @@ protected:
     vector<OCPTable> initT_Tab;
     /// number of nodes of P vs. Z table
     USI              numNodes{ 50 };
+
+    /// initial reservoir water saturation
+    vector<OCP_DBL>  swat;
 };
 
 

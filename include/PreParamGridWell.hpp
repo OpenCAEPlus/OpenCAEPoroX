@@ -94,6 +94,25 @@ protected:
 };
 
 
+/// Initial reservoir contions for each grid, for example, saturation, pressure.
+class InitialReservoir
+{
+    friend class PreParamGridWell;
+    friend class Reservoir;
+
+public:
+    /// check and fill in the missing data if necessary
+    void CheckData(const OCP_USI& numGrid);
+
+protected:
+    /// Initial water saturation
+    vector<OCP_DBL> swat;
+    /// Initial water saturation in each grid and use saturation end point scaling
+    vector<OCP_DBL> swatInit;
+    /// if Pcow should be scaled.
+    OCP_BOOL        scalePcow{ OCP_FALSE };
+};
+
 
 /// Input grid information and well geometry information from input file
 /// Generate the connections between active grids and wells
@@ -226,11 +245,7 @@ protected:
     vector<USI>     ROCKNUM;   
 
     // Initial Condition
-    /// Initial water saturation in each grid.
-    vector<OCP_DBL> Swat; 
-    /// if Pcow should be scaled.
-    OCP_BOOL        scalePcow{ OCP_FALSE }; 
-
+    InitialReservoir initR;
 
     /// Grid Location
     vector<USI>     location;

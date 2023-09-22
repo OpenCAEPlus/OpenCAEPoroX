@@ -247,6 +247,44 @@ protected:
 
 
 /////////////////////////////////////////////////////
+// PVTH2O
+/////////////////////////////////////////////////////
+
+class OCP_PVTH2O : public OCPFuncTable2
+{
+	/// Each sub-table has 4 columns
+	/// 0th column: The water phase pressure. (Pw), (pa (METRIC))
+	/// 1th column: The corresponding water density. (kg/m3 (METRIC))
+	/// 2th column: The corresponding water viscosity. (Pa.s (METRIC))
+	/// 3th column: The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
+
+protected:
+
+};
+
+
+class OCP_PVTCO2 : public OCPFuncTable2
+{
+	/// Each sub-table has 4 columns
+	/// 0th column: The CO2 phase pressure. (Pw), (pa (METRIC))
+	/// 1th column: The corresponding CO2 density. (kg/m3 (METRIC))
+	/// 2th column: The corresponding CO2 viscosity. (Pa.s (METRIC))
+	/// 3th column: The corresponding solubility (mass fraction) of H2O in CO2 phase. (dimensionless)
+protected:
+
+};
+
+
+
+
+/////////////////////////////////////////////////////
+// PVCO2
+/////////////////////////////////////////////////////
+
+
+
+
+/////////////////////////////////////////////////////
 // Viscosity Calculation
 /////////////////////////////////////////////////////
 

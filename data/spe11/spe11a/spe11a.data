@@ -5,7 +5,12 @@ MODEL
 ISOTHERMAL
 
 TABDIMS
-1 7 1
+7 1 1
+
+BLACKOIL
+GAS
+WATER
+
 
 METRIC
 
@@ -18,21 +23,36 @@ spe11a.property
 /
 
 
+SWAT
+1
+/
+
 
 PVTH2O
--- pressure  density    viscosibility  CO2 in water
-1.00E+05	9.98E+02	1.00E-03       6.53E-04
-1.07E+05	9.98E+02	1.00E-03       6.98E-04
-1.13E+05	9.98E+02	1.00E-03       7.42E-04
-1.20E+05	9.98E+02	1.00E-03       7.86E-04
+-- pressure     density(pure phase) 	viscosibility(pure phase)  CO2 in water
+1.00E+05	   9.98E+02	 				1.00E-03       				6.53E-04
+1.07E+05	   9.98E+02	 				1.00E-03       				6.98E-04
+1.13E+05	   9.98E+02	 				1.00E-03       				7.42E-04
+1.20E+05	   9.98E+02	 				1.00E-03       				7.86E-04
 /
 
 PVTCO2
--- pressure  density    viscosibility  H2O in gas 
-1.00E+05	1.82E+00	1.47E-05      2.35E-02
-1.07E+05	1.94E+00	1.47E-05      2.21E-02
-1.13E+05	2.06E+00	1.47E-05      2.08E-02
-1.20E+05	2.18E+00	1.47E-05      1.96E-02
+-- pressure     density(pure phase) 	viscosibility(pure phase)  H2O in gas 
+1.00E+05		1.82E+00				1.47E-05      				2.35E-02
+1.07E+05		1.94E+00				1.47E-05      				2.21E-02
+1.13E+05		2.06E+00				1.47E-05      				2.08E-02
+1.20E+05		2.18E+00				1.47E-05      				1.96E-02
+/
+
+
+GARCIAW
+
+NCOMPS
+2 
+/
+
+MW
+18.015E-3  44.1E-3
 /
 
 

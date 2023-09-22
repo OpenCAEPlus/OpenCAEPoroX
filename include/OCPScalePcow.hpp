@@ -85,7 +85,6 @@ protected:
 /// The Class scales the Pcow
 class ScalePcow
 {
-    friend class Reservoir;
     // For Output
     friend class Out4RPT;
 
@@ -98,7 +97,11 @@ public:
     void ScaleDer(const OCP_USI& bId, const USI& mIndex) const;
     /// Scale Pcow
     void Scale(const OCP_USI& bId, const USI& mIndex) const;
+    /// Get swatinit
+    auto& GetSwatInit() { return vs.swatInit; }
+    /// Reset to last time step
     void ResetTolastTimeStep() { }
+    /// Update last time step
     void UpdateLastTimeStep() { }
 
 protected:

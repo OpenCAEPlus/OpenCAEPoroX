@@ -895,7 +895,7 @@ vector<OCP_DBL>* ComponentParam::FindPtr02(const string& varName)
 
 void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
 {
-    OCP_ASSERT((numCom > 0) && (NTPVT > 0), "NPNC has not been set!");
+    OCP_ASSERT((numCom > 0) && (NTPVT > 0), "number of components has not been input!");
 
     Type_A_r<vector<OCP_DBL>>* objPtr = nullptr;
     objPtr                            = FindPtr01(keyword);

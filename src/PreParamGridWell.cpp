@@ -79,6 +79,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("SATNUM", 6):
             case Map_Str2Int("PVTNUM", 6):           
             case Map_Str2Int("ROCKNUM", 7):
+            case Map_Str2Int("SWAT", 4):
             case Map_Str2Int("SWATINIT", 8):
             case Map_Str2Int("SIGMAV", 6):
             case Map_Str2Int("MULTZ", 5):
@@ -591,10 +592,15 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         myPtr = &kz;
         break;
 
+    case Map_Str2Int("SWAT", 4):
+        initR.swat.reserve(numGrid);
+        myPtr = &initR.swat;
+        break;
+
     case Map_Str2Int("SWATINIT", 8):
-        Swat.reserve(numGrid);
-        myPtr = &Swat;
-        scalePcow = OCP_TRUE;
+        initR.swatInit.reserve(numGrid);
+        myPtr = &initR.swatInit;
+        initR.scalePcow = OCP_TRUE;
         break;
 
     case Map_Str2Int("SIGMAV", 6):
@@ -703,6 +709,20 @@ void PreParamGridWell::MultiplyVal(vector<OCP_DBL>& obj,
 }
 
 
+/////////////////////////////////////////////////////////////////////
+// Initial reservoir data
+/////////////////////////////////////////////////////////////////////
+
+void InitialReservoir::CheckData(const OCP_USI& numGrid)
+{
+    if (swat.size() == 1) {
+        swat.resize(numGrid, swat[0]);
+    }
+    else if (swat.size() != 0 && swat.size() != numGrid) {
+        OCP_ABORT("SWAT is not given correctly!");
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////////
 // Generate active grids' connections
@@ -712,6 +732,7 @@ void PreParamGridWell::Setup()
 {
     SetupGrid();
     SetupConnWellGrid();
+    initR.CheckData(numGrid);
 }
 
 
@@ -1554,7 +1575,8 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(ky);
     vector<OCP_DBL>().swap(kz);
     vector<OCP_DBL>().swap(sigma);
-    vector<OCP_DBL>().swap(Swat);
+    vector<OCP_DBL>().swap(initR.swat);
+    vector<OCP_DBL>().swap(initR.swatInit);
     vector<OCP_DBL>().swap(multZ);
     vector<USI>().swap(ACTNUM);
     vector<USI>().swap(SATNUM);

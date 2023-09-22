@@ -46,6 +46,10 @@ public:
                 for (USI i = 0; i < NTPVT; i++)
                     PVTs.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
             }
+            else if (rs_param.water && !rs_param.oil && rs_param.gas) {
+                for (USI i = 0; i < NTPVT; i++)
+                    PVTs.push_back(new MixtureUnitBlkOil_GW(rs_param, i, opts));
+            }
             else {
                 OCP_ABORT("Inavailable Mixture Type!");
             }
