@@ -430,18 +430,6 @@ public:
     /// Check Rock
     void CheckRock();
 
-    /// Check if keyword EQUIL is given.
-    void CheckEQUIL() const;
-
-    /// Check if density and gravity are both input, only one of them is needed.
-    void CheckDenGrav() const;
-
-    /// Check existence of disgas, it could only exist when both oil and gas exist.
-    void CheckPhase() const;
-
-    /// (Todo) Initialization of equilibration of only one region is realized.
-    void CheckEqlRegion() const;
-
     /// Check cpl1, cpl2, cpl3, cpl4
     void CheckCPL();
 

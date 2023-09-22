@@ -1583,8 +1583,6 @@ void PreParamGridWell::FreeMemory()
     vector<USI>().swap(PVTNUM);
     vector<USI>().swap(ROCKNUM);
 
-
-
     vector<WellParam>().swap(well);
 
     vector<OCP_DBL>().swap(v);

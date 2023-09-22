@@ -109,7 +109,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalKrPc(rs.bulk);
 
     rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
-    rs.bulk.optMs.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
+    rs.bulk.optMs.boundary.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
 
     rs.allWells.CalFlux(rs.bulk);
 

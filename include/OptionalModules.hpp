@@ -15,7 +15,7 @@
 #include "AcceleratePEC.hpp"
 #include "OCPMiscible.hpp"
 #include "OCPScalePcow.hpp"
-#include "HeatLoss.hpp"
+#include "OCPBoundary.hpp"
 #include "HeatConduct.hpp"
 
 class OptionalModules
@@ -36,7 +36,7 @@ public:
         misFac.ResetTolastTimeStep();
         misCur.ResetTolastTimeStep();
         scalePcow.ResetTolastTimeStep();
-        heatLoss.ResetToLastTimeStep();
+        boundary.ResetToLastTimeStep();
         heatConduct.ResetToLastTimeStep();
     }
     void UpdateLastTimeStep()
@@ -46,7 +46,7 @@ public:
         misFac.UpdateLastTimeStep();
         misCur.UpdateLastTimeStep();
         scalePcow.UpdateLastTimeStep();
-        heatLoss.UpdateLastTimeStep();
+        boundary.UpdateLastTimeStep();
         heatConduct.UpdateLastTimeStep();
     }
 
@@ -93,18 +93,14 @@ protected:
 public:
 
     void SetupIndependentModule(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
-        heatLoss.Setup(rs_param, bvs.nb);
+        boundary.Setup(rs_param, bvs);
         heatConduct.Setup(rs_param, bvs);
     }
 
-    /////////////////////////////////////////////////////////////////////
-    // Thermal
-    /////////////////////////////////////////////////////////////////////
-
 public:
 
-    /// Heat Loss
-    HeatLoss       heatLoss;
+    /// Boundary condition handler
+    OCPBoundary    boundary;
     /// Heat Conduct
     HeatConduct    heatConduct;
 

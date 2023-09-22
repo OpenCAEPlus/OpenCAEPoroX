@@ -82,9 +82,9 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CalResFIM(const OCP_USI& bId, const Bul
     }
     
     // Heat Loss
-    if (optM->heatLoss.IfUse()) {
+    if (optM->boundary.heatLoss.IfUse()) {
         // dT
-        res[nc + 1] += dt * optM->heatLoss.GetHl(bId);
+        res[nc + 1] += dt * optM->boundary.heatLoss.GetHl(bId);
     }
     return res;
 }
@@ -126,9 +126,9 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const B
     }
 
     // Heat Loss iterm
-    if (optM->heatLoss.IfUse()) {
+    if (optM->boundary.heatLoss.IfUse()) {
         // dT
-        dFdXp[dim * dim - 1] += dt * optM->heatLoss.GetHlT(bId);
+        dFdXp[dim * dim - 1] += dt * optM->boundary.heatLoss.GetHlT(bId);
     }
 
     return dFdXp;

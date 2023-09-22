@@ -579,9 +579,6 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
 /// Check consistency of input parameters.
 void ParamReservoir::CheckParam()
 {
-    CheckEQUIL();
-    CheckDenGrav();
-    CheckPhase();
     CheckRock();
     CheckCPL();
     CheckCPG();
@@ -593,37 +590,6 @@ void ParamReservoir::CheckRock()
 {
     if (rockSet.size() != NTROOC) {
         OCP_ABORT("Wrong ROCK or ROCKT!");
-    }
-}
-
-/// Check EQUIL keyword.
-void ParamReservoir::CheckEQUIL() const
-{
-    if (EQUIL.empty()) OCP_ABORT("EQUIL is missing!");
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::CheckDenGrav() const
-{
-    if (density.activity && gravity.activity) {
-        OCP_ABORT("Both DENSITY and GRAVITY have been given, just one can be used!");
-    }
-}
-
-/// TODO: Add Doxygen
-void ParamReservoir::CheckPhase() const
-{
-    if (blackOil && disGas && (!gas && !oil)) {
-        OCP_ABORT("DISGAS can only be used only if OIL and GAS are both present!");
-    }
-}
-
-
-/// TODO: Add Doxygen
-void ParamReservoir::CheckEqlRegion() const
-{
-    if (PBVD_T.data.size() > 1) {
-        OCP_ABORT("More than one equilibrium region is not supported!");
     }
 }
 
