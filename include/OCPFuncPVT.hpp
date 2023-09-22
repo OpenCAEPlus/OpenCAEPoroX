@@ -303,7 +303,7 @@ protected:
 class ViscosityMethod01 : public ViscosityMethod
 {
 public:
-	ViscosityMethod01(const TableSet& ts);
+	ViscosityMethod01(const Table2& tab);
 	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
 	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 

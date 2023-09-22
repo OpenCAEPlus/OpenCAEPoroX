@@ -18,17 +18,17 @@
 /////////////////////////////////////////////////////
 
 
-void OCPFuncTable2::Setup(const TableSet& ts) 
+void OCPFuncTable2::Setup(const Table2& tab) 
 {
-	numtable = ts.data.size();
-	ref      = ts.refData;
+	numtable = tab.data.size();
+	ref      = tab.refData;
 	ref.resize(numtable, 0);
 
 	for (USI i = 0; i < numtable; i++) {
-		tables.push_back(OCPTable(ts.data[i]));
+		tables.push_back(OCPTable(tab.data[i]));
 	}
 
-	lendata = ts.colNum - 1;
+	lendata = tab.colNum - 1;
 	data.resize(lendata);
 	cdata1.resize(lendata);
 	cdata2.resize(lendata);

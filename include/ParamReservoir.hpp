@@ -23,8 +23,7 @@
 
 using namespace std;
 
-/// TableSet is used to store a series of tables which have the same type. For example,
-/// a series of Function Table, each Function table is two-dimension.
+/// TableSet is used to store a series of tables.
 class TableSet
 {
 public:
@@ -33,9 +32,33 @@ public:
 public:
     string                          name;    ///< Name of table.
     USI                             colNum;  ///< Number of columns of table.
-    vector<string>                  refName; ///< name of refData
-    vector<OCP_DBL>                 refData; ///< refData for each sub data.
     vector<vector<vector<OCP_DBL>>> data;    ///< All table with the same name.
+};
+
+/// 2D table, which means the table values usually depend on two variable, 
+/// eg. pressure and temperature
+class Table2
+{
+public:
+    /// name of refData
+    string                          refName;
+    /// refData for each sub table
+    vector<OCP_DBL>                 refData;
+    /// Number of columns of table.
+    USI                             colNum;  
+    /// data
+    vector<vector<vector<OCP_DBL>>> data;
+};
+
+
+/// a series of Table2
+class Table2Set
+{
+public:
+    /// Name of table
+    string           name;    
+    /// all table with the same name.
+    vector<Table2>   data;    
 };
 
 
@@ -120,8 +143,6 @@ public:
     void InputLBCCOEF(ifstream& ifs);
     /// Input the Binary interaction of components
     void InputBIC(ifstream& ifs);
-    /// Input VISCTAB
-    void InputVISCTAB(ifstream& ifs);
     // Method params
     void InputSSMSTA(ifstream& ifs);
     void InputNRSTA(ifstream& ifs);
@@ -213,7 +234,7 @@ public:
 
     /// viscosity-versus-temperature dependence, This table can specify the
     /// viscosity-versus-temperature-pressure dependence.
-    TableSet viscTab;
+    Table2Set viscTab;
 
     /// reference pressure
     vector<OCP_DBL> Pref; 
@@ -313,6 +334,7 @@ public:
     /// Find corresponding variable according to the name of variable.
     /// It is used for the scope of the table.
     TableSet* FindPtrTable(const string& varName);
+    Table2Set* FindPtrTable2(const string& varName);
 
     /// Initialize the default value in reservoir, such as temperature, density, table.
     void Init();
@@ -327,8 +349,10 @@ public:
     /// Input the keyword: RTEMP. RTEMP gives the temperature of reservoir.
     void InputRTEMP(ifstream& ifs);
 
-    /// Input PVTtable and SATtable such as SWOF, PVCO.
+    /// Input table, fro example, PVTtable and SATtable such as SWOF, PVCO.
     void InputTABLE(ifstream& ifs, const string& tabName);
+    /// Input Table2, for example, VISCTAB
+    void InputTABLE2(ifstream& ifs, const string& tabName);
 
     /// Input the keyword: ROCK. ROCK contains the compressibility factor and reference
     /// pressure at initial porosity.
@@ -368,7 +392,6 @@ public:
     }
     void InputLBCCOEF(ifstream& ifs) { comsParam.InputLBCCOEF(ifs); }
     void InputBIC(ifstream& ifs) { comsParam.InputBIC(ifs); };
-    void InputVISCTAB(ifstream& ifs) { comsParam.InputVISCTAB(ifs); }
     void InputRefPR(ifstream& ifs, const string& keyword)
     {
         comsParam.InputRefPR(ifs, keyword);

@@ -51,7 +51,7 @@ class OCPFuncTable2
 {
 public:
 	OCPFuncTable2() = default;
-	void Setup(const TableSet& ts);
+	void Setup(const Table2& tab);
 	/// ref and tables[i][0] are both in in ascending order
 	void Eval(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out) const;
 	/// ref and tables[i][0] are both in in ascending order

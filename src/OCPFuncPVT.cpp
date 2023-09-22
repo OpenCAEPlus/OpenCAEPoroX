@@ -262,10 +262,10 @@ void OCP_PVCDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL
 /////////////////////////////////////////////////////
 
 
-ViscosityMethod01::ViscosityMethod01(const TableSet& ts)
+ViscosityMethod01::ViscosityMethod01(const Table2& tab)
 {
-	table.Setup(ts);
-	nc = ts.colNum - 1;
+	table.Setup(tab);
+	nc = tab.colNum - 1;
 	muc.resize(nc);
 	mucP.resize(nc);
 	mucT.resize(nc);
@@ -520,7 +520,7 @@ void ViscosityCalculation::Setup(const ComponentParam& param, const USI& tarId)
 		vM = new ViscosityMethod02(param.avisc.data[tarId], param.bvisc.data[tarId]);
 	}
 	else if (param.viscTab.data.size() > 0) {
-		vM = new ViscosityMethod01(param.viscTab);
+		vM = new ViscosityMethod01(param.viscTab.data[tarId]);
 	}
 	else if (param.LBCcoef.size() > 0) {
 		vM = new ViscosityMethod03(param, tarId);

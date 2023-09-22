@@ -63,16 +63,45 @@ TableSet* ParamReservoir::FindPtrTable(const string& varName)
             break;
 
         case Map_Str2Int("ZMFVD", 5):
+            if (!comps)      OCP_ABORT("COMPS isn't set correctly!");
+            if (numCom == 0) OCP_ABORT("Number of Components has not been specified!");
+
+            ZMFVD_T.colNum = numCom + 1;
             myPtr = &ZMFVD_T;
             break;
 
         case Map_Str2Int("TEMPVD", 6):
             myPtr = &TEMPVD_T;
             break;
+
+        default:
+            OCP_ABORT(varName + " is Inavailable!");
     }
 
     return myPtr;
 }
+
+
+Table2Set* ParamReservoir::FindPtrTable2(const string& varName)
+{
+
+    Table2Set* myPtr = nullptr;
+
+    switch (Map_Str2Int(&varName[0], varName.size())) 
+    {
+        case Map_Str2Int("VISCTAB", 7):
+            if (numCom == 0) OCP_ABORT("Number of Components has not been specified!");
+
+            myPtr = &comsParam.viscTab;
+            break;
+
+        default:
+            OCP_ABORT(varName + " is Inavailable!");
+    }
+
+    return myPtr;
+}
+
 
 /// Initialize tables and other reservoir parameters.
 void ParamReservoir::Init()
@@ -120,6 +149,9 @@ void ParamReservoir::InitTable()
     ZMFVD_T.name    = "ZMFVD";  // colnum equals numCom(hydrocarbon) + 1
     TEMPVD_T.name   = "TEMPVD"; // colnum equals 2
     TEMPVD_T.colNum = 2;
+
+    comsParam.viscTab.name = "VISCTAB"; // colnum equals numCom(hydrocarbon) + 1
+
 }
 
 /// TODO: Add Doxygen
@@ -155,18 +187,9 @@ void ParamReservoir::InputRTEMP(ifstream& ifs)
 /// TODO: Add Doxygen
 void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
 {
-    TableSet* obj;
-    obj = FindPtrTable(tabName);
-    if (obj == nullptr) {
-        OCP_ABORT("Wrong table name :" + tabName);
-    }
+    TableSet* obj = FindPtrTable(tabName);
 
-    USI col = obj->colNum;
-    if (tabName == "ZMFVD") {
-        if (!comps) OCP_ABORT("COMPS isn't set correctly!");
-        obj->colNum = numCom + 1;
-        col         = obj->colNum;
-    }
+    const USI col = obj->colNum;
     vector<vector<OCP_DBL>> tmpTab(col);
 
     vector<string> vbuf;
@@ -189,6 +212,26 @@ void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
     if (CURRENT_RANK == MASTER_PROCESS)
         obj->DisplayTable();
 }
+
+
+void ParamReservoir::InputTABLE2(ifstream& ifs, const string& tabName)
+{
+    Table2Set*      obj = FindPtrTable2(tabName);
+    Table2          tmpTab;
+    vector<string>  vbuf;
+
+    while (ReadLine(ifs, vbuf)) {
+        if (vbuf[0] == "/") break;
+        if (vbuf[0][0] == '*') {
+            // there is reference data
+            tmpTab.refName = vbuf[0];
+        }
+        else {
+            // no reference data
+        }
+    }
+}
+
 
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCK(ifstream& ifs)
@@ -624,11 +667,6 @@ void TableSet::DisplayTable() const
          << name << "\n---------------------" << endl;
 
     for (USI n = 0; n < data.size(); n++) {
-        if (refName.size() > n) {
-            cout << refName[n] << "   ";
-            cout << refData[n] << endl;
-        }
-
         const USI len = data[n][0].size();
         for (USI i = 0; i < len; i++) {
             for (USI j = 0; j < colNum; j++) {
@@ -964,52 +1002,6 @@ void ComponentParam::InputBIC(ifstream& ifs)
     }
 }
 
-void ComponentParam::InputVISCTAB(ifstream& ifs)
-{
-    vector<string>          vbuf;
-    vector<vector<OCP_DBL>> tmp;
-    USI                     ncol = numCom + 1; // temp + comps
-    tmp.resize(ncol);
-    OCP_BOOL flag = OCP_TRUE;
-
-
-    while (OCP_TRUE) {
-        if (flag) {
-            ReadLine(ifs, vbuf);
-            flag = OCP_FALSE;
-        }
-
-        if (vbuf[0] == "/") break;
-
-        if (vbuf[0] == "ATPRES") {
-            viscTab.refName.push_back("ATPRES");
-            viscTab.refData.push_back(stod(vbuf[1]));
-            ReadLine(ifs, vbuf);
-        }
-        // Read Table
-        while (OCP_TRUE) {
-            for (USI i = 0; i < ncol; i++) {
-                tmp[i].push_back(stod(vbuf[i]));
-            }
-            ReadLine(ifs, vbuf);
-            if (vbuf[0] == "ATPRES" || vbuf[0] == "/") {
-                viscTab.data.push_back(tmp);
-                tmp.clear();
-                tmp.resize(ncol);
-                break;
-            }
-        }
-        if (vbuf[0] == "/") break;
-    }
-    viscTab.name   = "VISCTAB";
-    viscTab.colNum = ncol;
-
-    
-    if (CURRENT_RANK == MASTER_PROCESS) {
-        viscTab.DisplayTable();
-        cout << "/" << endl;
-    }
-}
 
 /// TODO: Add Doxygen
 void ComponentParam::InputSSMSTA(ifstream& ifs)

@@ -276,7 +276,7 @@ void ParamRead::ReadFile(const string& filename)
                 break;
 
             case Map_Str2Int("VISCTAB", 7):
-                paramRs.InputVISCTAB(ifs);
+                paramRs.InputTABLE2(ifs, keyword);
                 break;
 
             case Map_Str2Int("SSMSTA", 6):

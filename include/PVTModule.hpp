@@ -59,11 +59,11 @@ public:
 
         if (PVTNUM.empty()) PVTNUM.resize(bvs.nb, 0);
 
-        bvs.np     = PVTs[0]->GetVs()->np;
-        bvs.nc     = PVTs[0]->GetVs()->nc;
-        bvs.o = PVTs[0]->GetVs()->o;
-        bvs.g = PVTs[0]->GetVs()->g;
-        bvs.w = PVTs[0]->GetVs()->w;
+        bvs.np = PVTs[0]->GetVs()->np;
+        bvs.nc = PVTs[0]->GetVs()->nc;
+        bvs.o  = PVTs[0]->GetVs()->o;
+        bvs.g  = PVTs[0]->GetVs()->g;
+        bvs.w  = PVTs[0]->GetVs()->w;
     }
     auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
     auto GetMixture() const {return PVTs[0]->GetMixture();}
