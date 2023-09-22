@@ -337,6 +337,11 @@ public:
     TableSet PVDG_T; ///< Table set of PVDG.
     TableSet PVTW_T; ///< Table set of PVTW.
 
+    /// PVT property for H2O
+    Table2Set PVTH2O;
+    /// PVT property for CO2
+    Table2Set PVTCO2;
+
     /// Find corresponding variable according to the name of variable.
     /// It is used for the scope of the table.
     TableSet* FindPtrTable(const string& varName);

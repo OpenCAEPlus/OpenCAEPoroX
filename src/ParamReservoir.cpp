@@ -95,6 +95,14 @@ Table2Set* ParamReservoir::FindPtrTable2(const string& varName)
             myPtr = &comsParam.viscTab;
             break;
 
+        case Map_Str2Int("PVTH2O", 6):
+            myPtr = &PVTH2O;
+            break;
+
+        case Map_Str2Int("PVTCO2", 6):
+            myPtr = &PVTCO2;
+            break;
+
         default:
             OCP_ABORT(varName + " is Inavailable!");
     }
@@ -151,7 +159,8 @@ void ParamReservoir::InitTable()
     TEMPVD_T.colNum = 2;
 
     comsParam.viscTab.name = "VISCTAB"; // colnum equals numCom(hydrocarbon) + 1
-
+    PVTH2O.name = "PVTH2O";
+    PVTCO2.name = "PVTCO2";
 }
 
 /// TODO: Add Doxygen

@@ -114,6 +114,12 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputTABLE(ifs, keyword);
                 break;
 
+            case Map_Str2Int("VISCTAB", 7):
+            case Map_Str2Int("PVTH2O", 6):
+            case Map_Str2Int("PVTCO2", 6):
+                paramRs.InputTABLE2(ifs, keyword);
+                break;
+
             case Map_Str2Int("ROCK", 4):
                 paramRs.InputROCK(ifs);
                 break;
@@ -273,10 +279,6 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("BIC", 3):
                 paramRs.InputBIC(ifs);
-                break;
-
-            case Map_Str2Int("VISCTAB", 7):
-                paramRs.InputTABLE2(ifs, keyword);
                 break;
 
             case Map_Str2Int("SSMSTA", 6):
