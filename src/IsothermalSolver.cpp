@@ -30,6 +30,7 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
     }
 }
 
+
 /// Setup solution methods, including IMPEC and FIM.
 void IsothermalSolver::InitReservoir(Reservoir& rs)
 {
@@ -48,6 +49,7 @@ void IsothermalSolver::InitReservoir(Reservoir& rs)
     }
 }
 
+
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
@@ -65,6 +67,7 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 }
+
 
 /// Assemble linear systems for IMPEC and FIM.
 void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
@@ -91,6 +94,7 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
     OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
 }
 
+
 /// Solve linear systems for IMPEC and FIM.
 void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 { 
@@ -108,6 +112,7 @@ void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 }
+
 
 /// Update physical properties for IMPEC and FIM.
 OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
@@ -136,6 +141,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     return flag;
 }
 
+
 /// Finish up Newton-Raphson iteration for IMPEC and FIM.
 OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
@@ -150,6 +156,7 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 }
+
 
 /// Finish up time step for IMPEC and FIM.
 void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
@@ -167,7 +174,7 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
         default:
             OCP_ABORT("Wrong method type!");
     }
-    ctrl.UpdateIters();
+    ctrl.iters.UpdateTotal();
 }
 
 /*----------------------------------------------------------------------------*/

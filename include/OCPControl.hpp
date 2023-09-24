@@ -119,38 +119,53 @@ public:
 /// Record iteration information
 class ItersInfo
 {
+    friend class OCPControl;
+
 public:
+    /// Update all Iters
+    void UpdateTotal();
+    /// Reset all Iters
+    void Reset();
+    /// Update the number of Newton iterations.
+    void UpdateNR() { NR++; }
+    /// Update the number of linear iterations.
+    void UpdateLS(const USI& num) { LS += num; }
+    /// Get num of time steps
+    auto GetTimeStep() const { return numTstep; }
+    /// Return the number of Newton iterations in one time step.
+    auto GetNR() const { return NR; }
+    /// Return the total number of Newton iterations.
+    auto GetNRt() const { return NRt; }
+    /// Return the total number of wasted Newton iterations.
+    auto GetNRwt() const { return NRwt; }
+    /// Return the number of linear iterations in one time step.
+    auto GetLS() const { return LS; }
+    /// Return the total number of linear iterations.
+    auto GetLSt() const { return LSt; }
+    /// Return the total number of wasted linear iterations.
+    auto GetLSwt() const { return LSwt; }
+
+protected:
     /// number of time step
     USI numTstep{ 0 };  
-    /// number of linear solver iterations
-    USI LS{ 0 };  
-    /// total number of iterations of linear solver
-    USI LSt{ 0 };
-    /// totalnumber of wasted linear iterations
-    USI LSwt{ 0 };
     /// number of Newton-Raphson iterations
     USI NR{ 0 }; 
     /// total number of Newton iterations
     USI NRt{ 0 }; 
     /// total number of wasted Newton iterations
     USI NRwt{ 0 };
+    /// number of linear solver iterations
+    USI LS{ 0 };
+    /// total number of iterations of linear solver
+    USI LSt{ 0 };
+    /// totalnumber of wasted linear iterations
+    USI LSwt{ 0 };
 };
 
 
 /// All parameters used for solution control
 class OCPControl
 {
-    friend class OpenCAEPoroX;
-    friend class OCPOutput;
-    friend class Out4RPT;
-
-    friend class IsoT_FIM;
-    friend class IsoT_IMPEC;
-    friend class IsoT_AIMc;
-    friend class T_FIM;
-    // temp
-    friend class Solver;
-
 public:
     /// Input parameters for control.
     void InputParam(const ParamControl& CtrlParam);
@@ -182,30 +197,6 @@ public:
     /// Return last time step size.
     OCP_DBL GetLastDt() const { return last_dt; }
 
-    /// Return the number of linear iterations in one time step.
-    USI GetLSiter() const { return iters.LS; }
-
-    /// Return the total number of linear iterations.
-    USI GetLSiterT() const { return iters.LSt; }
-
-    /// Return the number of Newton iterations in one time step.
-    USI GetNRiter() const { return iters.NR; }
-
-    /// Return the total number of Newton iterations.
-    USI GetNRiterT() const { return iters.NRt; }
-
-    /// Update the number of iterations.
-    void UpdateIters();
-
-    /// Update the number of linear iterations.
-    void UpdateIterLS(const USI& num) { iters.LS += num; }
-
-    /// Update the number of Newton iterations.
-    void UpdateIterNR() { iters.NR++; }
-
-    /// Reset the number of iterations.
-    void ResetIterNRLS();
-
     /// Determine whether the critical time point has been reached.
     OCP_BOOL IsCriticalTime(const USI& d)
     {
@@ -224,13 +215,13 @@ public:
     // Calculate next time step
     void CalNextTimeStep(Reservoir& rs, initializer_list<string> il);
 
-protected:
+public:
     MPI_Comm         myComm;
     OCP_INT          numproc, myrank;
     OCP_INT          workState;           ///< work state of global process
     OCP_INT          workState_loc;       ///< work state of current process
 
-protected:
+public:
     /// model: ifThermal, isothermal
     OCPModel model{ OCPModel::none };
     /// Discrete method

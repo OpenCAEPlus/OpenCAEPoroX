@@ -106,6 +106,26 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
     }
 }
 
+
+void ItersInfo::UpdateTotal()
+{
+    numTstep += 1;
+    NRt      += NR;
+    LSt      += LS;
+    NR        = 0;
+    LS        = 0;
+}
+
+
+void ItersInfo::Reset()
+{
+    NRwt += NR;  
+    LSwt += LS;
+    NR    = 0;
+    LS    = 0;
+}
+
+
 void OCPControl::InputParam(const ParamControl& CtrlParam)
 {
     model    = CtrlParam.model;
@@ -210,22 +230,6 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
     printLevel = ctrlFast.printLevel;
 }
 
-void OCPControl::UpdateIters()
-{
-    iters.numTstep += 1;
-    iters.NRt += iters.NR;
-    iters.LSt += iters.LS;
-    iters.NR = 0;
-    iters.LS = 0;
-}
-
-void OCPControl::ResetIterNRLS()
-{
-    iters.NRwt += iters.NR;
-    iters.NR = 0;
-    iters.LSwt += iters.LS;
-    iters.LS = 0;
-}
 
 OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
 {

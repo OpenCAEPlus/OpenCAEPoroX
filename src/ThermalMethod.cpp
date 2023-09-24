@@ -70,8 +70,8 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     }
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.UpdateIterLS(status);
-    ctrl.UpdateIterNR();
+    ctrl.iters.UpdateLS(status);
+    ctrl.iters.UpdateNR();
 
 #ifdef DEBUG
     // Output A, b, x
@@ -151,7 +151,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.NR >= ctrl.ctrlNR.maxIter) {
+    } else if (ctrl.iters.GetNR() >= ctrl.ctrlNR.maxIter) {
         ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -168,8 +168,7 @@ void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.GetCurDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});
-    ctrl.UpdateIters();
+    ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});   
 }
 
 void T_FIM::AllocateReservoir(Reservoir& rs)
@@ -539,7 +538,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.ResetIterNRLS();
+    ctrl.iters.Reset();
 
     CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
 }

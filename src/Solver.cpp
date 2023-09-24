@@ -92,7 +92,7 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
         cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.GetCurTime()
              << " Days";
-        cout << ",  NR: " << ctrl.GetNRiterT() << ",  LS: " << ctrl.GetLSiterT()
+        cout << ",  NR: " << ctrl.iters.GetNRt() << ",  LS: " << ctrl.iters.GetLSt()
              << ",  Last dt: " << ctrl.GetLastDt() << " Days" << endl;
     }
 

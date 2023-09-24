@@ -415,9 +415,9 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     // TIME
     Sumdata[n++].val.push_back(ctrl.GetCurTime());
     // NRiter
-    Sumdata[n++].val.push_back(ctrl.GetNRiterT());
+    Sumdata[n++].val.push_back(ctrl.iters.GetNRt());
     // LSiter
-    Sumdata[n++].val.push_back(ctrl.GetLSiterT());
+    Sumdata[n++].val.push_back(ctrl.iters.GetLSt());
 
     OCP_DBL  tmpV = 0;
     if (FPR) Sumdata[n++].val.push_back(bulk.CalFPR(tmpV));
@@ -1584,7 +1584,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
-        cout << "Timestep " << setw(6) << left << ctrl.iters.numTstep << ": " << fixed
+        cout << "Timestep " << setw(6) << left << ctrl.iters.GetTimeStep() << ": " << fixed
              << setw(10) << setprecision(3) << right << days << " Days"
              << "    Wall time: " << time / 1000 << " Sec" << endl;
     }

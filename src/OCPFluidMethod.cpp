@@ -102,8 +102,8 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 #endif // DEBUG
 
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.UpdateIterLS(status);
-    ctrl.UpdateIterNR();
+    ctrl.iters.UpdateLS(status);
+    ctrl.iters.UpdateNR();
 
 #ifdef DEBUG
     // ls.OutputSolution("testx_IMPEC.out");
@@ -575,7 +575,7 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
     rs.conn.vs.rho          = rs.conn.vs.lrho;
 
     // Iters
-    ctrl.ResetIterNRLS();
+    ctrl.iters.Reset();
 }
 
 void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
@@ -614,7 +614,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.ResetIterNRLS();
+    ctrl.iters.Reset();
 }
 
 void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
@@ -728,8 +728,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     }
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.UpdateIterLS(status);
-    ctrl.UpdateIterNR();
+    ctrl.iters.UpdateLS(status);
+    ctrl.iters.UpdateNR();
 
      
 #ifdef DEBUG
@@ -810,7 +810,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
         } else {
             return OCP_TRUE;
         }
-    } else if (ctrl.iters.NR >= ctrl.ctrlNR.maxIter) {
+    } else if (ctrl.iters.GetNR() >= ctrl.ctrlNR.maxIter) {
         ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -1423,7 +1423,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.ResetIterNRLS();
+    ctrl.iters.Reset();
 
     // Residual
     CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
@@ -1576,8 +1576,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 #endif // DEBUG
 
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.UpdateIterLS(status);
-    ctrl.UpdateIterNR();
+    ctrl.iters.UpdateLS(status);
+    ctrl.iters.UpdateNR();
 
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.ctrlNR);
@@ -1649,7 +1649,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.NR > ctrl.ctrlNR.maxIter) {
+    } else if (ctrl.iters.GetNR() > ctrl.ctrlNR.maxIter) {
         ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
