@@ -11,7 +11,7 @@
 
 #include "OCPControl.hpp"
 
-ControlTime::ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt)
+void ControlTime::SetParams(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt)
 {
     timeInit    = src_t[0];
     timeMax     = src_t[1];
@@ -24,6 +24,23 @@ ControlTime::ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& sr
     dSlim       = src_pt[1];
     dNlim       = src_pt[2];
     eVlim       = src_pt[3];
+}
+
+
+void ControlTime::SetParams(const ControlTime& src)
+{
+    timeInit    = src.timeInit;
+    timeMax     = src.timeMax;
+    timeMin     = src.timeMin;
+    maxIncreFac = src.maxIncreFac;
+    minChopFac  = src.minChopFac;
+    cutFacNR    = src.cutFacNR;
+
+    dPlim       = src.dPlim;
+    dTlim       = src.dTlim;
+    dSlim       = src.dSlim;
+    dNlim       = src.dNlim;
+    eVlim       = src.eVlim;
 }
 
 
@@ -157,7 +174,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     ctrlCriticalTime.back() = t;
     for (USI i = 0; i < n; i++) {
         for (USI d = ctrlCriticalTime[i]; d < ctrlCriticalTime[i + 1]; d++) {
-            ctrlTimeSet[d] = ControlTime(CtrlParam.tuning_T[i].Tuning[0], CtrlParam.tuning_T[i].Tuning[1]);
+            ctrlTimeSet[d].SetParams(CtrlParam.tuning_T[i].Tuning[0], CtrlParam.tuning_T[i].Tuning[1]);
             ctrlNRSet[d]   = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
@@ -175,9 +192,9 @@ void OCPControl::Setup(const Domain& domain)
 void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
-    ctrlTime    = ctrlTimeSet[i];
+    ctrlTime.SetParams(ctrlTimeSet[i]);
     ctrlNR      = ctrlNRSet[i];
-    end_time    = criticalTime[i + 1];
+    ctrlTime.end_time = criticalTime[i + 1];
 
     /// Set initial time step for next TSTEP
     GetWallTime timer;
@@ -189,16 +206,16 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 
     timer.Stop();
 
-    OCP_DBL dt = criticalTime[i + 1] - current_time;
+    OCP_DBL dt = criticalTime[i + 1] - ctrlTime.current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;
     if (wellOptChange || firstflag) {
-        current_dt = min(dt, ctrlTime.timeInit);
+        ctrlTime.current_dt = min(dt, ctrlTime.timeInit);
         firstflag = OCP_FALSE;
     }
     else {
-        current_dt = min(dt, predict_dt);
+        ctrlTime.current_dt = min(dt, ctrlTime.predict_dt);
     }
 }
 
@@ -306,11 +323,11 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME:
-        current_dt *= ctrlTime.cutFacNR;
+        ctrlTime.current_dt *= ctrlTime.cutFacNR;
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME_CFL:
-        current_dt /= (rs.bulk.GetMaxCFL() + 1);
+        ctrlTime.current_dt /= (rs.bulk.GetMaxCFL() + 1);
         return OCP_FALSE;
 
     default:
@@ -323,8 +340,8 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
 
 void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 {
-    last_dt = current_dt;
-    current_time += current_dt;
+    ctrlTime.last_dt       = ctrlTime.current_dt;
+    ctrlTime.current_time += ctrlTime.current_dt;
 
     OCP_DBL factor = ctrlTime.maxIncreFac;
 
@@ -358,20 +375,21 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 
     factor = max(ctrlTime.minChopFac, factor);
 
-    OCP_DBL dt_loc = current_dt * factor;
+    OCP_DBL dt_loc = ctrlTime.current_dt * factor;
     if (dt_loc > ctrlTime.timeMax) dt_loc = ctrlTime.timeMax;
     if (dt_loc < ctrlTime.timeMin) dt_loc = ctrlTime.timeMin;
 
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+    MPI_Allreduce(&dt_loc, &ctrlTime.current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-    predict_dt = current_dt;
+    ctrlTime.predict_dt = ctrlTime.current_dt;
 
-    if (current_dt > (end_time - current_time)) current_dt = (end_time - current_time);
+    if (ctrlTime.current_dt > (ctrlTime.end_time - ctrlTime.current_time)) 
+        ctrlTime.current_dt = (ctrlTime.end_time - ctrlTime.current_time);
 }
 
 /*----------------------------------------------------------------------------*/

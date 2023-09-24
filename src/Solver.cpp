@@ -90,10 +90,10 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 {
 
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.GetCurTime()
+        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.ctrlTime.GetCurrentTime()
              << " Days";
         cout << ",  NR: " << ctrl.iters.GetNRt() << ",  LS: " << ctrl.iters.GetLSt()
-             << ",  Last dt: " << ctrl.GetLastDt() << " Days" << endl;
+             << ",  Last dt: " << ctrl.ctrlTime.GetLastDt() << " Days" << endl;
     }
 
     switch (model) 
@@ -117,7 +117,7 @@ void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.GetCurDt() < MIN_TIME_CURSTEP)
+        if (ctrl.ctrlTime.GetCurrentDt() < MIN_TIME_CURSTEP)
             OCP_ABORT("Time stepsize is too small!");
         // Assemble linear system
         IsoTSolver.AssembleMat(rs, ctrl);
@@ -140,7 +140,7 @@ void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
 
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.GetCurDt() < MIN_TIME_CURSTEP)
+        if (ctrl.ctrlTime.GetCurrentDt() < MIN_TIME_CURSTEP)
             OCP_ABORT("Time stepsize is too small!");
         // Assemble linear system
         TSolver.AssembleMat(rs, ctrl);

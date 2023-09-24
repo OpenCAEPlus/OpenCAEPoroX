@@ -142,14 +142,14 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
 
         streambuf* oldcout = cout.rdbuf(mysb);
         // find an appropriate size for printing times
-        int fixWidth = OCP_MAX(log10(control.current_time), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
+        int fixWidth = OCP_MAX(log10(control.ctrlTime.GetCurrentTime()), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
         cout << "==================================================" << endl;
 
         // print numbers of steps
         cout << "Final time:                  " << right << fixed << setprecision(3)
-            << setw(fixWidth) << control.current_time << " (Days)" << endl;
+            << setw(fixWidth) << control.ctrlTime.GetCurrentTime() << " (Days)" << endl;
         cout << " - Avg time step size ......." << setw(fixWidth)
-            << control.current_time / control.iters.GetTimeStep() << " (" << control.iters.GetTimeStep()
+            << control.ctrlTime.GetCurrentTime() / control.iters.GetTimeStep() << " (" << control.iters.GetTimeStep()
             << " steps)" << endl;
         cout << " - Avg Newton steps ........." << setw(fixWidth)
             << static_cast<double>(control.iters.GetNRt()) / control.iters.GetTimeStep() << " ("

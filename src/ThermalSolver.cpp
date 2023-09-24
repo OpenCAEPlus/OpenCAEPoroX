@@ -29,7 +29,7 @@ void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
     GetWallTime timer;
     timer.Start();
 
-    fim.AssembleMat(LSolver, rs, ctrl.GetCurDt());
+    fim.AssembleMat(LSolver, rs, ctrl.ctrlTime.GetCurrentDt());
 
     OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
 }

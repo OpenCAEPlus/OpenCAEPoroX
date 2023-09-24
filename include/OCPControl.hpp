@@ -36,11 +36,23 @@ const OCP_INT OCP_RESET_CUTTIME_CFL = -3;
 /// Note: Most commonly used params are the first three
 class ControlTime
 {
-public:
-    ControlTime() = default;
-    ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt);
+
+    friend class OCPControl;
+
+    //////////////////////////////////////////////////////////
+    // control params
+    //////////////////////////////////////////////////////////
 
 public:
+    /// Default constructor
+    ControlTime() = default;
+    /// Set only control params
+    void SetParams(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt);
+    /// Set only control params
+    void SetParams(const ControlTime& src);
+
+protected:
+
     /// length of the first time step beginning the next TSTEP
     OCP_DBL timeInit; 
     /// Maximum time step during running
@@ -65,6 +77,46 @@ public:
     OCP_DBL dNlim;
     /// Ideal max relative Verr (pore - fluid) change
     OCP_DBL eVlim;
+
+
+    /// total simulation time
+    OCP_DBL total_time;
+    /// num of interval
+    
+    /// Begin of TSTEP interval
+    OCP_DBL begin_time;
+    /// End of TSTEP interval
+    OCP_DBL end_time;
+
+public:
+
+    //////////////////////////////////////////////////////////
+    // time information
+    //////////////////////////////////////////////////////////
+
+    /// cut time
+    void CutDt(const OCP_DBL& fac = -1) { 
+        if (fac < 0) current_dt *= cutFacNR;
+        else         current_dt *= fac;
+    }
+    /// Return the current time.
+    auto GetCurrentTime() const { return current_time; }
+    /// Return current time step size.
+    auto GetCurrentDt() const { return current_dt; }
+    /// Return last time step size.
+    auto GetLastDt() const { return last_dt; }
+    /// Determine whether the critical time point has been reached.
+    // auto IsCriticalTime(const USI& d) { return ((criticalTime[d] - current_time) < TINY); }
+
+protected:
+    /// from prediction for next TSTEP
+    OCP_DBL predict_dt;  
+    /// current time step
+    OCP_DBL current_dt;  
+    /// last time step
+    OCP_DBL last_dt; 
+    /// current time
+    OCP_DBL current_time{ 0 };     
 };
 
 
@@ -188,21 +240,6 @@ public:
     /// Return number of TSTEPs.
     USI GetNumTSteps() const { return criticalTime.size(); }
 
-    /// Return the current time.
-    OCP_DBL GetCurTime() const { return current_time; }
-
-    /// Return current time step size.
-    OCP_DBL GetCurDt() const { return current_dt; }
-
-    /// Return last time step size.
-    OCP_DBL GetLastDt() const { return last_dt; }
-
-    /// Determine whether the critical time point has been reached.
-    OCP_BOOL IsCriticalTime(const USI& d)
-    {
-        return ((criticalTime[d] - current_time) < TINY);
-    }
-
     /// Return work dir name.
     string GetWorkDir() const { return workDir; }
 
@@ -234,28 +271,21 @@ public:
     string   lsFile; 
 
     vector<OCP_DBL> criticalTime; ///< Set of Critical time by user
-
-    // Record time information
-    OCP_DBL predict_dt;      ///< from prediction for next TSTEP
-    OCP_DBL current_dt;      ///< Current time step
-    OCP_DBL last_dt;         ///< last time step
-    OCP_DBL current_time{0}; ///< Current time
-    OCP_DBL end_time;        ///< Next Critical time
-
+    auto IsCriticalTime(const USI& d) { return ((criticalTime[d] - ctrlTime.current_time) < TINY); }
     // Print level
     USI printLevel{0};
 
     ItersInfo           iters;
-
     /// Time control
     ControlTime         ctrlTime;
-    /// Time control set 
-    vector<ControlTime> ctrlTimeSet;
     /// NR control       
     ControlNR           ctrlNR;
+
+protected:
+    /// Time control set 
+    vector<ControlTime> ctrlTimeSet;
     /// NR control set   
     vector<ControlNR>   ctrlNRSet;
-
     // Receive directly from command lines, which will overwrite others
     FastControl         ctrlFast;
 };

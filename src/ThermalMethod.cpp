@@ -36,7 +36,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
+    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_TRUE);
 }
 
 void T_FIM::AssembleMat(LinearSystem&    ls,
@@ -90,13 +90,12 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-    OCP_DBL& dt = ctrl.current_dt;
 
     if (!ctrl.Check(rs, {"BulkNi", "BulkP", "BulkT"})) {
         ResetToLastTimeStep(rs, ctrl);
         if (CURRENT_RANK == MASTER_PROCESS) {
             cout << "Cut time step size and repeat! current dt = " << fixed
-                << setprecision(3) << dt << " days\n";
+                << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
         }      
         return OCP_FALSE;
     }
@@ -108,11 +107,11 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalKrPc(rs.bulk);
 
     rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
-    rs.bulk.optMs.boundary.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.GetCurTime() + dt, dt);
+    rs.bulk.optMs.boundary.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.ctrlTime.GetCurrentTime() + ctrl.ctrlTime.GetCurrentDt(), ctrl.ctrlTime.GetCurrentDt());
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, dt, OCP_FALSE);
+    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_FALSE);
 
     return OCP_TRUE;
 }
@@ -152,11 +151,11 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
 
     } else if (ctrl.iters.GetNR() >= ctrl.ctrlNR.maxIter) {
-        ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
+        ctrl.ctrlTime.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
                 "current dt = "
-             << fixed << setprecision(3) << ctrl.current_dt << " days\n";
+             << fixed << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;
@@ -165,7 +164,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 
 void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
-    rs.CalIPRT(ctrl.GetCurDt());
+    rs.CalIPRT(ctrl.ctrlTime.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
     ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});   
@@ -540,7 +539,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Iters
     ctrl.iters.Reset();
 
-    CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
+    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_TRUE);
 }
 
 void T_FIM::UpdateLastTimeStep(Reservoir& rs) const

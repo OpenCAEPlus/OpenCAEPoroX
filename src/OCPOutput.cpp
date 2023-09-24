@@ -413,7 +413,7 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     USI n = 0;
 
     // TIME
-    Sumdata[n++].val.push_back(ctrl.GetCurTime());
+    Sumdata[n++].val.push_back(ctrl.ctrlTime.GetCurrentTime());
     // NRiter
     Sumdata[n++].val.push_back(ctrl.iters.GetNRt());
     // LSiter
@@ -760,9 +760,9 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
 
     USI n = 0;
     // Time
-    Sumdata[n++].val.push_back(ctrl.GetCurTime());
+    Sumdata[n++].val.push_back(ctrl.ctrlTime.GetCurrentTime());
     // Time step
-    Sumdata[n++].val.push_back(ctrl.GetLastDt());
+    Sumdata[n++].val.push_back(ctrl.ctrlTime.GetLastDt());
     // dPmax
     Sumdata[n++].val.push_back(bulk.GetdPmax());
     // dVmax
@@ -1580,7 +1580,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
                                const OCPControl& ctrl,
                                const OCP_DBL&    time) const
 {
-    OCP_DBL days = ctrl.current_time;
+    OCP_DBL days = ctrl.ctrlTime.GetCurrentTime();
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
