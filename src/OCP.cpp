@@ -149,15 +149,15 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << "Final time:                  " << right << fixed << setprecision(3)
             << setw(fixWidth) << control.current_time << " (Days)" << endl;
         cout << " - Avg time step size ......." << setw(fixWidth)
-            << control.current_time / control.numTstep << " (" << control.numTstep
+            << control.current_time / control.iters.numTstep << " (" << control.iters.numTstep
             << " steps)" << endl;
         cout << " - Avg Newton steps ........." << setw(fixWidth)
-            << static_cast<double>(control.iterNR_total) / control.numTstep << " ("
-            << control.iterNR_total << " succeeded + " << control.wastedIterNR
+            << static_cast<double>(control.iters.NRt) / control.iters.numTstep << " ("
+            << control.iters.NRt << " succeeded + " << control.iters.NRwt
             << " wasted)" << endl;
         cout << " - Avg linear steps ........." << setw(fixWidth)
-            << static_cast<double>(control.iterLS_total) / control.iterNR_total << " ("
-            << control.iterLS_total << " succeeded + " << control.wastedIterLS
+            << static_cast<double>(control.iters.LSt) / control.iters.NRt << " ("
+            << control.iters.LSt << " succeeded + " << control.iters.LSwt
             << " wasted)" << endl;
 
         // print time usages

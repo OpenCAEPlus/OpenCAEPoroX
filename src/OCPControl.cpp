@@ -212,19 +212,19 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 
 void OCPControl::UpdateIters()
 {
-    numTstep += 1;
-    iterNR_total += iterNR;
-    iterLS_total += iterLS;
-    iterNR = 0;
-    iterLS = 0;
+    iters.numTstep += 1;
+    iters.NRt += iters.NR;
+    iters.LSt += iters.LS;
+    iters.NR = 0;
+    iters.LS = 0;
 }
 
 void OCPControl::ResetIterNRLS()
 {
-    wastedIterNR += iterNR;
-    iterNR = 0;
-    wastedIterLS += iterLS;
-    iterLS = 0;
+    iters.NRwt += iters.NR;
+    iters.NR = 0;
+    iters.LSwt += iters.LS;
+    iters.LS = 0;
 }
 
 OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
@@ -343,9 +343,9 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
         } else if (s == "eV") {
             if (eVmax > TINY) factor = min(factor, ctrlTime.eVlim / eVmax);
         } else if (s == "iter") {
-            if (iterNR < 5)
+            if (iters.NR < 5)
                 factor = min(factor, 2.0);
-            else if (iterNR > 10)
+            else if (iters.NR > 10)
                 factor = min(factor, 0.5);
             else
                 factor = min(factor, 1.5);

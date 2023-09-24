@@ -1584,13 +1584,12 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
-        cout << "Timestep " << setw(6) << left << ctrl.numTstep << ": " << fixed
+        cout << "Timestep " << setw(6) << left << ctrl.iters.numTstep << ": " << fixed
              << setw(10) << setprecision(3) << right << days << " Days"
              << "    Wall time: " << time / 1000 << " Sec" << endl;
     }
 
     // print to output file
-    // TODO: Add a control flag to enable or disable --zcs
     GetWallTime timer;
     timer.Start();
     //out4RPT.PrintRPT(workDir, rs, days);

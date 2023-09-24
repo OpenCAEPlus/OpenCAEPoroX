@@ -116,6 +116,27 @@ public:
 };
 
 
+/// Record iteration information
+class ItersInfo
+{
+public:
+    /// number of time step
+    USI numTstep{ 0 };  
+    /// number of linear solver iterations
+    USI LS{ 0 };  
+    /// total number of iterations of linear solver
+    USI LSt{ 0 };
+    /// totalnumber of wasted linear iterations
+    USI LSwt{ 0 };
+    /// number of Newton-Raphson iterations
+    USI NR{ 0 }; 
+    /// total number of Newton iterations
+    USI NRt{ 0 }; 
+    /// total number of wasted Newton iterations
+    USI NRwt{ 0 };
+};
+
+
 /// All parameters used for solution control
 class OCPControl
 {
@@ -162,25 +183,25 @@ public:
     OCP_DBL GetLastDt() const { return last_dt; }
 
     /// Return the number of linear iterations in one time step.
-    USI GetLSiter() const { return iterLS; }
+    USI GetLSiter() const { return iters.LS; }
 
     /// Return the total number of linear iterations.
-    USI GetLSiterT() const { return iterLS_total; }
+    USI GetLSiterT() const { return iters.LSt; }
 
     /// Return the number of Newton iterations in one time step.
-    USI GetNRiter() const { return iterNR; }
+    USI GetNRiter() const { return iters.NR; }
 
     /// Return the total number of Newton iterations.
-    USI GetNRiterT() const { return iterNR_total; }
+    USI GetNRiterT() const { return iters.NRt; }
 
     /// Update the number of iterations.
     void UpdateIters();
 
     /// Update the number of linear iterations.
-    void UpdateIterLS(const USI& num) { iterLS += num; }
+    void UpdateIterLS(const USI& num) { iters.LS += num; }
 
     /// Update the number of Newton iterations.
-    void UpdateIterNR() { iterNR++; }
+    void UpdateIterNR() { iters.NR++; }
 
     /// Reset the number of iterations.
     void ResetIterNRLS();
@@ -230,27 +251,22 @@ protected:
     OCP_DBL current_time{0}; ///< Current time
     OCP_DBL end_time;        ///< Next Critical time
 
-    // Record iteration information
-    USI numTstep{0};     ///< Number of time step
-    USI iterLS{0};       ///< Current iterations of linear solver
-    USI iterLS_total{0}; ///< Total iterations of linear solver
-    USI iterNR{0};       ///< Current number of Newton iterations
-    USI iterNR_total{0}; ///< Total number of Newton iterations
-    USI wastedIterNR{0}; ///< Number of wasted Newton iterations
-    USI wastedIterLS{0}; ///< Number of wasted linear iterations
-
     // Print level
     USI printLevel{0};
 
-    // Time, error, and iteration dynamic controllers, all of which could change at
-    // any critical time steps
-    ControlTime            ctrlTime;
-    vector<ControlTime>    ctrlTimeSet;
-    ControlNR              ctrlNR;
-    vector<ControlNR>      ctrlNRSet;
+    ItersInfo           iters;
+
+    /// Time control
+    ControlTime         ctrlTime;
+    /// Time control set 
+    vector<ControlTime> ctrlTimeSet;
+    /// NR control       
+    ControlNR           ctrlNR;
+    /// NR control set   
+    vector<ControlNR>   ctrlNRSet;
 
     // Receive directly from command lines, which will overwrite others
-    FastControl            ctrlFast;
+    FastControl         ctrlFast;
 };
 
 #endif /* end if __OCP_Control_HEADER__ */
