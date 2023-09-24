@@ -29,12 +29,12 @@ ControlTime::ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& sr
 
 ControlNR::ControlNR(const vector<OCP_DBL>& src)
 {
-    maxNRiter = src[0];
+    maxIter = src[0];
     NRtol     = src[1];
-    NRdPmax   = src[2];
-    NRdSmax   = src[3];
-    NRdPmin   = src[4];
-    NRdSmin   = src[5];
+    dPmax   = src[2];
+    dSmax   = src[3];
+    dPmin   = src[4];
+    dSmin   = src[5];
     Verrmax   = src[6];
 }
 

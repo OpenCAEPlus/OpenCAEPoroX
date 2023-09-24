@@ -78,17 +78,17 @@ public:
 
 public:
     /// Maximum number of Newton iterations in a time step
-    USI     maxNRiter; 
+    USI     maxIter; 
     /// Maximum non-linear convergence error
     OCP_DBL NRtol;
     /// Maximum Pressure change in a Newton iteration
-    OCP_DBL NRdPmax;
+    OCP_DBL dPmax;
     /// Maximum Saturation change in a Newton iteration
-    OCP_DBL NRdSmax;
+    OCP_DBL dSmax;
     /// Minimum Pressure change in a Newton iteration
-    OCP_DBL NRdPmin;
+    OCP_DBL dPmin;
     /// Minimum Saturation change in a Newton iteration
-    OCP_DBL NRdSmin;
+    OCP_DBL dSmin;
     /// Maximum Verr (vol error b/w fluid and pore) in a Newton step
     OCP_DBL Verrmax;   
 };

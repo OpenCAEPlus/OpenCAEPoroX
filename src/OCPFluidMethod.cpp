@@ -788,8 +788,8 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
         res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
         res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
         res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
-        (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
-            fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+        (fabs(NRdPmax) <= ctrl.ctrlNR.dPmin &&
+            fabs(NRdSmax) <= ctrl.ctrlNR.dSmin)) {
         conflag_loc = 0;
     }
 
@@ -810,7 +810,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
         } else {
             return OCP_TRUE;
         }
-    } else if (ctrl.iters.NR >= ctrl.ctrlNR.maxNRiter) {
+    } else if (ctrl.iters.NR >= ctrl.ctrlNR.maxIter) {
         ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -1273,8 +1273,8 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrlNR.NRdSmax;
-    // const OCP_DBL dPmaxlim = ctrlNR.NRdPmax;
+    const OCP_DBL dSmaxlim = ctrlNR.dSmax;
+    // const OCP_DBL dPmaxlim = ctrlNR.dPmax;
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
@@ -1617,7 +1617,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 #ifdef DEBUG
     // cout << "### DEBUG: Residuals = " << setprecision(3) << scientific
     //      << resAIMc.maxRelRes0_V << "  " << resAIMc.maxRelRes_V << "  "
-    //      << resAIMc.maxRelRes_N << "  " << NRdPmax << "  " << NRdSmax << endl;
+    //      << resAIMc.maxRelRes_N << "  " << dPmax << "  " << dSmax << endl;
 #endif
 
     OCP_INT conflag_loc = -1;
@@ -1625,8 +1625,8 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
         res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
         res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
         res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
-        (fabs(NRdPmax) <= ctrl.ctrlNR.NRdPmin &&
-            fabs(NRdSmax) <= ctrl.ctrlNR.NRdSmin)) {
+        (fabs(NRdPmax) <= ctrl.ctrlNR.dPmin &&
+            fabs(NRdSmax) <= ctrl.ctrlNR.dSmin)) {
         conflag_loc = 0;
     }
 
@@ -1649,7 +1649,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.NR > ctrl.ctrlNR.maxNRiter) {
+    } else if (ctrl.iters.NR > ctrl.ctrlNR.maxIter) {
         ctrl.current_dt *= ctrl.ctrlTime.cutFacNR;
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -2115,8 +2115,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrlNR.NRdSmax;
-    // const OCP_DBL dPmaxlim = ctrlNR.NRdPmax;
+    const OCP_DBL dSmaxlim = ctrlNR.dSmax;
+    // const OCP_DBL dPmaxlim = ctrlNR.dPmax;
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
