@@ -66,10 +66,10 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
     GetWallTime timer;
     timer.Start();
     output.PrintInfoSched(rs, ctrl, timer.Stop());
-    for (USI d = 0; d < ctrl.ctrlTime.GetNumTstepInterval(); d++) {
+    for (USI d = 0; d < ctrl.time.GetNumTstepInterval(); d++) {
         rs.ApplyControl(d);
         ctrl.ApplyControl(d, rs);
-        while (!ctrl.ctrlTime.IfEnd()) {
+        while (!ctrl.time.IfEnd()) {
             GoOneStep(rs, ctrl);
             output.SetVal(rs, ctrl);
             if (ctrl.printLevel >= PRINT_ALL) {
@@ -89,10 +89,10 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 {
 
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.ctrlTime.GetCurrentTime()
+        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.time.GetCurrentTime()
              << " Days";
         cout << ",  NR: " << ctrl.iters.GetNRt() << ",  LS: " << ctrl.iters.GetLSt()
-             << ",  Last dt: " << ctrl.ctrlTime.GetLastDt() << " Days" << endl;
+             << ",  Last dt: " << ctrl.time.GetLastDt() << " Days" << endl;
     }
 
     switch (model) 
@@ -116,7 +116,7 @@ void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.ctrlTime.GetCurrentDt() < MIN_TIME_CURSTEP)
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
             OCP_ABORT("Time stepsize is too small!");
         // Assemble linear system
         IsoTSolver.AssembleMat(rs, ctrl);
@@ -139,7 +139,7 @@ void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
 
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.ctrlTime.GetCurrentDt() < MIN_TIME_CURSTEP)
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
             OCP_ABORT("Time stepsize is too small!");
         // Assemble linear system
         TSolver.AssembleMat(rs, ctrl);

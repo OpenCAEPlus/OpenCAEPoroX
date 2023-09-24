@@ -58,10 +58,10 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
             impec.Prepare(rs, ctrl);
             break;
         case FIM:
-            fim.Prepare(rs, ctrl.ctrlTime.GetCurrentDt());
+            fim.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
         case AIMc:
-            aimc.Prepare(rs, ctrl.ctrlTime.GetCurrentDt());
+            aimc.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
         default:
             OCP_ABORT("Wrong method type!");
@@ -73,7 +73,7 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 {
     // Assemble
-    const OCP_DBL dt = ctrl.ctrlTime.GetCurrentDt();
+    const OCP_DBL dt = ctrl.time.GetCurrentDt();
     GetWallTime timer;
     timer.Start();
 

@@ -142,14 +142,14 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
 
         streambuf* oldcout = cout.rdbuf(mysb);
         // find an appropriate size for printing times
-        int fixWidth = OCP_MAX(log10(control.ctrlTime.GetCurrentTime()), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
+        int fixWidth = OCP_MAX(log10(control.time.GetCurrentTime()), log10(OCP_MAX(OCPTIME_TOTAL, 1.0))) + 6;
         cout << "==================================================" << endl;
 
         // print numbers of steps
         cout << "Final time:                  " << right << fixed << setprecision(3)
-            << setw(fixWidth) << control.ctrlTime.GetCurrentTime() << " (Days)" << endl;
+            << setw(fixWidth) << control.time.GetCurrentTime() << " (Days)" << endl;
         cout << " - Avg time step size ......." << setw(fixWidth)
-            << control.ctrlTime.GetCurrentTime() / control.iters.GetTimeStep() << " (" << control.iters.GetTimeStep()
+            << control.time.GetCurrentTime() / control.iters.GetTimeStep() << " (" << control.iters.GetTimeStep()
             << " steps)" << endl;
         cout << " - Avg Newton steps ........." << setw(fixWidth)
             << static_cast<double>(control.iters.GetNRt()) / control.iters.GetTimeStep() << " ("
@@ -303,7 +303,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
             // output detailed inforamtion to files
             if (true) {
                 ofstream myFile;
-                myFile.open(control.workDir + "statistics.out");
+                myFile.open(control.GetWorkDir() + "statistics.out");
 
                 ios::sync_with_stdio(false);
                 myFile.tie(0);

@@ -157,9 +157,9 @@ void ItersInfo::Reset()
 
 void OCPControl::InputParam(const ParamControl& CtrlParam)
 {
-    model    = CtrlParam.model;
-    workDir  = CtrlParam.workDir;
-    fileName = CtrlParam.fileName;
+    model   = CtrlParam.model;
+    workDir = CtrlParam.workDir;
+    ocpFile = CtrlParam.fileName;
 
     if (CtrlParam.method == "IMPEC") {
         method = IMPEC;
@@ -204,7 +204,7 @@ void OCPControl::Setup(const Domain& domain)
 void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
-    ctrlTime.SetParams(ctrlTimeSet[i]);
+    time.SetParams(ctrlTimeSet[i]);
     ctrlNR = ctrlNRSet[i];
 
     /// Set initial time step for next TSTEP
@@ -217,16 +217,16 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 
     timer.Stop();
 
-    OCP_DBL dt = ctrlTime.end_time - ctrlTime.current_time;
+    OCP_DBL dt = time.end_time - time.current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;
     if (wellOptChange || firstflag) {
-        ctrlTime.current_dt = min(dt, ctrlTime.timeInit);
+        time.current_dt = min(dt, time.timeInit);
         firstflag = OCP_FALSE;
     }
     else {
-        ctrlTime.current_dt = min(dt, ctrlTime.predict_dt);
+        time.current_dt = min(dt, time.predict_dt);
     }
 }
 
@@ -334,11 +334,11 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME:
-        ctrlTime.current_dt *= ctrlTime.cutFacNR;
+        time.current_dt *= time.cutFacNR;
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME_CFL:
-        ctrlTime.current_dt /= (rs.bulk.GetMaxCFL() + 1);
+        time.current_dt /= (rs.bulk.GetMaxCFL() + 1);
         return OCP_FALSE;
 
     default:
@@ -351,10 +351,10 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
 
 void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 {
-    ctrlTime.last_dt       = ctrlTime.current_dt;
-    ctrlTime.current_time += ctrlTime.current_dt;
+    time.last_dt       = time.current_dt;
+    time.current_time += time.current_dt;
 
-    OCP_DBL factor = ctrlTime.maxIncreFac;
+    OCP_DBL factor = time.maxIncreFac;
 
     const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
     const OCP_DBL dTmax = rs.bulk.GetdTmax();
@@ -364,16 +364,16 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 
     for (auto& s : il) {
         if (s == "dP") {
-            if (dPmax > TINY) factor = min(factor, ctrlTime.dPlim / dPmax);
+            if (dPmax > TINY) factor = min(factor, time.dPlim / dPmax);
         } else if (s == "dT") {
             // no input now -- no value
-            if (dTmax > TINY) factor = min(factor, ctrlTime.dTlim / dTmax);
+            if (dTmax > TINY) factor = min(factor, time.dTlim / dTmax);
         } else if (s == "dN") {
-            if (dNmax > TINY) factor = min(factor, ctrlTime.dNlim / dNmax);
+            if (dNmax > TINY) factor = min(factor, time.dNlim / dNmax);
         } else if (s == "dS") {
-            if (dSmax > TINY) factor = min(factor, ctrlTime.dSlim / dSmax);
+            if (dSmax > TINY) factor = min(factor, time.dSlim / dSmax);
         } else if (s == "eV") {
-            if (eVmax > TINY) factor = min(factor, ctrlTime.eVlim / eVmax);
+            if (eVmax > TINY) factor = min(factor, time.eVlim / eVmax);
         } else if (s == "iter") {
             if (iters.NR < 5)
                 factor = min(factor, 2.0);
@@ -384,23 +384,23 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
         }
     }
 
-    factor = max(ctrlTime.minChopFac, factor);
+    factor = max(time.minChopFac, factor);
 
-    OCP_DBL dt_loc = ctrlTime.current_dt * factor;
-    if (dt_loc > ctrlTime.timeMax) dt_loc = ctrlTime.timeMax;
-    if (dt_loc < ctrlTime.timeMin) dt_loc = ctrlTime.timeMin;
+    OCP_DBL dt_loc = time.current_dt * factor;
+    if (dt_loc > time.timeMax) dt_loc = time.timeMax;
+    if (dt_loc < time.timeMin) dt_loc = time.timeMin;
 
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allreduce(&dt_loc, &ctrlTime.current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+    MPI_Allreduce(&dt_loc, &time.current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-    ctrlTime.predict_dt = ctrlTime.current_dt;
+    time.predict_dt = time.current_dt;
 
-    if (ctrlTime.current_dt > (ctrlTime.end_time - ctrlTime.current_time)) 
-        ctrlTime.current_dt = (ctrlTime.end_time - ctrlTime.current_time);
+    if (time.current_dt > (time.end_time - time.current_time)) 
+        time.current_dt = (time.end_time - time.current_time);
 }
 
 /*----------------------------------------------------------------------------*/

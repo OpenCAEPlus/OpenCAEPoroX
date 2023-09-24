@@ -224,31 +224,12 @@ class OCPControl
 public:
     /// Input parameters for control.
     void InputParam(const ParamControl& CtrlParam);
-
     /// Setup Comm
     void Setup(const Domain& domain);
-
-    /// Get model
-    auto GetModel() const { return model; }
-
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
-
-    /// Setup fast Control.
-    void SetupFastControl(const USI& argc, const char* optset[]);
-
-    /// Return type of the solution method.
-    USI GetMethod() const { return method; }
-
-    /// Return work dir name.
-    string GetWorkDir() const { return workDir; }
-
-    /// Return linear solver file name.
-    string GetLsFile() const { return lsFile; }
-
     // Check order is important
     OCP_BOOL Check(Reservoir& rs, initializer_list<string> il);
-
     // Calculate next time step
     void CalNextTimeStep(Reservoir& rs, initializer_list<string> il);
 
@@ -259,27 +240,40 @@ public:
     OCP_INT          workState_loc;       ///< work state of current process
 
 public:
-    /// model: ifThermal, isothermal
-    OCPModel model{ OCPModel::none };
-    /// Discrete method
-    USI      method;  
-    /// Current work directory
-    string   workDir; 
-    /// Current file name
-    string   fileName;  
-    /// File name of linear Solver
-    string   lsFile; 
-
     // Print level
     USI printLevel{0};
+    ItersInfo        iters;
+    /// Time control 
+    ControlTime      time;
+    /// NR control    
+    ControlNR        ctrlNR;
 
-    ItersInfo           iters;
-    /// Time control
-    ControlTime         ctrlTime;
-    /// NR control       
-    ControlNR           ctrlNR;
+
+public:  
+    /// Get model
+    auto GetModel() const { return model; }
+    /// Get type of the solution method.
+    auto GetMethod() const { return method; }
+    /// Get work dir name.
+    auto GetWorkDir() const { return workDir; }
+    /// Get OCP file name.
+    auto GetOCPFile() const { return ocpFile; }
+    /// Get linear solver file name.
+    auto GetLsFile() const { return lsFile; }
+    /// Setup fast Control.
+    void SetupFastControl(const USI& argc, const char* optset[]);
 
 protected:
+    /// model: isothermal, thermal
+    OCPModel model{ OCPModel::none };
+    /// Discrete method
+    USI      method;
+    /// Current work directory
+    string   workDir;
+    /// Current file name
+    string   ocpFile;
+    /// File name of linear Solver
+    string   lsFile;
     /// Time control set 
     vector<ControlTime> ctrlTimeSet;
     /// NR control set   

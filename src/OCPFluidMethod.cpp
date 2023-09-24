@@ -61,7 +61,7 @@ void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
 void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    rs.CalCFL(ctrl.ctrlTime.GetCurrentDt(), OCP_TRUE);
+    rs.CalCFL(ctrl.time.GetCurrentDt(), OCP_TRUE);
     ctrl.Check(rs, {"CFL"});
 }
 
@@ -126,10 +126,10 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     // Calculate Flux between bulks and between bulks and wells
     CalFlux(rs);  
-    MassConserve(rs, ctrl.ctrlTime.GetCurrentDt());
+    MassConserve(rs, ctrl.time.GetCurrentDt());
 
     // Second check : CFL check
-    rs.CalCFL(ctrl.ctrlTime.GetCurrentDt(), OCP_TRUE);
+    rs.CalCFL(ctrl.time.GetCurrentDt(), OCP_TRUE);
     // Third check: Ni check
     if (!ctrl.Check(rs, { "CFL","BulkNi"})) {
         ResetToLastTimeStep01(rs, ctrl);
@@ -155,7 +155,7 @@ OCP_BOOL IsoT_IMPEC::FinishNR(const Reservoir& rs) { return OCP_TRUE; }
 
 void IsoT_IMPEC::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
-    rs.CalIPRT(ctrl.ctrlTime.GetCurrentDt());
+    rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
     // ctrl.CalNextTstepIMPEC(rs);
@@ -757,7 +757,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     if (!ctrl.Check(rs, {"BulkNi", "BulkP"})) {
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
-             << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
+             << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     }
 
@@ -770,7 +770,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(rs.bulk);
 
     // Update residual
-    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
 
     return OCP_TRUE;
 }
@@ -808,11 +808,11 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
     } else if (ctrl.iters.GetNR() >= ctrl.ctrlNR.maxIter) {
-        ctrl.ctrlTime.CutDt();
+        ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
                 "current dt = "
-             << fixed << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
+             << fixed << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;
@@ -821,7 +821,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 
 void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
-    rs.CalIPRT(ctrl.ctrlTime.GetCurrentDt());
+    rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
     ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});
@@ -1423,7 +1423,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     ctrl.iters.Reset();
 
     // Residual
-    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_TRUE);
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
 }
 
 void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
@@ -1588,7 +1588,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     if (!ctrl.Check(rs, {"BulkNi", "BulkP"})) {
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
-             << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
+             << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     }
 
@@ -1600,7 +1600,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.ctrlTime.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
     return OCP_TRUE;
 }
 
@@ -1645,11 +1645,11 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
 
     } else if (ctrl.iters.GetNR() > ctrl.ctrlNR.maxIter) {
-        ctrl.ctrlTime.CutDt();
+        ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
                 "current dt = "
-             << fixed << setprecision(3) << ctrl.ctrlTime.GetCurrentDt() << " days\n";
+             << fixed << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;
@@ -1659,7 +1659,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 /// Finish a time step.
 void IsoT_AIMc::FinishStep(Reservoir& rs, OCPControl& ctrl) const
 {
-    rs.CalIPRT(ctrl.ctrlTime.GetCurrentDt());
+    rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
     ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});
