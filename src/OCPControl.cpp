@@ -11,8 +11,9 @@
 
 #include "OCPControl.hpp"
 
-void ControlTime::SetParams(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt)
+void ControlTime::SetParams(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i)
 {
+    const auto& src_t = src.Tuning[0];
     timeInit    = src_t[0];
     timeMax     = src_t[1];
     timeMin     = src_t[2];
@@ -20,10 +21,16 @@ void ControlTime::SetParams(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>&
     minChopFac  = src_t[4];
     cutFacNR    = src_t[5];
 
+    const auto& src_pt = src.Tuning[1];
     dPlim       = src_pt[0];
     dSlim       = src_pt[1];
     dNlim       = src_pt[2];
     eVlim       = src_pt[3];
+
+    numTstepI  = Tstep.size() - 1;
+    total_time = Tstep.back();
+    begin_time = Tstep[i];
+    end_time   = Tstep[i + 1];
 }
 
 
@@ -41,6 +48,11 @@ void ControlTime::SetParams(const ControlTime& src)
     dSlim       = src.dSlim;
     dNlim       = src.dNlim;
     eVlim       = src.eVlim;
+
+    numTstepI  = src.numTstepI;
+    total_time = src.total_time;
+    begin_time = src.begin_time;
+    end_time   = src.end_time;
 }
 
 
@@ -160,21 +172,21 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     }
 
     lsFile = CtrlParam.lsFile;
-    criticalTime     = CtrlParam.criticalTime;
+    
+    // number of TSTEP interval
+    const USI nI = CtrlParam.criticalTime.size() - 1;
+    ctrlTimeSet.resize(nI);
+    ctrlNRSet.resize(nI);
 
-    USI t = CtrlParam.criticalTime.size();
-    ctrlTimeSet.resize(t);
-    ctrlNRSet.resize(t);
-
-    USI         n = CtrlParam.tuning_T.size();
+    const USI   n = CtrlParam.tuning_T.size();
     vector<USI> ctrlCriticalTime(n + 1);
     for (USI i = 0; i < n; i++) {
         ctrlCriticalTime[i] = CtrlParam.tuning_T[i].d;
     }
-    ctrlCriticalTime.back() = t;
+    ctrlCriticalTime.back() = nI;
     for (USI i = 0; i < n; i++) {
         for (USI d = ctrlCriticalTime[i]; d < ctrlCriticalTime[i + 1]; d++) {
-            ctrlTimeSet[d].SetParams(CtrlParam.tuning_T[i].Tuning[0], CtrlParam.tuning_T[i].Tuning[1]);
+            ctrlTimeSet[d].SetParams(CtrlParam.tuning_T[i], CtrlParam.criticalTime, d);
             ctrlNRSet[d]   = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
@@ -193,8 +205,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
     ctrlTime.SetParams(ctrlTimeSet[i]);
-    ctrlNR      = ctrlNRSet[i];
-    ctrlTime.end_time = criticalTime[i + 1];
+    ctrlNR = ctrlNRSet[i];
 
     /// Set initial time step for next TSTEP
     GetWallTime timer;
@@ -206,7 +217,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 
     timer.Stop();
 
-    OCP_DBL dt = criticalTime[i + 1] - ctrlTime.current_time;
+    OCP_DBL dt = ctrlTime.end_time - ctrlTime.current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;

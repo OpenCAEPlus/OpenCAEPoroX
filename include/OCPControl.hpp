@@ -47,9 +47,13 @@ public:
     /// Default constructor
     ControlTime() = default;
     /// Set only control params
-    void SetParams(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt);
+    void SetParams(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i);
     /// Set only control params
     void SetParams(const ControlTime& src);
+    /// Get total simulation time
+    auto GetTotalTime() const { return total_time; }
+    /// Get number of TSTEP interval
+    auto GetNumTstepInterval() const { return numTstepI; }
 
 protected:
 
@@ -78,11 +82,10 @@ protected:
     /// Ideal max relative Verr (pore - fluid) change
     OCP_DBL eVlim;
 
-
+    /// num of TSTEP interval
+    USI     numTstepI;
     /// total simulation time
     OCP_DBL total_time;
-    /// num of interval
-    
     /// Begin of TSTEP interval
     OCP_DBL begin_time;
     /// End of TSTEP interval
@@ -106,7 +109,7 @@ public:
     /// Return last time step size.
     auto GetLastDt() const { return last_dt; }
     /// Determine whether the critical time point has been reached.
-    // auto IsCriticalTime(const USI& d) { return ((criticalTime[d] - current_time) < TINY); }
+    auto IfEnd() { return ((end_time - current_time) < TINY); }
 
 protected:
     /// from prediction for next TSTEP
@@ -237,9 +240,6 @@ public:
     /// Return type of the solution method.
     USI GetMethod() const { return method; }
 
-    /// Return number of TSTEPs.
-    USI GetNumTSteps() const { return criticalTime.size(); }
-
     /// Return work dir name.
     string GetWorkDir() const { return workDir; }
 
@@ -270,8 +270,6 @@ public:
     /// File name of linear Solver
     string   lsFile; 
 
-    vector<OCP_DBL> criticalTime; ///< Set of Critical time by user
-    auto IsCriticalTime(const USI& d) { return ((criticalTime[d] - ctrlTime.current_time) < TINY); }
     // Print level
     USI printLevel{0};
 

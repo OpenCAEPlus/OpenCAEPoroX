@@ -66,11 +66,10 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
     GetWallTime timer;
     timer.Start();
     output.PrintInfoSched(rs, ctrl, timer.Stop());
-    USI numTSteps = ctrl.GetNumTSteps();
-    for (USI d = 0; d < numTSteps - 1; d++) {
+    for (USI d = 0; d < ctrl.ctrlTime.GetNumTstepInterval(); d++) {
         rs.ApplyControl(d);
         ctrl.ApplyControl(d, rs);
-        while (!ctrl.IsCriticalTime(d + 1)) {
+        while (!ctrl.ctrlTime.IfEnd()) {
             GoOneStep(rs, ctrl);
             output.SetVal(rs, ctrl);
             if (ctrl.printLevel >= PRINT_ALL) {

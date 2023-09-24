@@ -1548,8 +1548,8 @@ void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const 
 
     workDir  = ctrl.workDir;
     fileName = ctrl.fileName;
-    summary.Setup(reservoir, ctrl.criticalTime.back());
-    crtInfo.Setup(ctrl.criticalTime.back());
+    summary.Setup(reservoir, ctrl.ctrlTime.GetTotalTime());
+    crtInfo.Setup(ctrl.ctrlTime.GetTotalTime());
     // out4RPT.Setup(workDir, reservoir);
     out4VTK.Setup(workDir, reservoir);
 }
