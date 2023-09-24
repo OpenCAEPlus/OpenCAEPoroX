@@ -11,23 +11,21 @@
 
 #include "OCPControl.hpp"
 
-ControlTime::ControlTime(const vector<OCP_DBL>& src)
+ControlTime::ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt)
 {
-    timeInit    = src[0];
-    timeMax     = src[1];
-    timeMin     = src[2];
-    maxIncreFac = src[3];
-    minChopFac  = src[4];
-    cutFacNR    = src[5];
+    timeInit    = src_t[0];
+    timeMax     = src_t[1];
+    timeMin     = src_t[2];
+    maxIncreFac = src_t[3];
+    minChopFac  = src_t[4];
+    cutFacNR    = src_t[5];
+
+    dPlim       = src_pt[0];
+    dSlim       = src_pt[1];
+    dNlim       = src_pt[2];
+    eVlim       = src_pt[3];
 }
 
-ControlPreTime::ControlPreTime(const vector<OCP_DBL>& src)
-{
-    dPlim = src[0];
-    dSlim = src[1];
-    dNlim = src[2];
-    eVlim = src[3];
-}
 
 ControlNR::ControlNR(const vector<OCP_DBL>& src)
 {
@@ -129,7 +127,6 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     USI t = CtrlParam.criticalTime.size();
     ctrlTimeSet.resize(t);
-    ctrlPreTimeSet.resize(t);
     ctrlNRSet.resize(t);
 
     USI         n = CtrlParam.tuning_T.size();
@@ -140,9 +137,8 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     ctrlCriticalTime.back() = t;
     for (USI i = 0; i < n; i++) {
         for (USI d = ctrlCriticalTime[i]; d < ctrlCriticalTime[i + 1]; d++) {
-            ctrlTimeSet[d]    = ControlTime(CtrlParam.tuning_T[i].Tuning[0]);
-            ctrlPreTimeSet[d] = ControlPreTime(CtrlParam.tuning_T[i].Tuning[1]);
-            ctrlNRSet[d]      = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
+            ctrlTimeSet[d] = ControlTime(CtrlParam.tuning_T[i].Tuning[0], CtrlParam.tuning_T[i].Tuning[1]);
+            ctrlNRSet[d]   = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
 }
@@ -160,7 +156,6 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
     ctrlTime    = ctrlTimeSet[i];
-    ctrlPreTime = ctrlPreTimeSet[i];
     ctrlNR      = ctrlNRSet[i];
     end_time    = criticalTime[i + 1];
 
@@ -337,16 +332,16 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 
     for (auto& s : il) {
         if (s == "dP") {
-            if (dPmax > TINY) factor = min(factor, ctrlPreTime.dPlim / dPmax);
+            if (dPmax > TINY) factor = min(factor, ctrlTime.dPlim / dPmax);
         } else if (s == "dT") {
             // no input now -- no value
-            if (dTmax > TINY) factor = min(factor, ctrlPreTime.dTlim / dTmax);
+            if (dTmax > TINY) factor = min(factor, ctrlTime.dTlim / dTmax);
         } else if (s == "dN") {
-            if (dNmax > TINY) factor = min(factor, ctrlPreTime.dNlim / dNmax);
+            if (dNmax > TINY) factor = min(factor, ctrlTime.dNlim / dNmax);
         } else if (s == "dS") {
-            if (dSmax > TINY) factor = min(factor, ctrlPreTime.dSlim / dSmax);
+            if (dSmax > TINY) factor = min(factor, ctrlTime.dSlim / dSmax);
         } else if (s == "eV") {
-            if (eVmax > TINY) factor = min(factor, ctrlPreTime.eVlim / eVmax);
+            if (eVmax > TINY) factor = min(factor, ctrlTime.eVlim / eVmax);
         } else if (s == "iter") {
             if (iterNR < 5)
                 factor = min(factor, 2.0);

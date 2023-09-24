@@ -38,7 +38,7 @@ class ControlTime
 {
 public:
     ControlTime() = default;
-    ControlTime(const vector<OCP_DBL>& src);
+    ControlTime(const vector<OCP_DBL>& src_t, const vector<OCP_DBL>& src_pt);
 
 public:
     /// length of the first time step beginning the next TSTEP
@@ -53,23 +53,14 @@ public:
     OCP_DBL minChopFac;
     /// cutback factor after a convergence failure
     OCP_DBL cutFacNR;    
-};
 
-
-/// Params for time step prediction, i.e. Limits for changes at next time step
-class ControlPreTime
-{
-public:
-    ControlPreTime() = default;
-    ControlPreTime(const vector<OCP_DBL>& src);
-
-public:
+    // Params for time step prediction, i.e. Limits for changes at next time step
     /// Ideal max Pressure change
     OCP_DBL dPlim;
     /// Ideal max Temperature change
-    OCP_DBL dTlim; 
+    OCP_DBL dTlim;
     /// Ideal max Saturation change
-    OCP_DBL dSlim; 
+    OCP_DBL dSlim;
     /// Ideal max relative Ni (moles of components) change
     OCP_DBL dNlim;
     /// Ideal max relative Verr (pore - fluid) change
@@ -255,8 +246,6 @@ protected:
     // any critical time steps
     ControlTime            ctrlTime;
     vector<ControlTime>    ctrlTimeSet;
-    ControlPreTime         ctrlPreTime;
-    vector<ControlPreTime> ctrlPreTimeSet;
     ControlNR              ctrlNR;
     vector<ControlNR>      ctrlNRSet;
 
