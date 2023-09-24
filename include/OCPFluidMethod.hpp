@@ -134,7 +134,7 @@ protected:
     AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
+    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
 
 
 protected:
@@ -211,11 +211,9 @@ protected:
     /// Calculate relative permeability and capillary pressure for Implicit bulk
     void CalKrPcI(Bulk& bk);
     /// Assemble linear system for bulks
-    void
-    AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
-    void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for AIMc.

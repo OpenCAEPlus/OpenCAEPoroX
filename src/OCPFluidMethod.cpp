@@ -747,7 +747,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
     // Get solution from linear system to Reservoir
     timer.Start();
-    GetSolution(rs, ls.GetSolution(), ctrl);
+    GetSolution(rs, ls.GetSolution(), ctrl.ctrlNR);
     OCPTIME_NRSTEP += timer.Stop() / 1000;   
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
@@ -1230,7 +1230,7 @@ void IsoT_FIM::AssembleMatWells(LinearSystem&    ls,
 
 void IsoT_FIM::GetSolution(Reservoir&        rs,
                            vector<OCP_DBL>&  u,
-                           const OCPControl& ctrl)
+                           const ControlNR& ctrlNR)
 {
     const auto& domain = rs.domain;
     auto&       bk     = rs.bulk;
@@ -1273,8 +1273,8 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
-    // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
+    const OCP_DBL dSmaxlim = ctrlNR.NRdSmax;
+    // const OCP_DBL dPmaxlim = ctrlNR.NRdPmax;
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
@@ -1580,7 +1580,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     ctrl.UpdateIterNR();
 
     timer.Start();
-    GetSolution(rs, ls.GetSolution(), ctrl);
+    GetSolution(rs, ls.GetSolution(), ctrl.ctrlNR);
     OCPTIME_NRSTEP += timer.Stop() / 1000;
     ls.ClearData();
 }
@@ -2078,7 +2078,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 
 void IsoT_AIMc::GetSolution(Reservoir&             rs,
                             vector<OCP_DBL>& u,
-                            const OCPControl&      ctrl)
+                            const ControlNR& ctrlNR)
 {
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
@@ -2115,8 +2115,8 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
-    // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
+    const OCP_DBL dSmaxlim = ctrlNR.NRdSmax;
+    // const OCP_DBL dPmaxlim = ctrlNR.NRdPmax;
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;

@@ -26,7 +26,7 @@ void ParamControl::Init(string& indir, string& inFileName)
 void ParamControl::InitMethod()
 {
     method      = "IMPEC";
-    linearSolve = "./csr.fasp";
+    lsFile = "./csr.fasp";
 }
 
 /// Initialize TUNING parameters.
@@ -107,20 +107,20 @@ void ParamControl::InputMETHOD(ifstream& ifs)
 
     if (vbuf[0] == "FIM") {
         method      = "FIM";
-        linearSolve = "./bsr.fasp";
+        lsFile = "./bsr.fasp";
     }
     else if (vbuf[0] == "AIMc") {
         method      = "AIMc";
-        linearSolve = "./bsr.fasp";
+        lsFile = "./bsr.fasp";
     }
 
-    if (vbuf.size() > 1) linearSolve = vbuf[1];
+    if (vbuf.size() > 1) lsFile = vbuf[1];
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         cout << "\n---------------------" << endl
             << "METHOD"
             << "\n---------------------" << endl;
-        cout << "   " << method << "  " << linearSolve << endl;
+        cout << "   " << method << "  " << lsFile << endl;
     }
 }
 

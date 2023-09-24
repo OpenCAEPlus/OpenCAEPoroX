@@ -36,15 +36,14 @@ void T_FIM::InitReservoir(Reservoir& rs)
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, ctrl.GetCurTime() + ctrl.GetCurDt(), ctrl.GetCurDt(), OCP_TRUE);
+    CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
 }
 
 void T_FIM::AssembleMat(LinearSystem&    ls,
                         const Reservoir& rs,
-                        const OCP_DBL&   t,
                         const OCP_DBL&   dt)
 {
-    AssembleMatBulks(ls, rs, t, dt);
+    AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     ls.AssembleRhsCopy(res.resAbs);
 }
@@ -83,7 +82,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 #endif // DEBUG
     
     timer.Start();
-    GetSolution(rs, ls.GetSolution(), ctrl);
+    GetSolution(rs, ls.GetSolution(), ctrl.ctrlNR);
     OCPTIME_NRSTEP += timer.Stop() / 1000;
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
@@ -113,7 +112,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.GetCurTime() + dt, dt, OCP_FALSE);
+    CalRes(rs, dt, OCP_FALSE);
 
     return OCP_TRUE;
 }
@@ -542,7 +541,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Iters
     ctrl.ResetIterNRLS();
 
-    CalRes(rs, ctrl.GetCurTime() + ctrl.GetCurDt(), ctrl.GetCurDt(), OCP_TRUE);
+    CalRes(rs, ctrl.GetCurDt(), OCP_TRUE);
 }
 
 void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
@@ -607,10 +606,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 
-void T_FIM::CalRes(Reservoir&      rs,
-                   const OCP_DBL&  t,
-                   const OCP_DBL&  dt,
-                   const OCP_BOOL& resetRes0)
+void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
 {
     const Bulk& bk   = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -733,7 +729,6 @@ void T_FIM::CalRes(Reservoir&      rs,
 
 void T_FIM::AssembleMatBulks(LinearSystem&    ls,
                              const Reservoir& rs,
-                             const OCP_DBL&   t,
                              const OCP_DBL&   dt) const
 {
     const USI numWell = rs.GetNumOpenWell();
@@ -831,7 +826,7 @@ void T_FIM::AssembleMatWells(LinearSystem&    ls,
 
 void T_FIM::GetSolution(Reservoir&             rs,
                         vector<OCP_DBL>& u,
-                        const OCPControl&      ctrl)
+                        const ControlNR& ctrlNR)
 {
 
     const Domain&   domain = rs.domain;
@@ -869,8 +864,8 @@ void T_FIM::GetSolution(Reservoir&             rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrl.ctrlNR.NRdSmax;
-    // const OCP_DBL dPmaxlim = ctrl.ctrlNR.NRdPmax;
+    const OCP_DBL dSmaxlim = ctrlNR.NRdSmax;
+    // const OCP_DBL dPmaxlim = ctrlNR.NRdPmax;
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;

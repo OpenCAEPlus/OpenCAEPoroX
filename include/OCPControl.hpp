@@ -22,14 +22,18 @@
 
 using namespace std;
 
-
-const OCP_INT OCP_CONTINUE          = 0;    ///< continue
-const OCP_INT OCP_RESET             = -1;   ///< reset
-const OCP_INT OCP_RESET_CUTTIME     = -2;   ///< reset with cut time(cutFacNR)
-const OCP_INT OCP_RESET_CUTTIME_CFL = -3;   ///< reset with cut time(cfl)
+/// continue simulating
+const OCP_INT OCP_CONTINUE          = 0;  
+/// Reset to last time step
+const OCP_INT OCP_RESET             = -1; 
+/// Reset with cut time(because of failed newton iterations)
+const OCP_INT OCP_RESET_CUTTIME     = -2; 
+/// Reset with cut time(because of out-ranged cfl number)
+const OCP_INT OCP_RESET_CUTTIME_CFL = -3;   
 
 
 /// Params for choosing time stepsize in time marching.
+/// Note: Most commonly used params are the first three
 class ControlTime
 {
 public:
@@ -37,16 +41,22 @@ public:
     ControlTime(const vector<OCP_DBL>& src);
 
 public:
-    // Note: Most commonly used params are the first three
-    OCP_DBL timeInit;    ///< Max init step length of next time step
-    OCP_DBL timeMax;     ///< Max time step during running
-    OCP_DBL timeMin;     ///< Min time step during running
-    OCP_DBL maxIncreFac; ///< Max increase factor
-    OCP_DBL minChopFac;  ///< Min choppable factor
-    OCP_DBL cutFacNR;    ///< Factor by which time step is cut after convergence failure
+    /// length of the first time step beginning the next TSTEP
+    OCP_DBL timeInit; 
+    /// Maximum time step during running
+    OCP_DBL timeMax; 
+    /// Minimum time step during running
+    OCP_DBL timeMin; 
+    /// Maximum timestep increase factor
+    OCP_DBL maxIncreFac; 
+    /// Minimum timestep cutback factor
+    OCP_DBL minChopFac;
+    /// cutback factor after a convergence failure
+    OCP_DBL cutFacNR;    
 };
 
-/// Params for convergence and material balance error checks.
+
+/// Params for time step prediction, i.e. Limits for changes at next time step
 class ControlPreTime
 {
 public:
@@ -54,15 +64,21 @@ public:
     ControlPreTime(const vector<OCP_DBL>& src);
 
 public:
-    // Limits for changes at next time step
-    OCP_DBL dPlim; ///< Ideal max Pressure change
-    OCP_DBL dTlim; ///< Ideal max Temperature change
-    OCP_DBL dSlim; ///< Ideal max Saturation change
-    OCP_DBL dNlim; ///< Ideal max relative Ni (moles of components) change
-    OCP_DBL eVlim; ///< Ideal max relative Verr (pore - fluid) change
+    /// Ideal max Pressure change
+    OCP_DBL dPlim;
+    /// Ideal max Temperature change
+    OCP_DBL dTlim; 
+    /// Ideal max Saturation change
+    OCP_DBL dSlim; 
+    /// Ideal max relative Ni (moles of components) change
+    OCP_DBL dNlim;
+    /// Ideal max relative Verr (pore - fluid) change
+    OCP_DBL eVlim;
 };
 
-/// Params for Newton iterations and linear iterations.
+
+/// Params for Newton iterations controls
+/// Note: Important for convergence of solution methods
 class ControlNR
 {
 public:
@@ -70,33 +86,46 @@ public:
     ControlNR(const vector<OCP_DBL>& src);
 
 public:
-    // Note: Important for convergence of solution methods
-    USI     maxNRiter; ///< Maximum number of Newton iterations in a time step
-    OCP_DBL NRtol;     ///< Maximum non-linear convergence error
-    OCP_DBL NRdPmax;   ///< Maximum Pressure change in a Newton iteration
-    OCP_DBL NRdSmax;   ///< Maximum Saturation change in a Newton iteration
-    OCP_DBL NRdPmin;   ///< Minimum Pressure change in a Newton iteration
-    OCP_DBL NRdSmin;   ///< Minimum Saturation change in a Newton iteration
-    OCP_DBL Verrmax;   ///< Maximum Verr (vol error b/w fluid and pore) in a Newton step
+    /// Maximum number of Newton iterations in a time step
+    USI     maxNRiter; 
+    /// Maximum non-linear convergence error
+    OCP_DBL NRtol;
+    /// Maximum Pressure change in a Newton iteration
+    OCP_DBL NRdPmax;
+    /// Maximum Saturation change in a Newton iteration
+    OCP_DBL NRdSmax;
+    /// Minimum Pressure change in a Newton iteration
+    OCP_DBL NRdPmin;
+    /// Minimum Saturation change in a Newton iteration
+    OCP_DBL NRdSmin;
+    /// Maximum Verr (vol error b/w fluid and pore) in a Newton step
+    OCP_DBL Verrmax;   
 };
 
-/// Store shortcut instructions from the command line
+
+/// shortcut instructions from the command line
 class FastControl
 {
 public:
     void ReadParam(const USI& argc, const char* optset[]);
 
 public:
-    OCP_BOOL activity{OCP_FALSE};
-    USI      method;        ///< IMPEC or FIM
-    OCP_DBL  timeInit;      ///< Maximum Init step length of next time step
-    OCP_DBL  timeMax;       ///< Maximum time step during running
-    OCP_DBL  timeMin;       ///< Minimum time step during running
-    USI      printLevel{0}; ///< Decide the depth for printing
+    /// If use fastcontrol
+    OCP_BOOL ifUse{OCP_FALSE};
+    /// IMPEC, FIM or AIM
+    USI      method; 
+    /// length of the first time step beginning the next TSTEP
+    OCP_DBL  timeInit;  
+    /// Maximum time step during running
+    OCP_DBL  timeMax;  
+    /// Minimum time step during running
+    OCP_DBL  timeMin;   
+    /// Print level
+    USI      printLevel{0};
 };
 
-/// All control parameters except for well controllers.
-//  Note: Which solution method will be used is determined here!
+
+/// All parameters used for solution control
 class OCPControl
 {
     friend class OpenCAEPoroX;
@@ -122,9 +151,6 @@ public:
 
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
-
-    /// Initialize time step i.
-    void InitTime(const USI& i);
 
     /// Setup fast Control.
     void SetupFastControl(const USI& argc, const char* optset[]);
@@ -178,7 +204,7 @@ public:
     string GetWorkDir() const { return workDir; }
 
     /// Return linear solver file name.
-    string GetLsFile() const { return linearSolverFile; }
+    string GetLsFile() const { return lsFile; }
 
     // Check order is important
     OCP_BOOL Check(Reservoir& rs, initializer_list<string> il);
@@ -202,14 +228,13 @@ protected:
     /// Current file name
     string   fileName;  
     /// File name of linear Solver
-    string   linearSolverFile; 
+    string   lsFile; 
 
     vector<OCP_DBL> criticalTime; ///< Set of Critical time by user
 
     // Record time information
-    OCP_DBL predict_dt;         ///< from prediction for next TSTEP
+    OCP_DBL predict_dt;      ///< from prediction for next TSTEP
     OCP_DBL current_dt;      ///< Current time step
-    OCP_DBL current_dt_loc;  ///< Local Current time step
     OCP_DBL last_dt;         ///< last time step
     OCP_DBL current_time{0}; ///< Current time
     OCP_DBL end_time;        ///< Next Critical time
@@ -236,10 +261,7 @@ protected:
     vector<ControlNR>      ctrlNRSet;
 
     // Receive directly from command lines, which will overwrite others
-    FastControl ctrlFast;
-
-    // Well operation change
-    OCP_BOOL wellOptChange;
+    FastControl            ctrlFast;
 };
 
 #endif /* end if __OCP_Control_HEADER__ */

@@ -28,7 +28,6 @@ public:
     void     Prepare(Reservoir& rs, const OCPControl& ctrl);
     void     AssembleMat(LinearSystem&    ls,
                          const Reservoir& rs,
-                         const OCP_DBL&   t,
                          const OCP_DBL&   dt);
     void     SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
@@ -46,18 +45,13 @@ protected:
     void PassFlashValue(Bulk& bk, const OCP_USI& n);
     void CalKrPc(Bulk& bk) const;
     void UpdateLastTimeStep(Reservoir& rs) const;
-    void CalRes(Reservoir&      rs,
-                const OCP_DBL&  t,
-                const OCP_DBL&  dt,
-                const OCP_BOOL& resetRes0);
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0);
     void AssembleMatBulks(LinearSystem&    ls,
                           const Reservoir& rs,
-                          const OCP_DBL&   t,
                           const OCP_DBL&   dt) const;
     void
     AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
-    void
-    GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const OCPControl& ctrl);
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:

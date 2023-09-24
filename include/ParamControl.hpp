@@ -55,7 +55,7 @@ public:
     /// Discretization method for fluid equations.
     string             method;    
     /// linear solver input file.
-    string             linearSolve; 
+    string             lsFile; 
     /// Tuning set.
     vector<TuningPair> tuning_T;  
     /// Tuning.

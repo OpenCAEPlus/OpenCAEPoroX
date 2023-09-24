@@ -42,7 +42,7 @@ ControlNR::ControlNR(const vector<OCP_DBL>& src)
 
 void FastControl::ReadParam(const USI& argc, const char* optset[])
 {
-    activity = OCP_FALSE;
+    ifUse = OCP_FALSE;
     timeInit = timeMax = timeMin = -1.0;
 
     std::stringstream buffer;
@@ -71,7 +71,7 @@ void FastControl::ReadParam(const USI& argc, const char* optset[])
                 } else {
                     OCP_ABORT("Wrong method param in command line!");
                 }
-                activity = OCP_TRUE;
+                ifUse = OCP_TRUE;
                 if (method == FIM || method == AIMc) {
                     if (timeInit <= 0) timeInit = 1;
                     if (timeMax <= 0) timeMax = 10.0;
@@ -124,7 +124,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
         OCP_ABORT("Wrong method specified!");
     }
 
-    linearSolverFile = CtrlParam.linearSolve;
+    lsFile = CtrlParam.lsFile;
     criticalTime     = CtrlParam.criticalTime;
 
     USI t = CtrlParam.criticalTime.size();
@@ -158,48 +158,48 @@ void OCPControl::Setup(const Domain& domain)
 
 void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
+    /// Apply ith tuning for ith TSTEP
     ctrlTime    = ctrlTimeSet[i];
     ctrlPreTime = ctrlPreTimeSet[i];
     ctrlNR      = ctrlNRSet[i];
     end_time    = criticalTime[i + 1];
 
+    /// Set initial time step for next TSTEP
     GetWallTime timer;
     timer.Start();
 
+    OCP_BOOL       wellOptChange;
     const OCP_BOOL wellChange_loc  = rs.allWells.GetWellOptChange();
     MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
 
     timer.Stop();
 
-    InitTime(i);
-}
-
-void OCPControl::InitTime(const USI& i)
-{
     OCP_DBL dt = criticalTime[i + 1] - current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;
     if (wellOptChange || firstflag) {
         current_dt = min(dt, ctrlTime.timeInit);
-        firstflag  = OCP_FALSE;
-    } else {
+        firstflag = OCP_FALSE;
+    }
+    else {
         current_dt = min(dt, predict_dt);
     }
 }
 
+
 void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 {
     ctrlFast.ReadParam(argc, optset);
-    if (ctrlFast.activity) {
+    if (ctrlFast.ifUse) {
         method = ctrlFast.method;
         switch (method) {
             case IMPEC:
-                linearSolverFile = "./csr.fasp";
+                lsFile = "./csr.fasp";
                 break;
             case AIMc:
             case FIM:
-                linearSolverFile = "./bsr.fasp";
+                lsFile = "./bsr.fasp";
                 break;
             default:
                 OCP_ABORT("Wrong method specified from command line!");
@@ -359,22 +359,20 @@ void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
 
     factor = max(ctrlTime.minChopFac, factor);
 
-    current_dt_loc = current_dt;
-    current_dt_loc *= factor;
-    if (current_dt_loc > ctrlTime.timeMax) current_dt_loc = ctrlTime.timeMax;
-    if (current_dt_loc < ctrlTime.timeMin) current_dt_loc = ctrlTime.timeMin;
+    OCP_DBL dt_loc = current_dt * factor;
+    if (dt_loc > ctrlTime.timeMax) dt_loc = ctrlTime.timeMax;
+    if (dt_loc < ctrlTime.timeMin) dt_loc = ctrlTime.timeMin;
 
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allreduce(&current_dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+    MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
     predict_dt = current_dt;
 
-    const OCP_DBL dt = end_time - current_time;
-    if (current_dt > dt) current_dt = dt;   
+    if (current_dt > (end_time - current_time)) current_dt = (end_time - current_time);
 }
 
 /*----------------------------------------------------------------------------*/
