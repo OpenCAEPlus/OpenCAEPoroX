@@ -59,7 +59,7 @@ void ControlTime::SetParams(const ControlTime& src)
 ControlNR::ControlNR(const vector<OCP_DBL>& src)
 {
     maxIter = src[0];
-    NRtol     = src[1];
+    tol     = src[1];
     dPmax   = src[2];
     dSmax   = src[3];
     dPmin   = src[4];
@@ -205,7 +205,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
     time.SetParams(ctrlTimeSet[i]);
-    ctrlNR = ctrlNRSet[i];
+    NR = ctrlNRSet[i];
 
     /// Set initial time step for next TSTEP
     GetWallTime timer;
@@ -217,7 +217,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 
     timer.Stop();
 
-    OCP_DBL dt = time.end_time - time.current_time;
+    const OCP_DBL dt = time.end_time - time.current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;

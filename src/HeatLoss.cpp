@@ -30,6 +30,7 @@ HeatLossMethod01::HeatLossMethod01(const HLoss& param, HeatLossVarSet& hlvs)
 
 void HeatLossMethod01::CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt)
 {
+
 	if (bvs.location[bId] > 0) {
 		// overburden or underburden
 		const OCP_DBL lambda = bvs.location[bId] == 1 ? obD : ubD;

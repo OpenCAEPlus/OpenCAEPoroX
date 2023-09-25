@@ -68,17 +68,24 @@ protected:
         return NRdSmax;
     }
 
-    vector<OCP_DBL> dSNR;    ///< saturation change between NR steps
-    vector<OCP_DBL> dNNR;    ///< Ni change between NR steps
-    vector<OCP_DBL> dPNR;    ///< P  change between NR steps
-    vector<OCP_DBL> dTNR;    ///< T  change between NR steps
-
-    OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
-    OCP_DBL NRdTmax;         ///< Max temperature difference in an NR step
-    OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
-    OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
-
-    OCPRes  res;  ///< Residual for all equations
+    /// saturation change between NR steps
+    vector<OCP_DBL> dSNR;    
+    /// Ni change between NR steps
+    vector<OCP_DBL> dNNR;
+    /// P change between NR steps
+    vector<OCP_DBL> dPNR;
+    /// T change between NR steps
+    vector<OCP_DBL> dTNR;    
+    /// Max pressure difference in an NR step
+    OCP_DBL NRdPmax;   
+    /// Max temperature difference in an NR step
+    OCP_DBL NRdTmax;
+    /// Max Ni difference in an NR step
+    OCP_DBL NRdNmax; 
+    /// Max saturation difference in an NR step(Real)
+    OCP_DBL NRdSmax;         
+    /// Residual for all equations
+    OCPRes  res;  
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

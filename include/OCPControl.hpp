@@ -36,7 +36,6 @@ const OCP_INT OCP_RESET_CUTTIME_CFL = -3;
 /// Note: Most commonly used params are the first three
 class ControlTime
 {
-
     friend class OCPControl;
 
     //////////////////////////////////////////////////////////
@@ -127,15 +126,22 @@ protected:
 /// Note: Important for convergence of solution methods
 class ControlNR
 {
+    friend class OCPControl;
 public:
     ControlNR() = default;
     ControlNR(const vector<OCP_DBL>& src);
+    auto Tol() const { return tol; }
+    auto MaxIter() const { return maxIter; }
+    auto DPmax() const { return dPmax; }
+    auto DSmax() const { return dSmax; }
+    auto DPmin() const { return dPmin; }
+    auto DSmin() const { return dSmin; }
 
-public:
+protected:
     /// Maximum number of Newton iterations in a time step
     USI     maxIter; 
     /// Maximum non-linear convergence error
-    OCP_DBL NRtol;
+    OCP_DBL tol;
     /// Maximum Pressure change in a Newton iteration
     OCP_DBL dPmax;
     /// Maximum Saturation change in a Newton iteration
@@ -240,13 +246,14 @@ public:
     OCP_INT          workState_loc;       ///< work state of current process
 
 public:
-    // Print level
-    USI printLevel{0};
+    /// Print level
+    USI              printLevel{0};
+    /// num of time steps, nonlinear iterations and linear solver iterations
     ItersInfo        iters;
     /// Time control 
     ControlTime      time;
     /// NR control    
-    ControlNR        ctrlNR;
+    ControlNR        NR;
 
 
 public:  

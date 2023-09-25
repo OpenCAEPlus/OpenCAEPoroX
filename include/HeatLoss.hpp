@@ -17,7 +17,6 @@
 #include "ParamReservoir.hpp"
 #include "BulkVarSet.hpp"
 
-
 #include <vector>
 
 using namespace std;

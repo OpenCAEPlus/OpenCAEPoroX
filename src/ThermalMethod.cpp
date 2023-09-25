@@ -82,7 +82,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 #endif // DEBUG
     
     timer.Start();
-    GetSolution(rs, ls.GetSolution(), ctrl.ctrlNR);
+    GetSolution(rs, ls.GetSolution(), ctrl.NR);
     OCPTIME_NRSTEP += timer.Stop() / 1000;
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
@@ -123,12 +123,12 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
     OCP_INT conflag_loc = -1;
-    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.ctrlNR.NRtol ||
-        res.maxRelRes_V <= ctrl.ctrlNR.NRtol ||
-        res.maxRelRes_N <= ctrl.ctrlNR.NRtol) &&
-        res.maxWellRelRes_mol <= ctrl.ctrlNR.NRtol) ||
-        (fabs(NRdPmax) <= ctrl.ctrlNR.dPmin &&
-            fabs(NRdSmax) <= ctrl.ctrlNR.dSmin)) {
+    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.NR.Tol() ||
+        res.maxRelRes_V <= ctrl.NR.Tol() ||
+        res.maxRelRes_N <= ctrl.NR.Tol()) &&
+        res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
+        (fabs(NRdPmax) <= ctrl.NR.DPmin() &&
+            fabs(NRdSmax) <= ctrl.NR.DSmin())) {
         conflag_loc = 0;
     }
 
@@ -150,7 +150,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.GetNR() >= ctrl.ctrlNR.maxIter) {
+    } else if (ctrl.iters.GetNR() >= ctrl.NR.MaxIter()) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -862,7 +862,7 @@ void T_FIM::GetSolution(Reservoir&             rs,
     }
 
     // Bulk
-    const OCP_DBL dSmaxlim = ctrlNR.dSmax;
+    const OCP_DBL dSmaxlim = ctrlNR.DSmax();
     // const OCP_DBL dPmaxlim = ctrlNR.dPmax;
 
     vector<OCP_DBL> dtmp(row, 0);

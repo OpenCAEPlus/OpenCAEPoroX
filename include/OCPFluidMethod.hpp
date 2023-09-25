@@ -159,12 +159,14 @@ protected:
     vector<OCP_DBL> dNNR; 
     /// P change between NR steps
     vector<OCP_DBL> dPNR;    
-
-    OCP_DBL NRdPmax;         ///< Max pressure difference in an NR step
-    OCP_DBL NRdNmax;         ///< Max Ni difference in an NR step
-    OCP_DBL NRdSmax;         ///< Max saturation difference in an NR step(Real)
-
-    OCPRes  res;  ///< Residual for all equations
+    /// Max pressure difference in an NR step
+    OCP_DBL         NRdPmax;
+    /// Max Ni difference in an NR step
+    OCP_DBL         NRdNmax;   
+    /// Max saturation difference in an NR step(Real)
+    OCP_DBL         NRdSmax;         
+    /// Residual for all equations
+    OCPRes          res;  
 
 };
 
