@@ -115,6 +115,22 @@ void GMSHGrid::InputGrid2D(const string& file)
 	OCP_USI lineTag   = 1;
 	OCP_USI faceIndex = 0;
 
+	/// find all physical name, ordered as the ones of definitions in *.geo
+	vector<vector<string>> physicalNameSet(dimen + 1);
+	for (USI d = 0; d <= dimen; d++) {
+		gmsh::vectorpair dimTags;
+		string           tmp;
+		gmsh::model::getPhysicalGroups(dimTags, d);
+		for (const auto& p : dimTags) {
+			gmsh::model::getPhysicalName(p.first, p.second, tmp);
+			physicalNameSet[d].push_back(tmp);
+		}
+	}
+	/// Allocate facies
+	for (const auto& p2 : physicalNameSet[2]) {
+		facies.push_back(Facies(p2));
+	}
+
 	for (const auto& e : entities) {
 		// Dimension and tag of the entity:
 		const int dim = e.first, tag = e.second;
@@ -156,8 +172,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 				}				
 			}
 			if (faciesIndex == -1) {
-				facies.push_back(Facies(physicalName));
-				faciesIndex = facies.size() - 1;
+				OCP_ABORT("No Matched physical Body!");
 			}
 
 			// for triangle and quadrangle
@@ -254,6 +269,8 @@ void GMSHGrid::InputProperty(ifstream& ifs)
 		OCP_ABORT("INPUT KEYWORD GMSH FIRST!");
 	}
 
+	// Note that the order of physical must be consistent with the ones in *.geo
+	USI i = 0;
 	while (!ifs.eof()) {
 
 		string fbuf;
@@ -262,22 +279,21 @@ void GMSHGrid::InputProperty(ifstream& ifs)
 		if (fbuf == "GMSHPROEND") break;
 
 		vector<string> vbuf;
-		for (USI f = 0; f < facies.size(); f++) {
-			if (fbuf == facies[f].name) {
-				mapF2F.push_back(f);
-				// Input for current facies
+
+		if (i < facies.size()) {
+			if (fbuf == facies[i].name) {
 				while (true) {
 					ReadLine(ifs, vbuf);
 					if (vbuf[0] == "END") break;
 
-					if (vbuf[0] == "*PORO")      facies[f].poro = stod(vbuf[1]);
+					if (vbuf[0] == "*PORO")      facies[i].poro = stod(vbuf[1]);
 					else if (vbuf[0] == "*PERM") {
-						facies[f].kx = stod(vbuf[1]);
-						facies[f].ky = stod(vbuf[1]);
-						facies[f].kz = stod(vbuf[1]);
+						facies[i].kx = stod(vbuf[1]);
+						facies[i].ky = stod(vbuf[1]);
+						facies[i].kz = stod(vbuf[1]);
 					}
 				}
-				break;
+				i++;
 			}
 		}
 
@@ -291,6 +307,11 @@ void GMSHGrid::InputProperty(ifstream& ifs)
 				thickness = stod(vbuf[1]);
 			}
 		}
+	}
+
+
+	if (i != facies.size()) {
+		OCP_ABORT("Order of Physical body must be consistent with the ones in *.geo!");
 	}
 }
 

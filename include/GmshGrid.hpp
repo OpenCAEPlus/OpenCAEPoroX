@@ -147,9 +147,7 @@ public:
     /// Facies
     vector<Facies>  facies;
     /// element region index(facies)
-    vector<INT>     faciesNum;
-    /// map from facies (the order in which appear in GMSHPRO) to facies(the order in which appear in grids)
-    vector<USI>     mapF2F;
+    vector<OCP_USI> faciesNum;
     /// thickness (for 2d now)
     OCP_DBL         thickness;
 };
