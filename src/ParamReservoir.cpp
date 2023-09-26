@@ -356,11 +356,13 @@ void ParamReservoir::InputHLOSS(ifstream& ifs)
         USI len   = vbuf.size();
         while (index < len) {
             if (vbuf[index] == "*OVERBUR") {
-                hLoss.obC = stod(vbuf[index + 1]);
-                hLoss.obK = stod(vbuf[index + 2]);
+                hLoss.obUse = OCP_TRUE;
+                hLoss.obC   = stod(vbuf[index + 1]);
+                hLoss.obK   = stod(vbuf[index + 2]);
             } else if (vbuf[index] == "*UNDERBUR") {
-                hLoss.ubC = stod(vbuf[index + 1]);
-                hLoss.ubK = stod(vbuf[index + 2]);
+                hLoss.ubUse = OCP_TRUE;
+                hLoss.ubC   = stod(vbuf[index + 1]);
+                hLoss.ubK   = stod(vbuf[index + 2]);
             }
             index += 3;
         }

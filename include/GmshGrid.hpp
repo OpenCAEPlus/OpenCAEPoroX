@@ -148,6 +148,8 @@ public:
     vector<Facies>  facies;
     /// element region index(facies)
     vector<OCP_USI> faciesNum;
+    /// physical name set
+    vector<vector<string>> physicalNameSet;
     /// thickness (for 2d now)
     OCP_DBL         thickness;
 };

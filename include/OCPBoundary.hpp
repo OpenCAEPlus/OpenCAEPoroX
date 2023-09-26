@@ -29,7 +29,7 @@ class OCPBoundary
 
 public:
 	void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
-		heatLoss.Setup(rs_param, bvs.nb);
+		heatLoss.Setup(rs_param, bvs);
 	}
 	void ResetToLastTimeStep() { heatLoss.ResetToLastTimeStep(); }
 	void UpdateLastTimeStep() { heatLoss.UpdateLastTimeStep(); }

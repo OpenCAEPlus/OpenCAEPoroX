@@ -116,7 +116,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 	OCP_USI faceIndex = 0;
 
 	/// find all physical name, ordered as the ones of definitions in *.geo
-	vector<vector<string>> physicalNameSet(dimen + 1);
+	physicalNameSet.resize(dimen + 1);
 	for (USI d = 0; d <= dimen; d++) {
 		gmsh::vectorpair dimTags;
 		string           tmp;

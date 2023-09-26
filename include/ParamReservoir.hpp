@@ -72,10 +72,12 @@ class HLoss
 {
 public:
     OCP_BOOL ifHLoss{OCP_FALSE}; ///< If use Heat loss
-    OCP_DBL  obC;                ///< Volumetric heat capacity of overburden rock
-    OCP_DBL  obK;                ///< Thermal conductivity of overburden rock
-    OCP_DBL  ubC;                ///< Volumetric heat capacity of underburden rock
-    OCP_DBL  ubK;                ///< Thermal conductivity of underburden rock
+    OCP_BOOL obUse{ OCP_FALSE }; ///< If use heat loss in overburden
+    OCP_DBL  obC{ -1 };          ///< Volumetric heat capacity of overburden rock
+    OCP_DBL  obK{ -1 };          ///< Thermal conductivity of overburden rock
+    OCP_BOOL ubUse{ OCP_FALSE }; ///< If use heat loss in underburden
+    OCP_DBL  ubC{ -1 };          ///< Volumetric heat capacity of underburden rock
+    OCP_DBL  ubK{ -1 };          ///< Thermal conductivity of underburden rock
 };
 
 /// RockParam class contains information about the keyword ROCK.

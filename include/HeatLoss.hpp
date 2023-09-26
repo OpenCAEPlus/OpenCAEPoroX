@@ -71,18 +71,14 @@ public:
 class HeatLossMethod01 : public HeatLossMethod
 {
 public:
-    HeatLossMethod01(const HLoss& param, HeatLossVarSet& hlvs);
+    HeatLossMethod01(const OCP_DBL& bK_in, const OCP_DBL& bC_in, HeatLossVarSet& hlvs);
     void CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt) override;
 
 protected:
-    /// Thermal conductivity of overburden rock
-    OCP_DBL         obK;
-    /// Thermal conductivity of underburden rock
-    OCP_DBL         ubK;
-    /// Thermal diffusivity of overburden rock
-    OCP_DBL         obD;
-    /// Thermal diffusivity of underburden rock
-    OCP_DBL         ubD;
+    /// Thermal conductivity of burden rock
+    OCP_DBL         bK;
+    /// Thermal diffusivity of burden rock
+    OCP_DBL         bD;
 };
 
 
@@ -91,7 +87,12 @@ class HeatLoss
 public:
     HeatLoss() = default;
     auto IfUse() const { return ifUse; }
-    void Setup(const ParamReservoir& rs_param, const OCP_USI& nb);
+    auto IfUse(const OCP_USI& n) const {
+        if (!ifUse)              return OCP_FALSE;
+        else if (mIndex[n] < 0)  return OCP_FALSE;
+        else                     return OCP_TRUE;
+    }
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs);
     void CalHeatLoss(const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt);
     const OCP_DBL& GetHl(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!");  return vs.hl[bId]; };
     const OCP_DBL& GetHlT(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!"); return vs.hlT[bId]; };
@@ -103,6 +104,8 @@ protected:
     OCP_BOOL                ifUse{ OCP_FALSE };
     /// Heat loss varsets
     HeatLossVarSet          vs;
+    /// Method Index
+    vector<INT>             mIndex;
     /// method for heat loss calculation
     vector<HeatLossMethod*> hlM;
 };

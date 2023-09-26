@@ -82,7 +82,7 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CalResFIM(const OCP_USI& bId, const Bul
     }
     
     // Heat Loss
-    if (optM->boundary.heatLoss.IfUse()) {
+    if (optM->boundary.heatLoss.IfUse(bId)) {
         // dT
         res[nc + 1] += dt * optM->boundary.heatLoss.GetHl(bId);
     }
@@ -126,7 +126,7 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const B
     }
 
     // Heat Loss iterm
-    if (optM->boundary.heatLoss.IfUse()) {
+    if (optM->boundary.heatLoss.IfUse(bId)) {
         // dT
         dFdXp[dim * dim - 1] += dt * optM->boundary.heatLoss.GetHlT(bId);
     }
@@ -141,8 +141,6 @@ void BulkAccumuModule::Setup(const ParamReservoir& param, const BulkVarSet& bvs,
     if (param.thermal) bacT = new BulkAccumuTerm02(bvs, &opt);
     else               bacT = new BulkAccumuTerm01(bvs, &opt);
 }
-
-
 
 
 
