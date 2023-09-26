@@ -80,7 +80,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                 VarInfo<vector<OCP_DBL>>{ "SWAT", & grid.initR.swat, & bulk.INITm.GetSwat()},
             VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit() },
     }, vector<VarInfo<vector<OCP_USI>>>{
-        VarInfo<vector<OCP_USI>>{"LOCATION", &grid.location, &bulk.vs.location },
+        VarInfo<vector<OCP_USI>>{"BOUNDARY", &grid.boundIndex, &bulk.optMs.boundary.GetBoundaryIndex() },
         VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM() },
         VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM() },
         VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },

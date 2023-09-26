@@ -46,7 +46,7 @@ void HeatLossMethod01::CalHeatLoss(const OCP_USI& bId, HeatLossVarSet& hlvs, con
 }
 
 
-void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs)
+void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const vector<USI>& boundIndex)
 {
 	ifUse = rs_param.hLoss.ifHLoss;
 	if (ifUse) {
@@ -71,10 +71,10 @@ void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs)
 		}
 		mIndex.resize(bvs.nb, -1);
 		for (OCP_USI n = 0; n < bvs.nb; n++) {
-			if (bvs.location[n] == 1 && rs_param.hLoss.obUse) {
+			if (boundIndex[n] == 1 && rs_param.hLoss.obUse) {
 				mIndex[n] = obIndex;
 			}
-			else if (bvs.location[n] == 2 && rs_param.hLoss.ubUse) {
+			else if (boundIndex[n] == 2 && rs_param.hLoss.ubUse) {
 				mIndex[n] = ubIndex;
 			}
 		}

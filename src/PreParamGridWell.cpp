@@ -1243,11 +1243,15 @@ void PreParamGridWell::SetupBasicGmshGrid()
     numGrid  = numGridM;
     v.resize(numGrid);
     depth.resize(numGrid);
+    REGNUM.resize(numGrid);
+    boundIndex.resize(numGrid);
 
     if (gmshGrid.dimen == 2) {
         for (OCP_USI n = 0; n < numGridM; n++) {
-            v[n]     = gmshGrid.elements[n].area * gmshGrid.thickness;
-            depth[n] = gmshGrid.elements[n].center.y; /// Use y-coordinate
+            v[n]          = gmshGrid.elements[n].area * gmshGrid.thickness;
+            depth[n]      = gmshGrid.elements[n].center.y; /// Use y-coordinate
+            REGNUM[n]     = gmshGrid.elements[n].phyIndex;
+            boundIndex[n] = gmshGrid.elements[n].boundIndex;
         }
     }
 }
@@ -1319,14 +1323,14 @@ void PreParamGridWell::OutputPointsGmshGrid()
 
 void PreParamGridWell::SetLocationStructral()
 {
-    location.resize(numGrid);
+    boundIndex.resize(numGrid);
     const OCP_USI uplim   = nx * ny;
     const OCP_USI downlim = nx * ny * (nz - 1);
     for (OCP_USI n = 0; n < uplim; n++) {
-        location[n] = 1;
+        boundIndex[n] = 1;
     }
     for (OCP_USI n = downlim; n < nx * ny * nz; n++) {
-        location[n] = 2;
+        boundIndex[n] = 2;
     }
 }
 

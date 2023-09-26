@@ -285,8 +285,7 @@ public:
     /// last dSec_dPri
     vector<OCP_DBL>     ldSec_dPri;    
    
-    /// location of bulk: top, bottom, side
-    vector<USI>         location;
+
     /// content type of bulk, all rock, rock and fluid
     vector<BulkContent> cType;
     /// Initial temperature

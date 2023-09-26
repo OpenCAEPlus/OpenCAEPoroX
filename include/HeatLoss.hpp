@@ -92,7 +92,7 @@ public:
         else if (mIndex[n] < 0)  return OCP_FALSE;
         else                     return OCP_TRUE;
     }
-    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs);
+    void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const vector<USI>& boundIndex);
     void CalHeatLoss(const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt);
     const OCP_DBL& GetHl(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!");  return vs.hl[bId]; };
     const OCP_DBL& GetHlT(const OCP_USI& bId) const { OCP_ASSERT(ifUse, "Inavailable!"); return vs.hlT[bId]; };
