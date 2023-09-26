@@ -472,10 +472,10 @@ void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
     ky.resize(numGrid);
     kz.resize(numGrid);
     for (OCP_USI n = 0; n < numGrid; n++) {
-        poro[n] = gmshGrid.facies[gmshGrid.faciesNum[n]].poro;
-        kx[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].kx;
-        ky[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].ky;
-        kz[n]   = gmshGrid.facies[gmshGrid.faciesNum[n]].kz;
+        poro[n] = gmshGrid.facies[gmshGrid.elements[n].phyIndex].poro;
+        kx[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].kx;
+        ky[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].ky;
+        kz[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].kz;
     }
 }
 

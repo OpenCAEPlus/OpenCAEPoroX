@@ -16,11 +16,12 @@
 
 #include "GmshGrid.hpp"
 
-Polygon::Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo) 
+Polygon::Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo, const OCP_USI& index)
 {
 	p        = pIndex;
 	tag      = tag_in;
 	physical = phyinfo;
+	phyIndex = index;
 }
 
 
@@ -151,30 +152,31 @@ void GMSHGrid::InputGrid2D(const string& file)
 		std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
 		gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, dim, tag);
 
+
+		INT physicalIndex = -1;
+		for (INT p = 0; p < physicalNameSet[dim].size(); p++) {
+			if (physicalNameSet[dim][p] == physicalName) {
+				physicalIndex = p;
+				break;
+			}
+		}
+		if (physicalIndex == -1) {
+			OCP_ABORT("No Matched physical Body!");
+		}
+
+
 		if (dim == 1) {
 			// for boundary lines
 			for (USI t = 0; t < elemTypes.size(); t++) {
 				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
 					const OCP_USI bId = elemNodeTags[t][2 * l];
 					const OCP_USI eId = elemNodeTags[t][2 * l + 1];
-					edges.insert(Edge(bId - 1, eId - 1, elemTags[t][l], physicalName));
+					edges.insert(Edge(bId - 1, eId - 1, elemTags[t][l], physicalName, physicalIndex));
 					lineTag++;
 				}
 			}			
 		}
 		else if (dim == 2) {
-
-			INT faciesIndex = -1;
-			for (INT f = 0; f < facies.size(); f++) {
-				if (facies[f].name == physicalName) {
-					faciesIndex = f;
-					break;
-				}				
-			}
-			if (faciesIndex == -1) {
-				OCP_ABORT("No Matched physical Body!");
-			}
-
 			// for triangle and quadrangle
 			USI np = 0;
 			for (USI t = 0; t < elemTypes.size(); t++) {
@@ -201,8 +203,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 						indexFace.push_back(elemNodeTags[t][np * l + i] - 1);
 					}
 					faceIndex++;
-					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName));
-					faciesNum.push_back(faciesIndex);
+					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName, physicalIndex));
 				}
 			}
 		}
@@ -235,7 +236,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 		if (e.faceIndex.size() == 2) {
 			// boundary
 			Polygon& element = elements[e.faceIndex[0]];
-			element.location += (e.physical) + " & ";
+			element.boundary   += (e.physical) + " & ";
+			element.boundIndex += e.phyIndex;
 			// Calculate effective area
 			const OCP_USI   bId       = element.p[e.faceIndex[1]];
 			const OCP_USI   eId       = element.p[(e.faceIndex[1] + 1) % (element.p.size())];

@@ -677,8 +677,8 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 
 		Sw = 0;
 		Sg = 0;
-		USI     ncut = 10;
-		OCP_DBL avePcow = 0;
+		const USI ncut    = 10;
+		OCP_DBL   avePcow = 0;
 
 		for (USI k = 0; k < ncut; k++) {
 			OCP_DBL tmpSw = 0;

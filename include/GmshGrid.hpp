@@ -44,17 +44,15 @@ public:
             eId = b;
         }
     }
-    Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in) : Edge(b, e) {
-        tag = tag_in;
-    }
     Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in, const OCP_USI& face, const OCP_USI& localEdge) : Edge(b, e) {
         tag = tag_in;
         faceIndex.push_back(face);
         faceIndex.push_back(localEdge);
     }
-    Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in, const string& phyinfo) : Edge(b, e) {
+    Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in, const string& physical_in, const USI& phyIndex_in) : Edge(b, e) {
         tag      = tag_in;
-        physical = phyinfo;
+        physical = physical_in;
+        phyIndex = pow(2, phyIndex_in);
     }
     OCP_BOOL operator <(const Edge& e) const {
         if (bId < e.bId || (bId == e.bId && eId < e.eId)) return OCP_TRUE;
@@ -68,8 +66,10 @@ public:
     OCP_USI                 eId;
     /// tag of edge(for debug)
     OCP_USI                 tag;
-    /// physical info
+    /// physical info(for debug)
     string                  physical;
+    /// physical info binary encoding
+    OCP_USI                 phyIndex{ 0 };
     /// index of connected face and local index of edge
     mutable vector<OCP_USI> faceIndex;
     /// effective area from bId
@@ -81,7 +81,7 @@ class Polygon
 {
 public:
     /// constructor
-    Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo);
+    Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo, const OCP_USI& index);
     /// Calculate the center
     void CalCenter(const vector<OCP_DBL>& points);
     /// Calculate the area
@@ -92,12 +92,16 @@ public:
 public:   
     /// index of points(Store in order or reverse order)
     vector<OCP_USI> p;
-    /// tag of face(for debug)
+    /// tag of face (for debug)
     OCP_USI         tag;
-    /// physical info
+    /// physical info (for debug)
     string          physical;
-    /// location
-    string          location;
+    /// physical Index
+    OCP_USI         phyIndex;
+    /// boundary (for debug)
+    string          boundary;
+    /// index of boundary (binary encoding)
+    OCP_USI         boundIndex{ 0 };
     /// center
     Point3D         center;
     /// area
@@ -146,8 +150,6 @@ public:
     vector<Polygon> elements;
     /// Facies
     vector<Facies>  facies;
-    /// element region index(facies)
-    vector<OCP_USI> faciesNum;
     /// physical name set
     vector<vector<string>> physicalNameSet;
     /// thickness (for 2d now)
