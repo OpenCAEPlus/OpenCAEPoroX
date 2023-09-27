@@ -17,6 +17,7 @@
 #include "ParamReservoir.hpp"
 #include "BulkVarSet.hpp"
 #include "HeatLoss.hpp"
+#include "BoundaryFlow.hpp"
 
 
 #include <vector>
@@ -26,9 +27,9 @@ using namespace std;
 
 class OCPBoundary
 {
-
 public:
 	void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
+		
 		heatLoss.Setup(rs_param, bvs, boundIndex);
 	}
 	void ResetToLastTimeStep() { heatLoss.ResetToLastTimeStep(); }
@@ -36,11 +37,17 @@ public:
 
 
 public:
-
-	HeatLoss heatLoss;
+	/// Heat loss term
+	HeatLoss     heatLoss;
+	/// Boundary flow term
+	BoundaryFlow boundaryFlow;
 
 public:
 	auto& GetBoundaryIndex() { return boundIndex; }
+	auto& GetBoundName() { return boundName; }
+
+protected:
+
 
 protected:
 	vector<string> boundName;

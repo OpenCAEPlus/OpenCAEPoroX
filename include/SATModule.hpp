@@ -45,7 +45,10 @@ public:
         }
 
 
-        if (SATNUM.empty()) SATNUM.resize(bvs.nb, 0);
+        if (SATNUM.empty() || NTSFUN == 1) {
+            SATNUM.clear();
+            SATNUM.resize(bvs.nb, 0);
+        }
     }
     auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }

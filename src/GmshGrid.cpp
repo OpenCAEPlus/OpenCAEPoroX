@@ -83,6 +83,7 @@ OCP_BOOL Polygon::IfPointInElement(const Point3D& objP, const vector<OCP_DBL>& p
 
 void GMSHGrid::InputGrid(const string& file)
 {
+	ifUse = OCP_TRUE;
 
 	gmsh::initialize();
 	gmsh::open(file);

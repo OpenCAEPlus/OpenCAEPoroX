@@ -247,41 +247,23 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// PVTH2O
+// Suitable for a class of table
 /////////////////////////////////////////////////////
 
-class OCP_PVTH2O : public OCPFuncTable2
+class OCP_PVT2 : public OCPFuncTable2
 {
 	/// Each sub-table has 4 columns
-	/// 0th column: The water phase pressure. (Pw), (pa (METRIC))
-	/// 1th column: The corresponding water density. (kg/m3 (METRIC))
-	/// 2th column: The corresponding water viscosity. (Pa.s (METRIC))
-	/// 3th column: The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
+	/// 0th column: The phase pressure. (P), (pa (METRIC))
+	/// 1th column: The corresponding density. (kg/m3 (METRIC))
+	/// 2th column: The corresponding viscosity. (Pa.s (METRIC))
+	/// 3th column: e.g. The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
 
-protected:
-
+public:
+	OCP_DBL CalRho(const OCP_DBL& val1, const OCP_DBL& val2) {  }
 };
 
-
-class OCP_PVTCO2 : public OCPFuncTable2
-{
-	/// Each sub-table has 4 columns
-	/// 0th column: The CO2 phase pressure. (Pw), (pa (METRIC))
-	/// 1th column: The corresponding CO2 density. (kg/m3 (METRIC))
-	/// 2th column: The corresponding CO2 viscosity. (Pa.s (METRIC))
-	/// 3th column: The corresponding solubility (mass fraction) of H2O in CO2 phase. (dimensionless)
-protected:
-
-};
-
-
-
-
-/////////////////////////////////////////////////////
-// PVCO2
-/////////////////////////////////////////////////////
-
-
+typedef OCP_PVT2 OCP_PVTCO2;
+typedef OCP_PVT2 OCP_PVTH2O;
 
 
 /////////////////////////////////////////////////////

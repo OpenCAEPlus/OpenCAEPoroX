@@ -132,6 +132,18 @@ public:
     void InputGrid(const string& file);
     /// input property for each region
     void InputProperty(ifstream& ifs);
+    /// get boundary name
+    INT GetBoundaryName(vector<string>& names) const { 
+        if (ifUse) {
+            if (dimen == 2)      names = physicalNameSet[1];
+            else if (dimen == 3) names = physicalNameSet[2];
+            else                 OCP_ABORT("WRONG DIMENSION!");
+            return names.size();
+        }
+        else {
+            return 0;
+        }
+    }
 
 protected:
     void InputGrid2D(const string& file);
@@ -140,20 +152,22 @@ protected:
     void SetupConnAreaAndBoundary2D();
 
 public:
+    /// If use the gmsh grid
+    OCP_BOOL               ifUse{ OCP_FALSE };
     /// dimension
-    USI             dimen;
+    USI                    dimen;
     /// coordinates of points 
-    vector<OCP_DBL> points;
+    vector<OCP_DBL>        points;
     /// edges (for 2d now)
-    set<Edge>       edges;
+    set<Edge>              edges;
     /// elements (for 2d now)
-    vector<Polygon> elements;
+    vector<Polygon>        elements;
     /// Facies
-    vector<Facies>  facies;
+    vector<Facies>         facies;
     /// physical name set
     vector<vector<string>> physicalNameSet;
     /// thickness (for 2d now)
-    OCP_DBL         thickness;
+    OCP_DBL                thickness;
 };
 
 

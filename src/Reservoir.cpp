@@ -62,6 +62,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     const PreParamGridWell& grid = mygrid;
 
     /////////////////////////////////////////////////////////////////////////
+    // Distribute Grid-based data (lengths of all data are numGrid)
     /////////////////////////////////////////////////////////////////////////
 
     const VarInfoGrid varInfo(vector<VarInfo<vector<OCP_DBL>>> {
@@ -479,6 +480,60 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     // Free memory
     vector<vector<idx_t>>().swap(domain.elementCSR);
 
+
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // Distribute Boundary Name (used in Gmsh grid now)
+    /////////////////////////////////////////////////////////////////////////
+
+
+    if (myrank == MASTER_PROCESS) {
+        vector<string> names;       
+        INT numName = grid.gmshGrid.GetBoundaryName(names);
+        MPI_Bcast(&numName, 1, MPI_INT, MASTER_PROCESS, myComm);
+        if (numName > 0) {
+            vector<INT> lenName(numName);
+            string      nameset;
+            for (USI i = 0; i < numName; i++) {
+                lenName[i] = names[i].size();
+                nameset    += names[i];
+            }
+            MPI_Bcast(&lenName[0], numName, MPI_INT, MASTER_PROCESS, myComm);
+            INT len = 0;
+            for (USI i = 0; i < numName; i++) {
+                len += lenName[i];
+            }                               
+            MPI_Bcast(&nameset[0], len, MPI_CHAR, MASTER_PROCESS, myComm);
+
+            /// Set boundary name
+            auto& boundaryName = bulk.optMs.boundary.GetBoundName();
+            boundaryName       = names;
+        }       
+    }
+    else {
+        INT numName;
+        MPI_Bcast(&numName, 1, MPI_INT, MASTER_PROCESS, myComm);
+        if (numName > 0) {
+            vector<INT> lenName(numName);
+            MPI_Bcast(&lenName[0], numName, MPI_INT, MASTER_PROCESS, myComm);
+            INT len = 0;
+            for (USI i = 0; i < numName; i++) {
+                len += lenName[i];
+            }
+            vector<OCP_CHAR> nameset(len);
+            MPI_Bcast(&nameset[0], len, MPI_CHAR, MASTER_PROCESS, myComm);
+
+            /// Set boundary name
+            auto& boundaryName = bulk.optMs.boundary.GetBoundName();
+            USI bId = 0;
+            for (USI i = 0; i < numName; i++) {
+                boundaryName.push_back(string(&nameset[bId], lenName[i]));
+                bId += lenName[i];
+            }
+        }
+    }
+  
     MPI_Barrier(myComm);
 }
 

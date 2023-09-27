@@ -309,6 +309,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputRR(ifs);
                 break;
 
+            case Map_Str2Int("BOUNDARY", 8):
+                paramRs.InputBoundary(ifs);
+                break;
+
             default: // skip non-keywords
                 break;
         }

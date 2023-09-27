@@ -73,7 +73,10 @@ protected:
     OCP_PVTCO2 PVTCO2;
     /// PVT table for H2O
     OCP_PVTH2O PVTH2O;
-
+    /// Molecular weight of CO2
+    OCP_DBL    MWCO2;
+    /// Molecular weight of H2O
+    OCP_DBL    MWH2O;
 };
 
 
@@ -84,7 +87,7 @@ protected:
 class OCPMixtureBlkOilGW : public OCPMixture
 {
 public:
-    OCPMixtureBlkOilGW() { mixtureType = OCPMixtureType::BO_OW; }
+    OCPMixtureBlkOilGW() { mixtureType = OCPMixtureType::BO_GW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void InitFlash(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
         SetPS(P, Sw);

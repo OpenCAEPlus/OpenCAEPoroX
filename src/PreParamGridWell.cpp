@@ -1243,14 +1243,18 @@ void PreParamGridWell::SetupBasicGmshGrid()
     numGrid  = numGridM;
     v.resize(numGrid);
     depth.resize(numGrid);
-    REGNUM.resize(numGrid);
     boundIndex.resize(numGrid);
+    SATNUM.resize(numGrid);
+    PVTNUM.resize(numGrid);
+    ROCKNUM.resize(numGrid);
 
     if (gmshGrid.dimen == 2) {
         for (OCP_USI n = 0; n < numGridM; n++) {
             v[n]          = gmshGrid.elements[n].area * gmshGrid.thickness;
             depth[n]      = gmshGrid.elements[n].center.y; /// Use y-coordinate
-            REGNUM[n]     = gmshGrid.elements[n].phyIndex;
+            SATNUM[n]     = gmshGrid.elements[n].phyIndex;
+            PVTNUM[n]     = gmshGrid.elements[n].phyIndex;
+            ROCKNUM[n]    = gmshGrid.elements[n].phyIndex;
             boundIndex[n] = gmshGrid.elements[n].boundIndex;
         }
     }
@@ -1579,6 +1583,7 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(ky);
     vector<OCP_DBL>().swap(kz);
     vector<OCP_DBL>().swap(sigma);
+    vector<OCP_DBL>().swap(dzMtrx);
     vector<OCP_DBL>().swap(initR.swat);
     vector<OCP_DBL>().swap(initR.swatInit);
     vector<OCP_DBL>().swap(multZ);
@@ -1586,6 +1591,7 @@ void PreParamGridWell::FreeMemory()
     vector<USI>().swap(SATNUM);
     vector<USI>().swap(PVTNUM);
     vector<USI>().swap(ROCKNUM);
+    vector<USI>().swap(boundIndex);
 
     vector<WellParam>().swap(well);
 

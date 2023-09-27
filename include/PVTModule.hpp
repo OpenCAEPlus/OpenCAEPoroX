@@ -61,7 +61,10 @@ public:
 
         mixType = PVTs[0]->GetMixtureType();
 
-        if (PVTNUM.empty()) PVTNUM.resize(bvs.nb, 0);
+        if (PVTNUM.empty() || NTPVT == 1) {
+            PVTNUM.clear();
+            PVTNUM.resize(bvs.nb, 0);
+        }
 
         bvs.np = PVTs[0]->GetVs()->np;
         bvs.nc = PVTs[0]->GetVs()->nc;

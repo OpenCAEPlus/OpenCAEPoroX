@@ -578,6 +578,35 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
 }
 
 
+void ParamReservoir::InputBoundary(ifstream& ifs)
+{   
+    vector<string> vbuf;
+    while (OCP_TRUE) {
+        ReadLine(ifs, vbuf);
+        if (vbuf[0] == "BOUNDARYEND") break;
+        while (OCP_TRUE) {
+            if (vbuf[0] == "/") break;
+
+            if (vbuf[0] == "*NAME") {   
+                string name;
+                for (USI i = 1; i < vbuf.size(); i++) {
+                    if (vbuf[i] != "/") {
+                        name += vbuf[i];
+                    }
+                }
+                BDparam.push_back(BoundaryParam(name));
+            }
+            else if (vbuf[0] == "CONSTP") {
+                BDparam.back().constP = OCP_TRUE;
+                BDparam.back().P      = stod(vbuf[1]);
+            }
+
+            ReadLine(ifs, vbuf);
+        }     
+    } 
+}
+
+
 /// Check consistency of input parameters.
 void ParamReservoir::CheckParam()
 {

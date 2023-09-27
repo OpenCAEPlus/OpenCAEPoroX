@@ -512,13 +512,7 @@ void ParamWell::CheckPerf() const
     USI wellnum = well.size();
     USI perfnum;
     for (USI w = 0; w < wellnum; w++) {
-        perfnum = well[w].I_perf.size();
-        if (well[w].J_perf.size() != perfnum) {
-            OCP_ABORT("Wrong perforation size J_perf!");
-        }
-        if (well[w].K_perf.size() != perfnum) {
-            OCP_ABORT("Wrong perforation size K_perf!");
-        }
+        perfnum = well[w].GetPerfNum();
         if (well[w].diameter.size() != perfnum) {
             OCP_ABORT("Wrong perforation diameter size!");
         }
@@ -530,9 +524,6 @@ void ParamWell::CheckPerf() const
         }
         if (well[w].skinFactor.size() != perfnum) {
             OCP_ABORT("Wrong perforation skinFactor size!");
-        }
-        if (well[w].direction.size() != perfnum) {
-            OCP_ABORT("Wrong perforation direction size!");
         }
     }
 }

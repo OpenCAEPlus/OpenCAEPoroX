@@ -48,7 +48,10 @@ public:
 			}
 		}
 
-		if (ROCKNUM.empty()) ROCKNUM.resize(nb, 0);
+		if (ROCKNUM.empty() || NTROCK == 1) {
+			ROCKNUM.clear();
+			ROCKNUM.resize(nb, 0);
+		}
 	
     }
     auto GetROCK(const OCP_USI& n) const { return ROCKs[ROCKNUM[n]]; }

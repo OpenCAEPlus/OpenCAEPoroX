@@ -86,7 +86,6 @@ class HeatLoss
 {
 public:
     HeatLoss() = default;
-    auto IfUse() const { return ifUse; }
     auto IfUse(const OCP_USI& n) const {
         if (!ifUse)              return OCP_FALSE;
         else if (mIndex[n] < 0)  return OCP_FALSE;

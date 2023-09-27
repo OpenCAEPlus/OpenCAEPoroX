@@ -234,8 +234,6 @@ protected:
     /// transmissibility multipliers in Z-direction
     vector<OCP_DBL> multZ;
 
-    // Records the index of region for each grid(used in gmshgrid now)
-    vector<USI>     REGNUM;
     /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
     vector<USI>     ACTNUM; 
     /// Records the index of SAT region for each grid.  
@@ -244,13 +242,11 @@ protected:
     vector<USI>     PVTNUM;
     /// Records the index of ROCK region for each grid.
     vector<USI>     ROCKNUM;   
+    /// boundary indicator
+    vector<USI>     boundIndex;
 
     // Initial Condition
     InitialReservoir initR;
-
-    /// boundary indicator
-    vector<USI>      boundIndex;
-
 
     // Well
     vector<WellParam> well;

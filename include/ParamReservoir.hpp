@@ -119,6 +119,21 @@ public:
 };
 
 
+/// External boundary condition params
+class BoundaryParam
+{
+public:
+    BoundaryParam(const string& Name) : name(Name) {}
+
+    /// boundary name
+    string   name;
+    /// if use const pressure
+    OCP_BOOL constP{ OCP_FALSE };
+    /// pressure
+    OCP_DBL  P;
+};
+
+
 /// A internal structure used to store some params for reservoir, it can tell
 /// if these params are given by users.
 template <typename T>
@@ -281,12 +296,18 @@ class ParamReservoir
 {
 
 public:
-
-    OCP_DBL                  rsTemp;  ///< Temperature for reservoir.
-    vector<RockParam>        rockSet; ///< a set of rock
-    HLoss                    hLoss;   ///< Heat loss property
-    Miscstr                  miscstr; ///< reference Miscibility surface tension
-    vector<BrooksCoreyParam> BCparam; ///< params for Brooks-Corey model
+    /// Temperature for reservoir.
+    OCP_DBL                  rsTemp; 
+    /// a set of rock params
+    vector<RockParam>        rockSet;
+    /// Heat loss property
+    HLoss                    hLoss;  
+    /// reference Miscibility surface tension
+    Miscstr                  miscstr; 
+    /// params for Brooks-Corey model
+    vector<BrooksCoreyParam> BCparam;
+    /// params for boundary condition
+    vector<BoundaryParam>    BDparam;
 
     // phase property
     Type_A_r<OCP_DBL> density; ///< Density of oil, water, gas in standard conditions.
@@ -417,13 +438,15 @@ public:
         comsParam.InputRefPR(ifs, keyword);
     };
 
-    // Method params
+    // PEC Method params
     void InputSSMSTA(ifstream& ifs) { comsParam.InputSSMSTA(ifs); };
     void InputNRSTA(ifstream& ifs) { comsParam.InputNRSTA(ifs); };
     void InputSSMSP(ifstream& ifs) { comsParam.InputSSMSP(ifs); };
     void InputNRSP(ifstream& ifs) { comsParam.InputNRSP(ifs); };
     void InputRR(ifstream& ifs) { comsParam.InputRR(ifs); };
 
+    /// Input boundary conditons
+    void InputBoundary(ifstream& ifs);
 
     // check
     /// Check the reservoir param from input file.
