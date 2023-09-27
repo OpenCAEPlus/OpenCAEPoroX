@@ -117,7 +117,7 @@ void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
         if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
-            OCP_ABORT("Time stepsize is too small!");
+            OCP_ABORT("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
         // Assemble linear system
         IsoTSolver.AssembleMat(rs, ctrl);
         // Solve linear system
@@ -140,7 +140,7 @@ void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
         if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
-            OCP_ABORT("Time stepsize is too small!");
+            OCP_ABORT("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
         // Assemble linear system
         TSolver.AssembleMat(rs, ctrl);
         // Solve linear system

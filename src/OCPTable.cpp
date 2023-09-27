@@ -336,18 +336,18 @@ void OCPTable2::Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2
     else if (val1 <= ref.front())  tables.front().Eval_All(j2, val2, out);
     else if (val1 >= ref.front())  tables.back().Eval_All(j2, val2, out);
     else {
-        for (USI i = 0; i < numtable - 1; i++) {
-            if (val1 <= ref[i + 1]) {
-                const OCP_DBL w = (val1 - ref[i]) / (ref[i + 1] - ref[i]);
-                tables[i].Eval_All(j2, val2, data1, cdata1);
-                tables[i + 1].Eval_All(j2, val2, data2, cdata2);
+    for (USI i = 0; i < numtable - 1; i++) {
+        if (val1 <= ref[i + 1]) {
+            const OCP_DBL w = (val1 - ref[i]) / (ref[i + 1] - ref[i]);
+            tables[i].Eval_All(j2, val2, data1, cdata1);
+            tables[i + 1].Eval_All(j2, val2, data2, cdata2);
 
-                for (USI j = 0; j < nCol; j++) {
-                    out[j] = w * data1[j] + (1 - w) * data2[j];
-                }
-                break;
+            for (USI j = 0; j < nCol; j++) {
+                out[j] = w * data1[j] + (1 - w) * data2[j];
             }
+            break;
         }
+    }
     }
 }
 
@@ -369,7 +369,7 @@ void OCPTable2::Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2
                 for (USI j = 0; j < nCol; j++) {
                     out[j]    = w * data1[j] + (1 - w) * data2[j];
                     slope2[j] = w * cdata1[j] + (1 - w) * cdata2[j];
-                    slope1[j] = (data2[j] - data1[j]) / (ref[i + 1] - ref[i]);                                                     
+                    slope1[j] = (data2[j] - data1[j]) / (ref[i + 1] - ref[i]);
                 }
                 break;
             }
@@ -425,6 +425,47 @@ void OCPTable2::Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_D
     }
 }
 
+
+OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, const USI& destj) const
+{
+    if (numtable == 1)             return tables[0].Eval(j2, val2, destj);
+    else if (val1 <= ref.front())  return tables.front().Eval(j2, val2, destj);
+    else if (val1 >= ref.front())  return tables.back().Eval(j2, val2, destj);
+    else {
+        for (USI i = 0; i < numtable - 1; i++) {
+            if (val1 <= ref[i + 1]) {
+                const OCP_DBL w  = (val1 - ref[i]) / (ref[i + 1] - ref[i]);
+                const OCP_DBL d1 = tables[i].Eval(j2, val2, destj);
+                const OCP_DBL d2 = tables[i + 1].Eval(j2, val2, destj);
+
+                return w * d1 + (1 - w) * d2;
+            }
+        }
+    }
+}
+
+
+OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, const USI& destj, OCP_DBL& myK1, OCP_DBL& myK2) const
+{
+    myK1 = 0;
+    if (numtable == 1)             return tables[0].Eval(j2, val2, destj, myK2);
+    else if (val1 <= ref.front())  return tables.front().Eval(j2, val2, destj, myK2);
+    else if (val1 >= ref.front())  return tables.back().Eval(j2, val2, destj, myK2);
+    else {
+        for (USI i = 0; i < numtable - 1; i++) {
+            if (val1 <= ref[i + 1]) {
+                const OCP_DBL w  = (val1 - ref[i]) / (ref[i + 1] - ref[i]);
+                const OCP_DBL d1 = tables[i].Eval(j2, val2, destj, myK1);
+                const OCP_DBL d2 = tables[i + 1].Eval(j2, val2, destj, myK2);
+
+                myK2 = w * myK1 + (1 - w) * myK2;
+                myK1 = (d2 - d1) / (ref[i + 1] - ref[i]);
+
+                return (w * d1 + (1 - w) * d2);
+            }
+        }
+    }
+}
 
 
 /*----------------------------------------------------------------------------*/

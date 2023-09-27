@@ -113,6 +113,10 @@ public:
     /// ref and tables[i][0] are both in in ascending order
     void Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out,
         vector<OCP_DBL>& slope1, vector<OCP_DBL>& slope2) const;
+    /// interpolate the specified monotonically increasing column in table to evaluate the target column.
+    OCP_DBL Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, const USI& destj) const;
+    /// interpolate the specified monotonically increasing column in table to evaluate the target column, and return corresponding slope.
+    OCP_DBL Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, const USI& destj, OCP_DBL& myK1, OCP_DBL& myK2) const;
     /// Get number of column in 1D table
     auto GetColNum() const { return nCol; }
     /// is empty

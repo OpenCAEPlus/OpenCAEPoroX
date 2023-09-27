@@ -258,6 +258,33 @@ void OCP_PVCDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL
 
 
 /////////////////////////////////////////////////////
+// OCP_PVT2 (suitable for a class of table)
+/////////////////////////////////////////////////////
+
+
+void OCP_PVT2::CalRhoMuSol(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol)
+{
+	table.Eval_All0(T, P, data);
+	rho = data[1];
+	mu  = data[2];
+	sol = data[3];
+}
+
+
+void OCP_PVT2::CalRhoMuSolDer(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
+	OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP)
+{
+	table.Eval_All0(T, P, data, cdata1, cdata2);
+	rho  = data[1];
+	mu   = data[2];
+	sol  = data[3];
+	rhoP = cdata2[1];
+	muP  = cdata2[2];
+	solP = cdata2[3];
+}
+
+
+/////////////////////////////////////////////////////
 // ViscosityCalculation
 /////////////////////////////////////////////////////
 

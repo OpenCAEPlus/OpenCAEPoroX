@@ -247,7 +247,7 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// Suitable for a class of table
+// OCP_PVT2 (suitable for a class of table)
 /////////////////////////////////////////////////////
 
 class OCP_PVT2 : public OCPFuncTable2
@@ -259,7 +259,13 @@ class OCP_PVT2 : public OCPFuncTable2
 	/// 3th column: e.g. The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
 
 public:
-	OCP_DBL CalRho(const OCP_DBL& val1, const OCP_DBL& val2) { }
+	/// Calculate density
+	OCP_DBL CalRho(const OCP_DBL& T, const OCP_DBL& P) { return table.Eval(T, P, 0, 1); }
+	/// Calculate density, viscosity and corresponding solubility
+	void CalRhoMuSol(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol);
+	/// Calculate density, viscosity and corresponding solubility and their derivatives
+	void CalRhoMuSolDer(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
+						OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP);
 };
 
 typedef OCP_PVT2 OCP_PVTCO2;
