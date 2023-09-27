@@ -12,9 +12,9 @@
 #ifndef __OCPFUNCTABLE_HEADER__
 #define __OCPFUNCTABLE_HEADER__
 
- // OpenCAEPoroX header files
+// OpenCAEPoroX header files
 #include "OCPTable.hpp"
-#include "ParamReservoir.hpp"
+
 
 using namespace std;
 
@@ -51,20 +51,16 @@ class OCPFuncTable2
 {
 public:
 	OCPFuncTable2() = default;
-	void Setup(const Table2& tab);
-	/// ref and tables[i][0] are both in in ascending order
-	void Eval(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out) const;
-	/// ref and tables[i][0] are both in in ascending order
-	void Eval(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out, 
-		vector<OCP_DBL>& slope1, vector<OCP_DBL>& slope2) const;
-	OCP_BOOL IsEmpty() const { return (numtable == 0); }
+	void Setup(const Table2& tab) {
+		table.Setup(tab);
+		data.resize(table.GetColNum());
+		cdata1.resize(table.GetColNum());
+		cdata2.resize(table.GetColNum());
+	}
+	OCP_BOOL IsEmpty() const { return table.IsEmpty(); }
 
 protected:
-	USI                       numtable;
-	vector<OCP_DBL>           ref;
-	vector<OCPTable>          tables;
-
-	USI                       lendata;
+	OCPTable2                 table;
 	mutable vector<OCP_DBL>   data;
 	mutable vector<OCP_DBL>   cdata1;
 	mutable vector<OCP_DBL>   cdata2;

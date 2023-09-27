@@ -259,7 +259,7 @@ class OCP_PVT2 : public OCPFuncTable2
 	/// 3th column: e.g. The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
 
 public:
-	OCP_DBL CalRho(const OCP_DBL& val1, const OCP_DBL& val2) {  }
+	OCP_DBL CalRho(const OCP_DBL& val1, const OCP_DBL& val2) { }
 };
 
 typedef OCP_PVT2 OCP_PVTCO2;
@@ -329,7 +329,7 @@ public:
 
 protected:
 	/// Viscosity-versus-temperature&pressure dependence
-	OCPFuncTable2    table;
+	OCPTable2    viscTab;
 };
 
 

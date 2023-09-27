@@ -18,6 +18,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
+#include "ParamReservoir.hpp"
 
 using namespace std;
 
@@ -94,6 +95,40 @@ protected:
     mutable USI             bId;  ///< the starting point of rows when interpolating
     vector<vector<OCP_DBL>> data; ///< data of the table, data[i] is the ith column.
 };
+
+
+/// 2D table
+class OCPTable2
+{
+public:
+    /// Setup the table
+    void Setup(const Table2& tab);
+    /// ref and tables[i][0] are both in in ascending order
+    void Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, vector<OCP_DBL>& out) const;
+    /// ref and tables[i][0] are both in in ascending order
+    void Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2, vector<OCP_DBL>& out,
+        vector<OCP_DBL>& slope1, vector<OCP_DBL>& slope2) const;
+    /// ref and tables[i][0] are both in in ascending order
+    void Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out) const;
+    /// ref and tables[i][0] are both in in ascending order
+    void Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_DBL>& out,
+        vector<OCP_DBL>& slope1, vector<OCP_DBL>& slope2) const;
+    /// Get number of column in 1D table
+    auto GetColNum() const { return nCol; }
+    /// is empty
+    auto IsEmpty() const { return numtable == 0; }
+protected:
+    USI                       numtable;
+    vector<OCP_DBL>           ref;
+    vector<OCPTable>          tables;
+
+    USI                       nCol;
+    mutable vector<OCP_DBL>   data1;
+    mutable vector<OCP_DBL>   data2;
+    mutable vector<OCP_DBL>   cdata1;
+    mutable vector<OCP_DBL>   cdata2;
+};
+
 
 #endif /* end if __OCPTABLE_HEADER__ */
 

@@ -264,7 +264,7 @@ void OCP_PVCDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL
 
 ViscosityMethod01::ViscosityMethod01(const Table2& tab)
 {
-	table.Setup(tab);
+	viscTab.Setup(tab);
 	nc = tab.colNum - 1;
 	muc.resize(nc);
 	mucP.resize(nc);
@@ -276,7 +276,7 @@ OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp)
 {
 
 	OCP_DBL mu = 0;
-	table.Eval((*vp.P), (*vp.T) - CONV5, muc);
+	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV5, muc);
 	for (USI i = 0; i < nc; i++)
 		mu += vp.x[i] * log(muc[i]);
 	return exp(mu);
@@ -288,7 +288,7 @@ OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp, OCP_DBL& muP,
 	OCP_DBL mu = 0;
 	muP = 0;
 	muT = 0;
-	table.Eval((*vp.P), (*vp.T) - CONV5, muc, mucP, mucT);
+	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV5, muc, mucP, mucT);
 	for (USI i = 0; i < nc; i++) {
 		mux[i] = vp.x[i] * log(muc[i]);
 		mu     += mux[i];
