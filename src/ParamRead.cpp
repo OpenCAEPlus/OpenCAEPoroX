@@ -219,10 +219,12 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("PSURF", 5):
                 paramWell.InputPSURF(ifs);
+                paramRs.Psurf = paramWell.Psurf;
                 break;
 
             case Map_Str2Int("TSURF", 5):
                 paramWell.InputTSURF(ifs);
+                paramRs.Tsurf = paramWell.Tsurf;
                 break;
 
             case Map_Str2Int("SUMMARY", 7):

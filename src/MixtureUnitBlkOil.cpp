@@ -104,7 +104,7 @@ MixtureUnitBlkOil_GW::MixtureUnitBlkOil_GW(const ParamReservoir& rs_param, const
 
 void MixtureUnitBlkOil_GW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
 {
-    GWM.Flash(Pin, Niin);
+    GWM.Flash(Pin, Tin, Niin);
 }
 
 void MixtureUnitBlkOil_GW::InitFlashIMPEC(const OCP_DBL& Pin,
@@ -115,7 +115,7 @@ void MixtureUnitBlkOil_GW::InitFlashIMPEC(const OCP_DBL& Pin,
     const OCP_DBL* Ziin,
     const OCP_USI& bId)
 {
-    GWM.InitFlash(Pin, Sjin[1], Vpore);
+    GWM.InitFlash(Pin, Tin, Sjin[1], Vpore);
 }
 
 void MixtureUnitBlkOil_GW::InitFlashFIM(const OCP_DBL& Pin,
@@ -126,7 +126,7 @@ void MixtureUnitBlkOil_GW::InitFlashFIM(const OCP_DBL& Pin,
     const OCP_DBL* Ziin,
     const OCP_USI& bId)
 {
-    GWM.InitFlashDer(Pin, Sjin[1], Vpore);
+    GWM.InitFlashDer(Pin, Tin, Sjin[1], Vpore);
 }
 
 void MixtureUnitBlkOil_GW::FlashIMPEC(const OCP_DBL& Pin,
@@ -136,7 +136,7 @@ void MixtureUnitBlkOil_GW::FlashIMPEC(const OCP_DBL& Pin,
     const OCP_DBL* xijin,
     const OCP_USI& bId)
 {
-    GWM.Flash(Pin, Niin);
+    GWM.Flash(Pin, Tin, Niin);
 }
 
 void MixtureUnitBlkOil_GW::FlashFIM(const OCP_DBL& Pin,
@@ -147,7 +147,7 @@ void MixtureUnitBlkOil_GW::FlashFIM(const OCP_DBL& Pin,
     const OCP_DBL* xijin,
     const OCP_USI& bId)
 {
-    GWM.FlashDer(Pin, Niin);
+    GWM.FlashDer(Pin, Tin, Niin);
 }
 
 OCP_DBL MixtureUnitBlkOil_GW::XiPhase(const OCP_DBL& Pin,
@@ -155,7 +155,7 @@ OCP_DBL MixtureUnitBlkOil_GW::XiPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return GWM.CalXi(Pin, pt);
+    return GWM.CalXi(Pin, Tin, pt);
 }
 
 OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
@@ -164,7 +164,7 @@ OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return GWM.CalRho(Pin, pt);
+    return GWM.CalRho(Pin, Tin, pt);
 }
 
 

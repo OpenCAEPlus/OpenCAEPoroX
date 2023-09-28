@@ -334,7 +334,7 @@ void OCPTable2::Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2
 {
     if (numtable == 1)             tables[0].Eval_All(j2, val2, out);
     else if (val1 <= ref.front())  tables.front().Eval_All(j2, val2, out);
-    else if (val1 >= ref.front())  tables.back().Eval_All(j2, val2, out);
+    else if (val1 >= ref.back())   tables.back().Eval_All(j2, val2, out);
     else {
     for (USI i = 0; i < numtable - 1; i++) {
         if (val1 <= ref[i + 1]) {
@@ -358,7 +358,7 @@ void OCPTable2::Eval_All(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2
     fill(slope1.begin(), slope1.end(), 0.0);
     if (numtable == 1)             tables[0].Eval_All(j2, val2, out, slope2);
     else if (val1 <= ref.front())  tables.front().Eval_All(j2, val2, out, slope2);
-    else if (val1 >= ref.front())  tables.back().Eval_All(j2, val2, out, slope2);
+    else if (val1 >= ref.back())   tables.back().Eval_All(j2, val2, out, slope2);
     else {
         for (USI i = 0; i < numtable - 1; i++) {
             if (val1 <= ref[i + 1]) {
@@ -382,7 +382,7 @@ void OCPTable2::Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_D
 {
     if (numtable == 1)             tables[0].Eval_All0(val2, out);
     else if (val1 <= ref.front())  tables.front().Eval_All0(val2, out);
-    else if (val1 >= ref.front())  tables.back().Eval_All0(val2, out);
+    else if (val1 >= ref.back())   tables.back().Eval_All0(val2, out);
     else {
         for (USI i = 0; i < numtable - 1; i++) {
             if (val1 <= ref[i + 1]) {
@@ -406,7 +406,7 @@ void OCPTable2::Eval_All0(const OCP_DBL& val1, const OCP_DBL& val2, vector<OCP_D
     fill(slope1.begin(), slope1.end(), 0.0);
     if (numtable == 1)             tables[0].Eval_All0(val2, out, slope2);
     else if (val1 <= ref.front())  tables.front().Eval_All0(val2, out, slope2);
-    else if (val1 >= ref.front())  tables.back().Eval_All0(val2, out, slope2);
+    else if (val1 >= ref.back())   tables.back().Eval_All0(val2, out, slope2);
     else {
         for (USI i = 0; i < numtable - 1; i++) {
             if (val1 <= ref[i + 1]) {
@@ -430,7 +430,7 @@ OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2,
 {
     if (numtable == 1)             return tables[0].Eval(j2, val2, destj);
     else if (val1 <= ref.front())  return tables.front().Eval(j2, val2, destj);
-    else if (val1 >= ref.front())  return tables.back().Eval(j2, val2, destj);
+    else if (val1 >= ref.back())   return tables.back().Eval(j2, val2, destj);
     else {
         for (USI i = 0; i < numtable - 1; i++) {
             if (val1 <= ref[i + 1]) {
@@ -442,6 +442,7 @@ OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2,
             }
         }
     }
+    OCP_ABORT("WRONG EVAL!");
 }
 
 
@@ -450,7 +451,7 @@ OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2,
     myK1 = 0;
     if (numtable == 1)             return tables[0].Eval(j2, val2, destj, myK2);
     else if (val1 <= ref.front())  return tables.front().Eval(j2, val2, destj, myK2);
-    else if (val1 >= ref.front())  return tables.back().Eval(j2, val2, destj, myK2);
+    else if (val1 >= ref.back())   return tables.back().Eval(j2, val2, destj, myK2);
     else {
         for (USI i = 0; i < numtable - 1; i++) {
             if (val1 <= ref[i + 1]) {
@@ -465,6 +466,7 @@ OCP_DBL OCPTable2::Eval(const OCP_DBL& val1, const OCP_DBL& val2, const USI& j2,
             }
         }
     }
+    OCP_ABORT("WRONG EVAL!");
 }
 
 

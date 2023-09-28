@@ -35,8 +35,8 @@ public:
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) = 0;
-    virtual OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) = 0;
+    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
+    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
     virtual OCP_DBL CalVmStd(const PhaseType& pt) = 0;
 };
@@ -47,7 +47,8 @@ public:
 /////////////////////////////////////////////////////
 
 
-/// Use PVTH2O and PVTCO2
+/// Use PVTCO2 and PVTH2O
+/// Here, molar density(xi) is the mass density(rho)
 class OCPMixtureBlkOilGWMethod01 : public OCPMixtureBlkOilGWMethod
 {
 public:
@@ -56,27 +57,30 @@ public:
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs) override;
-    OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) override;
-    OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
 
 protected:
-    OCP_DBL CalXiO(const OCP_DBL& P) {  }
-    OCP_DBL CalXiW(const OCP_DBL& P) {  }
-    OCP_DBL CalRhoO(const OCP_DBL& P) {  }
-    OCP_DBL CalRhoW(const OCP_DBL& P) {  }
+    void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
+    OCP_DBL CalXiG(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoG(P, T); }
+    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoW(P, T); }
+    OCP_DBL CalRhoG(const OCP_DBL& P, const OCP_DBL& T) const { return PVTCO2.CalRho(P, T); }
+    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const;
 
 
 protected:
     /// PVT table for CO2
-    OCP_PVTCO2 PVTCO2;
+    OCP_PVTCO2    PVTCO2;
     /// PVT table for H2O
-    OCP_PVTH2O PVTH2O;
-    /// Molecular weight of CO2
-    OCP_DBL    MWCO2;
-    /// Molecular weight of H2O
-    OCP_DBL    MWH2O;
+    OCP_PVTH2O    PVTH2O;
+    /// volume per unit mass of gas in standard condition
+    OCP_DBL       stdVg;
+    /// volume per unit mass of water in standard condition
+    OCP_DBL       stdVw;
+    /// if use water density correction
+    Garciaw       garciaw;
 };
 
 
@@ -89,30 +93,30 @@ class OCPMixtureBlkOilGW : public OCPMixture
 public:
     OCPMixtureBlkOilGW() { mixtureType = OCPMixtureType::BO_GW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Sw);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, T, Sw);
         pmMethod->InitFlash(Vp, vs);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
-        SetPN(P, Ni);
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Sw);
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, T, Sw);
         pmMethod->InitFlashDer(Vp, vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
-        SetPN(P, Ni);
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPN(P, T, Ni);
         pmMethod->FlashDer(vs);
     }
-    OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) {
-        return pmMethod->CalXi(P, pt);
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalXi(P, T, pt);
     }
-    OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) {
-        return pmMethod->CalRho(P, pt);
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalRho(P, T, pt);
     }
     void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        SetPN(P, Ni);
+        SetPN(P, T, Ni);
         pmMethod->CalVStd(vs);
     }
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
@@ -121,13 +125,15 @@ public:
 
 
 protected:
-    void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) {
+    void SetPN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         vs.P = P;
+        vs.T = T;
         vs.Ni[0] = Ni[0];
         vs.Ni[1] = Ni[1];
     }
-    void SetPS(const OCP_DBL& P, const OCP_DBL& Sw) {
+    void SetPS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
         vs.P = P;
+        vs.T = T;
         vs.S[0] = 1 - Sw;
         vs.S[1] = Sw;
     }

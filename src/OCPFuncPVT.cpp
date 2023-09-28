@@ -262,25 +262,59 @@ void OCP_PVCDO::CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL
 /////////////////////////////////////////////////////
 
 
-void OCP_PVT2::CalRhoMuSol(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol)
+void OCP_PVT2::CalRhoMuSol(const OCP_DBL& P, const OCP_DBL& T, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol) const
 {
 	table.Eval_All0(T, P, data);
-	rho = data[1];
-	mu  = data[2];
-	sol = data[3];
+	rho = data[0];
+	mu  = data[1];
+	sol = data[2];
 }
 
 
-void OCP_PVT2::CalRhoMuSolDer(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
-	OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP)
+void OCP_PVT2::CalRhoMuSolDer(const OCP_DBL& P, const OCP_DBL& T, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
+	OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP) const
 {
 	table.Eval_All0(T, P, data, cdata1, cdata2);
-	rho  = data[1];
-	mu   = data[2];
-	sol  = data[3];
-	rhoP = cdata2[1];
-	muP  = cdata2[2];
-	solP = cdata2[3];
+	rho  = data[0];
+	mu   = data[1];
+	sol  = data[2];
+	rhoP = cdata2[0];
+	muP  = cdata2[1];
+	solP = cdata2[2];
+}
+
+
+/////////////////////////////////////////////////////
+// GARCIAW
+/////////////////////////////////////////////////////
+
+
+void Garciaw::CalRho(const OCP_DBL& T, const OCP_DBL& xGw, OCP_DBL& rhow) const
+{
+	if (ifUse){
+		const OCP_DBL tmp = MWCO2 / (10E-6 * (37.51 - 9.585E-2 * T + 8.74E-4 * T * T - 5.044E-7 * T * T * T));
+		rhow = 1 / ((1 - xGw) / rhow + xGw / tmp);
+	}
+}
+
+
+void Garciaw::CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP, OCP_DBL& rhow, OCP_DBL& rhowP, OCP_DBL& drhow_dxGw) const
+{
+	if (ifUse) {
+		const OCP_DBL tmp = MWCO2 / (10E-6 * (37.51 - 9.585E-2 * T + 8.74E-4 * T * T - 5.044E-7 * T * T * T));
+		const OCP_DBL tmp1 = ((1 - xGw) / rhow + xGw / tmp);
+
+		rhowP      = -((-xGwP * rhow - (1 - xGw) * rhowP) / (rhow * rhow) + xGwP / tmp) / (tmp1 * tmp1);
+		drhow_dxGw = -(-1 / rhow + 1 / tmp) / (tmp1 * tmp1);
+		rhow       = 1 / tmp1;
+	}
+}
+
+
+void Garciaw::CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP, const OCP_DBL& xGwT,
+	OCP_DBL& rhow, OCP_DBL& rhowP, OCP_DBL& rhowT, OCP_DBL& drhow_dxGw) const
+{
+	OCP_ABORT("Not Completed!");
 }
 
 

@@ -260,16 +260,44 @@ class OCP_PVT2 : public OCPFuncTable2
 
 public:
 	/// Calculate density
-	OCP_DBL CalRho(const OCP_DBL& T, const OCP_DBL& P) { return table.Eval(T, P, 0, 1); }
+	OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T) const { return table.Eval(T, P, 0, 1); }
 	/// Calculate density, viscosity and corresponding solubility
-	void CalRhoMuSol(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol);
+	void CalRhoMuSol(const OCP_DBL& P, const OCP_DBL& T, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol) const;
 	/// Calculate density, viscosity and corresponding solubility and their derivatives
-	void CalRhoMuSolDer(const OCP_DBL& T, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
-						OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP);
+	void CalRhoMuSolDer(const OCP_DBL& P, const OCP_DBL& T, OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
+						OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP) const;
 };
 
 typedef OCP_PVT2 OCP_PVTCO2;
 typedef OCP_PVT2 OCP_PVTH2O;
+
+
+/////////////////////////////////////////////////////
+// GARCIAW
+/////////////////////////////////////////////////////
+
+/// Garciaw Model for calculating mass density of water phase when
+/// considering the CO2 dissolve in water
+class Garciaw
+{
+public:
+	/// setup
+	void Setup(const OCP_BOOL& flag) { ifUse = flag; }
+	/// If Use Garciaw
+	auto IfUse() const { return ifUse; }
+	/// Calculate water mass density, rhow is mass density of pure water phase, xGw is mass fraction of CO2 in water
+	void CalRho(const OCP_DBL& T, const OCP_DBL& xGw, OCP_DBL& rhow) const;
+	/// Calculate water mass density and corresponding derivatives
+	void CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP, OCP_DBL& rhow, OCP_DBL& rhowP, OCP_DBL& drhow_dxGw) const;
+	/// Calculate water mass density and corresponding derivatives
+	void CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP, const OCP_DBL& xGwT, 
+				   OCP_DBL& rhow, OCP_DBL& rhowP, OCP_DBL& rhowT, OCP_DBL& drhow_dxGw) const;
+protected:
+	/// If use this model
+	OCP_BOOL      ifUse{ OCP_FALSE };
+	/// molecular weight
+	const OCP_DBL MWCO2{ 44.1E-3 };
+};
 
 
 /////////////////////////////////////////////////////

@@ -366,6 +366,12 @@ public:
     Table2Set PVTH2O;
     /// PVT property for CO2
     Table2Set PVTCO2;
+    /// Pressure in surface condition.
+    OCP_DBL           Psurf{ PRESSURE_STD };
+    /// Temperature in surface condition.
+    OCP_DBL           Tsurf{ TEMPERATURE_STD };
+
+public:
 
     /// Find corresponding variable according to the name of variable.
     /// It is used for the scope of the table.

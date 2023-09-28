@@ -169,7 +169,7 @@ public:
     OCP_DBL                 Nt;
     /// total volume of components
     OCP_DBL                 Vf;
-    /// mole number of components
+    /// mole number of components(mass in some conditions)
     vector<OCP_DBL>         Ni;
     /// existence of phase
     vector<OCP_BOOL>        phaseExist;
@@ -183,7 +183,7 @@ public:
     vector<OCP_DBL>         x;
     /// mass density of phases
     vector<OCP_DBL>         rho;
-    /// molar density of phases
+    /// molar density of phases(mass density in some conditions)
     vector<OCP_DBL>         xi;
     /// viscosity of phases
     vector<OCP_DBL>         mu;
