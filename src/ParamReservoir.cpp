@@ -398,7 +398,7 @@ void ParamReservoir::InputBrooksCorey(ifstream& ifs)
             else if (vbuf[index] == "*PENTRY") {
                 bc.Pentry = val;
             }
-            else if (vbuf[index] == "PCMAX") {
+            else if (vbuf[index] == "*PCMAX") {
                 bc.Pcmax = val;
             }
             else if (vbuf[index] == "*CWREPERM") {

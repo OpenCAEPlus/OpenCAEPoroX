@@ -47,7 +47,7 @@ void FlowUnit_OW::AssinValueDer()
 
     kr[oIndex]  = vs.kro;
     kr[wIndex]  = vs.krw;
-    pc[oIndex]  = 0;
+    pc[oIndex]  = vs.Pco;
     pc[wIndex]  = vs.Pcw;
 
     dKrdS[oo] = vs.dKrodSo;
@@ -55,8 +55,8 @@ void FlowUnit_OW::AssinValueDer()
     dKrdS[wo] = vs.dKrwdSo;
     dKrdS[ww] = vs.dKrwdSw;
 
-    dPcdS[oo] = 0;
-    dPcdS[ow] = 0;
+    dPcdS[oo] = vs.dPcodSo;
+    dPcdS[ow] = vs.dPcodSw;
     dPcdS[wo] = vs.dPcwdSo;
     dPcdS[ww] = vs.dPcwdSw;
 }
@@ -68,7 +68,7 @@ void FlowUnit_OW::AssinValue()
 
     kr[oIndex] = vs.kro;
     kr[wIndex] = vs.krw;
-    pc[oIndex] = 0;
+    pc[oIndex] = vs.Pco;
     pc[wIndex] = vs.Pcw;
 }
 
@@ -99,7 +99,7 @@ void FlowUnit_OG::AssinValueDer()
 
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
-    pc[oIndex] = 0;
+    pc[oIndex] = vs.Pco;
     pc[gIndex] = vs.Pcg;
 
     dKrdS[oo] = vs.dKrodSo;
@@ -107,8 +107,8 @@ void FlowUnit_OG::AssinValueDer()
     dKrdS[go] = vs.dKrgdSo;
     dKrdS[gg] = vs.dKrgdSg;
 
-    dPcdS[oo] = 0;
-    dPcdS[og] = 0;
+    dPcdS[oo] = vs.dPcodSo;
+    dPcdS[og] = vs.dPcodSg;
     dPcdS[go] = vs.dPcgdSo;
     dPcdS[gg] = vs.dPcgdSg;
 }
@@ -120,7 +120,7 @@ void FlowUnit_OG::AssinValue()
 
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
-    pc[oIndex] = 0;
+    pc[oIndex] = vs.Pco;
     pc[gIndex] = vs.Pcg;
 }
 
@@ -151,7 +151,7 @@ void FlowUnit_GW::AssinValueDer()
 
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
-    pc[gIndex] = 0;
+    pc[gIndex] = vs.Pcg;
     pc[wIndex] = vs.Pcw;
     
     dKrdS[gg] = vs.dKrgdSg;
@@ -159,10 +159,10 @@ void FlowUnit_GW::AssinValueDer()
     dKrdS[wg] = vs.dKrwdSg;
     dKrdS[ww] = vs.dKrwdSw;
     
-    dPcdS[gg] = 0;
-    dPcdS[gw] = 0;
+    dPcdS[gg] = vs.dPcgdSg;
+    dPcdS[gw] = vs.dPcgdSw;
     dPcdS[wg] = vs.dPcwdSg;
-    dPcdS[ww] = vs.dPcwdSg;
+    dPcdS[ww] = vs.dPcwdSw;
 }
 
 
@@ -172,7 +172,7 @@ void FlowUnit_GW::AssinValue()
 
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
-    pc[gIndex] = 0;
+    pc[gIndex] = vs.Pcg;
     pc[wIndex] = vs.Pcw;
 }
 
@@ -213,7 +213,7 @@ void FlowUnit_OGW::AssinValueDer()
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
-    pc[oIndex] = 0;;
+    pc[oIndex] = vs.Pco;
     pc[gIndex] = vs.Pcg;
     pc[wIndex] = vs.Pcw;
 
@@ -227,9 +227,9 @@ void FlowUnit_OGW::AssinValueDer()
     dKrdS[wg] = vs.dKrwdSg;
     dKrdS[ww] = vs.dKrwdSw;
 
-    dPcdS[oo] = 0;
-    dPcdS[og] = 0;
-    dPcdS[ow] = 0;
+    dPcdS[oo] = vs.dPcodSo;
+    dPcdS[og] = vs.dPcodSg;
+    dPcdS[ow] = vs.dPcodSw;
     dPcdS[go] = vs.dPcgdSo;
     dPcdS[gg] = vs.dPcgdSg;
     dPcdS[gw] = vs.dPcgdSw;
@@ -244,7 +244,7 @@ void FlowUnit_OGW::AssinValue()
     kr[oIndex] = vs.kro;
     kr[gIndex] = vs.krg;
     kr[wIndex] = vs.krw;
-    pc[oIndex] = 0;
+    pc[oIndex] = vs.Pco;
     pc[gIndex] = vs.Pcg;
     pc[wIndex] = vs.Pcw;
 }

@@ -242,6 +242,7 @@ public:
 // Brooks-Corey
 /////////////////////////////////////////////////////
 
+/// Use Brooks-Corey model, the nonwetting phase is reference phase
 class BrooksCorey 
 {
 public:

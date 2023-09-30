@@ -29,9 +29,6 @@ public:
     OCPGWFMethod() = default;
     virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
     virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
-    virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
-    virtual OCP_DBL CalSgByPcgo(const OCP_DBL& pcgo) const = 0;
-    virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
 };
 
 
@@ -44,13 +41,9 @@ public:
 class OCPGWFMethod01 : public OCPGWFMethod
 {
 public:
-    OCPGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin) { }
-    void CalKrPc(OCPFlowVarSet& vs) override { }
-    void CalKrPcDer(OCPFlowVarSet& vs) override { }
-
-    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { }
-    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { }
-    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { }
+    OCPGWFMethod01(const BrooksCoreyParam& bcp) { bc.Setup(bcp); }
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
 
 protected:
     BrooksCorey   bc;
@@ -65,7 +58,7 @@ class OCPFlowGW : public OCPFlow
 {
 public:
     OCPFlowGW() { flowType = OCPFlowType::GW; }
-    void Setup(const ParamReservoir& rs_param, const USI& i){}
+    void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& Sg, const OCP_DBL& Sw) {
         SetSaturation(Sg, Sw);
         pfMethod->CalKrPc(vs);
@@ -78,11 +71,8 @@ public:
     OCP_DBL GetSwco() const override { OCP_ABORT("Wrong Usage!"); }
     OCP_DBL GetMaxPcow() const override { OCP_ABORT("Wrong Usage!"); }
     OCP_DBL GetMinPcow() const override { OCP_ABORT("Wrong Usage!"); }
-
-    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return pfMethod->CalSgByPcgo(Pcgo); }
-    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return pfMethod->CalPcgoBySg(Sg); }
     OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Wrong Usage!"); }
-    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return pfMethod->CalKrg(Sg, dKrgdSg); }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Wrong Usage!"); }
 
 protected:
     void SetSaturation(const OCP_DBL& Sg, const OCP_DBL& Sw) {
