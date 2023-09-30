@@ -177,6 +177,7 @@ protected:
 // OCPFlowOGW
 /////////////////////////////////////////////////////
 
+/// There exists oil, gas and water, the reference phase is oil
 class OCPFlowOGW : public OCPFlow
 {
 public:

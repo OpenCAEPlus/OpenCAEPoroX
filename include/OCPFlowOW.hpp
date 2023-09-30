@@ -69,6 +69,7 @@ protected:
 // OCPFlowOW
 /////////////////////////////////////////////////////
 
+/// There exists oil and water, the reference phase is oil
 class OCPFlowOW : public OCPFlow
 {
 public:

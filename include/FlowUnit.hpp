@@ -22,6 +22,7 @@
 #include "OCPFlowOGW.hpp"
 #include "OCPFlowOW.hpp"
 #include "OCPFlowOG.hpp"
+#include "OCPFlowGW.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.
@@ -96,6 +97,7 @@ public:
 // FlowUnit_OW
 ///////////////////////////////////////////////
 
+/// There exists oil and water, the reference phase is oil
 class FlowUnit_OW : public FlowUnit
 {
 public:
@@ -139,6 +141,7 @@ protected:
 // FlowUnit_OG
 ///////////////////////////////////////////////
 
+/// There exists oil and gas, the reference phase is oil
 class FlowUnit_OG : public FlowUnit
 {
 public:
@@ -169,10 +172,48 @@ protected:
     OCPFlowOG  OGF;
 };
 
+
+///////////////////////////////////////////////
+// FlowUnit_GW
+///////////////////////////////////////////////
+
+/// There exists gas and water, the reference phase is gas
+class FlowUnit_GW : public FlowUnit
+{
+public:
+    FlowUnit_GW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts) {
+        Allocate(2);
+        GWF.Setup(rs_param, i);
+    }   
+    void    CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    void    CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId) override;
+    OCP_DBL GetSwco() const override { return 0; }
+    // useless
+    void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) override {};
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return 0; }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return 0; }
+    OCP_DBL CalPcowBySw(const OCP_DBL& sw) const override { return 0; }
+    OCP_DBL CalSwByPcow(const OCP_DBL& pcow) const override { return 0; }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& pcgw) const override { return 0; }
+
+protected:
+    void AssinValueDer();
+    void AssinValue();
+
+protected:
+    /// phase index
+    enum phaseIndex { gIndex, wIndex };
+    enum p2p { gg, gw, wg, ww };
+
+    OCPFlowGW  GWF;
+};
+
+
 ///////////////////////////////////////////////
 // FlowUnit_OGW
 ///////////////////////////////////////////////
 
+/// There exists oil, gas and water, the reference phase is oil
 class FlowUnit_OGW : public FlowUnit
 {
 public:

@@ -14,6 +14,7 @@
 
  // OpenCAEPoroX header files
 #include "OCPFuncTable.hpp"
+#include "ParamReservoir.hpp"
 
 using namespace std;
 
@@ -234,6 +235,46 @@ public:
 		dKrwdSw  = cdata[1];
 		dPcwodSw = -cdata[2];
 	}
+};
+
+
+/////////////////////////////////////////////////////
+// Brooks-Corey
+/////////////////////////////////////////////////////
+
+class BrooksCorey 
+{
+public:
+	/// Setup params
+	void Setup(const BrooksCoreyParam& bcp);
+	/// Calculate relative permeability for non wetting phase
+	OCP_DBL CalKrN(const OCP_DBL& sn) const;
+	/// Calculate relative permeability for wetting phase
+	OCP_DBL CalKrW(const OCP_DBL& sw) const;
+	/// Calculate relative permeability and capillary pressure for non wetting phase
+	void CalKrPcN(const OCP_DBL& sn, OCP_DBL& kr, OCP_DBL& pc) const;
+	/// Calculate relative permeability and capillary pressure for wetting phase
+	void CalKrPcW(const OCP_DBL& sw, OCP_DBL& kr, OCP_DBL& pc) const;
+	/// Calculate relative permeability and capillary pressure and their ders for non wetting phase
+	void CalKrPcDerN(const OCP_DBL& sn, OCP_DBL& kr, OCP_DBL& pc, OCP_DBL& dKrdSn, OCP_DBL& dPcdSn) const;
+	/// Calculate relative permeability and capillary pressure and their ders for wetting phase
+	void CalKrPcDerW(const OCP_DBL& sw, OCP_DBL& kr, OCP_DBL& pc, OCP_DBL& dKrdSw, OCP_DBL& dPcdSw) const;
+
+protected:
+	/// Immobile wetting phase saturation
+	OCP_DBL sw_imm;
+	/// Immobile nonwetting phase(gas) saturation
+	OCP_DBL sn_imm;
+	/// Gas entry pressure
+	OCP_DBL Pentry;
+	/// Max capillary pressure
+	OCP_DBL Pcmax;
+	/// Shape exponents for relative permeability of wetting phase
+	OCP_DBL Cw_kr;
+	/// Shape exponents for relative permeability of nonwetting phase
+	OCP_DBL Cn_kr;
+	/// Shape exponents for capillary pressure
+	OCP_DBL C_pc;
 };
 
 

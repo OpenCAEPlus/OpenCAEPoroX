@@ -24,13 +24,13 @@ OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin)
 
 void OCPOGFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-    SGOF.CalKrgKrogPcgo(vs.Sg, vs.krg, vs.kro, vs.Pcgo);
+    SGOF.CalKrgKrogPcgo(vs.Sg, vs.krg, vs.kro, vs.Pcg);
 }
 
 
 void OCPOGFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-    SGOF.CalKrgKrogPcgoDer(vs.Sg, vs.krg, vs.kro, vs.Pcgo, vs.dKrgdSg, vs.dKrodSg, vs.dPcgodSg);
+    SGOF.CalKrgKrogPcgoDer(vs.Sg, vs.krg, vs.kro, vs.Pcg, vs.dKrgdSg, vs.dKrodSg, vs.dPcgdSg);
 }
 
 

@@ -111,9 +111,9 @@ public:
     /// Max capillary pressure
     OCP_DBL Pcmax;
     /// Shape exponents for relative permeability of wetting phase
-    OCP_DBL Cw_rp;
+    OCP_DBL Cw_kr;
     /// Shape exponents for relative permeability of nonwetting phase
-    OCP_DBL Cn_rp;
+    OCP_DBL Cn_kr;
     /// Shape exponents for capillary pressure
     OCP_DBL C_pc;
 };

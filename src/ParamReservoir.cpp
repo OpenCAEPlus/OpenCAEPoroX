@@ -402,10 +402,10 @@ void ParamReservoir::InputBrooksCorey(ifstream& ifs)
                 bc.Pcmax = val;
             }
             else if (vbuf[index] == "*CWREPERM") {
-                bc.Cw_rp = val;
+                bc.Cw_kr = val;
             }
             else if (vbuf[index] == "*CNREPERM") {
-                bc.Cn_rp = val;
+                bc.Cn_kr = val;
             }
             else if (vbuf[index] == "*CPC") {
                 bc.C_pc = val;

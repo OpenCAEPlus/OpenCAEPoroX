@@ -26,13 +26,13 @@ OCPOWFMethod01::OCPOWFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVar
 
 void OCPOWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-    SWOF.CalKrwKrowPcwo(vs.Sw, vs.krw, vs.kro, vs.Pcwo);
+    SWOF.CalKrwKrowPcwo(vs.Sw, vs.krw, vs.kro, vs.Pcw);
 }
 
 
 void OCPOWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-    SWOF.CalKrwKrowPcwoDer(vs.Sw, vs.krw, vs.kro, vs.Pcwo, vs.dKrwdSw, vs.dKrodSw, vs.dPcwodSw);
+    SWOF.CalKrwKrowPcwoDer(vs.Sw, vs.krw, vs.kro, vs.Pcw, vs.dKrwdSw, vs.dKrodSw, vs.dPcwdSw);
 }
 
 

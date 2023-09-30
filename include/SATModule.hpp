@@ -40,6 +40,10 @@ public:
                 SATs.push_back(new FlowUnit_OGW(rs_param, i, opts));
             }
         }
+        else if (bvs.o < 0 && bvs.g >= 0 && bvs.w >= 0)
+            for (USI i = 0; i < NTSFUN; i++) {
+                SATs.push_back(new FlowUnit_GW(rs_param, i, opts));
+            }
         else {
             OCP_ABORT("Inavilable Mixture Type!");
         }

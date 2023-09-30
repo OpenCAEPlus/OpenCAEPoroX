@@ -1,7 +1,7 @@
-/*! \file    OCPFlowOG.hpp
- *  \brief   OCPFlowOG class declaration
+/*! \file    OCPFlowGW.hpp
+ *  \brief   OCPFlowGW class declaration
  *  \author  Shizhe Li
- *  \date    Jul/10/2023
+ *  \date    Sep/30/2023
  *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPFLOWOG_HEADER__
-#define __OCPFLOWOG_HEADER__
+#ifndef __OCPFLOWGW_HEADER__
+#define __OCPFLOWGW_HEADER__
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
@@ -22,11 +22,11 @@
 using namespace std;
 
 
-/// Calculate oil, gas relative permeability and capillary pressure
-class OCPOGFMethod
+/// Calculate gas, water relative permeability and capillary pressure
+class OCPGWFMethod
 {
 public:
-    OCPOGFMethod() = default;
+    OCPGWFMethod() = default;
     virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
     virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
     virtual OCP_DBL CalPcgoBySg(const OCP_DBL& sg) const = 0;
@@ -36,43 +36,42 @@ public:
 
 
 /////////////////////////////////////////////////////
-// OCPOGFMethod01
+// OCPGWFMethod01
 /////////////////////////////////////////////////////
 
 
-/// Use SGOF
-class OCPOGFMethod01 : public OCPOGFMethod
+/// Use Brooks-Corey type model
+class OCPGWFMethod01 : public OCPGWFMethod
 {
 public:
-    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin);
-    void CalKrPc(OCPFlowVarSet& vs) override;
-    void CalKrPcDer(OCPFlowVarSet& vs) override;
+    OCPGWFMethod01(const vector<vector<OCP_DBL>>& SGOFin) { }
+    void CalKrPc(OCPFlowVarSet& vs) override { }
+    void CalKrPcDer(OCPFlowVarSet& vs) override { }
 
-    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGOF.CalPcgo(Sg); }
-    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGOF.CalSg(Pcgo); }
-    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { }
 
 protected:
-    OCP_SGOF            SGOF;
+    BrooksCorey   bc;
 };
 
 
 /////////////////////////////////////////////////////
-// OCPFlowOG
+// OCPFlowGW
 /////////////////////////////////////////////////////
 
-/// There exists oil and gas, the reference phase is oil
-class OCPFlowOG : public OCPFlow
+class OCPFlowGW : public OCPFlow
 {
 public:
-    OCPFlowOG() { flowType = OCPFlowType::OG; }
-    void Setup(const ParamReservoir& rs_param, const USI& i);
-    void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
-        SetSaturation(So, Sg);
+    OCPFlowGW() { flowType = OCPFlowType::GW; }
+    void Setup(const ParamReservoir& rs_param, const USI& i){}
+    void CalKrPc(const OCP_DBL& Sg, const OCP_DBL& Sw) {
+        SetSaturation(Sg, Sw);
         pfMethod->CalKrPc(vs);
     }
-    void CalKrPcDer(const OCP_DBL& So, const OCP_DBL& Sg) {
-        SetSaturation(So, Sg);
+    void CalKrPcDer(const OCP_DBL& Sg, const OCP_DBL& Sw) {
+        SetSaturation(Sg, Sw);
         pfMethod->CalKrPcDer(vs);
     }
 
@@ -86,22 +85,22 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return pfMethod->CalKrg(Sg, dKrgdSg); }
 
 protected:
-    void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sg) {
-        vs.So = So;
+    void SetSaturation(const OCP_DBL& Sg, const OCP_DBL& Sw) {
         vs.Sg = Sg;
+        vs.Sw = Sw;
     }
 
 protected:
-    OCPOGFMethod*  pfMethod;
+    OCPGWFMethod* pfMethod;
 };
 
 
-#endif /* end if __OCPFLOWOG_HEADER__ */
+#endif /* end if __OCPFLOWGW_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           Jul/10/2023      Create file                          */
+/*  Shizhe Li           Sep/30/2023      Create file                          */
 /*----------------------------------------------------------------------------*/
