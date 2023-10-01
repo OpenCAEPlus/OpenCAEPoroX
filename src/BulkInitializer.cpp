@@ -14,32 +14,38 @@
 
 void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType)
 {
-	// for hydrostatic equilibrium(now)
+	// for hydrostatic equilibrium
+	if (rs_param.EQUIL.size() > 0) {
 
-	if (rs_param.PBVD_T.data.size() > 0) EQUIL.PBVD.Setup(rs_param.PBVD_T.data[0]);
+		Equil tmpEquil;
 
-	switch (mixType)
-	{
-	case OCPMixtureType::BO_OW:
-	case OCPMixtureType::THERMALK_OW:
-		EQUIL.Dref = rs_param.EQUIL[0];
-		EQUIL.Pref = rs_param.EQUIL[1];
-		EQUIL.DOWC = rs_param.EQUIL[2];
-		EQUIL.PcOW = rs_param.EQUIL[3];
-		break;
-	case OCPMixtureType::BO_OGW:
-	case OCPMixtureType::COMP:
-		EQUIL.Dref = rs_param.EQUIL[0];
-		EQUIL.Pref = rs_param.EQUIL[1];
-		EQUIL.DOWC = rs_param.EQUIL[2];
-		EQUIL.PcOW = rs_param.EQUIL[3];
-		EQUIL.DGOC = rs_param.EQUIL[4];
-		EQUIL.PcGO = rs_param.EQUIL[5];
-		break;
-	default:
-		OCP_ABORT("Wrong Type!");
-		break;
+		if (rs_param.PBVD_T.data.size() > 0) tmpEquil.PBVD.Setup(rs_param.PBVD_T.data[0]);
+		switch (mixType)
+		{
+		case OCPMixtureType::BO_OW:
+		case OCPMixtureType::THERMALK_OW:
+			tmpEquil.Dref = rs_param.EQUIL[0].data[0];
+			tmpEquil.Pref = rs_param.EQUIL[0].data[1];
+			tmpEquil.DOWC = rs_param.EQUIL[0].data[2];
+			tmpEquil.PcOW = rs_param.EQUIL[0].data[3];
+			break;
+		case OCPMixtureType::BO_OGW:
+		case OCPMixtureType::COMP:
+			tmpEquil.Dref = rs_param.EQUIL[0].data[0];
+			tmpEquil.Pref = rs_param.EQUIL[0].data[1];
+			tmpEquil.DOWC = rs_param.EQUIL[0].data[2];
+			tmpEquil.PcOW = rs_param.EQUIL[0].data[3];
+			tmpEquil.DGOC = rs_param.EQUIL[0].data[4];
+			tmpEquil.PcGO = rs_param.EQUIL[0].data[5];
+			break;
+		default:
+			OCP_ABORT("Wrong Type!");
+			break;
+		}
+
+		EQUIL.push_back(tmpEquil);
 	}
+
 
 	// Zi distribution
 	for (auto& z : rs_param.ZMFVD_T.data) {
@@ -64,29 +70,38 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 			}));
 		}
 	}
-
-
 }
 
 
-void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const Domain& domain)
+void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const OptionalModules& optMs, const Domain& domain)
 {
 	// for hydrostatic equilibrium
-	InitHydroEquil(bvs, pvtm, satm, domain);
+	if (EQUIL.size() > 0) {
+		InitHydroEquil(bvs, pvtm, satm, domain);
+	}
+	else if (swat.size() > 0) {
+		InitHydroEquilW(bvs, pvtm, satm, optMs, domain);
+	}
 }
 
+
+void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain)
+{
+	OCP_FUNCNAME;
+	
+}
 
 
 void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain)
 {
 	OCP_FUNCNAME;
 
-	OCP_DBL Dref = EQUIL.Dref;
-	OCP_DBL Pref = EQUIL.Pref;
-	OCP_DBL DOWC = EQUIL.DOWC;
-	OCP_DBL PcOW = EQUIL.PcOW;
-	OCP_DBL DOGC = EQUIL.DGOC;
-	OCP_DBL PcGO = EQUIL.PcGO;
+	OCP_DBL Dref = EQUIL[0].Dref;
+	OCP_DBL Pref = EQUIL[0].Pref;
+	OCP_DBL DOWC = EQUIL[0].DOWC;
+	OCP_DBL PcOW = EQUIL[0].PcOW;
+	OCP_DBL DOGC = EQUIL[0].DGOC;
+	OCP_DBL PcGO = EQUIL[0].PcGO;
 	OCP_DBL zRange[2];
 	OCP_DBL zRangeTmp[2] = { 1E8,0 };  // min , max
 
@@ -144,7 +159,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 
 	const auto initZi_flag = initZi_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
 	const auto initT_flag = initT_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
-	const auto PBVD_flag = EQUIL.PBVD.IsEmpty() ? OCP_FALSE : OCP_TRUE;
+	const auto PBVD_flag = EQUIL[0].PBVD.IsEmpty() ? OCP_FALSE : OCP_TRUE;
 
 	const auto PVT = PVTm.GetPVT(0);
 
@@ -153,7 +168,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		Pgref = Pref;
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 		if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-		if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+		if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 
 		gammaGtmp = GRAVITY_FACTOR *
@@ -165,7 +180,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id > 0; id--) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::gas);
@@ -175,7 +190,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id < numNodes - 1; id++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::gas);
@@ -191,7 +206,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI i = 0; i < mynum; i++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 			gammaGtmp = GRAVITY_FACTOR *
 				PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::gas);
@@ -202,7 +217,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI i = 0; i < mynum; i++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 			gammaOtmp = GRAVITY_FACTOR *
 				PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -214,7 +229,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		// find the oil pressure in tab
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 		if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-		if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+		if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 		gammaOtmp = GRAVITY_FACTOR *
 			PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -224,7 +239,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id > 0; id--) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -234,7 +249,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id < numNodes - 1; id++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -250,7 +265,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI i = 0; i < mynum; i++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Poref, Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -346,7 +361,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI i = 0; i < mynum; i++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 			gammaOtmp = GRAVITY_FACTOR *
 				PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -358,7 +373,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		// find the oil pressure in tab
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 		if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-		if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+		if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 		gammaOtmp = GRAVITY_FACTOR *
 			PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -368,7 +383,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id > 0; id--) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -378,7 +393,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id < numNodes - 1; id++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -395,7 +410,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI i = 0; i < mynum; i++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 				gammaOtmp =
 					GRAVITY_FACTOR *
@@ -407,7 +422,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI i = 0; i < mynum; i++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR *
@@ -420,7 +435,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			// find the gas pressure in tab
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 			gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgref, Pbb, myTemp,
 				tmpInitZi, PhaseType::gas);
@@ -430,7 +445,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI id = beginId; id > 0; id--) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
@@ -440,7 +455,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI id = beginId; id < numNodes - 1; id++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
@@ -456,7 +471,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		Poref = Pref;
 		if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 		if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-		if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+		if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 		gammaOtmp = GRAVITY_FACTOR *
 			PVT->RhoPhase(Poref, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -467,7 +482,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id > 0; id--) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -476,7 +491,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI id = beginId; id < numNodes - 1; id++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 			gammaOtmp = GRAVITY_FACTOR * PVT->RhoPhase(Potmp[id], Pbb, myTemp,
 				tmpInitZi, PhaseType::oil);
@@ -493,7 +508,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI i = 0; i < mynum; i++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 				gammaOtmp =
 					GRAVITY_FACTOR *
@@ -505,7 +520,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI i = 0; i < mynum; i++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR *
@@ -518,7 +533,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			// find the gas pressure in tab
 			if (initZi_flag) initZi_Tab[0].Eval_All0(Dref, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, Dref, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Dref, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Dref, 1);
 
 			gammaGtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pgref, Pbb, myTemp,
 				tmpInitZi, PhaseType::gas);
@@ -528,7 +543,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI id = beginId; id > 0; id--) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
@@ -539,7 +554,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			for (USI id = beginId; id < numNodes - 1; id++) {
 				if (initZi_flag) initZi_Tab[0].Eval_All0(Ztmp[id], tmpInitZi);
 				if (initT_flag) myTemp = initT_Tab[0].Eval(0, Ztmp[id], 1);
-				if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, Ztmp[id], 1);
+				if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, Ztmp[id], 1);
 
 				gammaGtmp =
 					GRAVITY_FACTOR * PVT->RhoPhase(Pgtmp[id], Pbb, myTemp,
@@ -557,7 +572,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		for (USI i = 0; i < mynum; i++) {
 			if (initZi_flag) initZi_Tab[0].Eval_All0(myz, tmpInitZi);
 			if (initT_flag) myTemp = initT_Tab[0].Eval(0, myz, 1);
-			if (PBVD_flag) Pbb = EQUIL.PBVD.Eval(0, myz, 1);
+			if (PBVD_flag) Pbb = EQUIL[0].PBVD.Eval(0, myz, 1);
 
 			gammaOtmp = GRAVITY_FACTOR *
 				PVT->RhoPhase(Ptmp, Pbb, myTemp, tmpInitZi, PhaseType::oil);
@@ -663,7 +678,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			Pbb = Po;
 		}
 		else if (PBVD_flag) {
-			Pbb = EQUIL.PBVD.Eval(0, bvs.depth[n], 1);
+			Pbb = EQUIL[0].PBVD.Eval(0, bvs.depth[n], 1);
 		}
 		bvs.Pb[n] = Pbb;
 

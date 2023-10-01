@@ -538,18 +538,21 @@ void ParamReservoir::InputEQUIL(ifstream& ifs)
     ReadLine(ifs, vbuf);
     if (vbuf[0] == "/") return;
 
-    EQUIL.resize(6, 0);
+    EQUILParam tmpEQUIL;
+    tmpEQUIL.data.resize(6, 0);
     DealDefault(vbuf);
     for (USI i = 0; i < 6; i++) {
-        if (vbuf[i] != "DEFAULT") EQUIL[i] = stod(vbuf[i]);
+        if (vbuf[i] != "DEFAULT") tmpEQUIL.data[i] = stod(vbuf[i]);
     }
+
+    EQUIL.push_back(tmpEQUIL);
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         cout << "\n---------------------" << endl
             << "EQUIL"
             << "\n---------------------" << endl;
         cout << "   ";
-        for (USI i = 0; i < 6; i++) cout << EQUIL[i] << "  ";
+        for (USI i = 0; i < 6; i++) cout << tmpEQUIL.data[i] << "  ";
         cout << endl;
     }
 }

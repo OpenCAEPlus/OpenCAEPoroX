@@ -116,7 +116,7 @@ public:
 
 public:
     auto& GetVarSet() const { return vs; }
-    void Initialize(const Domain& domain) { INITm.Initialize(vs, PVTm, SATm, domain); }
+    void Initialize(const Domain& domain) { INITm.Initialize(vs, PVTm, SATm, optMs, domain); }
 
 protected:
     /// Bsaic variable set

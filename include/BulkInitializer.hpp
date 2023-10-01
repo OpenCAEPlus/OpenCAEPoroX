@@ -26,7 +26,7 @@ using namespace std;
 /// Initial reservoir infomation for calculating initial equilibration.
 //  Note: This class includes reference depth and pressure at it, depth of contacts
 //  between phases, and capillary pressure at phase contact surfaces.
-class ParamEQUIL
+class Equil
 {
     friend class BulkInitializer;
     friend class Bulk;
@@ -52,16 +52,18 @@ class BulkInitializer
 {
 public:
 	void Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType);
-    void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
+    void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain);
     auto& GetSwat() { return swat; }
 
 protected:
     /// initialize reservoir with hydrostatic equilibrium only
     void InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
+    /// initialize reservoir with water and hydrostatic equilibrium
+    void InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain);
 
 protected:
     /// Equilibration data specification
-    ParamEQUIL       EQUIL;
+    vector<Equil>    EQUIL;
     /// Initial mole ratio of components vs. depth, table set
     vector<OCPTable> initZi_Tab; 
     /// Initial temperature vs. depth, table set
