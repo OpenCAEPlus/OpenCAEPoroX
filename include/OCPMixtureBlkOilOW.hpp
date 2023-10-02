@@ -39,6 +39,7 @@ public:
     virtual OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) = 0;
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
     virtual OCP_DBL CalVmStd(const PhaseType& pt) = 0;
+    virtual OCP_BOOL IfWellFriend() const = 0;
 };
 
 
@@ -61,6 +62,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
     
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO->CalXiO(P); }
@@ -118,7 +120,7 @@ public:
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
         return pmMethod->CalVmStd(pt);
     }
-
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 
 protected:
     void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) { 

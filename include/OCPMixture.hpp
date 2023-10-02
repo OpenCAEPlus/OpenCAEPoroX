@@ -27,7 +27,7 @@ class OCPMixture
 public:
     OCPMixture() = default;
     auto MixtureType() const { return vs.mixtureType; }
-    auto IfBlkModel() const { return (vs.mixtureType >= OCPMixtureType::SP) && (vs.mixtureType < OCPMixtureType::COMP); }
+    virtual OCP_BOOL IfWellFriend() const = 0;
     const OCPMixtureVarSet& GetVarSet() const { return vs; }
     virtual void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) = 0;
     virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
@@ -61,9 +61,9 @@ public:
         pmMethod->InitFlash(Vp, vs);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
-        const USI ftype = skipPSA->CalFtype(P, T, Ni, bId, skipMethodIndex);
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {    
         SetPTN(P, T, Ni);
+        const USI ftype = skipPSA->CalFtype01(bId, skipMethodIndex, vs);
         pmMethod->Flash(vs, ftype, lNP, lx);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
@@ -72,9 +72,9 @@ public:
         pmMethod->InitFlashDer(Vp, vs);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* Sjin, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
-        const USI ftype = skipPSA->CalFtype(P, T, Ni, Sjin, pmMethod->GetNumPhasePE(lNP), bId, skipMethodIndex);
-        SetPTN(P, T, Ni);
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* S, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {      
+        SetPTSN(P, T, S, Ni);
+        const USI ftype = skipPSA->CalFtype02(bId, skipMethodIndex, vs, lNP);
         pmMethod->FlashDer(vs, ftype, lNP, lx);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
@@ -92,7 +92,7 @@ public:
         return pmMethod->CalVmStd(P, T + CONV5, z, pt);
     }
     void OutputIters() const { pmMethod->OutIters(); }
-    const auto& GetNPPE() const { return pmMethod->GetNP(); }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 
 protected:
     void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {

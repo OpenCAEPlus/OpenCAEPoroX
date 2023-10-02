@@ -95,7 +95,6 @@ public:
 
     void OutMixtureIters() const override { compM.OutputIters(); }
 
-
 protected:
     /// mixture of components
     OCPMixtureComp  compM;

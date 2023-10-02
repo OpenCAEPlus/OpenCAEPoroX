@@ -15,7 +15,6 @@
 MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     compM.Setup(rs_param, i, opts);
-    mixtureType = compM.MixtureType();
     vs          = &compM.GetVarSet();
 
     /// Optional Features

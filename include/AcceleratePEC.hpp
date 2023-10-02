@@ -53,19 +53,11 @@ class SkipPSAMethod
 public:
     SkipPSAMethod() = default;
     /// Calculate the ftype without predicted saturations
-    virtual USI CalFtype(const OCP_DBL& Pin,
-                         const OCP_DBL& Tin,
-                         const OCP_DBL* Niin,
-                         const OCP_USI& n) = 0;
+    virtual USI CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) = 0;
     /// Calculate the ftype with predicted saturations
-    virtual USI CalFtype(const OCP_DBL& Pin,
-                         const OCP_DBL& Tin,
-                         const OCP_DBL* Niin,
-                         const OCP_DBL* S,
-                         const USI&     np,
-                         const OCP_USI& n) = 0;
+    virtual USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) = 0;
     /// Calculate skip info for next step
-    virtual void CalSkipForNextStep(const OCP_USI& bId) = 0;
+    virtual void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs) = 0;
 
 };
 
@@ -78,42 +70,31 @@ public:
 class SkipPSAMethod01 : public SkipPSAMethod
 {
 public:
-    SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureCompMethod* compMin);
+    SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureCompMethod* compMin);
     /// Calculate the ftype without predicted saturations
-    USI CalFtype(const OCP_DBL& Pin,
-                 const OCP_DBL& Tin,
-                 const OCP_DBL* Niin,
-                 const OCP_USI& bId) override;
+    USI CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
     /// Calculate the ftype with predicted saturations
-    USI CalFtype(const OCP_DBL& Pin,
-                 const OCP_DBL& Tin,
-                 const OCP_DBL* Niin,
-                 const OCP_DBL* S,
-                 const USI&     np,
-                 const OCP_USI& bId) override;
-    void CalSkipForNextStep(const OCP_USI& bId) override;
+    USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) override;
+    /// Calculate indicator for next step
+    void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs) override;
 
 protected:
-    OCP_BOOL IfSkip(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const OCP_USI& bId) const;
+    OCP_BOOL IfSkip(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) const;
 
 protected:
-    /// pointer of variables set
-    SkipPSAVarset*              vs;
-    /// support modules
-    const OCPMixtureCompMethod* compM;
-    
+  
     /// d ln phi[i][j] / d n[k][j]
-    vector<OCP_DBL>       lnphiN;
+    vector<OCP_DBL>             lnphiN;
     /// matrix for skipping Stability Analysis,    
-    vector<OCP_SIN>       skipMatSTA;
+    vector<OCP_SIN>             skipMatSTA;
     /// eigen values of matrix for skipping Skip Stability Analysis.
     /// Only the minimum eigen value will be used
-    vector<OCP_SIN>       eigenSkip;
+    vector<OCP_SIN>             eigenSkip;
     /// work space for computing eigenvalues with ssyevd_
-    vector<OCP_SIN>       eigenWork;
+    vector<OCP_SIN>             eigenWork;
+
+    /// support modules
+    const OCPMixtureCompMethod* compM;
 };
 
 
@@ -128,31 +109,21 @@ public:
     /// Return ifUse
     OCP_BOOL IfUseSkip() const { return ifUse; }
     /// Calculate the ftype without predicted saturations
-    USI CalFtype(const OCP_DBL& Pin,
-                 const OCP_DBL& Tin,
-                 const OCP_DBL* Niin,
-                 const OCP_USI& bId,
-                 const USI&     mIndex)
+    USI CalFtype01(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs)
     {
-        if (ifUse) return sm[mIndex]->CalFtype(Pin, Tin, Niin, bId);
-        else           return 0;
+        if (ifUse)  return sm[mIndex]->CalFtype01(bId, vs, mvs);
+        else        return 0;
     }
     /// Calculate the ftype with predicted saturations
-    USI CalFtype(const OCP_DBL& Pin,
-                 const OCP_DBL& Tin,
-                 const OCP_DBL* Niin,
-                 const OCP_DBL* S,
-                 const USI&     np,
-                 const OCP_USI& bId,
-                 const USI&     mIndex)
+    USI CalFtype02(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs, const USI& np)
     {
-        if (ifUse) return sm[mIndex]->CalFtype(Pin, Tin, Niin, S, np, bId);
-        else           return 0;
+        if (ifUse)  return sm[mIndex]->CalFtype02(bId, vs, mvs, np);
+        else        return 0;
     }
     void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex)
     {
         if (ifUse) 
-            sm[mIndex]->CalSkipForNextStep(bId);        
+            sm[mIndex]->CalSkipForNextStep(bId, vs);
     }
     /// Reset SkipPSA vars to last time step
     void ResetToLastTimeStep() { if(ifUse) vs.ResetToLastTimeStep(); }

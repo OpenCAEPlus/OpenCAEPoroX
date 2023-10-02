@@ -41,6 +41,7 @@ public:
     virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
     virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) = 0;
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return eC.CalEnthalpy(T, zi); }
+    virtual OCP_BOOL IfWellFriend() const = 0;
 
 protected:
     EnthalpyCalculation  eC;
@@ -66,6 +67,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) override { return 1 / CalXi(P, T, pt); }
+    OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
@@ -140,7 +142,7 @@ public:
     }
     
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T + CONV5, zi); }
-
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 protected:
     void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         vs.P     = P;

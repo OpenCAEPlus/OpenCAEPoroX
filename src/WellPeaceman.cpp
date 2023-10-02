@@ -615,7 +615,7 @@ void PeacemanWell::CalFactor(const Bulk& bk) const
     const BulkVarSet& bvs = bk.vs;
 
     if (opt.type == WellType::productor) {
-        if (mixture->IfBlkModel()) {
+        if (mixture->IfWellFriend()) {
             // For black oil models -- phase = components
             vector<OCP_DBL> qitmp(nc, 1.0);
             mixture->CalVStd(Psurf, Tsurf, &qitmp[0]);

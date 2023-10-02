@@ -19,7 +19,6 @@ MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const
 {
     OWM.Setup(rs_param, i);
 
-    mixtureType = OWM.MixtureType();
     vs          = &OWM.GetVarSet();
 }
 
@@ -98,7 +97,6 @@ MixtureUnitBlkOil_GW::MixtureUnitBlkOil_GW(const ParamReservoir& rs_param, const
 {
     GWM.Setup(rs_param, i);
 
-    mixtureType = GWM.MixtureType();
     vs          = &GWM.GetVarSet();
 }
 
@@ -177,7 +175,6 @@ OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
 MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     OGWM.Setup(rs_param, i);
-    mixtureType = OGWM.MixtureType();
     vs          = &OGWM.GetVarSet();
 }
 

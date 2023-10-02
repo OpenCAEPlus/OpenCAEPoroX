@@ -15,7 +15,6 @@
 MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalModules& opts)
 {
     OWTM.Setup(param, tarId);
-    mixtureType = OWTM.MixtureType();
     vs          = &OWTM.GetVarSet();
 }
 

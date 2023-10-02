@@ -31,57 +31,53 @@ void SkipPSAVarset::UpdateLastTimeStep()
 }
 
 
-SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureCompMethod* compMin)
+SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureCompMethod* compMin)
 {
-    vs     = vsin;
     compM  = compMin;
-    vs->np = compM->GetNPmax();
-    vs->nc = compM->GetNC();
+    svs.np = compM->GetNPmax();
+    svs.nc = compM->GetNC();
 
-    if (!vs->ifSetup) {
+    if (!svs.ifSetup) {
 
-        vs->ifSetup = OCP_TRUE;
+        svs.ifSetup = OCP_TRUE;
 
-        vs->flag.resize(vs->nb);
-        vs->P.resize(vs->nb);
-        vs->T.resize(vs->nb);
-        vs->minEigen.resize(vs->nb);
-        vs->zi.resize(vs->nb * vs->nc);
+        svs.flag.resize(svs.nb);
+        svs.P.resize(svs.nb);
+        svs.T.resize(svs.nb);
+        svs.minEigen.resize(svs.nb);
+        svs.zi.resize(svs.nb * svs.nc);
 
-        vs->lflag.resize(vs->nb);
-        vs->lP.resize(vs->nb);
-        vs->lT.resize(vs->nb);
-        vs->lminEigen.resize(vs->nb);
-        vs->lzi.resize(vs->nb * vs->nc);
+        svs.lflag.resize(svs.nb);
+        svs.lP.resize(svs.nb);
+        svs.lT.resize(svs.nb);
+        svs.lminEigen.resize(svs.nb);
+        svs.lzi.resize(svs.nb * svs.nc);
     }
 
-    lnphiN.resize(vs->nc * vs->nc);
-    skipMatSTA.resize(vs->nc * vs->nc);
-    eigenSkip.resize(vs->nc);
-    eigenWork.resize(2 * vs->nc + 1);
+    lnphiN.resize(svs.nc * svs.nc);
+    skipMatSTA.resize(svs.nc * svs.nc);
+    eigenSkip.resize(svs.nc);
+    eigenWork.resize(2 * svs.nc + 1);
 }
 
 
-OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_DBL& Pin,
-                                 const OCP_DBL& Tin,
-                                 const OCP_DBL* Niin,
-                                 const OCP_USI& bId) const
+OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) const
 {
-    if (vs->flag[bId]) {
+    if (svs.flag[bId]) {
 
         OCP_DBL Nt = 0;
-        for (USI i = 0; i < vs->nc; i++) {
-            Nt += Niin[i];
+        for (USI i = 0; i < svs.nc; i++) {
+            Nt += mvs.Ni[i];
         }
 
-        if (fabs(1 - vs->P[bId] / Pin) >= vs->minEigen[bId] / 10) {
+        if (fabs(1 - svs.P[bId] / mvs.P) >= svs.minEigen[bId] / 10) {
             return OCP_FALSE;
         }
-        if (fabs(vs->T[bId] - (Tin + CONV5)) >= vs->minEigen[bId] * 10) {
+        if (fabs(svs.T[bId] - mvs.T) >= svs.minEigen[bId] * 10) {
             return OCP_FALSE;
         }
-        for (USI i = 0; i < vs->nc; i++) {
-            if (fabs(Niin[i] / Nt - vs->zi[bId * vs->nc + i]) >= vs->minEigen[bId] / 10) {
+        for (USI i = 0; i < svs.nc; i++) {
+            if (fabs(mvs.Ni[i] / Nt - svs.zi[bId * svs.nc + i]) >= svs.minEigen[bId] / 10) {
                 return OCP_FALSE;
             }
         }
@@ -93,12 +89,9 @@ OCP_BOOL SkipPSAMethod01::IfSkip(const OCP_DBL& Pin,
 }
 
 
-USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
-                              const OCP_DBL& Tin,
-                              const OCP_DBL* Niin,
-                              const OCP_USI& bId)
+USI SkipPSAMethod01::CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs)
 {
-	if (IfSkip(Pin, Tin, Niin, bId)) {
+	if (IfSkip(bId, svs, mvs)) {
 		return 1;
 	}
 	else {
@@ -107,27 +100,23 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
 }
 
 
-USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
-                     const OCP_DBL&          Tin,
-                     const OCP_DBL*          Niin,
-                     const OCP_DBL*          S,
-                     const USI&              np,
-                     const OCP_USI&          bId)
+USI SkipPSAMethod01::CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np)
 {
-	if (IfSkip(Pin, Tin, Niin, bId)) {
+    const USI& npPE = compM->GetNumPhasePE(np);
+	if (IfSkip(bId, svs, mvs)) {
 		return 1;
 	}
-	else if (np >= 2) {
+	else if (npPE >= 2) {
         USI tmp = 0;
-		for (USI j = 0; j < vs->np; j++) {
-			if (S[j] >= 1E-4) {
+		for (USI j = 0; j < svs.np; j++) {
+			if (mvs.S[j] >= 1E-4) {
                 tmp++;
 			}
 		}
         // num of phases remains the same, then and flash from np phases directly
         // otherwise, flash from single phase
-        if (tmp == np) return np;
-        else           return 0;
+        if (tmp == npPE) return npPE;
+        else             return 0;
 	}
 	else {
 		return 0;
@@ -135,7 +124,7 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
 }
 
 
-void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
+void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs)
 {
     const USI& ftype    = compM->GetFtype();
     
@@ -147,7 +136,7 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
         const OCP_DBL&         T   = compM->GetT();
         const OCP_DBL&         Nt  = compM->GetNt();
         const vector<OCP_DBL>& zi  = compM->GetZi();
-        const USI&             nc  = vs->nc;
+        const USI&             nc  = svs.nc;
 
         eos->CalLnPhiN(P, T, &zi[0], Nt, &lnphiN[0]);
 
@@ -165,17 +154,17 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
 #endif // DEBUG
 
         CalEigenSY(nc, &skipMatSTA[0], &eigenSkip[0], &eigenWork[0], 2 * nc + 1);
-        vs->flag[bId]     = OCP_TRUE;
-        vs->minEigen[bId] = eigenSkip[0];
-        vs->P[bId]        = P;
-        vs->T[bId]        = T;
-        copy(zi.begin(), zi.end(), &vs->zi[bId * nc]);
+        svs.flag[bId]     = OCP_TRUE;
+        svs.minEigen[bId] = eigenSkip[0];
+        svs.P[bId]        = P;
+        svs.T[bId]        = T;
+        copy(zi.begin(), zi.end(), &svs.zi[bId * nc]);
     }
     else if (ftype == 1) {
-        vs->flag[bId] = OCP_TRUE;
+        svs.flag[bId] = OCP_TRUE;
     }
     else if (ftype == 2) {
-        vs->flag[bId] = OCP_FALSE;
+        svs.flag[bId] = OCP_FALSE;
     }
     else {
         OCP_ABORT("WRONG Ftype!");
@@ -187,7 +176,7 @@ USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureCompMethod* compM)
 {
     if (ifUse) {
         vs.SetNb(nb);
-        sm.push_back(new SkipPSAMethod01(&vs, compM));
+        sm.push_back(new SkipPSAMethod01(vs, compM));
         return sm.size() - 1;
     }
     return 0;

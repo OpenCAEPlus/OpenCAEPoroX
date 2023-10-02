@@ -77,7 +77,7 @@ public:
     const auto& GetZi() const { return zi; }
     /// Get Nt
     const auto& GetNt() const { return Nt; }
-    
+    virtual OCP_BOOL IfWellFriend() const = 0;
 
 ////////////////////////////////////////////////////////////////
 // Basic variables
@@ -249,6 +249,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     /// Water is always present
     USI GetNumPhasePE(const USI& np) const override { return np - 1; }
+    OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
 
 protected:
     void InitPTNtZ(OCPMixtureVarSet& vs);
