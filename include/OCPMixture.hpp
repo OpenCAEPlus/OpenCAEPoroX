@@ -51,7 +51,7 @@ protected:
 class OCPMixtureComp : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
@@ -114,6 +114,61 @@ protected:
     /// Skip stability analysis
     SkipPSA*              skipPSA;
     USI                   skipMethodIndex;
+};
+
+
+////////////////////////////////////////////////////////////////
+// OCPMixtureK 
+////////////////////////////////////////////////////////////////
+
+
+class OCPMixtureK : public OCPMixture
+{
+public:
+    OCPMixtureK() = default;
+    OCPMixtureK(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+    }
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* S, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
+        return pmMethod->CalXi(P, T + CONV5, z, pt);
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
+        return pmMethod->CalRho(P, T + CONV5, z, pt);
+    }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPTN(P, T, Ni);
+        return pmMethod->CalVStd(vs);
+    }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(P, T + CONV5, z, pt);
+    }
+    void OutputIters() const { pmMethod->OutIters(); }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
+
+protected:
+    void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.T = T + CONV5;
+        copy(S, S + vs.np, vs.S.begin());
+        copy(Ni, Ni + vs.nc, vs.Ni.begin());
+    }
+    void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.T = T + CONV5;
+        copy(Ni, Ni + vs.nc, vs.Ni.begin());
+    }
+
+protected:
+    /// method
+    OCPMixtureCompMethod* pmMethod;
 };
 
 

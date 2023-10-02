@@ -16,81 +16,11 @@
 #include "ParamReservoir.hpp"
 #include "OCPFuncPVT.hpp"
 #include "OCPMixture.hpp"
+#include "OCPMixtureKMethod.hpp"
 
 #include <vector>
 
 using namespace std;
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilOGWMethod
-/////////////////////////////////////////////////////
-
-
-class OCPMixtureBlkOilOGWMethod
-{
-public:
-    OCPMixtureBlkOilOGWMethod() = default;
-    virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) = 0;
-    virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) = 0;
-    virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
-    virtual void Flash(OCPMixtureVarSet& vs) = 0;
-    virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
-    virtual void FlashDer(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_DBL CalVmStd(const PhaseType& pt) = 0;
-    virtual void CalVStd(OCPMixtureVarSet& vs) = 0;
-    virtual OCP_BOOL IfWellFriend() const = 0;
-};
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilOGWMethod01
-/////////////////////////////////////////////////////
-
-
-/// Use PVDO and PVTW
-// Note that Vo,std, Vg,std, Vw,std are assumed to be 1
-class OCPMixtureBlkOilOGWMethod01 : public OCPMixtureBlkOilOGWMethod
-{
-public:
-    OCPMixtureBlkOilOGWMethod01(const ParamReservoir& rs_param, const USI& i,
-        OCPMixtureVarSet& vs);
-    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
-    void Flash(OCPMixtureVarSet& vs) override;
-    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
-    void FlashDer(OCPMixtureVarSet& vs) override;
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) override;
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) override;
-    OCP_DBL CalVmStd(const PhaseType& pt) override;
-    void CalVStd(OCPMixtureVarSet& vs) override;
-    OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
-
-protected:
-    OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) { return PVCO.CalXiO(P, Pb); }
-    OCP_DBL CalXiG(const OCP_DBL& P) { return PVDG.CalXiG(P); }
-    OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
-    OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) { return PVCO.CalRhoO(P, Pb); }
-    OCP_DBL CalRhoG(const OCP_DBL& P) { return PVDG.CalRhoG(P); }
-    OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }
-
-    void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
-
-protected:
-    /// PVCO table
-    OCP_PVCO        PVCO;
-    /// PVDG table
-    OCP_PVDG        PVDG;
-    /// PVTW table
-    OCP_PVTW        PVTW;
-    /// 1 lbmol oil components could absorb x lbmol gas components
-    OCP_DBL         x;
-    /// molar volume of oil phase in standard conditions
-    const OCP_DBL   stdVo{ 1 };
-    /// molar volume of gas phase in standard conditions
-    const OCP_DBL   stdVg{ 1 };
-    /// molar volume of water phase in standard conditions
-    const OCP_DBL   stdVw{ 1 };
-};
 
 
 /////////////////////////////////////////////////////
@@ -118,17 +48,17 @@ public:
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
-        return pmMethod->CalXi(P, Pb, pt);
+        return pmMethod->CalXi(P, Pb, 0, 0, pt);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
-        return pmMethod->CalRho(P, Pb, pt);
+        return pmMethod->CalRho(P, Pb, 0, 0, pt);
     }
     void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         SetPN(P, Ni);
         pmMethod->CalVStd(vs);
     }
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalVmStd(pt);
+        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
     }
     OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 
@@ -148,7 +78,7 @@ protected:
     }
 
 protected:
-    OCPMixtureBlkOilOGWMethod* pmMethod;
+    OCPMixtureKMethod* pmMethod;
 };
 
 

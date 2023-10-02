@@ -35,7 +35,7 @@ public:
     MixtureUnitComp() = default;
 
     MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
-    OCPMixture* GetMixture() override { return &compM; }
+    OCPMixture* GetMixture() override { return compM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
 
     void InitFlashIMPEC(const OCP_DBL& Pin,
@@ -93,11 +93,11 @@ public:
         OCP_ABORT("Can not be used in Compositional Model!");
     }
 
-    void OutMixtureIters() const override { compM.OutputIters(); }
+    void OutMixtureIters() const override { compM->OutputIters(); }
 
 protected:
     /// mixture of components
-    OCPMixtureComp  compM;
+    OCPMixtureComp* compM;
     /// Surface tension
     SurfaceTension* surTen;
     USI             stMethodIndex;

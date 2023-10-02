@@ -20,16 +20,23 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 
 
-void OCPMixtureComp::Setup(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     if (rs_param.PVTW_T.data[i].size() > 0) {
         pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
     }
 
     // Skip stability analysis
-    skipPSA         = &opts.skipPSA;
+    skipPSA = &opts.skipPSA;
     skipMethodIndex = skipPSA->Setup(opts.nb, pmMethod);
 }
+
+
+
+////////////////////////////////////////////////////////////////
+// OCPMixtureK 
+////////////////////////////////////////////////////////////////
+
 
 
 /*----------------------------------------------------------------------------*/
