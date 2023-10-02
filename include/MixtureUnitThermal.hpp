@@ -17,7 +17,6 @@
 // OpenCAEPoroX header files
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
-#include "OCPMixtureThermalOW.hpp"
 
 /// MixtureUnitThermal is inherited class of Mixture, it's used for ifThermal model.
 /// K-value Model

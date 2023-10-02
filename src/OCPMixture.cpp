@@ -80,6 +80,17 @@ void OCPMixtureBlkOilGW::Setup(const ParamReservoir& rs_param, const USI& i)
     }
 }
 
+
+/////////////////////////////////////////////////////
+// OCPMixtureUnitThermalOW 
+/////////////////////////////////////////////////////
+
+
+void OCPMixtureUnitThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)
+{
+    pmMethod = new OCPMixtureKOWMethod01T(rs_param.comsParam, i, vs);
+}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

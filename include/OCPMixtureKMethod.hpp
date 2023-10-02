@@ -52,6 +52,8 @@ public:
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// If current method is friendly to well
     virtual OCP_BOOL IfWellFriend() const = 0;
+    /// Calculate Enthalpy
+    virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const = 0;
 };
 
 
@@ -75,6 +77,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO->CalXiO(P); }
@@ -85,13 +88,68 @@ protected:
 
 protected:
     /// PVDO table
-    OCP_PVDO* PVDO;
+    OCP_PVDO*     PVDO;
     /// PVTW table
-    OCP_PVTW        PVTW;
+    OCP_PVTW      PVTW;
     /// molar volume of oil phase in standard conditions (stb/lbmol)
-    const OCP_DBL   stdVo{ 1 };
+    const OCP_DBL stdVo{ 1 };
     /// molar volume of water phase in standard conditions (stb/lbmol)
-    const OCP_DBL   stdVw{ 1 };
+    const OCP_DBL stdVw{ 1 };
+};
+
+
+/// Oil and Water are immiscible - thermal model
+class OCPMixtureKOWMethod01T : public OCPMixtureKMethod
+{
+public:
+    OCPMixtureKOWMethod01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)override;
+    void FlashDer(OCPMixtureVarSet& vs) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override { return 1 / CalXi(P, 0, T, 0, pt); }
+    OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T, zi); }
+
+
+protected:
+    OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& T);
+    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T);
+
+protected:
+    EnthalpyCalculation  eC;
+    ViscosityCalculation vC;
+
+protected:
+    /// Reference pressure
+    OCP_DBL Pref{PRESSURE_STD};   
+    /// Reference temperature
+    OCP_DBL Tref{TEMPERATURE_STD}; 
+    /// Component molar density at reference temperature and reference pressure, lb/ft3
+    vector<OCP_DBL> xi_ref;
+    /// Molecular Weight of components
+    vector<OCP_DBL> MWc;
+    /// Molecular Weight of phase
+    vector<OCP_DBL> MWp;      
+ 
+    /// Component compressibility, 1/psi
+    vector<OCP_DBL> cp;              
+    /// The first thermal expansion coefficient, 1/F
+    vector<OCP_DBL> ct1;  
+    /// The second thermal expansion coefficient, 1/F
+    vector<OCP_DBL> ct2;  
+    /// The coefficient of density dependence on temperature and pressure, 1/psi-F
+    vector<OCP_DBL> cpt;   
+             
+    /// Coefficients Ak in gas viscosity correlation formulae
+    vector<OCP_DBL> avg;       
+    /// Coefficients Bk in gas viscosity correlation formulae
+    vector<OCP_DBL> bvg;   
 };
 
 
@@ -115,6 +173,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) { return PVCO.CalXiO(P, Pb); }
@@ -164,6 +223,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
 
 protected:
     void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
@@ -171,7 +231,6 @@ protected:
     OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoW(P, T); }
     OCP_DBL CalRhoG(const OCP_DBL& P, const OCP_DBL& T) const { return PVTCO2.CalRho(P, T); }
     OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const;
-
 
 protected:
     /// PVT table for CO2

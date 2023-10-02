@@ -220,8 +220,8 @@ protected:
         vs.Ni[2] = Ni[2];
     }
     void SetPS(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw) {
-        vs.P = P;
-        vs.Pb = Pb;
+        vs.P    = P;
+        vs.Pb   = Pb;
         vs.S[0] = 1 - Sg - Sw;
         vs.S[1] = Sg;
         vs.S[2] = Sw;
@@ -337,6 +337,65 @@ protected:
     void SetPS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
         vs.P = P;
         vs.T = T;
+        vs.S[0] = 1 - Sw;
+        vs.S[1] = Sw;
+    }
+
+protected:
+    OCPMixtureKMethod* pmMethod;
+};
+
+
+/////////////////////////////////////////////////////
+// OCPMixtureUnitThermalOW 
+/////////////////////////////////////////////////////
+
+class OCPMixtureUnitThermalOW : public OCPMixture
+{
+public:
+    void Setup(const ParamReservoir& rs_param, const USI& i);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPTS(P, T, Sw);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPTN(P, T, Ni);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPTS(P, T, Sw);
+        pmMethod->InitFlashDer(Vp, vs);
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPTN(P, T, Ni);
+        pmMethod->FlashDer(vs);
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalXi(P, 0, T + CONV5, 0, pt);
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalRho(P, 0, T + CONV5, 0, pt);
+    }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(P, 0, T + CONV5, 0, pt);
+    }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPTN(P, T, Ni);
+        return pmMethod->CalVStd(vs);
+    }
+
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) { return pmMethod->CalEnthalpy(T + CONV5, zi); }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
+protected:
+    void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.T = T + CONV5;
+        vs.Ni[0] = Ni[0];
+        vs.Ni[1] = Ni[1];
+    }
+    void SetPTS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
+        vs.P = P;
+        vs.T = T + CONV5;
         vs.S[0] = 1 - Sw;
         vs.S[1] = Sw;
     }
