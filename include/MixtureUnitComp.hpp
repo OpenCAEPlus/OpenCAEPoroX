@@ -23,7 +23,7 @@
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
 #include "OCPPhaseEquilibrium.hpp"
-#include "OCPMixtureComp.hpp"
+#include "OCPMixtureCompMethod.hpp"
 
 using namespace std;
 

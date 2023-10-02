@@ -14,7 +14,7 @@
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
-#include "OCPMixtureComp.hpp"
+#include "OCPMixture.hpp"
 
 #include <vector>
 

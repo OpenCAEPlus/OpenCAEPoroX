@@ -12,7 +12,7 @@
 #ifndef __ACCELERATEPEC_HEADER__
 #define __ACCELERATEPEC_HEADER__
 
-#include "OCPMixtureComp.hpp"
+#include "OCPMixture.hpp"
 
 #include <vector>
 
@@ -21,7 +21,6 @@ using namespace std;
 
 class SkipPSAVarset
 {
-
 public:  
     void SetNb(const USI& nbin) { nb = nbin; }
     /// Reset SkipPSA vars to last time step

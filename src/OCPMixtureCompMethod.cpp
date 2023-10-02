@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "OCPMixtureComp.hpp"
+#include "OCPMixtureCompMethod.hpp"
 
 
 ////////////////////////////////////////////////////////////////
@@ -892,18 +892,6 @@ void OCPMixtureCompMethod01::CaldXsdXpW(OCPMixtureVarSet& vs)
     }
 }
 
-
-////////////////////////////////////////////////////////////////
-// OCPMixtureComp 
-////////////////////////////////////////////////////////////////
-
-
-void OCPMixtureComp::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVTW_T.data[i].size() > 0) {
-        pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
-    }
-}
 
 
 /*----------------------------------------------------------------------------*/

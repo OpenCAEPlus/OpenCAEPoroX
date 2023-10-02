@@ -15,6 +15,7 @@
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPFuncPVT.hpp"
+#include "OCPMixtureVarSet.hpp"
 #include "OCPMixture.hpp"
 
 #include <vector>
