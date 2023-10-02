@@ -672,9 +672,6 @@ void PeacemanWell::CalFactor(const Bulk& bk) const
 }
 
 
-
-
-
 /// It calculates pressure difference between perforations iteratively.
 /// This function can be used in both black oil model and compositional model.
 /// stability of this method shoule be tested.

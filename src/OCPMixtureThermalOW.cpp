@@ -19,6 +19,9 @@
 
 OCPMixtureUnitThermalOWMethod01::OCPMixtureUnitThermalOWMethod01(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs)
 {
+
+    vs.Init(2, 2, OCPMixtureType::THERMALK_OW);
+
     if (param.molden.activity)
         xi_ref = param.molden.data[tarId];
     else
@@ -242,7 +245,6 @@ void OCPMixtureUnitThermalOWMethod01::CalVStd(OCPMixtureVarSet& vs)
 
 void OCPMixtureUnitThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    vs.Init(2, 2, mixtureType);
     pmMethod = new OCPMixtureUnitThermalOWMethod01(rs_param.comsParam, i, vs);
 }
 

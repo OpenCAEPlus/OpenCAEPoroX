@@ -19,6 +19,9 @@
 
 OCPMixtureBlkOilOWMethod01::OCPMixtureBlkOilOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs) 
 {
+
+    vs.Init(2, 2, OCPMixtureType::BO_OW);
+
     OCP_DBL stdRhoO, stdRhoW;
     if (rs_param.density.activity) {
         stdRhoO = rs_param.density.data[0];
@@ -148,7 +151,6 @@ void OCPMixtureBlkOilOWMethod01::CalVStd(OCPMixtureVarSet& vs)
 
 void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
 {  
-    vs.Init(2, 2, mixtureType);
 	if (rs_param.PVTW_T.data.size() > 0 && 
        (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
 		pmMethod = new OCPMixtureBlkOilOWMethod01(rs_param, i, vs);

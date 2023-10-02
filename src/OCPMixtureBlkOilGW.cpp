@@ -19,6 +19,9 @@
 
 OCPMixtureBlkOilGWMethod01::OCPMixtureBlkOilGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
+    vs.Init(2, 2, OCPMixtureType::BO_GW);
+
+
     PVTCO2.Setup(rs_param.PVTCO2.data[i]);
     PVTH2O.Setup(rs_param.PVTH2O.data[i]);
 
@@ -239,7 +242,6 @@ void OCPMixtureBlkOilGWMethod01::CalVStd(OCPMixtureVarSet& vs)
 
 void OCPMixtureBlkOilGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
-    vs.Init(2, 2, mixtureType);
     if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
         pmMethod = new OCPMixtureBlkOilGWMethod01(rs_param, i, vs);
     }

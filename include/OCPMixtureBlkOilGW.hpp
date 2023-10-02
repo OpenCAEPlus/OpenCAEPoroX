@@ -91,7 +91,6 @@ protected:
 class OCPMixtureBlkOilGW : public OCPMixture
 {
 public:
-    OCPMixtureBlkOilGW() { mixtureType = OCPMixtureType::BO_GW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
         SetPS(P, T, Sw);
