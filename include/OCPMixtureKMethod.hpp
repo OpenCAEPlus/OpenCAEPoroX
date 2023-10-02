@@ -144,6 +144,45 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// OCPMixtureKGWMethod
+/////////////////////////////////////////////////////
+
+
+/// Use PVTCO2 and PVTH2O
+/// Here, molar density(xi) is the mass density(rho)
+class OCPMixtureKGWMethod01 : public OCPMixtureKMethod
+{
+public:
+    OCPMixtureKGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void FlashDer(OCPMixtureVarSet& vs) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
+
+protected:
+    void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
+    OCP_DBL CalXiG(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoG(P, T); }
+    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoW(P, T); }
+    OCP_DBL CalRhoG(const OCP_DBL& P, const OCP_DBL& T) const { return PVTCO2.CalRho(P, T); }
+    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const;
+
+
+protected:
+    /// PVT table for CO2
+    OCP_PVTCO2    PVTCO2;
+    /// PVT table for H2O
+    OCP_PVTH2O    PVTH2O;
+    /// if use water density correction
+    Garciaw       garciaw;
+};
+
+
 #endif /* end if __OCPMIXTUREKMETHOD_HEADER__ */
 
 /*----------------------------------------------------------------------------*/

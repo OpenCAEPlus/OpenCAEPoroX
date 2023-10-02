@@ -288,6 +288,64 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilGW 
+/////////////////////////////////////////////////////
+
+class OCPMixtureBlkOilGW : public OCPMixture
+{
+public:
+    void Setup(const ParamReservoir& rs_param, const USI& i);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, T, Sw);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPN(P, T, Ni);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, T, Sw);
+        pmMethod->InitFlashDer(Vp, vs);
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        SetPN(P, T, Ni);
+        pmMethod->FlashDer(vs);
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalXi(P, 0, T, 0, pt);
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
+        return pmMethod->CalRho(P, 0, T, 0, pt);
+    }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPN(P, T, Ni);
+        pmMethod->CalVStd(vs);
+    }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
+    }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
+
+protected:
+    void SetPN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.T = T;
+        vs.Ni[0] = Ni[0];
+        vs.Ni[1] = Ni[1];
+    }
+    void SetPS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
+        vs.P = P;
+        vs.T = T;
+        vs.S[0] = 1 - Sw;
+        vs.S[1] = Sw;
+    }
+
+protected:
+    OCPMixtureKMethod* pmMethod;
+};
+
+
 #endif /* end if __OCPMIXTURE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/

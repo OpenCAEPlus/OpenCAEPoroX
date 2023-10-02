@@ -68,6 +68,18 @@ void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
     }
 }
 
+
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilGW 
+/////////////////////////////////////////////////////
+
+void OCPMixtureBlkOilGW::Setup(const ParamReservoir& rs_param, const USI& i)
+{
+    if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
+        pmMethod = new OCPMixtureKGWMethod01(rs_param, i, vs);
+    }
+}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

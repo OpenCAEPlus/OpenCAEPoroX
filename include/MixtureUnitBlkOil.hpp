@@ -17,7 +17,6 @@
 // OpenCAEPoroX header files
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
-#include "OCPMixtureBlkOilGW.hpp"
 
 /// MixtureUnitBlkOil is inherited class of Mixture, it's used for black oil model.
 class MixtureUnitBlkOil : public MixtureUnit
