@@ -66,9 +66,13 @@ public:
     /// Get allowable maximum number of phases in PE
     const auto& GetNPmax() const { return NPmax; }
     /// Get EoS
-    const auto GetEoS() { return &eos; }
+    const auto GetEoS() const { return &eos; }
     /// Get Ftype
     const auto& GetFtype() const { return PE.GetFtype(); }
+    /// Get P
+    const auto& GetP() const { return P; }
+    /// Get T
+    const auto& GetT() const { return T; }
     /// Get zi
     const auto& GetZi() const { return zi; }
     /// Get Nt
@@ -93,6 +97,10 @@ protected:
     OCP_DBL         Nt;
     /// molar fraction of components
     vector<OCP_DBL> zi;
+    /// Pressure
+    OCP_DBL         P;
+    /// Tempeature 
+    OCP_DBL         T;
 
 
 ////////////////////////////////////////////////////////////////
@@ -243,7 +251,7 @@ public:
     USI GetNumPhasePE(const USI& np) const override { return np - 1; }
 
 protected:
-    void InitNtZ(OCPMixtureVarSet& vs);
+    void InitPTNtZ(OCPMixtureVarSet& vs);
     void CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs);
 
 protected:

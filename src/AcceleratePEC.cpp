@@ -31,12 +31,12 @@ void SkipPSAVarset::UpdateLastTimeStep()
 }
 
 
-SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureComp* compsin)
+SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset* vsin, const OCPMixtureCompMethod* compMin)
 {
     vs     = vsin;
-    comps  = compsin;   
-    vs->np = comps->GetNPmaxPE();
-    vs->nc = comps->GetNCPE();
+    compM  = compMin;
+    vs->np = compM->GetNPmax();
+    vs->nc = compM->GetNC();
 
     if (!vs->ifSetup) {
 
@@ -137,19 +137,19 @@ USI SkipPSAMethod01::CalFtype(const OCP_DBL& Pin,
 
 void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
 {
-    const USI& ftype    = comps->GetFtypePE();
+    const USI& ftype    = compM->GetFtype();
     
 
     if (ftype == 0) {
         // the range should be calculated, which also means last skip is unsatisfied
-        EoSCalculation* eos       = comps->GetEoSPE();
-        const OCP_DBL&  P         = comps->GetP();
-        const OCP_DBL&  T         = comps->GetT();
-        const OCP_DBL&  Nt        = comps->GetNtPE();
-        const vector<OCP_DBL>& zi = comps->GetZiPE();
-        const USI&      nc  = vs->nc;
+        const EoSCalculation*  eos = compM->GetEoS();
+        const OCP_DBL&         P   = compM->GetP();
+        const OCP_DBL&         T   = compM->GetT();
+        const OCP_DBL&         Nt  = compM->GetNt();
+        const vector<OCP_DBL>& zi  = compM->GetZi();
+        const USI&             nc  = vs->nc;
 
-        eos->CalLnPhiN(P, T, &zi[0], Nt, &lnphiN[0]);;
+        eos->CalLnPhiN(P, T, &zi[0], Nt, &lnphiN[0]);
 
         for (USI i = 0; i < nc; i++) {
             for (USI j = 0; j <= i; j++) {
@@ -183,11 +183,11 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId)
 }
 
 
-USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureComp* compsin)
+USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureCompMethod* compM)
 {
     if (ifUse) {
         vs.SetNb(nb);
-        sm.push_back(new SkipPSAMethod01(&vs, compsin));
+        sm.push_back(new SkipPSAMethod01(&vs, compM));
         return sm.size() - 1;
     }
     return 0;

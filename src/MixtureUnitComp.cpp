@@ -14,17 +14,14 @@
 
 MixtureUnitComp::MixtureUnitComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
-    compM.Setup(rs_param, i);
+    compM.Setup(rs_param, i, opts);
     mixtureType = compM.MixtureType();
     vs          = &compM.GetVarSet();
 
     /// Optional Features
-    // Skip stability analysis
-    skipPSA         = &opts.skipPSA;
-    skipMethodIndex = skipPSA->Setup(opts.nb, &compM);
     // Calculate surface tension
     surTen          = &opts.surTen;
-    stMethodIndex   = surTen->Setup(rs_param, i, opts.nb, &compM);
+    stMethodIndex   = surTen->Setup(rs_param, i, opts.nb);
     // Miscible Factor
     misFac          = &opts.misFac;
     mfMethodIndex   = misFac->Setup(rs_param, i, opts.nb, surTen);
@@ -44,9 +41,8 @@ void MixtureUnitComp::InitFlashIMPEC(const OCP_DBL& Pin,
                                  const OCP_DBL* Ziin,
                                  const OCP_USI& bId)
 {
-    compM.InitFlash(Pin, Tin, Sjin, Ziin, Vpore);
-    skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
-    surTen->CalSurfaceTension(bId, stMethodIndex);
+    compM.InitFlash(Pin, Tin, Sjin, Ziin, Vpore, bId);
+    surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
@@ -58,9 +54,8 @@ void MixtureUnitComp::InitFlashFIM(const OCP_DBL& Pin,
                                const OCP_DBL* Ziin,
                                const OCP_USI& bId)
 {
-    compM.InitFlashDer(Pin, Tin, Sjin, Ziin, Vpore);
-    skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
-    surTen->CalSurfaceTension(bId, stMethodIndex);
+    compM.InitFlashDer(Pin, Tin, Sjin, Ziin, Vpore, bId);
+    surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
@@ -71,10 +66,8 @@ void MixtureUnitComp::FlashIMPEC(const OCP_DBL& Pin,
                              const OCP_DBL* xijin,
                              const OCP_USI& bId)
 {
-    const USI ftype = skipPSA->CalFtype(Pin, Tin, Niin, bId, skipMethodIndex);
-    compM.Flash(Pin, Tin, Niin, ftype, lastNP, xijin);
-    skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
-    surTen->CalSurfaceTension(bId, stMethodIndex);
+    compM.Flash(Pin, Tin, Niin, lastNP, xijin, bId);
+    surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
@@ -86,10 +79,8 @@ void MixtureUnitComp::FlashFIM(const OCP_DBL& Pin,
                            const OCP_DBL* xijin,
                            const OCP_USI& bId)
 {
-    const USI ftype = skipPSA->CalFtype(Pin, Tin, Niin, Sjin, compM.GetNumPhasePE(lastNP), bId, skipMethodIndex);
-    compM.FlashDer(Pin, Tin, Niin, ftype, lastNP, xijin);
-    skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
-    surTen->CalSurfaceTension(bId, stMethodIndex);
+    compM.FlashDer(Pin, Tin, Niin, Sjin, lastNP, xijin, bId);
+    surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 

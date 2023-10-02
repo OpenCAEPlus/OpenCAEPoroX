@@ -14,7 +14,7 @@
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
-#include "OCPMixture.hpp"
+#include "OCPMixtureVarSet.hpp"
 
 #include <vector>
 
@@ -40,7 +40,7 @@ public:
     /// Default constructor
     SurTenMethod() = default;
     /// Calculate surface tensions
-    virtual void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs) const = 0;
+    virtual void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs, const OCPMixtureVarSet& mvs) const = 0;
 };
 
 
@@ -50,24 +50,18 @@ class SurTenMethod01 : public SurTenMethod
 {
 public:
     /// Default constructor
-    SurTenMethod01(const vector<OCP_DBL>& parachorin, OCPMixtureComp* mix, SurTenVarSet& stvs) {
+    SurTenMethod01(const vector<OCP_DBL>& parachorin, SurTenVarSet& stvs) {
         parachor = parachorin;
         NC       = parachor.size();
-        mixture  = mix;
-
         stvs.surTen.resize(stvs.nb);
     }
-    void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs) const;
+    void CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs, const OCPMixtureVarSet& mvs) const;
 
 protected:
     /// used to calculate oil-gas surface tension by Macleod-Sugden correlation
     vector<OCP_DBL> parachor; 
     /// num of components
     USI             NC;
-
-    // Dependent modules
-    /// mixture model
-    OCPMixtureComp* mixture;
 };
 
 
@@ -77,11 +71,11 @@ public:
     /// Default constructor
     SurfaceTension() = default;
     /// Setup surface tension method(different mixture use different setup)
-    USI Setup(const ParamReservoir& rs_param, const USI& i, const OCP_USI& nb, OCPMixtureComp* mix);
+    USI Setup(const ParamReservoir& rs_param, const USI& i, const OCP_USI& nb);
     /// Calculate surface tension with specified method
-    void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex) {
+    void CalSurfaceTension(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs) {
         if (ifUse) {
-            stMethod[mIndex]->CalSurfaceTension(bId, vs);
+            stMethod[mIndex]->CalSurfaceTension(bId, vs, mvs);
         }        
     }
     const auto& GetVS()const { return vs; }

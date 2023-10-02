@@ -23,7 +23,7 @@
 #include "MixtureUnit.hpp"
 #include "OCPFuncPVT.hpp"
 #include "OCPPhaseEquilibrium.hpp"
-#include "OCPMixtureCompMethod.hpp"
+#include "OCPMixture.hpp"
 
 using namespace std;
 
@@ -99,9 +99,6 @@ public:
 protected:
     /// mixture of components
     OCPMixtureComp  compM;
-    /// Skip stability analysis
-    SkipPSA*        skipPSA;
-    USI             skipMethodIndex;
     /// Surface tension
     SurfaceTension* surTen;
     USI             stMethodIndex;

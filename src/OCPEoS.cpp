@@ -65,7 +65,7 @@ EoS_PR::EoS_PR(const ComponentParam& param, const USI& tarId)
 }
 
 
-void EoS_PR::CalAiBi(const OCP_DBL& P, const OCP_DBL& T)
+void EoS_PR::CalAiBi(const OCP_DBL& P, const OCP_DBL& T) const
 {
     OCP_DBL mwi, Pri, Tri;
     for (USI i = 0; i < nc; i++) {
@@ -84,7 +84,7 @@ void EoS_PR::CalAiBi(const OCP_DBL& P, const OCP_DBL& T)
 }
 
 
-void EoS_PR::CalAjBj(const OCP_DBL* x)
+void EoS_PR::CalAjBj(const OCP_DBL* x) const
 {
     Aj = 0;
     Bj = 0;
@@ -99,7 +99,7 @@ void EoS_PR::CalAjBj(const OCP_DBL* x)
 }
 
 
-void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
+void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x) const
 {
     const OCP_DBL a = (delta1 + delta2 - 1) * Bj - 1;
     const OCP_DBL b = (Aj + delta1 * delta2 * Bj * Bj - (delta1 + delta2) * Bj * (Bj + 1));
@@ -124,7 +124,7 @@ void EoS_PR::CalZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 }
 
 
-void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
+void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x) const
 {
     CalAiBi(P, T);
     CalAjBj(x);
@@ -132,7 +132,7 @@ void EoS_PR::CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 }
 
 
-void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
+void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x) const
 {
     Bx = Bi;
     for (USI i = 0; i < nc; i++) {
@@ -150,7 +150,7 @@ void EoS_PR::CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 }
 
 
-void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt)
+void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt) const
 {
     for (USI i = 0; i < nc; i++) {
         OCP_DBL tmp = 0;
@@ -168,7 +168,7 @@ void EoS_PR::CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, con
 }
 
 
-void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
+void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x) const
 {
     Ap = Aj / P;
     Bp = Bj / P;
@@ -180,7 +180,7 @@ void EoS_PR::CalApBpZp(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 }
 
 
-void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* fug)
+void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* fug) const
 {
     CalAjBjZj(P, T, x);
 
@@ -197,7 +197,7 @@ void EoS_PR::CalFug(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DB
 
 
 void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, 
-                       OCP_DBL* fug, OCP_DBL* phi)
+                       OCP_DBL* fug, OCP_DBL* phi) const
 {
     CalAjBjZj(P, T, x);
 
@@ -214,7 +214,7 @@ void EoS_PR::CalFugPhi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x,
 }
 
 
-void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugx)
+void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugx) const
 {
 
     CalAjBjZj(P, T, x);
@@ -251,7 +251,7 @@ void EoS_PR::CalLnFugX(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP
 }
 
 
-void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn)
+void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn) const
 {
 
     CalAjBjZj(P, T, x);
@@ -300,7 +300,7 @@ void EoS_PR::CalLnFugN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, con
 }
 
 
-void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugP)
+void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL* lnfugP) const
 {
 
     CalAjBjZj(P, T, x);
@@ -341,7 +341,7 @@ void EoS_PR::CalLnFugP(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP
 
 
 void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x,
-    const OCP_DBL& nt, OCP_DBL* lnphin)
+    const OCP_DBL& nt, OCP_DBL* lnphin) const
 {
     OCP_DBL C, E, G;
     OCP_DBL Cnk, Dnk, Enk, Gnk;
@@ -382,7 +382,7 @@ void EoS_PR::CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x,
 }
 
 
-OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
+OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x) const
 {
     CalAjBjZj(P, T, x);
     OCP_DBL v = Zj * GAS_CONSTANT * T / P;
@@ -393,7 +393,7 @@ OCP_DBL EoS_PR::CalVm(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x)
 }
 
 
-OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx)
+OCP_DBL EoS_PR::CalVmDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) const
 {
     CalAjBjZj(P, T, x);
     CalAxBxZx(P, T, x);

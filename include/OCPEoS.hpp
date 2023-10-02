@@ -25,23 +25,23 @@ class EoS
 public:
 	EoS() = default;
 	/// Calculate fugacity
-	virtual void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) = 0;
+	virtual void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) const = 0;
 	/// Calculate fugacity and fugacity coefficient
-	virtual void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) = 0;
+	virtual void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) const = 0;
 	/// Calculate d(lnfug) / dx
-	virtual void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) = 0;
+	virtual void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) const = 0;
 	/// Calculate d(lnfug) / dn
-	virtual void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn) = 0;
+	virtual void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn) const = 0;
 	/// Calculate d(lnfug) / dP
-	virtual void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) = 0;
+	virtual void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) const = 0;
 	/// Calculate d(lnphi) / dn
-	virtual void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) = 0;
+	virtual void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) const = 0;
 
 public:
 	/// Calculate molar volume
-	virtual OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) = 0;
+	virtual OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const = 0;
 	/// Calculate molar volume and derivatives
-	virtual OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) = 0;
+	virtual OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) const = 0;
 
 };
 
@@ -56,40 +56,40 @@ class EoS_PR : public EoS
 public:
 	EoS_PR(const ComponentParam& param, const USI& tarId);
 	/// Calculate fugacity
-	void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) override;
+	void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) const override;
 	/// Calculate fugacity and fugacity coefficient
-	void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) override;
+	void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) const override;
 	/// Calculate d(lnfug) / dx
-	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) override;
+	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) const override;
 	/// Calculate d(lnfug) / dn
-	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn) override;
+	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnfugn) const override;
 	/// Calculate d(lnfug) / dP
-	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) override;
+	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) const override;
 	/// Calculate d(lnphi) / dn
-	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) override;
+	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) const override;
 
 public:
 	/// Calculate molar volume
-	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) override;
+	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const override;
 	/// Calculate molar volume and derivatives
-	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) override;
+	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) const override;
 
 
 protected:
 	/// Calculate Ai, Bi
-	void CalAiBi(const OCP_DBL& P, const OCP_DBL& T);
+	void CalAiBi(const OCP_DBL& P, const OCP_DBL& T) const;
 	/// Calculate Aj, Bj
-	void CalAjBj( const OCP_DBL* x);
+	void CalAjBj( const OCP_DBL* x) const;
 	/// Calculate compressible factor
-	void CalZj(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x);
+	void CalZj(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const;
 	/// Calculate Aj Bj Zj
-	void CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x);
+	void CalAjBjZj(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const;
 	/// Calculate Ax Bx Zx
-	void CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x);
+	void CalAxBxZx(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const;
 	/// Calculate An Bn Zn
-	void CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt);
+	void CalAnBnZn(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt) const;
 	/// Calculate Ap Bp Zp
-	void CalApBpZp(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x);
+	void CalApBpZp(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const;
 	
 protected:
 	USI             nc;
@@ -112,37 +112,37 @@ protected:
 	const OCP_DBL delta2 = -0.41421356237;
 
 	/// Auxliary variable A for components
-	vector<OCP_DBL> Ai;
+	mutable vector<OCP_DBL> Ai;
 	/// Auxliary variable B for components
-	vector<OCP_DBL> Bi;
+	mutable vector<OCP_DBL> Bi;
 	/// Auxliary variable
-	OCP_DBL Aj;
+	mutable OCP_DBL         Aj;
 	/// Auxliary variable
-	OCP_DBL Bj;
+	mutable OCP_DBL         Bj;
 	/// compressible factor
-	OCP_DBL Zj;
+	mutable OCP_DBL         Zj;
 	/// root container
-	vector<OCP_DBL> Z;
+	mutable vector<OCP_DBL> Z;
 
 	/// Derivatives
 	/// dAj / dx
-	vector<OCP_DBL> Ax;
+	mutable vector<OCP_DBL> Ax;
 	/// dBj / dx
-	vector<OCP_DBL> Bx;
+	mutable vector<OCP_DBL> Bx;
 	/// dZj / dx
-	vector<OCP_DBL> Zx;
+	mutable vector<OCP_DBL> Zx;
 	/// dAj / dn
-	vector<OCP_DBL> An;
+	mutable vector<OCP_DBL> An;
 	/// dBj / dn
-	vector<OCP_DBL> Bn;
+	mutable vector<OCP_DBL> Bn;
 	/// dZj / dn
-	vector<OCP_DBL> Zn;
+	mutable vector<OCP_DBL> Zn;
 	/// dAj / dP
-	OCP_DBL         Ap;
+	mutable OCP_DBL         Ap;
 	/// dBj / dP
-	OCP_DBL         Bp;
+	mutable OCP_DBL         Bp;
 	/// dZj / dP
-	OCP_DBL         Zp;
+	mutable OCP_DBL         Zp;
 };
 
 
@@ -152,35 +152,35 @@ public:
 	EoSCalculation() = default;
 	void Setup(const ComponentParam& param, const USI& tarId);
 	/// Calculate fugacity
-	void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) {
+	void CalFug(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug) const {
 		eos->CalFug(P, T, x, fug);
 	}
 	/// Calculate fugacity and fugacity coefficient
-	void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) {
+	void CalFugPhi(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* fug, OCP_DBL* phi) const {
 		eos->CalFugPhi(P, T, x, fug, phi);
 	}
 		/// Calculate d(lnfug) / dx
-	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) {
+	void CalLnFugX(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugx) const {
 		eos->CalLnFugX(P, T, x, lnfugx);
 	}
 	/// Calculate d(lnfug) / dn
-	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x,  const OCP_DBL& nt, OCP_DBL* lnfugn) {
+	void CalLnFugN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x,  const OCP_DBL& nt, OCP_DBL* lnfugn) const {
 		eos->CalLnFugN(P, T, x, nt, lnfugn);
 	}
 	/// Calculate d(lnfug) / dP
-	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) {
+	void CalLnFugP(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL* lnfugP) const {
 		eos->CalLnFugP(P, T, x, lnfugP);
 	}
 	/// Calculate d(lnphi) / dn
-	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) {
+	void CalLnPhiN(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, const OCP_DBL& nt, OCP_DBL* lnphin) const {
 		eos->CalLnPhiN(P, T, x, nt, lnphin);
 	}
 
 public:
 	/// Calculate molar volume
-	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) { return eos->CalVm(P, T, x); }
+	OCP_DBL CalVm(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x) const { return eos->CalVm(P, T, x); }
 	/// Calculate molar volume and derivatives
-	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) {
+	OCP_DBL CalVmDer(const OCP_DBL& P, const OCP_DBL& T,  const OCP_DBL* x, OCP_DBL& vmP, OCP_DBL* vmx) const {
 		return eos->CalVmDer(P, T, x, vmP, vmx);
 	}
 

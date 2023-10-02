@@ -14,6 +14,7 @@
 
 
 #include "OCPMixtureCompMethod.hpp"
+#include "OptionalModules.hpp"
 
 using namespace std;
 
@@ -50,26 +51,32 @@ protected:
 class OCPMixtureComp : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i);
+    void Setup(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp) {
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
         SetPTSN(P, T, S, Ni);
         pmMethod->InitFlash(Vp, vs);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& ftype, const USI& lNP, const OCP_DBL* lx) {
+    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
+        const USI ftype = skipPSA->CalFtype(P, T, Ni, bId, skipMethodIndex);
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs, ftype, lNP, lx);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp) {
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
         SetPTSN(P, T, S, Ni);
         pmMethod->InitFlashDer(Vp, vs);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& ftype, const USI& lNP, const OCP_DBL* lx) {
+    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* Sjin, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {
+        const USI ftype = skipPSA->CalFtype(P, T, Ni, Sjin, pmMethod->GetNumPhasePE(lNP), bId, skipMethodIndex);
         SetPTN(P, T, Ni);
         pmMethod->FlashDer(vs, ftype, lNP, lx);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
         return pmMethod->CalXi(P, T + CONV5, z, pt);
@@ -85,16 +92,7 @@ public:
         return pmMethod->CalVmStd(P, T + CONV5, z, pt);
     }
     void OutputIters() const { pmMethod->OutIters(); }
-    const auto& GetNCPE() const { return pmMethod->GetNC(); }
     const auto& GetNPPE() const { return pmMethod->GetNP(); }
-    const auto& GetNPmaxPE() const { return pmMethod->GetNPmax(); }
-    const auto GetEoSPE() const { return pmMethod->GetEoS(); }
-    const auto GetFtypePE() const { return pmMethod->GetFtype(); }
-    const auto GetNumPhasePE(const USI& np) const { return pmMethod->GetNumPhasePE(np); }
-    const auto& GetZiPE() const { return pmMethod->GetZi(); }
-    const auto& GetNtPE() const { return pmMethod->GetNt(); }
-    const auto& GetP() const { return vs.P; }
-    const auto& GetT() const { return vs.T; }
 
 protected:
     void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {
@@ -110,7 +108,12 @@ protected:
     }
 
 protected:
+    /// method
     OCPMixtureCompMethod* pmMethod;
+    // dependent module
+    /// Skip stability analysis
+    SkipPSA*              skipPSA;
+    USI                   skipMethodIndex;
 };
 
 
