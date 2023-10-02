@@ -14,6 +14,7 @@
 
 
 #include "OCPMixtureCompMethod.hpp"
+#include "OCPMixtureKMethod.hpp"
 #include "OptionalModules.hpp"
 
 using namespace std;
@@ -169,6 +170,121 @@ protected:
 protected:
     /// method
     OCPMixtureCompMethod* pmMethod;
+};
+
+
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilOGW 
+/////////////////////////////////////////////////////
+
+class OCPMixtureBlkOilOGW : public OCPMixture
+{
+public:
+    void Setup(const ParamReservoir& rs_param, const USI& i);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Pb, Sg, Sw);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Pb, Sg, Sw);
+        pmMethod->InitFlashDer(Vp, vs);
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->FlashDer(vs);
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
+        return pmMethod->CalXi(P, Pb, 0, 0, pt);
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
+        return pmMethod->CalRho(P, Pb, 0, 0, pt);
+    }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPN(P, Ni);
+        pmMethod->CalVStd(vs);
+    }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
+    }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
+
+protected:
+    void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.Ni[0] = Ni[0];
+        vs.Ni[1] = Ni[1];
+        vs.Ni[2] = Ni[2];
+    }
+    void SetPS(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw) {
+        vs.P = P;
+        vs.Pb = Pb;
+        vs.S[0] = 1 - Sg - Sw;
+        vs.S[1] = Sg;
+        vs.S[2] = Sw;
+    }
+
+protected:
+    OCPMixtureKMethod* pmMethod;
+};
+
+
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilOW 
+/////////////////////////////////////////////////////
+
+class OCPMixtureBlkOilOW : public OCPMixture
+{
+public:
+    void Setup(const ParamReservoir& rs_param, const USI& i);
+    void InitFlash(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Sw);
+        pmMethod->InitFlash(Vp, vs);
+    }
+    void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
+        SetPS(P, Sw);
+        pmMethod->InitFlashDer(Vp, vs);
+    }
+    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
+        SetPN(P, Ni);
+        pmMethod->FlashDer(vs);
+    }
+    OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) {
+        return pmMethod->CalXi(P, 0, 0, 0, pt);
+    }
+    OCP_DBL CalRho(const OCP_DBL& P, const PhaseType& pt) {
+        return pmMethod->CalRho(P, 0, 0, 0, pt);
+    }
+    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
+        SetPN(P, Ni);
+        pmMethod->CalVStd(vs);
+    }
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
+        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
+    }
+    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
+
+protected:
+    void SetPN(const OCP_DBL& P, const OCP_DBL* Ni) {
+        vs.P = P;
+        vs.Ni[0] = Ni[0];
+        vs.Ni[1] = Ni[1];
+    }
+    void SetPS(const OCP_DBL& P, const OCP_DBL& Sw) {
+        vs.P = P;
+        vs.S[0] = 1 - Sw;
+        vs.S[1] = Sw;
+    }
+
+protected:
+    OCPMixtureKMethod* pmMethod;
 };
 
 

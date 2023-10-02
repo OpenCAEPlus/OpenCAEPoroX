@@ -60,6 +60,39 @@ public:
 /////////////////////////////////////////////////////
 
 
+/// Use PVDO and PVTW
+// Note that Vo,std, Vw,std are assumed to be 1
+class OCPMixtureKOWMethod01 : public OCPMixtureKMethod
+{
+public:
+    OCPMixtureKOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void FlashDer(OCPMixtureVarSet& vs) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
+
+protected:
+    OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO->CalXiO(P); }
+    OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
+    OCP_DBL CalRhoO(const OCP_DBL& P) { return PVDO->CalRhoO(P); }
+    OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }
+
+
+protected:
+    /// PVDO table
+    OCP_PVDO* PVDO;
+    /// PVTW table
+    OCP_PVTW        PVTW;
+    /// molar volume of oil phase in standard conditions (stb/lbmol)
+    const OCP_DBL   stdVo{ 1 };
+    /// molar volume of water phase in standard conditions (stb/lbmol)
+    const OCP_DBL   stdVw{ 1 };
+};
 
 
 /////////////////////////////////////////////////////

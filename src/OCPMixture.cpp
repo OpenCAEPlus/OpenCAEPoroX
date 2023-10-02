@@ -39,6 +39,35 @@ OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, Opt
 
 
 
+
+
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilOGW 
+/////////////////////////////////////////////////////
+
+
+void OCPMixtureBlkOilOGW::Setup(const ParamReservoir& rs_param, const USI& i)
+{
+    if (rs_param.PVCO_T.data.size() > 0 &&
+        rs_param.PVDG_T.data.size() > 0 &&
+        rs_param.PVTW_T.data.size() > 0) {
+        pmMethod = new OCPMixtureKOGWMethod01(rs_param, i, vs);
+    }
+}
+
+
+/////////////////////////////////////////////////////
+// OCPMixtureBlkOilOW 
+/////////////////////////////////////////////////////
+
+void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
+{
+    if (rs_param.PVTW_T.data.size() > 0 &&
+        (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
+        pmMethod = new OCPMixtureKOWMethod01(rs_param, i, vs);
+    }
+}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
