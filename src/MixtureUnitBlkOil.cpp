@@ -24,7 +24,7 @@ MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const
 
 void MixtureUnitBlkOil_OW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
 {
-    OWM.Flash(Pin, Niin);
+    OWM.Flash(Pin, Tin, Niin);
 }
 
 void MixtureUnitBlkOil_OW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
@@ -52,7 +52,7 @@ OCP_DBL MixtureUnitBlkOil_OW::XiPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return OWM.CalXi(Pin, pt);
+    return OWM.CalXi(Pin, Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL MixtureUnitBlkOil_OW::RhoPhase(const OCP_DBL& Pin,
@@ -61,7 +61,7 @@ OCP_DBL MixtureUnitBlkOil_OW::RhoPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return OWM.CalRho(Pin, pt);
+    return OWM.CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
 }
 
 
@@ -107,7 +107,7 @@ OCP_DBL MixtureUnitBlkOil_GW::XiPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return GWM.CalXi(Pin, Tin, pt);
+    return GWM.CalXi(Pin, Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
@@ -116,7 +116,7 @@ OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return GWM.CalRho(Pin, Tin, pt);
+    return GWM.CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
 }
 
 
@@ -135,7 +135,7 @@ MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, con
 void MixtureUnitBlkOil_OGW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
 {
 
-    OGWM.Flash(Pin, Niin);
+    OGWM.Flash(Pin, Tin, Niin);
 }
 
 
@@ -165,7 +165,7 @@ MixtureUnitBlkOil_OGW::XiPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return OGWM.CalXi(Pin, Pin, pt);
+    return OGWM.CalXi(Pin, Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL
@@ -175,7 +175,7 @@ MixtureUnitBlkOil_OGW::RhoPhase(const OCP_DBL& Pin,
     const vector<OCP_DBL>& Ziin,
     const PhaseType& pt)
 {
-    return OGWM.CalRho(Pin, Pbbin, pt);
+    return OGWM.CalRho(Pin, Pbbin, Tin, &Ziin[0], pt);
 }
 
 

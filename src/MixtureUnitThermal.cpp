@@ -56,7 +56,7 @@ OCP_DBL MixtureUnitThermal_OW::XiPhase(const OCP_DBL& Pin,
                                     const vector<OCP_DBL>& Ziin,
                                     const PhaseType& pt)
 {
-    return OWTM.CalXi(Pin, Tin, pt);
+    return OWTM.CalXi(Pin, Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL
@@ -66,7 +66,7 @@ MixtureUnitThermal_OW::RhoPhase(const OCP_DBL& Pin,
                              const vector<OCP_DBL>& Ziin,
                              const PhaseType& pt)
 {
-    return OWTM.CalRho(Pin, Tin, pt);
+    return OWTM.CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
 }
 
 

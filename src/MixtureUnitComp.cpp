@@ -66,7 +66,7 @@ OCP_DBL MixtureUnitComp::XiPhase(const OCP_DBL& Pin,
                          const vector<OCP_DBL>& Ziin,
                          const PhaseType& pt)
 {
-    return compM->CalXi(Pin, Tin, &Ziin[0], pt);
+    return compM->CalXi(Pin, 0, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
@@ -75,7 +75,7 @@ OCP_DBL MixtureUnitComp::RhoPhase(const OCP_DBL& Pin,
                       const vector<OCP_DBL>& Ziin,
                       const PhaseType& pt)
 {
-    return compM->CalRho(Pin, Tin, &Ziin[0], pt);
+    return compM->CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
 }
 
 
