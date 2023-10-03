@@ -22,6 +22,7 @@
 #include "ParamReservoir.hpp"
 #include "WellOpt.hpp"
 #include "OCPMixture.hpp"
+#include "BulkVarSet.hpp"
 
 using namespace std;
 
@@ -37,35 +38,12 @@ public:
     virtual OCPMixture* GetMixture() = 0;
     /// flash calculation with saturation of phases.
     virtual void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) = 0;
-    virtual void InitFlashIMPEC(const OCP_DBL& Pin,
-                                const OCP_DBL& Pbbin,
-                                const OCP_DBL& Tin,
-                                const OCP_DBL* Sjin,
-                                const OCP_DBL& Vpore,
-                                const OCP_DBL* Ziin,
-                                const OCP_USI& bId)                                 = 0;
-    virtual void InitFlashFIM(const OCP_DBL& Pin,
-                              const OCP_DBL& Pbbin,
-                              const OCP_DBL& Tin,
-                              const OCP_DBL* Sjin,
-                              const OCP_DBL& Vpore,
-                              const OCP_DBL* Ziin,
-                              const OCP_USI& bId)                                   = 0;
+    virtual void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
+    virtual void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
     /// Flash calculation with moles of components.
-    virtual void FlashIMPEC(const OCP_DBL& Pin,
-                            const OCP_DBL& Tin,
-                            const OCP_DBL* Niin,
-                            const USI&     lastNP,
-                            const OCP_DBL* xijin,
-                            const OCP_USI& bId) = 0;
+    virtual void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
     /// Flash calculation with moles of components and Calculate the derivative
-    virtual void FlashFIM(const OCP_DBL& Pin,
-                          const OCP_DBL& Tin,
-                          const OCP_DBL* Niin,
-                          const OCP_DBL* Sjin,
-                          const USI&     lastNP,
-                          const OCP_DBL* xijin,
-                          const OCP_USI& bId)  = 0;
+    virtual void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
 
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed

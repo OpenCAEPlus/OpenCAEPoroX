@@ -174,6 +174,8 @@ public:
     OCP_DBL                 Vf;
     /// mole number of components(mass in some conditions)
     vector<OCP_DBL>         Ni;
+    /// existing phase num
+    USI                     phaseNum;
     /// existence of phase
     vector<OCP_BOOL>        phaseExist;
     /// saturation of phase

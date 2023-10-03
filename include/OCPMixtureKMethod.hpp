@@ -17,7 +17,7 @@
 #include "OCPFuncPVT.hpp"
 #include "OCPMixtureVarSet.hpp"
 #include "OCPPhaseEquilibrium.hpp"
-
+#include "BulkVarSet.hpp"
 
 #include <vector>
 
@@ -34,6 +34,8 @@ class OCPMixtureKMethod
 {
 public:
     OCPMixtureKMethod() = default;
+    /// Set variable set
+    virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     /// With P, Ni, perform flash calculations, and calculate VfP,Vfi only
@@ -68,6 +70,7 @@ class OCPMixtureKOWMethod01 : public OCPMixtureKMethod
 {
 public:
     OCPMixtureKOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -103,9 +106,10 @@ class OCPMixtureKOWMethod01T : public OCPMixtureKMethod
 {
 public:
     OCPMixtureKOWMethod01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
-    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void FlashDer(OCPMixtureVarSet& vs) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
@@ -164,6 +168,7 @@ class OCPMixtureKOGWMethod01 : public OCPMixtureKMethod
 {
 public:
     OCPMixtureKOGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -214,6 +219,7 @@ class OCPMixtureKGWMethod01 : public OCPMixtureKMethod
 {
 public:
     OCPMixtureKGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;

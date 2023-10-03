@@ -366,8 +366,7 @@ void T_FIM::InitFlash(Bulk& bk)
         if (bvs.cType[n] == BulkContent::rf) {
             auto PVT = bk.PVTm.GetPVT(n);
 
-            PVT->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * np],
-                                            bvs.rockVp[n],&bvs.Ni[n * nc], n);
+            PVT->InitFlashFIM(n, bvs);
             for (USI i = 0; i < nc; i++) {
                 bvs.Ni[n * nc + i] = PVT->GetNi(i);
             }
@@ -385,8 +384,7 @@ void T_FIM::CalFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bvs.cType[n] == BulkContent::rf) {
-            bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], &bvs.S[n * np], 
-                                        bvs.phaseNum[n], &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
             PassFlashValue(bk, n);
         }
     }

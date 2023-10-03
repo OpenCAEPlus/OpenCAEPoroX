@@ -664,10 +664,6 @@ OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, c
     }
     wIdP = vs.np - 1;
     wIdC = vs.nc - 1;
-
-    // setup constant value
-    vs.phaseExist[wIdP]       = OCP_TRUE;
-    vs.x[wIdP * vs.nc + wIdC] = 1.0;
 }
 
 
@@ -675,8 +671,17 @@ void OCPMixtureCompMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 {
     mvs.P = bvs.P[bId];
     mvs.T = bvs.T[bId] + CONV5;
-    copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np + bvs.np], mvs.S.begin());
-    copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc + bvs.nc], mvs.Ni.begin());
+    copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+    copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+    copy(&bvs.phaseExist[bId * bvs.np], &bvs.phaseExist[bId * bvs.np] + bvs.np, mvs.phaseExist.begin());
+    copy(&bvs.xij[bId * bvs.np * bvs.nc], &bvs.xij[bId * bvs.np * bvs.nc] + bvs.np * bvs.nc, mvs.x.begin());
+       
+    mvs.phaseNum = 0;
+    for (OCP_USI j = 0; j < mvs.np; j++) {
+        if (mvs.phaseExist[j]) {
+            mvs.phaseNum++;
+        }
+    }
 }
 
 
@@ -703,10 +708,10 @@ void OCPMixtureCompMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin)
+void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs, const USI& ftype)
 {
     InitNtZ(vs);
-    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, lNP - 1, lxin, vs.nc);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, vs.phaseNum - 1, &vs.x[0], vs.nc);
     CalProperty(vs);
     CalPropertyW(-1.0, vs);
     vs.CalVfS();
@@ -728,10 +733,10 @@ void OCPMixtureCompMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& v
 }
 
 
-void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin)
+void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype)
 {
     InitNtZ(vs);
-    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, lNP - 1, lxin, vs.nc);
+    PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, vs.phaseNum - 1, &vs.x[0], vs.nc);
     CalPropertyDer(vs);
     CalPropertyW(-1.0, vs);
     vs.CalVfS();
@@ -830,6 +835,9 @@ void OCPMixtureCompMethod01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
 
 void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs)
 {
+    // water property
+    vs.phaseExist[wIdP]       = OCP_TRUE;
+    vs.x[wIdP * vs.nc + wIdC] = 1.0;
     // if vw >= 0(water volume is given), then correct Nw
     PVTW.CalRhoXiMuDer(vs.P, vs.rho[wIdP], vs.xi[wIdP], vs.mu[wIdP], vs.rhoP[wIdP], vs.xiP[wIdP], vs.muP[wIdP]);
     if (vw >= 0) {

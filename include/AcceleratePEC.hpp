@@ -55,7 +55,7 @@ public:
     /// Calculate the ftype without predicted saturations
     virtual USI CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) = 0;
     /// Calculate the ftype with predicted saturations
-    virtual USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) = 0;
+    virtual USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) = 0;
     /// Calculate skip info for next step
     virtual void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) = 0;
 
@@ -74,7 +74,7 @@ public:
     /// Calculate the ftype without predicted saturations
     USI CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
     /// Calculate the ftype with predicted saturations
-    USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) override;
+    USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
     /// Calculate indicator for next step
     void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
 
@@ -115,9 +115,9 @@ public:
         else        return 0;
     }
     /// Calculate the ftype with predicted saturations
-    USI CalFtype02(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs, const USI& np)
+    USI CalFtype02(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs)
     {
-        if (ifUse)  return sm[mIndex]->CalFtype02(bId, vs, mvs, np);
+        if (ifUse)  return sm[mIndex]->CalFtype02(bId, vs, mvs);
         else        return 0;
     }
     void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs)

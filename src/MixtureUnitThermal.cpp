@@ -25,47 +25,24 @@ void MixtureUnitThermal_OW::Flash(const OCP_DBL& Pin,
     OWTM.Flash(Pin, Tin, Niin);
 }
 
-void MixtureUnitThermal_OW::InitFlashIMPEC(const OCP_DBL& Pin,
-                                        const OCP_DBL& Pbbin,
-                                        const OCP_DBL& Tin,
-                                        const OCP_DBL* Sjin,
-                                        const OCP_DBL& Vpore,
-                                        const OCP_DBL* Ziin,
-                                        const OCP_USI& bId)
+void MixtureUnitThermal_OW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.InitFlash(Pin, Tin, Sjin[1], Vpore); 
+    OWTM.InitFlash(bId, bvs);
 }
 
-void MixtureUnitThermal_OW::InitFlashFIM(const OCP_DBL& Pin,
-                                      const OCP_DBL& Pbbin,
-                                      const OCP_DBL& Tin,
-                                      const OCP_DBL* Sjin,
-                                      const OCP_DBL& Vpore,
-                                      const OCP_DBL* Ziin,
-                                      const OCP_USI& bId)
+void MixtureUnitThermal_OW::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.InitFlashDer(Pin, Tin, Sjin[1], Vpore);
+    OWTM.InitFlashDer(bId, bvs);
 }
 
-void MixtureUnitThermal_OW::FlashIMPEC(const OCP_DBL& Pin,
-                                    const OCP_DBL& Tin,
-                                    const OCP_DBL* Niin,
-                                    const USI&     lastNP,
-                                    const OCP_DBL* xijin,
-                                    const OCP_USI& bId)
+void MixtureUnitThermal_OW::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.Flash(Pin, Tin, Niin);
+    OWTM.Flash(bId, bvs);
 }
 
-void MixtureUnitThermal_OW::FlashFIM(const OCP_DBL& Pin,
-                                  const OCP_DBL& Tin,
-                                  const OCP_DBL* Niin,
-                                  const OCP_DBL* Sjin,
-                                  const USI&     lastNP,
-                                  const OCP_DBL* xijin,
-                                  const OCP_USI& bId)
+void MixtureUnitThermal_OW::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.FlashDer(Pin, Tin, Niin);
+    OWTM.FlashDer(bId, bvs);
 }
 
 

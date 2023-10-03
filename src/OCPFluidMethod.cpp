@@ -256,8 +256,7 @@ void IsoT_IMPEC::InitFlash(Bulk& bk) const
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
         auto PVT = bk.PVTm.GetPVT(n);
-        PVT->InitFlashIMPEC(bvs.P[n], bvs.Pb[n], bvs.T[n], &bvs.S[n * bvs.np],
-                                      bvs.rockVp[n], bvs.Ni.data() + n * bvs.nc, n);
+        PVT->InitFlashIMPEC(n, bvs);
         
         for (USI i = 0; i < bvs.nc; i++) {
             bvs.Ni[n * bvs.nc + i] = PVT->GetNi(i);
@@ -272,8 +271,7 @@ void IsoT_IMPEC::CalFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc],
-                                  bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
+        bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
         PassFlashValue(bk, n);
     }
 }
@@ -945,9 +943,7 @@ void IsoT_FIM::InitFlash(Bulk& bk)
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         auto PVT = bk.PVTm.GetPVT(n);
 
-        PVT->InitFlashFIM(bvs.P[n], bvs.Pb[n], bvs.T[n],
-                                                &bvs.S[n * bvs.np], bvs.rockVp[n],
-                                                bvs.Ni.data() + n * bvs.nc, n);
+        PVT->InitFlashFIM(n, bvs);
         for (USI i = 0; i < bvs.nc; i++) {
             bvs.Ni[n * bvs.nc + i] = PVT->GetNi(i);
         }
@@ -961,8 +957,7 @@ void IsoT_FIM::CalFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * bvs.nc], &bvs.S[n * bvs.np], 
-                                    bvs.phaseNum[n], &bvs.xij[n * bvs.np * bvs.nc], n);
+        bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
         PassFlashValue(bk, n);
     }
 }
@@ -1834,8 +1829,7 @@ void IsoT_AIMc::CalFlashEp(Bulk& bk)
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], bvs.phaseNum[n],
-                                          &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
             // bvs.PassFlashValueAIMcEp(n);
             PassFlashValueEp(bk, n);
         }
@@ -1853,8 +1847,7 @@ void IsoT_AIMc::CalFlashEa(Bulk& bk)
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
             // Explicit bulk
 
-            bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], bvs.phaseNum[n], 
-                                          &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
             // bvs.PassFlashValueAIMcEa(n);
 
             IsoT_IMPEC::PassFlashValue(bk, n);
@@ -1873,8 +1866,7 @@ void IsoT_AIMc::CalFlashI(Bulk& bk)
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
             // Implicit bulk
 
-            bk.PVTm.GetPVT(n)->FlashFIM(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], &bvs.S[n * np], 
-                                        bvs.phaseNum[n], &bvs.xij[n * np * nc], n);
+            bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
             IsoT_FIM::PassFlashValue(bk, n);
             for (USI j = 0; j < np; j++) {
                 bvs.vj[n * np + j] = bvs.vf[n] * bvs.S[n * np + j];

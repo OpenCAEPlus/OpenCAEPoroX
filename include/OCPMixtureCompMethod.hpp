@@ -44,11 +44,11 @@ public:
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     /// With P, Ni, perform flash calculations, and calculate VfP,Vfi only
-    virtual void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
+    virtual void Flash(OCPMixtureVarSet& vs, const USI& ftype) = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi,dXsdXp
     virtual void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     /// With P, Ni, perform flash calculations, and calculate VfP,Vfi,dXsdXp
-    virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lxin) = 0;
+    virtual void FlashDer(OCPMixtureVarSet& vs, const USI& ftype) = 0;
     /// Calculate molar density of target phase
     virtual OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Flash in standard conditions
@@ -235,9 +235,9 @@ public:
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
-    void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
+    void Flash(OCPMixtureVarSet& vs, const USI& ftype) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
-    void FlashDer(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
+    void FlashDer(OCPMixtureVarSet& vs, const USI& ftype) override;
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     void CalVStd(OCPMixtureVarSet& vs) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;

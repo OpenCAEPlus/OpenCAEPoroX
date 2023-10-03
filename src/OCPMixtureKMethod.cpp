@@ -56,6 +56,15 @@ OCPMixtureKOWMethod01::OCPMixtureKOWMethod01(const ParamReservoir& rs_param, con
 }
 
 
+void OCPMixtureKOWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = bvs.P[bId];
+	mvs.T = bvs.T[bId] + CONV5;
+	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+}
+
+
 void OCPMixtureKOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
@@ -210,6 +219,16 @@ OCPMixtureKOWMethod01T::OCPMixtureKOWMethod01T(const ComponentParam& param, cons
 	fill(vs.muP.begin(), vs.muP.end(), 0.0);
 	fill(vs.mux.begin(), vs.mux.end(), 0.0);
 }
+
+
+void OCPMixtureKOWMethod01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = bvs.P[bId];
+	mvs.T = bvs.T[bId] + CONV5;
+	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+}
+
 
 
 OCP_DBL OCPMixtureKOWMethod01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
@@ -409,6 +428,16 @@ OCPMixtureKOGWMethod01::OCPMixtureKOGWMethod01(const ParamReservoir& rs_param, c
 	vs.x[2 * 3 + 0] = 0;
 	vs.x[2 * 3 + 1] = 0;
 	vs.x[2 * 3 + 2] = 1;
+}
+
+
+void OCPMixtureKOGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+{
+	mvs.Pb = bvs.Pb[bId];
+	mvs.P  = bvs.P[bId];
+	mvs.T  = bvs.T[bId] + CONV5;
+	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }
 
 
@@ -755,6 +784,15 @@ OCPMixtureKGWMethod01::OCPMixtureKGWMethod01(const ParamReservoir& rs_param, con
 	PVTH2O.Setup(rs_param.PVTH2O.data[i]);
 
 	garciaw.Setup(rs_param.GARCIAW);
+}
+
+
+void OCPMixtureKGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = bvs.P[bId];
+	mvs.T = bvs.T[bId] + CONV5;
+	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }
 
 

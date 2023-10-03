@@ -32,53 +32,30 @@ void MixtureUnitComp::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DB
 }
 
 
-void MixtureUnitComp::InitFlashIMPEC(const OCP_DBL& Pin,
-                                 const OCP_DBL& Pbbin,
-                                 const OCP_DBL& Tin,
-                                 const OCP_DBL* Sjin,
-                                 const OCP_DBL& Vpore,
-                                 const OCP_DBL* Ziin,
-                                 const OCP_USI& bId)
+void MixtureUnitComp::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    compM->InitFlash(Pin, Tin, Sjin, Ziin, Vpore, bId);
+    compM->InitFlash(bId, bvs);
     surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
-void MixtureUnitComp::InitFlashFIM(const OCP_DBL& Pin,
-                               const OCP_DBL& Pbbin,
-                               const OCP_DBL& Tin,
-                               const OCP_DBL* Sjin,
-                               const OCP_DBL& Vpore,
-                               const OCP_DBL* Ziin,
-                               const OCP_USI& bId)
+void MixtureUnitComp::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    compM->InitFlashDer(Pin, Tin, Sjin, Ziin, Vpore, bId);
+    compM->InitFlashDer(bId, bvs);
     surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
-void MixtureUnitComp::FlashIMPEC(const OCP_DBL& Pin,
-                             const OCP_DBL& Tin,
-                             const OCP_DBL* Niin,
-                             const USI&     lastNP,
-                             const OCP_DBL* xijin,
-                             const OCP_USI& bId)
+void MixtureUnitComp::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    compM->Flash(Pin, Tin, Niin, lastNP, xijin, bId);
+    compM->Flash(bId, bvs);
     surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
 
-void MixtureUnitComp::FlashFIM(const OCP_DBL& Pin,
-                           const OCP_DBL& Tin,
-                           const OCP_DBL* Niin,
-                           const OCP_DBL* Sjin,
-                           const USI&     lastNP,
-                           const OCP_DBL* xijin,
-                           const OCP_USI& bId)
+void MixtureUnitComp::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    compM->FlashDer(Pin, Tin, Niin, Sjin, lastNP, xijin, bId);
+    compM->FlashDer(bId, bvs);
     surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
     misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }

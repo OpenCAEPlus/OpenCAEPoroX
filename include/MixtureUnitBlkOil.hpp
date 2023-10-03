@@ -50,42 +50,19 @@ public:
     {
         OCP_ABORT("Not Completed!");
     }
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-                        const OCP_DBL& Pbbin,
-                        const OCP_DBL& Tin,
-                        const OCP_DBL* Sjin,
-                        const OCP_DBL& Vpore,
-                        const OCP_DBL* Ziin,
-                        const OCP_USI& bId) override
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override
     {
         OCP_ABORT("Not Completed!");
     };
-    void InitFlashFIM(const OCP_DBL& Pin,
-                      const OCP_DBL& Pbbin,
-                      const OCP_DBL& Tin,
-                      const OCP_DBL* Sjin,
-                      const OCP_DBL& Vpore,
-                      const OCP_DBL* Ziin,
-                      const OCP_USI& bId) override
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override
     {
         OCP_ABORT("Not Completed!");
     };
-    void FlashIMPEC(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const USI&     lastNP,
-                    const OCP_DBL* xijin,
-                    const OCP_USI& bId) override
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override
     {
         OCP_ABORT("Not Completed!");
     };
-    void FlashFIM(const OCP_DBL& Pin,
-                  const OCP_DBL& Tin,
-                  const OCP_DBL* Niin,
-                  const OCP_DBL* Sjin,
-                  const USI&     lastNP,
-                  const OCP_DBL* xijin,
-                  const OCP_USI& bId) override
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override
     {
         OCP_ABORT("Not Completed!");
     };
@@ -119,33 +96,10 @@ public:
     MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &OWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-                        const OCP_DBL& Pbbin,
-                        const OCP_DBL& Tin,
-                        const OCP_DBL* Sjin,
-                        const OCP_DBL& Vpore,
-                        const OCP_DBL* Ziin,
-                        const OCP_USI& bId) override;
-    void InitFlashFIM(const OCP_DBL& Pin,
-                      const OCP_DBL& Pbbin,
-                      const OCP_DBL& Tin,
-                      const OCP_DBL* Sjin,
-                      const OCP_DBL& Vpore,
-                      const OCP_DBL* Ziin,
-                      const OCP_USI& bId) override;
-    void FlashIMPEC(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const USI&     lastNP,
-                    const OCP_DBL* xijin,
-                    const OCP_USI& bId) override;
-    void FlashFIM(const OCP_DBL& Pin,
-                  const OCP_DBL& Tin,
-                  const OCP_DBL* Niin,
-                  const OCP_DBL* Sjin,
-                  const USI&     lastNP,
-                  const OCP_DBL* xijin,
-                  const OCP_USI& bId) override;
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const vector<OCP_DBL>& Ziin,
@@ -172,33 +126,10 @@ public:
     MixtureUnitBlkOil_GW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &GWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-        const OCP_DBL& Pbbin,
-        const OCP_DBL& Tin,
-        const OCP_DBL* Sjin,
-        const OCP_DBL& Vpore,
-        const OCP_DBL* Ziin,
-        const OCP_USI& bId) override;
-    void InitFlashFIM(const OCP_DBL& Pin,
-        const OCP_DBL& Pbbin,
-        const OCP_DBL& Tin,
-        const OCP_DBL* Sjin,
-        const OCP_DBL& Vpore,
-        const OCP_DBL* Ziin,
-        const OCP_USI& bId) override;
-    void FlashIMPEC(const OCP_DBL& Pin,
-        const OCP_DBL& Tin,
-        const OCP_DBL* Niin,
-        const USI& lastNP,
-        const OCP_DBL* xijin,
-        const OCP_USI& bId) override;
-    void FlashFIM(const OCP_DBL& Pin,
-        const OCP_DBL& Tin,
-        const OCP_DBL* Niin,
-        const OCP_DBL* Sjin,
-        const USI& lastNP,
-        const OCP_DBL* xijin,
-        const OCP_USI& bId) override;
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
     OCP_DBL XiPhase(const OCP_DBL& Pin,
         const OCP_DBL& Tin,
         const vector<OCP_DBL>& Ziin,
@@ -226,33 +157,10 @@ public:
     MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     OCPMixture* GetMixture() override { return &OGWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-                        const OCP_DBL& Pbbin,
-                        const OCP_DBL& Tin,
-                        const OCP_DBL* Sjin,
-                        const OCP_DBL& Vpore,
-                        const OCP_DBL* Ziin,
-                        const OCP_USI& bId) override;
-    void InitFlashFIM(const OCP_DBL& Pin,
-                      const OCP_DBL& Pbbin,
-                      const OCP_DBL& Tin,
-                      const OCP_DBL* Sjin,
-                      const OCP_DBL& Vpore,
-                      const OCP_DBL* Ziin,
-                      const OCP_USI& bId) override;
-    void FlashIMPEC(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const USI&     lastNP,
-                    const OCP_DBL* xijin,
-                    const OCP_USI& bId) override;
-    void FlashFIM(const OCP_DBL& Pin,
-                  const OCP_DBL& Tin,
-                  const OCP_DBL* Niin,
-                  const OCP_DBL* Sjin,
-                  const USI&     lastNP,
-                  const OCP_DBL* xijin,
-                  const OCP_USI& bId) override;
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
     OCP_DBL XiPhase(const OCP_DBL& Pin,
                     const OCP_DBL& Tin,
                     const vector<OCP_DBL>& Ziin,

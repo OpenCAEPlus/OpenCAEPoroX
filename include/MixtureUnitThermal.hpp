@@ -35,35 +35,12 @@ public:
     OCPMixture* GetMixture() override { return &OWTM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     /// flash calculation with saturation of phases.
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-                        const OCP_DBL& Pbbin,
-                        const OCP_DBL& Tin,
-                        const OCP_DBL* Sjin,
-                        const OCP_DBL& Vpore,
-                        const OCP_DBL* Ziin,
-                        const OCP_USI& bId) override;
-    void InitFlashFIM(const OCP_DBL& Pin,
-                      const OCP_DBL& Pbbin,
-                      const OCP_DBL& Tin,
-                      const OCP_DBL* Sjin,
-                      const OCP_DBL& Vpore,
-                      const OCP_DBL* Ziin,
-                      const OCP_USI& bId) override;
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
     /// Flash calculation with moles of components.
-    void FlashIMPEC(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const USI&     lastNP,
-                    const OCP_DBL* xijin,
-                    const OCP_USI& bId) override;
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
     /// Flash calculation with moles of components and Calculate the derivative
-    void FlashFIM(const OCP_DBL& Pin,
-                  const OCP_DBL& Tin,
-                  const OCP_DBL* Niin,
-                  const OCP_DBL* Sjin,
-                  const USI&     lastNP,
-                  const OCP_DBL* xijin,
-                  const OCP_USI& bId) override;
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
     /// Return molar density of phase, it's used to calculate the molar density of
     /// injection fluids in injection wells.
     OCP_DBL XiPhase(const OCP_DBL& Pin,

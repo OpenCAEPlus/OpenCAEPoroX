@@ -27,47 +27,24 @@ void MixtureUnitBlkOil_OW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const O
     OWM.Flash(Pin, Niin);
 }
 
-void MixtureUnitBlkOil_OW::InitFlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWM.InitFlash(Pin, Sjin[1], Vpore);
+    OWM.InitFlash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OW::InitFlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OW::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWM.InitFlashDer(Pin, Sjin[1], Vpore);
+    OWM.InitFlashDer(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OW::FlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OW::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWM.Flash(Pin, Niin);
+    OWM.Flash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OW::FlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const OCP_DBL* Sjin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OW::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWM.FlashDer(Pin, Niin);
+    OWM.FlashDer(bId, bvs);
 }
 
 OCP_DBL MixtureUnitBlkOil_OW::XiPhase(const OCP_DBL& Pin,
@@ -105,47 +82,24 @@ void MixtureUnitBlkOil_GW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const O
     GWM.Flash(Pin, Tin, Niin);
 }
 
-void MixtureUnitBlkOil_GW::InitFlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_GW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    GWM.InitFlash(Pin, Tin, Sjin[1], Vpore);
+    GWM.InitFlash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_GW::InitFlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_GW::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    GWM.InitFlashDer(Pin, Tin, Sjin[1], Vpore);
+    GWM.InitFlashDer(bId, bvs);
 }
 
-void MixtureUnitBlkOil_GW::FlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_GW::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    GWM.Flash(Pin, Tin, Niin);
+    GWM.Flash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_GW::FlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const OCP_DBL* Sjin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_GW::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    GWM.FlashDer(Pin, Tin, Niin);
+    GWM.FlashDer(bId, bvs);
 }
 
 OCP_DBL MixtureUnitBlkOil_GW::XiPhase(const OCP_DBL& Pin,
@@ -185,47 +139,24 @@ void MixtureUnitBlkOil_OGW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const 
 }
 
 
-void MixtureUnitBlkOil_OGW::InitFlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OGW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OGWM.InitFlash(Pin, Pbbin, Sjin[1], Sjin[2], Vpore);
+    OGWM.InitFlash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OGW::InitFlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Pbbin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Sjin,
-    const OCP_DBL& Vpore,
-    const OCP_DBL* Ziin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OGW::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OGWM.InitFlashDer(Pin, Pbbin, Sjin[1], Sjin[2], Vpore);
+    OGWM.InitFlashDer(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OGW::FlashIMPEC(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OGW::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OGWM.Flash(Pin, Niin);
+    OGWM.Flash(bId, bvs);
 }
 
-void MixtureUnitBlkOil_OGW::FlashFIM(const OCP_DBL& Pin,
-    const OCP_DBL& Tin,
-    const OCP_DBL* Niin,
-    const OCP_DBL* Sjin,
-    const USI& lastNP,
-    const OCP_DBL* xijin,
-    const OCP_USI& bId)
+void MixtureUnitBlkOil_OGW::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OGWM.FlashDer(Pin, Niin);
+    OGWM.FlashDer(bId, bvs);
 }
 
 OCP_DBL

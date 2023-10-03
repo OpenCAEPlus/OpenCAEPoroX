@@ -38,39 +38,16 @@ public:
     OCPMixture* GetMixture() override { return compM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
 
-    void InitFlashIMPEC(const OCP_DBL& Pin,
-                        const OCP_DBL& Pbbin,
-                        const OCP_DBL& Tin,
-                        const OCP_DBL* Sjin,
-                        const OCP_DBL& Vpore,
-                        const OCP_DBL* Ziin,
-                        const OCP_USI& bId) override;
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
 
-    void InitFlashFIM(const OCP_DBL& Pin,
-                      const OCP_DBL& Pbbin,
-                      const OCP_DBL& Tin,
-                      const OCP_DBL* Sjin,
-                      const OCP_DBL& Vpore,
-                      const OCP_DBL* Ziin,
-                      const OCP_USI& bId) override;
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
 
     // ftype = 0, flash from single phase
     // ftype = 1, skip phase stability analysis and num of phase = 1
     // ftype = 1, skip phase stability analysis and num of phase = 2
-    void FlashIMPEC(const OCP_DBL& Pin,
-                    const OCP_DBL& Tin,
-                    const OCP_DBL* Niin,
-                    const USI&     lastNP,
-                    const OCP_DBL* xijin,
-                    const OCP_USI& bId) override;
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
 
-    void FlashFIM(const OCP_DBL& Pin,
-                  const OCP_DBL& Tin,
-                  const OCP_DBL* Niin,
-                  const OCP_DBL* Sjin,
-                  const USI&     lastNP,
-                  const OCP_DBL* xijin,
-                  const OCP_USI& bId) override;
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
 
 
     OCP_DBL

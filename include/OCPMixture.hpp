@@ -57,26 +57,26 @@ public:
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
-        SetPTSN(P, T, S, Ni);
-        pmMethod->InitFlash(Vp, vs);
+    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlash(bvs.rockVp[bId], vs);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {    
-        SetPTN(P, T, Ni);
+    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
         const USI ftype = skipPSA->CalFtype01(bId, skipMethodIndex, vs);
-        pmMethod->Flash(vs, ftype, lNP, lx);
+        pmMethod->Flash(vs, ftype);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
-        SetPTSN(P, T, S, Ni);
-        pmMethod->InitFlashDer(Vp, vs);
+    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* S, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {      
-        SetPTSN(P, T, S, Ni);
-        const USI ftype = skipPSA->CalFtype02(bId, skipMethodIndex, vs, lNP);
-        pmMethod->FlashDer(vs, ftype, lNP, lx);
+    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        const USI ftype = skipPSA->CalFtype02(bId, skipMethodIndex, vs);
+        pmMethod->FlashDer(vs, ftype);
         skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
@@ -96,12 +96,6 @@ public:
     OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 
 protected:
-    void SetPTSN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni) {
-        vs.P = P;
-        vs.T = T + CONV5;
-        copy(S, S + vs.np, vs.S.begin());
-        copy(Ni, Ni + vs.nc, vs.Ni.begin());
-    }
     void SetPTN(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         vs.P = P;
         vs.T = T + CONV5;
@@ -181,20 +175,24 @@ class OCPMixtureBlkOilOGW : public OCPMixture
 {
 public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Pb, Sg, Sw);
-        pmMethod->InitFlash(Vp, vs);
-    }
     void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
         SetPN(P, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Pb, Sg, Sw);
-        pmMethod->InitFlashDer(Vp, vs);
+    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlash(bvs.rockVp[bId], vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
-        SetPN(P, Ni);
+    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
+    }
+    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const PhaseType& pt) {
@@ -219,13 +217,6 @@ protected:
         vs.Ni[1] = Ni[1];
         vs.Ni[2] = Ni[2];
     }
-    void SetPS(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& Sg, const OCP_DBL& Sw) {
-        vs.P    = P;
-        vs.Pb   = Pb;
-        vs.S[0] = 1 - Sg - Sw;
-        vs.S[1] = Sg;
-        vs.S[2] = Sw;
-    }
 
 protected:
     OCPMixtureKMethod* pmMethod;
@@ -240,20 +231,24 @@ class OCPMixtureBlkOilOW : public OCPMixture
 {
 public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Sw);
-        pmMethod->InitFlash(Vp, vs);
-    }
     void Flash(const OCP_DBL& P, const OCP_DBL* Ni) {
         SetPN(P, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, Sw);
-        pmMethod->InitFlashDer(Vp, vs);
+    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlash(bvs.rockVp[bId], vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL* Ni) {
-        SetPN(P, Ni);
+    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
+    }
+    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const PhaseType& pt) {
@@ -277,11 +272,6 @@ protected:
         vs.Ni[0] = Ni[0];
         vs.Ni[1] = Ni[1];
     }
-    void SetPS(const OCP_DBL& P, const OCP_DBL& Sw) {
-        vs.P = P;
-        vs.S[0] = 1 - Sw;
-        vs.S[1] = Sw;
-    }
 
 protected:
     OCPMixtureKMethod* pmMethod;
@@ -296,20 +286,24 @@ class OCPMixtureBlkOilGW : public OCPMixture
 {
 public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, T, Sw);
-        pmMethod->InitFlash(Vp, vs);
-    }
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPS(P, T, Sw);
-        pmMethod->InitFlashDer(Vp, vs);
+    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlash(bvs.rockVp[bId], vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
-        SetPN(P, T, Ni);
+    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->Flash(vs);
+    }
+    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
+    }
+    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
@@ -334,12 +328,6 @@ protected:
         vs.Ni[0] = Ni[0];
         vs.Ni[1] = Ni[1];
     }
-    void SetPS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
-        vs.P = P;
-        vs.T = T;
-        vs.S[0] = 1 - Sw;
-        vs.S[1] = Sw;
-    }
 
 protected:
     OCPMixtureKMethod* pmMethod;
@@ -354,20 +342,24 @@ class OCPMixtureUnitThermalOW : public OCPMixture
 {
 public:
     void Setup(const ParamReservoir& rs_param, const USI& i);
-    void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPTS(P, T, Sw);
-        pmMethod->InitFlash(Vp, vs);
-    }
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
         SetPTN(P, T, Ni);
         pmMethod->Flash(vs);
     }
-    void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw, const OCP_DBL& Vp) {
-        SetPTS(P, T, Sw);
-        pmMethod->InitFlashDer(Vp, vs);
+    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->Flash(vs);
     }
-    void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) {
-        SetPTN(P, T, Ni);
+    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlash(bvs.rockVp[bId], vs);
+    }
+    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
+        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
+    }
+    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) {
+        pmMethod->SetVarSet(bId, bvs, vs);
         pmMethod->FlashDer(vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const PhaseType& pt) {
@@ -392,12 +384,6 @@ protected:
         vs.T = T + CONV5;
         vs.Ni[0] = Ni[0];
         vs.Ni[1] = Ni[1];
-    }
-    void SetPTS(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL& Sw) {
-        vs.P = P;
-        vs.T = T + CONV5;
-        vs.S[0] = 1 - Sw;
-        vs.S[1] = Sw;
     }
 
 protected:

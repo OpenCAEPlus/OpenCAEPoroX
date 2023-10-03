@@ -643,13 +643,13 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 
 		DepthP.Eval_All(0, bvs.depth[n], data, cdata);
 		const auto SAT = SATm.GetSAT(n);
-		auto Po = data[1];
-		auto Pg = data[2];
-		auto Pw = data[3];
-		auto Pcgo = Pg - Po;
-		auto Pcow = Po - Pw;
-		auto Sw = SAT->CalSwByPcow(Pcow);
-		auto Sg = 0;
+		OCP_DBL Po = data[1];
+		OCP_DBL Pg = data[2];
+		OCP_DBL Pw = data[3];
+		OCP_DBL Pcgo = Pg - Po;
+		OCP_DBL Pcow = Po - Pw;
+		OCP_DBL Sw = SAT->CalSwByPcow(Pcow);
+		OCP_DBL Sg = 0;
 		if (bvs.g >= 0) {
 			Sg = SAT->CalSgByPcgo(Pcgo);
 		}
@@ -686,7 +686,13 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		const OCP_DBL swco = SAT->GetSwco();
 		if (fabs(SAT->CalPcowBySw(0.0 - TINY)) < TINY &&
 			fabs(SAT->CalPcowBySw(1.0 + TINY) < TINY)) {
-			bvs.S[n * bvs.np + bvs.np - 1] = swco;
+			bvs.S[n * bvs.np + bvs.w] = swco;
+			if (bvs.g >= 0) {
+				bvs.S[n * bvs.np + bvs.g] = Sg;
+			}
+			if (bvs.o >= 0) {
+				bvs.S[n * bvs.np + bvs.o] = 1 - Sg - swco;
+			}
 			continue;
 		}
 
@@ -717,14 +723,20 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 				tmpSg = 1 - tmpSw;
 			}
 			Sw += tmpSw;
-			// Sg += tmpSg;
+			Sg += tmpSg;
 		}
 		Sw /= ncut;
-		// Sg /= ncut;
+		Sg /= ncut;
 		avePcow /= ncut;
 
 		SAT->SetupScale(n, Sw, avePcow);
-		bvs.S[n * bvs.np + bvs.np - 1] = Sw;
+		bvs.S[n * bvs.np + bvs.w] = Sw;
+		if (bvs.g >= 0) {
+			bvs.S[n * bvs.np + bvs.g] = Sg;
+		}
+		if (bvs.o >= 0) {
+			bvs.S[n * bvs.np + bvs.o] = 1 - Sg - Sw;
+		}
 	}
 }
 

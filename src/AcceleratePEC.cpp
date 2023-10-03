@@ -100,9 +100,9 @@ USI SkipPSAMethod01::CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, co
 }
 
 
-USI SkipPSAMethod01::CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np)
+USI SkipPSAMethod01::CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs)
 {
-    const USI& npPE = compM->GetNumPhasePE(np);
+    const USI& npPE = compM->GetNumPhasePE(mvs.phaseNum);
 	if (IfSkip(bId, svs, mvs)) {
 		return 1;
 	}
