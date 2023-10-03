@@ -822,7 +822,7 @@ void T_FIM::AssembleMatWells(LinearSystem&    ls,
 }
 
 
-void T_FIM::GetSolution(Reservoir&             rs,
+void T_FIM::GetSolution(Reservoir&       rs,
                         vector<OCP_DBL>& u,
                         const ControlNR& ctrlNR)
 {

@@ -57,7 +57,7 @@ public:
     /// Calculate the ftype with predicted saturations
     virtual USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) = 0;
     /// Calculate skip info for next step
-    virtual void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs) = 0;
+    virtual void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) = 0;
 
 };
 
@@ -76,7 +76,7 @@ public:
     /// Calculate the ftype with predicted saturations
     USI CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs, const USI& np) override;
     /// Calculate indicator for next step
-    void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs) override;
+    void CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
 
 protected:
     OCP_BOOL IfSkip(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) const;
@@ -120,10 +120,10 @@ public:
         if (ifUse)  return sm[mIndex]->CalFtype02(bId, vs, mvs, np);
         else        return 0;
     }
-    void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex)
+    void CalSkipForNextStep(const OCP_USI& bId, const USI& mIndex, const OCPMixtureVarSet& mvs)
     {
         if (ifUse) 
-            sm[mIndex]->CalSkipForNextStep(bId, vs);
+            sm[mIndex]->CalSkipForNextStep(bId, vs, mvs);
     }
     /// Reset SkipPSA vars to last time step
     void ResetToLastTimeStep() { if(ifUse) vs.ResetToLastTimeStep(); }

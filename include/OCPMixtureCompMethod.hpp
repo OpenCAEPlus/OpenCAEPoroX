@@ -17,7 +17,7 @@
 #include "OCPFuncPVT.hpp"
 #include "OCPMixtureVarSet.hpp"
 #include "OCPPhaseEquilibrium.hpp"
-
+#include "BulkVarSet.hpp"
 
 #include <vector>
 
@@ -37,6 +37,8 @@ class OCPMixtureCompMethod
 {
 public:
     OCPMixtureCompMethod() = default;
+    /// Set variable set
+    virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
     /// With P, Ni, perform flash calculations only
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
@@ -69,10 +71,6 @@ public:
     const auto GetEoS() const { return &eos; }
     /// Get Ftype
     const auto& GetFtype() const { return PE.GetFtype(); }
-    /// Get P
-    const auto& GetP() const { return P; }
-    /// Get T
-    const auto& GetT() const { return T; }
     /// Get zi
     const auto& GetZi() const { return zi; }
     /// Get Nt
@@ -97,10 +95,6 @@ protected:
     OCP_DBL         Nt;
     /// molar fraction of components
     vector<OCP_DBL> zi;
-    /// Pressure
-    OCP_DBL         P;
-    /// Tempeature 
-    OCP_DBL         T;
 
 
 ////////////////////////////////////////////////////////////////
@@ -238,6 +232,7 @@ class OCPMixtureCompMethod01 : public OCPMixtureCompMethod
 {
 public:
     OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs, const USI& ftype, const USI& lNP, const OCP_DBL* lx) override;
@@ -252,7 +247,7 @@ public:
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
 
 protected:
-    void InitPTNtZ(OCPMixtureVarSet& vs);
+    void InitNtZ(OCPMixtureVarSet& vs);
     void CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs);
 
 protected:

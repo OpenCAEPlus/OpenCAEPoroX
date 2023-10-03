@@ -124,7 +124,7 @@ USI SkipPSAMethod01::CalFtype02(const OCP_USI& bId, const SkipPSAVarset& svs, co
 }
 
 
-void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs)
+void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs, const OCPMixtureVarSet& mvs)
 {
     const USI& ftype    = compM->GetFtype();
     
@@ -132,8 +132,8 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs)
     if (ftype == 0) {
         // the range should be calculated, which also means last skip is unsatisfied
         const EoSCalculation*  eos = compM->GetEoS();
-        const OCP_DBL&         P   = compM->GetP();
-        const OCP_DBL&         T   = compM->GetT();
+        const OCP_DBL&         P   = mvs.P;
+        const OCP_DBL&         T   = mvs.T;
         const OCP_DBL&         Nt  = compM->GetNt();
         const vector<OCP_DBL>& zi  = compM->GetZi();
         const USI&             nc  = svs.nc;

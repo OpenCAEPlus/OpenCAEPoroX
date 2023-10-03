@@ -60,24 +60,24 @@ public:
     void InitFlash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
         SetPTSN(P, T, S, Ni);
         pmMethod->InitFlash(Vp, vs);
-        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {    
         SetPTN(P, T, Ni);
         const USI ftype = skipPSA->CalFtype01(bId, skipMethodIndex, vs);
         pmMethod->Flash(vs, ftype, lNP, lx);
-        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
     void InitFlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* S, const OCP_DBL* Ni, const OCP_DBL& Vp, const OCP_USI& bId) {
         SetPTSN(P, T, S, Ni);
         pmMethod->InitFlashDer(Vp, vs);
-        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
     void FlashDer(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, const OCP_DBL* S, const USI& lNP, const OCP_DBL* lx, const OCP_USI& bId) {      
         SetPTSN(P, T, S, Ni);
         const USI ftype = skipPSA->CalFtype02(bId, skipMethodIndex, vs, lNP);
         pmMethod->FlashDer(vs, ftype, lNP, lx);
-        skipPSA->CalSkipForNextStep(bId, skipMethodIndex);
+        skipPSA->CalSkipForNextStep(bId, skipMethodIndex, vs);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) {
         return pmMethod->CalXi(P, T + CONV5, z, pt);

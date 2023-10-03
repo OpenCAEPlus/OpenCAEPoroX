@@ -733,7 +733,6 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
      
 #ifdef DEBUG
     // Output A, b, x
-    
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
     //MPI_Barrier(rs.domain.myComm);
@@ -1318,20 +1317,12 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 				bvs.S[n * np + j] += chopmin * dtmp[j];
 			}
 
-			// dxij   ---- Compositional model only
-
-			if (bk.PVTm.GetMixtureType() == OCPMixtureType::COMP) {
-				USI js = np;
-				if (bvs.phaseNum[n] >= 3) {
-					// num of Hydroncarbon phase >= 2
-					OCP_USI bId = 0;
-					for (USI j = 0; j < 2; j++) {
-						bId = n * np * nc + j * nc;
-						for (USI i = 0; i < bvs.nc; i++) {
-							bvs.xij[bId + i] += chopmin * dtmp[js];
-							js++;
-						}
-					}
+			// dxij
+			USI js = np;
+			for (USI j = 0; j < np; j++) {
+				for (USI i = 0; i < bvs.nc; i++) {
+					bvs.xij[(n * np + j) * nc + i] += chopmin * dtmp[js];
+					js++;
 				}
 			}
 
@@ -1674,7 +1665,6 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
     BulkVarSet&   bvs = bk.vs;
     const OCP_USI nb  = bvs.nb;
     const USI     np  = bvs.np;
-    const USI     nc  = bvs.nc;
 
     bvs.vj.resize(nb * np);
     bvs.lvj.resize(nb * np);
@@ -2176,20 +2166,14 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
                 bvs.S[n * np + j] += chopmin * dtmp[j];
             }
 
-            // dxij   ---- Compositional model only
-            if (bk.PVTm.GetMixtureType() == OCPMixtureType::COMP) {
-                USI js = np;
-                if (bvs.phaseNum[n] >= 3) {
-                    OCP_USI bId = 0;
-                    for (USI j = 0; j < 2; j++) {
-                        bId = n * np * nc + j * nc;
-                        for (USI i = 0; i < bvs.nc; i++) {
-                            bvs.xij[bId + i] += chopmin * dtmp[js];
-                            js++;
-                        }
-                    }
-                }
-            }
+            // dxij
+			USI js = np;
+			for (USI j = 0; j < np; j++) {
+				for (USI i = 0; i < bvs.nc; i++) {
+					bvs.xij[(n * np + j) * nc + i] += chopmin * dtmp[js];
+					js++;
+				}
+			}
 
             // dP
             OCP_DBL dP = u[n * col];
