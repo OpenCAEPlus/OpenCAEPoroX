@@ -1,5 +1,5 @@
-/*! \file    OCPMixtureKMethod.hpp
- *  \brief   OCPMixtureKMethod class declaration
+/*! \file    OCPMixtureMethodK.hpp
+ *  \brief   OCPMixtureMethodK class declaration
  *  \author  Shizhe Li
  *  \date    Jul/31/2023
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPMIXTUREKMETHOD_HEADER__
-#define __OCPMIXTUREKMETHOD_HEADER__
+#ifndef __OCPMIXTUREMETHODK_HEADER__
+#define __OCPMIXTUREMETHODK_HEADER__
 
 #include "OCPConst.hpp"
 #include "ParamReservoir.hpp"
@@ -25,15 +25,15 @@ using namespace std;
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKMethod
+// OCPMixtureMethodK
 /////////////////////////////////////////////////////
 
 
-/// OCPMixtureKMethod is a bsaic class used in non-EoS model
-class OCPMixtureKMethod
+/// OCPMixtureMethodK is a bsaic class used in non-EoS model
+class OCPMixtureMethodK
 {
 public:
-    OCPMixtureKMethod() = default;
+    OCPMixtureMethodK() = default;
     /// Set variable set
     virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
@@ -60,16 +60,16 @@ public:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKOWMethod
+// OCPMixtureMethodK_OW01
 /////////////////////////////////////////////////////
 
 
 /// Use PVDO and PVTW
 // Note that Vo,std, Vw,std are assumed to be 1
-class OCPMixtureKOWMethod01 : public OCPMixtureKMethod
+class OCPMixtureMethodK_OW01 : public OCPMixtureMethodK
 {
 public:
-    OCPMixtureKOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    OCPMixtureMethodK_OW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
@@ -102,10 +102,10 @@ protected:
 
 
 /// Oil and Water are immiscible - thermal model
-class OCPMixtureKOWMethod01T : public OCPMixtureKMethod
+class OCPMixtureMethodK_OW01T : public OCPMixtureMethodK
 {
 public:
-    OCPMixtureKOWMethod01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
+    OCPMixtureMethodK_OW01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
@@ -158,16 +158,16 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKOGWMethod
+// OCPMixtureMethodK_OGW01
 /////////////////////////////////////////////////////
 
 
 /// Use PVDO and PVTW
 // Note that Vo,std, Vg,std, Vw,std are assumed to be 1
-class OCPMixtureKOGWMethod01 : public OCPMixtureKMethod
+class OCPMixtureMethodK_OGW01 : public OCPMixtureMethodK
 {
 public:
-    OCPMixtureKOGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    OCPMixtureMethodK_OGW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
@@ -209,16 +209,16 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKGWMethod
+// OCPMixtureMethodK_GW01
 /////////////////////////////////////////////////////
 
 
 /// Use PVTCO2 and PVTH2O
 /// Here, molar density(xi) is the mass density(rho)
-class OCPMixtureKGWMethod01 : public OCPMixtureKMethod
+class OCPMixtureMethodK_GW01 : public OCPMixtureMethodK
 {
 public:
-    OCPMixtureKGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;

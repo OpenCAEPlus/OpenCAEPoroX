@@ -23,7 +23,7 @@ using namespace std;
 OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     if (rs_param.PVTW_T.data[i].size() > 0) {
-        pmMethod = new OCPMixtureCompMethod01(rs_param, i, vs);
+        pmMethod = new OCPMixtureMethodComp01(rs_param, i, vs);
     }
 
     // Skip stability analysis
@@ -52,7 +52,7 @@ OCPMixtureBlkOilOGW::OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const U
     if (rs_param.PVCO_T.data.size() > 0 &&
         rs_param.PVDG_T.data.size() > 0 &&
         rs_param.PVTW_T.data.size() > 0) {
-        pmMethod = new OCPMixtureKOGWMethod01(rs_param, i, vs);
+        pmMethod = new OCPMixtureMethodK_OGW01(rs_param, i, vs);
     }
 }
 
@@ -66,7 +66,7 @@ OCPMixtureBlkOilOW::OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI
 {
     if (rs_param.PVTW_T.data.size() > 0 &&
         (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
-        pmMethod = new OCPMixtureKOWMethod01(rs_param, i, vs);
+        pmMethod = new OCPMixtureMethodK_OW01(rs_param, i, vs);
     }
 }
 
@@ -79,7 +79,7 @@ OCPMixtureBlkOilOW::OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI
 OCPMixtureBlkOilGW::OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI& i)
 {
     if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
-        pmMethod = new OCPMixtureKGWMethod01(rs_param, i, vs);
+        pmMethod = new OCPMixtureMethodK_GW01(rs_param, i, vs);
     }
 }
 
@@ -91,7 +91,7 @@ OCPMixtureBlkOilGW::OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI
 
 OCPMixtureUnitThermalOW::OCPMixtureUnitThermalOW(const ParamReservoir& rs_param, const USI& i)
 {
-    pmMethod = new OCPMixtureKOWMethod01T(rs_param.comsParam, i, vs);
+    pmMethod = new OCPMixtureMethodK_OW01T(rs_param.comsParam, i, vs);
 }
 
 /*----------------------------------------------------------------------------*/

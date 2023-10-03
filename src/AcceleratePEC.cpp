@@ -31,7 +31,7 @@ void SkipPSAVarset::UpdateLastTimeStep()
 }
 
 
-SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureCompMethod* compMin)
+SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureMethodComp* compMin)
 {
     compM  = compMin;
     svs.np = compM->GetNPmax();
@@ -172,7 +172,7 @@ void SkipPSAMethod01::CalSkipForNextStep(const OCP_USI& bId, SkipPSAVarset& svs,
 }
 
 
-USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureCompMethod* compM)
+USI SkipPSA::Setup(const OCP_USI& nb, const OCPMixtureMethodComp* compM)
 {
     if (ifUse) {
         vs.SetNb(nb);

@@ -12,7 +12,7 @@
 #ifndef __ACCELERATEPEC_HEADER__
 #define __ACCELERATEPEC_HEADER__
 
-#include "OCPMixtureCompMethod.hpp"
+#include "OCPMixtureMethodComp.hpp"
 
 #include <vector>
 
@@ -70,7 +70,7 @@ public:
 class SkipPSAMethod01 : public SkipPSAMethod
 {
 public:
-    SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureCompMethod* compMin);
+    SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureMethodComp* compMin);
     /// Calculate the ftype without predicted saturations
     USI CalFtype01(const OCP_USI& bId, const SkipPSAVarset& svs, const OCPMixtureVarSet& mvs) override;
     /// Calculate the ftype with predicted saturations
@@ -94,7 +94,7 @@ protected:
     vector<OCP_SIN>             eigenWork;
 
     /// support modules
-    const OCPMixtureCompMethod* compM;
+    const OCPMixtureMethodComp* compM;
 };
 
 
@@ -103,7 +103,7 @@ class SkipPSA
 
 public:
     /// Setup SkipPSA
-    USI Setup(const OCP_USI& nb, const OCPMixtureCompMethod* compsin);
+    USI Setup(const OCP_USI& nb, const OCPMixtureMethodComp* compsin);
     /// Set ifUse to true or false
     void SetUseSkip(const OCP_BOOL& flag) { ifUse = flag; }
     /// Return ifUse

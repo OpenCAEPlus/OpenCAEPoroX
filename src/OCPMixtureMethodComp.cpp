@@ -9,11 +9,11 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "OCPMixtureCompMethod.hpp"
+#include "OCPMixtureMethodComp.hpp"
 
 
 ////////////////////////////////////////////////////////////////
-// OCPMixtureCompMethod
+// OCPMixtureMethodComp
 ////////////////////////////////////////////////////////////////
 
 
@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod::Setup(const ComponentParam& param, const USI& tarId)
+void OCPMixtureMethodComp::Setup(const ComponentParam& param, const USI& tarId)
 {
     NPmax = param.numPhase;
     NC    = param.numCom; 
@@ -79,7 +79,7 @@ void OCPMixtureCompMethod::Setup(const ComponentParam& param, const USI& tarId)
 ////////////////////////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod::CopyPhaseFromPE(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CopyPhaseFromPE(OCPMixtureVarSet& vs)
 {
     NP = PE.GetNP();
     for (USI j = 0; j < NP; j++) {
@@ -94,7 +94,7 @@ void OCPMixtureCompMethod::CopyPhaseFromPE(OCPMixtureVarSet& vs)
 ////////////////////////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod::CalMW(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalMW(OCPMixtureVarSet& vs)
 {
     for (USI j = 0; j < NP; j++) {
         MW[j] = 0;
@@ -104,7 +104,7 @@ void OCPMixtureCompMethod::CalMW(OCPMixtureVarSet& vs)
     }
 }
 
-void OCPMixtureCompMethod::CalVmVj(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalVmVj(OCPMixtureVarSet& vs)
 {
     for (USI j = 0; j < NP; j++) {
         vm[j]    = eos.CalVmDer(vs.P, vs.T, &vs.x[j * vs.nc], vmP[j], &vmx[j][0]);
@@ -112,7 +112,7 @@ void OCPMixtureCompMethod::CalVmVj(OCPMixtureVarSet& vs)
     }
 }
 
-void OCPMixtureCompMethod::CalProperty(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalProperty(OCPMixtureVarSet& vs)
 {
     CopyPhaseFromPE(vs);
     CalMW(vs);
@@ -122,7 +122,7 @@ void OCPMixtureCompMethod::CalProperty(OCPMixtureVarSet& vs)
     ReOrderPhase(vs);
 }
 
-void OCPMixtureCompMethod::CalXiRhoMu(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalXiRhoMu(OCPMixtureVarSet& vs)
 {
     for (USI j = 0; j < NP; j++) {
         vs.xi[j] = 1 / vm[j];
@@ -131,7 +131,7 @@ void OCPMixtureCompMethod::CalXiRhoMu(OCPMixtureVarSet& vs)
     }
 }
 
-void OCPMixtureCompMethod::CalPropertyDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalPropertyDer(OCPMixtureVarSet& vs)
 {
     CopyPhaseFromPE(vs);
     CalMW(vs);
@@ -141,7 +141,7 @@ void OCPMixtureCompMethod::CalPropertyDer(OCPMixtureVarSet& vs)
     ReOrderPhaseDer(vs);
 }
 
-void OCPMixtureCompMethod::CalXiRhoMuDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalXiRhoMuDer(OCPMixtureVarSet& vs)
 {
     OCP_DBL   dummy;
     for (USI j = 0; j < NP; j++) {
@@ -171,7 +171,7 @@ void OCPMixtureCompMethod::CalXiRhoMuDer(OCPMixtureVarSet& vs)
 ///////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod::IdentifyPhase(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::IdentifyPhase(OCPMixtureVarSet& vs)
 {
     vs.phaseExist[0] = OCP_FALSE;
     vs.phaseExist[1] = OCP_FALSE;
@@ -214,7 +214,7 @@ void OCPMixtureCompMethod::IdentifyPhase(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod::ReOrderPhase(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::ReOrderPhase(OCPMixtureVarSet& vs)
 {
     // for NP <= 2 Now
     if (phaseLabel[0] != PhaseType::oil) {
@@ -232,7 +232,7 @@ void OCPMixtureCompMethod::ReOrderPhase(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod::ReOrderPhaseDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::ReOrderPhaseDer(OCPMixtureVarSet& vs)
 {
     // for NP <= 2 Now
     if (phaseLabel[0] != PhaseType::oil) {
@@ -261,7 +261,7 @@ void OCPMixtureCompMethod::ReOrderPhaseDer(OCPMixtureVarSet& vs)
 ////////////////////////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod::CalVfiVfp_full01(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalVfiVfp_full01(OCPMixtureVarSet& vs)
 {
     if (NP == 1) {
         const USI j = epIndex[0];
@@ -328,7 +328,7 @@ void OCPMixtureCompMethod::CalVfiVfp_full01(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod::AssembleMatVfiVfp_full01()
+void OCPMixtureMethodComp::AssembleMatVfiVfp_full01()
 {
     fill(JmatDer.begin(), JmatDer.end(), 0.0);
     // Attention 1: JmatDer should be sorted by column
@@ -363,7 +363,7 @@ void OCPMixtureCompMethod::AssembleMatVfiVfp_full01()
 }
 
 
-void OCPMixtureCompMethod::AssembleRhsVfiVfp_full01()
+void OCPMixtureMethodComp::AssembleRhsVfiVfp_full01()
 {
     fill(rhsDer.begin(), rhsDer.end(), 0.0);
     OCP_DBL* rhstmp = &rhsDer[0];
@@ -389,7 +389,7 @@ void OCPMixtureCompMethod::AssembleRhsVfiVfp_full01()
 }
 
 
-void OCPMixtureCompMethod::CaldXsdXp01(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CaldXsdXp01(OCPMixtureVarSet& vs)
 {
     // Calculate Sj and Vf before
     // Note that vf is the total fluid volume
@@ -458,7 +458,7 @@ void OCPMixtureCompMethod::CaldXsdXp01(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod::CalVfiVfp_full02(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CalVfiVfp_full02(OCPMixtureVarSet& vs)
 {
     // Attention!
     // NP = 1 or NP = 2
@@ -523,7 +523,7 @@ void OCPMixtureCompMethod::CalVfiVfp_full02(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod::AssembleMatVfiVfp_full02()
+void OCPMixtureMethodComp::AssembleMatVfiVfp_full02()
 {
     // NP = 2
     fill(JmatDer.begin(), JmatDer.end(), 0.0);
@@ -539,7 +539,7 @@ void OCPMixtureCompMethod::AssembleMatVfiVfp_full02()
 }
 
 
-void OCPMixtureCompMethod::AssembleRhsVfiVfp_full02()
+void OCPMixtureMethodComp::AssembleRhsVfiVfp_full02()
 {
     // NP = 2
     fill(rhsDer.begin(), rhsDer.end(), 0.0);
@@ -561,7 +561,7 @@ void OCPMixtureCompMethod::AssembleRhsVfiVfp_full02()
 }
 
 
-void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp::CaldXsdXp02(OCPMixtureVarSet& vs)
 {
     // Calculate Sj and Vf before
     // Note that vf is the total fluid volume
@@ -642,11 +642,11 @@ void OCPMixtureCompMethod::CaldXsdXp02(OCPMixtureVarSet& vs)
 
 
 ////////////////////////////////////////////////////////////////
-// OCPMixtureCompMethod01
+// OCPMixtureMethodComp01
 ////////////////////////////////////////////////////////////////
 
 
-OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
+OCPMixtureMethodComp01::OCPMixtureMethodComp01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
     vs.Init(rs_param.comsParam.numPhase + 1, rs_param.comsParam.numCom + 1, OCPMixtureType::COMP);
 
@@ -667,7 +667,7 @@ OCPMixtureCompMethod01::OCPMixtureCompMethod01(const ParamReservoir& rs_param, c
 }
 
 
-void OCPMixtureCompMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+void OCPMixtureMethodComp01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
     mvs.P = bvs.P[bId];
     mvs.T = bvs.T[bId] + CONV5;
@@ -685,7 +685,7 @@ void OCPMixtureCompMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 }
 
 
-void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::Flash(OCPMixtureVarSet& vs)
 {
     InitNtZ(vs);
     PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
@@ -695,7 +695,7 @@ void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     InitNtZ(vs);
     Nt = 1;
@@ -708,7 +708,7 @@ void OCPMixtureCompMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs, const USI& ftype)
+void OCPMixtureMethodComp01::Flash(OCPMixtureVarSet& vs, const USI& ftype)
 {
     InitNtZ(vs);
     PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, vs.phaseNum - 1, &vs.x[0], vs.nc);
@@ -719,7 +719,7 @@ void OCPMixtureCompMethod01::Flash(OCPMixtureVarSet& vs, const USI& ftype)
 }
 
 
-void OCPMixtureCompMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     InitNtZ(vs);
     Nt = 1;
@@ -733,7 +733,7 @@ void OCPMixtureCompMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& v
 }
 
 
-void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype)
+void OCPMixtureMethodComp01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype)
 {
     InitNtZ(vs);
     PE.PhaseEquilibrium(vs.P, vs.T, &zi[0], ftype, vs.phaseNum - 1, &vs.x[0], vs.nc);
@@ -745,7 +745,7 @@ void OCPMixtureCompMethod01::FlashDer(OCPMixtureVarSet& vs, const USI& ftype)
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodComp01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     // assume that only single phase exists here
     if (pt == PhaseType::wat) {
@@ -762,7 +762,7 @@ OCP_DBL OCPMixtureCompMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& T, const
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodComp01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     // assume that only single phase exists here
     if (pt == PhaseType::wat) {
@@ -776,7 +776,7 @@ OCP_DBL OCPMixtureCompMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const 
 }
 
 
-void OCPMixtureCompMethod01::CalVStd(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CalVStd(OCPMixtureVarSet& vs)
 {
     InitNtZ(vs);
     PE.PhaseEquilibrium(vs.P, vs.T, &zi[0]);
@@ -786,7 +786,7 @@ void OCPMixtureCompMethod01::CalVStd(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureCompMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodComp01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     if (pt == PhaseType::wat) {
         // water phase
@@ -799,7 +799,7 @@ OCP_DBL OCPMixtureCompMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, con
 }
 
 
-void OCPMixtureCompMethod01::InitNtZ(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::InitNtZ(OCPMixtureVarSet& vs)
 {
     Nt = 0;
     for (USI i = 0; i < NC; i++)    Nt += vs.Ni[i];
@@ -808,7 +808,7 @@ void OCPMixtureCompMethod01::InitNtZ(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
 {
     // correct Nt
     OCP_DBL vtmp = 0;
@@ -833,7 +833,7 @@ void OCPMixtureCompMethod01::CorrectNt(const OCP_DBL& vh, OCPMixtureVarSet& vs)
 
 
 
-void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& vs)
 {
     // water property
     vs.phaseExist[wIdP]       = OCP_TRUE;
@@ -855,35 +855,35 @@ void OCPMixtureCompMethod01::CalPropertyW(const OCP_DBL& vw, OCPMixtureVarSet& v
 ////////////////////////////////////////////////////////////
 
 
-void OCPMixtureCompMethod01::CalVfiVfp_full01(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CalVfiVfp_full01(OCPMixtureVarSet& vs)
 {
-    OCPMixtureCompMethod::CalVfiVfp_full01(vs);
+    OCPMixtureMethodComp::CalVfiVfp_full01(vs);
     AddVfpVfiW(vs);
 }
 
 
-void OCPMixtureCompMethod01::CaldXsdXp01(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CaldXsdXp01(OCPMixtureVarSet& vs)
 {
-    OCPMixtureCompMethod::CaldXsdXp01(vs);
+    OCPMixtureMethodComp::CaldXsdXp01(vs);
     CaldXsdXpW(vs);
 }
 
 
-void OCPMixtureCompMethod01::CalVfiVfp_full02(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CalVfiVfp_full02(OCPMixtureVarSet& vs)
 {
-    OCPMixtureCompMethod::CalVfiVfp_full02(vs);
+    OCPMixtureMethodComp::CalVfiVfp_full02(vs);
     AddVfpVfiW(vs);
 }
 
 
-void OCPMixtureCompMethod01::CaldXsdXp02(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CaldXsdXp02(OCPMixtureVarSet& vs)
 {
-    OCPMixtureCompMethod::CaldXsdXp02(vs);
+    OCPMixtureMethodComp::CaldXsdXp02(vs);
     CaldXsdXpW(vs);
 }
 
 
-void OCPMixtureCompMethod01::AddVfpVfiW(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::AddVfpVfiW(OCPMixtureVarSet& vs)
 {
     // for water
     vs.vfP       += vs.vjP[wIdP];
@@ -891,7 +891,7 @@ void OCPMixtureCompMethod01::AddVfpVfiW(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureCompMethod01::CaldXsdXpW(OCPMixtureVarSet& vs)
+void OCPMixtureMethodComp01::CaldXsdXpW(OCPMixtureVarSet& vs)
 {
     // for water
     // d Sj / dNw

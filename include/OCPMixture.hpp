@@ -13,8 +13,8 @@
 #define __OCPMIXTURE_HEADER__
 
 
-#include "OCPMixtureCompMethod.hpp"
-#include "OCPMixtureKMethod.hpp"
+#include "OCPMixtureMethodComp.hpp"
+#include "OCPMixtureMethodK.hpp"
 #include "OptionalModules.hpp"
 
 using namespace std;
@@ -114,7 +114,7 @@ protected:
 
 protected:
     /// method
-    OCPMixtureCompMethod* pmMethod;
+    OCPMixtureMethodComp* pmMethod;
     // dependent module
     /// Skip stability analysis
     SkipPSA*              skipPSA;
@@ -177,7 +177,7 @@ protected:
     }
 
 protected:
-    OCPMixtureKMethod* pmMethod;
+    OCPMixtureMethodK* pmMethod;
 };
 
 
@@ -235,7 +235,7 @@ protected:
     }
 
 protected:
-    OCPMixtureKMethod* pmMethod;
+    OCPMixtureMethodK* pmMethod;
 };
 
 
@@ -294,7 +294,7 @@ protected:
     }
 
 protected:
-    OCPMixtureKMethod* pmMethod;
+    OCPMixtureMethodK* pmMethod;
 };
 
 
@@ -352,7 +352,7 @@ protected:
     }
 
 protected:
-    OCPMixtureKMethod* pmMethod;
+    OCPMixtureMethodK* pmMethod;
 };
 
 

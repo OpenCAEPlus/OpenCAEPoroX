@@ -1,5 +1,5 @@
-/*! \file    OCPMixtureCompMethod.hpp
- *  \brief   OCPMixtureCompMethod class declaration
+/*! \file    OCPMixtureMethodComp.hpp
+ *  \brief   OCPMixtureMethodComp class declaration
  *  \author  Shizhe Li
  *  \date    Jul/31/2023
  *
@@ -25,18 +25,18 @@ using namespace std;
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureCompMethod
+// OCPMixtureMethodComp
 /////////////////////////////////////////////////////
 
 
-/// OCPMixtureCompMethod is a bsaic class used in compositional model
+/// OCPMixtureMethodComp is a bsaic class used in compositional model
 /// all variables are about components and phases participating in 
 /// Phase Equilibrium Calculations, these components and phases should be 
 /// be ranked first.
-class OCPMixtureCompMethod
+class OCPMixtureMethodComp
 {
 public:
-    OCPMixtureCompMethod() = default;
+    OCPMixtureMethodComp() = default;
     /// Set variable set
     virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
     /// With P, Ni, perform flash calculations only
@@ -223,15 +223,15 @@ protected:
 
 
 ////////////////////////////////////////////////////////////////
-// OCPMixtureCompMethod01
+// OCPMixtureMethodComp01
 ////////////////////////////////////////////////////////////////
 
 
 /// water and hydrocarbon phases are immiscible
-class OCPMixtureCompMethod01 : public OCPMixtureCompMethod
+class OCPMixtureMethodComp01 : public OCPMixtureMethodComp
 {
 public:
-    OCPMixtureCompMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    OCPMixtureMethodComp01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;

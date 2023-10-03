@@ -10,15 +10,15 @@
  */
 
 
-#include "OCPMixtureKMethod.hpp"
+#include "OCPMixtureMethodK.hpp"
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKOWMethod
+// OCPMixtureMethodK_OW01
 /////////////////////////////////////////////////////
 
 
-OCPMixtureKOWMethod01::OCPMixtureKOWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs) 
+OCPMixtureMethodK_OW01::OCPMixtureMethodK_OW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs) 
 {
 
     vs.Init(2, 2, OCPMixtureType::BO_OW);
@@ -56,7 +56,7 @@ OCPMixtureKOWMethod01::OCPMixtureKOWMethod01(const ParamReservoir& rs_param, con
 }
 
 
-void OCPMixtureKOWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+void OCPMixtureMethodK_OW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
 	mvs.T = bvs.T[bId];
@@ -65,7 +65,7 @@ void OCPMixtureKOWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs,
 }
 
 
-void OCPMixtureKOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
@@ -74,7 +74,7 @@ void OCPMixtureKOWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKOWMethod01::Flash(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01::Flash(OCPMixtureVarSet& vs)
 {
 
     // Oil Properties
@@ -101,7 +101,7 @@ void OCPMixtureKOWMethod01::Flash(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
     vs.Ni[1] = Vp * vs.S[1] * PVTW.CalXiW(vs.P);
@@ -110,7 +110,7 @@ void OCPMixtureKOWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs
 }
 
 
-void OCPMixtureKOWMethod01::FlashDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01::FlashDer(OCPMixtureVarSet& vs)
 {
     Flash(vs);
 
@@ -124,7 +124,7 @@ void OCPMixtureKOWMethod01::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OW01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     if (pt == PhaseType::oil)         return CalXiO(P);
     else if (pt == PhaseType::wat)    return CalXiW(P);
@@ -132,7 +132,7 @@ OCP_DBL OCPMixtureKOWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const 
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     if (pt == PhaseType::oil)         return CalRhoO(P);
     else if (pt == PhaseType::wat)    return CalRhoW(P);
@@ -140,7 +140,7 @@ OCP_DBL OCPMixtureKOWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
     if      (pt == PhaseType::oil)  return (stdVo * CONV1);
     else if (pt == PhaseType::wat)  return (stdVw * CONV1);
@@ -148,7 +148,7 @@ OCP_DBL OCPMixtureKOWMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, con
 }
 
 
-void OCPMixtureKOWMethod01::CalVStd(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01::CalVStd(OCPMixtureVarSet& vs)
 {
     vs.vj[0] = vs.Ni[0] * stdVo * CONV1;
     vs.vj[1] = vs.Ni[1] * stdVw * CONV1;
@@ -157,11 +157,11 @@ void OCPMixtureKOWMethod01::CalVStd(OCPMixtureVarSet& vs)
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKOWMethod01T
+// OCPMixtureMethodK_OW01T
 /////////////////////////////////////////////////////
 
 
-OCPMixtureKOWMethod01T::OCPMixtureKOWMethod01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs)
+OCPMixtureMethodK_OW01T::OCPMixtureMethodK_OW01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs)
 {
 
 	vs.Init(2, 2, OCPMixtureType::THERMALK_OW);
@@ -221,7 +221,7 @@ OCPMixtureKOWMethod01T::OCPMixtureKOWMethod01T(const ComponentParam& param, cons
 }
 
 
-void OCPMixtureKOWMethod01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
 	mvs.T = bvs.T[bId] + CONV5;
@@ -231,7 +231,7 @@ void OCPMixtureKOWMethod01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OW01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::oil)       return CalRhoO(P, T);
 	else if (pt == PhaseType::wat)  return CalRhoW(P, T);
@@ -239,7 +239,7 @@ OCP_DBL OCPMixtureKOWMethod01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, cons
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OW01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::oil)       return CalXiO(P, T);
 	else if (pt == PhaseType::wat)  return CalXiW(P, T);
@@ -247,7 +247,7 @@ OCP_DBL OCPMixtureKOWMethod01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
+OCP_DBL OCPMixtureMethodK_OW01T::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
 {
 	const OCP_DBL dP = P - Pref;
 	const OCP_DBL dT = T - Tref;
@@ -255,7 +255,7 @@ OCP_DBL OCPMixtureKOWMethod01T::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
+OCP_DBL OCPMixtureMethodK_OW01T::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
 {
 	const OCP_DBL dP = P - Pref;
 	const OCP_DBL dT = T - Tref;
@@ -263,19 +263,19 @@ OCP_DBL OCPMixtureKOWMethod01T::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
+OCP_DBL OCPMixtureMethodK_OW01T::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
 {
 	return MWp[0] * CalXiO(P, T);
 }
 
 
-OCP_DBL OCPMixtureKOWMethod01T::CalRhoW(const OCP_DBL& P, const OCP_DBL& T)
+OCP_DBL OCPMixtureMethodK_OW01T::CalRhoW(const OCP_DBL& P, const OCP_DBL& T)
 {
 	return MWp[1] * CalXiW(P, T);
 }
 
 
-void OCPMixtureKOWMethod01T::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01T::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T);
 	vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T);
@@ -283,13 +283,13 @@ void OCPMixtureKOWMethod01T::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKOWMethod01T::Flash(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01T::Flash(OCPMixtureVarSet& vs)
 {
 	FlashDer(vs);
 }
 
 
-void OCPMixtureKOWMethod01T::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01T::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	vs.Ni[0] = Vp * vs.S[0] * CalXiO(vs.P, vs.T);
 	vs.Ni[1] = Vp * vs.S[1] * CalXiW(vs.P, vs.T);
@@ -297,7 +297,7 @@ void OCPMixtureKOWMethod01T::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& v
 }
 
 
-void OCPMixtureKOWMethod01T::FlashDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01T::FlashDer(OCPMixtureVarSet& vs)
 {
 	// Assign value
 	const OCP_DBL dP = vs.P - Pref;
@@ -385,7 +385,7 @@ void OCPMixtureKOWMethod01T::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKOWMethod01T::CalVStd(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OW01T::CalVStd(OCPMixtureVarSet& vs)
 {
 	vs.vj[0] = vs.Ni[0] / CalXiO(vs.P, vs.T);
 	vs.vj[1] = vs.Ni[1] / CalXiW(vs.P, vs.T);
@@ -394,11 +394,11 @@ void OCPMixtureKOWMethod01T::CalVStd(OCPMixtureVarSet& vs)
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKOGWMethod
+// OCPMixtureMethodK_OGW01
 /////////////////////////////////////////////////////
 
 
-OCPMixtureKOGWMethod01::OCPMixtureKOGWMethod01(const ParamReservoir& rs_param, const USI& i,
+OCPMixtureMethodK_OGW01::OCPMixtureMethodK_OGW01(const ParamReservoir& rs_param, const USI& i,
 	OCPMixtureVarSet& vs)
 {
 	vs.Init(3, 3, OCPMixtureType::BO_OGW);
@@ -431,7 +431,7 @@ OCPMixtureKOGWMethod01::OCPMixtureKOGWMethod01(const ParamReservoir& rs_param, c
 }
 
 
-void OCPMixtureKOGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+void OCPMixtureMethodK_OGW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.Pb = bvs.Pb[bId];
 	mvs.P  = bvs.P[bId];
@@ -441,7 +441,7 @@ void OCPMixtureKOGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 }
 
 
-void OCPMixtureKOGWMethod01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	// water always exists
 	if (vs.S[0] < TINY) {
@@ -475,27 +475,27 @@ void OCPMixtureKOGWMethod01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKOGWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	CalNi(Vp, vs);
 	Flash(vs);
 }
 
 
-void OCPMixtureKOGWMethod01::Flash(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::Flash(OCPMixtureVarSet& vs)
 {
 	FlashDer(vs);
 }
 
 
-void OCPMixtureKOGWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	CalNi(Vp, vs);
 	FlashDer(vs);
 }
 
 
-void OCPMixtureKOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::FlashDer(OCPMixtureVarSet& vs)
 {
 
 	fill(vs.rhoP.begin(), vs.rhoP.end(), 0.0);
@@ -735,7 +735,7 @@ void OCPMixtureKOGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureKOGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OGW01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::oil)       return CalXiO(P, Pb);
 	else if (pt == PhaseType::gas)  return CalXiG(P);
@@ -744,7 +744,7 @@ OCP_DBL OCPMixtureKOGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const
 }
 
 
-OCP_DBL OCPMixtureKOGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OGW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::oil)       return CalRhoO(P, Pb);
 	else if (pt == PhaseType::gas)  return CalRhoG(P);
@@ -753,7 +753,7 @@ OCP_DBL OCPMixtureKOGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, cons
 }
 
 
-OCP_DBL OCPMixtureKOGWMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_OGW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if      (pt == PhaseType::oil)  return (stdVo * CONV1);
     else if (pt == PhaseType::gas)  return (stdVg * 1000);
@@ -762,7 +762,7 @@ OCP_DBL OCPMixtureKOGWMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, co
 }
 
 
-void OCPMixtureKOGWMethod01::CalVStd(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_OGW01::CalVStd(OCPMixtureVarSet& vs)
 {
 	vs.vj[0] = vs.Ni[0] * stdVo * CONV1;
 	vs.vj[1] = vs.Ni[1] * stdVg * 1000;
@@ -771,11 +771,11 @@ void OCPMixtureKOGWMethod01::CalVStd(OCPMixtureVarSet& vs)
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureKGWMethod01
+// OCPMixtureMethodK_GW01
 /////////////////////////////////////////////////////
 
 
-OCPMixtureKGWMethod01::OCPMixtureKGWMethod01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
+OCPMixtureMethodK_GW01::OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
 	vs.Init(2, 2, OCPMixtureType::BO_GW);
 
@@ -787,7 +787,7 @@ OCPMixtureKGWMethod01::OCPMixtureKGWMethod01(const ParamReservoir& rs_param, con
 }
 
 
-void OCPMixtureKGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+void OCPMixtureMethodK_GW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
 	mvs.T = bvs.T[bId];
@@ -796,7 +796,7 @@ void OCPMixtureKGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs,
 }
 
 
-void OCPMixtureKGWMethod01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	OCP_DBL dummy;
 	OCP_DBL xWg, xGw;
@@ -810,27 +810,27 @@ void OCPMixtureKGWMethod01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 }
 
 
-void OCPMixtureKGWMethod01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	CalNi(Vp, vs);
 	Flash(vs);
 }
 
 
-void OCPMixtureKGWMethod01::Flash(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::Flash(OCPMixtureVarSet& vs)
 {
 	FlashDer(vs);
 }
 
 
-void OCPMixtureKGWMethod01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
 	CalNi(Vp, vs);
 	FlashDer(vs);
 }
 
 
-void OCPMixtureKGWMethod01::FlashDer(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::FlashDer(OCPMixtureVarSet& vs)
 {
 
 	fill(vs.rhoP.begin(), vs.rhoP.end(), 0.0);
@@ -953,7 +953,7 @@ void OCPMixtureKGWMethod01::FlashDer(OCPMixtureVarSet& vs)
 }
 
 
-OCP_DBL OCPMixtureKGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_GW01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::gas)         return CalXiG(P, T);
 	else if (pt == PhaseType::wat)    return CalXiW(P, T);
@@ -961,7 +961,7 @@ OCP_DBL OCPMixtureKGWMethod01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const 
 }
 
 
-OCP_DBL OCPMixtureKGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_GW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if (pt == PhaseType::gas)         return CalRhoG(P, T);
 	else if (pt == PhaseType::wat)    return CalRhoW(P, T);
@@ -969,7 +969,7 @@ OCP_DBL OCPMixtureKGWMethod01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const
 }
 
 
-OCP_DBL OCPMixtureKGWMethod01::CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const
+OCP_DBL OCPMixtureMethodK_GW01::CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const
 {
 	OCP_DBL rhow, xGw, dummy;
 	PVTH2O.CalRhoMuSol(P, T, rhow, dummy, xGw);
@@ -978,12 +978,12 @@ OCP_DBL OCPMixtureKGWMethod01::CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const
 }
 
 
-OCP_DBL OCPMixtureKGWMethod01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+OCP_DBL OCPMixtureMethodK_GW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 }
 
 
-void OCPMixtureKGWMethod01::CalVStd(OCPMixtureVarSet& vs)
+void OCPMixtureMethodK_GW01::CalVStd(OCPMixtureVarSet& vs)
 {
 }
 
