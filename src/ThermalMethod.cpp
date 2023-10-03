@@ -358,7 +358,6 @@ void T_FIM::InitFlash(Bulk& bk)
 {
     BulkVarSet&    bvs = bk.vs;
     const OCP_USI& nb = bvs.nb;
-    const USI&     np = bvs.np;
     const USI&     nc = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
@@ -378,8 +377,6 @@ void T_FIM::CalFlash(Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     const OCP_USI&    nb  = bvs.nb;
-    const USI&        np  = bvs.np;
-    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bvs.cType[n] == BulkContent::rf) {

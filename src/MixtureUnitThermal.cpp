@@ -14,41 +14,41 @@
 
 MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalModules& opts)
 {
-    OWTM.Setup(param, tarId);
-    vs          = &OWTM.GetVarSet();
+    OWTM = new OCPMixtureUnitThermalOW(param, tarId);
+    vs   = &OWTM->GetVarSet();
 }
 
 void MixtureUnitThermal_OW::Flash(const OCP_DBL& Pin,
                                const OCP_DBL& Tin,
                                const OCP_DBL* Niin)
 {
-    OWTM.Flash(Pin, Tin, Niin);
+    OWTM->Flash(Pin, Tin, Niin);
 }
 
 void MixtureUnitThermal_OW::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.InitFlash(bId, bvs);
+    OWTM->InitFlash(bId, bvs);
 }
 
 void MixtureUnitThermal_OW::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.InitFlashDer(bId, bvs);
+    OWTM->InitFlashDer(bId, bvs);
 }
 
 void MixtureUnitThermal_OW::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.Flash(bId, bvs);
+    OWTM->Flash(bId, bvs);
 }
 
 void MixtureUnitThermal_OW::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 {
-    OWTM.FlashDer(bId, bvs);
+    OWTM->FlashDer(bId, bvs);
 }
 
 
 OCP_DBL MixtureUnitThermal_OW::CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin)
 {
-    return OWTM.CalEnthalpy(Tin, Ziin);
+    return OWTM->CalEnthalpy(Tin, Ziin);
 }
 
 OCP_DBL MixtureUnitThermal_OW::XiPhase(const OCP_DBL& Pin,
@@ -56,7 +56,7 @@ OCP_DBL MixtureUnitThermal_OW::XiPhase(const OCP_DBL& Pin,
                                     const vector<OCP_DBL>& Ziin,
                                     const PhaseType& pt)
 {
-    return OWTM.CalXi(Pin, Pin, Tin, &Ziin[0], pt);
+    return OWTM->CalXi(Pin, Pin, Tin, &Ziin[0], pt);
 }
 
 OCP_DBL
@@ -66,7 +66,7 @@ MixtureUnitThermal_OW::RhoPhase(const OCP_DBL& Pin,
                              const vector<OCP_DBL>& Ziin,
                              const PhaseType& pt)
 {
-    return OWTM.CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
+    return OWTM->CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
 }
 
 

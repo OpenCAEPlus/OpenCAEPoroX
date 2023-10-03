@@ -59,7 +59,7 @@ OCPMixtureKOWMethod01::OCPMixtureKOWMethod01(const ParamReservoir& rs_param, con
 void OCPMixtureKOWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
-	mvs.T = bvs.T[bId] + CONV5;
+	mvs.T = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }
@@ -435,7 +435,7 @@ void OCPMixtureKOGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 {
 	mvs.Pb = bvs.Pb[bId];
 	mvs.P  = bvs.P[bId];
-	mvs.T  = bvs.T[bId] + CONV5;
+	mvs.T  = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }
@@ -790,7 +790,7 @@ OCPMixtureKGWMethod01::OCPMixtureKGWMethod01(const ParamReservoir& rs_param, con
 void OCPMixtureKGWMethod01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
-	mvs.T = bvs.T[bId] + CONV5;
+	mvs.T = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }

@@ -46,15 +46,6 @@ OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, Opt
 /////////////////////////////////////////////////////
 
 
-void OCPMixtureBlkOilOGW::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVCO_T.data.size() > 0 &&
-        rs_param.PVDG_T.data.size() > 0 &&
-        rs_param.PVTW_T.data.size() > 0) {
-        pmMethod = new OCPMixtureKOGWMethod01(rs_param, i, vs);
-    }
-}
-
 
 OCPMixtureBlkOilOGW::OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const USI& i)
 {
@@ -70,14 +61,6 @@ OCPMixtureBlkOilOGW::OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const U
 // OCPMixtureBlkOilOW 
 /////////////////////////////////////////////////////
 
-void OCPMixtureBlkOilOW::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVTW_T.data.size() > 0 &&
-        (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
-        pmMethod = new OCPMixtureKOWMethod01(rs_param, i, vs);
-    }
-}
-
 
 OCPMixtureBlkOilOW::OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI& i)
 {
@@ -92,13 +75,6 @@ OCPMixtureBlkOilOW::OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI
 // OCPMixtureBlkOilGW 
 /////////////////////////////////////////////////////
 
-void OCPMixtureBlkOilGW::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
-        pmMethod = new OCPMixtureKGWMethod01(rs_param, i, vs);
-    }
-}
-
 
 OCPMixtureBlkOilGW::OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI& i)
 {
@@ -112,11 +88,6 @@ OCPMixtureBlkOilGW::OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI
 // OCPMixtureUnitThermalOW 
 /////////////////////////////////////////////////////
 
-
-void OCPMixtureUnitThermalOW::Setup(const ParamReservoir& rs_param, const USI& i)
-{
-    pmMethod = new OCPMixtureKOWMethod01T(rs_param.comsParam, i, vs);
-}
 
 OCPMixtureUnitThermalOW::OCPMixtureUnitThermalOW(const ParamReservoir& rs_param, const USI& i)
 {

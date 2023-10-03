@@ -32,7 +32,7 @@ class MixtureUnitThermal_OW : public MixtureUnitThermal
 public:
     MixtureUnitThermal_OW() = default;
     MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalModules& opts);
-    OCPMixture* GetMixture() override { return &OWTM; }
+    OCPMixture* GetMixture() override { return OWTM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     /// flash calculation with saturation of phases.
     void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
@@ -59,7 +59,7 @@ public:
     OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) override;
 
 protected:
-    OCPMixtureUnitThermalOW  OWTM;
+    OCPMixture*  OWTM;
 };
 
 #endif /* end if __MIXTURETHERMAL_HEADER__ */

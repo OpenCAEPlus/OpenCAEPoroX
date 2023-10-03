@@ -94,7 +94,7 @@ class MixtureUnitBlkOil_OW : public MixtureUnitBlkOil
 public:
     MixtureUnitBlkOil_OW() = default;
     MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
-    OCPMixture* GetMixture() override { return &OWM; }
+    OCPMixture* GetMixture() override { return OWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
     void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
@@ -111,7 +111,7 @@ public:
                      const PhaseType& pt) override;
 
 protected:
-    OCPMixtureBlkOilOW OWM;
+    OCPMixture* OWM;
 };
 
 
@@ -124,7 +124,7 @@ class MixtureUnitBlkOil_GW : public MixtureUnitBlkOil
 public:
     MixtureUnitBlkOil_GW() = default;
     MixtureUnitBlkOil_GW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
-    OCPMixture* GetMixture() override { return &GWM; }
+    OCPMixture* GetMixture() override { return GWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
     void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
@@ -141,7 +141,7 @@ public:
         const PhaseType& pt) override;
 
 private:
-    OCPMixtureBlkOilGW GWM;
+    OCPMixture* GWM;
 };
 
 
@@ -155,7 +155,7 @@ class MixtureUnitBlkOil_OGW : public MixtureUnitBlkOil
 public:
     MixtureUnitBlkOil_OGW() = default;
     MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
-    OCPMixture* GetMixture() override { return &OGWM; }
+    OCPMixture* GetMixture() override { return OGWM; }
     void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) override;
     void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) override;
     void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) override;
@@ -172,7 +172,7 @@ public:
                      const PhaseType& pt) override;
 
 protected:
-    OCPMixtureBlkOilOGW OGWM;
+    OCPMixture* OGWM;
 };
 
 #endif /* end if __MIXTUREBO_HEADER__ */

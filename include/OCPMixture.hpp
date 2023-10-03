@@ -129,7 +129,6 @@ protected:
 class OCPMixtureBlkOilOGW : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i);
     OCPMixtureBlkOilOGW() = default;
     OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const USI& i);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
@@ -189,7 +188,6 @@ protected:
 class OCPMixtureBlkOilOW : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i);
     OCPMixtureBlkOilOW() = default;
     OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI& i);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
@@ -248,7 +246,6 @@ protected:
 class OCPMixtureBlkOilGW : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i);
     OCPMixtureBlkOilGW() = default;
     OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI& i);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
@@ -308,7 +305,6 @@ protected:
 class OCPMixtureUnitThermalOW : public OCPMixture
 {
 public:
-    void Setup(const ParamReservoir& rs_param, const USI& i);
     OCPMixtureUnitThermalOW() = default;
     OCPMixtureUnitThermalOW(const ParamReservoir& rs_param, const USI& i);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
