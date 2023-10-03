@@ -1679,7 +1679,6 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
     bvs.vj.resize(nb * np);
     bvs.lvj.resize(nb * np);
 
-    bk.xijNR.resize(nb * np * nc);
     bk.cfl.resize(nb * np);
     bk.bulkTypeAIM.Setup(nb);
 }
@@ -1846,7 +1845,7 @@ void IsoT_AIMc::CalFlashEp(Bulk& bk)
             // Explicit bulk
 
             bk.PVTm.GetPVT(n)->FlashIMPEC(bvs.P[n], bvs.T[n], &bvs.Ni[n * nc], bvs.phaseNum[n],
-                                          &bk.xijNR[n * np * nc], n);
+                                          &bvs.xij[n * np * nc], n);
             // bvs.PassFlashValueAIMcEp(n);
             PassFlashValueEp(bk, n);
         }
@@ -1920,7 +1919,7 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
             // IMPORTANT -- need for next Flash
             // But xij in nonlinear equations has been modified
             for (USI i = 0; i < nc; i++) {
-                bk.xijNR[bIdp * nc + j * nc + i] = PVT->GetXij(j, i);
+                bvs.xij[bIdp * nc + j * nc + i] = PVT->GetXij(j, i);
             }
         }
     }
@@ -2227,7 +2226,6 @@ void IsoT_AIMc::GetSolution(Reservoir&             rs,
 void IsoT_AIMc::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 {
     rs.bulk.vs.vj    = rs.bulk.vs.lvj;
-    rs.bulk.xijNR = rs.bulk.vs.lxij;
     IsoT_FIM::ResetToLastTimeStep(rs, ctrl);
 
     // all FIM
@@ -2245,7 +2243,6 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
     IsoT_FIM::UpdateLastTimeStep(rs);
 
     rs.bulk.vs.lvj   = rs.bulk.vs.vj;
-    rs.bulk.xijNR = rs.bulk.vs.xij;
 }
 
 /*----------------------------------------------------------------------------*/

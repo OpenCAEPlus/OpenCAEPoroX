@@ -77,7 +77,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P) { return PVDO->CalXiO(P); }
@@ -173,7 +173,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_TRUE; }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) { return PVCO.CalXiO(P, Pb); }
@@ -223,7 +223,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const {}
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
 
 protected:
     void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);

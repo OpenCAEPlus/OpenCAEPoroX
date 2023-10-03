@@ -241,7 +241,6 @@ protected:
     vector<OCP_USI> wellBulkId; ///< Index of bulks which are penetrated by wells and
                                 ///< their K-neighbor
     BulkTypeAIM bulkTypeAIM;
-    vector<OCP_DBL> xijNR; ///< store the current NR step's xij in AIM
 };
 
 #endif /* end if __BULK_HEADER__ */
