@@ -136,8 +136,6 @@ public:
     vector<OCP_DBL>     Nt;
     /// Moles of component
     vector<OCP_DBL>     Ni;
-    /// Num of phases
-    vector<USI>         phaseNum;
     /// Existence of phase
     vector<OCP_BOOL>    phaseExist;
     /// Saturation of phase

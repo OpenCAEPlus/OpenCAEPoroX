@@ -182,7 +182,6 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     bvs.lporoP.resize(nb);
 
     // Fluid
-    bvs.phaseNum.resize(nb);
     bvs.Nt.resize(nb);
     bvs.Ni.resize(nb * nc);
     bvs.vf.resize(nb);
@@ -285,7 +284,6 @@ void IsoT_IMPEC::PassFlashValue(Bulk& bk, const OCP_USI& n) const
     const USI     nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
 
-    bvs.phaseNum[n] = 0;
     bvs.Nt[n]       = PVT->GetNt();
     bvs.vf[n]       = PVT->GetVf();
 
@@ -297,7 +295,6 @@ void IsoT_IMPEC::PassFlashValue(Bulk& bk, const OCP_USI& n) const
         bvs.phaseExist[bIdp + j] = PVT->GetPhaseExist(j);
         bvs.S[bIdp + j]          = PVT->GetS(j);
         if (bvs.phaseExist[bIdp + j]) {
-            bvs.phaseNum[n]++;
             for (USI i = 0; i < nc; i++) {
                 bvs.xij[bIdp * nc + j * nc + i] = PVT->GetXij(j, i);
             }
@@ -585,7 +582,6 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     bvs.poroP  = bvs.lporoP;
 
     // Fluid
-    bvs.phaseNum   = bvs.lphaseNum;
     bvs.P          = bvs.lP;
     bvs.Nt         = bvs.lNt;
     bvs.Ni         = bvs.lNi;
@@ -626,7 +622,6 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lrockVp = bvs.rockVp;
 
     // Fluid
-    bvs.lphaseNum   = bvs.phaseNum;
     bvs.lNt         = bvs.Nt;
     bvs.lNi         = bvs.Ni;
     bvs.lvf         = bvs.vf;
@@ -846,7 +841,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.lporoP.resize(nb);
 
     // Fluid
-    bvs.phaseNum.resize(nb);
     bvs.Nt.resize(nb);
     bvs.Ni.resize(nb * nc);
     bvs.vf.resize(nb);
@@ -971,7 +965,6 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
     const auto    nc     = bvs.nc;
     const OCP_USI bIdp   = n * np;
 
-    bvs.phaseNum[n] = 0;
     bvs.Nt[n]       = PVT->GetNt();
     bvs.vf[n]       = PVT->GetVf();
 
@@ -984,7 +977,6 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
         dSNR[bIdp + j] = bvs.S[bIdp + j] - dSNR[bIdp + j];
         bvs.phaseExist[bIdp + j] = PVT->GetPhaseExist(j);
         if (bvs.phaseExist[bIdp + j]) {
-            bvs.phaseNum[n]++;
             bvs.rho[bIdp + j] = PVT->GetRho(j);
             bvs.xi[bIdp + j]  = PVT->GetXi(j);
             bvs.mu[bIdp + j]  = PVT->GetMu(j);
@@ -1371,7 +1363,6 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.poroP  = bvs.lporoP;
     bvs.rockVp = bvs.lrockVp;
     // Fluid
-    bvs.phaseNum   = bvs.lphaseNum;
     bvs.Nt         = bvs.lNt;
     bvs.Ni         = bvs.lNi;
     bvs.vf         = bvs.lvf;
@@ -1421,7 +1412,6 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lrockVp = bvs.rockVp;
 
     // Fluid
-    bvs.lphaseNum   = bvs.phaseNum;
     bvs.lNt         = bvs.Nt;
     bvs.lNi         = bvs.Ni;
     bvs.lvf         = bvs.vf;
@@ -1893,10 +1883,8 @@ void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
         bvs.vfi[n * nc + i] = PVT->GetVfi(i);
     }
 
-    bvs.phaseNum[n] = 0;
     for (USI j = 0; j < np; j++) {
         if (PVT->GetPhaseExist(j)) {
-            bvs.phaseNum[n]++;
 
             // IMPORTANT -- need for next Flash
             // But xij in nonlinear equations has been modified
