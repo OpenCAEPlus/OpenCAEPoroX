@@ -58,18 +58,20 @@ void ScalePcowMethod01::SetScaleVal(const OCP_USI& bId, ScalePcowVarSet& spvs, O
 
 void ScalePcowMethod01::ScaleDer(const OCP_USI& bId, const ScalePcowVarSet& spvs) const
 {
-    const auto& sv = spvs.scaleVal[bId];
+    const auto&   sv = spvs.scaleVal[bId];
     OCPFlowVarSet vs = flow->GetVarSet();
-    vs.Pcw      = -((-vs.Pcw - minPcow) * sv + minPcow);
-    vs.dPcwdSw *= sv;
+    const INT&    w  = vs.w;
+    vs.Pc[w]         = -((-vs.Pc[w] - minPcow) * sv + minPcow);
+    vs.dPcwdSw       *= sv;
 }
 
 
 void ScalePcowMethod01::Scale(const OCP_USI& bId, const ScalePcowVarSet& spvs) const
 {
-    const auto& sv = spvs.scaleVal[bId];
+    const auto&   sv = spvs.scaleVal[bId];
     OCPFlowVarSet vs = flow->GetVarSet();
-    vs.Pcw = -((-vs.Pcw - minPcow) * sv + minPcow);
+    const INT&    w  = vs.w;
+    vs.Pc[w] = -((-vs.Pc[w] - minPcow) * sv + minPcow);
 }
 
 

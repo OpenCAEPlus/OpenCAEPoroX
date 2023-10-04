@@ -46,8 +46,7 @@ void FlowUnit_OW::AssinValueDer()
     const OCPFlowVarSet& vs = OWF.GetVarSet();
 
     kr = vs.kr;
-    pc[oIndex]  = vs.Pco;
-    pc[wIndex]  = vs.Pcw;
+    pc = vs.Pc;
 
     dKrdS[oo] = vs.dKrodSo;
     dKrdS[ow] = vs.dKrodSw;
@@ -66,8 +65,7 @@ void FlowUnit_OW::AssinValue()
     const OCPFlowVarSet& vs = OWF.GetVarSet();
 
     kr = vs.kr;
-    pc[oIndex] = vs.Pco;
-    pc[wIndex] = vs.Pcw;
+    pc = vs.Pc;
 }
 
 
@@ -96,8 +94,7 @@ void FlowUnit_OG::AssinValueDer()
     const OCPFlowVarSet& vs = OGF.GetVarSet();
 
     kr = vs.kr;
-    pc[oIndex] = vs.Pco;
-    pc[gIndex] = vs.Pcg;
+    pc = vs.Pc;
 
     dKrdS[oo] = vs.dKrodSo;
     dKrdS[og] = vs.dKrodSg;
@@ -116,8 +113,7 @@ void FlowUnit_OG::AssinValue()
     const OCPFlowVarSet& vs = OGF.GetVarSet();
 
     kr = vs.kr;
-    pc[oIndex] = vs.Pco;
-    pc[gIndex] = vs.Pcg;
+    pc = vs.Pc;
 }
 
 
@@ -146,8 +142,7 @@ void FlowUnit_GW::AssinValueDer()
     const OCPFlowVarSet& vs = GWF.GetVarSet();
 
     kr = vs.kr;
-    pc[gIndex] = vs.Pcg;
-    pc[wIndex] = vs.Pcw;
+    pc = vs.Pc;
     
     dKrdS[gg] = vs.dKrgdSg;
     dKrdS[gw] = vs.dKrgdSw;
@@ -166,8 +161,7 @@ void FlowUnit_GW::AssinValue()
     const OCPFlowVarSet& vs = GWF.GetVarSet();
 
     kr = vs.kr;
-    pc[gIndex] = vs.Pcg;
-    pc[wIndex] = vs.Pcw;
+    pc = vs.Pc;
 }
 
 ///////////////////////////////////////////////
@@ -205,9 +199,7 @@ void FlowUnit_OGW::AssinValueDer()
 {
     const OCPFlowVarSet& vs = OGWF.GetVarSet();
     kr = vs.kr;
-    pc[oIndex] = vs.Pco;
-    pc[gIndex] = vs.Pcg;
-    pc[wIndex] = vs.Pcw;
+    pc = vs.Pc;
 
     dKrdS[oo] = vs.dKrodSo;
     dKrdS[og] = vs.dKrodSg;
@@ -234,9 +226,7 @@ void FlowUnit_OGW::AssinValue()
 {
     const OCPFlowVarSet& vs = OGWF.GetVarSet();
     kr = vs.kr;
-    pc[oIndex] = vs.Pco;
-    pc[gIndex] = vs.Pcg;
-    pc[wIndex] = vs.Pcw;
+    pc = vs.Pc;
 }
 
 

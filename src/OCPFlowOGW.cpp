@@ -140,9 +140,9 @@ void OCPOGWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	SWOF.CalKrwKrowPcwo(vs.S[w], vs.kr[w], vs.krow, vs.Pcw);
+	SWOF.CalKrwKrowPcwo(vs.S[w], vs.kr[w], vs.krow, vs.Pc[w]);
 
-	SGOF.CalKrgKrogPcgo(vs.S[g], vs.kr[g], vs.krog, vs.Pcg);
+	SGOF.CalKrgKrogPcgo(vs.S[g], vs.kr[g], vs.krog, vs.Pc[g]);
 
 	opC.CalOilPer(vs);
 }
@@ -153,9 +153,9 @@ void OCPOGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	SWOF.CalKrwKrowPcwoDer(vs.S[w], vs.kr[w], vs.krow, vs.Pcw, vs.dKrwdSw, vs.dKrowdSw, vs.dPcwdSw);
+	SWOF.CalKrwKrowPcwoDer(vs.S[w], vs.kr[w], vs.krow, vs.Pc[w], vs.dKrwdSw, vs.dKrowdSw, vs.dPcwdSw);
 
-	SGOF.CalKrgKrogPcgoDer(vs.S[g], vs.kr[g], vs.krog, vs.Pcg, vs.dKrgdSg, vs.dKrogdSg, vs.dPcgdSg);
+	SGOF.CalKrgKrogPcgoDer(vs.S[g], vs.kr[g], vs.krog, vs.Pc[g], vs.dKrgdSg, vs.dKrogdSg, vs.dPcgdSg);
 
 	opC.CalOilPerDer(vs);
 }
@@ -190,9 +190,9 @@ void OCPOGWFMethod02::CalKrPc(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	SWFN.CalKrwPcwo(vs.S[w], vs.kr[w], vs.Pcw);
+	SWFN.CalKrwPcwo(vs.S[w], vs.kr[w], vs.Pc[w]);
 
-	SGFN.CalKrgPcgo(vs.S[g], vs.kr[g], vs.Pcg);
+	SGFN.CalKrgPcgo(vs.S[g], vs.kr[g], vs.Pc[g]);
 
 	SOF3.CalKrowKrog(vs.S[o], vs.krow, vs.krog);
 
@@ -206,9 +206,9 @@ void OCPOGWFMethod02::CalKrPcDer(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	SWFN.CalKrwPcwoDer(vs.S[w], vs.kr[w], vs.Pcw, vs.dKrwdSw, vs.dPcwdSw);
+	SWFN.CalKrwPcwoDer(vs.S[w], vs.kr[w], vs.Pc[w], vs.dKrwdSw, vs.dPcwdSw);
 
-	SGFN.CalKrgPcgoDer(vs.S[g], vs.kr[g], vs.Pcg, vs.dKrgdSg, vs.dPcgdSg);
+	SGFN.CalKrgPcgoDer(vs.S[g], vs.kr[g], vs.Pc[g], vs.dKrgdSg, vs.dPcgdSg);
 
 	SOF3.CalKrowKrogDer(vs.S[o], vs.krow, vs.krog, vs.dKrowdSo, vs.dKrogdSo);
 

@@ -30,7 +30,7 @@ void OCPOWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
     const INT& o = vs.o;
     const INT& w = vs.w;
-    SWOF.CalKrwKrowPcwo(vs.S[w], vs.kr[w], vs.kr[o], vs.Pcw);
+    SWOF.CalKrwKrowPcwo(vs.S[w], vs.kr[w], vs.kr[o], vs.Pc[w]);
 }
 
 
@@ -38,7 +38,7 @@ void OCPOWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
     const INT& o = vs.o;
     const INT& w = vs.w;
-    SWOF.CalKrwKrowPcwoDer(vs.S[w], vs.kr[w], vs.kr[o], vs.Pcw, vs.dKrwdSw, vs.dKrodSw, vs.dPcwdSw);
+    SWOF.CalKrwKrowPcwoDer(vs.S[w], vs.kr[w], vs.kr[o], vs.Pc[w], vs.dKrwdSw, vs.dKrodSw, vs.dPcwdSw);
 }
 
 

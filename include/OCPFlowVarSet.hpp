@@ -47,7 +47,6 @@ public:
         dKrwdSo = 0; dKrwdSg = 0; dKrwdSw = 0;
         dKrogdSo = 0; dKrogdSg = 0;
         dKrowdSo = 0; dKrowdSw = 0;
-        Pco = 0; Pcg = 0; Pcw = 0;
         dPcodSo = 0; dPcodSg = 0; dPcodSw = 0;
         dPcgdSo = 0; dPcgdSg = 0; dPcgdSw = 0;
         dPcwdSo = 0; dPcwdSg = 0; dPcwdSw = 0;
@@ -130,8 +129,6 @@ public:
     OCP_DBL dKrogdSo, dKrogdSg;
     OCP_DBL dKrowdSo, dKrowdSw;
 
-    /// Capillary pressure, relative to reference phase : Po - Pr, Pg - Pr, Pw - Pr
-    OCP_DBL Pco, Pcg, Pcw;
     /// the corresponding derivatives of capillary pressure
     OCP_DBL dPcodSo, dPcodSg, dPcodSw;
     OCP_DBL dPcgdSo, dPcgdSg, dPcgdSw;
