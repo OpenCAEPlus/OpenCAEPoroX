@@ -65,6 +65,14 @@ void OCPMixtureMethodK_OW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 }
 
 
+void OCPMixtureMethodK_OW01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = P;
+	mvs.T = T;
+	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
+}
+
+
 void OCPMixtureMethodK_OW01::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
     vs.Ni[0] = Vp * vs.S[0] * PVDO->CalXiO(vs.P);
@@ -230,48 +238,11 @@ void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bv
 }
 
 
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
 {
-	if (pt == PhaseType::oil)       return CalRhoO(P, T);
-	else if (pt == PhaseType::wat)  return CalRhoW(P, T);
-	else                            OCP_ABORT("WRONG TarPhase");
-}
-
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
-{
-	if (pt == PhaseType::oil)       return CalXiO(P, T);
-	else if (pt == PhaseType::wat)  return CalXiW(P, T);
-	else                            OCP_ABORT("WRONG TarPhase");
-}
-
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
-{
-	const OCP_DBL dP = P - Pref;
-	const OCP_DBL dT = T - Tref;
-	return xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
-}
-
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
-{
-	const OCP_DBL dP = P - Pref;
-	const OCP_DBL dT = T - Tref;
-	return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
-}
-
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
-{
-	return MWp[0] * CalXiO(P, T);
-}
-
-
-OCP_DBL OCPMixtureMethodK_OW01T::CalRhoW(const OCP_DBL& P, const OCP_DBL& T)
-{
-	return MWp[1] * CalXiW(P, T);
+	mvs.P = P;
+	mvs.T = T + CONV5;
+	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
 }
 
 
@@ -392,6 +363,50 @@ void OCPMixtureMethodK_OW01T::CalVStd(OCPMixtureVarSet& vs)
 }
 
 
+OCP_DBL OCPMixtureMethodK_OW01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+{
+	if (pt == PhaseType::oil)       return CalXiO(P, T + CONV5);
+	else if (pt == PhaseType::wat)  return CalXiW(P, T + CONV5);
+	else                            OCP_ABORT("WRONG TarPhase");
+}
+
+
+OCP_DBL OCPMixtureMethodK_OW01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+{
+	if (pt == PhaseType::oil)       return CalRhoO(P, T + CONV5);
+	else if (pt == PhaseType::wat)  return CalRhoW(P, T + CONV5);
+	else                            OCP_ABORT("WRONG TarPhase");
+}
+
+
+OCP_DBL OCPMixtureMethodK_OW01T::CalXiO(const OCP_DBL& P, const OCP_DBL& T)
+{
+	const OCP_DBL dP = P - Pref;
+	const OCP_DBL dT = T - Tref;
+	return xi_ref[0] * exp(cp[0] * dP - ct1[0] * dT - ct2[0] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[0] * dP * dT);
+}
+
+
+OCP_DBL OCPMixtureMethodK_OW01T::CalXiW(const OCP_DBL& P, const OCP_DBL& T)
+{
+	const OCP_DBL dP = P - Pref;
+	const OCP_DBL dT = T - Tref;
+	return xi_ref[1] * exp(cp[1] * dP - ct1[1] * dT - ct2[1] * (pow(T, 2) - pow(Tref, 2)) / 2 + cpt[1] * dP * dT);
+}
+
+
+OCP_DBL OCPMixtureMethodK_OW01T::CalRhoO(const OCP_DBL& P, const OCP_DBL& T)
+{
+	return MWp[0] * CalXiO(P, T);
+}
+
+
+OCP_DBL OCPMixtureMethodK_OW01T::CalRhoW(const OCP_DBL& P, const OCP_DBL& T)
+{
+	return MWp[1] * CalXiW(P, T);
+}
+
+
 
 /////////////////////////////////////////////////////
 // OCPMixtureMethodK_OGW01
@@ -438,6 +453,14 @@ void OCPMixtureMethodK_OGW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bv
 	mvs.T  = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+}
+
+
+void OCPMixtureMethodK_OGW01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = P;
+	mvs.T = T;
+	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
 }
 
 
@@ -793,6 +816,14 @@ void OCPMixtureMethodK_GW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 	mvs.T = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+}
+
+
+void OCPMixtureMethodK_GW01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = P;
+	mvs.T = T;
+	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
 }
 
 

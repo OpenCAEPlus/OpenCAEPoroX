@@ -685,6 +685,14 @@ void OCPMixtureMethodComp01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 }
 
 
+void OCPMixtureMethodComp01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
+{
+    mvs.P = P;
+    mvs.T = T + CONV5;
+    copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
+}
+
+
 void OCPMixtureMethodComp01::Flash(OCPMixtureVarSet& vs)
 {
     InitNtZ(vs);
@@ -771,7 +779,7 @@ OCP_DBL OCPMixtureMethodComp01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const 
     }
     else {
         // oil phase
-        return 1 / eos.CalVm(P, T, &z[0]);
+        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
     }
 }
 
@@ -794,7 +802,7 @@ OCP_DBL OCPMixtureMethodComp01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, con
     }
     else {
         // oil phase
-        return eos.CalVm(P, T, &z[0]);
+        return eos.CalVm(P, T + CONV5, &z[0]);
     }
 }
 

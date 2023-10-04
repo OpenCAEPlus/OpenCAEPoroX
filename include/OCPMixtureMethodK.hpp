@@ -36,6 +36,8 @@ public:
     OCPMixtureMethodK() = default;
     /// Set variable set
     virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
+    /// Set variable set
+    virtual void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
     virtual void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) = 0;
     /// With P, Ni, perform flash calculations, and calculate VfP,Vfi only
@@ -71,6 +73,7 @@ class OCPMixtureMethodK_OW01 : public OCPMixtureMethodK
 public:
     OCPMixtureMethodK_OW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -107,6 +110,7 @@ class OCPMixtureMethodK_OW01T : public OCPMixtureMethodK
 public:
     OCPMixtureMethodK_OW01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -117,7 +121,6 @@ public:
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override { return 1 / CalXi(P, 0, T, 0, pt); }
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T, zi); }
-
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
@@ -169,6 +172,7 @@ class OCPMixtureMethodK_OGW01 : public OCPMixtureMethodK
 public:
     OCPMixtureMethodK_OGW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
@@ -220,6 +224,7 @@ class OCPMixtureMethodK_GW01 : public OCPMixtureMethodK
 public:
     OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;

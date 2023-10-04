@@ -39,6 +39,8 @@ public:
     OCPMixtureMethodComp() = default;
     /// Set variable set
     virtual void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const = 0;
+    /// Set variable set
+    virtual void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const = 0;
     /// With P, Ni, perform flash calculations only
     virtual void Flash(OCPMixtureVarSet& vs) = 0;
     /// With P, S, Vp, perform flash calculations, and calculate VfP,Vfi only
@@ -57,10 +59,12 @@ public:
     virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Calculate mass density of target phase
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
-    /// Input total number of existing phase, return the number of existing phase in PEC
-    virtual USI GetNumPhasePE(const USI& np) const = 0;
     /// OutPut total flash iterations during the simulation
     void OutIters() const { PE.OutMixtureIters(); }
+    /// if current mixture is friendly to well
+    virtual OCP_BOOL IfWellFriend() const = 0;
+    /// Input total number of existing phase, return the number of existing phase in PEC
+    virtual USI GetNumPhasePE(const USI& np) const = 0;
     /// Get number of components in PE
     const auto& GetNC() const { return NC; }
     /// Get number if phases in PE
@@ -75,7 +79,7 @@ public:
     const auto& GetZi() const { return zi; }
     /// Get Nt
     const auto& GetNt() const { return Nt; }
-    virtual OCP_BOOL IfWellFriend() const = 0;
+
 
 ////////////////////////////////////////////////////////////////
 // Basic variables
@@ -233,6 +237,7 @@ class OCPMixtureMethodComp01 : public OCPMixtureMethodComp
 public:
     OCPMixtureMethodComp01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
     void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
     void Flash(OCPMixtureVarSet& vs) override;
     void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
     void Flash(OCPMixtureVarSet& vs, const USI& ftype) override;

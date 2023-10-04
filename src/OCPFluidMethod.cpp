@@ -1812,8 +1812,6 @@ void IsoT_AIMc::CalFlashEp(Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     const OCP_USI&    nb  = bvs.nb;
-    const USI&        np  = bvs.np;
-    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
@@ -1830,8 +1828,6 @@ void IsoT_AIMc::CalFlashEa(Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     const OCP_USI&    nb  = bvs.nb;
-    const USI&        np  = bvs.np;
-    const USI&        nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
@@ -1850,7 +1846,6 @@ void IsoT_AIMc::CalFlashI(Bulk& bk)
     BulkVarSet&    bvs = bk.vs;
     const OCP_USI& nb  = bvs.nb;
     const USI&     np  = bvs.np;
-    const USI&     nc  = bvs.nc;
 
     for (OCP_USI n = 0; n < nb; n++) {
         if (bk.bulkTypeAIM.IfFIMbulk(n)) {
