@@ -21,7 +21,7 @@
 OCPMixtureMethodK_OW01::OCPMixtureMethodK_OW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs) 
 {
 
-    vs.Init(2, 2, OCPMixtureType::BO_OW);
+    vs.Init(OCPMixtureType::BO_OW, 2, 2);
 
     OCP_DBL stdRhoO, stdRhoW;
     if (rs_param.density.activity) {
@@ -172,7 +172,7 @@ void OCPMixtureMethodK_OW01::CalVStd(OCPMixtureVarSet& vs)
 OCPMixtureMethodK_OW01T::OCPMixtureMethodK_OW01T(const ComponentParam& param, const USI& tarId, OCPMixtureVarSet& vs)
 {
 
-	vs.Init(2, 2, OCPMixtureType::THERMALK_OW);
+	vs.Init(OCPMixtureType::THERMALK_OW, 2, 2);
 
 	if (param.molden.activity)
 		xi_ref = param.molden.data[tarId];
@@ -416,7 +416,7 @@ OCP_DBL OCPMixtureMethodK_OW01T::CalRhoW(const OCP_DBL& P, const OCP_DBL& T)
 OCPMixtureMethodK_OGW01::OCPMixtureMethodK_OGW01(const ParamReservoir& rs_param, const USI& i,
 	OCPMixtureVarSet& vs)
 {
-	vs.Init(3, 3, OCPMixtureType::BO_OGW);
+	vs.Init( OCPMixtureType::BO_OGW, 3, 3);
 
 
 	OCP_DBL stdRhoO, stdRhoW, stdRhoG;
@@ -800,7 +800,7 @@ void OCPMixtureMethodK_OGW01::CalVStd(OCPMixtureVarSet& vs)
 
 OCPMixtureMethodK_GW01::OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
-	vs.Init(2, 2, OCPMixtureType::BO_GW);
+	vs.Init(OCPMixtureType::BO_GW, 2, 2);
 
 
 	PVTCO2.Setup(rs_param.PVTCO2.data[i]);

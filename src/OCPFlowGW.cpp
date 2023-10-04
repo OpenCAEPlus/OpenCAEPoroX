@@ -20,15 +20,21 @@
 
 void OCPGWFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-	bc.CalKrPcN(vs.Sg, vs.krg, vs.Pcg);
-	bc.CalKrPcW(vs.Sw, vs.krw, vs.Pcw);
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	bc.CalKrPcN(vs.S[g], vs.kr[g], vs.Pcg);
+	bc.CalKrPcW(vs.S[w], vs.kr[w], vs.Pcw);
 }
 
 
 void OCPGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-	bc.CalKrPcDerN(vs.Sg, vs.krg, vs.Pcg, vs.dKrgdSg, vs.dPcgdSg);
-	bc.CalKrPcDerW(vs.Sw, vs.krw, vs.Pcw, vs.dKrwdSw, vs.dPcwdSw);
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pcg, vs.dKrgdSg, vs.dPcgdSg);
+	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pcw, vs.dKrwdSw, vs.dPcwdSw);
 }
 
 
@@ -40,7 +46,7 @@ void OCPGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 void OCPFlowGW::Setup(const ParamReservoir& rs_param, const USI& i)
 {
 	if (rs_param.BCparam.size() > 0) {
-		pfMethod = new OCPGWFMethod01(rs_param.BCparam[i]);
+		pfMethod = new OCPGWFMethod01(rs_param.BCparam[i], vs);
 	}
 }
 

@@ -16,28 +16,33 @@
  // OCPOGFMethod01
  /////////////////////////////////////////////////////
 
-OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin)
+OCPOGFMethod01::OCPOGFMethod01(const vector<vector<OCP_DBL>>& SWOFin, OCPFlowVarSet& vs)
 {
+    vs.Init(OCPFlowType::OG, 2, 2);
     SGOF.Setup(SWOFin);
 }
 
 
 void OCPOGFMethod01::CalKrPc(OCPFlowVarSet& vs)
 {
-    SGOF.CalKrgKrogPcgo(vs.Sg, vs.krg, vs.kro, vs.Pcg);
+    const INT& o = vs.o;
+    const INT& g = vs.g;
+    SGOF.CalKrgKrogPcgo(vs.S[g], vs.kr[g], vs.kr[o], vs.Pcg);
 }
 
 
 void OCPOGFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
-    SGOF.CalKrgKrogPcgoDer(vs.Sg, vs.krg, vs.kro, vs.Pcg, vs.dKrgdSg, vs.dKrodSg, vs.dPcgdSg);
+    const INT& o = vs.o;
+    const INT& g = vs.g;
+    SGOF.CalKrgKrogPcgoDer(vs.S[g], vs.kr[g], vs.kr[o], vs.Pcg, vs.dKrgdSg, vs.dKrodSg, vs.dPcgdSg);
 }
 
 
 void OCPFlowOG::Setup(const ParamReservoir& rs_param, const USI& i)
 {
     if (rs_param.SGOF_T.data.size() > 0) {
-        pfMethod = new OCPOGFMethod01(rs_param.SGOF_T.data[i]);
+        pfMethod = new OCPOGFMethod01(rs_param.SGOF_T.data[i], vs);
     }
 }
 

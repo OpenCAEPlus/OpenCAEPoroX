@@ -44,7 +44,7 @@ public:
 class OCPOGFMethod01 : public OCPOGFMethod
 {
 public:
-    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin);
+    OCPOGFMethod01(const vector<vector<OCP_DBL>>& SGOFin, OCPFlowVarSet& vs);
     void CalKrPc(OCPFlowVarSet& vs) override;
     void CalKrPcDer(OCPFlowVarSet& vs) override;
 
@@ -65,7 +65,7 @@ protected:
 class OCPFlowOG : public OCPFlow
 {
 public:
-    OCPFlowOG() { flowType = OCPFlowType::OG; }
+    OCPFlowOG() { vs.flowType = OCPFlowType::OG; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sg) {
         SetSaturation(So, Sg);
@@ -87,8 +87,8 @@ public:
 
 protected:
     void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sg) {
-        vs.So = So;
-        vs.Sg = Sg;
+        vs.S[vs.o] = So;
+        vs.S[vs.g] = Sg;
     }
 
 protected:

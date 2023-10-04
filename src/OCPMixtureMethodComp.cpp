@@ -648,7 +648,7 @@ void OCPMixtureMethodComp::CaldXsdXp02(OCPMixtureVarSet& vs)
 
 OCPMixtureMethodComp01::OCPMixtureMethodComp01(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
 {
-    vs.Init(rs_param.comsParam.numPhase + 1, rs_param.comsParam.numCom + 1, OCPMixtureType::COMP);
+    vs.Init(OCPMixtureType::COMP, rs_param.comsParam.numPhase + 1, rs_param.comsParam.numCom + 1);
 
     Setup(rs_param.comsParam, i);
     // water property

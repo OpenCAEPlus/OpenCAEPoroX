@@ -64,14 +64,17 @@ void MisCurveMethod01::CurveCorrect(const OCP_USI& bId, const MisFacVarSet& mfvs
         // miscible
 
         OCPFlowVarSet& vs = flow->GetVarSet();
+        const INT&     o  = vs.o;
+        const INT&     g  = vs.g;
+        const INT&     w  = vs.w;
 
         // for permeability
         OCP_DBL tmp;
-        const OCP_DBL krgt = flow->CalKrg((1 - vs.Sw), tmp);
+        const OCP_DBL krgt = flow->CalKrg((1 - vs.S[w]), tmp);
         const OCP_DBL krh = 0.5 * (vs.krow + krgt);
 
-        vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
-        vs.krg = Fk * vs.krg + (1 - Fk) * krh * vs.Sg / (1 - vs.Sw);
+        vs.kr[o] = Fk * vs.kr[o] + (1 - Fk) * krh * vs.S[o] / (1 - vs.S[w]);
+        vs.kr[g] = Fk * vs.kr[g] + (1 - Fk) * krh * vs.S[g] / (1 - vs.S[w]);
 
         // for capillary pressure
         vs.Pcg *= Fp;
@@ -88,24 +91,27 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& m
         // miscible
 
         OCPFlowVarSet& vs = flow->GetVarSet();
+        const INT&     o  = vs.o;
+        const INT&     g  = vs.g;
+        const INT&     w  = vs.w;
 
         // for permeability
         OCP_DBL       dkrgd1_Sw = 0;
-        const OCP_DBL krgt = flow->CalKrg((1 - vs.Sw), dkrgd1_Sw);
+        const OCP_DBL krgt = flow->CalKrg((1 - vs.S[w]), dkrgd1_Sw);
         const OCP_DBL krh = 0.5 * (vs.krow + krgt);
 
-        vs.kro = Fk * vs.kro + (1 - Fk) * krh * vs.So / (1 - vs.Sw);
-        vs.krg = Fk * vs.krg + (1 - Fk) * krh * vs.Sg / (1 - vs.Sw);
+        vs.kr[o] = Fk * vs.kr[o] + (1 - Fk) * krh * vs.S[o] / (1 - vs.S[w]);
+        vs.kr[g] = Fk * vs.kr[g] + (1 - Fk) * krh * vs.S[g] / (1 - vs.S[w]);
 
         const OCP_DBL dKrhdSo = 0.5 * vs.dKrowdSo;
         const OCP_DBL dKrhdSw = 0.5 * (vs.dKrowdSw - dkrgd1_Sw);      
 
-        vs.dKrodSo = Fk * vs.dKrodSo + (1 - Fk) * (dKrhdSo * vs.So + krh) / (1 - vs.Sw);
+        vs.dKrodSo = Fk * vs.dKrodSo + (1 - Fk) * (dKrhdSo * vs.S[o] + krh) / (1 - vs.S[w]);
         vs.dKrodSg = Fk * vs.dKrodSg;
-        vs.dKrodSw = Fk * vs.dKrodSw + (1 - Fk) * vs.So * (dKrhdSw * (1 - vs.Sw) + krh) / ((1 - vs.Sw) * (1 - vs.Sw));
-        vs.dKrgdSo = (1 - Fk) * dKrhdSo * vs.Sg / (1 - vs.Sw);
-        vs.dKrgdSg = Fk * vs.dKrgdSg + (1 - Fk) * krh / (1 - vs.Sw);
-        vs.dKrgdSw = (1 - Fk) * vs.Sg * (dKrhdSw * (1 - vs.Sw) + krh) / ((1 - vs.Sw) * (1 - vs.Sw));
+        vs.dKrodSw = Fk * vs.dKrodSw + (1 - Fk) * vs.S[o] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
+        vs.dKrgdSo = (1 - Fk) * dKrhdSo * vs.S[g] / (1 - vs.S[w]);
+        vs.dKrgdSg = Fk * vs.dKrgdSg + (1 - Fk) * krh / (1 - vs.S[w]);
+        vs.dKrgdSw = (1 - Fk) * vs.S[g] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
 
         // for capillary pressure
         vs.Pcg     *= Fp;

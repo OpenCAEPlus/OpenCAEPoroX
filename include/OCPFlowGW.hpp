@@ -41,7 +41,10 @@ public:
 class OCPGWFMethod01 : public OCPGWFMethod
 {
 public:
-    OCPGWFMethod01(const BrooksCoreyParam& bcp) { bc.Setup(bcp); }
+    OCPGWFMethod01(const BrooksCoreyParam& bcp, OCPFlowVarSet& vs) { 
+        vs.Init(OCPFlowType::GW, 2, 2);
+        bc.Setup(bcp); 
+    }
     void CalKrPc(OCPFlowVarSet& vs) override;
     void CalKrPcDer(OCPFlowVarSet& vs) override;
 
@@ -57,7 +60,7 @@ protected:
 class OCPFlowGW : public OCPFlow
 {
 public:
-    OCPFlowGW() { flowType = OCPFlowType::GW; }
+    OCPFlowGW() { vs.flowType = OCPFlowType::GW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& Sg, const OCP_DBL& Sw) {
         SetSaturation(Sg, Sw);
@@ -76,8 +79,8 @@ public:
 
 protected:
     void SetSaturation(const OCP_DBL& Sg, const OCP_DBL& Sw) {
-        vs.Sg = Sg;
-        vs.Sw = Sw;
+        vs.S[vs.g] = Sg;
+        vs.S[vs.w] = Sw;
     }
 
 protected:

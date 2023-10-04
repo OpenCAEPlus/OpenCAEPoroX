@@ -73,7 +73,7 @@ protected:
 class OCPFlowOW : public OCPFlow
 {
 public:
-    OCPFlowOW() { flowType = OCPFlowType::OW; }
+    OCPFlowOW() { vs.flowType = OCPFlowType::OW; }
     void Setup(const ParamReservoir& rs_param, const USI& i);
     void CalKrPc(const OCP_DBL& So, const OCP_DBL& Sw) {
         SetSaturation(So, Sw);
@@ -95,8 +95,8 @@ public:
 
 protected:
     void SetSaturation(const OCP_DBL& So, const OCP_DBL& Sw) {
-        vs.So = So;
-        vs.Sw = Sw;
+        vs.S[vs.o] = So;
+        vs.S[vs.w] = Sw;
     }
 
 protected:

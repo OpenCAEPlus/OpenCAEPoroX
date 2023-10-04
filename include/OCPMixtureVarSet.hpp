@@ -56,8 +56,10 @@ class OCPMixtureVarSet
 {
 public:
     OCPMixtureVarSet() = default;
-    void Init(const USI& numPhase, const USI& numCom, const OCPMixtureType& mixType) {
+    void Init(const OCPMixtureType& mixType, const USI& numPhase, const USI& numCom) {
         mixtureType = mixType;
+        np = numPhase;
+        nc = numCom;
 
         switch (mixtureType)
         {
@@ -97,8 +99,6 @@ public:
         }
 
         // vars
-        np = numPhase;
-        nc = numCom;
         Ni.resize(nc);
         phaseExist.resize(np);
         S.resize(np);
