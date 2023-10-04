@@ -42,9 +42,6 @@ public:
         Swco = 0;
         krocw = 0;
         krog = 0; krow = 0;
-        dKrodSo = 0; dKrodSg = 0; dKrodSw = 0;
-        dKrgdSo = 0; dKrgdSg = 0; dKrgdSw = 0;
-        dKrwdSo = 0; dKrwdSg = 0; dKrwdSw = 0;
         dKrogdSo = 0; dKrogdSg = 0;
         dKrowdSo = 0; dKrowdSw = 0;
         dPcodSo = 0; dPcodSg = 0; dPcodSw = 0;
@@ -87,6 +84,15 @@ public:
             OCP_ABORT("Inavailable Flow Type!");
             break;
         }
+        oo = o * np + o;
+        og = o * np + g;
+        ow = o * np + w;
+        go = g * np + o;
+        gg = g * np + g;
+        gw = g * np + w;
+        wo = w * np + o;
+        wg = w * np + g;
+        ww = w * np + w;
 
         // vars
         Init0();
@@ -102,6 +108,8 @@ public:
     OCPFlowType     flowType;
     /// index of oil, gas, water
     INT             o, g, w;
+    /// auxiliary index
+    INT             oo, og, ow, go, gg, gw, wo, wg, ww;
     /// num of phase, components
     USI             np, nc;
     /// saturations
@@ -123,9 +131,6 @@ public:
     /// the corresponding oil relative permeability when only oil and water are present
     OCP_DBL krow;
     /// the corresponding derivatives of permeability
-    OCP_DBL dKrodSo, dKrodSg, dKrodSw;
-    OCP_DBL dKrgdSo, dKrgdSg, dKrgdSw;
-    OCP_DBL dKrwdSo, dKrwdSg, dKrwdSw;
     OCP_DBL dKrogdSo, dKrogdSg;
     OCP_DBL dKrowdSo, dKrowdSw;
 

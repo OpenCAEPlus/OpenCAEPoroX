@@ -33,8 +33,8 @@ void OCPGWFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pc[g], vs.dKrgdSg, vs.dPcgdSg);
-	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pc[w], vs.dKrwdSw, vs.dPcwdSw);
+	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pc[g], vs.dKrdS[vs.gg], vs.dPcgdSg);
+	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pc[w], vs.dKrdS[vs.ww], vs.dPcwdSw);
 }
 
 

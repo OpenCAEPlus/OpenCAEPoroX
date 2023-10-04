@@ -106,12 +106,12 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& m
         const OCP_DBL dKrhdSo = 0.5 * vs.dKrowdSo;
         const OCP_DBL dKrhdSw = 0.5 * (vs.dKrowdSw - dkrgd1_Sw);      
 
-        vs.dKrodSo = Fk * vs.dKrodSo + (1 - Fk) * (dKrhdSo * vs.S[o] + krh) / (1 - vs.S[w]);
-        vs.dKrodSg = Fk * vs.dKrodSg;
-        vs.dKrodSw = Fk * vs.dKrodSw + (1 - Fk) * vs.S[o] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
-        vs.dKrgdSo = (1 - Fk) * dKrhdSo * vs.S[g] / (1 - vs.S[w]);
-        vs.dKrgdSg = Fk * vs.dKrgdSg + (1 - Fk) * krh / (1 - vs.S[w]);
-        vs.dKrgdSw = (1 - Fk) * vs.S[g] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
+        vs.dKrdS[vs.oo] = Fk * vs.dKrdS[vs.oo] + (1 - Fk) * (dKrhdSo * vs.S[o] + krh) / (1 - vs.S[w]);
+        vs.dKrdS[vs.og] = Fk * vs.dKrdS[vs.og];
+        vs.dKrdS[vs.ow] = Fk * vs.dKrdS[vs.ow] + (1 - Fk) * vs.S[o] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
+        vs.dKrdS[vs.go] = (1 - Fk) * dKrhdSo * vs.S[g] / (1 - vs.S[w]);
+        vs.dKrdS[vs.gg] = Fk * vs.dKrdS[vs.gg] + (1 - Fk) * krh / (1 - vs.S[w]);
+        vs.dKrdS[vs.gw] = (1 - Fk) * vs.S[g] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
 
         // for capillary pressure
         vs.Pc[g]   *= Fp;

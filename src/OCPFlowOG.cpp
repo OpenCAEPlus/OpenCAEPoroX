@@ -35,7 +35,7 @@ void OCPOGFMethod01::CalKrPcDer(OCPFlowVarSet& vs)
 {
     const INT& o = vs.o;
     const INT& g = vs.g;
-    SGOF.CalKrgKrogPcgoDer(vs.S[g], vs.kr[g], vs.kr[o], vs.Pc[g], vs.dKrgdSg, vs.dKrodSg, vs.dPcgdSg);
+    SGOF.CalKrgKrogPcgoDer(vs.S[g], vs.kr[g], vs.kr[o], vs.Pc[g], vs.dKrdS[vs.gg], vs.dKrdS[vs.og], vs.dPcgdSg);
 }
 
 
