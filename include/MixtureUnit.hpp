@@ -20,7 +20,6 @@
 #include "OCPConst.hpp"
 #include "OptionalModules.hpp"
 #include "ParamReservoir.hpp"
-#include "WellOpt.hpp"
 #include "OCPMixture.hpp"
 #include "BulkVarSet.hpp"
 
@@ -32,44 +31,45 @@ using namespace std;
 class MixtureUnit
 {
 public:
-    MixtureUnit() = default;
+    MixtureUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     /// return type of mixture.
     auto GetMixtureType() const { return vs->mixtureType; }
-    virtual OCPMixture* GetMixture() = 0;
-    /// flash calculation with saturation of phases.
-    virtual void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) = 0;
-    virtual void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
-    virtual void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
-    /// Flash calculation with moles of components.
-    virtual void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
-    /// Flash calculation with moles of components and Calculate the derivative
-    virtual void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) = 0;
-
+    /// return the mixture.
+    OCPMixture* GetMixture() { return mix; }
+    /// flash calculation
+    void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin);
+    /// flash calculation with saturation of phases for some bulk
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs);
+    /// flash calculation with saturation of phases for some bulk
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs);
+    /// Flash calculation with moles of components for some bulk
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs);
+    /// Flash calculation with moles of components and Calculate the derivative for some bulk
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs);
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed
     // for compositional model: if tar phase is hydrocarbon phase, Pin, Tin, Ziin is
     // needed. if tar phase is water, only Pin is needed.
-    virtual OCP_DBL XiPhase(const OCP_DBL& Pin,
-                            const OCP_DBL& Tin,
-                            const vector<OCP_DBL>& Ziin,
-                            const PhaseType& pt) = 0;
-
+    OCP_DBL XiPhase(const OCP_DBL& Pin, const OCP_DBL& Tin, const vector<OCP_DBL>& Ziin, const PhaseType& pt) {
+        return mix->CalXi(Pin, Pin, Tin, &Ziin[0], pt);
+    }
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed, if
     // tarPhase is oil,then Pbb is needed, too for compositional model: if tar phase is
     // hydrocarbon phase, Pin, Tin, Ziin is needed. if tar phase is water, only Pin is
     // needed.
-    virtual OCP_DBL RhoPhase(const OCP_DBL& Pin,
-                             const OCP_DBL& Pbb,
-                             const OCP_DBL& Tin,
-                             const vector<OCP_DBL>& Ziin,
-                             const PhaseType& pt) = 0;
-
+    OCP_DBL RhoPhase(const OCP_DBL& Pin, const OCP_DBL& Pbb, const OCP_DBL& Tin,
+                     const vector<OCP_DBL>& Ziin, const PhaseType& pt){
+        return mix->CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
+    }
     // for well
     /// Calculate Production rate for PROD well
-    virtual OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) = 0;
-
-    virtual void OutMixtureIters() const = 0;
+    OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) {
+        return mix->CalEnthalpy(Tin, Ziin);
+    }
+    void OutMixtureIters() const {
+        mix->OutputIters();
+    }
 
 public:
     const auto GetVs() const { return vs; }
@@ -106,8 +106,18 @@ public:
     const auto& GetHx(const USI& j, const USI& i) const { return vs->Hx[j * vs->nc + i]; }
 
 protected:
+    /// mixture of components
+    OCPMixture*             mix;
     /// variable set for mixture
     const OCPMixtureVarSet* vs;
+
+protected:
+    /// Surface tension
+    SurfaceTension* surTen;
+    USI             stMethodIndex;
+    /// Miscible Factor
+    MiscibleFactor* misFac;
+    USI             mfMethodIndex;
 };
 
 #endif /* end if __MIXTURE_HEADER__ */

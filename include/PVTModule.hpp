@@ -17,9 +17,6 @@
 
 // OpenCAEPoroX header files
 #include "MixtureUnit.hpp"
-#include "MixtureUnitBlkOil.hpp"
-#include "MixtureUnitComp.hpp"
-#include "MixtureUnitThermal.hpp"
 #include "BulkVarSet.hpp"
 
 using namespace std;
@@ -33,31 +30,8 @@ public:
     {
         NTPVT = rs_param.NTPVT;
 
-        if (rs_param.thermal) {
-            for (USI i = 0; i < NTPVT; i++)
-                PVTs.push_back(new MixtureUnitThermal_OW(rs_param, i, opts));
-        }
-        else if (rs_param.blackOil) {
-            if (rs_param.water && rs_param.oil && !rs_param.gas) {
-                for (USI i = 0; i < NTPVT; i++)
-                    PVTs.push_back(new MixtureUnitBlkOil_OW(rs_param, i, opts));
-            }
-            else if (rs_param.water && rs_param.oil && rs_param.gas) {
-                for (USI i = 0; i < NTPVT; i++)
-                    PVTs.push_back(new MixtureUnitBlkOil_OGW(rs_param, i, opts));
-            }
-            else if (rs_param.water && !rs_param.oil && rs_param.gas) {
-                for (USI i = 0; i < NTPVT; i++)
-                    PVTs.push_back(new MixtureUnitBlkOil_GW(rs_param, i, opts));
-            }
-            else {
-                OCP_ABORT("Inavailable Mixture Type!");
-            }
-        }
-        else if (rs_param.comps) {
-            for (USI i = 0; i < NTPVT; i++)
-                PVTs.push_back(new MixtureUnitComp(rs_param, i, opts));
-        }
+        for (USI i = 0; i < NTPVT; i++)
+            PVTs.push_back(new MixtureUnit(rs_param, i, opts));
 
         mixType = PVTs[0]->GetMixtureType();
 

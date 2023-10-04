@@ -55,7 +55,7 @@ public:
     /// Calculate mass density of target phase
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Output iterations
-    void OutIters() const { OCP_ABORT("Not Used!"); }
+    virtual void OutIters() const { }
     /// If current method is friendly to well
     virtual OCP_BOOL IfWellFriend() const = 0;
     /// Calculate Enthalpy
