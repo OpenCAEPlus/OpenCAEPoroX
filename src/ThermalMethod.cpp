@@ -454,7 +454,7 @@ void T_FIM::CalKrPc(Bulk& bk) const
             auto SAT = bk.SATm.GetSAT(n);
 
             OCP_USI bId = n * np;
-            SAT->CalKrPcFIM(&bvs.S[bId], n);
+            SAT->CalKrPcFIM(n, &bvs.S[bId]);
             copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
             copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
             copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);

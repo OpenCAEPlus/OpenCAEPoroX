@@ -320,7 +320,7 @@ void IsoT_IMPEC::CalKrPc(Bulk& bk) const
         auto SAT = bk.SATm.GetSAT(n);
 
         OCP_USI bId = n * bvs.np;
-        SAT->CalKrPc(&bvs.S[bId], n);
+        SAT->CalKrPc(n, &bvs.S[bId]);
         copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
         copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
         for (USI j = 0; j < bvs.np; j++)
@@ -1011,7 +1011,7 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
         auto SAT = bk.SATm.GetSAT(n);
 
         const OCP_USI bId = n * np;
-        SAT->CalKrPcFIM(&bvs.S[bId], n);
+        SAT->CalKrPcFIM(n, &bvs.S[bId]);
         copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
         copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
         copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
@@ -1902,7 +1902,7 @@ void IsoT_AIMc::CalKrPcE(Bulk& bk)
             auto SAT = bk.SATm.GetSAT(n);
             // Explicit bulk
             const OCP_USI bId = n * np;
-            SAT->CalKrPc(&bvs.S[bId], n);
+            SAT->CalKrPc(n, &bvs.S[bId]);
             copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
             copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
             for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
@@ -1921,7 +1921,7 @@ void IsoT_AIMc::CalKrPcI(Bulk& bk)
             auto SAT = bk.SATm.GetSAT(n);
             // Implicit bulk
             const OCP_USI bId = n * np;
-            SAT->CalKrPcFIM(&bvs.S[bId], n);
+            SAT->CalKrPcFIM(n, &bvs.S[bId]);
             copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
             copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
             copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);

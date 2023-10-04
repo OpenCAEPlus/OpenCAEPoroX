@@ -22,7 +22,7 @@ class OptionalModules
 {
     friend class MixtureUnit;
     friend class OCPMixtureComp;
-    friend class FlowUnit_OGW;
+    friend class FlowUnit;
     friend class FlowUnit_OW;
     friend class Reservoir;
 

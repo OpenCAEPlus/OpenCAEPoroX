@@ -13,178 +13,29 @@
 
 
 ///////////////////////////////////////////////
-// FlowUnit_OW
+// FlowUnit
 ///////////////////////////////////////////////
 
 
-void FlowUnit_OW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
+void FlowUnit::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const
 {
     scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);
 }
 
 
-void FlowUnit_OW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit::CalKrPc(const OCP_USI& bId, const OCP_DBL* S) const
 {
-    bulkId = bId;
-    OWF.CalKrPc(S_in[oIndex], S_in[wIndex]);
-    scalePcow->Scale(bId, spMethodIndex);
-    AssinValue();
-}
-
-
-void FlowUnit_OW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    OWF.CalKrPcDer(S_in[oIndex], S_in[wIndex]);
-    scalePcow->ScaleDer(bId, spMethodIndex);
-    AssinValueDer();
-}
-
-
-void FlowUnit_OW::AssinValueDer()
-{
-    const OCPFlowVarSet& vs = OWF.GetVarSet();
-
-    kr    = vs.kr;
-    pc    = vs.Pc;
-    dKrdS = vs.dKrdS;
-    dPcdS = vs.dPcdS;
-}
-
-
-void FlowUnit_OW::AssinValue()
-{
-    const OCPFlowVarSet& vs = OWF.GetVarSet();
-
-    kr = vs.kr;
-    pc = vs.Pc;
-}
-
-
-///////////////////////////////////////////////
-// FlowUnit_OG
-///////////////////////////////////////////////
-
-
-void FlowUnit_OG::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    OGF.CalKrPc(S_in[oIndex], S_in[gIndex]);
-    AssinValue();
-}
-
-void FlowUnit_OG::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    OGF.CalKrPcDer(S_in[oIndex], S_in[gIndex]);
-    AssinValueDer();
-}
-
-
-void FlowUnit_OG::AssinValueDer()
-{
-    const OCPFlowVarSet& vs = OGF.GetVarSet();
-
-    kr    = vs.kr;
-    pc    = vs.Pc;
-    dKrdS = vs.dKrdS;
-    dPcdS = vs.dPcdS;
-}
-
-
-void FlowUnit_OG::AssinValue()
-{
-    const OCPFlowVarSet& vs = OGF.GetVarSet();
-
-    kr = vs.kr;
-    pc = vs.Pc;
-}
-
-
-///////////////////////////////////////////////
-// FlowUnit_GW
-///////////////////////////////////////////////
-
-
-void FlowUnit_GW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    GWF.CalKrPc(S_in[gIndex], S_in[wIndex]);
-    AssinValue();
-}
-
-
-void FlowUnit_GW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    GWF.CalKrPcDer(S_in[gIndex], S_in[wIndex]);
-    AssinValueDer();
-}
-
-void FlowUnit_GW::AssinValueDer()
-{
-    const OCPFlowVarSet& vs = GWF.GetVarSet();
-
-    kr    = vs.kr;
-    pc    = vs.Pc; 
-    dKrdS = vs.dKrdS;
-    dPcdS = vs.dPcdS;
-}
-
-
-void FlowUnit_GW::AssinValue()
-{
-    const OCPFlowVarSet& vs = GWF.GetVarSet();
-
-    kr = vs.kr;
-    pc = vs.Pc;
-}
-
-///////////////////////////////////////////////
-// FlowUnit_OGW
-///////////////////////////////////////////////
-
-
-void FlowUnit_OGW::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin)
-{
-    scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);
-}
-
-
-void FlowUnit_OGW::CalKrPc(const OCP_DBL* S_in, const OCP_USI& bId)
-{
-    bulkId = bId;
-    OGWF.CalKrPc(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    flow->CalKrPc(S);
     misCurve->CorrectCurve(bId, mcMethodIndex);
     scalePcow->Scale(bId, spMethodIndex);
-    AssinValue();
 }
 
 
-void FlowUnit_OGW::CalKrPcFIM(const OCP_DBL* S_in, const OCP_USI& bId)
+void FlowUnit::CalKrPcFIM(const OCP_USI& bId, const OCP_DBL* S) const
 {
-    bulkId = bId;
-    OGWF.CalKrPcDer(S_in[oIndex], S_in[gIndex], S_in[wIndex]);
+    flow->CalKrPcDer(S);
     misCurve->CorrectCurveDer(bId, mcMethodIndex);
     scalePcow->ScaleDer(bId, spMethodIndex);
-    AssinValueDer(); 
-}
-
-
-void FlowUnit_OGW::AssinValueDer()
-{
-    const OCPFlowVarSet& vs = OGWF.GetVarSet();
-    kr    = vs.kr;
-    pc    = vs.Pc;
-    dKrdS = vs.dKrdS;
-    dPcdS = vs.dPcdS;
-}
-
-void FlowUnit_OGW::AssinValue()
-{
-    const OCPFlowVarSet& vs = OGWF.GetVarSet();
-    kr = vs.kr;
-    pc = vs.Pc;
 }
 
 
