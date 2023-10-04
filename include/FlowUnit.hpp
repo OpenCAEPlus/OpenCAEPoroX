@@ -19,10 +19,7 @@
 #include "OCPFuncSAT.hpp"
 #include "OptionalModules.hpp"
 #include "ParamReservoir.hpp"
-#include "OCPFlowOGW.hpp"
-#include "OCPFlowOW.hpp"
-#include "OCPFlowOG.hpp"
-#include "OCPFlowGW.hpp"
+#include "OCPFlow.hpp"
 
 /// designed to deal with matters related to saturation table.
 /// relative permeability, capillary pressure will be calculated here.

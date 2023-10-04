@@ -333,28 +333,6 @@ protected:
 };
 
 
-/// Calculate oil, gas, water relative permeability and capillary pressure
-class OCPOGWFMethod
-{
-public:
-	OCPOGWFMethod() = default;
-	virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
-	virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
-
-	virtual OCP_DBL GetSwco() const = 0;
-	virtual OCP_DBL GetMaxPcow() const = 0;
-	virtual OCP_DBL GetMinPcow() const = 0;
-
-	virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const = 0;
-	virtual OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const = 0;
-	virtual OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const = 0;
-	virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const = 0;
-	virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const = 0;
-	virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
-
-protected:
-	OCP3POilPerCalculation  opC;
-};
 
 
 
