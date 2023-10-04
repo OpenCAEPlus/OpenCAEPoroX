@@ -141,6 +141,93 @@ void BrooksCorey::CalKrPcDerW(const OCP_DBL& sw, OCP_DBL& kr, OCP_DBL& pc, OCP_D
 }
 
 
+/////////////////////////////////////////////////////
+// OCP3POilPerMethod01
+/////////////////////////////////////////////////////
+
+
+void OCP3POilPerMethod01::CalOilPer(OCPFlowVarSet& vs)
+{
+	const INT& o = vs.o;
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	vs.kr[o] = vs.krocw
+		* ((vs.krow / vs.krocw + vs.kr[w]) * (vs.krog / vs.krocw + vs.kr[g])
+			- (vs.kr[w] + vs.kr[g]));
+	if (vs.kr[o] < 0) vs.kr[o] = 0;
+}
+
+
+void OCP3POilPerMethod01::CalOilPerDer(OCPFlowVarSet& vs)
+{
+	const INT& o = vs.o;
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	vs.kr[o] = vs.krocw
+		* ((vs.krow / vs.krocw + vs.kr[w]) * (vs.krog / vs.krocw + vs.kr[g])
+			- (vs.kr[w] + vs.kr[g]));
+
+	if (vs.kr[o] < 0) {
+		vs.kr[o] = 0;
+		vs.dKrdS[vs.oo] = 0;
+		vs.dKrdS[vs.og] = 0;
+		vs.dKrdS[vs.ow] = 0;
+	}
+	else {
+		vs.dKrdS[vs.oo] = vs.dKrowdSo * (vs.krog / vs.krocw + vs.kr[g])
+			+ vs.dKrogdSo * (vs.krow / vs.krocw + vs.kr[w]);
+		vs.dKrdS[vs.ow] = vs.krocw * ((vs.dKrowdSw / vs.krocw + vs.dKrdS[vs.ww])
+			* (vs.krog / vs.krocw + vs.kr[g]) - (vs.dKrdS[vs.ww]));
+		vs.dKrdS[vs.og] = vs.krocw * ((vs.krow / vs.krocw + vs.kr[w])
+			* (vs.dKrogdSg / vs.krocw + vs.dKrdS[vs.gg]) - (vs.dKrdS[vs.gg]));
+	}
+}
+
+/////////////////////////////////////////////////////
+// OCP3POilPerMethod02
+/////////////////////////////////////////////////////
+
+
+void OCP3POILPerMethod02::CalOilPer(OCPFlowVarSet& vs)
+{
+	const INT& o = vs.o;
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	const OCP_DBL tmp = vs.S[g] + vs.S[w] - vs.Swco;
+	if (tmp <= TINY) {
+		vs.kr[o] = vs.krocw;
+	}
+	else {
+		vs.kr[o] = (vs.S[g] * vs.krog + (vs.S[w] - vs.Swco) * vs.krow) / tmp;
+	}
+}
+
+
+void OCP3POILPerMethod02::CalOilPerDer(OCPFlowVarSet& vs)
+{
+	const INT& o = vs.o;
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+
+	const OCP_DBL tmp = vs.S[g] + vs.S[w] - vs.Swco;
+	if (tmp <= TINY) {
+		vs.kr[o] = vs.krocw;
+		vs.dKrdS[vs.oo] = 0;
+		vs.dKrdS[vs.og] = 0;
+		vs.dKrdS[vs.ow] = 0;
+	}
+	else {
+		vs.kr[o] = (vs.S[g] * vs.krog + (vs.S[w] - vs.Swco) * vs.krow) / tmp;
+		vs.dKrdS[vs.oo] = (vs.S[g] * vs.dKrogdSo + (vs.S[w] - vs.Swco) * vs.dKrowdSo) / tmp;
+		vs.dKrdS[vs.og] = (vs.krog + vs.S[g] * vs.dKrogdSg - vs.kr[o]) / tmp;
+		vs.dKrdS[vs.ow] = (vs.krow + (vs.S[w] - vs.Swco) * vs.dKrowdSw - vs.kr[o]) / tmp;
+	}
+}
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

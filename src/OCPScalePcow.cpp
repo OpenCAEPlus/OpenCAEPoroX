@@ -62,7 +62,7 @@ void ScalePcowMethod01::ScaleDer(const OCP_USI& bId, const ScalePcowVarSet& spvs
     OCPFlowVarSet vs = flow->GetVarSet();
     const INT&    w  = vs.w;
     vs.Pc[w]         = -((-vs.Pc[w] - minPcow) * sv + minPcow);
-    vs.dPcwdSw       *= sv;
+    vs.dPcdS[vs.ww]  *= sv;
 }
 
 

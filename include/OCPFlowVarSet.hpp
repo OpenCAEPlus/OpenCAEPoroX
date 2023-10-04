@@ -44,9 +44,6 @@ public:
         krog = 0; krow = 0;
         dKrogdSo = 0; dKrogdSg = 0;
         dKrowdSo = 0; dKrowdSw = 0;
-        dPcodSo = 0; dPcodSg = 0; dPcodSw = 0;
-        dPcgdSo = 0; dPcgdSg = 0; dPcgdSw = 0;
-        dPcwdSo = 0; dPcwdSg = 0; dPcwdSw = 0;
     }
     void Init(const OCPFlowType& fType, const USI& numPhase, const USI& numCom) {
         flowType = fType;
@@ -127,17 +124,12 @@ public:
     /// oil relative permeability in the presence of connate water only
     OCP_DBL         krocw;
     /// the corresponding oil relative permeability when oil, gas and connate water are present
-    OCP_DBL krog;
+    OCP_DBL         krog;
     /// the corresponding oil relative permeability when only oil and water are present
-    OCP_DBL krow;
+    OCP_DBL         krow;
     /// the corresponding derivatives of permeability
-    OCP_DBL dKrogdSo, dKrogdSg;
-    OCP_DBL dKrowdSo, dKrowdSw;
-
-    /// the corresponding derivatives of capillary pressure
-    OCP_DBL dPcodSo, dPcodSg, dPcodSw;
-    OCP_DBL dPcgdSo, dPcgdSg, dPcgdSw;
-    OCP_DBL dPcwdSo, dPcwdSg, dPcwdSw;
+    OCP_DBL         dKrogdSo, dKrogdSg;
+    OCP_DBL         dKrowdSo, dKrowdSw;
 };
 
 

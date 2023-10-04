@@ -114,10 +114,10 @@ void MisCurveMethod01::CurveCorrectDer(const OCP_USI& bId, const MisFacVarSet& m
         vs.dKrdS[vs.gw] = (1 - Fk) * vs.S[g] * (dKrhdSw * (1 - vs.S[w]) + krh) / ((1 - vs.S[w]) * (1 - vs.S[w]));
 
         // for capillary pressure
-        vs.Pc[g]   *= Fp;
-        vs.dPcgdSo *= Fp;
-        vs.dPcgdSg *= Fp;
-        vs.dPcgdSw *= Fp;
+        vs.Pc[g]        *= Fp;
+        vs.dPcdS[vs.go] *= Fp;
+        vs.dPcdS[vs.gg] *= Fp;
+        vs.dPcdS[vs.gw] *= Fp;
     }
 }
 

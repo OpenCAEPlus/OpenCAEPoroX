@@ -15,6 +15,7 @@
  // OpenCAEPoroX header files
 #include "OCPFuncTable.hpp"
 #include "ParamReservoir.hpp"
+#include "OCPFlowVarSet.hpp"
 
 using namespace std;
 
@@ -277,6 +278,84 @@ protected:
 	/// Shape exponents for capillary pressure
 	OCP_DBL C_pc;
 };
+
+
+/// Calculate oil permeability
+class OCP3POilPerMethod
+{
+public:
+	virtual void CalOilPer(OCPFlowVarSet& vs) = 0;
+	virtual void CalOilPerDer(OCPFlowVarSet& vs) = 0;
+};
+
+
+/////////////////////////////////////////////////////
+// OCP3POilPerMethod01
+/////////////////////////////////////////////////////
+
+/// Stone 2
+class OCP3POilPerMethod01 : public OCP3POilPerMethod
+{
+public:
+	OCP3POilPerMethod01() = default;
+	void CalOilPer(OCPFlowVarSet& vs) override;
+	void CalOilPerDer(OCPFlowVarSet& vs) override;
+};
+
+
+/////////////////////////////////////////////////////
+// OCP3POilPerMethod02
+/////////////////////////////////////////////////////
+
+
+/// Eclipse default
+class OCP3POILPerMethod02 : public OCP3POilPerMethod
+{
+public:
+	OCP3POILPerMethod02() = default;
+	void CalOilPer(OCPFlowVarSet& vs) override;
+	void CalOilPerDer(OCPFlowVarSet& vs) override;
+};
+
+
+class OCP3POilPerCalculation
+{
+public:
+	void Setup(const USI& i) {
+		if (i == 1) pM = new OCP3POilPerMethod01();
+		else        pM = new OCP3POILPerMethod02();
+	}
+	void CalOilPer(OCPFlowVarSet& vs) { pM->CalOilPer(vs); }
+	void CalOilPerDer(OCPFlowVarSet& vs) { pM->CalOilPerDer(vs); }
+
+protected:
+	OCP3POilPerMethod* pM;
+};
+
+
+/// Calculate oil, gas, water relative permeability and capillary pressure
+class OCPOGWFMethod
+{
+public:
+	OCPOGWFMethod() = default;
+	virtual void CalKrPc(OCPFlowVarSet& vs) = 0;
+	virtual void CalKrPcDer(OCPFlowVarSet& vs) = 0;
+
+	virtual OCP_DBL GetSwco() const = 0;
+	virtual OCP_DBL GetMaxPcow() const = 0;
+	virtual OCP_DBL GetMinPcow() const = 0;
+
+	virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const = 0;
+	virtual OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const = 0;
+	virtual OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const = 0;
+	virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const = 0;
+	virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const = 0;
+	virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
+
+protected:
+	OCP3POilPerCalculation  opC;
+};
+
 
 
 #endif // __OCPFUNCSAT_HEADER__
