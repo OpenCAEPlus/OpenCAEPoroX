@@ -439,6 +439,7 @@ public:
         vector<string> vbuf; 
         ReadLine(ifs, vbuf);
         comsParam.numCom = stoi(vbuf[0]);
+        numCom           = comsParam.numCom;
     }
     void InputCNAMES(ifstream& ifs) { comsParam.InputCNAMES(ifs); };
     void InputCOMPONENTS(ifstream& ifs, const string& keyword)

@@ -32,13 +32,13 @@ MixtureUnit::MixtureUnit(const ParamReservoir& rs_param, const USI& i, OptionalM
 }
 
 
-void MixtureUnit::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
+void MixtureUnit::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) const
 {
 	mix->Flash(Pin, Tin, Niin);
 }
 
 
-void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
+void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
 	mix->InitFlash(bId, bvs);
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
@@ -46,7 +46,7 @@ void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 }
 
 
-void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
+void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
 	mix->InitFlashDer(bId, bvs);
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
@@ -54,7 +54,7 @@ void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
 }
 
 
-void MixtureUnit::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
+void MixtureUnit::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
 	mix->Flash(bId, bvs);
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
@@ -62,7 +62,7 @@ void MixtureUnit::FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs)
 }
 
 
-void MixtureUnit::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs)
+void MixtureUnit::FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
 	mix->FlashDer(bId, bvs);
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);

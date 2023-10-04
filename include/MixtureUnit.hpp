@@ -35,22 +35,22 @@ public:
     /// return type of mixture.
     auto GetMixtureType() const { return vs->mixtureType; }
     /// return the mixture.
-    OCPMixture* GetMixture() { return mix; }
+    OCPMixture* GetMixture() const { return mix; }
     /// flash calculation
-    void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin);
+    void Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin) const;
     /// flash calculation with saturation of phases for some bulk
-    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs);
+    void InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const;
     /// flash calculation with saturation of phases for some bulk
-    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs);
+    void InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const;
     /// Flash calculation with moles of components for some bulk
-    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs);
+    void FlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const;
     /// Flash calculation with moles of components and Calculate the derivative for some bulk
-    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs);
+    void FlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const;
     /// return mass density of phase
     // for blackoil model: if tarPhase is gas and water, Pin and tar phase is needed
     // for compositional model: if tar phase is hydrocarbon phase, Pin, Tin, Ziin is
     // needed. if tar phase is water, only Pin is needed.
-    OCP_DBL XiPhase(const OCP_DBL& Pin, const OCP_DBL& Tin, const vector<OCP_DBL>& Ziin, const PhaseType& pt) {
+    OCP_DBL XiPhase(const OCP_DBL& Pin, const OCP_DBL& Tin, const vector<OCP_DBL>& Ziin, const PhaseType& pt) const {
         return mix->CalXi(Pin, Pin, Tin, &Ziin[0], pt);
     }
     /// return mass density of phase
@@ -59,12 +59,12 @@ public:
     // hydrocarbon phase, Pin, Tin, Ziin is needed. if tar phase is water, only Pin is
     // needed.
     OCP_DBL RhoPhase(const OCP_DBL& Pin, const OCP_DBL& Pbb, const OCP_DBL& Tin,
-                     const vector<OCP_DBL>& Ziin, const PhaseType& pt){
+                     const vector<OCP_DBL>& Ziin, const PhaseType& pt) const {
         return mix->CalRho(Pin, Pbb, Tin, &Ziin[0], pt);
     }
     // for well
     /// Calculate Production rate for PROD well
-    OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) {
+    OCP_DBL CalInjWellEnthalpy(const OCP_DBL& Tin, const OCP_DBL* Ziin) const {
         return mix->CalEnthalpy(Tin, Ziin);
     }
     void OutMixtureIters() const {

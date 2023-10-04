@@ -31,25 +31,26 @@ public:
         NTPVT = rs_param.NTPVT;
 
         for (USI i = 0; i < NTPVT; i++)
-            PVTs.push_back(new MixtureUnit(rs_param, i, opts));
+            PVTs.push_back(MixtureUnit(rs_param, i, opts));
 
-        mixType = PVTs[0]->GetMixtureType();
+        mixType = PVTs[0].GetMixtureType();
 
         if (PVTNUM.empty() || NTPVT == 1) {
             PVTNUM.clear();
             PVTNUM.resize(bvs.nb, 0);
         }
 
-        bvs.np = PVTs[0]->GetVs()->np;
-        bvs.nc = PVTs[0]->GetVs()->nc;
-        bvs.o  = PVTs[0]->GetVs()->o;
-        bvs.g  = PVTs[0]->GetVs()->g;
-        bvs.w  = PVTs[0]->GetVs()->w;
+        bvs.np = PVTs[0].GetVs()->np;
+        bvs.nc = PVTs[0].GetVs()->nc;
+        bvs.o  = PVTs[0].GetVs()->o;
+        bvs.g  = PVTs[0].GetVs()->g;
+        bvs.w  = PVTs[0].GetVs()->w;
     }
-    auto GetPVT(const OCP_USI& n) const { return PVTs[PVTNUM[n]]; }
-    auto GetMixture() const {return PVTs[0]->GetMixture();}
+    auto GetPVT(const OCP_USI& n) const { return &PVTs[PVTNUM[n]]; }
+    auto GetMixture() const {return PVTs[0].GetMixture();}
     auto& GetPVTNUM() { return PVTNUM; }
     auto GetMixtureType() const { return mixType; }
+    void OutputIters(const USI& i) const { PVTs[0].OutMixtureIters(); }
 
 protected:
     OCPMixtureType       mixType;
@@ -58,7 +59,7 @@ protected:
     /// Index of PVT region for each bulk
     vector<USI>          PVTNUM;
     /// PVT modules
-    vector<MixtureUnit*> PVTs;
+    vector<MixtureUnit>  PVTs;
 
 };
 

@@ -157,7 +157,7 @@ protected:
 public:
 
     /// Output iterations in MixtureUnit
-    void OutMixtureIters() const { PVTm.GetPVT(0)->OutMixtureIters(); }
+    void OutMixtureIters() const { PVTm.OutputIters(0); }
 
 
     /////////////////////////////////////////////////////////////////////

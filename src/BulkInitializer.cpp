@@ -161,7 +161,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 	const auto initT_flag = initT_Tab.size() > 0 ? OCP_TRUE : OCP_FALSE;
 	const auto PBVD_flag = EQUIL[0].PBVD.IsEmpty() ? OCP_FALSE : OCP_TRUE;
 
-	const auto PVT = PVTm.GetPVT(0);
+	auto PVT = PVTm.GetPVT(0);
 
 	if (Dref < DOGC && bvs.g >= 0) {
 		// reference pressure is gas pressure
