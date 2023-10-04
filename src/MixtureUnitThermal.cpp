@@ -14,7 +14,7 @@
 
 MixtureUnitThermal_OW::MixtureUnitThermal_OW(const ParamReservoir& param, const USI& tarId, OptionalModules& opts)
 {
-    OWTM = new OCPMixtureUnitThermalOW(param, tarId);
+    OWTM = new OCPMixtureK(param, tarId, opts);
     vs   = &OWTM->GetVarSet();
 }
 

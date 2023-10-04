@@ -116,14 +116,14 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCPMixtureBlkOilOGW 
+// OCPMixtureK
 /////////////////////////////////////////////////////
 
-class OCPMixtureBlkOilOGW : public OCPMixture
+class OCPMixtureK : public OCPMixture
 {
 public:
-    OCPMixtureBlkOilOGW() = default;
-    OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const USI& i);
+    OCPMixtureK() = default;
+    OCPMixtureK(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         pmMethod->SetVarSet(P, T, Ni, vs);
         pmMethod->Flash(vs);
@@ -149,16 +149,16 @@ public:
         pmMethod->CalVStd(vs);
     }
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
+        return pmMethod->CalVmStd(P, P, T, z, pt);
     }
     OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXi(P, Pb, 0, 0, pt);
+        return pmMethod->CalXi(P, Pb, T, z, pt);
     }
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalRho(P, Pb, 0, 0, pt);
+        return pmMethod->CalRho(P, Pb, T, z, pt);
     }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
-    void OutputIters() const override { OCP_ABORT("Not Used!"); }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return pmMethod->CalEnthalpy(T, zi); }
+    void OutputIters() const override { return pmMethod->OutIters(); }
     OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
 
 
@@ -166,161 +166,6 @@ protected:
     OCPMixtureMethodK* pmMethod;
 };
 
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilOW 
-/////////////////////////////////////////////////////
-
-class OCPMixtureBlkOilOW : public OCPMixture
-{
-public:
-    OCPMixtureBlkOilOW() = default;
-    OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI& i);
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        pmMethod->Flash(vs);
-    }
-    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlash(bvs.rockVp[bId], vs);
-    }
-    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->Flash(vs);
-    }
-    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
-    }
-    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->FlashDer(vs);
-    }
-    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        pmMethod->CalVStd(vs);
-    }
-    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
-    }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXi(P, 0, 0, 0, pt);
-    }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalRho(P, 0, 0, 0, pt);
-    }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
-    void OutputIters() const override { OCP_ABORT("Not Used!"); }
-    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
-
-
-protected:
-    OCPMixtureMethodK* pmMethod;
-};
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilGW 
-/////////////////////////////////////////////////////
-
-class OCPMixtureBlkOilGW : public OCPMixture
-{
-public:
-    OCPMixtureBlkOilGW() = default;
-    OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI& i);
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        pmMethod->Flash(vs);
-    }
-    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlash(bvs.rockVp[bId], vs);
-    }
-    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->Flash(vs);
-    }
-    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
-    }
-    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->FlashDer(vs);
-    }
-    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        pmMethod->CalVStd(vs);
-    }
-    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalVmStd(0, 0, 0, 0, pt);
-    }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXi(P, 0, T, 0, pt);
-    }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalRho(P, 0, T, 0, pt);
-    }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
-    void OutputIters() const override { OCP_ABORT("Not Used!"); }
-    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
-
-
-protected:
-    OCPMixtureMethodK* pmMethod;
-};
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureUnitThermalOW 
-/////////////////////////////////////////////////////
-
-class OCPMixtureUnitThermalOW : public OCPMixture
-{
-public:
-    OCPMixtureUnitThermalOW() = default;
-    OCPMixtureUnitThermalOW(const ParamReservoir& rs_param, const USI& i);
-    void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        pmMethod->Flash(vs);
-    }
-    void Flash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->Flash(vs);
-    }
-    void InitFlash(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlash(bvs.rockVp[bId], vs);
-    }
-    void InitFlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->InitFlashDer(bvs.rockVp[bId], vs);
-    }
-    void FlashDer(const OCP_USI& bId, const BulkVarSet& bvs) override {
-        pmMethod->SetVarSet(bId, bvs, vs);
-        pmMethod->FlashDer(vs);
-    }
-    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalVmStd(P, 0, T, 0, pt);
-    }
-    void CalVStd(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
-        pmMethod->SetVarSet(P, T, Ni, vs);
-        return pmMethod->CalVStd(vs);
-    }
-    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalXi(P, 0, T, 0, pt);
-    }
-    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override {
-        return pmMethod->CalRho(P, 0, T, 0, pt);
-    }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return pmMethod->CalEnthalpy(T + CONV5, zi); }
-    void OutputIters() const override { OCP_ABORT("Not Used!"); }
-    OCP_BOOL IfWellFriend() const override { return pmMethod->IfWellFriend(); }
-
-
-protected:
-    OCPMixtureMethodK* pmMethod;
-};
 
 
 #endif /* end if __OCPMIXTURE_HEADER__ */

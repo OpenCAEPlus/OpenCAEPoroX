@@ -17,9 +17,8 @@
 
 MixtureUnitBlkOil_OW::MixtureUnitBlkOil_OW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
-    OWM = new OCPMixtureBlkOilOW(rs_param, i);
-
-    vs          = &OWM->GetVarSet();
+    OWM = new OCPMixtureK(rs_param, i, opts);
+    vs  = &OWM->GetVarSet();
 }
 
 void MixtureUnitBlkOil_OW::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* Niin)
@@ -72,7 +71,7 @@ OCP_DBL MixtureUnitBlkOil_OW::RhoPhase(const OCP_DBL& Pin,
 
 MixtureUnitBlkOil_GW::MixtureUnitBlkOil_GW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
-    GWM = new OCPMixtureBlkOilGW(rs_param, i);
+    GWM = new OCPMixtureK(rs_param, i, opts);
 
     vs          = &GWM->GetVarSet();
 }
@@ -128,7 +127,7 @@ OCP_DBL MixtureUnitBlkOil_GW::RhoPhase(const OCP_DBL& Pin,
 
 MixtureUnitBlkOil_OGW::MixtureUnitBlkOil_OGW(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
-    OGWM = new OCPMixtureBlkOilOGW(rs_param, i);
+    OGWM = new OCPMixtureK(rs_param, i, opts);
     vs          = &OGWM->GetVarSet();
 }
 

@@ -54,6 +54,8 @@ public:
     virtual OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
     /// Calculate mass density of target phase
     virtual OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) = 0;
+    /// Output iterations
+    void OutIters() const { OCP_ABORT("Not Used!"); }
     /// If current method is friendly to well
     virtual OCP_BOOL IfWellFriend() const = 0;
     /// Calculate Enthalpy
@@ -120,7 +122,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override { return 1 / CalXi(P, 0, T, 0, pt); }
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T, zi); }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T + CONV5, zi); }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);

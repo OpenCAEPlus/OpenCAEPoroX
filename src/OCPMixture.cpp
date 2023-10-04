@@ -33,65 +33,28 @@ OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, Opt
 
 
 
-////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
 // OCPMixtureK 
-////////////////////////////////////////////////////////////////
-
-
-
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilOGW 
 /////////////////////////////////////////////////////
 
 
-
-OCPMixtureBlkOilOGW::OCPMixtureBlkOilOGW(const ParamReservoir& rs_param, const USI& i)
+OCPMixtureK::OCPMixtureK(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     if (rs_param.PVCO_T.data.size() > 0 &&
         rs_param.PVDG_T.data.size() > 0 &&
         rs_param.PVTW_T.data.size() > 0) {
         pmMethod = new OCPMixtureMethodK_OGW01(rs_param, i, vs);
     }
-}
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilOW 
-/////////////////////////////////////////////////////
-
-
-OCPMixtureBlkOilOW::OCPMixtureBlkOilOW(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVTW_T.data.size() > 0 &&
+    else if (rs_param.PVTW_T.data.size() > 0 &&
         (rs_param.PVDO_T.data.size() > 0 || rs_param.PVCDO_T.data.size() > 0)) {
         pmMethod = new OCPMixtureMethodK_OW01(rs_param, i, vs);
     }
-}
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureBlkOilGW 
-/////////////////////////////////////////////////////
-
-
-OCPMixtureBlkOilGW::OCPMixtureBlkOilGW(const ParamReservoir& rs_param, const USI& i)
-{
-    if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
+    else if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
         pmMethod = new OCPMixtureMethodK_GW01(rs_param, i, vs);
     }
-}
-
-
-/////////////////////////////////////////////////////
-// OCPMixtureUnitThermalOW 
-/////////////////////////////////////////////////////
-
-
-OCPMixtureUnitThermalOW::OCPMixtureUnitThermalOW(const ParamReservoir& rs_param, const USI& i)
-{
-    pmMethod = new OCPMixtureMethodK_OW01T(rs_param.comsParam, i, vs);
+    else if (rs_param.thermal) {
+        pmMethod = new OCPMixtureMethodK_OW01T(rs_param.comsParam, i, vs);
+    }
 }
 
 /*----------------------------------------------------------------------------*/
