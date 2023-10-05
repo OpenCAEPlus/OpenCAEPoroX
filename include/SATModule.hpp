@@ -32,7 +32,7 @@ public:
 
         // Setup Saturation function
         for (USI i = 0; i < NTSFUN; i++)
-            SATs.push_back(new FlowUnit(rs_param, i, opts));
+            SATs.push_back(FlowUnit(rs_param, i, opts));
 
 
         if (SATNUM.empty() || NTSFUN == 1) {
@@ -40,7 +40,7 @@ public:
             SATNUM.resize(bvs.nb, 0);
         }
     }
-    auto GetSAT(const OCP_USI& n) const { return SATs[SATNUM[n]]; }
+    auto GetSAT(const OCP_USI& n) const { return &SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }
     auto GetNTSFUN() { return NTSFUN; }
 
@@ -50,7 +50,7 @@ protected:
     /// Index of SAT region for each bulk
     vector<USI>       SATNUM;
     /// SAT modules
-    vector<FlowUnit*> SATs;
+    vector<FlowUnit>  SATs;
 };
 
 
