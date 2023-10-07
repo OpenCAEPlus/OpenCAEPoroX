@@ -917,7 +917,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     dPNR.resize(nb);
 
     // Allocate Residual
-    res.Setup_IsoT(bvs.nbI, rs.allWells.numWell, nc);
+    res.SetupIsoT(bvs.nbI, rs.allWells.numWell, nc);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -1022,13 +1022,13 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
 
 void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
 {
-    const Bulk& bk  = rs.bulk;
+    const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
 
-    const USI              nb    = bvs.nbI;
-    const USI              np    = bvs.np;
-    const USI              nc    = bvs.nc;
-    const USI              len   = nc + 1;
+    const USI nb  = bvs.nbI;
+    const USI np  = bvs.np;
+    const USI nc  = bvs.nc;
+    const USI len = nc + 1;
     
     res.SetZero();
   
@@ -1039,10 +1039,10 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     }
 
     // Flux Term
-    OCP_USI bId, eId;
-    BulkConn&       conn  = rs.conn;
+    OCP_USI         bId, eId;
+    BulkConn&       conn = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
-    USI     fluxnum;
+    USI             fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();

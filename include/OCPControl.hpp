@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCP_CONTROL_HEADER__
-#define __OCP_CONTROL_HEADER__
+#ifndef __OCPCONTROL_HEADER__
+#define __OCPCONTROL_HEADER__
 
 // Standard header files
 #include <vector>
@@ -289,7 +289,7 @@ protected:
     FastControl         ctrlFast;
 };
 
-#endif /* end if __OCP_Control_HEADER__ */
+#endif /* end if __OCPControl_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
