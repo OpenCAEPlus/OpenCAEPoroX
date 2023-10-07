@@ -13,7 +13,7 @@
 #define __ISOTHERMALSOLVER_HEADER__
 
 // OpenCAEPoroX header files
-#include "OCPFluidMethod.hpp"
+#include "IsoThermalMethod.hpp"
 
 /// IsothermalSolver class for fluid solution method.
 class IsothermalSolver
