@@ -124,8 +124,6 @@ ControlTimeParam::ControlTimeParam(const TuningPair& src, const vector<OCP_DBL>&
     dNlim       = src_pt[2];
     eVlim       = src_pt[3];
 
-    numTstepI  = Tstep.size() - 1;
-    total_time = Tstep.back();
     begin_time = Tstep[i];
     end_time   = Tstep[i + 1];
 }

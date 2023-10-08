@@ -143,10 +143,6 @@ protected:
     /// Ideal max relative Verr (pore - fluid) change
     OCP_DBL eVlim;
 
-    /// num of TSTEP interval
-    USI     numTstepI;
-    /// total simulation time
-    OCP_DBL total_time;
     /// Begin of TSTEP interval
     OCP_DBL begin_time;
     /// End of TSTEP interval
@@ -174,9 +170,9 @@ public:
     /// Calculate next time step
     void CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il);
     /// Get total simulation time
-    auto GetTotalTime() const { return ps.front().total_time; }
+    auto GetTotalTime() const { return ps.back().end_time; }
     /// Get number of TSTEP interval
-    auto GetNumTstepInterval() const { return ps.front().numTstepI; }
+    auto GetNumTstepInterval() const { return ps.size(); }
 
 protected:
     MPI_Comm         myComm;
