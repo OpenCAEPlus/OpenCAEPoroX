@@ -113,7 +113,7 @@ public:
     void InputParam(const OutputSummary& summary_param);
 
     /// Setup outputting structure
-    void Setup(const Reservoir& reservoir, const OCP_DBL& totalTime);
+    void Setup(const Reservoir& reservoir);
 
     /// Set value for vars
     void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
@@ -164,7 +164,7 @@ class CriticalInfo
 {
 public:
     /// Setup vars to print and reserve memory
-    void Setup(const OCP_DBL& totalTime);
+    void Setup();
 
     /// Set values for vars
     void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);

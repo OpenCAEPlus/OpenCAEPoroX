@@ -66,6 +66,7 @@ public:
 class Reservoir
 {
     friend class OCPControl;
+    friend class ControlTime;
     friend class Summary;
     friend class CriticalInfo;
     friend class Out4RPT;

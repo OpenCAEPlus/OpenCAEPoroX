@@ -1571,7 +1571,6 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CaldMaxIsoT(rs.bulk.GetVarSet());
-    // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
 #ifdef DEBUG
     // cout << "### DEBUG: Residuals = " << setprecision(3) << scientific

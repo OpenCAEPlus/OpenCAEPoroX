@@ -11,7 +11,104 @@
 
 #include "OCPControl.hpp"
 
-void ControlTime::SetParams(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i)
+
+FastControl::FastControl(const USI& argc, const char* optset[])
+{
+    ifUse = OCP_FALSE;
+    timeInit = timeMax = timeMin = -1.0;
+
+    std::stringstream buffer;
+    string            tmp;
+    string            key;
+    string            value;
+    for (USI n = 2; n < argc; n++) {
+        buffer << optset[n];
+        buffer >> tmp;
+
+        string::size_type pos = tmp.find_last_of('=');
+        if (pos == string::npos) OCP_ABORT("Unknown Usage! See -h");
+
+        key = tmp.substr(0, pos);
+        value = tmp.substr(pos + 1, tmp.size() - pos);
+
+        switch (Map_Str2Int(&key[0], key.size())) {
+
+        case Map_Str2Int("method", 6):
+            if (value == "FIM") {
+                method = FIM;
+            }
+            else if (value == "IMPEC") {
+                method = IMPEC;
+            }
+            else if (value == "AIMc") {
+                method = AIMc;
+            }
+            else {
+                OCP_ABORT("Wrong method param in command line!");
+            }
+            ifUse = OCP_TRUE;
+            if (method == FIM || method == AIMc) {
+                if (timeInit <= 0) timeInit = 1;
+                if (timeMax <= 0) timeMax = 10.0;
+                if (timeMin <= 0) timeMin = 0.1;
+            }
+            else {
+                if (timeInit <= 0) timeInit = 0.1;
+                if (timeMax <= 0) timeMax = 1.0;
+                if (timeMin <= 0) timeMin = 0.1;
+            }
+            break;
+
+        case Map_Str2Int("dtInit", 6):
+            timeInit = stod(value);
+            break;
+
+        case Map_Str2Int("dtMin", 5):
+            timeMin = stod(value);
+            break;
+
+        case Map_Str2Int("dtMax", 5):
+            timeMax = stod(value);
+            break;
+
+        case Map_Str2Int("verbose", 7):
+            printLevel = OCP_MIN(OCP_MAX(stoi(value), PRINT_NONE), PRINT_ALL);
+            break;
+
+        default:
+            OCP_ABORT("Unknown Options: " + key + "   See -h");
+            break;
+        }
+
+        buffer.clear();
+    }
+}
+
+
+void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
+{
+    FastControl ctrlFast(argc, optset);
+    if (ctrlFast.ifUse) {
+        method = ctrlFast.method;
+        switch (method) {
+        case IMPEC:
+            lsFile = "./csr.fasp";
+            break;
+        case AIMc:
+        case FIM:
+            lsFile = "./bsr.fasp";
+            break;
+        default:
+            OCP_ABORT("Wrong method specified from command line!");
+            break;
+        }
+        time.SetFastControl(ctrlFast);
+    }
+    printLevel = ctrlFast.printLevel;
+}
+
+
+ControlTimeParam::ControlTimeParam(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i)
 {
     const auto& src_t = src.Tuning[0];
     timeInit    = src_t[0];
@@ -34,25 +131,100 @@ void ControlTime::SetParams(const TuningPair& src, const vector<OCP_DBL>& Tstep,
 }
 
 
-void ControlTime::SetParams(const ControlTime& src)
+void ControlTimeParam::SetFastControl(const FastControl& fCtrl)
 {
-    timeInit    = src.timeInit;
-    timeMax     = src.timeMax;
-    timeMin     = src.timeMin;
-    maxIncreFac = src.maxIncreFac;
-    minChopFac  = src.minChopFac;
-    cutFacNR    = src.cutFacNR;
+    timeInit = fCtrl.timeInit;
+    timeMax  = fCtrl.timeMax;
+    timeMin  = fCtrl.timeMin;
+}
 
-    dPlim       = src.dPlim;
-    dTlim       = src.dTlim;
-    dSlim       = src.dSlim;
-    dNlim       = src.dNlim;
-    eVlim       = src.eVlim;
 
-    numTstepI  = src.numTstepI;
-    total_time = src.total_time;
-    begin_time = src.begin_time;
-    end_time   = src.end_time;
+void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
+{
+    w = i;
+
+    /// Set initial time step for next TSTEP
+    GetWallTime timer;
+    timer.Start();
+
+    OCP_BOOL       wellOptChange;
+    const OCP_BOOL wellChange_loc = wells.GetWellOptChange();
+    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, MPI_INT, MPI_LAND, myComm);
+
+    timer.Stop();
+
+
+    const OCP_DBL dt = ps[w].end_time - current_time;
+    if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
+
+    static OCP_BOOL firstflag = OCP_TRUE;
+    if (wellOptChange || firstflag) {
+        current_dt = min(dt, ps[w].timeInit);
+        firstflag = OCP_FALSE;
+    }
+    else {
+        current_dt = min(dt, predict_dt);
+    }
+}
+
+
+void ControlTime::CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il)
+{
+    last_dt = current_dt;
+    current_time += current_dt;
+
+    OCP_DBL factor = ps[w].maxIncreFac;
+
+    const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
+    const OCP_DBL dTmax = rs.bulk.GetdTmax();
+    const OCP_DBL dNmax = rs.bulk.GetdNmax();
+    const OCP_DBL dSmax = rs.bulk.GetdSmax();
+    const OCP_DBL eVmax = rs.bulk.GeteVmax();
+
+    for (auto& s : il) {
+        if (s == "dP") {
+            if (dPmax > TINY) factor = min(factor, ps[w].dPlim / dPmax);
+        }
+        else if (s == "dT") {
+            // no input now -- no value
+            if (dTmax > TINY) factor = min(factor, ps[w].dTlim / dTmax);
+        }
+        else if (s == "dN") {
+            if (dNmax > TINY) factor = min(factor, ps[w].dNlim / dNmax);
+        }
+        else if (s == "dS") {
+            if (dSmax > TINY) factor = min(factor, ps[w].dSlim / dSmax);
+        }
+        else if (s == "eV") {
+            if (eVmax > TINY) factor = min(factor, ps[w].eVlim / eVmax);
+        }
+        else if (s == "iter") {
+            if (iters.GetNR() < 5)
+                factor = min(factor, 2.0);
+            else if (iters.GetNR() > 10)
+                factor = min(factor, 0.5);
+            else
+                factor = min(factor, 1.5);
+        }
+    }
+
+    factor = max(ps[w].minChopFac, factor);
+
+    OCP_DBL dt_loc = current_dt * factor;
+    if (dt_loc > ps[w].timeMax) dt_loc = ps[w].timeMax;
+    if (dt_loc < ps[w].timeMin) dt_loc = ps[w].timeMin;
+
+    GetWallTime timer;
+    timer.Start();
+
+    MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+
+    predict_dt = current_dt;
+
+    if (current_dt > (ps[w].end_time - current_time))
+        current_dt = (ps[w].end_time - current_time);
 }
 
 
@@ -67,73 +239,6 @@ ControlNR::ControlNR(const vector<OCP_DBL>& src)
     Verrmax   = src[6];
 }
 
-void FastControl::ReadParam(const USI& argc, const char* optset[])
-{
-    ifUse = OCP_FALSE;
-    timeInit = timeMax = timeMin = -1.0;
-
-    std::stringstream buffer;
-    string            tmp;
-    string            key;
-    string            value;
-    for (USI n = 2; n < argc; n++) {
-        buffer << optset[n];
-        buffer >> tmp;
-
-        string::size_type pos = tmp.find_last_of('=');
-        if (pos == string::npos) OCP_ABORT("Unknown Usage! See -h");
-
-        key   = tmp.substr(0, pos);
-        value = tmp.substr(pos + 1, tmp.size() - pos);
-
-        switch (Map_Str2Int(&key[0], key.size())) {
-
-            case Map_Str2Int("method", 6):
-                if (value == "FIM") {
-                    method = FIM;
-                } else if (value == "IMPEC") {
-                    method = IMPEC;
-                } else if (value == "AIMc") {
-                    method = AIMc;
-                } else {
-                    OCP_ABORT("Wrong method param in command line!");
-                }
-                ifUse = OCP_TRUE;
-                if (method == FIM || method == AIMc) {
-                    if (timeInit <= 0) timeInit = 1;
-                    if (timeMax <= 0) timeMax = 10.0;
-                    if (timeMin <= 0) timeMin = 0.1;
-                } else {
-                    if (timeInit <= 0) timeInit = 0.1;
-                    if (timeMax <= 0) timeMax = 1.0;
-                    if (timeMin <= 0) timeMin = 0.1;
-                }
-                break;
-
-            case Map_Str2Int("dtInit", 6):
-                timeInit = stod(value);
-                break;
-
-            case Map_Str2Int("dtMin", 5):
-                timeMin = stod(value);
-                break;
-
-            case Map_Str2Int("dtMax", 5):
-                timeMax = stod(value);
-                break;
-
-            case Map_Str2Int("verbose", 7):
-                printLevel = OCP_MIN(OCP_MAX(stoi(value), PRINT_NONE), PRINT_ALL);
-                break;
-
-            default:
-                OCP_ABORT("Unknown Options: " + key + "   See -h");
-                break;
-        }
-
-        buffer.clear();
-    }
-}
 
 
 void ItersInfo::UpdateTotal()
@@ -175,7 +280,6 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     
     // number of TSTEP interval
     const USI nI = CtrlParam.criticalTime.size() - 1;
-    ctrlTimeSet.resize(nI);
     ctrlNRSet.resize(nI);
 
     const USI   n = CtrlParam.tuning_T.size();
@@ -186,7 +290,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     ctrlCriticalTime.back() = nI;
     for (USI i = 0; i < n; i++) {
         for (USI d = ctrlCriticalTime[i]; d < ctrlCriticalTime[i + 1]; d++) {
-            ctrlTimeSet[d].SetParams(CtrlParam.tuning_T[i], CtrlParam.criticalTime, d);
+            time.SetCtrlParam(CtrlParam.tuning_T[i], CtrlParam.criticalTime, d);
             ctrlNRSet[d]   = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
@@ -198,68 +302,20 @@ void OCPControl::Setup(const Domain& domain)
     myComm  = domain.myComm;
     numproc = domain.numproc;
     myrank  = domain.myrank;
+
+    time.SetupComm(domain);
 }
 
 
 void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
-    time.SetParams(ctrlTimeSet[i]);
+    time.SetNextTSTEP(i, rs.allWells);
     NR = ctrlNRSet[i];
-
-    /// Set initial time step for next TSTEP
-    GetWallTime timer;
-    timer.Start();
-
-    OCP_BOOL       wellOptChange;
-    const OCP_BOOL wellChange_loc  = rs.allWells.GetWellOptChange();
-    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, MPI_INT, MPI_LAND, rs.domain.myComm);
-
-    timer.Stop();
-
-    const OCP_DBL dt = time.end_time - time.current_time;
-    if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
-
-    static OCP_BOOL firstflag = OCP_TRUE;
-    if (wellOptChange || firstflag) {
-        time.current_dt = min(dt, time.timeInit);
-        firstflag = OCP_FALSE;
-    }
-    else {
-        time.current_dt = min(dt, time.predict_dt);
-    }
 }
 
 
-void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
-{
-    ctrlFast.ReadParam(argc, optset);
-    if (ctrlFast.ifUse) {
-        method = ctrlFast.method;
-        switch (method) {
-            case IMPEC:
-                lsFile = "./csr.fasp";
-                break;
-            case AIMc:
-            case FIM:
-                lsFile = "./bsr.fasp";
-                break;
-            default:
-                OCP_ABORT("Wrong method specified from command line!");
-                break;
-        }
-        USI n = ctrlTimeSet.size();
-        for (USI i = 0; i < n; i++) {
-            ctrlTimeSet[i].timeInit = ctrlFast.timeInit;
-            ctrlTimeSet[i].timeMax  = ctrlFast.timeMax;
-            ctrlTimeSet[i].timeMin  = ctrlFast.timeMin;
-        }
-    }
-    printLevel = ctrlFast.printLevel;
-}
-
-
-OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
+OCP_BOOL OCPControl::Check(Reservoir& rs, const initializer_list<string>& il)
 {
     workState_loc = OCP_CONTINUE;
     OCP_INT flag;
@@ -312,7 +368,6 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
             default:
                 break;
         }
-
         if (workState_loc != OCP_CONTINUE)
             break;
     }
@@ -334,11 +389,11 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME:
-        time.current_dt *= time.cutFacNR;
+        time.CutDt();
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME_CFL:
-        time.current_dt /= (rs.bulk.GetMaxCFL() + 1);
+        time.CutDt(1/ (rs.bulk.GetMaxCFL() + 1));
         return OCP_FALSE;
 
     default:
@@ -349,59 +404,6 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, initializer_list<string> il)
     return OCP_TRUE;
 }
 
-void OCPControl::CalNextTimeStep(Reservoir& rs, initializer_list<string> il)
-{
-    time.last_dt       = time.current_dt;
-    time.current_time += time.current_dt;
-
-    OCP_DBL factor = time.maxIncreFac;
-
-    const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
-    const OCP_DBL dTmax = rs.bulk.GetdTmax();
-    const OCP_DBL dNmax = rs.bulk.GetdNmax();
-    const OCP_DBL dSmax = rs.bulk.GetdSmax();
-    const OCP_DBL eVmax = rs.bulk.GeteVmax();
-
-    for (auto& s : il) {
-        if (s == "dP") {
-            if (dPmax > TINY) factor = min(factor, time.dPlim / dPmax);
-        } else if (s == "dT") {
-            // no input now -- no value
-            if (dTmax > TINY) factor = min(factor, time.dTlim / dTmax);
-        } else if (s == "dN") {
-            if (dNmax > TINY) factor = min(factor, time.dNlim / dNmax);
-        } else if (s == "dS") {
-            if (dSmax > TINY) factor = min(factor, time.dSlim / dSmax);
-        } else if (s == "eV") {
-            if (eVmax > TINY) factor = min(factor, time.eVlim / eVmax);
-        } else if (s == "iter") {
-            if (iters.NR < 5)
-                factor = min(factor, 2.0);
-            else if (iters.NR > 10)
-                factor = min(factor, 0.5);
-            else
-                factor = min(factor, 1.5);
-        }
-    }
-
-    factor = max(time.minChopFac, factor);
-
-    OCP_DBL dt_loc = time.current_dt * factor;
-    if (dt_loc > time.timeMax) dt_loc = time.timeMax;
-    if (dt_loc < time.timeMin) dt_loc = time.timeMin;
-
-    GetWallTime timer;
-    timer.Start();
-
-    MPI_Allreduce(&dt_loc, &time.current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-
-    time.predict_dt = time.current_dt;
-
-    if (time.current_dt > (time.end_time - time.current_time)) 
-        time.current_dt = (time.end_time - time.current_time);
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

@@ -48,9 +48,9 @@ void Summary::InputParam(const OutputSummary& summary_param)
     // cout << "Summary::InputParam" << endl;
 }
 
-void Summary::Setup(const Reservoir& rs, const OCP_DBL& totalTime)
+void Summary::Setup(const Reservoir& rs)
 {
-    const USI maxRowNum = totalTime;
+    const USI maxRowNum = 1000;
 
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("NRiter", "-", "-", "int", maxRowNum));
@@ -739,10 +739,10 @@ void Summary::PostProcess(const string& dir, const string& filename, const OCP_I
 }
 
 
-void CriticalInfo::Setup(const OCP_DBL& totalTime)
+void CriticalInfo::Setup()
 {
     // Allocate memory
-    const USI maxRowNum = totalTime;
+    const USI maxRowNum = 1000;
 
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("dt", "-", "DAY", "fixed", maxRowNum));
@@ -1548,8 +1548,8 @@ void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const 
 
     workDir  = ctrl.GetWorkDir();
     fileName = ctrl.GetOCPFile();
-    summary.Setup(reservoir, ctrl.time.GetTotalTime());
-    crtInfo.Setup(ctrl.time.GetTotalTime());
+    summary.Setup(reservoir);
+    crtInfo.Setup();
     // out4RPT.Setup(workDir, reservoir);
     out4VTK.Setup(workDir, reservoir);
 }
