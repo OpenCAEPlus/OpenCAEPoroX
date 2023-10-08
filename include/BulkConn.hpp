@@ -19,8 +19,6 @@
 #include "Bulk.hpp"
 #include "OCPFlux.hpp"
 #include "DenseMat.hpp"
-#include "LinearSystem.hpp"
-#include "OCPStructure.hpp"
 
 using namespace std;
 

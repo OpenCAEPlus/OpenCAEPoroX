@@ -18,7 +18,7 @@
 #include "UtilOutput.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
-#include "OCPStructure.hpp"
+#include "OCPNRsuite.hpp"
 
 class T_FIM
 {
@@ -36,8 +36,7 @@ public:
 
 protected:
     void AllocateReservoir(Reservoir& rs);
-    void
-    AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
+    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     void InitRock(Bulk& bk) const;
     void CalRock(Bulk& bk) const;
     void InitFlash(Bulk& bk);
@@ -46,11 +45,8 @@ protected:
     void CalKrPc(Bulk& bk) const;
     void UpdateLastTimeStep(Reservoir& rs) const;
     void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0);
-    void AssembleMatBulks(LinearSystem&    ls,
-                          const Reservoir& rs,
-                          const OCP_DBL&   dt) const;
-    void
-    AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulks(LinearSystem&    ls, const Reservoir& rs, const OCP_DBL&   dt) const;
+    void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 

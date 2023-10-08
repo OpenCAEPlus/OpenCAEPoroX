@@ -19,7 +19,7 @@
 #include "UtilOutput.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
-#include "OCPStructure.hpp"
+#include "OCPNRsuite.hpp"
 
 class IsothermalMethod
 {
@@ -60,8 +60,7 @@ private:
     /// Allocate memory for reservoir
     void AllocateReservoir(Reservoir& rs);
     /// Allocate memory for linear system
-    void
-    AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
+    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Calculate flux between bulks and wells
@@ -71,11 +70,9 @@ private:
     /// Update mole composition of each bulk according to mass conservation for IMPEC
     void MassConserve(Reservoir& rs, const OCP_DBL& dt) const;
     /// Assemble linear system for bulks
-    void
-    AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Assemble linear system for wells
-    void
-    AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Pj, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u);
     /// Reset variables to last time step
@@ -166,8 +163,7 @@ protected:
     /// Residual for all equations
     OCPRes          res;  
 
-
-    OCPNRsuit       NR;
+    OCPNRsuite      NR;
 
 };
 

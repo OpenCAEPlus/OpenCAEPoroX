@@ -20,7 +20,6 @@
 #include "DenseMat.hpp"
 #include "FlowUnit.hpp"
 #include "LinearSystem.hpp"
-#include "OCPStructure.hpp"
 #include "ParamReservoir.hpp"
 #include "Domain.hpp"
 #include "PreParamGridWell.hpp"
@@ -229,7 +228,7 @@ protected:
                    ///< current time step.
 
     mutable vector<OCP_DBL> cfl;             ///< CFL number for each bulk
-    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number
+    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number for global
     mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
 
 

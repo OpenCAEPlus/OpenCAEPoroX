@@ -20,11 +20,11 @@
 #include "DenseMat.hpp"
 #include "LinearSystem.hpp"
 #include "OCPConst.hpp"
-#include "OCPStructure.hpp"
 #include "ParamWell.hpp"
 #include "WellOpt.hpp"
 #include "WellPerf.hpp"
 #include "OCPMixture.hpp"
+#include "OCPNRsuite.hpp"
 
 using namespace std;
 
