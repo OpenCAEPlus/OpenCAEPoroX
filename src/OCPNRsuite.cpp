@@ -67,9 +67,9 @@ void OCPNRsuite::SetupIsoT(const OCP_USI& nbin, const USI& npin, const USI& ncin
     lP.resize(nb);
     lN.resize(nb * nc);
     lS.resize(nb * np);
-    dPNR.resize(nb);
-    dNNR.resize(nb * nc);
-    dSNR.resize(nb * np);
+    dP.resize(nb);
+    dN.resize(nb * nc);
+    dS.resize(nb * np);
 }
 
 
@@ -83,10 +83,10 @@ void OCPNRsuite::SetupT(const OCP_USI& nbin, const USI& npin, const USI& ncin)
     lT.resize(nb);
     lN.resize(nb * nc);
     lS.resize(nb * np);
-    dPNR.resize(nb);
-    dTNR.resize(nb);
-    dNNR.resize(nb * nc);
-    dSNR.resize(nb * np);
+    dP.resize(nb);
+    dT.resize(nb);
+    dN.resize(nb * nc);
+    dS.resize(nb * np);
 }
 
 
@@ -106,20 +106,21 @@ void OCPNRsuite::CaldMaxIsoT(const BulkVarSet& bvs)
     dSmax = 0;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        dPNR[n] = bvs.P[n] - lP[n];
-        if (dPmax < fabs(dPNR[n]))  dPmax = dPNR[n];
+        dP[n] = bvs.P[n] - lP[n];
+        if (dPmax < fabs(dP[n]))  dPmax = dP[n];
 
         OCP_DBL  Nt = 0;
         for (USI i = 0; i < nc; i++) {
             Nt += lN[n * nc + i];
-            dNNR[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
+            dN[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
         }
         for (USI i = 0; i < nc; i++) {
-            if (fabs(dNmax) < fabs(dNNR[n * nc + i] / Nt))  dNmax = dNNR[n * nc + i] / Nt;
+            if (fabs(dNmax) < fabs(dN[n * nc + i] / Nt))  dNmax = dN[n * nc + i] / Nt;
         }
 
         for (USI j = 0; j < np; j++) {
-            if (fabs(dSmax) < fabs(dSNR[n]))  dSmax = dSNR[n];
+            dS[n * np + j] = bvs.S[n * np + j] - lS[n * np + j];
+            if (fabs(dSmax) < fabs(dS[n * np + j]))  dSmax = dS[n * np + j];
         }
     }
 
@@ -137,22 +138,23 @@ void OCPNRsuite::CaldMaxT(const BulkVarSet& bvs)
     dSmax = 0;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        dPNR[n] = bvs.P[n] - lP[n];
-        if (fabs(dPmax) < fabs(dPNR[n]))  dPmax = dPNR[n];
-        dTNR[n] = bvs.T[n] - lT[n];
-        if (fabs(dTmax) < fabs(dTNR[n]))  dTmax = dTNR[n];
+        dP[n] = bvs.P[n] - lP[n];
+        if (fabs(dPmax) < fabs(dP[n]))  dPmax = dP[n];
+        dT[n] = bvs.T[n] - lT[n];
+        if (fabs(dTmax) < fabs(dT[n]))  dTmax = dT[n];
 
         OCP_DBL  Nt   = 0;
         for (USI i = 0; i < nc; i++) {
             Nt               += lN[n * nc + i];
-            dNNR[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
+            dN[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
         }
         for (USI i = 0; i < nc; i++) {
-            if (fabs(dNmax) < fabs(dNNR[n * nc + i] / Nt))  dNmax = dNNR[n * nc + i] / Nt;
+            if (fabs(dNmax) < fabs(dN[n * nc + i] / Nt))  dNmax = dN[n * nc + i] / Nt;
         }
 
         for (USI j = 0; j < np; j++) {
-            if (fabs(dSmax) < fabs(dSNR[n]))  dSmax = dSNR[n];
+            dS[n * np + j] = bvs.S[n * np + j] - lS[n * np + j];
+            if (fabs(dSmax) < fabs(dS[n * np + j]))  dSmax = dS[n * np + j];
         }
     }
 

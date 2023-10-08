@@ -67,6 +67,10 @@ public:
     void Reset(const BulkVarSet& bvs);
     void CaldMaxIsoT(const BulkVarSet& bvs);
     void CaldMaxT(const BulkVarSet& bvs);
+    auto DP(const OCP_USI& n) const { return dP[n]; }
+    auto DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
+    auto DPmax() const { return dPmax; };
+    auto DSmax() const { return dSmax; };
 
 protected:
     /// numBulk
@@ -82,13 +86,13 @@ protected:
     /// S at last NR steps
     vector<OCP_DBL> lS;
     /// P change between NR steps
-    vector<OCP_DBL> dPNR;
+    vector<OCP_DBL> dP;
     /// T change between NR steps
-    vector<OCP_DBL> dTNR;
+    vector<OCP_DBL> dT;
     /// Ni change between NR steps
-    vector<OCP_DBL> dNNR;
+    vector<OCP_DBL> dN;
     /// saturation change between NR steps
-    vector<OCP_DBL> dSNR;
+    vector<OCP_DBL> dS;
 
     /// Max pressure difference in an NR step
     OCP_DBL         dPmax;

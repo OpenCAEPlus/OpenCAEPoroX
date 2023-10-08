@@ -51,37 +51,10 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-
-    OCP_DBL CalNRdSmax()
-    {
-        NRdSmax = 0;
-        const OCP_USI len = dSNR.size();
-        for (USI n = 0; n < len; n++) {
-            if (fabs(NRdSmax) < fabs(dSNR[n])) {
-                NRdSmax = dSNR[n];
-            }
-        }
-        return NRdSmax;
-    }
-
-    /// saturation change between NR steps
-    vector<OCP_DBL> dSNR;    
-    /// Ni change between NR steps
-    vector<OCP_DBL> dNNR;
-    /// P change between NR steps
-    vector<OCP_DBL> dPNR;
-    /// T change between NR steps
-    vector<OCP_DBL> dTNR;    
-    /// Max pressure difference in an NR step
-    OCP_DBL NRdPmax;   
-    /// Max temperature difference in an NR step
-    OCP_DBL NRdTmax;
-    /// Max Ni difference in an NR step
-    OCP_DBL NRdNmax; 
-    /// Max saturation difference in an NR step(Real)
-    OCP_DBL NRdSmax;         
+    
     /// Residual for all equations
-    OCPRes  res;  
+    OCPRes     res;  
+    OCPNRsuite NR;
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */
