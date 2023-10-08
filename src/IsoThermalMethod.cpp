@@ -695,7 +695,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     // Assemble rhs -- from residual
-    ls.AssembleRhsCopy(res.resAbs);
+    ls.AssembleRhsCopy(NR.res.resAbs);
 }
 
 void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
@@ -774,10 +774,10 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     NR.CaldMaxIsoT(rs.bulk.GetVarSet());
    
     OCP_INT conflag_loc = -1;
-    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.NR.Tol() ||
-        res.maxRelRes_V <= ctrl.NR.Tol() ||
-        res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
+    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
+        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
+        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
+        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
         (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
             fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
         conflag_loc = 0;
@@ -913,9 +913,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 
 
     // Allocate Residual
-    res.SetupIsoT(bvs.nbI, rs.allWells.numWell, nc);
-
-    NR.SetupIsoT(bvs.nbI, np, nc);
+    NR.SetupIsoT(bvs, rs.allWells.numWell);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -1026,6 +1024,8 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     const USI np  = bvs.np;
     const USI nc  = bvs.nc;
     const USI len = nc + 1;
+
+    OCPRes&   res = NR.res;
     
     res.SetZero();
   
@@ -1505,7 +1505,7 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
 {
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(res.resAbs);
+    ls.AssembleRhsCopy(NR.res.resAbs);
 }
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -1580,10 +1580,10 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 #endif
 
     OCP_INT conflag_loc = -1;
-    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.NR.Tol() ||
-        res.maxRelRes_V <= ctrl.NR.Tol() ||
-        res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
+    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
+        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
+        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
+        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
         (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
             fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
         conflag_loc = 0;

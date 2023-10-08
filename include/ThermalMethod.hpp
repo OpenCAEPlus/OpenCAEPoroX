@@ -51,10 +51,8 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    
-    /// Residual for all equations
-    OCPRes     res;  
-    OCPNRsuite NR;
+    /// Newton-Raphson iteration suite
+    OCPNRsuite      NR;
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

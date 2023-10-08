@@ -58,11 +58,13 @@ void OCPRes::SetInitRes()
 }
 
 
-void OCPNRsuite::SetupIsoT(const OCP_USI& nbin, const USI& npin, const USI& ncin) 
+void OCPNRsuite::SetupIsoT(const BulkVarSet& bvs, const OCP_USI& nw)
 {
-    nb = nbin;
-    np = npin;
-    nc = ncin;
+    nb = bvs.nbI;
+    np = bvs.np;
+    nc = bvs.nc;
+
+    res.SetupIsoT(nb, nw, nc);
 
     lP.resize(nb);
     lN.resize(nb * nc);
@@ -70,14 +72,17 @@ void OCPNRsuite::SetupIsoT(const OCP_USI& nbin, const USI& npin, const USI& ncin
     dP.resize(nb);
     dN.resize(nb * nc);
     dS.resize(nb * np);
+
 }
 
 
-void OCPNRsuite::SetupT(const OCP_USI& nbin, const USI& npin, const USI& ncin)
+void OCPNRsuite::SetupT(const BulkVarSet& bvs, const OCP_USI& nw)
 {
-    nb = nbin;
-    np = npin;
-    nc = ncin;
+    nb = bvs.nbI;
+    np = bvs.np;
+    nc = bvs.nc;
+
+    res.SetupT(nb, nw, nc);
 
     lP.resize(nb);
     lT.resize(nb);

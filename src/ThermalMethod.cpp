@@ -45,7 +45,7 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
 {
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(res.resAbs);
+    ls.AssembleRhsCopy(NR.res.resAbs);
 }
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -116,16 +116,17 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     return OCP_TRUE;
 }
 
+
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CaldMaxT(rs.bulk.GetVarSet());
     // const OCP_DBL NRdNmax = rs.GetNRdNmax();
 
     OCP_INT conflag_loc = -1;
-    if (((res.maxRelRes_V <= res.maxRelRes0_V * ctrl.NR.Tol() ||
-        res.maxRelRes_V <= ctrl.NR.Tol() ||
-        res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
+    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
+        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
+        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
+        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
         (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
             fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
         conflag_loc = 0;
@@ -295,9 +296,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     conn.vs.flux_vj.resize(numConn* np);
 
     // Allocate Residual
-    res.SetupT(bvs.nbI, rs.allWells.numWell, nc);
-
-    NR.SetupT(bvs.nbI, np, nc);
+    NR.SetupT(bvs, rs.allWells.numWell);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -595,6 +594,8 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
     const USI   np   = bvs.np;
     const USI   nc   = bvs.nc;
     const USI   len  = nc + 2;
+
+    OCPRes& res = NR.res;
     
     res.SetZero();
 

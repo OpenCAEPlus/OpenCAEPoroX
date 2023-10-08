@@ -131,12 +131,8 @@ protected:
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
 
-
 protected:
-     
-    /// Residual for all equations
-    OCPRes          res;  
-
+    /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
 };
 

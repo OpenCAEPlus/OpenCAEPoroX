@@ -62,15 +62,28 @@ public:
 class OCPNRsuite
 {
 public:
-    void SetupIsoT(const OCP_USI& nb, const USI& np, const USI& nc);
-    void SetupT(const OCP_USI& nb, const USI& np, const USI& nc);
+    /// Setup for isothemral model
+    void SetupIsoT(const BulkVarSet& bvs, const OCP_USI& nw);
+    /// Setup for themral model
+    void SetupT(const BulkVarSet& bvs, const OCP_USI& nw);
+    /// Reset 
     void Reset(const BulkVarSet& bvs);
+    /// Calculate max change for isothemral model
     void CaldMaxIsoT(const BulkVarSet& bvs);
+    /// Calculate max change for themral model
     void CaldMaxT(const BulkVarSet& bvs);
+    /// Get dP
     auto DP(const OCP_USI& n) const { return dP[n]; }
+    /// Get dNi
     auto DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
+    /// Get max dP
     auto DPmax() const { return dPmax; };
+    /// Get max dS
     auto DSmax() const { return dSmax; };
+
+public:
+    /// residual
+    OCPRes          res;
 
 protected:
     /// numBulk
