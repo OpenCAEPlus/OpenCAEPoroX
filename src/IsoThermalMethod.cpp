@@ -919,7 +919,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     // Allocate Residual
     res.SetupIsoT(bvs.nbI, rs.allWells.numWell, nc);
 
-    
+    NR.SetupIsoT(bvs.nbI, np, nc);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,

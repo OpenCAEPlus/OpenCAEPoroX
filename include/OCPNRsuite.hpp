@@ -65,7 +65,8 @@ public:
     void SetupIsoT(const OCP_USI& nb, const USI& np, const USI& nc);
     void SetupT(const OCP_USI& nb, const USI& np, const USI& nc);
     void Reset(const BulkVarSet& bvs);
-    void CaldMax(const BulkVarSet& bvs);
+    void CaldMaxIsoT(const BulkVarSet& bvs);
+    void CaldMaxT(const BulkVarSet& bvs);
 
 protected:
     /// numBulk

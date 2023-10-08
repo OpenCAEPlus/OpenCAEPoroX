@@ -63,6 +63,7 @@ void OCPNRsuite::SetupIsoT(const OCP_USI& nbin, const USI& npin, const USI& ncin
     nb = nbin;
     np = npin;
     nc = ncin;
+
     lP.resize(nb);
     lN.resize(nb * nc);
     lS.resize(nb * np);
@@ -98,7 +99,37 @@ void OCPNRsuite::Reset(const BulkVarSet& bvs)
 }
 
 
-void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
+void OCPNRsuite::CaldMaxIsoT(const BulkVarSet& bvs)
+{
+    dPmax = 0;
+    dNmax = 0;
+    dSmax = 0;
+
+    for (OCP_USI n = 0; n < nb; n++) {
+        dPNR[n] = bvs.P[n] - lP[n];
+        if (dPmax < fabs(dPNR[n]))  dPmax = dPNR[n];
+
+        OCP_DBL  Nt = 0;
+        for (USI i = 0; i < nc; i++) {
+            Nt += lN[n * nc + i];
+            dNNR[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
+        }
+        for (USI i = 0; i < nc; i++) {
+            if (fabs(dNmax) < fabs(dNNR[n * nc + i] / Nt))  dNmax = dNNR[n * nc + i] / Nt;
+        }
+
+        for (USI j = 0; j < np; j++) {
+            if (fabs(dSmax) < fabs(dSNR[n]))  dSmax = dSNR[n];
+        }
+    }
+
+    lP = bvs.P;
+    lN = bvs.Ni;
+    lS = bvs.S;
+}
+
+
+void OCPNRsuite::CaldMaxT(const BulkVarSet& bvs)
 {
     dPmax = 0;
     dTmax = 0;
@@ -107,9 +138,9 @@ void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
 
     for (OCP_USI n = 0; n < nb; n++) {
         dPNR[n] = bvs.P[n] - lP[n];
-        if (dPmax < fabs(dPNR[n]))  dPmax = fabs(dPNR[n]);
+        if (fabs(dPmax) < fabs(dPNR[n]))  dPmax = dPNR[n];
         dTNR[n] = bvs.T[n] - lT[n];
-        if (dTmax < fabs(dTNR[n]))  dTmax = fabs(dTNR[n]);
+        if (fabs(dTmax) < fabs(dTNR[n]))  dTmax = dTNR[n];
 
         OCP_DBL  Nt   = 0;
         for (USI i = 0; i < nc; i++) {
@@ -117,11 +148,11 @@ void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
             dNNR[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
         }
         for (USI i = 0; i < nc; i++) {
-            if (dNmax < fabs(dNNR[n * nc + i] / Nt))  dNmax = fabs(dNNR[n * nc + i] / Nt);
+            if (fabs(dNmax) < fabs(dNNR[n * nc + i] / Nt))  dNmax = dNNR[n * nc + i] / Nt;
         }
 
         for (USI j = 0; j < np; j++) {
-            if (dSmax < fabs(dSNR[n]))  dSmax = fabs(dSNR[n]);
+            if (fabs(dSmax) < fabs(dSNR[n]))  dSmax = dSNR[n];
         }
     }
 

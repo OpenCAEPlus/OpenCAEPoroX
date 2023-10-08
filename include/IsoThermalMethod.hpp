@@ -164,7 +164,6 @@ protected:
     OCPRes          res;  
 
     OCPNRsuite      NR;
-
 };
 
 

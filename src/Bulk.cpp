@@ -203,7 +203,7 @@ void Bulk::CalMaxChange()
     OCP_DBL tmp = 0;
     OCP_USI id;
 
-    for (OCP_USI n = 0; n < vs.nb; n++) {
+    for (OCP_USI n = 0; n < vs.nbI; n++) {
 
         // dP
         tmp = fabs(vs.P[n] - vs.lP[n]);
