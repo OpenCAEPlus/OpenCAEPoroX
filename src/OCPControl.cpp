@@ -108,6 +108,27 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 }
 
 
+
+
+void ItersInfo::UpdateTotal()
+{
+    numTstep += 1;
+    NRt += NR;
+    LSt += LS;
+    NR = 0;
+    LS = 0;
+}
+
+
+void ItersInfo::Reset()
+{
+    NRwt += NR;
+    LSwt += LS;
+    NR = 0;
+    LS = 0;
+}
+
+
 ControlTimeParam::ControlTimeParam(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i)
 {
     const auto& src_t = src.Tuning[0];
@@ -139,7 +160,7 @@ void ControlTimeParam::SetFastControl(const FastControl& fCtrl)
 
 void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 {
-    w = i;
+    wp = &ps[i];
 
     /// Set initial time step for next TSTEP
     GetWallTime timer;
@@ -152,12 +173,12 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
     timer.Stop();
 
 
-    const OCP_DBL dt = ps[w].end_time - current_time;
+    const OCP_DBL dt = wp->end_time - current_time;
     if (dt <= 0) OCP_ABORT("Non-positive time stepsize!");
 
     static OCP_BOOL firstflag = OCP_TRUE;
     if (wellOptChange || firstflag) {
-        current_dt = min(dt, ps[w].timeInit);
+        current_dt = min(dt, wp->timeInit);
         firstflag = OCP_FALSE;
     }
     else {
@@ -168,93 +189,135 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 
 void ControlTime::CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il)
 {
+
     last_dt = current_dt;
     current_time += current_dt;
 
-    OCP_DBL factor = ps[w].maxIncreFac;
+    OCP_DBL factor =  wp->maxIncreFac;
 
     const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
-    const OCP_DBL dTmax = rs.bulk.GetdTmax();
-    const OCP_DBL dNmax = rs.bulk.GetdNmax();
-    const OCP_DBL dSmax = rs.bulk.GetdSmax();
-    const OCP_DBL eVmax = rs.bulk.GeteVmax();
+const OCP_DBL dTmax = rs.bulk.GetdTmax();
+const OCP_DBL dNmax = rs.bulk.GetdNmax();
+const OCP_DBL dSmax = rs.bulk.GetdSmax();
+const OCP_DBL eVmax = rs.bulk.GeteVmax();
 
+for (auto& s : il) {
+    if (s == "dP") {
+        if (dPmax > TINY) factor = min(factor, wp->dPlim / dPmax);
+    }
+    else if (s == "dT") {
+        // no input now -- no value
+        if (dTmax > TINY) factor = min(factor, wp->dTlim / dTmax);
+    }
+    else if (s == "dN") {
+        if (dNmax > TINY) factor = min(factor, wp->dNlim / dNmax);
+    }
+    else if (s == "dS") {
+        if (dSmax > TINY) factor = min(factor, wp->dSlim / dSmax);
+    }
+    else if (s == "eV") {
+        if (eVmax > TINY) factor = min(factor, wp->eVlim / eVmax);
+    }
+    else if (s == "iter") {
+        if (iters.GetNR() < 5)
+            factor = min(factor, 2.0);
+        else if (iters.GetNR() > 10)
+            factor = min(factor, 0.5);
+        else
+            factor = min(factor, 1.5);
+    }
+    else {
+        OCP_ABORT("Iterm not recognized!");
+    }
+}
+
+factor = max(wp->minChopFac, factor);
+
+OCP_DBL dt_loc = current_dt * factor;
+if (dt_loc > wp->timeMax) dt_loc = wp->timeMax;
+if (dt_loc < wp->timeMin) dt_loc = wp->timeMin;
+
+GetWallTime timer;
+timer.Start();
+
+MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+
+OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+
+predict_dt = current_dt;
+
+if (current_dt > (wp->end_time - current_time))
+current_dt = (wp->end_time - current_time);
+}
+
+
+ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
+{
+    maxIter = src[0];
+    tol = src[1];
+    dPmax = src[2];
+    dSmax = src[3];
+    dPmin = src[4];
+    dSmin = src[5];
+    Verrmax = src[6];
+}
+
+
+OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
+{
+    OCP_INT conflag_loc = -1;
     for (auto& s : il) {
-        if (s == "dP") {
-            if (dPmax > TINY) factor = min(factor, ps[w].dPlim / dPmax);
+        if (s == "res") {
+            if ((NRs.res.maxRelRes_V <= NRs.res.maxRelRes0_V * wp->tol ||
+                NRs.res.maxRelRes_V <= wp->tol ||
+                NRs.res.maxRelRes_N <= wp->tol) &&
+                NRs.res.maxWellRelRes_mol <= wp->tol) {
+                conflag_loc = 1;
+            }
+        }
+        else if (s == "resT") {
+            if (((NRs.res.maxRelRes_V <= NRs.res.maxRelRes0_V * wp->tol ||
+                NRs.res.maxRelRes_V <= wp->tol ||
+                NRs.res.maxRelRes_N <= wp->tol) &&
+                NRs.res.maxWellRelRes_mol <= wp->tol)) {
+                conflag_loc = 1;
+            }
+        }
+        else if (s == "d") {
+            if (fabs(NRs.DPmax()) <= wp->dPmin && fabs(NRs.DSmax()) <= wp->dSmin) {
+                conflag_loc = 1;
+            }
         }
         else if (s == "dT") {
-            // no input now -- no value
-            if (dTmax > TINY) factor = min(factor, ps[w].dTlim / dTmax);
+            if (fabs(NRs.DPmax()) <= wp->dPmin && fabs(NRs.DSmax()) <= wp->dSmin) {
+                conflag_loc = 1;
+            }
         }
-        else if (s == "dN") {
-            if (dNmax > TINY) factor = min(factor, ps[w].dNlim / dNmax);
-        }
-        else if (s == "dS") {
-            if (dSmax > TINY) factor = min(factor, ps[w].dSlim / dSmax);
-        }
-        else if (s == "eV") {
-            if (eVmax > TINY) factor = min(factor, ps[w].eVlim / eVmax);
-        }
-        else if (s == "iter") {
-            if (iters.GetNR() < 5)
-                factor = min(factor, 2.0);
-            else if (iters.GetNR() > 10)
-                factor = min(factor, 0.5);
-            else
-                factor = min(factor, 1.5);
+        else {
+            OCP_ABORT("Iterm not recognized!");
         }
     }
-
-    factor = max(ps[w].minChopFac, factor);
-
-    OCP_DBL dt_loc = current_dt * factor;
-    if (dt_loc > ps[w].timeMax) dt_loc = ps[w].timeMax;
-    if (dt_loc < ps[w].timeMin) dt_loc = ps[w].timeMin;
 
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+    OCP_INT conflag;
+    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-    predict_dt = current_dt;
-
-    if (current_dt > (ps[w].end_time - current_time))
-        current_dt = (ps[w].end_time - current_time);
-}
-
-
-ControlNR::ControlNR(const vector<OCP_DBL>& src)
-{
-    maxIter = src[0];
-    tol     = src[1];
-    dPmax   = src[2];
-    dSmax   = src[3];
-    dPmin   = src[4];
-    dSmin   = src[5];
-    Verrmax   = src[6];
-}
-
-
-
-void ItersInfo::UpdateTotal()
-{
-    numTstep += 1;
-    NRt      += NR;
-    LSt      += LS;
-    NR        = 0;
-    LS        = 0;
-}
-
-
-void ItersInfo::Reset()
-{
-    NRwt += NR;  
-    LSwt += LS;
-    NR    = 0;
-    LS    = 0;
+    if (conflag == 1) {
+        // converge
+        return 1;
+    }
+    else if (iters.GetNR() >= wp->maxIter) {
+        // not converge in specified numbers of iterations, reset
+        return -1;
+    }
+    else {
+        // not converge and go on iterativing
+        return 0;
+    }
 }
 
 
@@ -276,20 +339,17 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     lsFile = CtrlParam.lsFile;
     
-    // number of TSTEP interval
-    const USI nI = CtrlParam.criticalTime.size() - 1;
-    ctrlNRSet.resize(nI);
 
     const USI   n = CtrlParam.tuning_T.size();
     vector<USI> ctrlCriticalTime(n + 1);
     for (USI i = 0; i < n; i++) {
         ctrlCriticalTime[i] = CtrlParam.tuning_T[i].d;
     }
-    ctrlCriticalTime.back() = nI;
+    ctrlCriticalTime.back() = CtrlParam.criticalTime.size() - 1;
     for (USI i = 0; i < n; i++) {
         for (USI d = ctrlCriticalTime[i]; d < ctrlCriticalTime[i + 1]; d++) {
             time.SetCtrlParam(CtrlParam.tuning_T[i], CtrlParam.criticalTime, d);
-            ctrlNRSet[d]   = ControlNR(CtrlParam.tuning_T[i].Tuning[2]);
+            NR.SetCtrlParam(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
 }
@@ -302,6 +362,7 @@ void OCPControl::Setup(const Domain& domain)
     myrank  = domain.myrank;
 
     time.SetupComm(domain);
+    NR.SetupComm(domain);
 }
 
 
@@ -309,7 +370,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 {
     /// Apply ith tuning for ith TSTEP
     time.SetNextTSTEP(i, rs.allWells);
-    NR = ctrlNRSet[i];
+    NR.SetNextTSTEP(i);
 }
 
 
@@ -319,20 +380,13 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, const initializer_list<string>& il)
     OCP_INT flag;
     for (auto& s : il) {
 
-        if (s == "BulkP")
-            flag = rs.bulk.CheckP();
-        else if (s == "BulkT")
-            flag = rs.bulk.CheckT();
-        else if (s == "BulkNi")
-            flag = rs.bulk.CheckNi();
-        else if (s == "BulkVe")
-            flag = rs.bulk.CheckVe(0.01);
-        else if (s == "CFL")
-            flag = rs.bulk.CheckCFL(1.0);
-        else if (s == "WellP")
-            flag = rs.allWells.CheckP(rs.bulk);
-        else
-            OCP_ABORT("Check iterm not recognized!");
+        if (s == "BulkP")        flag = rs.bulk.CheckP();
+        else if (s == "BulkT")   flag = rs.bulk.CheckT();
+        else if (s == "BulkNi")  flag = rs.bulk.CheckNi();
+        else if (s == "BulkVe")  flag = rs.bulk.CheckVe(0.01);
+        else if (s == "CFL")     flag = rs.bulk.CheckCFL(1.0);
+        else if (s == "WellP")   flag = rs.allWells.CheckP(rs.bulk);
+        else                     OCP_ABORT("Check iterm not recognized!");
 
         switch (flag) {
             // Bulk

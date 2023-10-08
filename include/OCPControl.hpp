@@ -19,6 +19,7 @@
 #include "OCPConst.hpp"
 #include "ParamControl.hpp"
 #include "Reservoir.hpp"
+#include "OCPNRsuite.hpp"
 
 using namespace std;
 
@@ -160,12 +161,15 @@ public:
         numproc = domain.numproc;
         myrank  = domain.myrank;
     }
+    /// Setup control param
     void SetCtrlParam(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i) {
         ps.push_back(ControlTimeParam(src, Tstep, i));
     }
+    /// Setup fast control param
     void SetFastControl(const FastControl& fCtrl) {
         for (auto& p : ps)  p.SetFastControl(fCtrl);
     }
+    /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i, const AllWells& wells);
     /// Calculate next time step
     void CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il);
@@ -181,7 +185,7 @@ protected:
 public:
     /// cut time
     void CutDt(const OCP_DBL& fac = -1) {
-        if (fac < 0) current_dt *= ps[w].cutFacNR;
+        if (fac < 0) current_dt *= wp->cutFacNR;
         else         current_dt *= fac;
     }
     /// Return the current time.
@@ -191,13 +195,13 @@ public:
     /// Return last time step size.
     auto GetLastDt() const { return last_dt; }
     /// Determine whether the critical time point has been reached.
-    auto IfEnd() { return ((ps[w].end_time - current_time) < TINY); }
+    auto IfEnd() { return ((wp->end_time - current_time) < TINY); }
 
 protected:
     /// control param set
     vector<ControlTimeParam> ps;
-    /// work index
-    USI                      w{0};
+    /// work param
+    const ControlTimeParam*  wp;
     /// from prediction for next TSTEP
     OCP_DBL                  predict_dt;
     /// current time step
@@ -211,18 +215,12 @@ protected:
 
 /// Params for Newton iterations controls
 /// Note: Important for convergence of solution methods
-class ControlNR
+class ControlNRParam
 {
-    friend class OCPControl;
+    friend class ControlNR;
 public:
-    ControlNR() = default;
-    ControlNR(const vector<OCP_DBL>& src);
-    auto Tol() const { return tol; }
-    auto MaxIter() const { return maxIter; }
-    auto DPmax() const { return dPmax; }
-    auto DSmax() const { return dSmax; }
-    auto DPmin() const { return dPmin; }
-    auto DSmin() const { return dSmin; }
+    ControlNRParam() = default;
+    ControlNRParam(const vector<OCP_DBL>& src);
 
 protected:
     /// Maximum number of Newton iterations in a time step
@@ -242,6 +240,41 @@ protected:
 };
 
 
+class ControlNR
+{
+public:
+    /// Setup control param
+    void SetCtrlParam(const vector<OCP_DBL>& src) {
+        ps.push_back(ControlNRParam(src));
+    }
+    /// Setup communicator
+    void SetupComm(const Domain& domain) {
+        myComm = domain.myComm;
+        numproc = domain.numproc;
+        myrank = domain.myrank;
+    }
+    /// Set param for next TSTEP
+    void SetNextTSTEP(const USI& i) { wp = &ps[i]; }
+    /// Get dSmax
+    auto DSmax() const { return wp->dSmax; }
+    /// Get dPmax
+    auto DPmax() const { return wp->dPmax; }
+    /// If NR iterations converge
+    OCP_INT CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const;
+
+protected:
+    MPI_Comm         myComm;
+    OCP_INT          numproc, myrank;
+
+protected:
+    /// control param set
+    vector<ControlNRParam> ps;
+    /// current param
+    const ControlNRParam*  wp;
+};
+
+
+
 /// All parameters used for solution control
 class OCPControl
 {
@@ -254,6 +287,10 @@ public:
     void ApplyControl(const USI& i, const Reservoir& rs);
     // Check order is important
     OCP_BOOL Check(Reservoir& rs, const initializer_list<string>& il);
+    /// Check if converge
+    OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
+        return NR.CheckConverge(NRs, iters, il);
+    }
     // Calculate next time step
     void CalNextTimeStep(const Reservoir& rs, const initializer_list<string>& il) {
         time.CalNextTimeStep(rs, iters, il);
@@ -267,13 +304,13 @@ public:
 
 public:
     /// Print level
-    USI              printLevel{0};
+    USI         printLevel{0};
     /// num of time steps, nonlinear iterations and linear solver iterations
-    ItersInfo        iters;
+    ItersInfo   iters;
     /// Time control 
-    ControlTime      time;
+    ControlTime time;
     /// NR control    
-    ControlNR        NR;
+    ControlNR   NR;
 
 
 public:  
@@ -301,8 +338,6 @@ protected:
     string   ocpFile;
     /// File name of linear Solver
     string   lsFile;
-    /// NR control set   
-    vector<ControlNR>   ctrlNRSet;
 };
 
 #endif /* end if __OCPControl_HEADER__ */

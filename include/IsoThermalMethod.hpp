@@ -145,7 +145,7 @@ public:
     /// Setup neighbor
     void SetupNeighbor(Reservoir& rs);
     /// Init
-    void InitReservoir(Reservoir& rs) const;
+    void InitReservoir(Reservoir& rs);
     /// Prepare for Assembling matrix.
     void Prepare(Reservoir& rs, const OCP_DBL& dt);
     /// Assemble Matrix

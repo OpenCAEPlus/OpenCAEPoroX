@@ -772,35 +772,16 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CaldMaxIsoT(rs.bulk.GetVarSet());
-   
-    OCP_INT conflag_loc = -1;
-    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
-        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
-        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
-        (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
-            fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
-        conflag_loc = 0;
-    }
+    const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
-    GetWallTime timer;
-    timer.Start();
-
-    OCP_INT conflag;
-    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-
-
-    if (conflag == 0) {
-
+    if (conflag == 1) {
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {
             return OCP_TRUE;
         }
-    } else if (ctrl.iters.GetNR() >= ctrl.NR.MaxIter()) {
+    } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -1469,7 +1450,7 @@ void IsoT_AIMc::SetupNeighbor(Reservoir& rs)
 }
 
 
-void IsoT_AIMc::InitReservoir(Reservoir& rs) const
+void IsoT_AIMc::InitReservoir(Reservoir& rs)
 {
     rs.bulk.Initialize(rs.domain);
 
@@ -1481,6 +1462,8 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs) const
     rs.allWells.InitBHP(rs.bulk);
 
     UpdateLastTimeStep(rs);
+
+    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
@@ -1571,33 +1554,9 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CaldMaxIsoT(rs.bulk.GetVarSet());
+    const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
-#ifdef DEBUG
-    // cout << "### DEBUG: Residuals = " << setprecision(3) << scientific
-    //      << resAIMc.maxRelRes0_V << "  " << resAIMc.maxRelRes_V << "  "
-    //      << resAIMc.maxRelRes_N << "  " << dPmax << "  " << dSmax << endl;
-#endif
-
-    OCP_INT conflag_loc = -1;
-    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
-        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
-        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
-        (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
-            fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
-        conflag_loc = 0;
-    }
-
-    GetWallTime timer;
-    timer.Start();
-
-    OCP_INT conflag;
-    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-
-    if (conflag == 0) {
-
+    if (conflag == 1) {
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
@@ -1607,7 +1566,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.GetNR() > ctrl.NR.MaxIter()) {
+    } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -2022,7 +1981,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
     }
 }
 
-void IsoT_AIMc::GetSolution(Reservoir&             rs,
+void IsoT_AIMc::GetSolution(Reservoir&       rs,
                             vector<OCP_DBL>& u,
                             const ControlNR& ctrlNR)
 {

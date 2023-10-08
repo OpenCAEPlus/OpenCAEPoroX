@@ -112,11 +112,11 @@ void OCPNRsuite::CaldMaxIsoT(const BulkVarSet& bvs)
 
     for (OCP_USI n = 0; n < nb; n++) {
         dP[n] = bvs.P[n] - lP[n];
-        if (dPmax < fabs(dP[n]))  dPmax = dP[n];
+        if (fabs(dPmax) < fabs(dP[n]))  dPmax = dP[n];
 
         OCP_DBL  Nt = 0;
         for (USI i = 0; i < nc; i++) {
-            Nt += lN[n * nc + i];
+            Nt             += lN[n * nc + i];
             dN[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
         }
         for (USI i = 0; i < nc; i++) {
@@ -150,7 +150,7 @@ void OCPNRsuite::CaldMaxT(const BulkVarSet& bvs)
 
         OCP_DBL  Nt   = 0;
         for (USI i = 0; i < nc; i++) {
-            Nt               += lN[n * nc + i];
+            Nt             += lN[n * nc + i];
             dN[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
         }
         for (USI i = 0; i < nc; i++) {

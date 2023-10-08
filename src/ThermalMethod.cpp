@@ -31,6 +31,8 @@ void T_FIM::InitReservoir(Reservoir& rs)
 
     rs.allWells.InitBHP(rs.bulk);
     UpdateLastTimeStep(rs);
+
+    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
@@ -120,29 +122,9 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CaldMaxT(rs.bulk.GetVarSet());
-    // const OCP_DBL NRdNmax = rs.GetNRdNmax();
+    const OCP_INT conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
-    OCP_INT conflag_loc = -1;
-    if (((NR.res.maxRelRes_V <= NR.res.maxRelRes0_V * ctrl.NR.Tol() ||
-        NR.res.maxRelRes_V <= ctrl.NR.Tol() ||
-        NR.res.maxRelRes_N <= ctrl.NR.Tol()) &&
-        NR.res.maxWellRelRes_mol <= ctrl.NR.Tol()) ||
-        (fabs(NR.DPmax()) <= ctrl.NR.DPmin() &&
-            fabs(NR.DSmax()) <= ctrl.NR.DSmin())) {
-        conflag_loc = 0;
-    }
-
-    GetWallTime timer;
-    timer.Start();
-
-    OCP_INT conflag;
-    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, rs.domain.myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-
-
-    if (conflag == 0) {
-
+    if (conflag == 1) {
         if (!ctrl.Check(rs, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
@@ -150,7 +132,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (ctrl.iters.GetNR() >= ctrl.NR.MaxIter()) {
+    } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
@@ -523,6 +505,8 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     ctrl.iters.Reset();
 
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+
+    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
