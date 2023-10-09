@@ -682,7 +682,7 @@ void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
-    CalRes(rs, dt, OCP_TRUE);
+    CalRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
 }
 
@@ -763,14 +763,14 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(rs.bulk);
 
     // Update residual
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMaxIsoT(rs.bulk.GetVarSet());
+    NR.CaldMax(rs.bulk.GetVarSet());
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
@@ -893,7 +893,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 
 
     // Allocate Residual
-    NR.SetupIsoT(bvs, rs.allWells.numWell);
+    NR.Setup(OCP_FALSE, bvs, rs.allWells.numWell, rs.domain);
 }
 
 void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -995,7 +995,7 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     }
 }
 
-void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
+void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
 {
     const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -1077,17 +1077,6 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes
     }
 
     Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
-    if (resetRes0) {
-        res.SetInitRes();
-
-        GetWallTime timer;
-        timer.Start();
-
-        OCP_DBL tmploc = res.maxRelRes0_V;
-        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
-
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-    }
 }
 
 void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
@@ -1366,7 +1355,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     ctrl.iters.Reset();
 
     // Residual
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     NR.InitStep(rs.bulk.GetVarSet());
 }
@@ -1466,7 +1455,7 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, dt, OCP_TRUE);
+    CalRes(rs, dt);
 
     // Set FIM Bulk
     rs.CalCFL(dt, OCP_FALSE);
@@ -1545,13 +1534,13 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
     return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMaxIsoT(rs.bulk.GetVarSet());
+    NR.CaldMax(rs.bulk.GetVarSet());
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {

@@ -72,7 +72,6 @@ class Reservoir
     friend class Out4RPT;
     friend class Out4VTK;
 
-    // temp
     friend class IsoT_IMPEC;
     friend class IsoT_FIM;
     friend class IsoT_AIMc;

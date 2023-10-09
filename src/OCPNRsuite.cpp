@@ -52,37 +52,24 @@ void OCPRes::SetZero()
 }
 
 
-void OCPRes::SetInitRes() 
-{ 
-    maxRelRes0_V = maxRelRes_V; 
-}
-
-
-void OCPNRsuite::SetupIsoT(const BulkVarSet& bvs, const OCP_USI& nw)
+void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
 {
-    nb = bvs.nbI;
-    np = bvs.np;
-    nc = bvs.nc;
+    myComm  = domain.myComm;
+    numproc = domain.numproc;
+    myrank  = domain.myrank;
 
-    res.SetupIsoT(nb, nw, nc);
+    ifThermal = ifthermal;
+    nb        = bvs.nbI;
+    np        = bvs.np;
+    nc        = bvs.nc;
 
-    lP.resize(nb);
-    lN.resize(nb * nc);
-    lS.resize(nb * np);
-    dP.resize(nb);
-    dN.resize(nb * nc);
-    dS.resize(nb * np);
+    if (ifThermal) {
+        res.SetupT(nb, nw, nc);
+    }
+    else {
+        res.SetupIsoT(nb, nw, nc);
+    }
 
-}
-
-
-void OCPNRsuite::SetupT(const BulkVarSet& bvs, const OCP_USI& nw)
-{
-    nb = bvs.nbI;
-    np = bvs.np;
-    nc = bvs.nc;
-
-    res.SetupT(nb, nw, nc);
 
     lP.resize(nb);
     lT.resize(nb);
@@ -97,6 +84,15 @@ void OCPNRsuite::SetupT(const BulkVarSet& bvs, const OCP_USI& nw)
 
 void OCPNRsuite::InitStep(const BulkVarSet& bvs)
 {
+    GetWallTime timer;
+    timer.Start();
+    
+    OCP_DBL tmploc = res.maxRelRes_V;
+    MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, myComm);
+    
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+
+
     lP = bvs.lP;
     lT = bvs.lT;
     lN = bvs.lNi;
@@ -109,42 +105,7 @@ void OCPNRsuite::InitStep(const BulkVarSet& bvs)
 }
 
 
-void OCPNRsuite::CaldMaxIsoT(const BulkVarSet& bvs)
-{
-    OCP_DBL dPmaxTmp = 0;
-    OCP_DBL dNmaxTmp = 0;
-    OCP_DBL dSmaxTmp = 0;
-
-    for (OCP_USI n = 0; n < nb; n++) {
-        dP[n] = bvs.P[n] - lP[n];
-        if (fabs(dPmaxTmp) < fabs(dP[n]))  dPmaxTmp = dP[n];
-
-        OCP_DBL  Nt = 0;
-        for (USI i = 0; i < nc; i++) {
-            Nt             += lN[n * nc + i];
-            dN[n * nc + i] = bvs.Ni[n * nc + i] - lN[n * nc + i];
-        }
-        for (USI i = 0; i < nc; i++) {
-            if (fabs(dNmaxTmp) < fabs(dN[n * nc + i] / Nt))  dNmaxTmp = dN[n * nc + i] / Nt;
-        }
-
-        for (USI j = 0; j < np; j++) {
-            dS[n * np + j] = bvs.S[n * np + j] - lS[n * np + j];
-            if (fabs(dSmaxTmp) < fabs(dS[n * np + j]))  dSmaxTmp = dS[n * np + j];
-        }
-    }
-
-    lP = bvs.P;
-    lN = bvs.Ni;
-    lS = bvs.S;
-
-    dPmax.push_back(dPmaxTmp);
-    dNmax.push_back(dNmaxTmp);
-    dSmax.push_back(dSmaxTmp);
-}
-
-
-void OCPNRsuite::CaldMaxT(const BulkVarSet& bvs)
+void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
 {
     OCP_DBL dPmaxTmp = 0;
     OCP_DBL dTmaxTmp = 0;

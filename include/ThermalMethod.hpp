@@ -44,7 +44,7 @@ protected:
     void PassFlashValue(Bulk& bk, const OCP_USI& n);
     void CalKrPc(Bulk& bk) const;
     void UpdateLastTimeStep(Reservoir& rs) const;
-    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0);
+    void CalRes(Reservoir& rs, const OCP_DBL& dt);
     void AssembleMatBulks(LinearSystem&    ls, const Reservoir& rs, const OCP_DBL&   dt) const;
     void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);

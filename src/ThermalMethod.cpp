@@ -36,7 +36,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
     NR.InitStep(rs.bulk.GetVarSet());
 }
 
@@ -112,7 +112,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     return OCP_TRUE;
 }
@@ -120,7 +120,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMaxT(rs.bulk.GetVarSet());
+    NR.CaldMax(rs.bulk.GetVarSet());
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
     if (conflag == 1) {
@@ -277,7 +277,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     conn.vs.flux_vj.resize(numConn* np);
 
     // Allocate Residual
-    NR.SetupT(bvs, rs.allWells.numWell);
+    NR.Setup(OCP_TRUE, bvs, rs.allWells.numWell, rs.domain);
 }
 
 void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
@@ -503,7 +503,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Iters
     ctrl.iters.Reset();
 
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     NR.InitStep(rs.bulk.GetVarSet());
 }
@@ -569,7 +569,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 
-void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
+void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
 {
     const Bulk& bk   = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -677,19 +677,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& resetRes0)
             }
         }
     }
-
     Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
-    if (resetRes0) {
-        res.SetInitRes();
-
-        GetWallTime timer;
-        timer.Start();
-
-        OCP_DBL tmploc = res.maxRelRes0_V;
-        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, rs.domain.myComm);
-
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-    }
 }
 
 void T_FIM::AssembleMatBulks(LinearSystem&    ls,

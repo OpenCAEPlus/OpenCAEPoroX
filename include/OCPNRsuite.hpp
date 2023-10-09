@@ -18,6 +18,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "BulkVarSet.hpp"
+#include "Domain.hpp"
 
 using namespace std;
 
@@ -27,7 +28,6 @@ public:
     void SetupIsoT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc);
     void SetupT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc);
     void SetZero();
-    void SetInitRes();
 
     /// residual for all equations for each bulk
     vector<OCP_DBL> resAbs; 
@@ -62,16 +62,12 @@ public:
 class OCPNRsuite
 {
 public:
-    /// Setup for isothemral model
-    void SetupIsoT(const BulkVarSet& bvs, const OCP_USI& nw);
     /// Setup for themral model
-    void SetupT(const BulkVarSet& bvs, const OCP_USI& nw);
+    void Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain);
     /// Reset 
     void InitStep(const BulkVarSet& bvs);
-    /// Calculate max change for isothemral model
-    void CaldMaxIsoT(const BulkVarSet& bvs);
     /// Calculate max change for themral model
-    void CaldMaxT(const BulkVarSet& bvs);
+    void CaldMax(const BulkVarSet& bvs);
     /// Get dP
     OCP_DBL DP(const OCP_USI& n) const { return dP[n]; }
     /// Get dNi
@@ -86,6 +82,11 @@ public:
     OCPRes          res;
 
 protected:
+    /// Communicator
+    MPI_Comm        myComm;
+    OCP_INT         numproc, myrank;
+    /// model
+    OCP_BOOL        ifThermal{ OCP_FALSE };
     /// numBulk
     OCP_USI         nb;
     /// numPhase, numCom

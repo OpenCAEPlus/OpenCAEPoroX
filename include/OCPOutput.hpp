@@ -333,7 +333,7 @@ public:
     /// Setup all kinds of output
     void Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
     /// Assign values to be output in PrintInfo()
-    void  SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
     /// Output info which is each time step based
     void PrintInfo() const;
     /// Output info which is Keyword TSTEP based

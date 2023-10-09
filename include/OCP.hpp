@@ -97,16 +97,16 @@ protected:
 
 protected:
     /// The core properties of a reservoir.
-    Reservoir reservoir;
+    Reservoir  reservoir;
 
     /// Contains discrete methods and linear system solver.
-    Solver solver;
+    Solver     solver;
 
     /// Control class handles algorithm params and time stepping.
     OCPControl control;
 
     /// Output class handles output level of the program.
-    OCPOutput output;
+    OCPOutput  output;
 };
 
 #endif /* end if __OCP_HEADER__ */
