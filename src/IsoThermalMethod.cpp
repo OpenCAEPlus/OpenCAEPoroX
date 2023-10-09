@@ -626,6 +626,7 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lNi         = bvs.Ni;
     bvs.lvf         = bvs.vf;
     bvs.lP          = bvs.P;
+    bvs.lT          = bvs.T;
     bvs.lPj         = bvs.Pj;
     bvs.lPc         = bvs.Pc;
     bvs.lphaseExist = bvs.phaseExist;
@@ -1373,6 +1374,7 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lNi         = bvs.Ni;
     bvs.lvf         = bvs.vf;
     bvs.lP          = bvs.P;
+    bvs.lT          = bvs.T;
     bvs.lPj         = bvs.Pj;
     bvs.lPc         = bvs.Pc;
     bvs.lphaseExist = bvs.phaseExist;

@@ -52,7 +52,7 @@ protected:
 
 protected:
     /// Newton-Raphson iteration suite
-    OCPNRsuite      NR;
+    OCPNLsuite      NR;
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

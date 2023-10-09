@@ -263,7 +263,7 @@ ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
 }
 
 
-OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
+OCP_INT ControlNR::CheckConverge(const OCPNLsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
 {
     OCP_INT conflag_loc = -1;
     for (auto& s : il) {
@@ -284,12 +284,12 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, 
             }
         }
         else if (s == "d") {
-            if (fabs(NRs.DPmax()) <= wp->dPmin && fabs(NRs.DSmax()) <= wp->dSmin) {
+            if (fabs(NRs.DPmaxNR()) <= wp->dPmin && fabs(NRs.DSmaxNR()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }
         else if (s == "dT") {
-            if (fabs(NRs.DPmax()) <= wp->dPmin && fabs(NRs.DSmax()) <= wp->dSmin) {
+            if (fabs(NRs.DPmaxNR()) <= wp->dPmin && fabs(NRs.DSmaxNR()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }

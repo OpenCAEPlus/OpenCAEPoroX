@@ -747,6 +747,7 @@ void CriticalInfo::Setup()
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("dt", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("dPmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dTmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dVmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dSmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dNmax", "-", "-", "float", maxRowNum));
@@ -765,6 +766,8 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     Sumdata[n++].val.push_back(ctrl.time.GetLastDt());
     // dPmax
     Sumdata[n++].val.push_back(bulk.GetdPmax());
+    // dTmax
+    Sumdata[n++].val.push_back(bulk.GetdTmax());
     // dVmax
     Sumdata[n++].val.push_back(bulk.GeteVmax());
     // dSmax

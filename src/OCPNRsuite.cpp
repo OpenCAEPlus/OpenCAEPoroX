@@ -1,5 +1,5 @@
-/*! \file    OCPNRsuite.cpp
- *  \brief   data structure used in NR iterations
+/*! \file    OCPNLsuite.cpp
+ *  \brief   data structure used in non-linear iterations
  *  \author  Shizhe Li
  *  \date    Oct/07/2023
  *
@@ -52,7 +52,7 @@ void OCPRes::SetZero()
 }
 
 
-void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
+void OCPNLsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
 {
     myComm  = domain.myComm;
     numproc = domain.numproc;
@@ -82,7 +82,7 @@ void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const O
 }
 
 
-void OCPNRsuite::InitStep(const BulkVarSet& bvs)
+void OCPNLsuite::InitStep(const BulkVarSet& bvs)
 {
     GetWallTime timer;
     timer.Start();
@@ -98,14 +98,14 @@ void OCPNRsuite::InitStep(const BulkVarSet& bvs)
     lN = bvs.lNi;
     lS = bvs.lS;
 
-    dPmax.clear();
-    dTmax.clear();
-    dNmax.clear();
-    dSmax.clear();
+    dPmaxNR.clear();
+    dTmaxNR.clear();
+    dNmaxNR.clear();
+    dSmaxNR.clear();
 }
 
 
-void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
+void OCPNLsuite::CaldMax(const BulkVarSet& bvs)
 {
     OCP_DBL dPmaxTmp = 0;
     OCP_DBL dTmaxTmp = 0;
@@ -138,10 +138,10 @@ void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
     lN = bvs.Ni;
     lS = bvs.S;
 
-    dPmax.push_back(dPmaxTmp);
-    dTmax.push_back(dTmaxTmp);
-    dNmax.push_back(dNmaxTmp);
-    dSmax.push_back(dSmaxTmp);
+    dPmaxNR.push_back(dPmaxTmp);
+    dTmaxNR.push_back(dTmaxTmp);
+    dNmaxNR.push_back(dNmaxTmp);
+    dSmaxNR.push_back(dSmaxTmp);
 }
 
 

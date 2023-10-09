@@ -485,8 +485,8 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.muP       = bvs.lmuP;
     bvs.muT       = bvs.lmuT;
     bvs.mux       = bvs.lmux;
-    bvs.dPcdS   = bvs.ldPcdS;
-    bvs.dKrdS    = bvs.ldKrdS;
+    bvs.dPcdS     = bvs.ldPcdS;
+    bvs.dKrdS     = bvs.ldKrdS;
     bvs.UfP       = bvs.lUfP;
     bvs.UfT       = bvs.lUfT;
     bvs.Ufi       = bvs.lUfi;

@@ -26,6 +26,9 @@ class IsothermalMethod
 public:
     void CalRock(Bulk& bk) const;
 
+protected:
+    /// Newton-Raphson iteration suite
+    OCPNLsuite      NR;
 };
 
 /// IsoT_IMPEC is IMPEC (implicit pressure explict saturation) method.
@@ -131,9 +134,6 @@ protected:
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
 
-protected:
-    /// Newton-Raphson iteration suite
-    OCPNRsuite      NR;
 };
 
 

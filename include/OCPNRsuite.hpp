@@ -1,5 +1,5 @@
-/*! \file    OCPNRsuite.hpp
- *  \brief   data structure used in NR iterations
+/*! \file    OCPNLsuite.hpp
+ *  \brief   data structure used in non-linear iterations
  *  \author  Shizhe Li
  *  \date    Oct/30/2021
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPNRSUITE_HEADER__
-#define __OCPNRSUITE_HEADER__
+#ifndef __OCPNLSUITE_HEADER__
+#define __OCPNLSUITE_HEADER__
 
 // Standard header files
 #include <vector>
@@ -59,7 +59,7 @@ public:
 
 
 /// NR dataset for nonlinear solution
-class OCPNRsuite
+class OCPNLsuite
 {
 public:
     /// Setup for themral model
@@ -73,9 +73,9 @@ public:
     /// Get dNi
     OCP_DBL DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
     /// Get max dP
-    OCP_DBL DPmax() const { return dPmax.back(); };
+    OCP_DBL DPmaxNR() const { return dPmaxNR.back(); };
     /// Get max dS
-    OCP_DBL DSmax() const { return dSmax.back(); };
+    OCP_DBL DSmaxNR() const { return dSmaxNR.back(); };
 
 public:
     /// residual
@@ -91,6 +91,9 @@ protected:
     OCP_USI         nb;
     /// numPhase, numCom
     USI             np, nc;
+
+    // between NR-step
+
     /// P at last NR steps
     vector<OCP_DBL> lP;
     /// T at last NR steps
@@ -109,17 +112,34 @@ protected:
     vector<OCP_DBL> dS;
 
     /// Max pressure difference of all NR steps within a time step
-    vector<OCP_DBL> dPmax;
+    vector<OCP_DBL> dPmaxNR;
     /// Max temperature difference of all NR steps within a time step
-    vector<OCP_DBL> dTmax;
+    vector<OCP_DBL> dTmaxNR;
     /// Max Ni difference of all NR steps within a time step
-    vector<OCP_DBL> dNmax;
+    vector<OCP_DBL> dNmaxNR;
     /// Max saturation difference of all NR steps within a time step
-    vector<OCP_DBL> dSmax;
+    vector<OCP_DBL> dSmaxNR;
+
+
+    // between time-step
+
+    OCP_DBL dPmax; ///< Max change in pressure during the current time step.
+    OCP_DBL dTmax; ///< Max change in temperature during the current time step.
+    OCP_DBL dSmax; ///< Max change in saturation during the current time step.
+    OCP_DBL dNmax; ///< Max change in moles of component during the current time step.
+    OCP_DBL eVmax; ///< Max relative diff between fluid and pore volume during the
+                   ///< current time step.
+
+    mutable vector<OCP_DBL> cfl;             ///< CFL number for each bulk
+    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number for global
+    mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
+
+    // Iters
+
 };
 
 
-#endif  /* end if __ISOTHERMALMETHOD_HEADER__ */
+#endif  /* end if __OCPNLSUITE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
