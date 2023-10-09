@@ -67,19 +67,19 @@ public:
     /// Setup for themral model
     void SetupT(const BulkVarSet& bvs, const OCP_USI& nw);
     /// Reset 
-    void Reset(const BulkVarSet& bvs);
+    void InitStep(const BulkVarSet& bvs);
     /// Calculate max change for isothemral model
     void CaldMaxIsoT(const BulkVarSet& bvs);
     /// Calculate max change for themral model
     void CaldMaxT(const BulkVarSet& bvs);
     /// Get dP
-    auto DP(const OCP_USI& n) const { return dP[n]; }
+    OCP_DBL DP(const OCP_USI& n) const { return dP[n]; }
     /// Get dNi
-    auto DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
+    OCP_DBL DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
     /// Get max dP
-    auto DPmax() const { return dPmax; };
+    OCP_DBL DPmax() const { return dPmax.back(); };
     /// Get max dS
-    auto DSmax() const { return dSmax; };
+    OCP_DBL DSmax() const { return dSmax.back(); };
 
 public:
     /// residual
@@ -107,14 +107,14 @@ protected:
     /// saturation change between NR steps
     vector<OCP_DBL> dS;
 
-    /// Max pressure difference in an NR step
-    OCP_DBL         dPmax;
-    /// Max temperature difference in an NR step
-    OCP_DBL         dTmax;
-    /// Max Ni difference in an NR step
-    OCP_DBL         dNmax;
-    /// Max saturation difference in an NR step(Real)
-    OCP_DBL         dSmax;
+    /// Max pressure difference of all NR steps within a time step
+    vector<OCP_DBL> dPmax;
+    /// Max temperature difference of all NR steps within a time step
+    vector<OCP_DBL> dTmax;
+    /// Max Ni difference of all NR steps within a time step
+    vector<OCP_DBL> dNmax;
+    /// Max saturation difference of all NR steps within a time step
+    vector<OCP_DBL> dSmax;
 };
 
 

@@ -675,8 +675,6 @@ void IsoT_FIM::InitReservoir(Reservoir& rs)
     rs.allWells.InitBHP(rs.bulk);
     // Update variables at last time step
     UpdateLastTimeStep(rs);
-
-    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
@@ -685,6 +683,7 @@ void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
     CalRes(rs, dt, OCP_TRUE);
+    NR.InitStep(rs.bulk.GetVarSet());
 }
 
 void IsoT_FIM::AssembleMat(LinearSystem&    ls,
@@ -1369,7 +1368,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Residual
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
 
-    NR.Reset(rs.bulk.GetVarSet());
+    NR.InitStep(rs.bulk.GetVarSet());
 }
 
 void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
@@ -1462,8 +1461,6 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
     rs.allWells.InitBHP(rs.bulk);
 
     UpdateLastTimeStep(rs);
-
-    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
@@ -1480,6 +1477,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalKrPcI(rs.bulk);
 
     UpdateLastTimeStep(rs);
+    NR.InitStep(rs.bulk.GetVarSet());
 }
 
 void IsoT_AIMc::AssembleMat(LinearSystem&    ls,

@@ -31,14 +31,13 @@ void T_FIM::InitReservoir(Reservoir& rs)
 
     rs.allWells.InitBHP(rs.bulk);
     UpdateLastTimeStep(rs);
-
-    NR.Reset(rs.bulk.GetVarSet());
 }
 
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    NR.InitStep(rs.bulk.GetVarSet());
 }
 
 void T_FIM::AssembleMat(LinearSystem&    ls,
@@ -506,7 +505,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
 
-    NR.Reset(rs.bulk.GetVarSet());
+    NR.InitStep(rs.bulk.GetVarSet());
 }
 
 void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
