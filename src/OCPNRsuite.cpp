@@ -1,4 +1,4 @@
-/*! \file    OCPNLsuite.cpp
+/*! \file    OCPNRsuite.cpp
  *  \brief   data structure used in non-linear iterations
  *  \author  Shizhe Li
  *  \date    Oct/07/2023
@@ -52,7 +52,7 @@ void OCPRes::SetZero()
 }
 
 
-void OCPNLsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
+void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
 {
     myComm  = domain.myComm;
     numproc = domain.numproc;
@@ -82,7 +82,7 @@ void OCPNLsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const O
 }
 
 
-void OCPNLsuite::InitStep(const BulkVarSet& bvs)
+void OCPNRsuite::InitStep(const BulkVarSet& bvs)
 {
     GetWallTime timer;
     timer.Start();
@@ -105,7 +105,7 @@ void OCPNLsuite::InitStep(const BulkVarSet& bvs)
 }
 
 
-void OCPNLsuite::CaldMax(const BulkVarSet& bvs)
+void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
 {
     OCP_DBL dPmaxTmp = 0;
     OCP_DBL dTmaxTmp = 0;

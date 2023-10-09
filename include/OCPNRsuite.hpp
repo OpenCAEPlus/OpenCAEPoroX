@@ -1,4 +1,4 @@
-/*! \file    OCPNLsuite.hpp
+/*! \file    OCPNRsuite.hpp
  *  \brief   data structure used in non-linear iterations
  *  \author  Shizhe Li
  *  \date    Oct/30/2021
@@ -59,7 +59,7 @@ public:
 
 
 /// NR dataset for nonlinear solution
-class OCPNLsuite
+class OCPNRsuite
 {
 public:
     /// Setup for themral model
@@ -119,23 +119,6 @@ protected:
     vector<OCP_DBL> dNmaxNR;
     /// Max saturation difference of all NR steps within a time step
     vector<OCP_DBL> dSmaxNR;
-
-
-    // between time-step
-
-    OCP_DBL dPmax; ///< Max change in pressure during the current time step.
-    OCP_DBL dTmax; ///< Max change in temperature during the current time step.
-    OCP_DBL dSmax; ///< Max change in saturation during the current time step.
-    OCP_DBL dNmax; ///< Max change in moles of component during the current time step.
-    OCP_DBL eVmax; ///< Max relative diff between fluid and pore volume during the
-                   ///< current time step.
-
-    mutable vector<OCP_DBL> cfl;             ///< CFL number for each bulk
-    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number for global
-    mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
-
-    // Iters
-
 };
 
 

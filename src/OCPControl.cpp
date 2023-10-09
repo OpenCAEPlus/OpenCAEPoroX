@@ -263,7 +263,7 @@ ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
 }
 
 
-OCP_INT ControlNR::CheckConverge(const OCPNLsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
+OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
 {
     OCP_INT conflag_loc = -1;
     for (auto& s : il) {

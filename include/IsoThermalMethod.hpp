@@ -28,7 +28,7 @@ public:
 
 protected:
     /// Newton-Raphson iteration suite
-    OCPNLsuite      NR;
+    OCPNRsuite      NR;
 };
 
 /// IsoT_IMPEC is IMPEC (implicit pressure explict saturation) method.
