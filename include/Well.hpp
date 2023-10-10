@@ -85,7 +85,9 @@ public:
     /// Calculate flow rate of moles of phases for injection well and production well
     virtual void CalIPRate(const Bulk& bk, const OCP_DBL& dt) = 0;
     /// Calculate max change of well pressure between two time step
-    virtual OCP_DBL CalMaxChangeP() const = 0;
+    virtual OCP_DBL CalMaxChangeTime() const = 0;
+    /// Calculate max change of well pressure between two NR step
+    virtual OCP_DBL CalMaxChangeNR() = 0;
     /// Reset to last time step
     virtual void ResetToLastTimeStep(const Bulk& bk) = 0;
     /// Update last time step
@@ -147,8 +149,10 @@ protected:
     vector<OCP_DBL>     qi_lbmol;
     /// ifUse unweighted permeability.
     OCP_BOOL            ifUseUnweight{ OCP_FALSE };
-    /// Last bhp
+    /// bhp at last time step
     OCP_DBL             lbhp;
+    /// bhp at last NR step
+    OCP_DBL             NRbhp;
 
     /// well oil production rate.
     OCP_DBL             WOPR{0};

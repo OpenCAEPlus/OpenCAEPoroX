@@ -45,7 +45,9 @@ public:
 	/// Calculate flow rate of moles of phases for injection well and production well
 	void CalIPRate(const Bulk& bk, const OCP_DBL& dt) override;
 	/// Calculate max change of well pressure between two time step
-	OCP_DBL CalMaxChangeP() const override;
+	OCP_DBL CalMaxChangeTime() const override;
+	/// Calculate max change of well pressure between two NR step
+	OCP_DBL CalMaxChangeNR() override;
 	/// Reset to last time step
 	void ResetToLastTimeStep(const Bulk& bk) override;
 	/// Update last time step

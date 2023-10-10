@@ -120,8 +120,6 @@ public:
     USI GetWellPerfNum() const;
     /// Calculate maximum num of perforations of all Wells.
     USI     GetMaxWellPerNum() const;
-    void    CalMaxBHPChange();
-    OCP_DBL GetdBHPmax() const { return dPmax; }
 
     /// Return the BHP of wth well.
     OCP_DBL GetWBHP(const USI& w) const

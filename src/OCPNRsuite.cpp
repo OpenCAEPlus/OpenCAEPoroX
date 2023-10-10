@@ -116,7 +116,7 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     dPmaxTmp = 0;
     const AllWells& well = rs.allWells;
     for (const auto& w : well.wells) {
-        OCP_DBL dPw = w->CalMaxChangeP();
+        const OCP_DBL dPw = w->CalMaxChangeNR();
         if (fabs(dPmaxTmp) < fabs(dPw)) {
             dPmaxTmp = dPw;
         }
@@ -181,7 +181,7 @@ void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
     // for well
     const AllWells& well = rs.allWells;
     for (const auto& w : well.wells) {
-        OCP_DBL dPw = w->CalMaxChangeP();
+        OCP_DBL dPw = w->CalMaxChangeTime();
         if (fabs(dPWmaxT) < fabs(dPw)) {
             dPWmaxT = dPw;
         }

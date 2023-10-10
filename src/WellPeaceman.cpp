@@ -223,10 +223,21 @@ void PeacemanWell::CalIPRate(const Bulk& bk, const OCP_DBL& dt)
 }
 
 
-OCP_DBL PeacemanWell::CalMaxChangeP() const
+OCP_DBL PeacemanWell::CalMaxChangeTime() const
 { 
     if (opt.state != WellState::open)  return 0;
     else                               return (bhp - lbhp); 
+}
+
+
+OCP_DBL PeacemanWell::CalMaxChangeNR()
+{
+    if (opt.state != WellState::open)  return 0;
+    else {
+        const OCP_DBL dP = bhp - NRbhp;
+        NRbhp = bhp;
+        return dP;
+    }
 }
 
 
@@ -234,7 +245,8 @@ void PeacemanWell::ResetToLastTimeStep(const Bulk& bk)
 {
     if (opt.state != WellState::open)  return;
 
-    bhp = lbhp;
+    bhp   = lbhp;
+    NRbhp = lbhp;
     if (opt.mode == WellOptMode::bhp) bhp = opt.tarBHP;
     CalPerfP();
     CalFluxInit(bk);
@@ -243,7 +255,8 @@ void PeacemanWell::ResetToLastTimeStep(const Bulk& bk)
 
 void PeacemanWell::UpdateLastTimeStep()
 { 
-    lbhp = bhp; 
+    lbhp  = bhp; 
+    NRbhp = bhp;
 }
 
 

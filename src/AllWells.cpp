@@ -285,13 +285,6 @@ USI AllWells::GetMaxWellPerNum() const
     return m;
 }
 
-void AllWells::CalMaxBHPChange()
-{
-    dPmax = 0;
-    for (USI w = 0; w < numWell; w++) {
-        dPmax = max(dPmax, wells[w]->CalMaxChangeP());
-    }
-}
 
 USI AllWells::GetNumOpenWell() const
 {
