@@ -11,6 +11,17 @@
 
 #include "OCPOutput.hpp"
 
+
+void ItersInfo::Update(const OCPNRsuite& NRs)
+{
+    numTstep++;
+    NRt  += NRs.GetIterNR();
+    NRwt += NRs.GetIterNRw();
+    LSt  += NRs.GetIterLS();
+    LSwt += NRs.GetIterLSw();
+}
+
+
 void Summary::InputParam(const OutputSummary& summary_param)
 {
     FPR  = summary_param.FPR;
@@ -405,7 +416,7 @@ void Summary::Setup(const Reservoir& rs)
 
 }
 
-void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl)
+void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInfo& iters)
 {
     const Bulk&     bulk  = rs.bulk;
     const AllWells& wells = rs.allWells;
@@ -415,9 +426,9 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl)
     // TIME
     Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
     // NRiter
-    Sumdata[n++].val.push_back(ctrl.iters.GetNRt());
+    Sumdata[n++].val.push_back(iters.GetNRt());
     // LSiter
-    Sumdata[n++].val.push_back(ctrl.iters.GetLSt());
+    Sumdata[n++].val.push_back(iters.GetLSt());
 
     OCP_DBL  tmpV = 0;
     if (FPR) Sumdata[n++].val.push_back(bulk.CalFPR(tmpV));
@@ -1597,7 +1608,8 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const
     GetWallTime timer;
     timer.Start();
 
-    summary.SetVal(reservoir, ctrl);
+    iters.Update(NR);
+    summary.SetVal(reservoir, ctrl, iters);
     crtInfo.SetVal(reservoir, ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
@@ -1622,7 +1634,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
-        cout << "Timestep " << setw(6) << left << ctrl.iters.GetTimeStep() << ": " << fixed
+        cout << "Timestep " << setw(6) << left << iters.GetTimeStep() << ": " << fixed
              << setw(10) << setprecision(3) << right << days << " Days"
              << "    Wall time: " << time / 1000 << " Sec" << endl;
     }
@@ -1651,6 +1663,17 @@ void OCPOutput::PostProcess() const
     
     
     OCPTIME_OUTPUT += timer.Stop() / 1000;
+}
+
+
+void OCPOutput::PrintCurrentTimeIter(const OCPControl& ctrl) const
+{
+    if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
+        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.time.GetCurrentTime()
+            << " Days";
+        cout << ",  NR: " << iters.GetNRt() << ",  LS: " << iters.GetLSt()
+            << ",  Last dt: " << ctrl.time.GetLastDt() << " Days" << endl;
+    }
 }
 
 /*----------------------------------------------------------------------------*/

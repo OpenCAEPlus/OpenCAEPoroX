@@ -55,54 +55,6 @@ public:
 };
 
 
-/// Record iteration information
-class ItersInfo
-{
-    friend class OCPControl;
-
-public:
-    /// Update all Iters
-    void UpdateTotal();
-    /// Reset all Iters
-    void Reset();
-    /// Update the number of Newton iterations.
-    void UpdateNR() { NR++; }
-    /// Update the number of linear iterations.
-    void UpdateLS(const USI& num) { LS += num; }
-    /// Get num of time steps
-    auto GetTimeStep() const { return numTstep; }
-    /// Return the number of Newton iterations in one time step.
-    auto GetNR() const { return NR; }
-    /// Return the total number of Newton iterations.
-    auto GetNRt() const { return NRt; }
-    /// Return the total number of wasted Newton iterations.
-    auto GetNRwt() const { return NRwt; }
-    /// Return the number of linear iterations in one time step.
-    auto GetLS() const { return LS; }
-    /// Return the total number of linear iterations.
-    auto GetLSt() const { return LSt; }
-    /// Return the total number of wasted linear iterations.
-    auto GetLSwt() const { return LSwt; }
-
-protected:
-    /// number of time step
-    USI numTstep{ 0 };
-    /// number of Newton-Raphson iterations
-    USI NR{ 0 };
-    /// total number of Newton iterations
-    USI NRt{ 0 };
-    /// total number of wasted Newton iterations
-    USI NRwt{ 0 };
-    /// number of linear solver iterations
-    USI LS{ 0 };
-    /// total number of iterations of linear solver
-    USI LSt{ 0 };
-    /// totalnumber of wasted linear iterations
-    USI LSwt{ 0 };
-};
-
-
-
 /// Params for choosing time stepsize in time marching.
 /// Note: Most commonly used params are the first three
 class ControlTimeParam
@@ -172,7 +124,7 @@ public:
     /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i, const AllWells& wells);
     /// Calculate next time step
-    void CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il);
+    void CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Get total simulation time
     auto GetTotalTime() const { return ps.back().end_time; }
     /// Get number of TSTEP interval
@@ -260,7 +212,7 @@ public:
     /// Get dPmax
     auto DPmax() const { return wp->dPmax; }
     /// If NR iterations converge
-    OCP_INT CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const;
+    OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const;
 
 protected:
     MPI_Comm         myComm;
@@ -289,11 +241,11 @@ public:
     OCP_BOOL Check(Reservoir& rs, const initializer_list<string>& il);
     /// Check if converge
     OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
-        return NR.CheckConverge(NRs, iters, il);
+        return NR.CheckConverge(NRs, il);
     }
     // Calculate next time step
-    void CalNextTimeStep(const Reservoir& rs, const initializer_list<string>& il) {
-        time.CalNextTimeStep(rs, iters, il);
+    void CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il) {
+        time.CalNextTimeStep(rs, NRs, il);
     }
 
 public:
@@ -305,8 +257,6 @@ public:
 public:
     /// Print level
     USI         printLevel{0};
-    /// num of time steps, nonlinear iterations and linear solver iterations
-    ItersInfo   iters;
     /// Time control 
     ControlTime time;
     /// NR control    

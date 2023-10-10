@@ -38,6 +38,7 @@ void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
     rs.allWells.PrepareWell(rs.bulk);
     CalRes(rs, ctrl.time.GetCurrentDt());
     NR.InitStep(rs.bulk.GetVarSet());
+    NR.InitIter();
 }
 
 void T_FIM::AssembleMat(LinearSystem&    ls,
@@ -71,8 +72,8 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     }
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.iters.UpdateLS(status);
-    ctrl.iters.UpdateNR();
+
+    NR.UpdateIter(status);
 
 #ifdef DEBUG
     // Output A, b, x
@@ -148,7 +149,7 @@ void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});   
+    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 void T_FIM::AllocateReservoir(Reservoir& rs)
@@ -501,11 +502,10 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.iters.Reset();
-
     CalRes(rs, ctrl.time.GetCurrentDt());
 
     NR.InitStep(rs.bulk.GetVarSet());
+    NR.ResetIter();
 }
 
 void T_FIM::UpdateLastTimeStep(Reservoir& rs) const

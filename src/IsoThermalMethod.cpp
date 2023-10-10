@@ -63,6 +63,7 @@ void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.PrepareWell(rs.bulk);
     rs.CalCFL(ctrl.time.GetCurrentDt(), OCP_TRUE);
     ctrl.Check(rs, {"CFL"});
+    NR.InitIter();
 }
 
 void IsoT_IMPEC::AssembleMat(LinearSystem&    ls,
@@ -102,8 +103,8 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 #endif // DEBUG
 
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.iters.UpdateLS(status);
-    ctrl.iters.UpdateNR();
+
+    NR.UpdateIter(status);
 
 #ifdef DEBUG
     // ls.OutputSolution("testx_IMPEC.out");
@@ -159,7 +160,7 @@ void IsoT_IMPEC::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
     // ctrl.CalNextTstepIMPEC(rs);
-    ctrl.CalNextTimeStep(rs, {"dP", "dN", "dS", "eV"});
+    ctrl.CalNextTimeStep(rs, NR, {"dP", "dN", "dS", "eV"});
 }
 
 void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
@@ -569,7 +570,7 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
     rs.conn.vs.rho          = rs.conn.vs.lrho;
 
     // Iters
-    ctrl.iters.Reset();
+    NR.ResetIter();
 }
 
 void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
@@ -607,7 +608,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.iters.Reset();
+    NR.ResetIter();
 }
 
 void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
@@ -685,6 +686,7 @@ void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
     // Calculate initial residual
     CalRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
+    NR.InitIter();
 }
 
 void IsoT_FIM::AssembleMat(LinearSystem&    ls,
@@ -722,8 +724,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     }
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.iters.UpdateLS(status);
-    ctrl.iters.UpdateNR();
+
+    NR.UpdateIter(status);
 
      
 #ifdef DEBUG
@@ -798,7 +800,7 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});
+    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 void IsoT_FIM::AllocateReservoir(Reservoir& rs)
@@ -1353,7 +1355,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    ctrl.iters.Reset();
+    NR.ResetIter();
 
     // Residual
     CalRes(rs, ctrl.time.GetCurrentDt());
@@ -1469,6 +1471,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
 
     UpdateLastTimeStep(rs);
     NR.InitStep(rs.bulk.GetVarSet());
+    NR.InitIter();
 }
 
 void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
@@ -1509,8 +1512,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 #endif // DEBUG
 
     OCPTIME_LSOLVER += timer.Stop() / 1000;
-    ctrl.iters.UpdateLS(status);
-    ctrl.iters.UpdateNR();
+
+    NR.UpdateIter(status);
 
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
@@ -1573,7 +1576,7 @@ void IsoT_AIMc::FinishStep(Reservoir& rs, OCPControl& ctrl) const
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     rs.CalMaxChange();
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, {"dP", "dS", "iter"});
+    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 /// Allocate memory for reservoir

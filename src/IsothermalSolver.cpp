@@ -175,7 +175,6 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
         default:
             OCP_ABORT("Wrong method type!");
     }
-    ctrl.iters.UpdateTotal();
 }
 
 

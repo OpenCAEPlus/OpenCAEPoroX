@@ -149,15 +149,15 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << "Final time:                  " << right << fixed << setprecision(3)
             << setw(fixWidth) << control.time.GetCurrentTime() << " (Days)" << endl;
         cout << " - Avg time step size ......." << setw(fixWidth)
-            << control.time.GetCurrentTime() / control.iters.GetTimeStep() << " (" << control.iters.GetTimeStep()
+            << control.time.GetCurrentTime() / output.iters.GetTimeStep() << " (" << output.iters.GetTimeStep()
             << " steps)" << endl;
         cout << " - Avg Newton steps ........." << setw(fixWidth)
-            << static_cast<double>(control.iters.GetNRt()) / control.iters.GetTimeStep() << " ("
-            << control.iters.GetNRt() << " succeeded + " << control.iters.GetNRwt()
+            << static_cast<double>(output.iters.GetNRt()) / output.iters.GetTimeStep() << " ("
+            << output.iters.GetNRt() << " succeeded + " << output.iters.GetNRwt()
             << " wasted)" << endl;
         cout << " - Avg linear steps ........." << setw(fixWidth)
-            << static_cast<double>(control.iters.GetLSt()) / control.iters.GetNRt() << " ("
-            << control.iters.GetLSt() << " succeeded + " << control.iters.GetLSwt()
+            << static_cast<double>(output.iters.GetLSt()) / output.iters.GetNRt() << " ("
+            << output.iters.GetLSt() << " succeeded + " << output.iters.GetLSwt()
             << " wasted)" << endl;
 
         // print time usages

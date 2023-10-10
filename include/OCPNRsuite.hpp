@@ -131,9 +131,36 @@ protected:
 
     // Iterations
 public:
+    void InitIter() {
+        iterNR  = 0;
+        iterLS  = 0;
+        iterNRw = 0;
+        iterLSw = 0;
+    }
+    void UpdateIter(const USI& lsIter) {
+        iterNR++;
+        iterLS += lsIter;
+    }
+    void ResetIter() {
+        iterNRw += iterNR;
+        iterLSw += iterLS;
+        iterNR  = 0;
+        iterLS  = 0;
+    }
+    auto GetIterNR() const { return iterNR; }
+    auto GetIterLS() const { return iterLS; }
+    auto GetIterNRw() const { return iterNRw; }
+    auto GetIterLSw() const { return iterLSw; }
 
 protected:
-
+    /// number of Newton-Raphson iterations
+    USI iterNR{ 0 };
+    /// number of linear solver iterations
+    USI iterLS{ 0 };
+    /// wasted number of Newton-Raphson iterations
+    USI iterNRw{ 0 };
+    /// wasted number of linear solver iterations
+    USI iterLSw{ 0 };
 
 };
 

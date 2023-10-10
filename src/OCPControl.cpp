@@ -108,27 +108,6 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 }
 
 
-
-
-void ItersInfo::UpdateTotal()
-{
-    numTstep += 1;
-    NRt += NR;
-    LSt += LS;
-    NR = 0;
-    LS = 0;
-}
-
-
-void ItersInfo::Reset()
-{
-    NRwt += NR;
-    LSwt += LS;
-    NR = 0;
-    LS = 0;
-}
-
-
 ControlTimeParam::ControlTimeParam(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i)
 {
     const auto& src_t = src.Tuning[0];
@@ -187,48 +166,47 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 }
 
 
-void ControlTime::CalNextTimeStep(const Reservoir& rs, const ItersInfo& iters, const initializer_list<string>& il)
+void ControlTime::CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il)
 {
+	last_dt = current_dt;
+	current_time += current_dt;
 
-    last_dt = current_dt;
-    current_time += current_dt;
+	OCP_DBL factor = wp->maxIncreFac;
 
-    OCP_DBL factor =  wp->maxIncreFac;
+	const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
+	const OCP_DBL dTmax = rs.bulk.GetdTmax();
+	const OCP_DBL dNmax = rs.bulk.GetdNmax();
+	const OCP_DBL dSmax = rs.bulk.GetdSmax();
+	const OCP_DBL eVmax = rs.bulk.GeteVmax();
 
-    const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
-const OCP_DBL dTmax = rs.bulk.GetdTmax();
-const OCP_DBL dNmax = rs.bulk.GetdNmax();
-const OCP_DBL dSmax = rs.bulk.GetdSmax();
-const OCP_DBL eVmax = rs.bulk.GeteVmax();
-
-for (auto& s : il) {
-    if (s == "dP") {
-        if (dPmax > TINY) factor = min(factor, wp->dPlim / dPmax);
-    }
-    else if (s == "dT") {
-        // no input now -- no value
-        if (dTmax > TINY) factor = min(factor, wp->dTlim / dTmax);
-    }
-    else if (s == "dN") {
-        if (dNmax > TINY) factor = min(factor, wp->dNlim / dNmax);
-    }
-    else if (s == "dS") {
-        if (dSmax > TINY) factor = min(factor, wp->dSlim / dSmax);
-    }
-    else if (s == "eV") {
-        if (eVmax > TINY) factor = min(factor, wp->eVlim / eVmax);
-    }
-    else if (s == "iter") {
-        if (iters.GetNR() < 5)
-            factor = min(factor, 2.0);
-        else if (iters.GetNR() > 10)
-            factor = min(factor, 0.5);
-        else
-            factor = min(factor, 1.5);
-    }
-    else {
-        OCP_ABORT("Iterm not recognized!");
-    }
+	for (auto& s : il) {
+		if (s == "dP") {
+			if (dPmax > TINY) factor = min(factor, wp->dPlim / dPmax);
+		}
+		else if (s == "dT") {
+			// no input now -- no value
+			if (dTmax > TINY) factor = min(factor, wp->dTlim / dTmax);
+		}
+		else if (s == "dN") {
+			if (dNmax > TINY) factor = min(factor, wp->dNlim / dNmax);
+		}
+		else if (s == "dS") {
+			if (dSmax > TINY) factor = min(factor, wp->dSlim / dSmax);
+		}
+		else if (s == "eV") {
+			if (eVmax > TINY) factor = min(factor, wp->eVlim / eVmax);
+		}
+		else if (s == "iter") {
+			if (NRs.GetIterNR() < 5)
+				factor = min(factor, 2.0);
+			else if (NRs.GetIterNR() > 10)
+				factor = min(factor, 0.5);
+			else
+				factor = min(factor, 1.5);
+		}
+		else {
+			OCP_ABORT("Iterm not recognized!");
+		}
 }
 
 factor = max(wp->minChopFac, factor);
@@ -263,7 +241,7 @@ ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
 }
 
 
-OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, const initializer_list<string>& il) const
+OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const
 {
     OCP_INT conflag_loc = -1;
     for (auto& s : il) {
@@ -310,7 +288,7 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, 
         // converge
         return 1;
     }
-    else if (iters.GetNR() >= wp->maxIter) {
+    else if (NRs.GetIterNR() >= wp->maxIter) {
         // not converge in specified numbers of iterations, reset
         return -1;
     }

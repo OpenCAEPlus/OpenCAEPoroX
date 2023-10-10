@@ -70,6 +70,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
         rs.ApplyControl(d);
         ctrl.ApplyControl(d, rs);
         while (!ctrl.time.IfEnd()) {
+            output.PrintCurrentTimeIter(ctrl);
             const OCPNRsuite& NR = GoOneStep(rs, ctrl);
             output.SetVal(rs, ctrl, NR);
             if (ctrl.printLevel >= PRINT_ALL) {
@@ -87,14 +88,6 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
 /// This is one time step of dynamic simulation in an abstract setting.
 const OCPNRsuite& Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 {
-
-    if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.time.GetCurrentTime()
-             << " Days";
-        cout << ",  NR: " << ctrl.iters.GetNRt() << ",  LS: " << ctrl.iters.GetLSt()
-             << ",  Last dt: " << ctrl.time.GetLastDt() << " Days" << endl;
-    }
-
     switch (model) 
     {
         case OCPModel::isothermal:

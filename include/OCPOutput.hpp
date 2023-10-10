@@ -77,6 +77,37 @@ public:
 };
 
 
+/// Record iteration information
+class ItersInfo
+{
+
+public:
+    /// Update all Iters
+    void Update(const OCPNRsuite& NRs);
+    /// Get num of time steps
+    auto GetTimeStep() const { return numTstep; }
+    /// Return the total number of Newton iterations.
+    auto GetNRt() const { return NRt; }
+    /// Return the total number of wasted Newton iterations.
+    auto GetNRwt() const { return NRwt; }
+    /// Return the total number of linear iterations.
+    auto GetLSt() const { return LSt; }
+    /// Return the total number of wasted linear iterations.
+    auto GetLSwt() const { return LSwt; }
+
+protected:
+    /// number of time step
+    USI numTstep{ 0 };
+    /// total number of Newton iterations
+    USI NRt{ 0 };
+    /// total number of wasted Newton iterations
+    USI NRwt{ 0 };
+    /// total number of iterations of linear solver
+    USI LSt{ 0 };
+    /// totalnumber of wasted linear iterations
+    USI LSwt{ 0 };
+};
+
 
 /// The SumItem class is an auxiliary structure storing summary data to output.
 class SumItem
@@ -118,7 +149,7 @@ public:
     void Setup(const Reservoir& reservoir);
 
     /// Set value for vars
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const ItersInfo& iters);
 
     /// Write output information to a file.
     void PrintInfo(const string& dir, const string& filename, const OCP_INT& rank) const;
@@ -339,11 +370,11 @@ public:
     /// Output info which is each time step based
     void PrintInfo() const;
     /// Output info which is Keyword TSTEP based
-    void PrintInfoSched(const Reservoir&  rs,
-                            const OCPControl& ctrl,
-                            const OCP_DBL&    time) const;
+    void PrintInfoSched(const Reservoir&  rs, const OCPControl& ctrl, const OCP_DBL& time) const;
     /// Post-process the output file
     void PostProcess() const;
+    /// output current time step and iterations to screen
+    void PrintCurrentTimeIter(const OCPControl& ctrl) const;
 
 protected:
     MPI_Comm  myComm;
@@ -353,6 +384,7 @@ protected:
 protected:
     string       workDir;
     string       fileName;
+    ItersInfo    iters;
     Summary      summary;
     CriticalInfo crtInfo;
     Out4RPT      out4RPT;

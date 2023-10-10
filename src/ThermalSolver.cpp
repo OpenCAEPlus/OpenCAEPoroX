@@ -60,7 +60,6 @@ OCP_BOOL ThermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 void ThermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     fim.FinishStep(rs, ctrl);
-    ctrl.iters.UpdateTotal();
 }
 
 
