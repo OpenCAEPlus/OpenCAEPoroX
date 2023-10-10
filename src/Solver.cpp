@@ -71,7 +71,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
         ctrl.ApplyControl(d, rs);
         while (!ctrl.time.IfEnd()) {
             const OCPNRsuite& NR = GoOneStep(rs, ctrl);
-            output.SetVal(rs, ctrl);
+            output.SetVal(rs, ctrl, NR);
             if (ctrl.printLevel >= PRINT_ALL) {
                 // Print Summary and critical information at every time step
                 output.PrintInfo();

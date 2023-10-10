@@ -755,11 +755,39 @@ void CriticalInfo::Setup()
 
 }
 
-void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl)
+void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
 {
     const Bulk& bulk = rs.bulk;
 
+    // for NR step
+    const auto& dP = NR.DPmaxNR();
+    const auto& dT = NR.DTmaxNR();
+    const auto& dN = NR.DNmaxNR();
+    const auto& dS = NR.DSmaxNR();
+
     USI n = 0;
+    for (INT i = 0; i < dP.size(); i++) {
+        // Time
+        Sumdata[n++].val.push_back(-(i+1));
+        // Time step
+        Sumdata[n++].val.push_back(-(i + 1));
+        // dPmax
+        Sumdata[n++].val.push_back(fabs(dP[i]));
+        // dTmax
+        Sumdata[n++].val.push_back(fabs(dT[i]));
+        // dVmax
+        Sumdata[n++].val.push_back(fabs(-1));
+        // dSmax
+        Sumdata[n++].val.push_back(dS[i]);
+        // dNmax
+        Sumdata[n++].val.push_back(dN[i]);
+        // CFL
+        Sumdata[n++].val.push_back(-1);
+
+        n = 0;
+    }
+
+    // for time step
     // Time
     Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
     // Time step
@@ -810,6 +838,13 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
     const OCP_USI num = Sumdata[0].val.size();
     for (OCP_USI n = 0; n < num; n++) {
         for (const auto& v : Sumdata) {
+
+            // for NR STEP
+            if ((v.Item == "TIME" || v.Item == "dt") && (v.val[n] < 0)) {
+                outF << setw(ns) << to_string(INT(-v.val[n]));
+                continue;
+            }
+
             if (v.Type == "fixed") {
                 outF << fixed << setprecision(3);
             }
@@ -1557,13 +1592,13 @@ void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const 
     out4VTK.Setup(workDir, reservoir);
 }
 
-void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl)
+void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR)
 {
     GetWallTime timer;
     timer.Start();
 
     summary.SetVal(reservoir, ctrl);
-    crtInfo.SetVal(reservoir, ctrl);
+    crtInfo.SetVal(reservoir, ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }

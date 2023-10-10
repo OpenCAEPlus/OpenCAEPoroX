@@ -76,6 +76,8 @@ public:
         index; ///< Records the index of bulk or well, whose properties will be printed
 };
 
+
+
 /// The SumItem class is an auxiliary structure storing summary data to output.
 class SumItem
 {
@@ -167,7 +169,7 @@ public:
     void Setup();
 
     /// Set values for vars
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR);
 
     /// Print to file
     void PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const;
@@ -333,7 +335,7 @@ public:
     /// Setup all kinds of output
     void Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
     /// Assign values to be output in PrintInfo()
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR);
     /// Output info which is each time step based
     void PrintInfo() const;
     /// Output info which is Keyword TSTEP based

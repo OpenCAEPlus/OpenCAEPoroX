@@ -72,10 +72,18 @@ public:
     OCP_DBL DP(const OCP_USI& n) const { return dP[n]; }
     /// Get dNi
     OCP_DBL DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
-    /// Get max dP
-    OCP_DBL DPmaxNR() const { return dPmaxNR.back(); };
-    /// Get max dS
-    OCP_DBL DSmaxNR() const { return dSmaxNR.back(); };
+    /// Get current max dP
+    OCP_DBL DPmaxNRc() const { return dPmaxNR.back(); };
+    /// Get current max dS
+    OCP_DBL DSmaxNRc() const { return dSmaxNR.back(); };
+    /// Get all max dP
+    const auto& DPmaxNR() const { return dPmaxNR; };
+    /// Get all max dT
+    const auto& DTmaxNR() const { return dTmaxNR; };
+    /// Get all max dN
+    const auto& DNmaxNR() const { return dNmaxNR; };
+    /// Get all max dS
+    const auto& DSmaxNR() const { return dSmaxNR; };
 
 public:
     /// residual

@@ -284,12 +284,12 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const ItersInfo& iters, 
             }
         }
         else if (s == "d") {
-            if (fabs(NRs.DPmaxNR()) <= wp->dPmin && fabs(NRs.DSmaxNR()) <= wp->dSmin) {
+            if (fabs(NRs.DPmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }
         else if (s == "dT") {
-            if (fabs(NRs.DPmaxNR()) <= wp->dPmin && fabs(NRs.DSmaxNR()) <= wp->dSmin) {
+            if (fabs(NRs.DPmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }
