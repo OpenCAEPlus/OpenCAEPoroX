@@ -767,7 +767,7 @@ void CriticalInfo::Setup()
 
 }
 
-void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInfo& iters, const OCPNRsuite& NR)
+void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
 {
     const Bulk& bulk = rs.bulk;
 
@@ -781,7 +781,7 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const Ite
     USI n = 0;
     for (INT i = 0; i < dP.size(); i++) {
         // Time
-        Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
+        Sumdata[n++].val.push_back(-1);
         // Time step size
         Sumdata[n++].val.push_back(-(i + 1));
         // LS
@@ -823,7 +823,7 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const Ite
     Sumdata[n++].val.push_back(bulk.GetMaxCFL());
 }
 
-void CriticalInfo::PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const
+void CriticalInfo::PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank, const ItersInfo& iters) const
 {
     string   FileOut;
     if (rank >= 0) {
@@ -839,7 +839,10 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
         OCP_ABORT("Can not open " + FileOut);
     }
 
-    outF << "FastReview OF RUN " + dir + filename << " -- " << Sumdata[0].val.size() << " time step\n";
+    outF << "FastReview OF RUN " + dir + filename
+        << " -- " << iters.GetNumTimeStep() << " time step "
+        << " -- " << iters.GetNRt() << " (+" << iters.GetNRwt() << ") NR step"
+        << " : " << iters.GetLSt() << " (+" << iters.GetLSwt() << ") LS step\n";
 
     // Item
     for (const auto& v : Sumdata) {
@@ -858,6 +861,11 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
 
             outF.unsetf(ios_base::fixed);
             outF.unsetf(ios_base::scientific);
+
+            if (rank < 0 && v.Item == "TIME" && v.val[n] < 0) {
+                outF << setw(ns) << "-";
+                continue;
+            }
 
             // for NR STEP
             if (v.Item == "dt/NRiter" && v.val[n] < 0) {
@@ -884,13 +892,13 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
 
 
 /// Combine all files into 1 by Master process
-void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc, const ItersInfo& iters) const
 {
 
     vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
     sumdata->clear();
 
-    OCP_USI         rowNum;
+    OCP_USI         rowNum = 0;
     vector<string>  buffer;
 
     for (USI p = 0; p < numproc; p++) {
@@ -907,8 +915,8 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
             ReadLine(ifs, buffer, OCP_FALSE);
             for (USI i = 0; i < buffer.size(); i++) {
                 if (buffer[i] == "--") {
-                    rowNum = stoi(buffer[i + 1]);
-                    break;
+                    rowNum += stoi(buffer[i + 1]);
+                    continue;
                 }
             }
             // Get Item
@@ -958,7 +966,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
             v.Type = "float";
         }
     }
-    PrintFastReview(dir, filename, -1);
+    PrintFastReview(dir, filename, -1, iters);
 }
 
 
@@ -1626,7 +1634,7 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const
 
     iters.Update(NR);
     summary.SetVal(reservoir, ctrl, iters);
-    crtInfo.SetVal(reservoir, ctrl, iters, NR);
+    crtInfo.SetVal(reservoir, ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
@@ -1637,7 +1645,7 @@ void OCPOutput::PrintInfo() const
     timer.Start();
 
     summary.PrintInfo(workDir, fileName, (numproc > 1 ? myrank : -1));
-    crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1));
+    crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1), iters);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
@@ -1650,7 +1658,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
-        cout << "Timestep " << setw(6) << left << iters.GetTimeStep() << ": " << fixed
+        cout << "Timestep " << setw(6) << left << iters.GetNumTimeStep() << ": " << fixed
              << setw(10) << setprecision(3) << right << days << " Days"
              << "    Wall time: " << time / 1000 << " Sec" << endl;
     }
@@ -1671,7 +1679,7 @@ void OCPOutput::PostProcess() const
     timer.Start();
     if (numproc > 1 && myrank == MASTER_PROCESS) {
         summary.PostProcess(workDir, fileName, numproc);
-        crtInfo.PostProcess(workDir, fileName, numproc);           
+        crtInfo.PostProcess(workDir, fileName, numproc, iters);           
     }
     if (myrank == MASTER_PROCESS) {
         out4VTK.PostProcess(workDir, fileName, numproc);

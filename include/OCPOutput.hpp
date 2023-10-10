@@ -85,7 +85,7 @@ public:
     /// Update all Iters
     void Update(const OCPNRsuite& NRs);
     /// Get num of time steps
-    auto GetTimeStep() const { return numTstep; }
+    auto GetNumTimeStep() const { return numTstep; }
     /// Return the total number of Newton iterations.
     auto GetNRt() const { return NRt; }
     /// Return the total number of wasted Newton iterations.
@@ -200,13 +200,13 @@ public:
     void Setup();
 
     /// Set values for vars
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const ItersInfo& iters, const OCPNRsuite& NR);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR);
 
     /// Print to file
-    void PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank) const;
+    void PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank, const ItersInfo& iters) const;
 
     /// Combine all files into 1 by Master process
-    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
+    void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc, const ItersInfo& iters) const;
 
 private:
     vector<SumItem> Sumdata;
