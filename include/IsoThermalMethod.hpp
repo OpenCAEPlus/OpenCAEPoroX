@@ -159,7 +159,7 @@ public:
     /// Finish a Newton-Raphson iteration.
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish a time step.
-    void FinishStep(Reservoir& rs, OCPControl& ctrl) const;
+    void FinishStep(Reservoir& rs, OCPControl& ctrl);
     /// Get NRsuite
     const OCPNRsuite& GetNRsuite() const { return NR; }
 

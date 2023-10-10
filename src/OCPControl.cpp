@@ -166,18 +166,18 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 }
 
 
-void ControlTime::CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il)
+void ControlTime::CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il)
 {
 	last_dt = current_dt;
 	current_time += current_dt;
 
 	OCP_DBL factor = wp->maxIncreFac;
 
-	const OCP_DBL dPmax = max(rs.bulk.GetdPmax(), rs.allWells.GetdBHPmax());
-	const OCP_DBL dTmax = rs.bulk.GetdTmax();
-	const OCP_DBL dNmax = rs.bulk.GetdNmax();
-	const OCP_DBL dSmax = rs.bulk.GetdSmax();
-	const OCP_DBL eVmax = rs.bulk.GeteVmax();
+	const OCP_DBL dPmax = fabs(NRs.DPmaxT());
+	const OCP_DBL dTmax = fabs(NRs.DTmaxT());
+	const OCP_DBL dNmax = fabs(NRs.DNmaxT());
+	const OCP_DBL dSmax = fabs(NRs.DSmaxT());
+	const OCP_DBL eVmax = fabs(NRs.EVmaxT());
 
 	for (auto& s : il) {
 		if (s == "dP") {
@@ -207,25 +207,25 @@ void ControlTime::CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, co
 		else {
 			OCP_ABORT("Iterm not recognized!");
 		}
-}
+	}
 
-factor = max(wp->minChopFac, factor);
+	factor = max(wp->minChopFac, factor);
 
-OCP_DBL dt_loc = current_dt * factor;
-if (dt_loc > wp->timeMax) dt_loc = wp->timeMax;
-if (dt_loc < wp->timeMin) dt_loc = wp->timeMin;
+	OCP_DBL dt_loc = current_dt * factor;
+	if (dt_loc > wp->timeMax) dt_loc = wp->timeMax;
+	if (dt_loc < wp->timeMin) dt_loc = wp->timeMin;
 
-GetWallTime timer;
-timer.Start();
+	GetWallTime timer;
+	timer.Start();
 
-MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+	MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
 
-OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+	OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-predict_dt = current_dt;
+	predict_dt = current_dt;
 
-if (current_dt > (wp->end_time - current_time))
-current_dt = (wp->end_time - current_time);
+	if (current_dt > (wp->end_time - current_time))
+		current_dt = (wp->end_time - current_time);
 }
 
 
@@ -262,12 +262,12 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<s
             }
         }
         else if (s == "d") {
-            if (fabs(NRs.DPmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
+            if (fabs(NRs.DPBmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }
         else if (s == "dT") {
-            if (fabs(NRs.DPmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
+            if (fabs(NRs.DPBmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
                 conflag_loc = 1;
             }
         }

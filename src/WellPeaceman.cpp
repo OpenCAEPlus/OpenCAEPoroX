@@ -226,7 +226,7 @@ void PeacemanWell::CalIPRate(const Bulk& bk, const OCP_DBL& dt)
 OCP_DBL PeacemanWell::CalMaxChangeP() const
 { 
     if (opt.state != WellState::open)  return 0;
-    else                               return fabs(bhp - lbhp); 
+    else                               return (bhp - lbhp); 
 }
 
 
@@ -1180,7 +1180,7 @@ void PeacemanWellIsoT::AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OC
 }
 
 
-void PeacemanWellIsoT::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const
+void PeacemanWellIsoT::CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const
 {
     if (opt.state == WellState::open) {
 
@@ -1626,7 +1626,7 @@ void PeacemanWellIsoT::AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, co
 }
 
 
-void PeacemanWellT::CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const
+void PeacemanWellT::CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const
 {
     if (opt.state == WellState::open) {
 

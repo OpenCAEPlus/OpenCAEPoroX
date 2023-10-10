@@ -17,45 +17,10 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "BulkVarSet.hpp"
 #include "Domain.hpp"
+#include "Reservoir.hpp"
 
 using namespace std;
-
-class OCPRes
-{
-public:
-    void SetupIsoT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc);
-    void SetupT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc);
-    void SetZero();
-
-    /// residual for all equations for each bulk
-    vector<OCP_DBL> resAbs; 
-    /// 2-norm of relative residual wrt. pore volume for all equations of each bulk
-    vector<OCP_DBL> resRelV; 
-    /// 2-norm of relative residual wrt. total moles for mass conserve equations of each bulk
-    vector<OCP_DBL> resRelN; 
-    /// 2-norm of relative residual wrt. total energy for energy conserve equations of each bulk
-    vector<OCP_DBL> resRelE; 
-    /// (initial) maximum relative residual wrt. pore volume for each bulk,
-    OCP_DBL maxRelRes0_V; 
-    /// (iterations) maximum relative residual wrt. pore volume for each bulk
-    OCP_DBL maxRelRes_V; 
-    /// maximum relative residual wrt. total moles for each bulk
-    OCP_DBL maxRelRes_N;  
-    /// maximum relative residual wrt. total energy for each bulk
-    OCP_DBL maxRelRes_E; 
-    /// maximum relative residual wrt. total moles for each well
-    OCP_DBL maxWellRelRes_mol; 
-
-    // use negative number to represent well number (ToDo)
-    /// index of bulk which has maxRelRes_V
-    OCP_INT maxId_V; 
-    /// index of bulk which has maxRelRes_N
-    OCP_INT maxId_N; 
-    /// index of bulk which has maxRelRes_E
-    OCP_INT maxId_E; 
-};
 
 
 /// NR dataset for nonlinear solution
@@ -67,27 +32,29 @@ public:
     /// Reset 
     void InitStep(const BulkVarSet& bvs);
     /// Calculate max change for themral model
-    void CaldMax(const BulkVarSet& bvs);
+    void CalMaxChangeNR(const Reservoir& rs);
     /// Get dP
     OCP_DBL DP(const OCP_USI& n) const { return dP[n]; }
     /// Get dNi
     OCP_DBL DN(const OCP_USI& n, const USI& i) const { return dN[n * nc + i]; }
     /// Get current max dP
-    OCP_DBL DPmaxNRc() const { return dPmaxNR.back(); };
+    OCP_DBL DPBmaxNRc() const { return dPBmaxNR.back(); };
     /// Get current max dS
     OCP_DBL DSmaxNRc() const { return dSmaxNR.back(); };
-    /// Get all max dP
-    const auto& DPmaxNR() const { return dPmaxNR; };
+    /// Get all bulk max dP
+    const auto& DPBmaxNR() const { return dPBmaxNR; };
     /// Get all max dT
     const auto& DTmaxNR() const { return dTmaxNR; };
     /// Get all max dN
     const auto& DNmaxNR() const { return dNmaxNR; };
     /// Get all max dS
     const auto& DSmaxNR() const { return dSmaxNR; };
+    /// Get all well max dP
+    const auto& DPWmaxNR() const { return dPWmaxNR; };
 
 public:
     /// residual
-    OCPRes          res;
+    OCPNRresidual          res;
 
 protected:
     /// Communicator
@@ -119,14 +86,52 @@ protected:
     /// saturation change between NR steps
     vector<OCP_DBL> dS;
 
-    /// Max pressure difference of all NR steps within a time step
-    vector<OCP_DBL> dPmaxNR;
+    /// Max pressure difference of all NR steps within a time step (bulk)
+    vector<OCP_DBL> dPBmaxNR;
     /// Max temperature difference of all NR steps within a time step
     vector<OCP_DBL> dTmaxNR;
     /// Max Ni difference of all NR steps within a time step
     vector<OCP_DBL> dNmaxNR;
     /// Max saturation difference of all NR steps within a time step
     vector<OCP_DBL> dSmaxNR;
+    /// Max pressure difference of all NR steps within a time step (well)
+    vector<OCP_DBL> dPWmaxNR;
+
+public:
+    /// calculate maximum change between time step
+    void CalMaxChangeTime(const Reservoir& rs);
+    /// Return dPmax.
+    OCP_DBL DPmaxT() const { return dPmaxT; }
+    /// Return dPmax.
+    OCP_DBL DPBmaxT() const { return dPBmaxT; }
+    /// Return dPmax.
+    OCP_DBL DPWmaxT() const { return dPWmaxT; }
+    /// Return dTmax
+    OCP_DBL DTmaxT() const { return dTmaxT; }
+    /// Return dNmax.
+    OCP_DBL DNmaxT() const { return dNmaxT; }
+    /// Return dSmax.
+    OCP_DBL DSmaxT() const { return dSmaxT; }
+    /// Return eVmax.
+    OCP_DBL EVmaxT() const { return eVmaxT; }
+
+
+protected:
+    // between time step
+    /// Max change in pressure during the current time step.(bulk and well)
+    OCP_DBL dPmaxT; 
+    /// Max change in pressure during the current time step.(bulk and well)
+    OCP_DBL dPBmaxT;
+    /// Max change in pressure during the current time step.(bulk and well)
+    OCP_DBL dPWmaxT;
+    /// Max change in temperature during the current time step.
+    OCP_DBL dTmaxT; 
+    /// Max relative change in moles of component during the current time step.
+    OCP_DBL dNmaxT;
+    /// Max change in saturation during the current time step.
+    OCP_DBL dSmaxT; 
+    /// Max relative diff between fluid and pore volume during the current time step.
+    OCP_DBL eVmaxT; 
 
 
     // Iterations

@@ -17,41 +17,6 @@
 #include "OCPNRsuite.hpp"
 
 
-void OCPRes::SetupIsoT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc)
-{
-    OCP_USI reslen = (nb + nw) * (nc + 1);
-    resAbs.resize(reslen);
-    resRelV.resize(nb);
-    resRelN.resize(nb);
-}
-
-
-void OCPRes::SetupT(const OCP_USI& nb, const OCP_USI& nw, const OCP_USI& nc)
-{
-    OCP_USI reslen = (nb + nw) * (nc + 2);
-    resAbs.resize(reslen);
-    resRelV.resize(nb);
-    resRelN.resize(nb);
-    resRelE.resize(nb);
-}
-
-
-void OCPRes::SetZero()
-{
-    fill(resAbs.begin(), resAbs.end(), 0);
-    fill(resRelV.begin(), resRelV.end(), 0);
-    fill(resRelN.begin(), resRelN.end(), 0);
-    fill(resRelE.begin(), resRelE.end(), 0);
-    maxRelRes_V       = 0;
-    maxRelRes_N       = 0;
-    maxRelRes_E       = 0;
-    maxWellRelRes_mol = 0;
-    maxId_V           = 0;
-    maxId_N           = 0;
-    maxId_E           = 0;
-}
-
-
 void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
 {
     myComm  = domain.myComm;
@@ -98,19 +63,23 @@ void OCPNRsuite::InitStep(const BulkVarSet& bvs)
     lN = bvs.lNi;
     lS = bvs.lS;
 
-    dPmaxNR.clear();
+    dPBmaxNR.clear();
     dTmaxNR.clear();
     dNmaxNR.clear();
     dSmaxNR.clear();
+    dPWmaxNR.clear();
 }
 
 
-void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
+void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
 {
     OCP_DBL dPmaxTmp = 0;
     OCP_DBL dTmaxTmp = 0;
     OCP_DBL dNmaxTmp = 0;
     OCP_DBL dSmaxTmp = 0;
+
+    // for bulk
+    const BulkVarSet& bvs = rs.bulk.GetVarSet();
 
     for (OCP_USI n = 0; n < nb; n++) {
         dP[n] = bvs.P[n] - lP[n];
@@ -138,11 +107,94 @@ void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
     lN = bvs.Ni;
     lS = bvs.S;
 
-    dPmaxNR.push_back(dPmaxTmp);
+    dPBmaxNR.push_back(dPmaxTmp);
     dTmaxNR.push_back(dTmaxTmp);
     dNmaxNR.push_back(dNmaxTmp);
     dSmaxNR.push_back(dSmaxTmp);
+
+    // for well   -- wrong now
+    dPmaxTmp = 0;
+    const AllWells& well = rs.allWells;
+    for (const auto& w : well.wells) {
+        OCP_DBL dPw = w->CalMaxChangeP();
+        if (fabs(dPmaxTmp) < fabs(dPw)) {
+            dPmaxTmp = dPw;
+        }
+    }
+    dPWmaxNR.push_back(dPmaxTmp);
 }
+
+
+void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
+{
+    OCP_FUNCNAME;
+
+    dPmaxT  = 0;
+    dPBmaxT = 0;
+    dPWmaxT = 0;
+    dTmaxT  = 0;
+    dNmaxT  = 0;
+    dSmaxT  = 0;
+    eVmaxT  = 0;
+
+    // for bulk
+    const BulkVarSet& bvs = rs.bulk.GetVarSet();
+
+    OCP_USI id;
+    for (OCP_USI n = 0; n < nb; n++) {
+
+        // dP
+        if (fabs(dPBmaxT) < fabs(bvs.P[n] - bvs.lP[n])) {
+            dPBmaxT = bvs.P[n] - bvs.lP[n];
+        }
+
+        // dT
+        if (fabs(dTmaxT) < fabs(bvs.T[n] - bvs.lT[n])) {
+            dTmaxT = bvs.T[n] - bvs.lT[n];
+        }
+
+        // dS
+        for (USI j = 0; j < np; j++) {
+            id = n * np + j;
+            if (fabs(dSmaxT) < fabs(bvs.S[id] - bvs.lS[id])) {
+                dSmaxT = bvs.S[id] - bvs.lS[id];
+            }
+        }
+
+        // dN
+        for (USI i = 0; i < nc; i++) {
+            id = n * nc + i;
+            const OCP_DBL tmp = fabs(max(bvs.Ni[id], bvs.lNi[id]));
+            if (tmp > TINY) {
+                if (fabs(dNmaxT) < fabs((bvs.Ni[id] - bvs.lNi[id]) / tmp)) {
+                    dNmaxT = (bvs.Ni[id] - bvs.lNi[id]) / tmp;
+                }
+            }
+        }
+
+        // Ve
+        if (fabs(eVmaxT) < fabs((bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n])) {
+            eVmaxT = (bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n];
+        }
+    }
+
+    // for well
+    const AllWells& well = rs.allWells;
+    for (const auto& w : well.wells) {
+        OCP_DBL dPw = w->CalMaxChangeP();
+        if (fabs(dPWmaxT) < fabs(dPw)) {
+            dPWmaxT = dPw;
+        }
+    }
+
+    if (fabs(dPBmaxT) < fabs(dPWmaxT)) {
+        dPmaxT = dPWmaxT;
+    }
+    else {
+        dPmaxT = dPBmaxT;
+    }
+}
+
 
 
 void OCPNRsuite::InitIter() {

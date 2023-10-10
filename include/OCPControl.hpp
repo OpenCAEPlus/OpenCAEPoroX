@@ -124,7 +124,7 @@ public:
     /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i, const AllWells& wells);
     /// Calculate next time step
-    void CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il);
+    void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Get total simulation time
     auto GetTotalTime() const { return ps.back().end_time; }
     /// Get number of TSTEP interval
@@ -244,8 +244,8 @@ public:
         return NR.CheckConverge(NRs, il);
     }
     // Calculate next time step
-    void CalNextTimeStep(const Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il) {
-        time.CalNextTimeStep(rs, NRs, il);
+    void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il) {
+        time.CalNextTimeStep(NRs, il);
     }
 
 public:

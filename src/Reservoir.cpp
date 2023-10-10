@@ -562,13 +562,7 @@ void Reservoir::ApplyControl(const USI& i)
     allWells.SetupWellGroup(bulk);
 }
 
-void Reservoir::CalMaxChange()
-{
-    OCP_FUNCNAME;
 
-    bulk.CalMaxChange();
-    allWells.CalMaxBHPChange();
-}
 
 void Reservoir::CalIPRT(const OCP_DBL& dt)
 {

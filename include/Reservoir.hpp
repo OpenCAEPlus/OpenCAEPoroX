@@ -71,6 +71,7 @@ class Reservoir
     friend class CriticalInfo;
     friend class Out4RPT;
     friend class Out4VTK;
+    friend class OCPNRsuite;
 
     friend class IsoT_IMPEC;
     friend class IsoT_FIM;
@@ -112,8 +113,6 @@ public:
     void ApplyControl(const USI& i);
     /// Calculate num of Injection, Production
     void CalIPRT(const OCP_DBL& dt);
-    /// Calculate Maximum Change of some reference variables for IMPEC
-    void CalMaxChange();
     /// Return the num of Bulk
     OCP_USI GetBulkNum() const { return bulk.GetBulkNum(); }
     /// Return the num of Bulk

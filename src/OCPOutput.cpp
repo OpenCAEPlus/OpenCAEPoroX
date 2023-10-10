@@ -758,7 +758,8 @@ void CriticalInfo::Setup()
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("dt/NRiter", "-", "DAY/-", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("LSiter", "-", "-", "int", maxRowNum));
-    Sumdata.push_back(SumItem("dPmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dPBmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("dPWmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dTmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dVmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dSmax", "-", "-", "float", maxRowNum));
@@ -767,27 +768,30 @@ void CriticalInfo::Setup()
 
 }
 
-void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
+void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NRs)
 {
     const Bulk& bulk = rs.bulk;
 
     // for NR step
-    const auto& dP = NR.DPmaxNR();
-    const auto& dT = NR.DTmaxNR();
-    const auto& dN = NR.DNmaxNR();
-    const auto& dS = NR.DSmaxNR();
-    const auto& LS = NR.GetIterNRLS();
+    const auto& dPB = NRs.DPBmaxNR();
+    const auto& dPW = NRs.DPWmaxNR();
+    const auto& dT  = NRs.DTmaxNR();
+    const auto& dN  = NRs.DNmaxNR();
+    const auto& dS  = NRs.DSmaxNR();
+    const auto& LS  = NRs.GetIterNRLS();
 
     USI n = 0;
-    for (INT i = 0; i < dP.size(); i++) {
+    for (INT i = 0; i < dPB.size(); i++) {
         // Time
         Sumdata[n++].val.push_back(-1);
         // Time step size
         Sumdata[n++].val.push_back(-(i + 1));
         // LS
         Sumdata[n++].val.push_back(LS[i]);
-        // dPmax
-        Sumdata[n++].val.push_back(fabs(dP[i]));
+        // dPBmax
+        Sumdata[n++].val.push_back(fabs(dPB[i]));
+        // dPWmax
+        Sumdata[n++].val.push_back(fabs(dPW[i]));
         // dTmax
         Sumdata[n++].val.push_back(fabs(dT[i]));
         // dVmax
@@ -808,17 +812,19 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
     // Time step
     Sumdata[n++].val.push_back(ctrl.time.GetLastDt());
     // LS
-    Sumdata[n++].val.push_back(NR.GetIterLS());
-    // dPmax
-    Sumdata[n++].val.push_back(bulk.GetdPmax());
+    Sumdata[n++].val.push_back(NRs.GetIterLS());
+    // dPBmax
+    Sumdata[n++].val.push_back(NRs.DPBmaxT());
+    // dPWmax
+    Sumdata[n++].val.push_back(NRs.DPWmaxT());
     // dTmax
-    Sumdata[n++].val.push_back(bulk.GetdTmax());
+    Sumdata[n++].val.push_back(NRs.DTmaxT());
     // dVmax
-    Sumdata[n++].val.push_back(bulk.GeteVmax());
+    Sumdata[n++].val.push_back(NRs.EVmaxT());
     // dSmax
-    Sumdata[n++].val.push_back(bulk.GetdSmax());
+    Sumdata[n++].val.push_back(NRs.DSmaxT());
     // dNmax
-    Sumdata[n++].val.push_back(bulk.GetdNmax());
+    Sumdata[n++].val.push_back(NRs.DNmaxT());
     // CFL
     Sumdata[n++].val.push_back(bulk.GetMaxCFL());
 }

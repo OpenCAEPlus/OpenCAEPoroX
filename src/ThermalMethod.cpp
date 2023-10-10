@@ -121,7 +121,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMax(rs.bulk.GetVarSet());
+    NR.CalMaxChangeNR(rs);
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
     if (conflag == 1) {
@@ -147,9 +147,9 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 void T_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     rs.CalIPRT(ctrl.time.GetCurrentDt());
-    rs.CalMaxChange();
+    NR.CalMaxChangeTime(rs);
+    ctrl.CalNextTimeStep(NR, {"dP", "dS", "iter"});
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 void T_FIM::AllocateReservoir(Reservoir& rs)
@@ -578,7 +578,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
     const USI   nc   = bvs.nc;
     const USI   len  = nc + 2;
 
-    OCPRes& res = NR.res;
+    OCPNRresidual& res = NR.res;
     
     res.SetZero();
 

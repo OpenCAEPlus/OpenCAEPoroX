@@ -157,10 +157,9 @@ OCP_BOOL IsoT_IMPEC::FinishNR(const Reservoir& rs) { return OCP_TRUE; }
 void IsoT_IMPEC::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     rs.CalIPRT(ctrl.time.GetCurrentDt());
-    rs.CalMaxChange();
+    NR.CalMaxChangeTime(rs);
+    ctrl.CalNextTimeStep(NR, {"dP", "dN", "dS", "eV"});
     UpdateLastTimeStep(rs);
-    // ctrl.CalNextTstepIMPEC(rs);
-    ctrl.CalNextTimeStep(rs, NR, {"dP", "dN", "dS", "eV"});
 }
 
 void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
@@ -773,7 +772,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMax(rs.bulk.GetVarSet());
+    NR.CalMaxChangeNR(rs);
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
@@ -798,9 +797,9 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     rs.CalIPRT(ctrl.time.GetCurrentDt());
-    rs.CalMaxChange();
+    NR.CalMaxChangeTime(rs);
+    ctrl.CalNextTimeStep(NR, {"dP", "dS", "iter"});
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 void IsoT_FIM::AllocateReservoir(Reservoir& rs)
@@ -1008,7 +1007,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
     const USI nc  = bvs.nc;
     const USI len = nc + 1;
 
-    OCPRes&   res = NR.res;
+    OCPNRresidual&   res = NR.res;
     
     res.SetZero();
   
@@ -1354,13 +1353,11 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
 
-    // Iters
-    NR.ResetIter();
-
     // Residual
     CalRes(rs, ctrl.time.GetCurrentDt());
 
     NR.InitStep(rs.bulk.GetVarSet());
+    NR.ResetIter();
 }
 
 void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
@@ -1545,7 +1542,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CaldMax(rs.bulk.GetVarSet());
+    NR.CalMaxChangeNR(rs);
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
@@ -1571,12 +1568,12 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 }
 
 /// Finish a time step.
-void IsoT_AIMc::FinishStep(Reservoir& rs, OCPControl& ctrl) const
+void IsoT_AIMc::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     rs.CalIPRT(ctrl.time.GetCurrentDt());
-    rs.CalMaxChange();
+    NR.CalMaxChangeTime(rs);
+    ctrl.CalNextTimeStep(NR, {"dP", "dS", "iter"});
     UpdateLastTimeStep(rs);
-    ctrl.CalNextTimeStep(rs, NR, {"dP", "dS", "iter"});
 }
 
 /// Allocate memory for reservoir

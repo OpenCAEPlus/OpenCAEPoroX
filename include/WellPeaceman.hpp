@@ -94,7 +94,7 @@ protected:
 class PeacemanWellIsoT : public PeacemanWell
 {
 public:
-	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const override;
+	void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
 	void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
 	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
@@ -114,7 +114,7 @@ protected:
 class PeacemanWellT : public PeacemanWell
 {
 public:
-	void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const override;
+	void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
 	void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
 	void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:

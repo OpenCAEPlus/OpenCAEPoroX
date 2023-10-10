@@ -24,7 +24,7 @@
 #include "WellOpt.hpp"
 #include "WellPerf.hpp"
 #include "OCPMixture.hpp"
-#include "OCPNRsuite.hpp"
+#include "OCPNRresidual.hpp"
 
 using namespace std;
 
@@ -194,7 +194,7 @@ protected:
 
 public:
     /// Calculate resiual for FIM method
-    virtual void CalResFIM(OCP_USI& wId, OCPRes& res, const Bulk& bk, const OCP_DBL& dt) const = 0;
+    virtual void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const = 0;
     /// Assemble matrix for FIM method
     virtual void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const = 0;
     /// Get solution for FIM method

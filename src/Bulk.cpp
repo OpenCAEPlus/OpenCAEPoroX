@@ -191,61 +191,6 @@ OCP_INT Bulk::CheckCFL(const OCP_DBL& cflLim) const
         return BULK_SUCCESS;
 }
 
-void Bulk::CalMaxChange()
-{
-    OCP_FUNCNAME;
-
-    dPmax       = 0;
-    dTmax       = 0;
-    dNmax       = 0;
-    dSmax       = 0;
-    eVmax       = 0;
-    OCP_DBL tmp = 0;
-    OCP_USI id;
-
-    for (OCP_USI n = 0; n < vs.nbI; n++) {
-
-        // dP
-        tmp = fabs(vs.P[n] - vs.lP[n]);
-        if (dPmax < tmp) {
-            dPmax = tmp;
-        }
-
-        // dT
-        tmp = fabs(vs.T[n] - vs.lT[n]);
-        if (dTmax < tmp) {
-            dTmax = tmp;
-        }
-
-        // dS
-        for (USI j = 0; j < vs.np; j++) {
-            id  = n * vs.np + j;
-            tmp = fabs(vs.S[id] - vs.lS[id]);
-            if (dSmax < tmp) {
-                dSmax = tmp;
-            }
-        }
-
-        // dN
-        for (USI i = 0; i < vs.nc; i++) {
-            id  = n * vs.nc + i;
-            tmp = fabs(max(vs.Ni[id], vs.lNi[id]));
-            if (tmp > TINY) {
-                tmp = fabs(vs.Ni[id] - vs.lNi[id]) / tmp;
-                if (dNmax < tmp) {
-                    dNmax = tmp;
-                }
-            }
-        }
-
-        // Ve
-        tmp = fabs(vs.vf[n] - vs.rockVp[n]) / vs.rockVp[n];
-        if (eVmax < tmp) {
-            eVmax = tmp;
-        }
-    }
-}
-
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

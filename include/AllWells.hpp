@@ -57,9 +57,9 @@ private:
 /// modules.
 class AllWells
 {
-
     // temp
     friend class Reservoir;
+    friend class OCPNRsuite;
     friend class Out4RPT;
     friend class Out4VTK;
 
