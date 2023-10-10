@@ -30,17 +30,17 @@ public:
 
 private:
     /// General API
-    void GoOneStep(Reservoir& rs, OCPControl& ctrl);
+    const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
 
     /// Setup solver for isothermal model
     void SetupIsoT(Reservoir& rs, const OCPControl& ctrl);
     /// Run one time step for isothermal model
-    void GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl);
+    const OCPNRsuite& GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl);
 
     /// Setup solver for ifThermal model
     void SetupT(Reservoir& rs, const OCPControl& ctrl);
     /// Run one time step for ifThermal model
-    void GoOneStepT(Reservoir& rs, OCPControl& ctrl);
+    const OCPNRsuite& GoOneStepT(Reservoir& rs, OCPControl& ctrl);
 
 protected:
     /// Model

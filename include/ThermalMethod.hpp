@@ -33,6 +33,7 @@ public:
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     void     FinishStep(Reservoir& rs, OCPControl& ctrl);
+    const OCPNRsuite& GetNRsuite() const { return NR; }
 
 protected:
     void AllocateReservoir(Reservoir& rs);

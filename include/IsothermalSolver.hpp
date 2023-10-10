@@ -35,6 +35,8 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish the current time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
+    /// GetNRsuite
+    const OCPNRsuite& GetNRsuite() const;
 
 private:
     USI          method = FIM;

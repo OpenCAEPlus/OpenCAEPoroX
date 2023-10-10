@@ -70,7 +70,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
         rs.ApplyControl(d);
         ctrl.ApplyControl(d, rs);
         while (!ctrl.time.IfEnd()) {
-            GoOneStep(rs, ctrl);
+            const OCPNRsuite& NR = GoOneStep(rs, ctrl);
             output.SetVal(rs, ctrl);
             if (ctrl.printLevel >= PRINT_ALL) {
                 // Print Summary and critical information at every time step
@@ -85,7 +85,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
 }
 
 /// This is one time step of dynamic simulation in an abstract setting.
-void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
+const OCPNRsuite& Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 {
 
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
@@ -98,10 +98,9 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     switch (model) 
     {
         case OCPModel::isothermal:
-            GoOneStepIsoT(rs, ctrl);
-            break;
+            return GoOneStepIsoT(rs, ctrl);
         case OCPModel::thermal:
-            GoOneStepT(rs, ctrl);
+            return GoOneStepT(rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong model type specified!");
@@ -109,7 +108,7 @@ void Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     }
 }
 
-void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
+const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
 {
     // Prepare for time marching
     IsoTSolver.Prepare(rs, ctrl);
@@ -130,9 +129,11 @@ void Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
 
     // Finish current time step
     IsoTSolver.FinishStep(rs, ctrl);
+
+    return IsoTSolver.GetNRsuite();
 }
 
-void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
+const OCPNRsuite& Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
 {
     // Prepare for time marching
     TSolver.Prepare(rs, ctrl);
@@ -153,6 +154,8 @@ void Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
 
     // Finish current time step
     TSolver.FinishStep(rs, ctrl);
+
+    return TSolver.GetNRsuite();
 }
 
 /*----------------------------------------------------------------------------*/

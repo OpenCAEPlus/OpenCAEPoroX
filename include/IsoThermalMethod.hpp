@@ -24,7 +24,10 @@
 class IsothermalMethod
 {
 public:
+    /// Calculate rock
     void CalRock(Bulk& bk) const;
+    /// Get NRsuite
+    const OCPNRsuite& GetNRsuite() const { return NR; }
 
 protected:
     /// Newton-Raphson iteration suite
@@ -124,7 +127,7 @@ protected:
     /// Update values of last step for FIM.
     void UpdateLastTimeStep(Reservoir& rs) const;
 
-protected:
+private:
     /// Perform Flash with Sj and calculate values needed for FIM
     void InitFlash(Bulk& bk);
     /// Perform Flash with Ni and calculate values needed for FIM
@@ -133,7 +136,6 @@ protected:
     void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
-
 };
 
 
@@ -158,6 +160,8 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl) const;
+    /// Get NRsuite
+    const OCPNRsuite& GetNRsuite() const { return NR; }
 
 protected:
     /// Allocate memory for reservoir

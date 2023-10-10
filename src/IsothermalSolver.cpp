@@ -20,13 +20,14 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
         case IMPEC:
             impec.Setup(rs, LSolver, ctrl);
             break;
+        case FIM:
+            fim.Setup(rs, LSolver, ctrl);
+            break;
         case AIMc:
             aimc.Setup(rs, LSolver, ctrl);
             break;
-        case FIM:
         default:
-            fim.Setup(rs, LSolver, ctrl);
-            break;
+            OCP_ABORT("Wrong method type!");
     }
 }
 
@@ -175,6 +176,24 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
     ctrl.iters.UpdateTotal();
+}
+
+
+const OCPNRsuite& IsothermalSolver::GetNRsuite() const
+{
+    switch (method) {
+    case IMPEC:
+        return impec.GetNRsuite();
+        break;
+    case FIM:
+        return fim.GetNRsuite();
+        break;
+    case AIMc:
+        return aimc.GetNRsuite();
+        break;
+    default:
+        OCP_ABORT("Wrong method type!");
+    }
 }
 
 /*----------------------------------------------------------------------------*/

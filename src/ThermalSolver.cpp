@@ -63,6 +63,12 @@ void ThermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
     ctrl.iters.UpdateTotal();
 }
 
+
+const OCPNRsuite& ThermalSolver::GetNRsuite() const
+{
+    return fim.GetNRsuite();
+}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

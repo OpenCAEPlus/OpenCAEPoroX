@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPNLSUITE_HEADER__
-#define __OCPNLSUITE_HEADER__
+#ifndef __OCPNRSUITE_HEADER__
+#define __OCPNRSUITE_HEADER__
 
 // Standard header files
 #include <vector>
@@ -119,10 +119,18 @@ protected:
     vector<OCP_DBL> dNmaxNR;
     /// Max saturation difference of all NR steps within a time step
     vector<OCP_DBL> dSmaxNR;
+
+
+    // Iterations
+public:
+
+protected:
+
+
 };
 
 
-#endif  /* end if __OCPNLSUITE_HEADER__ */
+#endif  /* end if __OCPNRSUITE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
