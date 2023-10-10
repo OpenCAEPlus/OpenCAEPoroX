@@ -27,8 +27,10 @@ using namespace std;
 class OCPNRsuite
 {
 public:
-    /// Setup for themral model
+    /// Setup for method which use NR
     void Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain);
+    /// Setup for method which does not use NR
+    void Setup(const BulkVarSet& bvs, const Domain& domain);
     /// Reset 
     void InitStep(const BulkVarSet& bvs);
     /// Calculate max change for themral model
@@ -54,12 +56,14 @@ public:
 
 public:
     /// residual
-    OCPNRresidual          res;
+    OCPNRresidual   res;
 
 protected:
     /// Communicator
     MPI_Comm        myComm;
     OCP_INT         numproc, myrank;
+    /// if use NR
+    OCP_BOOL        ifUseNR{ OCP_FALSE };
     /// model
     OCP_BOOL        ifThermal{ OCP_FALSE };
     /// numBulk
@@ -97,6 +101,21 @@ protected:
     /// Max pressure difference of all NR steps within a time step (well)
     vector<OCP_DBL> dPWmaxNR;
 
+    // CFL
+public:
+    /// Return maxCFL
+    OCP_DBL GetMaxCFL() const { return maxCFL; }
+
+protected:
+    /// CFL number for each bulk
+    vector<OCP_DBL> cfl;  
+    /// max CFL number for global
+    OCP_DBL         maxCFL{ 0 };
+    /// local maxCFL
+    OCP_DBL         maxCFL_loc{ 0 }; 
+
+
+    // between time step
 public:
     /// calculate maximum change between time step
     void CalMaxChangeTime(const Reservoir& rs);
@@ -117,7 +136,6 @@ public:
 
 
 protected:
-    // between time step
     /// Max change in pressure during the current time step.(bulk and well)
     OCP_DBL dPmaxT; 
     /// Max change in pressure during the current time step.(bulk and well)

@@ -23,10 +23,12 @@ void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const O
     numproc = domain.numproc;
     myrank  = domain.myrank;
 
-    ifThermal = ifthermal;
     nb        = bvs.nbI;
     np        = bvs.np;
     nc        = bvs.nc;
+
+    ifUseNR   = OCP_TRUE;
+    ifThermal = ifthermal;
 
     if (ifThermal) {
         res.SetupT(nb, nw, nc);
@@ -44,6 +46,20 @@ void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const O
     dT.resize(nb);
     dN.resize(nb * nc);
     dS.resize(nb * np);
+}
+
+
+void OCPNRsuite::Setup(const BulkVarSet& bvs, const Domain& domain)
+{
+    ifUseNR = OCP_FALSE;
+
+    myComm  = domain.myComm;
+    numproc = domain.numproc;
+    myrank  = domain.myrank;
+
+    nb = bvs.nbI;
+    np = bvs.np;
+    nc = bvs.nc;
 }
 
 

@@ -122,6 +122,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     // First check : Pressure check
     if (!ctrl.Check(rs, {"BulkP", "WellP"})) {
         rs.bulk.vs.P = rs.bulk.vs.lP;
+        NR.ResetIter();
         return OCP_FALSE;
     }
 
@@ -236,6 +237,9 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 
     conn.vs.lupblock.resize(conn.numConn * np);
     conn.vs.lrho.resize(conn.numConn * np);
+
+
+    NR.Setup(bvs, rs.domain);
 }
 
 void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
