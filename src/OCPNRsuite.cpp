@@ -145,6 +145,33 @@ void OCPNRsuite::CaldMax(const BulkVarSet& bvs)
 }
 
 
+void OCPNRsuite::InitIter() {
+    iterNR  = 0;
+    iterLS  = 0;
+    iterNRw = 0;
+    iterLSw = 0;
+    iterNRLS.clear();
+}
+
+
+void OCPNRsuite::UpdateIter(const USI& lsIter) 
+{
+    iterNR++;
+    iterLS += lsIter;
+    iterNRLS.push_back(lsIter);
+}
+
+
+void OCPNRsuite::ResetIter() 
+{
+    iterNRw += iterNR;
+    iterLSw += iterLS;
+    iterNR = 0;
+    iterLS = 0;
+    iterNRLS.clear();
+}
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

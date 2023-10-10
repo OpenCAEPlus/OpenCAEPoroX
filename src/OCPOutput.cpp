@@ -756,7 +756,8 @@ void CriticalInfo::Setup()
     const USI maxRowNum = 1000;
 
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
-    Sumdata.push_back(SumItem("dt", "-", "DAY", "fixed", maxRowNum));
+    Sumdata.push_back(SumItem("dt/NRiter", "-", "DAY/-", "fixed", maxRowNum));
+    Sumdata.push_back(SumItem("LSiter", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("dPmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dTmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dVmax", "-", "-", "float", maxRowNum));
@@ -766,7 +767,7 @@ void CriticalInfo::Setup()
 
 }
 
-void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
+void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInfo& iters, const OCPNRsuite& NR)
 {
     const Bulk& bulk = rs.bulk;
 
@@ -775,13 +776,16 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
     const auto& dT = NR.DTmaxNR();
     const auto& dN = NR.DNmaxNR();
     const auto& dS = NR.DSmaxNR();
+    const auto& LS = NR.GetIterNRLS();
 
     USI n = 0;
     for (INT i = 0; i < dP.size(); i++) {
         // Time
-        Sumdata[n++].val.push_back(-(i+1));
-        // Time step
+        Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
+        // Time step size
         Sumdata[n++].val.push_back(-(i + 1));
+        // LS
+        Sumdata[n++].val.push_back(LS[i]);
         // dPmax
         Sumdata[n++].val.push_back(fabs(dP[i]));
         // dTmax
@@ -803,6 +807,8 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
     Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
     // Time step
     Sumdata[n++].val.push_back(ctrl.time.GetLastDt());
+    // LS
+    Sumdata[n++].val.push_back(NR.GetIterLS());
     // dPmax
     Sumdata[n++].val.push_back(bulk.GetdPmax());
     // dTmax
@@ -850,18 +856,25 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
     for (OCP_USI n = 0; n < num; n++) {
         for (const auto& v : Sumdata) {
 
+            outF.unsetf(ios_base::fixed);
+            outF.unsetf(ios_base::scientific);
+
             // for NR STEP
-            if ((v.Item == "TIME" || v.Item == "dt") && (v.val[n] < 0)) {
-                outF << setw(ns) << to_string(INT(-v.val[n]));
+            if (v.Item == "dt/NRiter" && v.val[n] < 0) {
+                outF << fixed << setprecision(0) << setw(ns) << -v.val[n];
                 continue;
             }
 
             if (v.Type == "fixed") {
                 outF << fixed << setprecision(3);
             }
+            else if (v.Type == "int") {
+                outF << fixed << setprecision(0);
+            }
             else if (v.Type == "float") {
                 outF << scientific << setprecision(3);
             }
+
             outF << setw(ns) << v.val[n];
         }
         outF << "\n";
@@ -937,6 +950,9 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
     for (auto& v : *sumdata) {
         if (v.Item == "TIME" || v.Item == "dt") {
             v.Type = "fixed";
+        }
+        else if (v.Item == "LS") {
+            v.Type = "int";
         }
         else {
             v.Type = "float";
@@ -1610,7 +1626,7 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const
 
     iters.Update(NR);
     summary.SetVal(reservoir, ctrl, iters);
-    crtInfo.SetVal(reservoir, ctrl, NR);
+    crtInfo.SetVal(reservoir, ctrl, iters, NR);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }

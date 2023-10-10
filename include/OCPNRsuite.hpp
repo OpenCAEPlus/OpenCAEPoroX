@@ -131,37 +131,34 @@ protected:
 
     // Iterations
 public:
-    void InitIter() {
-        iterNR  = 0;
-        iterLS  = 0;
-        iterNRw = 0;
-        iterLSw = 0;
-    }
-    void UpdateIter(const USI& lsIter) {
-        iterNR++;
-        iterLS += lsIter;
-    }
-    void ResetIter() {
-        iterNRw += iterNR;
-        iterLSw += iterLS;
-        iterNR  = 0;
-        iterLS  = 0;
-    }
+    /// initialize iters when begining a new time step
+    void InitIter();
+    /// update iters when finishing a LS step
+    void UpdateIter(const USI& lsIter);
+    /// Reset iters when resetting time step
+    void ResetIter();
+    /// Get iterNR
     auto GetIterNR() const { return iterNR; }
+    /// Get iterLS
     auto GetIterLS() const { return iterLS; }
+    /// Get iterNRw
     auto GetIterNRw() const { return iterNRw; }
+    /// Get iterLSw
     auto GetIterLSw() const { return iterLSw; }
+    /// Get iterNRLS
+    const auto& GetIterNRLS() const { return iterNRLS; };
 
 protected:
-    /// number of Newton-Raphson iterations
-    USI iterNR{ 0 };
-    /// number of linear solver iterations
-    USI iterLS{ 0 };
-    /// wasted number of Newton-Raphson iterations
-    USI iterNRw{ 0 };
-    /// wasted number of linear solver iterations
-    USI iterLSw{ 0 };
-
+    /// number of Newton-Raphson iterations within a time step
+    USI         iterNR{ 0 };
+    /// number of linear solver iterations within a time step
+    USI         iterLS{ 0 };
+    /// wasted number of Newton-Raphson iterations within a time step
+    USI         iterNRw{ 0 };
+    /// wasted number of linear solver iterations within a time step
+    USI         iterLSw{ 0 };
+    /// LS iterations of each NR within a time step
+    vector<USI> iterNRLS;
 };
 
 
