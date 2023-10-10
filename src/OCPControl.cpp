@@ -352,7 +352,7 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 }
 
 
-OCP_BOOL OCPControl::Check(Reservoir& rs, const initializer_list<string>& il)
+OCP_BOOL OCPControl::Check( Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il)
 {
     workState_loc = OCP_CONTINUE;
     OCP_INT flag;
@@ -362,7 +362,7 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, const initializer_list<string>& il)
         else if (s == "BulkT")   flag = rs.bulk.CheckT();
         else if (s == "BulkNi")  flag = rs.bulk.CheckNi();
         else if (s == "BulkVe")  flag = rs.bulk.CheckVe(0.01);
-        else if (s == "CFL")     flag = rs.bulk.CheckCFL(1.0);
+        else if (s == "CFL")     flag = NRs.CheckCFL(1.0);
         else if (s == "WellP")   flag = rs.allWells.CheckP(rs.bulk);
         else                     OCP_ABORT("Check iterm not recognized!");
 
@@ -423,7 +423,7 @@ OCP_BOOL OCPControl::Check(Reservoir& rs, const initializer_list<string>& il)
         return OCP_FALSE;
 
     case OCP_RESET_CUTTIME_CFL:
-        time.CutDt(1/ (rs.bulk.GetMaxCFL() + 1));
+        time.CutDt(1/ (NRs.GetMaxCFL() + 1));
         return OCP_FALSE;
 
     default:

@@ -826,7 +826,7 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
     // dNmax
     Sumdata[n++].val.push_back(NRs.DNmaxT());
     // CFL
-    Sumdata[n++].val.push_back(bulk.GetMaxCFL());
+    Sumdata[n++].val.push_back(NRs.GetMaxCFL());
 }
 
 void CriticalInfo::PrintFastReview(const string& dir, const string& filename, const OCP_INT& rank, const ItersInfo& iters) const

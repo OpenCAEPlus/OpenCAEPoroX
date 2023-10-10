@@ -238,7 +238,7 @@ public:
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
     // Check order is important
-    OCP_BOOL Check(Reservoir& rs, const initializer_list<string>& il);
+    OCP_BOOL Check(Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Check if converge
     OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         return NR.CheckConverge(NRs, il);

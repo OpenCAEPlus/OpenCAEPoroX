@@ -46,6 +46,8 @@ void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const O
     dT.resize(nb);
     dN.resize(nb * nc);
     dS.resize(nb * np);
+
+    cfl.resize(nb * np);
 }
 
 
@@ -60,6 +62,8 @@ void OCPNRsuite::Setup(const BulkVarSet& bvs, const Domain& domain)
     nb = bvs.nbI;
     np = bvs.np;
     nc = bvs.nc;
+
+    cfl.resize(nb * np);
 }
 
 
@@ -130,8 +134,8 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
 
     // for well   -- wrong now
     dPmaxTmp = 0;
-    const AllWells& well = rs.allWells;
-    for (const auto& w : well.wells) {
+    const auto& wells = rs.allWells.wells;
+    for (const auto& w : wells) {
         const OCP_DBL dPw = w->CalMaxChangeNR();
         if (fabs(dPmaxTmp) < fabs(dPw)) {
             dPmaxTmp = dPw;
@@ -139,6 +143,77 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     }
     dPWmaxNR.push_back(dPmaxTmp);
 }
+
+
+/// Calculate CFL number
+void OCPNRsuite::CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& ifComm)
+{
+    const BulkVarSet&     bvs     = rs.bulk.GetVarSet();
+    const BulkConnVarSet& cvs     = rs.conn.GetVarSet();
+    const vector<Well*>&  wells   = rs.allWells.wells;
+    const auto            numConn = rs.conn.GetNumConn();
+
+    fill(cfl.begin(), cfl.end(), 0.0);
+
+    for (OCP_USI c = 0; c < numConn; c++) {
+        for (USI j = 0; j < np; j++) {
+            const OCP_USI uId = cvs.upblock[c * np + j];
+            if (uId < nb) {
+                cfl[uId * np + j] += fabs(cvs.flux_vj[c * np + j]) * dt;
+            }          
+        }
+    }
+
+    for (const auto& wl : wells) {
+        if (wl->IsOpen() && wl->WellType() == WellType::productor) {
+            for (USI p = 0; p < wl->PerfNum(); p++) {
+                if (wl->PerfState(p) == WellState::open) {
+                    const OCP_USI k = wl->PerfLocation(p);
+
+                    for (USI j = 0; j < np; j++) {
+                        cfl[k * np + j] += fabs(wl->PerfProdQj_ft3(p, j)) * dt;
+                    }
+                }
+            }
+        }
+    }
+
+    maxCFL_loc = 0;
+    const OCP_USI len = nb * np;
+    for (OCP_USI n = 0; n < len; n++) {
+        if (bvs.phaseExist[n] && bvs.vj[n] > TINY) {
+            cfl[n] /= bvs.vj[n];
+#ifdef DEBUG
+            if (!isfinite(cfl[n])) {
+                OCP_ABORT("cfl is nan!");
+            }
+#endif // DEBUG
+            if (maxCFL_loc < cfl[n]) maxCFL_loc = cfl[n];
+        }
+    }
+    if (ifComm) {
+
+        GetWallTime timer;
+        timer.Start();
+
+        MPI_Allreduce(&maxCFL_loc, &maxCFL, 1, MPI_DOUBLE, MPI_MAX, myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+    }
+    else {
+        maxCFL = maxCFL_loc;
+    }
+}
+
+
+OCP_BOOL OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
+{
+	if (maxCFL > cflLim)
+		return BULK_OUTRANGED_CFL;
+	else
+		return BULK_SUCCESS;
+}
+
 
 
 void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
@@ -195,8 +270,8 @@ void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
     }
 
     // for well
-    const AllWells& well = rs.allWells;
-    for (const auto& w : well.wells) {
+    const auto& wells = rs.allWells.wells;
+    for (const auto& w : wells) {
         OCP_DBL dPw = w->CalMaxChangeTime();
         if (fabs(dPWmaxT) < fabs(dPw)) {
             dPWmaxT = dPw;

@@ -61,8 +61,8 @@ void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
 void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    rs.CalCFL(ctrl.time.GetCurrentDt(), OCP_TRUE);
-    ctrl.Check(rs, {"CFL"});
+    NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    ctrl.Check(rs, NR, {"CFL"});
     NR.InitIter();
 }
 
@@ -120,7 +120,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
     // First check : Pressure check
-    if (!ctrl.Check(rs, {"BulkP", "WellP"})) {
+    if (!ctrl.Check(rs, NR, {"BulkP", "WellP"})) {
         rs.bulk.vs.P = rs.bulk.vs.lP;
         NR.ResetIter();
         return OCP_FALSE;
@@ -131,9 +131,9 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     MassConserve(rs, ctrl.time.GetCurrentDt());
 
     // Second check : CFL check
-    rs.CalCFL(ctrl.time.GetCurrentDt(), OCP_TRUE);
+    NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
     // Third check: Ni check
-    if (!ctrl.Check(rs, { "CFL","BulkNi"})) {
+    if (!ctrl.Check(rs, NR, { "CFL","BulkNi"})) {
         ResetToLastTimeStep01(rs, ctrl);
         return OCP_FALSE;
     }
@@ -142,7 +142,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
 
     // Fouth check: Volume error check
-    if (!ctrl.Check(rs, {"BulkVe"})) {
+    if (!ctrl.Check(rs, NR, {"BulkVe"})) {
         ResetToLastTimeStep02(rs, ctrl);
         return OCP_FALSE;
     }
@@ -224,9 +224,6 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
 
     bvs.lvfP.resize(nb);
     bvs.lvfi.resize(nb * nc);
-
-    // others
-    bk.cfl.resize(nb * np);
 
     BulkConn& conn = rs.conn;
 
@@ -753,7 +750,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-    if (!ctrl.Check(rs, {"BulkNi", "BulkP"})) {
+    if (!ctrl.Check(rs, NR, {"BulkNi", "BulkP"})) {
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
              << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
@@ -780,7 +777,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
-        if (!ctrl.Check(rs, {"WellP"})) {
+        if (!ctrl.Check(rs, NR, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {
@@ -1463,7 +1460,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalRes(rs, dt);
 
     // Set FIM Bulk
-    rs.CalCFL(dt, OCP_FALSE);
+    NR.CalCFL(rs, dt, OCP_FALSE);
     rs.allWells.SetupWellBulk(rs.bulk);
     SetFIMBulk(rs);
     //  Calculate FIM Bulk properties
@@ -1525,7 +1522,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
     // First check: Ni check and bulk Pressure check
-    if (!ctrl.Check(rs, {"BulkNi", "BulkP"})) {
+    if (!ctrl.Check(rs, NR, {"BulkNi", "BulkP"})) {
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
              << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
@@ -1550,7 +1547,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
-        if (!ctrl.Check(rs, {"WellP"})) {
+        if (!ctrl.Check(rs, NR, {"WellP"})) {
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {
@@ -1593,7 +1590,6 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
     bvs.vj.resize(nb * np);
     bvs.lvj.resize(nb * np);
 
-    bk.cfl.resize(nb * np);
     bk.bulkTypeAIM.Setup(nb);
 }
 
@@ -1605,8 +1601,8 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
     // We just consider at most 1 layer neighbor now
 
-    Bulk&           bk  = rs.bulk;
-    BulkVarSet&     bvs = bk.vs;
+    Bulk&           bk   = rs.bulk;
+    BulkVarSet&     bvs  = bk.vs;
     const BulkConn& conn = rs.conn;
     const OCP_USI   nb   = bvs.nbI;
     const USI       np   = bvs.np;
@@ -1615,16 +1611,15 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     // all impec
     bk.bulkTypeAIM.Init(-1);
 
-    OCP_USI  bIdp, bIdc;
+    OCP_USI  bIdc;
     OCP_BOOL flag;
 
     for (OCP_USI n = 0; n < nb; n++) {
-        bIdp = n * np;
         bIdc = n * nc;
         flag = OCP_FALSE;
         // CFL
         for (USI j = 0; j < np; j++) {
-            if (bk.cfl[bIdp + j] > 0.8) {
+            if (NR.GetCFL(n,j) > 0.8) {
                 flag = OCP_TRUE;
                 break;
             }

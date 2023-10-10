@@ -137,8 +137,6 @@ protected:
     Domain           domain;      ///< domain decomposition
 
 public:
-    /// Calculate the CFL number, including bulks and wells for IMPEC
-    OCP_DBL CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const;
     void    PrintSolFIM(const string& outfile) const;
     void    OutInfoFinal() const { if (domain.numproc == 1) bulk.OutMixtureIters(); }
 };

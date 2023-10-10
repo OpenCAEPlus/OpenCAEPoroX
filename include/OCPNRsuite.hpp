@@ -103,8 +103,14 @@ protected:
 
     // CFL
 public:
-    /// Return maxCFL
+    /// Calculate CFL number
+    void CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& ifComm);
+    /// Get maxCFL
     OCP_DBL GetMaxCFL() const { return maxCFL; }
+    /// Get CFL
+    const OCP_DBL& GetCFL(const OCP_USI& n, const USI& j) const { return cfl[n * np + j]; }
+    /// Check CFL
+    OCP_BOOL CheckCFL(const OCP_DBL& cflLim) const;
 
 protected:
     /// CFL number for each bulk

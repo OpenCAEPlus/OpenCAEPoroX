@@ -31,6 +31,7 @@ using namespace std;
 class BulkConn
 {
     friend class Reservoir;
+    friend class NRsuite;
     // temp
     friend class IsoT_FIM;
     friend class IsoT_IMPEC;
@@ -46,6 +47,10 @@ public:
 public:
     /// Input params
     void InputParam(const ParamReservoir& rs_param, const Bulk& bk);
+    /// Get variable set
+    auto& GetVarSet() const { return vs; }
+    /// Get num of connection
+    auto GetNumConn() const { return numConn; }
 
 protected:
     OCP_USI numConn; ///< Number of connections between bulks.

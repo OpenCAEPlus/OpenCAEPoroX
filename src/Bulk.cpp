@@ -183,14 +183,6 @@ OCP_INT Bulk::CheckVe(const OCP_DBL& Vlim) const
     return BULK_SUCCESS;
 }
 
-OCP_INT Bulk::CheckCFL(const OCP_DBL& cflLim) const
-{
-    if (maxCFL > cflLim)
-        return BULK_OUTRANGED_CFL;
-    else
-        return BULK_SUCCESS;
-}
-
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

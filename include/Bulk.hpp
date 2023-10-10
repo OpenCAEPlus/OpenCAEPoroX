@@ -200,18 +200,6 @@ public:
     OCP_INT CheckNi();
     /// Check if relative volume error is outranged.
     OCP_INT CheckVe(const OCP_DBL& Vlim) const;
-    /// Check if Cfl is outranged.
-    OCP_INT CheckCFL(const OCP_DBL& cflLim) const;
-
-    /// Return maxCFL
-    OCP_DBL GetMaxCFL() const { return maxCFL; }
-
-protected:
-
-    mutable vector<OCP_DBL> cfl;             ///< CFL number for each bulk
-    mutable OCP_DBL         maxCFL{ 0 };     ///< max CFL number for global
-    mutable OCP_DBL         maxCFL_loc{ 0 }; ///< local maxCFL
-
 
 public:
     /// push back an element for wellBulkId

@@ -571,59 +571,6 @@ void Reservoir::CalIPRT(const OCP_DBL& dt)
     allWells.CalIPRT(bulk, dt);
 }
 
-OCP_DBL Reservoir::CalCFL(const OCP_DBL& dt, const OCP_BOOL& ifComm) const
-{
-    fill(bulk.cfl.begin(), bulk.cfl.end(), 0.0);
-    const USI np = bulk.vs.np;
-
-    for (OCP_USI c = 0; c < conn.numConn; c++) {
-        for (USI j = 0; j < np; j++) {           
-            const OCP_USI uId = conn.vs.upblock[c * np + j];
-            bulk.cfl[uId * np + j] += fabs(conn.vs.flux_vj[c * np + j]) * dt;
-        }
-    }
-
-    for (const auto& wl : allWells.wells) {
-        if (wl->IsOpen() && wl->WellType() == WellType::productor) {
-            for (USI p = 0; p < wl->PerfNum(); p++) {
-                if (wl->PerfState(p) == WellState::open) {
-                    const OCP_USI k = wl->PerfLocation(p);
-
-                    for (USI j = 0; j < np; j++) {
-                        bulk.cfl[k * np + j] += fabs(wl->PerfProdQj_ft3(p, j)) * dt;
-                    }
-                }
-            }
-        }
-    }
-
-    bulk.maxCFL_loc       = 0;
-    const OCP_USI len = bulk.vs.nb * np;
-    for (OCP_USI n = 0; n < len; n++) {
-        if (bulk.vs.phaseExist[n] && bulk.vs.vj[n] > TINY) {
-            bulk.cfl[n] /= bulk.vs.vj[n];
-#ifdef DEBUG
-            if (!isfinite(bulk.cfl[n])) {
-                OCP_ABORT("cfl is nan!");
-            }
-#endif // DEBUG
-            if (bulk.maxCFL_loc < bulk.cfl[n]) bulk.maxCFL_loc = bulk.cfl[n];
-        }
-    }
-    if (ifComm) {
-
-        GetWallTime timer;
-        timer.Start();
-
-        MPI_Allreduce(&bulk.maxCFL_loc, &bulk.maxCFL, 1, MPI_DOUBLE, MPI_MAX, domain.myComm);
-
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-    }
-    else {
-        bulk.maxCFL = bulk.maxCFL_loc;
-    }
-    return bulk.maxCFL;
-}
 
 void Reservoir::PrintSolFIM(const string& outfile) const
 {
