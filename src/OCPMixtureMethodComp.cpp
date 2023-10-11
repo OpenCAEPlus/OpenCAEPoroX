@@ -671,6 +671,7 @@ void OCPMixtureMethodComp01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 {
     mvs.P = bvs.P[bId];
     mvs.T = bvs.T[bId] + CONV5;
+    copy(&bvs.Pj[bId * bvs.np], &bvs.Pj[bId * bvs.np] + bvs.np, mvs.Pj.begin());
     copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
     copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
     copy(&bvs.phaseExist[bId * bvs.np], &bvs.phaseExist[bId * bvs.np] + bvs.np, mvs.phaseExist.begin());

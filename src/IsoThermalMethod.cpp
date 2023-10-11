@@ -62,7 +62,9 @@ void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
     NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
-    ctrl.Check(rs, NR, {"CFL"});
+    if (!NR.CheckPhysical(rs, { "CFL" })) {
+        ctrl.time.CutDt(NR);
+    }
     NR.InitIter();
 }
 
@@ -120,9 +122,10 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
     // First check : Pressure check
-    if (!ctrl.Check(rs, NR, {"BulkP", "WellP"})) {
-        rs.bulk.vs.P = rs.bulk.vs.lP;
+    if (!NR.CheckPhysical(rs, { "BulkP", "WellP" })) {
+        ctrl.time.CutDt(NR);
         NR.ResetIter();
+        rs.bulk.vs.P = rs.bulk.vs.lP;
         return OCP_FALSE;
     }
 
@@ -133,7 +136,9 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     // Second check : CFL check
     NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
     // Third check: Ni check
-    if (!ctrl.Check(rs, NR, { "CFL","BulkNi"})) {
+
+    if (!NR.CheckPhysical(rs, { "CFL","BulkNi" })) {
+        ctrl.time.CutDt(NR);
         ResetToLastTimeStep01(rs, ctrl);
         return OCP_FALSE;
     }
@@ -142,7 +147,8 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
 
     // Fouth check: Volume error check
-    if (!ctrl.Check(rs, NR, {"BulkVe"})) {
+    if (!NR.CheckPhysical(rs, { "BulkVe" })) {
+        ctrl.time.CutDt(NR);
         ResetToLastTimeStep02(rs, ctrl);
         return OCP_FALSE;
     }
@@ -750,7 +756,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-    if (!ctrl.Check(rs, NR, {"BulkNi", "BulkP"})) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
+        ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
              << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
@@ -777,7 +784,8 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
-        if (!ctrl.Check(rs, NR, {"WellP"})) {
+        if (!NR.CheckPhysical(rs, { "WellP" })) {
+            ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {
@@ -1522,7 +1530,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
     // First check: Ni check and bulk Pressure check
-    if (!ctrl.Check(rs, NR, {"BulkNi", "BulkP"})) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
+        ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
         cout << "Cut time step size and repeat! current dt = " << fixed
              << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
@@ -1547,7 +1556,8 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == 1) {
-        if (!ctrl.Check(rs, NR, {"WellP"})) {
+        if (!NR.CheckPhysical(rs, { "WellP" })) {
+            ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {

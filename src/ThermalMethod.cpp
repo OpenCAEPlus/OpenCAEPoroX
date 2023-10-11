@@ -93,7 +93,8 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
-    if (!ctrl.Check(rs, NR, {"BulkNi", "BulkP", "BulkT"})) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP", "BulkT" })) {
+        ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
         if (CURRENT_RANK == MASTER_PROCESS) {
             cout << "Cut time step size and repeat! current dt = " << fixed
@@ -125,7 +126,8 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCP_INT conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
     if (conflag == 1) {
-        if (!ctrl.Check(rs, NR, {"WellP"})) {
+        if (!NR.CheckPhysical(rs, { "WellP" })) {
+            ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
         } else {

@@ -770,7 +770,6 @@ void CriticalInfo::Setup()
 
 void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NRs)
 {
-    const Bulk& bulk = rs.bulk;
 
     // for NR step
     const auto& dPB = NRs.DPBmaxNR();

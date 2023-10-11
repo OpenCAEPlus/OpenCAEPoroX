@@ -23,15 +23,6 @@
 
 using namespace std;
 
-/// continue simulating
-const OCP_INT OCP_CONTINUE          = 0;  
-/// Reset to last time step
-const OCP_INT OCP_RESET             = -1; 
-/// Reset with cut time(because of failed newton iterations)
-const OCP_INT OCP_RESET_CUTTIME     = -2; 
-/// Reset with cut time(because of out-ranged cfl number)
-const OCP_INT OCP_RESET_CUTTIME_CFL = -3;   
-
 
 /// shortcut instructions from the command line
 class FastControl
@@ -121,6 +112,12 @@ public:
     void SetFastControl(const FastControl& fCtrl) {
         for (auto& p : ps)  p.SetFastControl(fCtrl);
     }
+    /// cut time
+    void CutDt(const OCP_DBL& fac = -1) {
+        if (fac < 0) current_dt *= wp->cutFacNR;
+        else         current_dt *= fac;
+    }
+    void CutDt(const OCPNRsuite& NRs);
     /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i, const AllWells& wells);
     /// Calculate next time step
@@ -135,11 +132,7 @@ protected:
     OCP_INT          numproc, myrank;
 
 public:
-    /// cut time
-    void CutDt(const OCP_DBL& fac = -1) {
-        if (fac < 0) current_dt *= wp->cutFacNR;
-        else         current_dt *= fac;
-    }
+
     /// Return the current time.
     auto GetCurrentTime() const { return current_time; }
     /// Return current time step size.
@@ -237,8 +230,6 @@ public:
     void Setup(const Domain& domain);
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
-    // Check order is important
-    OCP_BOOL Check(Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Check if converge
     OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         return NR.CheckConverge(NRs, il);
@@ -251,8 +242,6 @@ public:
 public:
     MPI_Comm         myComm;
     OCP_INT          numproc, myrank;
-    OCP_INT          workState;           ///< work state of global process
-    OCP_INT          workState_loc;       ///< work state of current process
 
 public:
     /// Print level

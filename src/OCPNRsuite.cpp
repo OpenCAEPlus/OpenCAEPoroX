@@ -145,6 +145,77 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
 }
 
 
+void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
+{
+    OCP_FUNCNAME;
+
+    dPmaxT = 0;
+    dPBmaxT = 0;
+    dPWmaxT = 0;
+    dTmaxT = 0;
+    dNmaxT = 0;
+    dSmaxT = 0;
+    eVmaxT = 0;
+
+    // for bulk
+    const BulkVarSet& bvs = rs.bulk.GetVarSet();
+
+    OCP_USI id;
+    for (OCP_USI n = 0; n < nb; n++) {
+
+        // dP
+        if (fabs(dPBmaxT) < fabs(bvs.P[n] - bvs.lP[n])) {
+            dPBmaxT = bvs.P[n] - bvs.lP[n];
+        }
+
+        // dT
+        if (fabs(dTmaxT) < fabs(bvs.T[n] - bvs.lT[n])) {
+            dTmaxT = bvs.T[n] - bvs.lT[n];
+        }
+
+        // dS
+        for (USI j = 0; j < np; j++) {
+            id = n * np + j;
+            if (fabs(dSmaxT) < fabs(bvs.S[id] - bvs.lS[id])) {
+                dSmaxT = bvs.S[id] - bvs.lS[id];
+            }
+        }
+
+        // dN
+        for (USI i = 0; i < nc; i++) {
+            id = n * nc + i;
+            const OCP_DBL tmp = fabs(max(bvs.Ni[id], bvs.lNi[id]));
+            if (tmp > TINY) {
+                if (fabs(dNmaxT) < fabs((bvs.Ni[id] - bvs.lNi[id]) / tmp)) {
+                    dNmaxT = (bvs.Ni[id] - bvs.lNi[id]) / tmp;
+                }
+            }
+        }
+
+        // Ve
+        if (fabs(eVmaxT) < fabs((bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n])) {
+            eVmaxT = (bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n];
+        }
+    }
+
+    // for well
+    const auto& wells = rs.allWells.wells;
+    for (const auto& w : wells) {
+        OCP_DBL dPw = w->CalMaxChangeTime();
+        if (fabs(dPWmaxT) < fabs(dPw)) {
+            dPWmaxT = dPw;
+        }
+    }
+
+    if (fabs(dPBmaxT) < fabs(dPWmaxT)) {
+        dPmaxT = dPWmaxT;
+    }
+    else {
+        dPmaxT = dPBmaxT;
+    }
+}
+
+
 /// Calculate CFL number
 void OCPNRsuite::CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& ifComm)
 {
@@ -215,77 +286,78 @@ OCP_BOOL OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
 }
 
 
-
-void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
+OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const
 {
-    OCP_FUNCNAME;
+    OCP_INT workState_loc = OCP_CONTINUE;
+    OCP_INT flag;
+    for (auto& s : il) {
 
-    dPmaxT  = 0;
-    dPBmaxT = 0;
-    dPWmaxT = 0;
-    dTmaxT  = 0;
-    dNmaxT  = 0;
-    dSmaxT  = 0;
-    eVmaxT  = 0;
+        if (s == "BulkP")        flag = rs.bulk.CheckP();
+        else if (s == "BulkT")   flag = rs.bulk.CheckT();
+        else if (s == "BulkNi")  flag = rs.bulk.CheckNi();
+        else if (s == "BulkVe")  flag = rs.bulk.CheckVe(0.01);
+        else if (s == "CFL")     flag = CheckCFL(1.0);
+        else if (s == "WellP")   flag = rs.allWells.CheckP(rs.bulk);
+        else                     OCP_ABORT("Check iterm not recognized!");
 
-    // for bulk
-    const BulkVarSet& bvs = rs.bulk.GetVarSet();
+        switch (flag) {
+            // Bulk
+        case BULK_SUCCESS:
+            break;
 
-    OCP_USI id;
-    for (OCP_USI n = 0; n < nb; n++) {
+        case BULK_NEGATIVE_PRESSURE:
+        case BULK_NEGATIVE_TEMPERATURE:
+        case BULK_NEGATIVE_COMPONENTS_MOLES:
+        case BULK_OUTRANGED_VOLUME_ERROR:
+            workState_loc = OCP_RESET_CUTTIME;
+            break;
 
-        // dP
-        if (fabs(dPBmaxT) < fabs(bvs.P[n] - bvs.lP[n])) {
-            dPBmaxT = bvs.P[n] - bvs.lP[n];
+        case BULK_OUTRANGED_CFL:
+            workState_loc = OCP_RESET_CUTTIME_CFL;
+            break;
+
+            // Well
+        case WELL_SUCCESS:
+            break;
+
+        case WELL_NEGATIVE_PRESSURE:
+            workState_loc = OCP_RESET_CUTTIME;
+            break;
+
+        case WELL_SWITCH_TO_BHPMODE:
+        case WELL_CROSSFLOW:
+            workState_loc = OCP_RESET;
+            break;
+
+        default:
+            break;
         }
-
-        // dT
-        if (fabs(dTmaxT) < fabs(bvs.T[n] - bvs.lT[n])) {
-            dTmaxT = bvs.T[n] - bvs.lT[n];
-        }
-
-        // dS
-        for (USI j = 0; j < np; j++) {
-            id = n * np + j;
-            if (fabs(dSmaxT) < fabs(bvs.S[id] - bvs.lS[id])) {
-                dSmaxT = bvs.S[id] - bvs.lS[id];
-            }
-        }
-
-        // dN
-        for (USI i = 0; i < nc; i++) {
-            id = n * nc + i;
-            const OCP_DBL tmp = fabs(max(bvs.Ni[id], bvs.lNi[id]));
-            if (tmp > TINY) {
-                if (fabs(dNmaxT) < fabs((bvs.Ni[id] - bvs.lNi[id]) / tmp)) {
-                    dNmaxT = (bvs.Ni[id] - bvs.lNi[id]) / tmp;
-                }
-            }
-        }
-
-        // Ve
-        if (fabs(eVmaxT) < fabs((bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n])) {
-            eVmaxT = (bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n];
-        }
+        if (workState_loc != OCP_CONTINUE)
+            break;
     }
 
-    // for well
-    const auto& wells = rs.allWells.wells;
-    for (const auto& w : wells) {
-        OCP_DBL dPw = w->CalMaxChangeTime();
-        if (fabs(dPWmaxT) < fabs(dPw)) {
-            dPWmaxT = dPw;
-        }
-    }
+    GetWallTime timer;
+    timer.Start();
 
-    if (fabs(dPBmaxT) < fabs(dPWmaxT)) {
-        dPmaxT = dPWmaxT;
-    }
-    else {
-        dPmaxT = dPBmaxT;
+    MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MIN, myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+    OCPTIME_COMM_1ALLREDUCE += timer.Stop() / 1000;
+
+    switch (workState)
+    {
+    case OCP_CONTINUE:
+        return OCP_TRUE;
+
+    case OCP_RESET:
+    case OCP_RESET_CUTTIME:
+    case OCP_RESET_CUTTIME_CFL:
+        return OCP_FALSE;
+
+    default:
+        OCP_ABORT("WRONG work state!");
     }
 }
-
 
 
 void OCPNRsuite::InitIter() {

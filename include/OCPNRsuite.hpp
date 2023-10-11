@@ -23,14 +23,46 @@
 using namespace std;
 
 
+/// continue simulating
+const OCP_INT OCP_CONTINUE          = 0;
+/// Reset to last time step
+const OCP_INT OCP_RESET             = -1;
+/// Reset with cut time(because of failed newton iterations)
+const OCP_INT OCP_RESET_CUTTIME     = -2;
+/// Reset with cut time(because of out-ranged cfl number)
+const OCP_INT OCP_RESET_CUTTIME_CFL = -3;
+
+
 /// NR dataset for nonlinear solution
 class OCPNRsuite
 {
+
 public:
     /// Setup for method which use NR
     void Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain);
     /// Setup for method which does not use NR
     void Setup(const BulkVarSet& bvs, const Domain& domain);
+
+protected:
+    /// Communicator
+    MPI_Comm        myComm;
+    OCP_INT         numproc, myrank;
+    /// if use NR
+    OCP_BOOL        ifUseNR{ OCP_FALSE };
+    /// model
+    OCP_BOOL        ifThermal{ OCP_FALSE };
+    /// numBulk
+    OCP_USI         nb;
+    /// numPhase, numCom
+    USI             np, nc;
+
+public:
+    /// residual
+    OCPNRresidual   res;
+
+
+    // between NR-step
+public:
     /// Reset 
     void InitStep(const BulkVarSet& bvs);
     /// Calculate max change for themral model
@@ -54,24 +86,8 @@ public:
     /// Get all well max dP
     const auto& DPWmaxNR() const { return dPWmaxNR; };
 
-public:
-    /// residual
-    OCPNRresidual   res;
 
 protected:
-    /// Communicator
-    MPI_Comm        myComm;
-    OCP_INT         numproc, myrank;
-    /// if use NR
-    OCP_BOOL        ifUseNR{ OCP_FALSE };
-    /// model
-    OCP_BOOL        ifThermal{ OCP_FALSE };
-    /// numBulk
-    OCP_USI         nb;
-    /// numPhase, numCom
-    USI             np, nc;
-
-    // between NR-step
 
     /// P at last NR steps
     vector<OCP_DBL> lP;
@@ -92,33 +108,14 @@ protected:
 
     /// Max pressure difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dPBmaxNR;
-    /// Max temperature difference of all NR steps within a time step
+    /// Max temperature difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dTmaxNR;
-    /// Max Ni difference of all NR steps within a time step
+    /// Max Ni difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dNmaxNR;
-    /// Max saturation difference of all NR steps within a time step
+    /// Max saturation difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dSmaxNR;
     /// Max pressure difference of all NR steps within a time step (well)
     vector<OCP_DBL> dPWmaxNR;
-
-    // CFL
-public:
-    /// Calculate CFL number
-    void CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& ifComm);
-    /// Get maxCFL
-    OCP_DBL GetMaxCFL() const { return maxCFL; }
-    /// Get CFL
-    const OCP_DBL& GetCFL(const OCP_USI& n, const USI& j) const { return cfl[n * np + j]; }
-    /// Check CFL
-    OCP_BOOL CheckCFL(const OCP_DBL& cflLim) const;
-
-protected:
-    /// CFL number for each bulk
-    vector<OCP_DBL> cfl;  
-    /// max CFL number for global
-    OCP_DBL         maxCFL{ 0 };
-    /// local maxCFL
-    OCP_DBL         maxCFL_loc{ 0 }; 
 
 
     // between time step
@@ -144,18 +141,47 @@ public:
 protected:
     /// Max change in pressure during the current time step.(bulk and well)
     OCP_DBL dPmaxT; 
-    /// Max change in pressure during the current time step.(bulk and well)
+    /// Max change in pressure during the current time step.(bulk)
     OCP_DBL dPBmaxT;
-    /// Max change in pressure during the current time step.(bulk and well)
+    /// Max change in pressure during the current time step.(well)
     OCP_DBL dPWmaxT;
-    /// Max change in temperature during the current time step.
+    /// Max change in temperature during the current time step.(bulk)
     OCP_DBL dTmaxT; 
-    /// Max relative change in moles of component during the current time step.
+    /// Max relative change in moles of component during the current time step.(bulk)
     OCP_DBL dNmaxT;
-    /// Max change in saturation during the current time step.
+    /// Max change in saturation during the current time step.(bulk)
     OCP_DBL dSmaxT; 
-    /// Max relative diff between fluid and pore volume during the current time step.
+    /// Max relative diff between fluid and pore volume during the current time step.(bulk)
     OCP_DBL eVmaxT; 
+
+
+    // CFL
+public:
+    /// Calculate CFL number
+    void CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& ifComm);
+    /// Get maxCFL
+    OCP_DBL GetMaxCFL() const { return maxCFL; }
+    /// Get CFL
+    const OCP_DBL& GetCFL(const OCP_USI& n, const USI& j) const { return cfl[n * np + j]; }
+
+
+protected:
+    /// Check CFL
+    OCP_BOOL CheckCFL(const OCP_DBL& cflLim) const;
+    /// CFL number for each bulk
+    vector<OCP_DBL> cfl;
+    /// max CFL number for global
+    OCP_DBL         maxCFL{ 0 };
+    /// local maxCFL
+    OCP_DBL         maxCFL_loc{ 0 };
+
+    // Check
+public:
+    OCP_BOOL CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const;
+    auto GetWorkState() const { return workState; }
+
+protected:
+    mutable OCP_INT workState;
 
 
     // Iterations

@@ -99,6 +99,7 @@ public:
         }
 
         // vars
+        Pj.resize(np);
         Ni.resize(nc);
         phaseExist.resize(np);
         S.resize(np);
@@ -166,6 +167,8 @@ public:
     USI                     np, nc;
     /// pressure, temperature
     OCP_DBL                 P, T;
+    /// Phase Pressure
+    vector<OCP_DBL>         Pj;
     /// Buble point pressure 
     OCP_DBL                 Pb;
     /// total moles of components

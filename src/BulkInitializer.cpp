@@ -674,6 +674,16 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		}
 		bvs.P[n] = Po;
 
+		if (bvs.o >= 0) {
+			bvs.Pj[n * bvs.np + bvs.o] = Po;
+		}
+		if (bvs.g >= 0) {
+			bvs.Pj[n * bvs.np + bvs.g] = Pg;
+		}
+		if (bvs.w >= 0) {
+			bvs.Pj[n * bvs.np + bvs.w] = Pw;
+		}
+
 		if (bvs.depth[n] < DOGC) {
 			Pbb = Po;
 		}

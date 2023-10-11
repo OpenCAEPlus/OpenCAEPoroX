@@ -137,6 +137,28 @@ void ControlTimeParam::SetFastControl(const FastControl& fCtrl)
 }
 
 
+void ControlTime::CutDt(const OCPNRsuite& NRs)
+{
+    switch (NRs.GetWorkState())
+    {
+    case OCP_RESET:
+        // do not cut
+        break;
+
+    case OCP_RESET_CUTTIME:
+        current_dt *= wp->cutFacNR;
+        break;
+
+    case OCP_RESET_CUTTIME_CFL:
+        current_dt /= (NRs.GetMaxCFL() + 1);
+        break;
+
+    default:
+        OCP_ABORT("WRONG work state!");
+    }
+}
+
+
 void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 {
     wp = &ps[i];
@@ -352,87 +374,6 @@ void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
 }
 
 
-OCP_BOOL OCPControl::Check( Reservoir& rs, const OCPNRsuite& NRs, const initializer_list<string>& il)
-{
-    workState_loc = OCP_CONTINUE;
-    OCP_INT flag;
-    for (auto& s : il) {
-
-        if (s == "BulkP")        flag = rs.bulk.CheckP();
-        else if (s == "BulkT")   flag = rs.bulk.CheckT();
-        else if (s == "BulkNi")  flag = rs.bulk.CheckNi();
-        else if (s == "BulkVe")  flag = rs.bulk.CheckVe(0.01);
-        else if (s == "CFL")     flag = NRs.CheckCFL(1.0);
-        else if (s == "WellP")   flag = rs.allWells.CheckP(rs.bulk);
-        else                     OCP_ABORT("Check iterm not recognized!");
-
-        switch (flag) {
-            // Bulk
-            case BULK_SUCCESS:
-                break;
-
-            case BULK_NEGATIVE_PRESSURE:
-            case BULK_NEGATIVE_TEMPERATURE:
-            case BULK_NEGATIVE_COMPONENTS_MOLES:
-            case BULK_OUTRANGED_VOLUME_ERROR:
-                workState_loc = OCP_RESET_CUTTIME;
-                break;
-
-            case BULK_OUTRANGED_CFL:
-                workState_loc = OCP_RESET_CUTTIME_CFL;
-                break;
-
-            // Well
-            case WELL_SUCCESS:
-                break;
-
-            case WELL_NEGATIVE_PRESSURE:
-                workState_loc = OCP_RESET_CUTTIME;
-                break;
-
-            case WELL_SWITCH_TO_BHPMODE:
-            case WELL_CROSSFLOW:
-                workState_loc = OCP_RESET;
-                break;
-
-            default:
-                break;
-        }
-        if (workState_loc != OCP_CONTINUE)
-            break;
-    }
-
-    GetWallTime timer;
-    timer.Start();
-
-    MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MIN, myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-    OCPTIME_COMM_1ALLREDUCE += timer.Stop() / 1000;
-
-    switch (workState)
-    {
-    case OCP_CONTINUE:
-        return OCP_TRUE;
-
-    case OCP_RESET:
-        return OCP_FALSE;
-
-    case OCP_RESET_CUTTIME:
-        time.CutDt();
-        return OCP_FALSE;
-
-    case OCP_RESET_CUTTIME_CFL:
-        time.CutDt(1/ (NRs.GetMaxCFL() + 1));
-        return OCP_FALSE;
-
-    default:
-        OCP_ABORT("WRONG work state!");
-    }
-
-
-    return OCP_TRUE;
-}
 
 
 /*----------------------------------------------------------------------------*/
