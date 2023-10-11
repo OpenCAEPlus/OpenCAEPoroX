@@ -141,15 +141,15 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
 {
     switch (NRs.GetWorkState())
     {
-    case OCP_RESET:
+    case OCPNRState::reset:
         // do not cut
         break;
 
-    case OCP_RESET_CUTTIME:
+    case OCPNRState::resetCut:
         current_dt *= wp->cutFacNR;
         break;
 
-    case OCP_RESET_CUTTIME_CFL:
+    case OCPNRState::resetCutCFL:
         current_dt /= (NRs.GetMaxCFL() + 1);
         break;
 

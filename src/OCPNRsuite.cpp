@@ -288,7 +288,7 @@ OCP_BOOL OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
 
 OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const
 {
-    OCP_INT workState_loc = OCP_CONTINUE;
+    OCPNRState workState_loc = OCPNRState::continueSol;
     OCP_INT flag;
     for (auto& s : il) {
 
@@ -309,11 +309,11 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
         case BULK_NEGATIVE_TEMPERATURE:
         case BULK_NEGATIVE_COMPONENTS_MOLES:
         case BULK_OUTRANGED_VOLUME_ERROR:
-            workState_loc = OCP_RESET_CUTTIME;
+            workState_loc = OCPNRState::resetCut;
             break;
 
         case BULK_OUTRANGED_CFL:
-            workState_loc = OCP_RESET_CUTTIME_CFL;
+            workState_loc = OCPNRState::resetCutCFL;
             break;
 
             // Well
@@ -321,37 +321,37 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
             break;
 
         case WELL_NEGATIVE_PRESSURE:
-            workState_loc = OCP_RESET_CUTTIME;
+            workState_loc = OCPNRState::resetCut;
             break;
 
         case WELL_SWITCH_TO_BHPMODE:
         case WELL_CROSSFLOW:
-            workState_loc = OCP_RESET;
+            workState_loc = OCPNRState::reset;
             break;
 
         default:
             break;
         }
-        if (workState_loc != OCP_CONTINUE)
+        if (workState_loc != OCPNRState::continueSol)
             break;
     }
 
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MIN, myComm);
+    MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MAX, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
     OCPTIME_COMM_1ALLREDUCE += timer.Stop() / 1000;
 
     switch (workState)
     {
-    case OCP_CONTINUE:
+    case OCPNRState::continueSol:
         return OCP_TRUE;
 
-    case OCP_RESET:
-    case OCP_RESET_CUTTIME:
-    case OCP_RESET_CUTTIME_CFL:
+    case OCPNRState::reset:
+    case OCPNRState::resetCut:
+    case OCPNRState::resetCutCFL:
         return OCP_FALSE;
 
     default:

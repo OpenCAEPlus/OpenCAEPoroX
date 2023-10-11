@@ -22,6 +22,18 @@
 
 using namespace std;
 
+enum class OCPNRState
+{
+    /// continue NR
+    continueSol,
+    /// reset to last time step
+    reset,
+    /// reset to last time step and cut time
+    resetCut,
+    /// reset to last time step due to large cfl and cut time
+    resetCutCFL
+};
+
 
 /// continue simulating
 const OCP_INT OCP_CONTINUE          = 0;
@@ -181,7 +193,7 @@ public:
     auto GetWorkState() const { return workState; }
 
 protected:
-    mutable OCP_INT workState;
+    mutable OCPNRState workState;
 
 
     // Iterations
