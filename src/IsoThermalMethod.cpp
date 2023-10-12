@@ -759,8 +759,6 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
-        cout << "Cut time step size and repeat! current dt = " << fixed
-             << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     }
 
@@ -794,9 +792,6 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
-        cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
-                "current dt = "
-             << fixed << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;
@@ -1533,8 +1528,6 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
-        cout << "Cut time step size and repeat! current dt = " << fixed
-             << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     }
 
@@ -1569,9 +1562,6 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
     } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
-        cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
-                "current dt = "
-             << fixed << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;

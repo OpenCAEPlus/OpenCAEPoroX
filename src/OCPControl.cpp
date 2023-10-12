@@ -137,13 +137,29 @@ void ControlTimeParam::SetFastControl(const FastControl& fCtrl)
 }
 
 
+void ControlTime::CutDt(const OCP_DBL& fac) 
+{
+    const OCP_DBL ldt = current_dt;
+
+    if (fac < 0) current_dt *= wp->cutFacNR;
+    else         current_dt *= fac;
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        cout << "### WARNING: Cut time step size: " << fixed
+            << setprecision(3) << ldt << " days -> "
+            << setprecision(3) << current_dt << " days !\n";
+    }
+}
+
+
 void ControlTime::CutDt(const OCPNRsuite& NRs)
 {
+    const OCP_DBL ldt = current_dt;
     switch (NRs.GetWorkState())
     {
     case OCPNRState::reset:
         // do not cut
-        break;
+        return;
 
     case OCPNRState::resetCut:
         current_dt *= wp->cutFacNR;
@@ -155,6 +171,12 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
 
     default:
         OCP_ABORT("WRONG work state!");
+    }
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+		cout << "### WARNING: Cut time step size: " << fixed
+			<< setprecision(3) << ldt << " days -> "
+			<< setprecision(3) << current_dt << " days !\n";
     }
 }
 
@@ -312,6 +334,9 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<s
     }
     else if (NRs.GetIterNR() >= wp->maxIter) {
         // not converge in specified numbers of iterations, reset
+        if (CURRENT_RANK == MASTER_PROCESS) {
+            cout << "### WARNING: NR not fully converged!\n";
+        }
         return -1;
     }
     else {

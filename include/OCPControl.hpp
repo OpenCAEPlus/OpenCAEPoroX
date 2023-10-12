@@ -113,10 +113,7 @@ public:
         for (auto& p : ps)  p.SetFastControl(fCtrl);
     }
     /// cut time
-    void CutDt(const OCP_DBL& fac = -1) {
-        if (fac < 0) current_dt *= wp->cutFacNR;
-        else         current_dt *= fac;
-    }
+    void CutDt(const OCP_DBL& fac = -1);
     void CutDt(const OCPNRsuite& NRs);
     /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i, const AllWells& wells);

@@ -95,11 +95,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP", "BulkT" })) {
         ctrl.time.CutDt(NR);
-        ResetToLastTimeStep(rs, ctrl);
-        if (CURRENT_RANK == MASTER_PROCESS) {
-            cout << "Cut time step size and repeat! current dt = " << fixed
-                << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
-        }      
+        ResetToLastTimeStep(rs, ctrl);   
         return OCP_FALSE;
     }
 
@@ -137,9 +133,6 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     } else if (conflag == -1) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
-        cout << "### WARNING: NR not fully converged! Cut time step size and repeat!  "
-                "current dt = "
-             << fixed << setprecision(3) << ctrl.time.GetCurrentDt() << " days\n";
         return OCP_FALSE;
     } else {
         return OCP_FALSE;
