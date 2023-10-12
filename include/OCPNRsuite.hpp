@@ -22,27 +22,30 @@
 
 using namespace std;
 
-enum class OCPNRState
+/// NR state for physical check
+enum class OCPNRStateP
 {
-    /// continue NR
+    /// continue solve
     continueSol,
     /// reset to last time step
     reset,
     /// reset to last time step and cut time
     resetCut,
     /// reset to last time step due to large cfl and cut time
-    resetCutCFL
+    resetCutCFL,
 };
 
 
-/// continue simulating
-const OCP_INT OCP_CONTINUE          = 0;
-/// Reset to last time step
-const OCP_INT OCP_RESET             = -1;
-/// Reset with cut time(because of failed newton iterations)
-const OCP_INT OCP_RESET_CUTTIME     = -2;
-/// Reset with cut time(because of out-ranged cfl number)
-const OCP_INT OCP_RESET_CUTTIME_CFL = -3;
+/// NR state for convergence check
+enum class OCPNRStateC
+{
+    /// converge
+    converge,
+    /// continue iterate
+    continueIter,
+    /// not converge
+    not_converge,
+};
 
 
 /// NR dataset for nonlinear solution
@@ -193,7 +196,7 @@ public:
     auto GetWorkState() const { return workState; }
 
 protected:
-    mutable OCPNRState workState;
+    mutable OCPNRStateP workState;
 
 
     // Iterations

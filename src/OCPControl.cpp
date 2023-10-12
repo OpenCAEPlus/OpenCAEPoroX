@@ -157,15 +157,15 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
     const OCP_DBL ldt = current_dt;
     switch (NRs.GetWorkState())
     {
-    case OCPNRState::reset:
+    case OCPNRStateP::reset:
         // do not cut
         return;
 
-    case OCPNRState::resetCut:
+    case OCPNRStateP::resetCut:
         current_dt *= wp->cutFacNR;
         break;
 
-    case OCPNRState::resetCutCFL:
+    case OCPNRStateP::resetCutCFL:
         current_dt /= (NRs.GetMaxCFL() + 1);
         break;
 
@@ -285,16 +285,16 @@ ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
 }
 
 
-OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const
+OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const
 {
-    OCP_INT conflag_loc = -1;
+    OCPNRStateC conflag_loc = OCPNRStateC::not_converge;
     for (auto& s : il) {
         if (s == "res") {
             if ((NRs.res.maxRelRes_V <= NRs.res.maxRelRes0_V * wp->tol ||
                 NRs.res.maxRelRes_V <= wp->tol ||
                 NRs.res.maxRelRes_N <= wp->tol) &&
                 NRs.res.maxWellRelRes_mol <= wp->tol) {
-                conflag_loc = 1;
+                conflag_loc = OCPNRStateC::converge;
             }
         }
         else if (s == "resT") {
@@ -302,17 +302,17 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<s
                 NRs.res.maxRelRes_V <= wp->tol ||
                 NRs.res.maxRelRes_N <= wp->tol) &&
                 NRs.res.maxWellRelRes_mol <= wp->tol)) {
-                conflag_loc = 1;
+                conflag_loc = OCPNRStateC::converge;
             }
         }
         else if (s == "d") {
             if (fabs(NRs.DPBmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
-                conflag_loc = 1;
+                conflag_loc = OCPNRStateC::converge;
             }
         }
         else if (s == "dT") {
             if (fabs(NRs.DPBmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
-                conflag_loc = 1;
+                conflag_loc = OCPNRStateC::converge;
             }
         }
         else {
@@ -323,25 +323,25 @@ OCP_INT ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<s
     GetWallTime timer;
     timer.Start();
 
-    OCP_INT conflag;
-    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MIN, myComm);
+    OCPNRStateC conflag;
+    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MAX, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
 
-    if (conflag == 1) {
+    if (conflag == OCPNRStateC::converge) {
         // converge
-        return 1;
+        return OCPNRStateC::converge;
     }
     else if (NRs.GetIterNR() >= wp->maxIter) {
         // not converge in specified numbers of iterations, reset
         if (CURRENT_RANK == MASTER_PROCESS) {
             cout << "### WARNING: NR not fully converged!\n";
         }
-        return -1;
+        return OCPNRStateC::not_converge;
     }
     else {
         // not converge and go on iterativing
-        return 0;
+        return OCPNRStateC::continueIter;
     }
 }
 

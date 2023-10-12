@@ -119,9 +119,9 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CalMaxChangeNR(rs);
-    const OCP_INT conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
+    const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
-    if (conflag == 1) {
+    if (conflag == OCPNRStateC::converge) {
         if (!NR.CheckPhysical(rs, { "WellP" })) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
@@ -130,7 +130,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (conflag == -1) {
+    } else if (conflag == OCPNRStateC::not_converge) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;

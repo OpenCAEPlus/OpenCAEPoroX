@@ -779,9 +779,9 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CalMaxChangeNR(rs);
-    const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
+    const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
-    if (conflag == 1) {
+    if (conflag == OCPNRStateC::converge) {
         if (!NR.CheckPhysical(rs, { "WellP" })) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
@@ -789,7 +789,7 @@ OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
         } else {
             return OCP_TRUE;
         }
-    } else if (conflag == -1) {
+    } else if (conflag == OCPNRStateC::not_converge) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
@@ -1546,9 +1546,9 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     NR.CalMaxChangeNR(rs);
-    const OCP_INT conflag = ctrl.CheckConverge(NR, { "res", "d" });
+    const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
-    if (conflag == 1) {
+    if (conflag == OCPNRStateC::converge) {
         if (!NR.CheckPhysical(rs, { "WellP" })) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
@@ -1559,7 +1559,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_TRUE;
         }
 
-    } else if (conflag == -1) {
+    } else if (conflag == OCPNRStateC::not_converge) {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;

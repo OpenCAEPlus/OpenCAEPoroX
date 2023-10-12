@@ -288,7 +288,7 @@ ReservoirState OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
 
 OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const
 {
-    OCPNRState     workState_loc = OCPNRState::continueSol;
+    OCPNRStateP     workState_loc = OCPNRStateP::continueSol;
     ReservoirState rsState;
     for (auto& s : il) {
 
@@ -309,11 +309,11 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
         case ReservoirState::bulk_negative_T:
         case ReservoirState::bulk_negative_N:
         case ReservoirState::bulk_large_EV:
-            workState_loc = OCPNRState::resetCut;
+            workState_loc = OCPNRStateP::resetCut;
             break;
 
         case ReservoirState::bulk_large_CFL:
-            workState_loc = OCPNRState::resetCutCFL;
+            workState_loc = OCPNRStateP::resetCutCFL;
             break;
 
             // Well
@@ -321,18 +321,18 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
             break;
 
         case ReservoirState::well_negative_P:
-            workState_loc = OCPNRState::resetCut;
+            workState_loc = OCPNRStateP::resetCut;
             break;
 
         case ReservoirState::well_switch_BHPm:
         case ReservoirState::well_crossflow:
-            workState_loc = OCPNRState::reset;
+            workState_loc = OCPNRStateP::reset;
             break;
 
         default:
             break;
         }
-        if (workState_loc != OCPNRState::continueSol)
+        if (workState_loc != OCPNRStateP::continueSol)
             break;
     }
 
@@ -346,12 +346,12 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
 
     switch (workState)
     {
-    case OCPNRState::continueSol:
+    case OCPNRStateP::continueSol:
         return OCP_TRUE;
 
-    case OCPNRState::reset:
-    case OCPNRState::resetCut:
-    case OCPNRState::resetCutCFL:
+    case OCPNRStateP::reset:
+    case OCPNRStateP::resetCut:
+    case OCPNRStateP::resetCutCFL:
         return OCP_FALSE;
 
     default:

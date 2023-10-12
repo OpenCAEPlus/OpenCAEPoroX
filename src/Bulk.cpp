@@ -117,7 +117,6 @@ ReservoirState Bulk::CheckP() const
             PStringSci << std::scientific << vs.P[n];
             OCP_WARNING("Negative pressure: P[" + std::to_string(n) +
                         "] = " + PStringSci.str());
-            cout << "P = " << vs.P[n] << endl;
             return ReservoirState::bulk_negative_P;
         }
     }
@@ -133,7 +132,6 @@ ReservoirState Bulk::CheckT() const
             PStringSci << std::scientific << vs.T[n];
             OCP_WARNING("Negative pressure: T[" + std::to_string(n) +
                         "] = " + PStringSci.str());
-            cout << "T = " << vs.T[n] << endl;
             return ReservoirState::bulk_negative_T;
         }
     }

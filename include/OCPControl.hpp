@@ -202,7 +202,7 @@ public:
     /// Get dPmax
     auto DPmax() const { return wp->dPmax; }
     /// If NR iterations converge
-    OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const;
+    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const;
 
 protected:
     MPI_Comm         myComm;
@@ -228,7 +228,7 @@ public:
     /// Apply control for time step i.
     void ApplyControl(const USI& i, const Reservoir& rs);
     /// Check if converge
-    OCP_INT CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
+    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         return NR.CheckConverge(NRs, il);
     }
     // Calculate next time step
