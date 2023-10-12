@@ -482,7 +482,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
 
 
-
+#ifdef WITH_GMSH
     /////////////////////////////////////////////////////////////////////////
     // Distribute Boundary Name (used in Gmsh grid now)
     /////////////////////////////////////////////////////////////////////////
@@ -533,6 +533,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             }
         }
     }
+#endif
   
     MPI_Barrier(myComm);
 }

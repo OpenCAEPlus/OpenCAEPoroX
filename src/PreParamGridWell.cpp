@@ -90,7 +90,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("INCLUDE", 7):
                 InputINCLUDE(ifs);
                 break;
-
+#ifdef WITH_GMSH
             case Map_Str2Int("GMSH", 4):
                 InputGMSH(ifs);
                 break;
@@ -98,6 +98,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("GMSHPRO", 7):
                 InputGMSHPRO(ifs);
                 break;
+#endif
 
             case Map_Str2Int("WELSPECS", 8):
                 InputWELSPECS(ifs);
@@ -142,10 +143,12 @@ void PreParamGridWell::CheckInput()
         if (dz.size() != numGrid)          OCP_ABORT("WRONG DZ!");
         if (tops.size() != nx * ny)        OCP_ABORT("WRONG TOPS!");
     }
+#ifdef WITH_GMSH
     else if (gridType == GridType::gmsh) {
         if (gmshGrid.edges.empty())       OCP_ABORT("WRONG GMSH!");
         if (gmshGrid.elements.empty())    OCP_ABORT("WRONG GMSH!");
     }
+#endif
     else                                  OCP_ABORT("WRONG Grid Type!");
 
     cout << "Check Grid param ... done";
@@ -450,6 +453,8 @@ void PreParamGridWell::InputINCLUDE(ifstream& ifs)
     Input(vbuf[0]);
 }
 
+
+#ifdef WITH_GMSH
 void PreParamGridWell::InputGMSH(ifstream& ifs)
 {
     gridType = GridType::gmsh;
@@ -478,7 +483,7 @@ void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
         kz[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].kz;
     }
 }
-
+#endif
 
 void PreParamGridWell::InputWELSPECS(ifstream& ifs)
 {
@@ -750,9 +755,11 @@ void PreParamGridWell::SetupGrid()
         OutputBaiscInfo();
         SetLocationStructral();
         break;
+#ifdef WITH_GMSH
     case GridType::gmsh:
         SetupGmshGrid();
         break;
+#endif
     default:
         OCP_ABORT("WRONG Grid Type!");
     }
@@ -1226,7 +1233,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 }
 
 
-
+#ifdef WITH_GMSH
 void PreParamGridWell::SetupGmshGrid()
 {
     SetupBasicGmshGrid();
@@ -1323,6 +1330,7 @@ void PreParamGridWell::OutputPointsGmshGrid()
 
     Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
 }
+#endif
 
 
 void PreParamGridWell::SetLocationStructral()
@@ -1485,6 +1493,7 @@ OCP_USI PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
     if (gridType >= GridType::structured && gridType < GridType::unstructured) {
         return (well.K_perf[p] - 1) * (nx * ny) + (well.J_perf[p] - 1) * nx + (well.I_perf[p] - 1);
     }
+#ifdef WITH_GMSH
     else if (gridType >= GridType::unstructured) {
         // find the element whose center is closest to the perforation first
         OCP_DBL mindis = 1E8;
@@ -1504,6 +1513,7 @@ OCP_USI PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
         if (!flag) OCP_ABORT("NEED MORE CHECK!");
         return bId;
     }
+#endif
     else {
         OCP_ABORT("INAVAILABLE WELL TYPE!");
     }

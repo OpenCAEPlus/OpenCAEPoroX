@@ -137,7 +137,7 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     dTmaxNR.push_back(dTmaxTmp);
     dNmaxNR.push_back(dNmaxTmp);
     dSmaxNR.push_back(dSmaxTmp);
-    eVmaxNR.push_back(0);
+    eVmaxNR.push_back(eVmaxTmp);
 
     // for well   -- wrong now
     dPmaxTmp = 0;
@@ -156,13 +156,13 @@ void OCPNRsuite::CalMaxChangeTime(const Reservoir& rs)
 {
     OCP_FUNCNAME;
 
-    dPmaxT = 0;
+    dPmaxT  = 0;
     dPBmaxT = 0;
     dPWmaxT = 0;
-    dTmaxT = 0;
-    dNmaxT = 0;
-    dSmaxT = 0;
-    eVmaxT = 0;
+    dTmaxT  = 0;
+    dNmaxT  = 0;
+    dSmaxT  = 0;
+    eVmaxT  = 0;
 
     // for bulk
     const BulkVarSet& bvs = rs.bulk.GetVarSet();

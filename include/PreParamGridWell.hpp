@@ -160,10 +160,13 @@ protected:
     void InputCOMPDAT(ifstream& ifs);
     /// Input INCLUDE
     void InputINCLUDE(ifstream& ifs);
+
+#ifdef WITH_GMSH
     /// Input GMSH
     void InputGMSH(ifstream& ifs);
     /// Input Physical Property
     void InputGMSHPRO(ifstream& ifs);
+#endif
     // Input tools
     /// Find pointer to the specified variable.
     vector<OCP_DBL>* FindPtr(const string& varName, const OCP_DBL&);
@@ -217,8 +220,10 @@ protected:
     vector<OCP_DBL> zcorn; 
 
     // General grid
+#ifdef WITH_GMSH
     /// GMSH Grid
     GMSHGrid        gmshGrid;
+#endif
 
     // Rock param
     /// Net to gross
@@ -289,6 +294,7 @@ protected:
     /// Output grid points for corner-point grid.
     void OutputPointsCornerGrid(const OCP_COORD& mycord);
 
+#ifdef WITH_GMSH
     /// Setup gmsh grid.
     void SetupGmshGrid();
     /// Setup depth, v for a gmsh grid
@@ -297,6 +303,7 @@ protected:
     void SetupActiveConnGmshGrid();
     /// Output grid points for a gmsh grid
     void OutputPointsGmshGrid();
+#endif
 
     // For Structral Grid
     /// Set location for grid: top, bottom, side or interior
