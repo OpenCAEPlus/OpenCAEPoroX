@@ -41,7 +41,7 @@ public:
 	/// Calculate Flux
 	void CalFlux(const Bulk& bk) override;
 	/// Check if abnormal Pressure occurs.
-	OCP_INT CheckP(const Bulk& bk) override;
+	ReservoirState CheckP(const Bulk& bk) override;
 	/// Calculate flow rate of moles of phases for injection well and production well
 	void CalIPRate(const Bulk& bk, const OCP_DBL& dt) override;
 	/// Calculate max change of well pressure between two time step
@@ -69,7 +69,7 @@ protected:
 	/// Calculate flow rate of moles of phases for production well with calculated qi_lbmol.
 	void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
 	/// Check if cross flow happens.
-	OCP_INT CheckCrossFlow(const Bulk& bk);
+	ReservoirState CheckCrossFlow(const Bulk& bk);
 	/// Calculate the production weight
 	void CalFactor(const Bulk& bk) const;
 	/// Calculate pressure difference between well and perforations.

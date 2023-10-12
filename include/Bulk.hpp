@@ -34,17 +34,6 @@
 
 using namespace std;
 
-/////////////////////////////////////////////////////////////////////
-// General Error Yype
-/////////////////////////////////////////////////////////////////////
-
-const int BULK_SUCCESS                   = 0;
-const int BULK_NEGATIVE_PRESSURE         = -1;
-const int BULK_NEGATIVE_TEMPERATURE      = -2;
-const int BULK_NEGATIVE_COMPONENTS_MOLES = -3;
-const int BULK_OUTRANGED_VOLUME_ERROR    = -4;
-const int BULK_OUTRANGED_CFL             = -5;
-
 
 class BulkTypeAIM
 {
@@ -193,13 +182,13 @@ public:
 
 public:
     /// Check if negative P occurs
-    OCP_INT CheckP() const;
+    ReservoirState CheckP() const;
     /// Check if negative T occurs
-    OCP_INT CheckT() const;
+    ReservoirState CheckT() const;
     /// Check if negative Ni occurs
-    OCP_INT CheckNi();
+    ReservoirState CheckNi();
     /// Check if relative volume error is outranged.
-    OCP_INT CheckVe(const OCP_DBL& Vlim) const;
+    ReservoirState CheckVe(const OCP_DBL& Vlim) const;
 
 public:
     /// push back an element for wellBulkId

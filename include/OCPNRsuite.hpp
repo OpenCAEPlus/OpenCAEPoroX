@@ -179,7 +179,7 @@ public:
 
 protected:
     /// Check CFL
-    OCP_BOOL CheckCFL(const OCP_DBL& cflLim) const;
+    ReservoirState CheckCFL(const OCP_DBL& cflLim) const;
     /// CFL number for each bulk
     vector<OCP_DBL> cfl;
     /// max CFL number for global

@@ -107,7 +107,7 @@ public:
         for (auto& w : wells) w->ResetToLastTimeStep(bk);
     }
     /// Check if unreasonable well pressure or perforation pressure occurs.
-    OCP_INT CheckP(const Bulk& bk);
+    ReservoirState CheckP(const Bulk& bk);
     /// Return the num of wells.
     USI GetWellNum() const { return numWell; }
     /// Return the name of specified well.

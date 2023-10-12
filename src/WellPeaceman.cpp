@@ -165,9 +165,9 @@ void PeacemanWell::CalFlux(const Bulk& bk)
 }
 
 
-OCP_INT PeacemanWell::CheckP(const Bulk& bk)
+ReservoirState PeacemanWell::CheckP(const Bulk& bk)
 {
-    if (opt.state != WellState::open)  return WELL_SUCCESS;
+    if (opt.state != WellState::open)  return ReservoirState::well_success;
 
     OCP_FUNCNAME;
     // 0 : all correct
@@ -177,7 +177,7 @@ OCP_INT PeacemanWell::CheckP(const Bulk& bk)
 
     if (bhp < 0) {
         cout << "### WARNING: Well " << name << " BHP = " << bhp << endl;
-        return WELL_NEGATIVE_PRESSURE;
+        return ReservoirState::well_negative_P;
     }
     for (USI p = 0; p < numPerf; p++) {
         if (perf[p].state == WellState::open && perf[p].P < 0) {
@@ -185,7 +185,7 @@ OCP_INT PeacemanWell::CheckP(const Bulk& bk)
             cout << "### WARNING: Well " << name << " Perf[" << p
                 << "].P = " << perf[p].P << endl;
 #endif // DEBUG
-            return WELL_NEGATIVE_PRESSURE;
+            return ReservoirState::well_negative_P;
         }
     }
 
@@ -197,8 +197,8 @@ OCP_INT PeacemanWell::CheckP(const Bulk& bk)
         cout << "### WARNING: Well " << name << " switch to BHPMode" << endl;
 #endif
         opt.mode = WellOptMode::bhp;
-        bhp = opt.tarBHP;
-        return WELL_SWITCH_TO_BHPMODE;
+        bhp      = opt.tarBHP;
+        return ReservoirState::well_switch_BHPm;
     }
 
     return CheckCrossFlow(bk);
@@ -540,7 +540,7 @@ void PeacemanWell::CalProdQj(const Bulk& bvs, const OCP_DBL& dt)
 }
 
 
-OCP_INT PeacemanWell::CheckCrossFlow(const Bulk& bk)
+ReservoirState PeacemanWell::CheckCrossFlow(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
@@ -614,10 +614,10 @@ OCP_INT PeacemanWell::CheckCrossFlow(const Bulk& bk)
         // CalFlux(bvs);
         // CaldG(bvs);
         // CheckOptMode(bvs);
-        return WELL_CROSSFLOW;
+        return ReservoirState::well_crossflow;
     }
 
-    return WELL_SUCCESS;
+    return ReservoirState::well_success;
 }
 
 

@@ -217,7 +217,7 @@ void AllWells::CalIPRT(const Bulk& bk, OCP_DBL dt)
 }
 
 
-OCP_INT AllWells::CheckP(const Bulk& bk)
+ReservoirState AllWells::CheckP(const Bulk& bk)
 {
     OCP_FUNCNAME;
 
@@ -226,30 +226,30 @@ OCP_INT AllWells::CheckP(const Bulk& bk)
 
     for (USI w = 0; w < numWell; w++) {
 
-        OCP_INT flag = wells[w]->CheckP(bk);
+        ReservoirState flag = wells[w]->CheckP(bk);
 
         switch (flag) 
         {
-        case WELL_NEGATIVE_PRESSURE:
-            return WELL_NEGATIVE_PRESSURE;
+        case ReservoirState::well_negative_P:
+            return ReservoirState::well_negative_P;
 
-        case WELL_SWITCH_TO_BHPMODE:
+        case ReservoirState::well_switch_BHPm:
             flagSwitch = OCP_TRUE;
             break;
 
-        case WELL_CROSSFLOW:
+        case ReservoirState::well_crossflow:
             flagCrossf = OCP_TRUE;
             break;
 
-        case WELL_SUCCESS:
+        case ReservoirState::well_success:
         default:
             break;
         }
     }
 
-    if (flagSwitch || flagCrossf) return WELL_SWITCH_TO_BHPMODE;
+    if (flagSwitch || flagCrossf) return ReservoirState::well_switch_BHPm;
 
-    return WELL_SUCCESS;
+    return ReservoirState::well_success;
 }
 
 // return the index of Specified well name

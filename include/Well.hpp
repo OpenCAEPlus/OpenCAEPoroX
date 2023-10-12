@@ -28,14 +28,6 @@
 
 using namespace std;
 
-/////////////////////////////////////////////////////////////////////
-// General Well Error Type
-/////////////////////////////////////////////////////////////////////
-
-const int WELL_SUCCESS           = 10;
-const int WELL_NEGATIVE_PRESSURE = -11;
-const int WELL_SWITCH_TO_BHPMODE = -12;
-const int WELL_CROSSFLOW         = -13;
 
 /// Well class defines well, and any operations referred to wells are in it.
 /// Well connects to the bulks by perforations, which serve as source and sink.
@@ -81,7 +73,7 @@ public:
     /// Calculate Flux
     virtual void CalFlux(const Bulk& bk) = 0;
     /// Check if abnormal Pressure occurs.
-    virtual OCP_INT CheckP(const Bulk& bk) = 0;
+    virtual ReservoirState CheckP(const Bulk& bk) = 0;
     /// Calculate flow rate of moles of phases for injection well and production well
     virtual void CalIPRate(const Bulk& bk, const OCP_DBL& dt) = 0;
     /// Calculate max change of well pressure between two time step

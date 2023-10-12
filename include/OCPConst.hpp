@@ -131,6 +131,32 @@ enum class ConnDirect
 };
 
 
+/// Reservoir state
+enum class ReservoirState
+{
+    /// bulk success
+    bulk_success,
+    /// bulk negative pressure
+    bulk_negative_P,
+    /// bulk negative temperature
+    bulk_negative_T,
+    /// bulk negative component moles
+    bulk_negative_N,
+    /// bulk large volume error
+    bulk_large_EV,
+    /// bulk large CFL
+    bulk_large_CFL,
+    /// well success 
+    well_success,
+    /// well negative pressure
+    well_negative_P,
+    /// well switch to BHPMODE
+    well_switch_BHPm,
+    /// well cross flow
+    well_crossflow
+};
+
+
 // Parallel Module
 const USI MASTER_PROCESS = 0; ///< master process
 

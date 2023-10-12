@@ -107,7 +107,7 @@ OCP_DBL Bulk::CalFTR(OCP_DBL& vtmp) const
 
 
 /// Return OCP_TRUE if no negative pressure and OCP_FALSE otherwise.
-OCP_INT Bulk::CheckP() const
+ReservoirState Bulk::CheckP() const
 {
     OCP_FUNCNAME;
 
@@ -118,14 +118,14 @@ OCP_INT Bulk::CheckP() const
             OCP_WARNING("Negative pressure: P[" + std::to_string(n) +
                         "] = " + PStringSci.str());
             cout << "P = " << vs.P[n] << endl;
-            return BULK_NEGATIVE_PRESSURE;
+            return ReservoirState::bulk_negative_P;
         }
     }
 
-    return BULK_SUCCESS;
+    return ReservoirState::bulk_success;
 }
 
-OCP_INT Bulk::CheckT() const
+ReservoirState Bulk::CheckT() const
 {
     for (OCP_USI n = 0; n < vs.nb; n++) {
         if (vs.T[n] < 0) {
@@ -134,15 +134,15 @@ OCP_INT Bulk::CheckT() const
             OCP_WARNING("Negative pressure: T[" + std::to_string(n) +
                         "] = " + PStringSci.str());
             cout << "T = " << vs.T[n] << endl;
-            return BULK_NEGATIVE_TEMPERATURE;
+            return ReservoirState::bulk_negative_T;
         }
     }
 
-    return BULK_SUCCESS;
+    return ReservoirState::bulk_success;
 }
 
 /// Return OCP_TRUE if no negative Ni and OCP_FALSE otherwise.
-OCP_INT Bulk::CheckNi()
+ReservoirState Bulk::CheckNi()
 {
     OCP_FUNCNAME;
 
@@ -159,15 +159,15 @@ OCP_INT Bulk::CheckNi()
                 OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
                             std::to_string(bId) + "] = " + NiStringSci.str());
 
-                return BULK_NEGATIVE_COMPONENTS_MOLES;
+                return ReservoirState::bulk_negative_N;
             }
         }
     }
-    return BULK_SUCCESS;
+    return ReservoirState::bulk_success;
 }
 
 /// Return OCP_TRUE if all Ve < Vlim and OCP_FALSE otherwise.
-OCP_INT Bulk::CheckVe(const OCP_DBL& Vlim) const
+ReservoirState Bulk::CheckVe(const OCP_DBL& Vlim) const
 {
     OCP_FUNCNAME;
 
@@ -177,10 +177,10 @@ OCP_INT Bulk::CheckVe(const OCP_DBL& Vlim) const
         if (dVe > Vlim) {
             cout << "Volume error at Bulk[" << n << "] = " << setprecision(6) << dVe
                  << " is too big!" << endl;
-            return BULK_OUTRANGED_VOLUME_ERROR;
+            return ReservoirState::bulk_large_EV;
         }
     }
-    return BULK_SUCCESS;
+    return ReservoirState::bulk_success;
 }
 
 

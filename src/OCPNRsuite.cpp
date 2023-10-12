@@ -277,55 +277,55 @@ void OCPNRsuite::CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& 
 }
 
 
-OCP_BOOL OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
+ReservoirState OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
 {
-	if (maxCFL > cflLim)
-		return BULK_OUTRANGED_CFL;
+    if (maxCFL > cflLim)
+        return ReservoirState::bulk_large_CFL;
 	else
-		return BULK_SUCCESS;
+        return ReservoirState::bulk_success;
 }
 
 
 OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const
 {
-    OCPNRState workState_loc = OCPNRState::continueSol;
-    OCP_INT flag;
+    OCPNRState     workState_loc = OCPNRState::continueSol;
+    ReservoirState rsState;
     for (auto& s : il) {
 
-        if (s == "BulkP")        flag = rs.bulk.CheckP();
-        else if (s == "BulkT")   flag = rs.bulk.CheckT();
-        else if (s == "BulkNi")  flag = rs.bulk.CheckNi();
-        else if (s == "BulkVe")  flag = rs.bulk.CheckVe(0.01);
-        else if (s == "CFL")     flag = CheckCFL(1.0);
-        else if (s == "WellP")   flag = rs.allWells.CheckP(rs.bulk);
+        if (s == "BulkP")        rsState = rs.bulk.CheckP();
+        else if (s == "BulkT")   rsState = rs.bulk.CheckT();
+        else if (s == "BulkNi")  rsState = rs.bulk.CheckNi();
+        else if (s == "BulkVe")  rsState = rs.bulk.CheckVe(0.01);
+        else if (s == "CFL")     rsState = CheckCFL(1.0);
+        else if (s == "WellP")   rsState = rs.allWells.CheckP(rs.bulk);
         else                     OCP_ABORT("Check iterm not recognized!");
 
-        switch (flag) {
+        switch (rsState) {
             // Bulk
-        case BULK_SUCCESS:
+        case ReservoirState::bulk_success:
             break;
 
-        case BULK_NEGATIVE_PRESSURE:
-        case BULK_NEGATIVE_TEMPERATURE:
-        case BULK_NEGATIVE_COMPONENTS_MOLES:
-        case BULK_OUTRANGED_VOLUME_ERROR:
+        case ReservoirState::bulk_negative_P:
+        case ReservoirState::bulk_negative_T:
+        case ReservoirState::bulk_negative_N:
+        case ReservoirState::bulk_large_EV:
             workState_loc = OCPNRState::resetCut;
             break;
 
-        case BULK_OUTRANGED_CFL:
+        case ReservoirState::bulk_large_CFL:
             workState_loc = OCPNRState::resetCutCFL;
             break;
 
             // Well
-        case WELL_SUCCESS:
+        case ReservoirState::well_success:
             break;
 
-        case WELL_NEGATIVE_PRESSURE:
+        case ReservoirState::well_negative_P:
             workState_loc = OCPNRState::resetCut;
             break;
 
-        case WELL_SWITCH_TO_BHPMODE:
-        case WELL_CROSSFLOW:
+        case ReservoirState::well_switch_BHPm:
+        case ReservoirState::well_crossflow:
             workState_loc = OCPNRState::reset;
             break;
 
