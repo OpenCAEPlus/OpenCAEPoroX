@@ -92,15 +92,16 @@ public:
     OCP_DBL DSmaxNRc() const { return dSmaxNR.back(); };
     /// Get all bulk max dP
     const auto& DPBmaxNR() const { return dPBmaxNR; };
+    /// Get all well max dP
+    const auto& DPWmaxNR() const { return dPWmaxNR; };
     /// Get all max dT
     const auto& DTmaxNR() const { return dTmaxNR; };
     /// Get all max dN
     const auto& DNmaxNR() const { return dNmaxNR; };
     /// Get all max dS
     const auto& DSmaxNR() const { return dSmaxNR; };
-    /// Get all well max dP
-    const auto& DPWmaxNR() const { return dPWmaxNR; };
-
+    /// Get all max eV
+    const auto& EVmaxNR() const { return eVmaxNR; };
 
 protected:
 
@@ -123,14 +124,16 @@ protected:
 
     /// Max pressure difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dPBmaxNR;
+    /// Max pressure difference of all NR steps within a time step (well)
+    vector<OCP_DBL> dPWmaxNR;
     /// Max temperature difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dTmaxNR;
     /// Max Ni difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dNmaxNR;
     /// Max saturation difference of all NR steps within a time step (bulk)
     vector<OCP_DBL> dSmaxNR;
-    /// Max pressure difference of all NR steps within a time step (well)
-    vector<OCP_DBL> dPWmaxNR;
+    /// Max volume error of all NR steps within a time step (bulk)
+    vector<OCP_DBL> eVmaxNR;
 
 
     // between time step

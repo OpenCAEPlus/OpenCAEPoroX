@@ -84,10 +84,11 @@ void OCPNRsuite::InitStep(const BulkVarSet& bvs)
     lS = bvs.lS;
 
     dPBmaxNR.clear();
+    dPWmaxNR.clear();
     dTmaxNR.clear();
     dNmaxNR.clear();
     dSmaxNR.clear();
-    dPWmaxNR.clear();
+    eVmaxNR.clear();
 }
 
 
@@ -97,6 +98,7 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     OCP_DBL dTmaxTmp = 0;
     OCP_DBL dNmaxTmp = 0;
     OCP_DBL dSmaxTmp = 0;
+    OCP_DBL eVmaxTmp = 0;
 
     // for bulk
     const BulkVarSet& bvs = rs.bulk.GetVarSet();
@@ -120,6 +122,10 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
             dS[n * np + j] = bvs.S[n * np + j] - lS[n * np + j];
             if (fabs(dSmaxTmp) < fabs(dS[n * np + j]))  dSmaxTmp = dS[n * np + j];
         }
+
+        if (fabs(eVmaxTmp) < fabs((bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n])) {
+            eVmaxTmp = (bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n];
+        }
     }
 
     lP = bvs.P;
@@ -131,6 +137,7 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     dTmaxNR.push_back(dTmaxTmp);
     dNmaxNR.push_back(dNmaxTmp);
     dSmaxNR.push_back(dSmaxTmp);
+    eVmaxNR.push_back(0);
 
     // for well   -- wrong now
     dPmaxTmp = 0;

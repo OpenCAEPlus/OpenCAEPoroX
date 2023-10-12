@@ -761,23 +761,24 @@ void CriticalInfo::Setup()
     Sumdata.push_back(SumItem("dPBmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dPWmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dTmax", "-", "-", "float", maxRowNum));
-    Sumdata.push_back(SumItem("dVmax", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("eVmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dSmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("dNmax", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("CFL", "-", "-", "float", maxRowNum));
 
 }
 
-void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NRs)
+void CriticalInfo::SetVal(const OCPControl& ctrl, const OCPNRsuite& NRs)
 {
 
     // for NR step
+    const auto& LS  = NRs.GetIterNRLS();
     const auto& dPB = NRs.DPBmaxNR();
     const auto& dPW = NRs.DPWmaxNR();
     const auto& dT  = NRs.DTmaxNR();
-    const auto& dN  = NRs.DNmaxNR();
+    const auto& eV  = NRs.EVmaxNR();
     const auto& dS  = NRs.DSmaxNR();
-    const auto& LS  = NRs.GetIterNRLS();
+    const auto& dN  = NRs.DNmaxNR();
 
     USI n = 0;
     for (INT i = 0; i < dPB.size(); i++) {
@@ -788,19 +789,19 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
         // LS
         Sumdata[n++].val.push_back(LS[i]);
         // dPBmax
-        Sumdata[n++].val.push_back(fabs(dPB[i]));
+        Sumdata[n++].val.push_back(dPB[i]);
         // dPWmax
-        Sumdata[n++].val.push_back(fabs(dPW[i]));
+        Sumdata[n++].val.push_back(dPW[i]);
         // dTmax
-        Sumdata[n++].val.push_back(fabs(dT[i]));
-        // dVmax
-        Sumdata[n++].val.push_back(fabs(-1));
+        Sumdata[n++].val.push_back(dT[i]);
+        // eVmax
+        Sumdata[n++].val.push_back(eV[i]);
         // dSmax
         Sumdata[n++].val.push_back(dS[i]);
         // dNmax
         Sumdata[n++].val.push_back(dN[i]);
         // CFL
-        Sumdata[n++].val.push_back(-1);
+        Sumdata[n++].val.push_back(0.0);
 
         n = 0;
     }
@@ -818,7 +819,7 @@ void CriticalInfo::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCP
     Sumdata[n++].val.push_back(NRs.DPWmaxT());
     // dTmax
     Sumdata[n++].val.push_back(NRs.DTmaxT());
-    // dVmax
+    // eVmax
     Sumdata[n++].val.push_back(NRs.EVmaxT());
     // dSmax
     Sumdata[n++].val.push_back(NRs.DSmaxT());
@@ -1639,7 +1640,7 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const
 
     iters.Update(NR);
     summary.SetVal(reservoir, ctrl, iters);
-    crtInfo.SetVal(reservoir, ctrl, NR);
+    crtInfo.SetVal(ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop() / 1000;
 }
