@@ -2,6 +2,7 @@ target_sources(
   OpenCAEPoroX
   PUBLIC AcceleratePEC.hpp
 		 AllWells.hpp
+		 BoundaryFlow.hpp
 		 Bulk.hpp
 		 BulkAccumuModule.hpp
 		 BulkConn.hpp
@@ -17,37 +18,34 @@ target_sources(
 		 GmshGrid.hpp
 		 HeatConduct.hpp
 		 HeatLoss.hpp
+		 IsoThermalMethod.hpp
 		 IsothermalSolver.hpp
 		 LinearSolver.hpp
 		 LinearSystem.hpp
 		 MixtureUnit.hpp
-		 MixtureUnitBlkOil.hpp
-		 MixtureUnitComp.hpp
-		 MixtureUnitThermal.hpp
 		 OCP.hpp
+		 OCPBoundary.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
 		 OCPEoS.hpp
 		 OCPFlow.hpp
-		 OCPFlowOG.hpp
-		 OCPFlowOGW.hpp
-		 OCPFlowOW.hpp
-		 OCPFluidMethod.hpp
+		 OCPFlowMethod.hpp
+		 OCPFlowVarSet.hpp
 		 OCPFlux.hpp
 		 OCPFuncPVT.hpp
 		 OCPFuncSAT.hpp
 		 OCPFuncTable.hpp
 		 OCPMiscible.hpp
 		 OCPMixture.hpp
-		 OCPMixtureBlkOilOGW.h
-		 OCPMixtureBlkOilOW.hp
-		 OCPMixtureComp.hpp
-		 OCPMixtureThermalOW.h
+		 OCPMixtureMethodComp.hpp
+		 OCPMixtureMethodK.hpp
+		 OCPMixtureVarSet.hpp
+		 OCPNRresidual.hpp
+		 OCPNRsuite.hpp
 		 OCPOutput.hpp
-		 OCPPhaseEquilibrium.h
+		 OCPPhaseEquilibrium.hpp
 		 OCPRock.hpp
 		 OCPScalePcow.hpp
-		 OCPStructure.hpp
 		 OCPSurfaceTension.hpp
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp

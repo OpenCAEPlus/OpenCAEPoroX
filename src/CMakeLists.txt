@@ -2,11 +2,13 @@ target_sources(
   OpenCAEPoroX
   PRIVATE AcceleratePEC.cpp
 		  AllWells.cpp
+		  BoundaryFlow.cpp
 		  Bulk.cpp
 		  BulkAccumuModule.cpp
 		  BulkConn.cpp
 		  BulkConnTrans.cpp
 		  BulkInitializer.cpp
+		  CMakeLists.txt
 		  CornerGrid.cpp
 		  Decoupling.cpp
 		  DenseMat.cpp
@@ -16,29 +18,27 @@ target_sources(
 		  GmshGrid.cpp
 		  HeatConduct.cpp
 		  HeatLoss.cpp
+		  IsoThermalMethod.cpp
 		  IsothermalSolver.cpp
 		  LinearSystem.cpp
-		  MixtureUnitBlkOil.cpp
-		  MixtureUnitComp.cpp
-		  MixtureUnitThermal.cpp
+		  MixtureUnit.cpp
 		  OCP.cpp
+		  OCPBoundary.cpp
 		  OCPControl.cpp
 		  OCPEoS.cpp
-		  OCPFlowOG.cpp
-		  OCPFlowOGW.cpp
-		  OCPFlowOW.cpp
-		  OCPFluidMethod.cpp
+		  OCPFlow.cpp
+		  OCPFlowMethod.cpp
 		  OCPFlux.cpp
 		  OCPFuncPVT.cpp
 		  OCPFuncSAT.cpp
-		  OCPFuncTable.cpp
 		  OCPMiscible.cpp
-		  OCPMixtureBlkOilOGW.cpp
-		  OCPMixtureBlkOilOW.cpp
-		  OCPMixtureComp.cpp
-		  OCPMixtureThermalOW.cpp
+		  OCPMixture.cpp
+		  OCPMixtureMethodComp.c
+		  OCPMixtureMethodK.cpp
+		  OCPNRresidual.cpp
+		  OCPNRsuite.cpp
 		  OCPOutput.cpp
-		  OCPPhaseEquilibrium.cpp
+		  OCPPhaseEquilibrium.cp
 		  OCPRock.cpp
 		  OCPScalePcow.cpp
 		  OCPSurfaceTension.cpp
