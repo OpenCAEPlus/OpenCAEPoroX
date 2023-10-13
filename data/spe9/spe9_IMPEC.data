@@ -118,9 +118,9 @@ EQUALS
 /
 
 
---EQUALS
---'PERMX'   100    1  24  1  25  1  15  /
---/
+		
+										 
+   
 
 PERMX
 -- LAYER  1
@@ -2394,6 +2394,7 @@ COPY
  'PERMX' 'PERMY'  1 24 1 25 1 15 /
  'PERMX' 'PERMZ'  1 24 1 25 1 15 /
 /
+
 MULTIPLY
  'PERMZ' 0.01  1 24 1 25 1 15 /
 /
@@ -2489,15 +2490,19 @@ PVTW
 ROCK
 --Ref   Comp
 --Pres
-LINEAR01    3600  1.0E-6 /
+LINEAR01    3600  1.0E-6 
 /
 
 GRAVITY
 64.6936    1.01032   0.9193 /
 
+--DENSITY
+-- Oil   Water   Gas
+ 44.98  63.01  0.0702  /
 
---RPTPROPS
---SWFN SGFN SOF2 SOF3 /
+
+--RPTPROPS--SWFN SGFN SOF2 SOF3 /
+					   
 
 
 SOLUTION   =====================================================================
@@ -2541,42 +2546,42 @@ WWPR
 WWPT
 /
 WGIR
-INJE1
+	 
 /
 WGIT
-INJE1
+	 
 /
 WWIR
-INJE1
+	 
 /
 WWIT
-INJE1
+	 
 /
 WBHP
 /
-BPR
-15 16 2 /
-15 16 3 /
-15 16 4 /
+   
+		 
+		 
+		 
 /
-DG
-PROD17
-/
-SGAS
-15 16 2 /
-15 16 3 /
-15 16 4 /
-/
-SWAT
-15 16 2 /
-15 16 3 /
-15 16 4 /
-/
+  
+	  
+ 
+	
+		 
+		 
+		 
+ 
+	
+		 
+		 
+		 
+ 
 
 SCHEDULE   =====================================================================
   
---RPTSCHED
-'PRES' 'SWAT' 'RESTART=2' 'FIP=2' 'WELLS=2' 'VFPPROD=1' 'CPU=2' 'WELSPECS' 'FIPTR=2' 
+VTKSCHED
+PRES  SOIL SGAS SWAT 
 /
   
 WELSPECS
@@ -2661,7 +2666,7 @@ TUNING
 /
 
 METHOD
-IMPEC csr.fasp
+IMPEC  csr.fasp
 /
 
 
@@ -2672,7 +2677,6 @@ TSTEP
 TSTEP
 10 4*5 70 100 
 / 
-
 
 WELTARG
  'PROD*'  'ORAT'  100.0 /

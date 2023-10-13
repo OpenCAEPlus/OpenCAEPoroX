@@ -151,7 +151,8 @@ void PeacemanWell::CalFluxInit(const Bulk& bk)
     if (opt.state != WellState::open)  return;
 
     CalTrans(bk);
-    CaldG(bk);
+    // recalculating seems worse
+    // CaldG(bk);
     CalFlux(bk, OCP_TRUE);
 }
 
