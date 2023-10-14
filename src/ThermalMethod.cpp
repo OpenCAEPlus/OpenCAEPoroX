@@ -199,7 +199,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Uf.resize(nb);
     bvs.H.resize(nb * np);
 
-    bvs.lphaseNum.resize(nb);
     bvs.lNt.resize(nb);
     bvs.lNi.resize(nb * nc);
     bvs.lvf.resize(nb);

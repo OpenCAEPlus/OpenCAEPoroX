@@ -171,8 +171,6 @@ public:
     vector<OCP_DBL>     lNt;
     /// last Ni         
     vector<OCP_DBL>     lNi; 
-    /// last phaseNum
-    vector<USI>         lphaseNum;   
     /// last phaseExist
     vector<OCP_BOOL>    lphaseExist;
     /// last S

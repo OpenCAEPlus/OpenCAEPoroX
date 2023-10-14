@@ -207,7 +207,6 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     bvs.mu.resize(nb * np);
     bvs.kr.resize(nb * np);
 
-    bvs.lphaseNum.resize(nb);
     bvs.lNt.resize(nb);
     bvs.lNi.resize(nb * nc);
     bvs.lvf.resize(nb);
@@ -778,6 +777,25 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
+
+    //// Calculate phase num
+    //OCP_USI P2 = 0;
+    //OCP_USI P3 = 0;
+    //const auto& bvs = rs.bulk.GetVarSet();
+    //for (OCP_USI n = 0; n < bvs.nb; n++) {
+    //    if (bvs.phaseExist[n * bvs.np + 0] + bvs.phaseExist[n * bvs.np + 1] + bvs.phaseExist[n * bvs.np + 2] == 2) {
+    //        P2++;
+    //        continue;
+    //    }
+    //    if (bvs.phaseExist[n * bvs.np + 0] + bvs.phaseExist[n * bvs.np + 1] + bvs.phaseExist[n * bvs.np + 2] == 3) {
+    //        P3++;
+    //        continue;
+    //    }
+    //}
+    //cout << P2 << "   " << P3 << endl;
+
+
+
     NR.CalMaxChangeNR(rs);
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
@@ -845,7 +863,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.mu.resize(nb * np);
     bvs.kr.resize(nb * np);
 
-    bvs.lphaseNum.resize(nb);
     bvs.lNt.resize(nb);
     bvs.lNi.resize(nb * nc);
     bvs.lvf.resize(nb);
