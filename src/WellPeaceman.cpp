@@ -19,19 +19,13 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
     numPerf = domain.GetPerfNum(wId);
     perf.resize(numPerf);
     USI pp = 0;
-    for (USI p = 0; p < well.I_perf.size(); p++) {
+    for (USI p = 0; p < well.GetPerfNum(); p++) {
 
-        const OCP_USI tmpI = well.I_perf[p] - 1;
-        const OCP_USI tmpJ = well.J_perf[p] - 1;
-        const OCP_USI tmpK = well.K_perf[p] - 1;
         const OCP_INT loc = domain.GetPerfLocation(wId, p);       
         if (loc < 0) {
             continue;
         }
         perf[pp].location = loc;
-        perf[pp].I = tmpI;
-        perf[pp].J = tmpJ;
-        perf[pp].K = tmpK;
         perf[pp].WI = well.WI[p];
         perf[pp].radius = well.diameter[p] / 2.0;
         perf[pp].kh = well.kh[p];
@@ -44,6 +38,9 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
         }
         else if (well.direction[p] == "Z" || well.direction[p] == "z") {
             perf[pp].direction = PerfDirection::z;
+        }
+        else if (well.direction[p] == "usg") {
+            perf[pp].direction = PerfDirection::usg;
         }
         else {
             OCP_ABORT("Wrong direction of perforations!");
@@ -294,6 +291,8 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dx * pow(kykz, 0.5));
                 }
+                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                    (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
             case PerfDirection::y:
@@ -309,6 +308,8 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dy * pow(kzkx, 0.5));
                 }
+                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                    (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
             case PerfDirection::z:
@@ -324,13 +325,16 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dz * pow(kxky, 0.5));
                 }
+                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                    (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
+            case PerfDirection::usg:
+
+                break;
             default:
                 OCP_ABORT("Wrong direction of perforations!");
             }
-            perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
-                (log(ro / perf[p].radius) + perf[p].skinFactor);
         }
     }
 }

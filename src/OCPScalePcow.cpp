@@ -21,7 +21,19 @@
 ////////////////////////////////////////////////////////////////
 
 
-ScalePcowMethod01::ScalePcowMethod01(OCPFlow* flowin, ScalePcowVarSet& spvs) {
+ScalePcowMethod01::ScalePcowMethod01(OCPFlow* flowin, ScalePcowVarSet& spvs) 
+{
+
+    switch (flowin->FlowType())
+    {
+    case OCPFlowType::OGW:
+    case OCPFlowType::OW:
+        break;
+    default:
+        OCP_ABORT("Wrong FlowType for ScalePcow!");
+        break;
+    }
+
     flow    = flowin;
     Swco    = flow->GetSwco();
     maxPcow = flow->GetMaxPcow();
@@ -82,15 +94,6 @@ void ScalePcowMethod01::Scale(const OCP_USI& bId, const ScalePcowVarSet& spvs) c
 
 USI ScalePcow::Setup(OCPFlow* flowin)
 {
-	switch (flowin->FlowType())
-	{
-    case OCPFlowType::OGW:
-    case OCPFlowType::OW:
-        break;
-	default:
-        OCP_ABORT("Wrong FlowType for ScalePcow!");
-		break;
-	}
 
     if (vs.swatInit.size() > 0) {
         ifScale = OCP_TRUE;

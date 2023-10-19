@@ -1290,8 +1290,8 @@ void PreParamGridWell::SetupActiveConnGmshGrid()
             eIdb  = map_All2Act[eIdg].GetId();
             areaB = e.area[0];
             areaE = e.area[1];
-            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::n, areaB, areaE));
-            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::n, areaE, areaB));
+            gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::usg, areaB, areaE));
+            gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::usg, areaE, areaB));
         }
     }
 }

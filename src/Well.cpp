@@ -151,8 +151,7 @@ void Well::ShowPerfStatus(const Bulk& bk) const
         // OCP_DBL         qt = Dnorm1(nc, &Qitmp[0]);
         OCP_USI n = perf[p].location;
         cout << setw(3) << p << "   " << (USI)perf[p].state << "   " << setw(6)
-             << perf[p].location << "  " << setw(2) << perf[p].I + 1 << "  " << setw(2)
-             << perf[p].J + 1 << "  " << setw(2) << perf[p].K + 1 << "  " << setw(10)
+             << perf[p].location << "  "
              << setprecision(6) << perf[p].WI << "  "               // ccf
              << setprecision(3) << perf[p].radius << "  "           // ccf
              << setw(8) << setprecision(4) << perf[p].kh << "  "    // kh

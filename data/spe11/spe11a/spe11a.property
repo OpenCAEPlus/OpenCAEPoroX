@@ -114,6 +114,14 @@ RTEMP
 20
 /
 
+NCOMPS
+2
+/
+
+ZMFVD
+0.0  0.0  1.0
+/
+
 PSURF
 1.1E5
 

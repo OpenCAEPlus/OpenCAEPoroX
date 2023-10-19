@@ -128,6 +128,8 @@ enum class ConnDirect
     zp,
     /// (i,j,k) -> (i,j,k-1),  structural grid only
     zm,
+    /// unstructral grid
+    usg
 };
 
 

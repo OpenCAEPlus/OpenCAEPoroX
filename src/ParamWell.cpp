@@ -147,6 +147,8 @@ void WellParam::InputCOMPDATUS(vector<string>& vbuf)
 
     if (vbuf[7] != "DEFAULT")  skinFactor.push_back(stod(vbuf[7]));
     else                       skinFactor.push_back(0.0);
+
+    direction.push_back("usg");
 }
 
 

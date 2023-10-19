@@ -63,7 +63,6 @@ TableSet* ParamReservoir::FindPtrTable(const string& varName)
             break;
 
         case Map_Str2Int("ZMFVD", 5):
-            if (!comps)      OCP_ABORT("COMPS isn't set correctly!");
             if (numCom == 0) OCP_ABORT("Number of Components has not been specified!");
 
             ZMFVD_T.colNum = numCom + 1;

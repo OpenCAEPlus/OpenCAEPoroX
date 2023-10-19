@@ -29,7 +29,9 @@ enum class PerfDirection
     /// y-direction
     y,
     /// z-direction
-    z
+    z,
+    /// unstructral grid
+    usg
 };
 
 
@@ -47,9 +49,6 @@ public:
     OCP_USI Location() const { return location; }
 
 public:
-    USI      I;        ///< I-index of Perforation in grid.
-    USI      J;        ///< J-index of Perforation in grid.
-    USI      K;        ///< K-index of Perforation in grid.
     /// state of perforation
     WellState state{ WellState::close };
     OCP_USI  location; ///< Index of bulks which connects to current perforation.
