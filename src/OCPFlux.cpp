@@ -29,7 +29,7 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
-    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans(); 
+    const OCP_DBL Akd = bp.Trans(); 
     OCP_USI       bId_np_j, eId_np_j, uId_np_j;
     OCP_BOOL      exbegin, exend;
     OCP_DBL       dP;
@@ -93,7 +93,7 @@ void OCPFlux01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
 
     const OCP_USI bId    = bp.BId();
     const OCP_USI eId    = bp.EId();
-    const OCP_DBL Akd    = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL Akd    = bp.Trans();
     const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
 
     OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
@@ -197,7 +197,7 @@ void OCPFlux01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const B
 
     const OCP_USI bId    = bp.BId();
     const OCP_USI eId    = bp.EId();
-    const OCP_DBL Akd    = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL Akd    = bp.Trans();
     const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
 
     OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
@@ -459,7 +459,7 @@ void OCPFlux01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const
     
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
-    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL Akd = bp.Trans();
     const OCP_DBL dD  = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);    
      
     valbb = 0;   valee = 0;
@@ -504,7 +504,7 @@ void OCPFlux02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
-    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL Akd = bp.Trans();
     OCP_USI       bId_np_j, eId_np_j, uId_np_j;
     OCP_BOOL      exbegin, exend;
     OCP_DBL       dP;
@@ -582,7 +582,7 @@ void OCPFlux02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
-    const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+    const OCP_DBL Akd = bp.Trans();
     const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
 
     OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;
@@ -716,7 +716,7 @@ void OCPFluxT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         OCP_BOOL      exbegin, exend;
         OCP_DBL       dP;
 
-        const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+        const OCP_DBL Akd = bp.Trans();
 
         for (USI j = 0; j < np; j++) {
             bId_np_j = bId * np + j;
@@ -808,7 +808,7 @@ void OCPFluxT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const 
 
     if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
         // Fluid Bulk Connection
-        const OCP_DBL Akd = CONV1 * CONV2 * bp.Trans();
+        const OCP_DBL Akd = bp.Trans();
         const OCP_DBL dGamma = GRAVITY_FACTOR * (bvs.depth[bId] - bvs.depth[eId]);
 
         OCP_USI  bId_np_j, eId_np_j, uId_np_j, dId_np_j;

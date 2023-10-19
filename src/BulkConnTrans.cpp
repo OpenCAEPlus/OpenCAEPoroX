@@ -62,7 +62,8 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
     if (!isfinite(bp.trans)) {
         OCP_ABORT("Transmissbility is NAN!");
     }
-    
+
+    bp.trans *= CONV_DARCY;
 }
 
 

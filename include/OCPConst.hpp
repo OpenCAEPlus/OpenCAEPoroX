@@ -63,14 +63,16 @@ const OCP_DBL PRESSURE_STD    = 14.7;       ///< 14.6959 psia = 1 atm
 const OCP_DBL TEMPERATURE_STD = 60;         ///< Standard temperature: F
 
 // Unit conversion consts
-const OCP_DBL CONV1 = 5.61458;               ///< 1 bbl = CONV1 ft3
-const OCP_DBL CONV2 = 1.12712E-3;            ///< Darcy constant in field unit
-const OCP_DBL CONV3 = 0.45359237;            ///< 1 lb = CONV3 kg
-const OCP_DBL CONV4 = 0.02831685;            ///< 1 ft3 = CONV4 m3
-const OCP_DBL CONV5 = 459.67;                ///< 0 F = CONV5 R
-const OCP_DBL CONV6 = 778.172448;            ///<
-const OCP_DBL CONV7 = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
+const OCP_DBL CONV1      = 5.61458;               ///< 1 bbl = CONV1 ft3
+const OCP_DBL CONV2      = 1.12712E-3;            ///< Darcy constant in field unit
+const OCP_DBL CONV3      = 0.45359237;            ///< 1 lb = CONV3 kg
+const OCP_DBL CONV4      = 0.02831685;            ///< 1 ft3 = CONV4 m3
+const OCP_DBL CONV5      = 459.67;                ///< 0 F = CONV5 R
+const OCP_DBL CONV6      = 778.172448;            ///<
+const OCP_DBL CONV7      = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
 
+/// Darcy constants
+const OCP_DBL CONV_DARCY = CONV1 * CONV2;
 
 enum class GridType
 {
