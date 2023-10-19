@@ -269,6 +269,7 @@ void PeacemanWell::CalWI(const Bulk& bk)
 
     for (USI p = 0; p < numPerf; p++) {
         if (perf[p].WI > 0) {
+            perf[p].WI *= CONV1;
             break;
         }
         else {
@@ -291,7 +292,7 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dx * pow(kykz, 0.5));
                 }
-                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                perf[p].WI = (2 * PI) * perf[p].kh /
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
@@ -308,7 +309,7 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dy * pow(kzkx, 0.5));
                 }
-                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                perf[p].WI = (2 * PI) * perf[p].kh /
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
@@ -325,7 +326,7 @@ void PeacemanWell::CalWI(const Bulk& bk)
                 if (perf[p].kh < 0) {
                     perf[p].kh = (dz * pow(kxky, 0.5));
                 }
-                perf[p].WI = CONV2 * (2 * PI) * perf[p].kh /
+                perf[p].WI = (2 * PI) * perf[p].kh /
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
                 break;
             }
@@ -335,6 +336,8 @@ void PeacemanWell::CalWI(const Bulk& bk)
             default:
                 OCP_ABORT("Wrong direction of perforations!");
             }
+
+            perf[p].WI *= CONV_DARCY;
         }
     }
 }
@@ -350,7 +353,7 @@ void PeacemanWell::CalTrans(const Bulk& bk)
         for (USI p = 0; p < numPerf; p++) {
             perf[p].transINJ = 0;
             const OCP_USI k    = perf[p].location;
-            const OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+            const OCP_DBL temp = perf[p].WI * perf[p].multiplier;
 
             // single phase
             for (USI j = 0; j < np; j++) {
@@ -369,7 +372,7 @@ void PeacemanWell::CalTrans(const Bulk& bk)
     else {
         for (USI p = 0; p < numPerf; p++) {
             const OCP_USI k    = perf[p].location;
-            const OCP_DBL temp = CONV1 * perf[p].WI * perf[p].multiplier;
+            const OCP_DBL temp = perf[p].WI * perf[p].multiplier;
 
             // multi phase
             for (USI j = 0; j < np; j++) {
@@ -1287,7 +1290,7 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
                     dQdXsB[(i + 1) * ncol2 + k] +=
-                        CONV1 * perf[p].WI * perf[p].multiplier * perf[p].xi *
+                        perf[p].WI * perf[p].multiplier * perf[p].xi *
                         opt.injZi[i] * bvs.dKrdS[n_np_j * np + k] * dP / mu;
                 }
                 // dQ / dxij
@@ -1408,7 +1411,7 @@ void PeacemanWellIsoT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, cons
 
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
-                    tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
+                    tmp = perf[p].WI * perf[p].multiplier * dP / mu * xi *
                         xij * bvs.dKrdS[n_np_j * np + k];
                     // capillary pressure
                     tmp += transIJ * bvs.dPcdS[n_np_j * np + k];
@@ -1794,7 +1797,7 @@ void PeacemanWellT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OC
                     // dQ / dS
                     for (USI k = 0; k < np; k++) {
                         dQdXsB[(i + 1) * ncol2 + k] +=
-                            CONV1 * perf[p].WI * perf[p].multiplier * perf[p].xi *
+                            perf[p].WI * perf[p].multiplier * perf[p].xi *
                             opt.injZi[i] * bvs.dKrdS[n_np_j * np + k] * dP / mu;
                     }
                     // dQ / dxij
@@ -1819,7 +1822,7 @@ void PeacemanWellT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OC
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
                     dQdXsB[(nc + 1) * ncol2 + k] +=
-                        CONV1 * perf[p].WI * perf[p].multiplier * perf[p].xi *
+                        perf[p].WI * perf[p].multiplier * perf[p].xi *
                         bvs.dKrdS[n_np_j * np + k] * dP / mu * Hw;
                 }
                 // dQ / dxij
@@ -1961,7 +1964,7 @@ void PeacemanWellT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const O
 
                 // dQ / dS
                 for (USI k = 0; k < np; k++) {
-                    tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
+                    tmp = perf[p].WI * perf[p].multiplier * dP / mu * xi *
                         xij * bvs.dKrdS[n_np_j * np + k];
                     // capillary pressure
                     tmp += transIJ * bvs.dPcdS[n_np_j * np + k];
@@ -1992,7 +1995,7 @@ void PeacemanWellT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const O
 
             // dQ / dS
             for (USI k = 0; k < np; k++) {
-                tmp = CONV1 * perf[p].WI * perf[p].multiplier * dP / mu * xi *
+                tmp = perf[p].WI * perf[p].multiplier * dP / mu * xi *
                     bvs.dKrdS[n_np_j * np + k] * H;
                 // capillary pressure
                 tmp += transJ * bvs.dPcdS[n_np_j * np + k] * H;
