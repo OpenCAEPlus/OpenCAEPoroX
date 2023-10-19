@@ -12,13 +12,9 @@
 #ifndef __BULKCONN_HEADER__
 #define __BULKCONN_HEADER__
 
-// Standard header files
-#include <vector>
-
 // OpenCAEPoroX header files
 #include "Bulk.hpp"
 #include "OCPFlux.hpp"
-#include "DenseMat.hpp"
 
 using namespace std;
 

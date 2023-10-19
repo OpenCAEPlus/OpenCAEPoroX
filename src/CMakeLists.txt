@@ -8,7 +8,6 @@ target_sources(
 		  BulkConn.cpp
 		  BulkConnTrans.cpp
 		  BulkInitializer.cpp
-		  CMakeLists.txt
 		  CornerGrid.cpp
 		  Decoupling.cpp
 		  DenseMat.cpp
@@ -33,12 +32,12 @@ target_sources(
 		  OCPFuncSAT.cpp
 		  OCPMiscible.cpp
 		  OCPMixture.cpp
-		  OCPMixtureMethodComp.c
+		  OCPMixtureMethodComp.cpp
 		  OCPMixtureMethodK.cpp
 		  OCPNRresidual.cpp
 		  OCPNRsuite.cpp
 		  OCPOutput.cpp
-		  OCPPhaseEquilibrium.cp
+		  OCPPhaseEquilibrium.cpp
 		  OCPRock.cpp
 		  OCPScalePcow.cpp
 		  OCPSurfaceTension.cpp

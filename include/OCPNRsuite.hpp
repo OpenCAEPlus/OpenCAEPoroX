@@ -12,12 +12,8 @@
 #ifndef __OCPNRSUITE_HEADER__
 #define __OCPNRSUITE_HEADER__
 
-// Standard header files
-#include <vector>
 
 // OpenCAEPoroX header files
-#include "OCPConst.hpp"
-#include "Domain.hpp"
 #include "Reservoir.hpp"
 
 using namespace std;

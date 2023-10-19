@@ -18,8 +18,6 @@
 #include "Bulk.hpp"
 
 
-#include <vector>
-
 using namespace std;
 
 

@@ -37,7 +37,7 @@ void FaspSolver::SetupParam(const string& dir, const string& file)
         ifs.close(); // if file has been opened, close it first
         fasp_param_input(myfile.data(), &inParam);
     }
-    fasp_param_init(&inParam, &itParam, &amgParam, &iluParam, &swzParam);
+    fasp_param_init(&inParam, &itsParam, &amgParam, &iluParam, &swzParam);
 }
 
 void ScalarFaspSolver::Allocate(const OCP_USI&     max_nnz,
@@ -178,24 +178,24 @@ OCP_INT ScalarFaspSolver::Solve()
 
         // Using no preconditioner for Krylov iterative methods
         if (precond_type == PREC_NULL) {
-            status = fasp_solver_dcsr_krylov(&A, &b, &x, &itParam);
+            status = fasp_solver_dcsr_krylov(&A, &b, &x, &itsParam);
         }
 
         // Using diag(A) as preconditioner for Krylov iterative methods
         else if (precond_type == PREC_DIAG) {
-            status = fasp_solver_dcsr_krylov_diag(&A, &b, &x, &itParam);
+            status = fasp_solver_dcsr_krylov_diag(&A, &b, &x, &itsParam);
         }
 
         // Using AMG as preconditioner for Krylov iterative methods
         else if (precond_type == PREC_AMG || precond_type == PREC_FMG) {
             if (print_level > PRINT_NONE) fasp_param_amg_print(&amgParam);
-            status = fasp_solver_dcsr_krylov_amg(&A, &b, &x, &itParam, &amgParam);
+            status = fasp_solver_dcsr_krylov_amg(&A, &b, &x, &itsParam, &amgParam);
         }
 
         // Using ILU as preconditioner for Krylov iterative methods
         else if (precond_type == PREC_ILU) {
             if (print_level > PRINT_NONE) fasp_param_ilu_print(&iluParam);
-            status = fasp_solver_dcsr_krylov_ilu(&A, &b, &x, &itParam, &iluParam);
+            status = fasp_solver_dcsr_krylov_ilu(&A, &b, &x, &itsParam, &iluParam);
         }
 
         // Undefined iterative methods
@@ -431,26 +431,26 @@ OCP_INT VectorFaspSolver::Solve()
         // Preconditioned Krylov methods in BSR format
         switch (precond_type) {
             case PC_NULL:
-                status = fasp_solver_dbsr_krylov(&A, &b, &x, &itParam);
+                status = fasp_solver_dbsr_krylov(&A, &b, &x, &itsParam);
                 break;
             case PC_DIAG:
-                status = fasp_solver_dbsr_krylov_diag(&A, &b, &x, &itParam);
+                status = fasp_solver_dbsr_krylov_diag(&A, &b, &x, &itsParam);
                 break;
             case PC_BILU:
-                status = fasp_solver_dbsr_krylov_ilu(&A, &b, &x, &itParam, &iluParam);
+                status = fasp_solver_dbsr_krylov_ilu(&A, &b, &x, &itsParam, &iluParam);
                 break;
 
 #if WITH_FASPCPR //! FASPCPR solver (i.e., CPR or ASCPR preconditioners) added by
                  //! zhaoli, 2022.12.11
             case PC_FASP1:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
-                status = FASP_BSRSOL_ASCPR(&Asc, &fsc, &x, &itParam, &iluParam,
+                status = FASP_BSRSOL_ASCPR(&Asc, &fsc, &x, &itsParam, &iluParam,
                                            &amgParam, 0);
                 break;
 
             case PC_FASP1_SHARE:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
-                status = FASP_BSRSOL_ASCPR(&Asc, &fsc, &x, &itParam, &iluParam,
+                status = FASP_BSRSOL_ASCPR(&Asc, &fsc, &x, &itsParam, &iluParam,
                                            &amgParam, RESET_CONST);
                 break;
 #endif
@@ -460,60 +460,60 @@ OCP_INT VectorFaspSolver::Solve()
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
 #if WITH_FASP4CUDA // zhaoli 2022.04.04
                 status = fasp_solver_dbsr_krylov_FASP1_cuda_interface(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
 #else
                 status = fasp_solver_dbsr_krylov_FASP1a(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
 #endif
                 break;
             case PC_FASP1_SHARE: // zhaoli 2021.03.24
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
 #if WITH_FASP4CUDA
                 status = fasp_solver_dbsr_krylov_FASP1_cuda_share_interface(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order,
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order,
                     RESET_CONST);
 #else
                 status = fasp_solver_dbsr_krylov_FASP1a_share_interface(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order,
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order,
                     RESET_CONST);
 #endif
                 break;
             case PC_FASP2:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
                 status = fasp_solver_dbsr_krylov_FASP2(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
                 break;
             case PC_FASP3:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
                 status = fasp_solver_dbsr_krylov_FASP3(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
                 break;
             case PC_FASP4:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
 #if WITH_FASP4CUDA
                 status = fasp_solver_dbsr_krylov_FASP4_cuda(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
 #else
                 status = fasp_solver_dbsr_krylov_FASP4(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
 #endif
                 break;
             case PC_FASP4_SHARE: // zhaoli 2021.04.24
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
 #if WITH_FASP4CUDA // zhaoli 2022.08.03
                 status = fasp_solver_dbsr_krylov_FASP4_cuda_share_interface(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order,
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order,
                     RESET_CONST);
 #else
                 status = fasp_solver_dbsr_krylov_FASP4_share_interface(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order,
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order,
                     RESET_CONST);
 #endif
                 break;
             case PC_FASP5:
                 Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
                 status = fasp_solver_dbsr_krylov_FASP5(
-                    &Asc, &fsc, &x, &itParam, &iluParam, &amgParam, NULL, &order);
+                    &Asc, &fsc, &x, &itsParam, &iluParam, &amgParam, NULL, &order);
                 break;
 #endif
             default:

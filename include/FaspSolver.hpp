@@ -100,13 +100,13 @@ public:
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override {}
 
     /// Get number of iterations used by iterative solver.
-    USI GetNumIters() const override { return itParam.maxit; }
+    USI GetNumIters() const override { return itsParam.maxit; }
 
 public:
     string      solveDir;  ///< Current work dir
     string      solveFile; ///< Relative path of fasp file
     input_param inParam;   ///< Parameters from input files
-    ITS_param   itParam;   ///< Parameters for iterative method
+    ITS_param   itsParam;  ///< Parameters for iterative method
     AMG_param   amgParam;  ///< Parameters for AMG method
     ILU_param   iluParam;  ///< Parameters for ILU method
     SWZ_param   swzParam;  ///< Parameters for Schwarz method
