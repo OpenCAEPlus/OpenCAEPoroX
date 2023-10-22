@@ -261,7 +261,7 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 
 	MPI_Scan(&numElementLoc, &global_end, 1, MPI_INT, MPI_SUM, myComm);
 
-	OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+	OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
 	global_begin = global_end - numElementLoc;
 	global_end   = global_end - 1;
@@ -293,7 +293,7 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);
 	MPI_Waitall(numSendProc, send_request.data(), MPI_STATUS_IGNORE);
 
-	OCPTIME_COMM_P2P += timer.Stop() / 1000;
+	OCPTIME_COMM_P2P += timer.Stop() / TIME_S2MS;
 
 	return &global_index;
 }

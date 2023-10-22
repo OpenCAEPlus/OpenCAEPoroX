@@ -75,7 +75,7 @@ void OCPNRsuite::InitStep(const BulkVarSet& bvs)
     OCP_DBL tmploc = res.maxRelRes_V;
     MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, MPI_DOUBLE, MPI_MIN, myComm);
     
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
 
     lP = bvs.lP;
@@ -276,7 +276,7 @@ void OCPNRsuite::CalCFL(const Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& 
 
         MPI_Allreduce(&maxCFL_loc, &maxCFL, 1, MPI_DOUBLE, MPI_MAX, myComm);
 
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
     }
     else {
         maxCFL = maxCFL_loc;
@@ -348,8 +348,8 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
 
     MPI_Allreduce(&workState_loc, &workState, 1, MPI_INT, MPI_MAX, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
-    OCPTIME_COMM_1ALLREDUCE += timer.Stop() / 1000;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    OCPTIME_COMM_1ALLREDUCE += timer.Stop() / TIME_S2MS;
 
     switch (workState)
     {

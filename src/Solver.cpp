@@ -82,7 +82,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
         // rs.allWells.ShowWellStatus(rs.bulk);
     }
     rs.OutInfoFinal();
-    OCPTIME_TOTAL += timer.Stop() / 1000;
+    OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
 }
 
 /// This is one time step of dynamic simulation in an abstract setting.

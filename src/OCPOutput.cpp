@@ -1642,7 +1642,7 @@ void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const
     summary.SetVal(reservoir, ctrl, iters);
     crtInfo.SetVal(ctrl, NR);
 
-    OCPTIME_OUTPUT += timer.Stop() / 1000;
+    OCPTIME_OUTPUT += timer.Stop() / TIME_S2MS;
 }
 
 void OCPOutput::PrintInfo() const
@@ -1653,7 +1653,7 @@ void OCPOutput::PrintInfo() const
     summary.PrintInfo(workDir, fileName, (numproc > 1 ? myrank : -1));
     crtInfo.PrintFastReview(workDir, fileName, (numproc > 1 ? myrank : -1), iters);
 
-    OCPTIME_OUTPUT += timer.Stop() / 1000;
+    OCPTIME_OUTPUT += timer.Stop() / TIME_S2MS;
 }
 
 void OCPOutput::PrintInfoSched(const Reservoir&  rs,
@@ -1666,7 +1666,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
         cout << "Timestep " << setw(6) << left << iters.GetNumTimeStep() << ": " << fixed
              << setw(10) << setprecision(3) << right << days << " Days"
-             << "    Wall time: " << time / 1000 << " Sec" << endl;
+             << "    Wall time: " << time / TIME_S2MS << " Sec" << endl;
     }
 
     // print to output file
@@ -1674,7 +1674,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     timer.Start();
     //out4RPT.PrintRPT(workDir, rs, days);
     out4VTK.PrintVTK(rs);
-    OCPTIME_OUTPUT += timer.Stop() / 1000;
+    OCPTIME_OUTPUT += timer.Stop() / TIME_S2MS;
 }
 
 
@@ -1692,7 +1692,7 @@ void OCPOutput::PostProcess() const
     }
     
     
-    OCPTIME_OUTPUT += timer.Stop() / 1000;
+    OCPTIME_OUTPUT += timer.Stop() / TIME_S2MS;
 }
 
 

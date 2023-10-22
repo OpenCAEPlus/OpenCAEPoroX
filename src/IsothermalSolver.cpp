@@ -92,7 +92,7 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
    
-    OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
+    OCPTIME_ASSEMBLE_MAT += timer.Stop() / TIME_S2MS;
 }
 
 
@@ -137,7 +137,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 
-    OCPTIME_UPDATE_GRID += timer.Stop() / 1000;
+    OCPTIME_UPDATE_GRID += timer.Stop() / TIME_S2MS;
 
     return flag;
 }

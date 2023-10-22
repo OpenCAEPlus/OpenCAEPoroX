@@ -31,7 +31,7 @@ void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 
     fim.AssembleMat(LSolver, rs, ctrl.time.GetCurrentDt());
 
-    OCPTIME_ASSEMBLE_MAT += timer.Stop() / 1000;
+    OCPTIME_ASSEMBLE_MAT += timer.Stop() / TIME_S2MS;
 }
 
 void ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
@@ -46,7 +46,7 @@ OCP_BOOL ThermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     timer.Start();
     OCP_BOOL flag = fim.UpdateProperty(rs, ctrl);
 
-    OCPTIME_UPDATE_GRID += timer.Stop() / 1000;
+    OCPTIME_UPDATE_GRID += timer.Stop() / TIME_S2MS;
     return flag;
 }
 

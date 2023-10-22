@@ -72,7 +72,7 @@ void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
     MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 }
 
 
@@ -193,7 +193,7 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
 
     MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 }
 
 

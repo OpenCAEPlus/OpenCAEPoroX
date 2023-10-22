@@ -264,7 +264,7 @@ void ControlTime::CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<
 
 	MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
 
-	OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+	OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
 	predict_dt = current_dt;
 
@@ -326,7 +326,7 @@ OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_li
     OCPNRStateC conflag;
     MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MAX, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
     if (conflag == OCPNRStateC::converge) {
         // converge

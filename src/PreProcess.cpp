@@ -28,7 +28,7 @@ PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm com
     partition.SetDistribution();
     domain.Setup(partition, preParamGridWell);
 
-    OCPTIME_PARTITION = timer.Stop() / 1000;
+    OCPTIME_PARTITION = timer.Stop() / TIME_S2MS;
     OCPTIME_TOTAL     += OCPTIME_PARTITION;
 }
 

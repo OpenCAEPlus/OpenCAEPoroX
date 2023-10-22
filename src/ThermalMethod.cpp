@@ -62,7 +62,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / 1000;
+    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / TIME_S2MS;
 
     // Solve linear system  
     timer.Start();
@@ -71,7 +71,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
         status = ls.GetNumIters();
     }
     // Record time, iterations
-    OCPTIME_LSOLVER += timer.Stop() / 1000;
+    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
     NR.UpdateIter(status);
 
@@ -85,7 +85,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
-    OCPTIME_NRSTEP += timer.Stop() / 1000;
+    OCPTIME_NRSTEP += timer.Stop() / TIME_S2MS;
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }

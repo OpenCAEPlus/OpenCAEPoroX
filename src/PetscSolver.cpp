@@ -36,7 +36,7 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
     MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, MPI_INT, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / 1000;   
+    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
     
     allBegin[0] = 0;
     allEnd[0]   = allEle[0] - 1;
