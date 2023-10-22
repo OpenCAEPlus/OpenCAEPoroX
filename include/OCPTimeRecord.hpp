@@ -16,6 +16,9 @@
 
 #include "OCPConst.hpp"
 
+/// 1 [s] = 1000 [ms]
+const OCP_DBL TIME_S2MS = 1000;
+
 
 extern OCP_DBL OCPTIME_TOTAL;				///< Time for Total Simulation
 extern OCP_DBL OCPTIME_PARTITION;			///< Time for Grid Inputting and Partition

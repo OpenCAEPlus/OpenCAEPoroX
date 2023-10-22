@@ -230,7 +230,7 @@ public:
     /// dmu / dx
     vector<OCP_DBL> mux;
 
-    /// Internal energy of fluid
+    /// Internal energy of per unit volume of fluid
     OCP_DBL Uf;
     /// dUf / dP
     OCP_DBL UfP;

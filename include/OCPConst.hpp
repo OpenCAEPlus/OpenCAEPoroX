@@ -18,17 +18,8 @@
 
 // OpenCAEPoroX header files
 #include "UtilError.hpp"
-
-// Build-in data type
-typedef unsigned int       USI;      ///< Generic unsigned integer
-typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
-typedef unsigned int       OCP_USI;  ///< Long unsigned integer
-typedef int                INT;      ///< Generic signed integer
-typedef int                OCP_INT;  ///< Long integer
-typedef double             OCP_DBL;  ///< Double precision
-typedef float              OCP_SIN;  ///< Single precision
-typedef unsigned int       OCP_BOOL; ///< OCP_BOOL in OCP
-typedef char               OCP_CHAR; ///< Char
+#include "OCPDataType.hpp"
+#include "OCPUnits.hpp"
 
 // General error type
 const int OCP_SUCCESS         = 0;    ///< Finish without trouble
@@ -36,7 +27,6 @@ const int OCP_ERROR_NUM_INPUT = -1;   ///< Wrong number of input param
 const int OCP_ERROR           = -100; ///< Unidentified error
 
 // General consts
-const OCP_DBL  GAS_CONSTANT = 10.73159;    ///< Gas Constant
 const OCP_DBL  TINY         = 1E-8;        ///< Small constant
 const OCP_DBL  OCP_HUGE     = 1E16;        ///< Huge constant
 const OCP_DBL  PI           = 3.141592653; ///< Pi
@@ -54,25 +44,6 @@ const OCP_DBL MAX_DP_LIMIT      = 200;   ///< Maximal pressure change
 const OCP_DBL MAX_DS_LIMIT      = 0.1;   ///< Maximal saturation change
 const OCP_DBL TARGET_DP         = 50;    ///< Target pressure change
 const OCP_DBL TARGET_DS         = 0.01;  ///< Target saturation change
-
-// Physical consts
-const OCP_DBL GRAVITY_FACTOR  = 0.00694444; ///< 0.00694444 ft2 psi / lb
-const OCP_DBL RHOW_STD        = 62.3664;    ///< Water density at surface cond: lb/ft3
-const OCP_DBL RHOAIR_STD      = 0.076362;   ///< Air density at surface cond : lb/ft3
-const OCP_DBL PRESSURE_STD    = 14.7;       ///< 14.6959 psia = 1 atm
-const OCP_DBL TEMPERATURE_STD = 60;         ///< Standard temperature: F
-
-// Unit conversion consts
-const OCP_DBL CONV1      = 5.61458;               ///< 1 bbl = CONV1 ft3
-const OCP_DBL CONV2      = 1.12712E-3;            ///< Darcy constant in field unit
-const OCP_DBL CONV3      = 0.45359237;            ///< 1 lb = CONV3 kg
-const OCP_DBL CONV4      = 0.02831685;            ///< 1 ft3 = CONV4 m3
-const OCP_DBL CONV5      = 459.67;                ///< 0 F = CONV5 R
-const OCP_DBL CONV6      = 778.172448;            ///<
-const OCP_DBL CONV7      = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
-
-/// Darcy constants
-const OCP_DBL CONV_DARCY = CONV1 * CONV2;
 
 enum class GridType
 {
