@@ -29,8 +29,8 @@ void OCPRockIsoT_Linear::CalPoro(const OCP_DBL& P, const OCP_DBL& T, const OCP_D
 
 inline void OCPRockT::CalRockHT(const OCP_DBL& T)
 {
-    const OCP_DBL Ta  = T + CONV5;
-    const OCP_DBL Tra = Tref + CONV5;
+    const OCP_DBL Ta  = T + CONV4;
+    const OCP_DBL Tra = Tref + CONV4;
     Hr                = hcp1 * (Ta - Tra) + 0.5 * hcp2 * (Ta * Ta - Tra * Tra);
     dHrdT             = hcp1 + hcp2 * Ta;
 }

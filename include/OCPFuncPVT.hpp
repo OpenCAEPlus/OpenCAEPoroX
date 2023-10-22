@@ -144,7 +144,7 @@ public:
 		stdVg   = stdVgin;
 	}
 	OCP_DBL CalXiG(const OCP_DBL& P) const { return 1 / CONV1 / (CalBg(P) * stdVg); }
-	OCP_DBL CalRhoG(const OCP_DBL& P) const { return (CONV8 / CONV1) * stdRhoG / CalBg(P);}
+	OCP_DBL CalRhoG(const OCP_DBL& P) const { return CONV3 * stdRhoG / CalBg(P);}
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 					   OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 

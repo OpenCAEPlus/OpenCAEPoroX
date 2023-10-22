@@ -144,8 +144,8 @@ protected:
     vector<SolventINJ> solvents;   ///< Sets of Solvent
     OCP_DBL            dPmax{0};   ///< Maximum BHP change
 
-    OCP_DBL          Psurf{PRESSURE_STD};    ///< well reference pressure
-    OCP_DBL          Tsurf{TEMPERATURE_STD}; ///< well reference temperature
+    OCP_DBL          Psurf;    ///< well reference pressure
+    OCP_DBL          Tsurf;    ///< well reference temperature
 
     /////////////////////////////////////////////////////////////////////
     // Injection/Production Rate

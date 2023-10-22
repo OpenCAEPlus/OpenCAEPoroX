@@ -23,8 +23,8 @@ void SurTenMethod01::CalSurfaceTension(const OCP_USI& bId, SurTenVarSet& stvs, c
         stvs.surTen[bId] = OCP_HUGE;
     else {
         const OCPMixtureVarSet& vs = mvs;
-        const OCP_DBL           Bl = vs.xi[0] * CONV7;
-        const OCP_DBL           Bv = vs.xi[1] * CONV7;    
+        const OCP_DBL           Bl = vs.xi[0] * CONV6;
+        const OCP_DBL           Bv = vs.xi[1] * CONV6;    
         const OCP_DBL*          xl = vs.GetXj(0);
         const OCP_DBL*          xv = vs.GetXj(1);
         OCP_DBL surTen = 0;

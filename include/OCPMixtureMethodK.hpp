@@ -122,7 +122,7 @@ public:
     OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
     OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override { return 1 / CalXi(P, 0, T, 0, pt); }
     OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
-    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T + CONV5, zi); }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { return eC.CalEnthalpy(T + CONV4, zi); }
 
 protected:
     OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& T);
@@ -136,9 +136,9 @@ protected:
 
 protected:
     /// Reference pressure
-    OCP_DBL Pref{PRESSURE_STD};   
+    OCP_DBL Pref;   
     /// Reference temperature
-    OCP_DBL Tref{TEMPERATURE_STD}; 
+    OCP_DBL Tref; 
     /// Component molar density at reference temperature and reference pressure, lb/ft3
     vector<OCP_DBL> xi_ref;
     /// Molecular Weight of components

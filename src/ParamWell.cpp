@@ -162,6 +162,16 @@ Solvent::Solvent(const vector<string>& vbuf)
     }
 }
 
+
+void ParamWell::Init() 
+{ 
+    // Field default
+    Psurf = FIELD_PRESSURE_STD;
+    Tsurf = FIELD_TEMPERATURE_STD;
+    InitTime(); 
+};
+
+
 void ParamWell::InputWELSPECS(ifstream& ifs)
 {
     vector<string> vbuf;

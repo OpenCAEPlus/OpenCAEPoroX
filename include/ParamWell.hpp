@@ -149,12 +149,12 @@ public:
     /// Sets of Solvent.
     vector<Solvent>   solSet;
     /// Pressure in surface condition.
-    OCP_DBL           Psurf{PRESSURE_STD}; 
+    OCP_DBL           Psurf; 
     /// Temperature in surface condition.
-    OCP_DBL           Tsurf{TEMPERATURE_STD}; 
+    OCP_DBL           Tsurf; 
 
     /// Initialize the inputting the params of wells.
-    void Init() { InitTime(); };
+    void Init();
     /// Initialize the critical time.
     void InitTime() { criticalTime.push_back(0); };
     /// Input the well keyword WELSPECS. WELSPECS defines wells including well name,

@@ -204,7 +204,7 @@ OCPMixtureMethodK_OW01T::OCPMixtureMethodK_OW01T(const ComponentParam& param, co
 	else
 		OCP_ABORT("MW hasn't been input!");
 
-	Tref = param.Tref[tarId] + CONV5;
+	Tref = param.Tref[tarId] + CONV4;
 	Pref = param.Pref[tarId];
 
 	vC.Setup(param, tarId);
@@ -232,7 +232,7 @@ OCPMixtureMethodK_OW01T::OCPMixtureMethodK_OW01T(const ComponentParam& param, co
 void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = bvs.P[bId];
-	mvs.T = bvs.T[bId] + CONV5;
+	mvs.T = bvs.T[bId] + CONV4;
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 }
@@ -241,7 +241,7 @@ void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_USI& bId, const BulkVarSet& bv
 void OCPMixtureMethodK_OW01T::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
 {
 	mvs.P = P;
-	mvs.T = T + CONV5;
+	mvs.T = T + CONV4;
 	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
 }
 
@@ -335,8 +335,8 @@ void OCPMixtureMethodK_OW01T::FlashDer(OCPMixtureVarSet& vs)
 	// Internal energy per unit volume of fluid
 
 	// Uf, d Uf / d T, d Uf / d P
-	vs.Uf  = -vs.P / (GRAVITY_FACTOR * CONV6);
-	vs.UfP = -1 / (GRAVITY_FACTOR * CONV6);
+	vs.Uf  = -vs.P / CONV5;
+	vs.UfP = -1 / CONV5;
 	vs.UfT = 0;
 
 	for (USI j = 0; j < 2; j++) {
@@ -365,16 +365,16 @@ void OCPMixtureMethodK_OW01T::CalVStd(OCPMixtureVarSet& vs)
 
 OCP_DBL OCPMixtureMethodK_OW01T::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-	if (pt == PhaseType::oil)       return CalXiO(P, T + CONV5);
-	else if (pt == PhaseType::wat)  return CalXiW(P, T + CONV5);
+	if (pt == PhaseType::oil)       return CalXiO(P, T + CONV4);
+	else if (pt == PhaseType::wat)  return CalXiW(P, T + CONV4);
 	else                            OCP_ABORT("WRONG TarPhase");
 }
 
 
 OCP_DBL OCPMixtureMethodK_OW01T::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-	if (pt == PhaseType::oil)       return CalRhoO(P, T + CONV5);
-	else if (pt == PhaseType::wat)  return CalRhoW(P, T + CONV5);
+	if (pt == PhaseType::oil)       return CalRhoO(P, T + CONV4);
+	else if (pt == PhaseType::wat)  return CalRhoW(P, T + CONV4);
 	else                            OCP_ABORT("WRONG TarPhase");
 }
 
@@ -779,7 +779,7 @@ OCP_DBL OCPMixtureMethodK_OGW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, con
 OCP_DBL OCPMixtureMethodK_OGW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if      (pt == PhaseType::oil)  return (stdVo * CONV1);
-    else if (pt == PhaseType::gas)  return (stdVg * CONV8);
+    else if (pt == PhaseType::gas)  return (stdVg * CONV2);
     else if (pt == PhaseType::wat)  return (stdVw * CONV1);
     else                            OCP_ABORT("Wrong Phase Type!");
 }
@@ -788,7 +788,7 @@ OCP_DBL OCPMixtureMethodK_OGW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, c
 void OCPMixtureMethodK_OGW01::CalVStd(OCPMixtureVarSet& vs)
 {
 	vs.vj[0] = vs.Ni[0] * stdVo * CONV1;
-	vs.vj[1] = vs.Ni[1] * stdVg * CONV8;
+	vs.vj[1] = vs.Ni[1] * stdVg * CONV2;
 	vs.vj[2] = vs.Ni[2] * stdVw * CONV1;
 }
 

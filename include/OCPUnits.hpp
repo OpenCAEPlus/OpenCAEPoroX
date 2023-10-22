@@ -30,10 +30,12 @@ void SetUnit(const string& unitType);
 const OCP_DBL FIELD_CONV1           = 5.61458;
 /// 1 [Mscf] = 1000 [ft3]
 const OCP_DBL FIELD_CONV2           = 1000;
+/// 0 [F] = 459.67 [R]
+const OCP_DBL FIELD_CONV3           = 459.67;
 /// 1 [btu] = 5.40395 [psia]，[ft3]
-const OCP_DBL FIELD_CONV3           = 5.40395;
+const OCP_DBL FIELD_CONV4           = 5.40395;
 /// 1 [lbm]/[ft3] = 0.0160185 [gm-M]/[cc]
-const OCP_DBL FIELD_CONV4           = 0.0160185;
+const OCP_DBL FIELD_CONV5           = 0.0160185;
 /// Gas constant ([ft3]，[psi]/[R]/[lb-M])
 const OCP_DBL FIELD_GAS_CONSTANT    = 10.73159;
 /// Gravity constant ([ft2]，[psi]/[lb])
@@ -54,12 +56,14 @@ const OCP_DBL FIELD_TEMPERATURE_STD = 60;
 // Metric Units
 ////////////////////////////////////////////////
 
-/// 1 [rm3] = 1 [sm3]
+/// 1 [m3] = 1 [m3]
 const OCP_DBL METRIC_CONV1           = 1.0;
+/// 0 [C] = 273.15 [K]
+const OCP_DBL METRIC_CONV2           = 273.15;
 /// 1 [kj] = 0.01 [bar]，[m3]
-const OCP_DBL METRIC_CONV2           = 0.01;
-/// 1 [kg-M]/[m3] = 0.0160185 [gm-M]/[cc]
-const OCP_DBL METRIC_CONV3           = 0.001;
+const OCP_DBL METRIC_CONV3           = 0.01;
+/// 1 [kg-M]/[m3] = 0.001 [gm-M]/[cc]
+const OCP_DBL METRIC_CONV4           = 0.001;
 /// Gas constant ([m3]，[bars]/[K]/[kg-M])
 const OCP_DBL METRIC_GAS_CONSTANT    = 0.083143;
 /// Gravity constant ([m2]，[bars]/[kg])
@@ -81,30 +85,36 @@ const OCP_DBL METRIC_TEMPERATURE_STD = 20;
 // Work Units
 ////////////////////////////////////////////////
 
-
-
-
-// Physical consts
-const OCP_DBL GAS_CONSTANT    = 10.73159;    ///< Gas Constant
-const OCP_DBL GRAVITY_FACTOR  = 0.00694444; ///< 0.00694444 ft2 psi / lb
-const OCP_DBL RHOW_STD        = 62.3664;    ///< Water density at surface cond: lb/ft3
-const OCP_DBL RHOAIR_STD      = 0.076362;   ///< Air density at surface cond : lb/ft3
-const OCP_DBL PRESSURE_STD    = 14.7;       ///< 14.6959 psia = 1 atm
-const OCP_DBL TEMPERATURE_STD = 60;         ///< Standard temperature: F
-
-
-// Unit conversion consts
-const OCP_DBL CONV1 = 5.61458;               ///< 1 bbl = CONV1 ft3
-const OCP_DBL CONV2 = 1.12712E-3;            ///< Darcy constant in field unit
-const OCP_DBL CONV3 = 0.45359237;            ///< 1 lb = CONV3 kg
-const OCP_DBL CONV4 = 0.02831685;            ///< 1 ft3 = CONV4 m3
-const OCP_DBL CONV5 = 459.67;                ///< 0 F = CONV5 R
-const OCP_DBL CONV6 = 778.172448;            ///< 1[Btu] = 778.172448 [ft]，[lbf]
-const OCP_DBL CONV7 = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
-const OCP_DBL CONV8 = 1000;                  ///< 1 Mscf -> 1000 ft3
-
+// physical variable
 /// Darcy constants
-const OCP_DBL CONV_DARCY = CONV1 * CONV2;
+extern OCP_DBL CONV_DARCY;
+/// Gas constant
+extern OCP_DBL GAS_CONSTANT;
+/// Gravity constant
+extern OCP_DBL GRAVITY_FACTOR;
+/// Density of water at standard condition
+extern OCP_DBL RHOW_STD;
+/// Density of air at standard condition
+extern OCP_DBL RHOAIR_STD;
+/// Atmospheric pressure
+extern OCP_DBL PRESSURE_STD;
+/// Standard temperature
+extern OCP_DBL TEMPERATURE_STD;
+
+// unit conversion
+/// [bbl] -> [ft3], [m3] -> [m3]
+extern OCP_DBL CONV1;
+/// [Mscf] -> [ft3], [m3] -> [m3]
+extern OCP_DBL CONV2;
+/// [Mscf] -> [bbl], [m3] -> [m3]
+extern OCP_DBL CONV3;
+/// [F] -> [R], [C] -> [K]
+extern OCP_DBL CONV4;
+/// [btu] -> [psia]，[ft3], [kj] -> [bar]，[m3]
+extern OCP_DBL CONV5;
+/// [lbm]/[ft3] -> [gm-M]/[cc], [kg-M]/[m3] -> [gm-M]/[cc]
+extern OCP_DBL CONV6;
+
 
 
 #endif // __OPENCAEPORO_UNITS_HEADER__

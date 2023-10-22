@@ -670,7 +670,7 @@ OCPMixtureMethodComp01::OCPMixtureMethodComp01(const ParamReservoir& rs_param, c
 void OCPMixtureMethodComp01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
 {
     mvs.P = bvs.P[bId];
-    mvs.T = bvs.T[bId] + CONV5;
+    mvs.T = bvs.T[bId] + CONV4;
     copy(&bvs.Pj[bId * bvs.np], &bvs.Pj[bId * bvs.np] + bvs.np, mvs.Pj.begin());
     copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
     copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
@@ -689,7 +689,7 @@ void OCPMixtureMethodComp01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 void OCPMixtureMethodComp01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
 {
     mvs.P = P;
-    mvs.T = T + CONV5;
+    mvs.T = T + CONV4;
     copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
 }
 
@@ -780,7 +780,7 @@ OCP_DBL OCPMixtureMethodComp01::CalXi(const OCP_DBL& P, const OCP_DBL& T, const 
     }
     else {
         // oil phase
-        return 1 / eos.CalVm(P, T + CONV5, &z[0]);
+        return 1 / eos.CalVm(P, T + CONV4, &z[0]);
     }
 }
 
@@ -803,7 +803,7 @@ OCP_DBL OCPMixtureMethodComp01::CalVmStd(const OCP_DBL& P, const OCP_DBL& T, con
     }
     else {
         // oil phase
-        return eos.CalVm(P, T + CONV5, &z[0]);
+        return eos.CalVm(P, T + CONV4, &z[0]);
     }
 }
 

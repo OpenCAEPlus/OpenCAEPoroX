@@ -378,9 +378,9 @@ public:
     /// PVT property for CO2
     Table2Set PVTCO2;
     /// Pressure in surface condition.
-    OCP_DBL           Psurf{ PRESSURE_STD };
+    OCP_DBL   Psurf;
     /// Temperature in surface condition.
-    OCP_DBL           Tsurf{ TEMPERATURE_STD };
+    OCP_DBL   Tsurf;
 
 public:
 

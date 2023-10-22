@@ -113,7 +113,11 @@ Table2Set* ParamReservoir::FindPtrTable2(const string& varName)
 /// Initialize tables and other reservoir parameters.
 void ParamReservoir::Init()
 {
+    // Field default
     unitType = "FIELD";
+    Psurf = FIELD_PRESSURE_STD;
+    Tsurf = FIELD_TEMPERATURE_STD;
+
 
     InitTable();
 

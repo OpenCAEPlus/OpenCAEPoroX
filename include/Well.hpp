@@ -126,9 +126,9 @@ protected:
     /// information of perforations.
     vector<Perforation> perf;    
     /// Well surface pressure, psia
-    OCP_DBL             Psurf{ PRESSURE_STD };
+    OCP_DBL             Psurf;
     /// Well surface temperature, F
-    OCP_DBL             Tsurf{ TEMPERATURE_STD };
+    OCP_DBL             Tsurf;
     /// mixture model
     OCPMixture*         mixture;
     /// num of phases

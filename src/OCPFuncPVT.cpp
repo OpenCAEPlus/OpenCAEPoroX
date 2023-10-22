@@ -68,7 +68,7 @@ OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const
 	const OCP_DBL bref  = data[2];
 	const OCP_DBL Cbref = data[4];
 	const OCP_DBL b     = bref * (1 - Cbref * (P - Pb));
-	const OCP_DBL rhoO  = (stdRhoO + (CONV8 / CONV1) * rssat * stdRhoG) / b;
+	const OCP_DBL rhoO  = (stdRhoO + CONV3 * rssat * stdRhoG) / b;
 	return rhoO;
 }
 
@@ -96,8 +96,8 @@ void OCP_PVCO::CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_
 	xi   = (1 + x) / (b * CONV1 * stdVo);
 	xiP  = (xP * b - (1 + x) * bP) / ((b * b) * (CONV1 * stdVo));
 
-	rho  = (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) / b;
-	rhoP = (CONV8 / CONV1) * stdRhoG * rsP / b - (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bP / (b * b);
+	rho  = (stdRhoO + CONV3 * rs * stdRhoG) / b;
+	rhoP = CONV3 * stdRhoG * rsP / b - (stdRhoO + CONV3 * rs * stdRhoG) * bP / (b * b);
 }
 
 
@@ -127,9 +127,9 @@ void OCP_PVCO::CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, 
 	xiP   = -(1 + x) * bP / ((b * b) * (CONV1 * stdVo));
 	xiRs  = (xRs * b - (1 + x) * bRs) / ((b * b) * CONV1* stdVo);
 
-	rho   = (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) / b;
-	rhoP  = -(stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bP / (b * b);
-	rhoRs = ((CONV8 / CONV1) * stdRhoG * b - (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bRs) / (b * b);
+	rho   = (stdRhoO + CONV3 * rs * stdRhoG) / b;
+	rhoP  = -(stdRhoO + CONV3 * rs * stdRhoG) * bP / (b * b);
+	rhoRs = (CONV3 * stdRhoG * b - (stdRhoO + CONV3 * rs * stdRhoG) * bRs) / (b * b);
 }
 
 
@@ -172,8 +172,8 @@ void OCP_PVDG::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	xi   = 1 / CONV1 / (b * stdVg);
 	xiP  = -1 / CONV1 * bp / ((b * b) * stdVg);
 
-	rho  = CONV8 / CONV1 * stdRhoG / b;
-	rhoP = -CONV8 / CONV1 * stdRhoG * bp / (b * b);
+	rho  = CONV3 * stdRhoG / b;
+	rhoP = -CONV3 * stdRhoG * bp / (b * b);
 }
 
 OCP_DBL OCP_PVDG::CalBg(const OCP_DBL& P) const
@@ -337,7 +337,7 @@ OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp)
 {
 
 	OCP_DBL mu = 0;
-	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV5, muc);
+	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV4, muc);
 	for (USI i = 0; i < nc; i++)
 		mu += vp.x[i] * log(muc[i]);
 	return exp(mu);
@@ -349,7 +349,7 @@ OCP_DBL ViscosityMethod01::CalViscosity(const ViscosityParams& vp, OCP_DBL& muP,
 	OCP_DBL mu = 0;
 	muP = 0;
 	muT = 0;
-	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV5, muc, mucP, mucT);
+	viscTab.Eval_All0((*vp.P), (*vp.T) - CONV4, muc, mucP, mucT);
 	for (USI i = 0; i < nc; i++) {
 		mux[i] = vp.x[i] * log(muc[i]);
 		mu     += mux[i];
@@ -600,7 +600,7 @@ void ViscosityCalculation::Setup(const ComponentParam& param, const USI& tarId)
 EnthalpyMethod01::EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
 	const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in)
 {
-	Tref = Trefin + CONV5;
+	Tref = Trefin + CONV4;
 	cpl1 = cpl1in;
 	cpl2 = cpl2in;
 	cpl3 = cpl3in;
@@ -645,7 +645,7 @@ EnthalpyMethod02::EnthalpyMethod02(const OCP_DBL& Trefin, const vector<OCP_DBL>&
 	const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin,
 	const vector<OCP_DBL>& evin)
 {
-	Tref  = Trefin + CONV5;
+	Tref  = Trefin + CONV4;
 	Tcrit = Tcritin;
 	cpg1  = cpg1in;
 	cpg2  = cpg2in;
