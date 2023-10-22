@@ -16,7 +16,7 @@
 void Well::SetupUnit()
 {
     if (mixture->OilIndex() >= 0) unitConvert.push_back(1.0 / CONV1);
-    if (mixture->GasIndex() >= 0) unitConvert.push_back(1.0 / 1000);
+    if (mixture->GasIndex() >= 0) unitConvert.push_back(1.0 / CONV8);
     if (mixture->WatIndex() >= 0) unitConvert.push_back(1.0 / CONV1);
 
     OCP_ASSERT(unitConvert.size() == np, "WRONG unitConvert");

@@ -304,6 +304,9 @@ class ParamReservoir
 {
 
 public:
+
+    string                   unitType;
+
     /// Temperature for reservoir.
     OCP_DBL                  rsTemp; 
     /// a set of rock params

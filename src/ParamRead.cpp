@@ -38,11 +38,12 @@ void ParamRead::GetDirAndName()
 /// This is the general interface for reading input files.
 void ParamRead::ReadInputFile(const string& filename)
 {
-    inputFile    = filename;
+    inputFile = filename;
     GetDirAndName();
     Init();
     ReadFile(inputFile);
     CheckParam();  
+    SetUnit(paramRs.unitType);
 }
 
 /// Read parameters from a file, which is called in ReadInputFile.
@@ -60,6 +61,15 @@ void ParamRead::ReadFile(const string& filename)
         string keyword = vbuf[0];
 
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
+
+            case Map_Str2Int("FIELD", 5):
+                paramRs.unitType = "FIELD";
+                break;
+
+            case Map_Str2Int("METRIC", 6):
+                paramRs.unitType = "METRIC";
+                break;
+
             case Map_Str2Int("BLACKOIL", 8):
                 paramRs.blackOil = OCP_TRUE;
                 break;

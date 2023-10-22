@@ -14,6 +14,12 @@
 
 // OpenCAEPoroX header files
 #include "OCPDataType.hpp"
+#include "UtilError.hpp"
+
+using namespace std;
+
+
+void SetUnit(const string& unitType);
 
 
 ////////////////////////////////////////////////
@@ -22,10 +28,12 @@
 
 /// 1 [bbl] = 5.61458 [ft3]
 const OCP_DBL FIELD_CONV1           = 5.61458;
+/// 1 [Mscf] = 1000 [ft3]
+const OCP_DBL FIELD_CONV2           = 1000;
 /// 1 [btu] = 5.40395 [psia]，[ft3]
-const OCP_DBL FIELD_CONV2           = 5.40395;
+const OCP_DBL FIELD_CONV3           = 5.40395;
 /// 1 [lbm]/[ft3] = 0.0160185 [gm-M]/[cc]
-const OCP_DBL FIELD_CONV3           = 0.0160185;
+const OCP_DBL FIELD_CONV4           = 0.0160185;
 /// Gas constant ([ft3]，[psi]/[R]/[lb-M])
 const OCP_DBL FIELD_GAS_CONSTANT    = 10.73159;
 /// Gravity constant ([ft2]，[psi]/[lb])
@@ -69,6 +77,12 @@ const OCP_DBL METRIC_TEMPERATURE_STD = 20;
 
 
 
+////////////////////////////////////////////////
+// Work Units
+////////////////////////////////////////////////
+
+
+
 
 // Physical consts
 const OCP_DBL GAS_CONSTANT    = 10.73159;    ///< Gas Constant
@@ -87,6 +101,7 @@ const OCP_DBL CONV4 = 0.02831685;            ///< 1 ft3 = CONV4 m3
 const OCP_DBL CONV5 = 459.67;                ///< 0 F = CONV5 R
 const OCP_DBL CONV6 = 778.172448;            ///< 1[Btu] = 778.172448 [ft]，[lbf]
 const OCP_DBL CONV7 = CONV3 / (CONV4 * 1E3); ///< lbm/ft3 -> gm-M/cc
+const OCP_DBL CONV8 = 1000;                  ///< 1 Mscf -> 1000 ft3
 
 /// Darcy constants
 const OCP_DBL CONV_DARCY = CONV1 * CONV2;

@@ -113,6 +113,8 @@ Table2Set* ParamReservoir::FindPtrTable2(const string& varName)
 /// Initialize tables and other reservoir parameters.
 void ParamReservoir::Init()
 {
+    unitType = "FIELD";
+
     InitTable();
 
     gravity.data.resize(3);

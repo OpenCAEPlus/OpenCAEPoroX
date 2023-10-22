@@ -779,7 +779,7 @@ OCP_DBL OCPMixtureMethodK_OGW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, con
 OCP_DBL OCPMixtureMethodK_OGW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
 	if      (pt == PhaseType::oil)  return (stdVo * CONV1);
-    else if (pt == PhaseType::gas)  return (stdVg * 1000);
+    else if (pt == PhaseType::gas)  return (stdVg * CONV8);
     else if (pt == PhaseType::wat)  return (stdVw * CONV1);
     else                            OCP_ABORT("Wrong Phase Type!");
 }
@@ -788,7 +788,7 @@ OCP_DBL OCPMixtureMethodK_OGW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, c
 void OCPMixtureMethodK_OGW01::CalVStd(OCPMixtureVarSet& vs)
 {
 	vs.vj[0] = vs.Ni[0] * stdVo * CONV1;
-	vs.vj[1] = vs.Ni[1] * stdVg * 1000;
+	vs.vj[1] = vs.Ni[1] * stdVg * CONV8;
 	vs.vj[2] = vs.Ni[2] * stdVw * CONV1;
 }
 

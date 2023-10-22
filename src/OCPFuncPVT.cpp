@@ -68,7 +68,7 @@ OCP_DBL OCP_PVCO::CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const
 	const OCP_DBL bref  = data[2];
 	const OCP_DBL Cbref = data[4];
 	const OCP_DBL b     = bref * (1 - Cbref * (P - Pb));
-	const OCP_DBL rhoO  = (stdRhoO + (1000 / CONV1) * rssat * stdRhoG) / b;
+	const OCP_DBL rhoO  = (stdRhoO + (CONV8 / CONV1) * rssat * stdRhoG) / b;
 	return rhoO;
 }
 
@@ -96,8 +96,8 @@ void OCP_PVCO::CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_
 	xi   = (1 + x) / (b * CONV1 * stdVo);
 	xiP  = (xP * b - (1 + x) * bP) / ((b * b) * (CONV1 * stdVo));
 
-	rho  = (stdRhoO + (1000 / CONV1) * rs * stdRhoG) / b;
-	rhoP = (1000 / CONV1) * stdRhoG * rsP / b - (stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bP / (b * b);
+	rho  = (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) / b;
+	rhoP = (CONV8 / CONV1) * stdRhoG * rsP / b - (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bP / (b * b);
 }
 
 
@@ -127,9 +127,9 @@ void OCP_PVCO::CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, 
 	xiP   = -(1 + x) * bP / ((b * b) * (CONV1 * stdVo));
 	xiRs  = (xRs * b - (1 + x) * bRs) / ((b * b) * CONV1* stdVo);
 
-	rho   = (stdRhoO + (1000 / CONV1) * rs * stdRhoG) / b;	
-	rhoP  = -(stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bP / (b * b);	
-	rhoRs = ((1000 / CONV1) * stdRhoG * b - (stdRhoO + (1000 / CONV1) * rs * stdRhoG) * bRs) / (b * b);
+	rho   = (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) / b;
+	rhoP  = -(stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bP / (b * b);
+	rhoRs = ((CONV8 / CONV1) * stdRhoG * b - (stdRhoO + (CONV8 / CONV1) * rs * stdRhoG) * bRs) / (b * b);
 }
 
 
@@ -172,8 +172,8 @@ void OCP_PVDG::CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DB
 	xi   = 1 / CONV1 / (b * stdVg);
 	xiP  = -1 / CONV1 * bp / ((b * b) * stdVg);
 
-	rho  = 1000 / CONV1 * stdRhoG / b;	
-	rhoP = -1000 / CONV1 * stdRhoG * bp / (b * b);
+	rho  = CONV8 / CONV1 * stdRhoG / b;
+	rhoP = -CONV8 / CONV1 * stdRhoG * bp / (b * b);
 }
 
 OCP_DBL OCP_PVDG::CalBg(const OCP_DBL& P) const
