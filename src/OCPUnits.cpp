@@ -13,9 +13,12 @@
 #include "OCPUnits.hpp"
 
 
-void SetUnit(const string& unitType)
+void SetUnit(const string& ut)
 {
-	if (unitType == "FIELD") {
+	if (ut == "FIELD") {
+
+		unitType        = UnitType::FIELD;
+
 		CONV_DARCY      = FIELD_DARCY;
 		GAS_CONSTANT    = FIELD_GAS_CONSTANT;
 		GRAVITY_FACTOR  = FIELD_GRAVITY_FACTOR;
@@ -31,7 +34,10 @@ void SetUnit(const string& unitType)
 		CONV6           = FIELD_CONV5;
 
 	}
-	else if (unitType == "METRIC") {
+	else if (ut == "METRIC") {
+
+		unitType        = UnitType::METRIC;
+
 		CONV_DARCY      = METRIC_DARCY;
 		GAS_CONSTANT    = METRIC_GAS_CONSTANT;
 		GRAVITY_FACTOR  = METRIC_GRAVITY_FACTOR;
@@ -50,6 +56,10 @@ void SetUnit(const string& unitType)
 		OCP_ABORT("Unit Type is not available!");
 	}
 }
+
+
+/// OCP unit type
+UnitType unitType = UnitType::FIELD;
 
 
 ////////////////////////////////////////////////

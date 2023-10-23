@@ -273,68 +273,71 @@ void PeacemanWell::CalWI(const Bulk& bk)
             break;
         }
         else {
-            const OCP_USI Idb = perf[p].location;
-            const OCP_DBL dx = bvs.dx[Idb];
-            const OCP_DBL dy = bvs.dy[Idb];
-            const OCP_DBL dz = bvs.dz[Idb] * bvs.ntg[Idb];
-            OCP_DBL       ro = 0;
-            switch (perf[p].direction) {
-            case PerfDirection::x:
-            {
-                const OCP_DBL kykz = bvs.rockKy[Idb] * bvs.rockKz[Idb];
-                const OCP_DBL ky_kz = bvs.rockKy[Idb] / bvs.rockKz[Idb];
-                assert(kykz > 0);
-                ro = 0.28 * pow((dy * dy * pow(1 / ky_kz, 0.5) +
-                    dz * dz * pow(ky_kz, 0.5)),
-                    0.5);
-                ro /= (pow(ky_kz, 0.25) + pow(1 / ky_kz, 0.25));
+            if (perf[p].direction != PerfDirection::usg) {
+                const OCP_USI Idb = perf[p].location;
+                const OCP_DBL dx = bvs.dx[Idb];
+                const OCP_DBL dy = bvs.dy[Idb];
+                const OCP_DBL dz = bvs.dz[Idb] * bvs.ntg[Idb];
+                OCP_DBL       ro = 0;
+                switch (perf[p].direction) 
+                {
+                case PerfDirection::x:
+                {
+                    const OCP_DBL kykz = bvs.rockKy[Idb] * bvs.rockKz[Idb];
+                    const OCP_DBL ky_kz = bvs.rockKy[Idb] / bvs.rockKz[Idb];
+                    assert(kykz > 0);
+                    ro = 0.28 * pow((dy * dy * pow(1 / ky_kz, 0.5) +
+                        dz * dz * pow(ky_kz, 0.5)),
+                        0.5);
+                    ro /= (pow(ky_kz, 0.25) + pow(1 / ky_kz, 0.25));
 
-                if (perf[p].kh < 0) {
-                    perf[p].kh = (dx * pow(kykz, 0.5));
+                    if (perf[p].kh < 0) {
+                        perf[p].kh = (dx * pow(kykz, 0.5));
+                    }
+                    break;
                 }
+
+                case PerfDirection::y:
+                {
+                    const OCP_DBL kzkx = bvs.rockKz[Idb] * bvs.rockKx[Idb];
+                    const OCP_DBL kz_kx = bvs.rockKz[Idb] / bvs.rockKx[Idb];
+                    assert(kzkx > 0);
+                    ro = 0.28 * pow((dz * dz * pow(1 / kz_kx, 0.5) +
+                        dx * dx * pow(kz_kx, 0.5)),
+                        0.5);
+                    ro /= (pow(kz_kx, 0.25) + pow(1 / kz_kx, 0.25));
+
+                    if (perf[p].kh < 0) {
+                        perf[p].kh = (dy * pow(kzkx, 0.5));
+                    }
+                    break;
+                }
+
+                case PerfDirection::z:
+                {
+                    const OCP_DBL kxky = bvs.rockKx[Idb] * bvs.rockKy[Idb];
+                    const OCP_DBL kx_ky = bvs.rockKx[Idb] / bvs.rockKy[Idb];
+                    assert(kxky > 0);
+                    ro = 0.28 * pow((dx * dx * pow(1 / kx_ky, 0.5) +
+                        dy * dy * pow(kx_ky, 0.5)),
+                        0.5);
+                    ro /= (pow(kx_ky, 0.25) + pow(1 / kx_ky, 0.25));
+
+                    if (perf[p].kh < 0) {
+                        perf[p].kh = (dz * pow(kxky, 0.5));
+                    }
+                    break;
+                }
+                
+                default:
+                    OCP_ABORT("Wrong direction of perforations!");
+                }
+
                 perf[p].WI = (2 * PI) * perf[p].kh /
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
-                break;
             }
-            case PerfDirection::y:
-            {
-                const OCP_DBL kzkx = bvs.rockKz[Idb] * bvs.rockKx[Idb];
-                const OCP_DBL kz_kx = bvs.rockKz[Idb] / bvs.rockKx[Idb];
-                assert(kzkx > 0);
-                ro = 0.28 * pow((dz * dz * pow(1 / kz_kx, 0.5) +
-                    dx * dx * pow(kz_kx, 0.5)),
-                    0.5);
-                ro /= (pow(kz_kx, 0.25) + pow(1 / kz_kx, 0.25));
-
-                if (perf[p].kh < 0) {
-                    perf[p].kh = (dy * pow(kzkx, 0.5));
-                }
-                perf[p].WI = (2 * PI) * perf[p].kh /
-                    (log(ro / perf[p].radius) + perf[p].skinFactor);
-                break;
-            }
-            case PerfDirection::z:
-            {
-                const OCP_DBL kxky = bvs.rockKx[Idb] * bvs.rockKy[Idb];
-                const OCP_DBL kx_ky = bvs.rockKx[Idb] / bvs.rockKy[Idb];
-                assert(kxky > 0);
-                ro = 0.28 * pow((dx * dx * pow(1 / kx_ky, 0.5) +
-                    dy * dy * pow(kx_ky, 0.5)),
-                    0.5);
-                ro /= (pow(kx_ky, 0.25) + pow(1 / kx_ky, 0.25));
-
-                if (perf[p].kh < 0) {
-                    perf[p].kh = (dz * pow(kxky, 0.5));
-                }
-                perf[p].WI = (2 * PI) * perf[p].kh /
-                    (log(ro / perf[p].radius) + perf[p].skinFactor);
-                break;
-            }
-            case PerfDirection::usg:
-
-                break;
-            default:
-                OCP_ABORT("Wrong direction of perforations!");
+            else {
+                perf[p].WI = PI * perf[p].radius * perf[p].radius;
             }
 
             perf[p].WI *= CONV_DARCY;

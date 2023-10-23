@@ -63,10 +63,14 @@ void ParamRead::ReadFile(const string& filename)
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
 
             case Map_Str2Int("FIELD", 5):
+                if (CURRENT_RANK == MASTER_PROCESS)
+                    cout << "FIELD" << endl;
                 paramRs.unitType = "FIELD";
                 break;
 
             case Map_Str2Int("METRIC", 6):
+                if (CURRENT_RANK == MASTER_PROCESS)
+                    cout << "METRIC" << endl;
                 paramRs.unitType = "METRIC";
                 break;
 
@@ -360,7 +364,7 @@ void ParamRead::CheckParam()
     }
 
     paramRs.CheckParam();
-    paramWell.CheckParam(paramRs.blackOil);
+    paramWell.CheckParam();
 }
 
 /*----------------------------------------------------------------------------*/

@@ -50,8 +50,6 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
         wells[wdst]->name  = paramWell.well[wsrc].name;
         wells[wdst]->group = paramWell.well[wsrc].group;
         wells[wdst]->depth = paramWell.well[wsrc].depth;
-        wells[wdst]->I     = paramWell.well[wsrc].I - 1;
-        wells[wdst]->J     = paramWell.well[wsrc].J - 1;
         wells[wdst]->InputPerfo(paramWell.well[wsrc], domain, wsrc);
         wells[wdst]->Psurf         = Psurf;
         wells[wdst]->Tsurf         = Tsurf;
@@ -62,6 +60,10 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
         // If identical optParam.d occurs, use the last one
         tmpOptParam.clear();
         const USI n0 = paramWell.well[wsrc].optParam.size();
+        if (n0 == 0) {
+            OCP_ABORT("NO Well Opt Param for -- " + paramWell.well[wsrc].name);
+        }
+
         for (USI i = 0; i < n0 - 1; i++) {
             if (paramWell.well[wsrc].optParam[i].d !=
                 paramWell.well[wsrc].optParam[i + 1].d) {

@@ -79,7 +79,7 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 	if (EQUIL.size() > 0) {
 		InitHydroEquil(bvs, pvtm, satm, domain);
 	}
-	else if (swat.size() > 0) {
+	else {
 		InitHydroEquilW(bvs, pvtm, satm, optMs, domain);
 	}
 }
@@ -88,9 +88,55 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain)
 {
 	OCP_FUNCNAME;
+	// all water phase and all water component
+	const OCP_DBL         Dref = 0;
+	const OCP_DBL         Pref = 1.1;
+	const vector<OCP_DBL> tmpInitZi{ 0, 1 };
 
+	auto PVT = PVTm.GetPVT(0);
 
-	
+	/// calculate initial pressure for each bulk
+	numNodes = 100;
+	const OCP_DBL tabdz = (1.2 - 0) / (numNodes - 1);
+	vector<OCP_DBL> Ztmp(numNodes, 0);
+	vector<OCP_DBL> Potmp(numNodes, 0);
+	vector<OCP_DBL> Pgtmp(numNodes, 0);
+	vector<OCP_DBL> Pwtmp(numNodes, 0);
+	for (USI i = 1; i < numNodes; i++) {
+		Ztmp[i] = Ztmp[i - 1] + tabdz;
+	}
+
+	const OCP_DBL Ttmp = 20;
+	Pwtmp[0] = Pref;
+
+	OCP_DBL gammaWtmp;
+	// find the water pressure
+	for (USI id = 0; id < numNodes - 1; id++) {
+		gammaWtmp = GRAVITY_FACTOR * PVT->RhoPhase(Pwtmp[id], 0, Ttmp, tmpInitZi, PhaseType::wat);
+		Pwtmp[id + 1] = Pwtmp[id] + gammaWtmp * (Ztmp[id + 1] - Ztmp[id]);
+	}
+
+	Potmp = Pwtmp;
+	Pgtmp = Pwtmp;
+	OCPTable DepthP(vector<vector<OCP_DBL>>{Ztmp, Potmp, Pgtmp, Pwtmp});
+	if (CURRENT_RANK == MASTER_PROCESS)
+		DepthP.Display();
+
+	std::vector<OCP_DBL> data(4, 0);
+	for (OCP_USI n = 0; n < bvs.nb; n++) {
+
+		for (USI i = 0; i < bvs.nc; i++) {
+			bvs.Ni[n * bvs.nc + i] = tmpInitZi[i];
+		}
+		
+		DepthP.Eval_All(0, bvs.depth[n], data);
+		bvs.P[n] = data[2];
+		bvs.Pj[n * bvs.np + bvs.g] = data[2];
+		bvs.Pj[n * bvs.np + bvs.w] = data[3];
+
+		bvs.S[n * bvs.np + bvs.g] = 0;
+		bvs.S[n * bvs.np + bvs.w] = 1;
+	}
 }
 
 
@@ -627,7 +673,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		DepthP.Display();
 
 	// calculate Pc from DepthP to calculate Sj
-	std::vector<OCP_DBL> data(4, 0), cdata(4, 0);
+	std::vector<OCP_DBL> data(4, 0);
 
 	for (OCP_USI n = 0; n < bvs.nb; n++) {
 		if (initZi_flag) {
@@ -643,7 +689,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 		}
 
 
-		DepthP.Eval_All(0, bvs.depth[n], data, cdata);
+		DepthP.Eval_All(0, bvs.depth[n], data);
 		const auto SAT = SATm.GetSAT(n);
 		OCP_DBL Po = data[1];
 		OCP_DBL Pg = data[2];
@@ -717,7 +763,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			OCP_DBL tmpSw = 0;
 			OCP_DBL tmpSg = 0;
 			OCP_DBL dep = bvs.depth[n] + bvs.dz[n] / ncut * (k - (ncut - 1) / 2.0);
-			DepthP.Eval_All(0, dep, data, cdata);
+			DepthP.Eval_All(0, dep, data);
 			Po = data[1];
 			Pg = data[2];
 			Pw = data[3];

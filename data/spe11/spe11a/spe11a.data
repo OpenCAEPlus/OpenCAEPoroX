@@ -25,20 +25,20 @@ spe11a.property
 
 
 PVTCO2
--- pressure     density(pure phase) 	viscosibility(pure phase)  H2O in gas 
-1.00E+05		1.82E+00				1.47E-05      				2.35E-02
-1.07E+05		1.94E+00				1.47E-05      				2.21E-02
-1.13E+05		2.06E+00				1.47E-05      				2.08E-02
-1.20E+05		2.18E+00				1.47E-05      				1.96E-02
+-- pressure (bar)     density(pure phase) ([kg/m3]) 	viscosibility(pure phase) (bar·s)        H2O in gas (mass-fraction)
+1.00		                  1.82E+00				             1.47E-10      				      2.35E-02
+1.07		                  1.94E+00				             1.47E-10      				      2.21E-02
+1.13		                  2.06E+00				             1.47E-10      				      2.08E-02
+1.20		                  2.18E+00				             1.47E-10      				      1.96E-02
 /
 
 
 PVTH2O
--- pressure     density(pure phase) 	viscosibility(pure phase)  CO2 in water
-1.00E+05	   9.98E+02	 				1.00E-03       				6.53E-04
-1.07E+05	   9.98E+02	 				1.00E-03       				6.98E-04
-1.13E+05	   9.98E+02	 				1.00E-03       				7.42E-04
-1.20E+05	   9.98E+02	 				1.00E-03       				7.86E-04
+-- pressure (bar)     density(pure phase) ([kg/m3]) 	viscosibility(pure phase) (bar·s)         CO2 in water (mass-fraction)
+1.00	                      9.98E+02	 				1.00E-08       				                6.53E-04
+1.07	                      9.98E+02	 				1.00E-08       				                6.98E-04
+1.13	                      9.98E+02	 				1.00E-08       				                7.42E-04
+1.20	                      9.98E+02	 				1.00E-08       				                7.86E-04
 /
 
 
@@ -64,7 +64,7 @@ FIM  bsr.fasp
 
 TUNING
 -- Init     max    min   incre   chop    cut
-   0.1       0.1    0.1      5    0.3    0.3                    /
+   1E-5     1E-4    1E-6      5    0.3    0.3                    /
 --  dPlim  dSlim   dNlim   dVerrlim
      300     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax

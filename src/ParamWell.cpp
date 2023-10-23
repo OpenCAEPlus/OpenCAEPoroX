@@ -492,32 +492,11 @@ void ParamWell::InputTSURF(ifstream& ifs)
 }
 
 // check
-void ParamWell::CheckParam(const OCP_BOOL& boModel) const
+void ParamWell::CheckParam() const
 {
-    if (boModel) {
-        CheckINJFluid();
-    }
     CheckPerf();
 }
 
-void ParamWell::CheckINJFluid() const
-{
-    USI wellnum = well.size();
-    USI len;
-    for (USI w = 0; w < wellnum; w++) {
-        len = well[w].optParam.size();
-        for (USI i = 0; i < len; i++) {
-            const WellOptParam& tmpOpt = well[w].optParam[i].opt;
-            if (tmpOpt.type == "INJ") {
-                if (tmpOpt.fluidType == "WAT" || tmpOpt.fluidType == "WATER") {
-                } else if (tmpOpt.fluidType == "GAS") {
-                } else {
-                    OCP_ABORT("Wrong FluidType!");
-                }
-            }
-        }
-    }
-}
 
 void ParamWell::CheckPerf() const
 {

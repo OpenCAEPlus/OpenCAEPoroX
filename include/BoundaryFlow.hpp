@@ -49,13 +49,18 @@ public:
 };
 
 
+/// Const pressure flow
 class BoundaryFlowMethod01 : public BoundaryFlowMethod
 {
 public:
-    BoundaryFlowMethod01(const OCP_DBL& bK_in, const OCP_DBL& bC_in, BoundaryFlowVarSet& hlvs);
+    BoundaryFlowMethod01(const BoundaryParam& bP, BoundaryFlowVarSet& bfvs) {
+        name = bP.name;
+        P    = bP.P;
+    }
 
 protected:
-
+    string  name;
+    OCP_DBL P;
 };
 
 

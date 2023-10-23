@@ -13,13 +13,34 @@
 #include "BoundaryFlow.hpp"
 
 
-
-
-
-
 void BoundaryFlow::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const vector<string>& boundName, const vector<USI>& boundIndex)
 {
 
+	if (rs_param.BDparam.size() > 0) {
+		ifUse = OCP_TRUE;
+
+
+		for (const auto& bP : rs_param.BDparam) {
+			if (bP.constP) {
+				bfM.push_back(new BoundaryFlowMethod01(bP, vs));
+
+
+			}
+		}
+
+		const USI bLen = boundName.size();
+		vector<USI> boundCode(bLen, 0);
+		for (OCP_USI n = 0; n < bvs.nb; n++) {
+			fill(boundCode.begin(), boundCode.end(), 0.0);
+			for (OCP_INT i = bLen - 1; i >= 0; i--) {
+				boundCode[i] = (((boundIndex[n] >> i) & 1));
+
+				if (boundIndex[n] == 4) {
+					cout << "get it" << endl;
+				}
+			}
+		}
+	}
 }
 
 /*----------------------------------------------------------------------------*/

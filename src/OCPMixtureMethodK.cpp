@@ -802,7 +802,6 @@ OCPMixtureMethodK_GW01::OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, c
 {
 	vs.Init(OCPMixtureType::BO_GW, 2, 2);
 
-
 	PVTCO2.Setup(rs_param.PVTCO2.data[i]);
 	PVTH2O.Setup(rs_param.PVTH2O.data[i]);
 
@@ -816,6 +815,7 @@ void OCPMixtureMethodK_GW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 	mvs.T = bvs.T[bId];
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+	copy(&bvs.Pj[bId * bvs.np], &bvs.Pj[bId * bvs.np] + bvs.np, mvs.Pj.begin());
 }
 
 
@@ -829,15 +829,16 @@ void OCPMixtureMethodK_GW01::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const
 
 void OCPMixtureMethodK_GW01::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
 {
-	OCP_DBL dummy;
-	OCP_DBL xWg, xGw;
-	PVTCO2.CalRhoMuSol(vs.P, vs.T, vs.rho[0], dummy, xWg);
-	PVTH2O.CalRhoMuSol(vs.P, vs.T, vs.rho[1], dummy, xGw);
-	// correct the water phase density
-	garciaw.CalRho(vs.T, xGw, vs.rho[1]);
+	// assume all pure water for initial reservoir
 
-	vs.Ni[0] = Vp * (vs.S[0] * vs.rho[0] * (1 - xWg) + vs.S[1] * vs.rho[1] * xGw);
-	vs.Ni[1] = Vp * (vs.S[0] * vs.rho[0] * xWg + vs.S[1] * vs.rho[1] * (1 - xGw));
+	OCP_DBL dummy;
+	OCP_DBL xGw;
+	PVTH2O.CalRhoMuSol(vs.Pj[1], vs.T, vs.rho[1], dummy, xGw);
+	// correct the water phase density
+	garciaw.CalRho(vs.T, 0.0, vs.rho[1]);
+
+	vs.Ni[0] = 0;
+	vs.Ni[1] = Vp * vs.S[1] * vs.rho[1];
 }
 
 
@@ -877,10 +878,10 @@ void OCPMixtureMethodK_GW01::FlashDer(OCPMixtureVarSet& vs)
 	OCP_DBL xWgP, xGwP;
 
 	// Gas Properties
-	PVTCO2.CalRhoMuSolDer(vs.P, vs.T, vs.rho[0], vs.mu[0], xWg, vs.rhoP[0], vs.muP[0], xWgP);
+	PVTCO2.CalRhoMuSolDer(vs.Pj[0], vs.T, vs.rho[0], vs.mu[0], xWg, vs.rhoP[0], vs.muP[0], xWgP);
 
 	// Water Properties
-	PVTH2O.CalRhoMuSolDer(vs.P, vs.T, vs.rho[1], vs.mu[1], xGw, vs.rhoP[1], vs.muP[1], xGwP);
+	PVTH2O.CalRhoMuSolDer(vs.Pj[1], vs.T, vs.rho[1], vs.mu[1], xGw, vs.rhoP[1], vs.muP[1], xGwP);
 
 
 	vs.Nt = vs.Ni[0] + vs.Ni[1];
@@ -979,49 +980,57 @@ void OCPMixtureMethodK_GW01::FlashDer(OCPMixtureVarSet& vs)
 		vs.dXsdXp[4 * 3 + 0] = xGw;                                              // dXGw / dP
 		vs.dXsdXp[5 * 3 + 0] = -xGw;                                             // dXWw / dP
 	}
-
-
 }
 
 
 OCP_DBL OCPMixtureMethodK_GW01::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-	if (pt == PhaseType::gas)         return CalXiG(P, T);
-	else if (pt == PhaseType::wat)    return CalXiW(P, T);
+	if (pt == PhaseType::gas)         return CalXiG(P, T, z);
+	else if (pt == PhaseType::wat)    return CalXiW(P, T, z);
 	else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
 
 OCP_DBL OCPMixtureMethodK_GW01::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-	if (pt == PhaseType::gas)         return CalRhoG(P, T);
-	else if (pt == PhaseType::wat)    return CalRhoW(P, T);
+	if (pt == PhaseType::gas)         return CalRhoG(P, T, z);
+	else if (pt == PhaseType::wat)    return CalRhoW(P, T, z);
 	else                              OCP_ABORT("WRONG PHASE TYPE");
 }
 
 
-OCP_DBL OCPMixtureMethodK_GW01::CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const
+OCP_DBL OCPMixtureMethodK_GW01::CalRhoW(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z) const
 {
+	// Water Properties
 	OCP_DBL rhow, xGw, dummy;
 	PVTH2O.CalRhoMuSol(P, T, rhow, dummy, xGw);
-	garciaw.CalRho(T, xGw, rhow);
+
+	if (z[0] < xGw) {
+		// water is unsaturated
+		garciaw.CalRho(T, z[0], rhow);
+	}
+	else {
+		// water is saturated
+		garciaw.CalRho(T, xGw, rhow);
+	}
 	return rhow;
 }
 
 
 OCP_DBL OCPMixtureMethodK_GW01::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
 {
-
+	if (pt == PhaseType::gas)       return 1 / CalRhoG(P, T, z);
+	else if (pt == PhaseType::wat)  return 1 / CalRhoW(P, T, z);
+	else                            OCP_ABORT("WRONG Phase Type!");
 }
 
 
 void OCPMixtureMethodK_GW01::CalVStd(OCPMixtureVarSet& vs)
 {
+	vs.Pj[0] = vs.P;
+	vs.Pj[1] = vs.P;
+	Flash(vs);
 }
-
-
-
-
 
 
 /*----------------------------------------------------------------------------*/

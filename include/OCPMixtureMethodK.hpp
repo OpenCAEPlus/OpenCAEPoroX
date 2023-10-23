@@ -240,10 +240,10 @@ public:
 
 protected:
     void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
-    OCP_DBL CalXiG(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoG(P, T); }
-    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T) const { return CalRhoW(P, T); }
-    OCP_DBL CalRhoG(const OCP_DBL& P, const OCP_DBL& T) const { return PVTCO2.CalRho(P, T); }
-    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T) const;
+    OCP_DBL CalXiG(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z) const { return CalRhoG(P, T, z); }
+    OCP_DBL CalXiW(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z) const { return CalRhoW(P, T, z); }
+    OCP_DBL CalRhoG(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z) const { return PVTCO2.CalRho(P, T); }
+    OCP_DBL CalRhoW(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* z) const;
 
 protected:
     /// PVT table for CO2

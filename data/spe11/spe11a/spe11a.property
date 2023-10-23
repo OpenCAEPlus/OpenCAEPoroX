@@ -105,7 +105,7 @@ GMSHPROEND
 
 BOUNDARY
 *NAME  Top_Boundary
-CONSTP 1.1E5
+CONSTP 1.1
 /
 BOUNDARYEND
 
@@ -123,10 +123,16 @@ ZMFVD
 /
 
 PSURF
-1.1E5
+1.1
 
 TSURF
 20
+
+
+
+WELLSTRE
+Solvent 1 0 /
+/
 
 
 WELSPECS
@@ -136,4 +142,11 @@ I2 Field 1.7 0.7 0 GAS COORDINATE
 
 COMPDAT
 'I*'   3*  1*   1.8E-3   3*   /
+/
+
+
+WCONINJE
+--d
+--name type   openflag  mode  surface_rate(m3/day)    BHP
+I*     Solvent   OPEN    RATE       0.0072            10000 /
 /

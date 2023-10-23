@@ -109,10 +109,6 @@ protected:
     string              name;
     /// belonging group of well, it would be moved to opt if necessary.
     string              group;
-    /// I-index of the well header.
-    USI                 I;
-    /// J-index of the well header.
-    USI                 J;
     /// reference depth of well.
     OCP_DBL             depth;
     /// Well pressure in reference depth.

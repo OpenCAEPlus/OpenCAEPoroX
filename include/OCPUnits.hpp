@@ -19,7 +19,21 @@
 using namespace std;
 
 
-void SetUnit(const string& unitType);
+enum class UnitType
+{
+	/// field units
+	FIELD,
+	/// metric units
+	METRIC
+};
+
+
+
+void SetUnit(const string& ut);
+
+
+/// OCP unit type
+extern UnitType unitType;
 
 
 ////////////////////////////////////////////////
