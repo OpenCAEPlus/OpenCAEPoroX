@@ -1251,6 +1251,7 @@ void PreParamGridWell::SetupBasicGmshGrid()
     v.resize(numGrid);
     depth.resize(numGrid);
     boundIndex.resize(numGrid);
+    boundArea.resize(numGrid);
     SATNUM.resize(numGrid);
     PVTNUM.resize(numGrid);
     ROCKNUM.resize(numGrid);
@@ -1262,7 +1263,8 @@ void PreParamGridWell::SetupBasicGmshGrid()
             SATNUM[n]     = gmshGrid.elements[n].phyIndex;
             PVTNUM[n]     = gmshGrid.elements[n].phyIndex;
             ROCKNUM[n]    = gmshGrid.elements[n].phyIndex;
-            boundIndex[n] = gmshGrid.elements[n].boundIndex;
+            boundIndex[n] = gmshGrid.elements[n].boundIndex;      
+            boundArea[n]  = gmshGrid.elements[n].boundArea;
         }
     }
 }
@@ -1602,6 +1604,7 @@ void PreParamGridWell::FreeMemory()
     vector<USI>().swap(PVTNUM);
     vector<USI>().swap(ROCKNUM);
     vector<USI>().swap(boundIndex);
+    vector<OCP_DBL>().swap(boundArea);
 
     vector<WellParam>().swap(well);
 

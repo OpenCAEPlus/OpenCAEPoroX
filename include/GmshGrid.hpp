@@ -102,6 +102,8 @@ public:
     string          boundary;
     /// index of boundary (binary encoding)
     OCP_USI         boundIndex{ 0 };
+    /// effective area of boundary
+    OCP_DBL         boundArea{ 0 };
     /// center
     Point3D         center;
     /// area

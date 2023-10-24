@@ -44,14 +44,16 @@ public:
 
 public:
 	auto& GetBoundaryIndex() { return boundIndex; }
+	auto& GetBoundaryArea() { return boundArea; }
 	auto& GetBoundName() { return boundName; }
 
 protected:
 
 
 protected:
-	vector<string> boundName;
-	vector<USI>    boundIndex;
+	vector<string>  boundName;
+	vector<USI>     boundIndex;
+	vector<OCP_DBL> boundArea;
 };
 
 

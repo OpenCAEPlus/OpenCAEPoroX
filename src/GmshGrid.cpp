@@ -247,6 +247,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
 			const Point3D&& center2edge = 0.5 * (edgeNode0 + edgeNode1) - element.center;
 			e.area.push_back(fabs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
+
+			element.boundArea = e.area[0];
 		}
 		else {
 			// internal edge

@@ -249,6 +249,8 @@ protected:
     vector<USI>     ROCKNUM;   
     /// boundary indicator
     vector<USI>     boundIndex;
+    /// boundary area
+    vector<OCP_DBL> boundArea;
 
     // Initial Condition
     InitialReservoir initR;
