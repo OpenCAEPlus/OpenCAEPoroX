@@ -114,10 +114,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         // Calculate the number of kind of grid data needs to be sent to other process
         VarInfoGrid send_var;
         send_var_info = GetSendVarInfo(varInfo, send_var);
-        if (grid.activeGridNum < grid.numGrid) {
-            send_var_info += pow(2, sizeof(OCP_INT) * 8 - 2);
-            domain.allActive = OCP_FALSE;
-        }
                 
         MPI_Bcast(&send_var_info, 1, MPI_INT, MASTER_PROCESS, myComm);
 
@@ -148,9 +144,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         // send_var_value, send_edge(direction, areaB, areaE, transmult)
         const USI varNumEdge = 4;
         OCP_USI maxSendSize = maxNumElement * send_var.numByte_total + maxNumEdge * varNumEdge * sizeof(OCP_DBL);
-        if (!domain.allActive) {
-            maxSendSize += maxNumElement * sizeof(OCP_USI);
-        }
+
         send_buffer[0].resize(maxSendSize);
         vector<OCP_BOOL>        work_state{ OCP_FALSE };
         OCP_CHAR*               work_buffer;
@@ -219,14 +213,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                 }
             }        
             send_size += conn_size * sizeof(OCP_DBL);
-
-            // global index(include inactive grid)
-            if (!domain.allActive) {
-                OCP_USI* agi = (OCP_USI*)(conn_ptr + conn_size);
-                copy(gridIndexA.data(), gridIndexA.data() + numGrid, agi);
-                send_size += numGrid * sizeof(gridIndexA[0]);
-            }
-           
+         
             // send
             MPI_Isend((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm, &request[p - 1]);
             // MPI_Send((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm);
@@ -312,14 +299,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         }
         conn.numConn = conn.iteratorConn.size();
 
-        // global index(include inactive grid)
-        if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.vs.nb);
-            for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
-                domain.gridAllIndex[n] = grid.map_Act2All[domain.grid[n]];
-            }
-        }
-
         if (myrank == 1) {
             //for (OCP_USI n = 0; n < bulk.numBulk; n++) {
             //    cout << domain.grid[n] << "  " << bulk.poroInit[n] - 1 << endl;
@@ -359,7 +338,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         for (OCP_INT i = sizeof(OCP_INT) * 8 - 1; i >= 0; i--) {
             recv_var_info.push_back(((send_var_info >> i) & 1));
         }
-        if (recv_var_info[1] == 1)  domain.allActive = OCP_FALSE;
         reverse(recv_var_info.begin(), recv_var_info.end());
 
         VarInfoGrid recv_var;
@@ -379,10 +357,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         const USI varNumEdge = 4;
         MPI_Status status;
         OCP_USI   recv_size   = numIgridEdge[0] * recv_var.numByte_total + numIgridEdge[2] * varNumEdge * sizeof(OCP_DBL);
-        if (!domain.allActive) {
-            // recv global index(include inactive grid)
-            recv_size += numIgridEdge[0] * sizeof(OCP_USI);
-        }
         OCP_CHAR* recv_buffer = new OCP_CHAR[recv_size]();
 
         MPI_Recv((void*)recv_buffer, recv_size, MPI_BYTE, MASTER_PROCESS, 0, myComm, &status);       
@@ -466,14 +440,6 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         }
         conn.numConn = conn.iteratorConn.size();
         set<OCP_USI>().swap(recv_proc);
-
-        // record global index of grid if inactive grid exist
-        if (!domain.allActive) {
-            domain.gridAllIndex.resize(bulk.vs.nb);
-            const OCP_USI* src = (OCP_USI*)conn_ptr;
-            OCP_USI*       dst = domain.gridAllIndex.data();
-            copy(src, src + bulk.vs.nb, dst);
-        }
 
         delete[] recv_buffer;
     }

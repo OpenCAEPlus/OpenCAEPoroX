@@ -115,12 +115,6 @@ public:
 
 	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid in equations
 
-
-	// If all grids are active. if not, record their global index(include inactive grid) (useless now)
-	OCP_BOOL          allActive{ OCP_TRUE };
-	vector<OCP_USI>   gridAllIndex;
-
-
 	// Well perforations
 public:
 	OCP_INT GetPerfLocation(const OCP_USI& wId, const USI& p) const;

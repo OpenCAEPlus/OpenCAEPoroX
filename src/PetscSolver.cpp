@@ -80,7 +80,7 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
 
 OCP_INT ScalarPetscSolver::Solve()
 {
-    return IMPEC_solver_p(myrank, numproc, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
+    OCP_ABORT("Inavailable!");
 }
 
 
