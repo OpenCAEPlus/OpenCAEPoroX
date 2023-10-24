@@ -22,7 +22,7 @@
 using namespace std;
 
 
-enum class PerfDirection
+enum class PerfDirection : USI
 {
     /// x-direction
     x,

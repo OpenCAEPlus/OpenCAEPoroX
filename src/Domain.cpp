@@ -54,9 +54,9 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	}
 
 	// Traverse elementCSR in ascending order of process number
-	idx_t    global_well_start = numElementTotal - numWellTotal;
-	USI      localIndex        = 0;
-	vector<set<OCP_USI>> ghostElement;
+	OCP_ULL  global_well_start = numElementTotal - numWellTotal;
+	OCP_USI  localIndex        = 0;
+	vector<set<OCP_ULL>> ghostElement;
 	grid.reserve(numElementLocal * 1.5); // preserved space
 	for (const auto& s : recv_proc) {
 		for (const auto& e : elementCSR) {
@@ -72,7 +72,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 						continue;
 					}
 					grid.push_back(my_vtx[i]);
-					init_global_to_local.insert(make_pair(static_cast<OCP_USI>(my_vtx[i]), localIndex));
+					init_global_to_local.insert(make_pair(static_cast<OCP_ULL>(my_vtx[i]), localIndex));
 					for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
 						if (my_edge_proc[j] != myrank) {
 							// current interior grid is also ghost grid of other process
@@ -82,13 +82,13 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 									if (localIndex != send_element_loc[s].back()) {
 										send_element_loc[s].push_back(localIndex);
 									}
-									ghostElement[s].insert(static_cast<OCP_USI>(my_edge[j]));
+									ghostElement[s].insert(static_cast<OCP_ULL>(my_edge[j]));
 									break;
 								}
 							}
 							if (s == send_element_loc.size()) {
 								send_element_loc.push_back(vector<OCP_USI>{static_cast<OCP_USI>(my_edge_proc[j]), localIndex});
-								ghostElement.push_back(set<OCP_USI>{static_cast<OCP_USI>(my_edge[j])});
+								ghostElement.push_back(set<OCP_ULL>{static_cast<OCP_ULL>(my_edge[j])});
 							}
 						}
 					}
@@ -133,6 +133,8 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 
 	//////////////////////////////////////////////////////////////
 	// Output partition information
+	//////////////////////////////////////////////////////////////
+
 	if (false) {
 		ofstream myFile;
 		myFile.open("test/process" + to_string(myrank) + ".txt");
@@ -241,18 +243,18 @@ USI Domain::GetPerfNum(const OCP_USI& wId) const
 }
 
 
-const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
+const vector<OCP_ULL>* Domain::CalGlobalIndex(const USI& nw) const
 {
 	global_index.resize(numGridLocal + nw);
 
-	const OCP_INT numElementLoc = numGridInterior + nw;
-	OCP_INT       global_begin;
-	OCP_INT       global_end;
+	const OCP_ULL numElementLoc = numGridInterior + nw;
+	OCP_ULL       global_begin;
+	OCP_ULL       global_end;
 
 	GetWallTime timer;
 	timer.Start();
 
-	MPI_Scan(&numElementLoc, &global_end, 1, MPI_INT, MPI_SUM, myComm);
+	MPI_Scan(&numElementLoc, &global_end, 1, OCPMPI_ULL, MPI_SUM, myComm);
 
 	OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
@@ -267,20 +269,20 @@ const vector<OCP_USI>* Domain::CalGlobalIndex(const USI& nw) const
 
 	// Get Ghost grid's global index by communication	
 	for (USI i = 0; i < numRecvProc; i++) {
-		const vector<OCP_USI>& rel = recv_element_loc[i];
-		const OCP_USI bId = rel[1] + nw;
-		MPI_Irecv(&global_index[bId], rel[2] - rel[1], MPI_INT, rel[0], 0, myComm, &recv_request[i]);
+		const auto& rel = recv_element_loc[i];
+		const auto  bId = rel[1] + nw;
+		MPI_Irecv(&global_index[bId], rel[2] - rel[1], OCPMPI_ULL, rel[0], 0, myComm, &recv_request[i]);
 	}
-	vector<vector<OCP_INT>> send_buffer(numSendProc);
+	vector<vector<OCP_ULL>> send_buffer(numSendProc);
 	for (USI i = 0; i < numSendProc; i++) {
-		const vector<OCP_USI>& sel = send_element_loc[i];
-		vector<OCP_INT>&       s   = send_buffer[i];
+		const auto& sel = send_element_loc[i];
+		auto&       s   = send_buffer[i];
 		s.resize(sel.size());
 		s[0] = sel[0];
 		for (USI j = 1; j < sel.size(); j++) {
 			s[j] = global_index[sel[j]];
 		}
-		MPI_Isend(s.data() + 1, s.size() - 1, MPI_INT, s[0], 0, myComm, &send_request[i]);
+		MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_ULL, s[0], 0, myComm, &send_request[i]);
 	}
 
 	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);

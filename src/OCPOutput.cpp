@@ -1430,7 +1430,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 
     // Input cell values    
     vector<vector<OCP_DBL>> gridVal;        // each row is on a node of TSTEP in turn
-    vector<OCP_USI>         global_index;
+    vector<OCP_ULL>         global_index;
     vector<OCP_USI>         mypart(numGrid);
     OCP_DBL*                workPtr;
     vector<OCP_DBL>         tmpVal;

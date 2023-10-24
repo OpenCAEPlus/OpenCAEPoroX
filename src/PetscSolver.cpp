@@ -34,7 +34,7 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
     GetWallTime timer;
     timer.Start();
 
-    MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, MPI_INT, myComm);
+    MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, OCPMPI_INT, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
     

@@ -95,7 +95,7 @@ protected:
 
     // conmunication
     int              myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
-    const vector<OCP_USI>* global_index;
+    const vector<OCP_ULL>* global_index;
 };
 
 // For unknown reasons, pardiso's BSR version doesn't work, so convert a BSR mat to CSR first

@@ -19,7 +19,7 @@
 using namespace std;
 
 /// NR state for physical check
-enum class OCPNRStateP
+enum class OCPNRStateP : USI
 {
     /// continue solve
     continueSol,
@@ -33,7 +33,7 @@ enum class OCPNRStateP
 
 
 /// NR state for convergence check
-enum class OCPNRStateC
+enum class OCPNRStateC : USI
 {
     /// converge
     converge,

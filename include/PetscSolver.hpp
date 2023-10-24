@@ -56,8 +56,8 @@ protected:
     // CSR/BSR   
     int                     blockdim;   ///< block dim              
     vector<double>          A;          ///< value
-    vector<int>             iA;         ///< row ptr
-    vector<int>             jA;         ///< col index  
+    vector<OCP_USI>         iA;         ///< row ptr
+    vector<OCP_USI>         jA;         ///< col index  
     double*                 b;          ///< rhs
     double*                 x;          ///< solution
 
@@ -65,9 +65,9 @@ protected:
     MPI_Comm                myComm;       ///< Communicator
     int                     numproc;      ///< num of process
     int                     myrank;       ///< current rank
-    const vector<OCP_USI>*  global_index; ///< global index
-    vector<int>             allBegin;     ///< begin for all process(self-include) 
-    vector<int>             allEnd;       ///< end for all process(self-include)
+    const vector<OCP_ULL>*  global_index; ///< global index
+    vector<OCP_ULL>         allBegin;     ///< begin for all process(self-include) 
+    vector<OCP_ULL>         allEnd;       ///< end for all process(self-include)
     vector<int>             allEle;       ///< num of elements for each proc
 };
 

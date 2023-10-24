@@ -256,7 +256,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
             OCP_ASSERT(record_var_num == staVar.size(), "wrong staVar");
 
             record_total.resize(record_var_num * domain.numproc);
-            MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
+            MPI_Gather(record_local.data(), record_var_num, OCPMPI_DBL, record_total.data(), record_var_num, OCPMPI_DBL, MASTER_PROCESS, domain.myComm);
 
             // Calculate average, max, min
             for (USI n = 0; n < record_var_num; n++) {
@@ -340,7 +340,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
             }
         }
         else {
-            MPI_Gather(record_local.data(), record_var_num, MPI_DOUBLE, record_total.data(), record_var_num, MPI_DOUBLE, MASTER_PROCESS, domain.myComm);
+            MPI_Gather(record_local.data(), record_var_num, OCPMPI_DBL, record_total.data(), record_var_num, OCPMPI_DBL, MASTER_PROCESS, domain.myComm);
         }
     }
 }

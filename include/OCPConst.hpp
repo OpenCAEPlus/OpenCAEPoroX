@@ -45,7 +45,7 @@ const OCP_DBL MAX_DS_LIMIT      = 0.1;   ///< Maximal saturation change
 const OCP_DBL TARGET_DP         = 50;    ///< Target pressure change
 const OCP_DBL TARGET_DS         = 0.01;  ///< Target saturation change
 
-enum class GridType
+enum class GridType : USI
 {
     /// Structured Grid
     structured,
@@ -59,7 +59,7 @@ enum class GridType
     gmsh
 };
 
-enum class OCPModel
+enum class OCPModel : USI
 {
     /// none
     none,
@@ -75,7 +75,7 @@ const USI FIM   = 2; ///< Solution method = FIM
 const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
 
 
-enum class ConnDirect
+enum class ConnDirect : USI
 {
     /// none
     n,
@@ -107,7 +107,7 @@ enum class ConnDirect
 
 
 /// Reservoir state
-enum class ReservoirState
+enum class ReservoirState : USI
 {
     /// bulk success
     bulk_success,

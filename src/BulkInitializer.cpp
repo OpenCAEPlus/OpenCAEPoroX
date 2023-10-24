@@ -161,7 +161,7 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 	}
 	zRangeTmp[1] *= -1;
 
-	MPI_Allreduce(&zRangeTmp, &zRange, 2, MPI_DOUBLE, MPI_MIN, domain.myComm);
+	MPI_Allreduce(&zRangeTmp, &zRange, 2, OCPMPI_DBL, MPI_MIN, domain.myComm);
 	const OCP_DBL Zmin = zRange[0];
 	const OCP_DBL Zmax = -zRange[1];
 	OCP_DBL tabdz = (Zmax - Zmin) / (numNodes - 1);

@@ -19,7 +19,7 @@
 using namespace std;
 
 
-enum class OCPMixtureType
+enum class OCPMixtureType : USI
 {
     /// single phase
     SP,
@@ -40,7 +40,7 @@ enum class OCPMixtureType
 };
 
 
-enum class PhaseType
+enum class PhaseType : USI
 {
     /// oil phase
     oil,

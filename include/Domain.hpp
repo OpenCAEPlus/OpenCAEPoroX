@@ -77,7 +77,7 @@ protected:
 	/// elements received from other process in CSR
 	vector<vector<idx_t>>   elementCSR;  
 	///< global index of interior grid & ghost grid
-	vector<OCP_USI>         grid;        
+	vector<OCP_ULL>         grid;
 	/// well's global index(index starts from zero)
 	vector<OCP_USI>         well; 
 
@@ -86,17 +86,17 @@ protected:
 	/// num of all neighbor of grids: well-included, self-included
 	vector<USI>             neighborNum; 
 	/// global index -> local index (interior grid & ghost grid)
-	map<OCP_USI, OCP_USI>   init_global_to_local; 
+	map<OCP_ULL, OCP_USI>   init_global_to_local;
 
 	////////////////////////////////////////
 	// Communication
 	////////////////////////////////////////
 
 public:
-	const vector<OCP_USI>* CalGlobalIndex(const USI& nw) const;
+	const vector<OCP_ULL>* CalGlobalIndex(const USI& nw) const;
 
 	////////////////////////////////////////
-	// Tacit Communication (Prefered)
+	// Tacit Communication (Prefered, Local Index)
 	////////////////////////////////////////
 
 	USI numSendProc, numRecvProc;
@@ -113,7 +113,7 @@ public:
 	// Global Index Communication
 	////////////////////////////////////////
 
-	mutable vector<USI>     global_index;  ///< Interior grid + active well + ghost grid in equations
+	mutable vector<OCP_ULL>     global_index;  ///< Interior grid + active well + ghost grid in equations
 
 	// Well perforations
 public:

@@ -191,7 +191,7 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
 
     OCP_BOOL       wellOptChange;
     const OCP_BOOL wellChange_loc = wells.GetWellOptChange();
-    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, MPI_INT, MPI_LAND, myComm);
+    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, OCPMPI_BOOL, MPI_LAND, myComm);
 
     timer.Stop();
 
@@ -262,7 +262,7 @@ void ControlTime::CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<
 	GetWallTime timer;
 	timer.Start();
 
-	MPI_Allreduce(&dt_loc, &current_dt, 1, MPI_DOUBLE, MPI_MIN, myComm);
+	MPI_Allreduce(&dt_loc, &current_dt, 1, OCPMPI_DBL, MPI_MIN, myComm);
 
 	OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 
@@ -324,7 +324,7 @@ OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_li
     timer.Start();
 
     OCPNRStateC conflag;
-    MPI_Allreduce(&conflag_loc, &conflag, 1, MPI_INT, MPI_MAX, myComm);
+    MPI_Allreduce(&conflag_loc, &conflag, 1, OCPMPI_ENUM, MPI_MAX, myComm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
 

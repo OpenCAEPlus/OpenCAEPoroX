@@ -19,7 +19,7 @@
 using namespace std;
 
 
-enum class UnitType
+enum class UnitType : USI
 {
 	/// field units
 	FIELD,

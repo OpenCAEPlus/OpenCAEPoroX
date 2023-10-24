@@ -18,7 +18,7 @@
 using namespace std;
 
 
-enum class OCPFlowType
+enum class OCPFlowType : USI
 {
     /// single phase
     SP,

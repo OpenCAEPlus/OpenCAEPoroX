@@ -21,7 +21,7 @@
 
 using namespace std;
 
-enum class WellType
+enum class WellType : USI
 {
     /// injection well
     injector,
@@ -29,7 +29,7 @@ enum class WellType
     productor
 };
 
-enum class WellState
+enum class WellState : USI
 {
     /// Open
     open,
@@ -37,7 +37,7 @@ enum class WellState
     close
 };
 
-enum class WellOptMode
+enum class WellOptMode : USI
 {
     /// injection well rate control
     irate,

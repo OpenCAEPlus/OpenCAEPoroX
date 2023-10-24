@@ -88,6 +88,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
     });
 
+
     /////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////
 
@@ -115,16 +116,16 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         VarInfoGrid send_var;
         send_var_info = GetSendVarInfo(varInfo, send_var);
                 
-        MPI_Bcast(&send_var_info, 1, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Bcast(&send_var_info, 1, OCPMPI_INT, MASTER_PROCESS, myComm);
 
         // Master proc is excluded
         OCP_INT* numIgridEdgeproc = new OCP_INT[3 * numproc]();
-        MPI_Gather(numIgridEdge, 3, MPI_INT, numIgridEdgeproc, 3, MPI_INT, MASTER_PROCESS, myComm);        
+        MPI_Gather(numIgridEdge, 3, OCPMPI_INT, numIgridEdgeproc, 3, OCPMPI_INT, MASTER_PROCESS, myComm);
       
         OCP_INT* dislps               = new OCP_INT[numproc + 1]();
         OCP_USI* numGridInterior_proc = new OCP_USI[numproc]();
-        OCP_INT maxNumElement = 0;
-        OCP_INT maxNumEdge    = 0;
+        OCP_INT  maxNumElement = 0;
+        OCP_INT  maxNumEdge    = 0;
         OCP_INT* numIgridproc = numIgridEdgeproc;
         for (USI p = 1; p < numproc; p++) {
             numGridInterior_proc[p] = numIgridEdgeproc[3 * p + 1];
@@ -135,8 +136,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             dislps[p + 1]   = numIgridproc[p] + dislps[p];
         }
 
-        OCP_INT* iGridproc = new OCP_INT[dislps[numproc]];
-        MPI_Gatherv(0, 0, MPI_INT, iGridproc, numIgridproc, dislps, MPI_INT, MASTER_PROCESS, myComm);
+        OCP_ULL* iGridproc = new OCP_ULL[dislps[numproc]];
+        MPI_Gatherv(0, 0, OCPMPI_ULL, iGridproc, numIgridproc, dislps, OCPMPI_ULL, MASTER_PROCESS, myComm);
         delete[] numIgridEdgeproc;
 
         // Send vars and conns to other process      
@@ -174,8 +175,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
             // grid
             const OCP_USI  numGrid   = dislps[p + 1] - dislps[p];
-            const OCP_INT* gridIndex = &iGridproc[dislps[p]];
-            vector<OCP_USI> gridIndexA(numGrid);
+            const OCP_ULL* gridIndex = &iGridproc[dislps[p]];
+            vector<OCP_ULL> gridIndexA(numGrid);
             for (OCP_USI n = 0; n < numGrid; n++) {
                 gridIndexA[n] = grid.map_Act2All[gridIndex[n]];
             }
@@ -215,8 +216,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             send_size += conn_size * sizeof(OCP_DBL);
          
             // send
-            MPI_Isend((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm, &request[p - 1]);
-            // MPI_Send((void*)work_buffer, send_size, MPI_BYTE, p, 0, myComm);
+            MPI_Isend((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm, &request[p - 1]);
+            // MPI_Send((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm);
             // cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
 
             // update work_state(request)
@@ -265,8 +266,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         // Get conn-based vars from grid
         vector<BulkConnPair>* dst = &conn.iteratorConn;
         domain.neighborNum.reserve(domain.numGridInterior);
-        const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
-        const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
+        const auto  global_well_start = domain.numElementTotal - domain.numWellTotal;
+        const auto& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
         for (OCP_USI n = 0; n < bulk.vs.nbI; n++) {
@@ -319,7 +320,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     }
     else {
         // Get num of kind of vars
-        MPI_Bcast(&send_var_info, 1, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Bcast(&send_var_info, 1, OCPMPI_INT, MASTER_PROCESS, myComm);
         
         numIgridEdge[0] = domain.numGridLocal;
         numIgridEdge[1] = domain.numGridInterior;
@@ -327,9 +328,9 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             numIgridEdge[2] += e[2];    // well may be included
         }
 
-        MPI_Gather(numIgridEdge, 3, MPI_INT, 0, 3, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Gather(numIgridEdge, 3, OCPMPI_INT, 0, 3, OCPMPI_INT, MASTER_PROCESS, myComm);
             
-        MPI_Gatherv(domain.grid.data(), numIgridEdge[0], MPI_INT, 0, 0, 0, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Gatherv(domain.grid.data(), numIgridEdge[0], OCPMPI_ULL, 0, 0, 0, OCPMPI_ULL, MASTER_PROCESS, myComm);
 
         // recv vars to from master process
         // decode first
@@ -359,7 +360,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         OCP_USI   recv_size   = numIgridEdge[0] * recv_var.numByte_total + numIgridEdge[2] * varNumEdge * sizeof(OCP_DBL);
         OCP_CHAR* recv_buffer = new OCP_CHAR[recv_size]();
 
-        MPI_Recv((void*)recv_buffer, recv_size, MPI_BYTE, MASTER_PROCESS, 0, myComm, &status);       
+        MPI_Recv((void*)recv_buffer, recv_size, OCPMPI_BYTE, MASTER_PROCESS, 0, myComm, &status);
         // cout << "Third stage : " << myrank <<  " receives " << recv_size << "b from 0" << endl;
              
         // dbl
@@ -385,8 +386,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         OCP_DBL*     conn_ptr = (OCP_DBL*)usi_ptr;
         vector<BulkConnPair>* dst = &conn.iteratorConn;       
         domain.neighborNum.reserve(domain.numGridInterior);
-        const OCP_USI     global_well_start = domain.numElementTotal - domain.numWellTotal;
-        const map<OCP_USI, OCP_USI>& init2local = domain.init_global_to_local;
+        const auto  global_well_start = domain.numElementTotal - domain.numWellTotal;
+        const auto& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
         // Traverse elementCSR in ascending order of process number
         set<OCP_USI> recv_proc;
@@ -458,7 +459,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     if (myrank == MASTER_PROCESS) {
         vector<string> names;       
         INT numName = grid.gmshGrid.GetBoundaryName(names);
-        MPI_Bcast(&numName, 1, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Bcast(&numName, 1, OCPMPI_INT, MASTER_PROCESS, myComm);
         if (numName > 0) {
             vector<INT> lenName(numName);
             string      nameset;
@@ -466,12 +467,12 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                 lenName[i] = names[i].size();
                 nameset    += names[i];
             }
-            MPI_Bcast(&lenName[0], numName, MPI_INT, MASTER_PROCESS, myComm);
+            MPI_Bcast(&lenName[0], numName, OCPMPI_INT, MASTER_PROCESS, myComm);
             INT len = 0;
             for (USI i = 0; i < numName; i++) {
                 len += lenName[i];
             }                               
-            MPI_Bcast(&nameset[0], len, MPI_CHAR, MASTER_PROCESS, myComm);
+            MPI_Bcast(&nameset[0], len, OCPMPI_CHAR, MASTER_PROCESS, myComm);
 
             /// Set boundary name
             auto& boundaryName = bulk.optMs.boundary.GetBoundName();
@@ -480,16 +481,16 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     }
     else {
         INT numName;
-        MPI_Bcast(&numName, 1, MPI_INT, MASTER_PROCESS, myComm);
+        MPI_Bcast(&numName, 1, OCPMPI_INT, MASTER_PROCESS, myComm);
         if (numName > 0) {
             vector<INT> lenName(numName);
-            MPI_Bcast(&lenName[0], numName, MPI_INT, MASTER_PROCESS, myComm);
+            MPI_Bcast(&lenName[0], numName, OCPMPI_INT, MASTER_PROCESS, myComm);
             INT len = 0;
             for (USI i = 0; i < numName; i++) {
                 len += lenName[i];
             }
             vector<OCP_CHAR> nameset(len);
-            MPI_Bcast(&nameset[0], len, MPI_CHAR, MASTER_PROCESS, myComm);
+            MPI_Bcast(&nameset[0], len, OCPMPI_CHAR, MASTER_PROCESS, myComm);
 
             /// Set boundary name
             auto& boundaryName = bulk.optMs.boundary.GetBoundName();

@@ -20,7 +20,7 @@
 using namespace std;
 
 
-enum class BulkContent
+enum class BulkContent : USI
 {
     /// all rock
     r,
