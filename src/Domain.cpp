@@ -38,8 +38,6 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		well.resize(numWellTotal);
 		for (OCP_USI w = 0; w < numWellTotal; w++) {
 			well[w] = w;
-			well2Bulk.push_back(gridwell.connWellGrid[w]);
-			sort(well2Bulk[w].begin(), well2Bulk[w].end());
 		}
 		return;
 	}
@@ -71,8 +69,6 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 					if (my_vtx[i] >= global_well_start) {
 						// well
 						well.push_back(my_vtx[i] - global_well_start);
-						well2Bulk.push_back(vector<OCP_USI>(my_edge + my_xadj[i], my_edge + my_xadj[i + 1]));
-						sort(well2Bulk.back().begin(), well2Bulk.back().end());
 						continue;
 					}
 					grid.push_back(my_vtx[i]);
@@ -208,9 +204,6 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		myFile << endl << endl << endl << "well" << endl;
 		for (USI w = 0; w < well.size(); w++) {
 			myFile << setw(8) << well[w];
-			for (const auto& p : well2Bulk[w]) {
-				myFile << setw(8) << p;
-			}
 		}
 		myFile << endl << endl << endl;
 		myFile << "Grid Num" << endl;

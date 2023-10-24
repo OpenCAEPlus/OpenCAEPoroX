@@ -80,8 +80,6 @@ protected:
 	vector<OCP_USI>         grid;        
 	/// well's global index(index starts from zero) (useless now)
 	vector<OCP_USI>         well; 
-	/// wells' bulk neighbor, init global index, ascending order (useless now)
-	vector<vector<OCP_USI>> well2Bulk;  
 
 	/// Well's global index(start from zero), perfortions' index(start from zero) and location(bulks' local index) of perforation
 	vector<vector<OCP_USI>> wellWPB;
