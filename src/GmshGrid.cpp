@@ -16,7 +16,7 @@
 
 #include "GmshGrid.hpp"
 
-Polygon::Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo, const OCP_USI& index)
+Polygon::Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index)
 {
 	p        = pIndex;
 	tag      = tag_in;
@@ -111,11 +111,11 @@ void GMSHGrid::InputGrid2D(const string& file)
 	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
 
 	// Get all the elementary entities in the model, as a vector of (dimension, tag) pairs:
-	std::vector<std::pair<int, int>> entities;
+	gmsh::vectorpair entities;
 	gmsh::model::getEntities(entities);
 
-	OCP_USI lineTag   = 1;
-	OCP_USI faceIndex = 0;
+	OCP_ULL lineTag   = 1;
+	OCP_ULL faceIndex = 0;
 
 	/// find all physical name, ordered as the ones of definitions in *.geo
 	physicalNameSet.resize(dimen + 1);
@@ -169,9 +169,9 @@ void GMSHGrid::InputGrid2D(const string& file)
 		if (dim == 1) {
 			// for boundary lines
 			for (USI t = 0; t < elemTypes.size(); t++) {
-				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
-					const OCP_USI bId = elemNodeTags[t][2 * l];
-					const OCP_USI eId = elemNodeTags[t][2 * l + 1];
+				for (OCP_ULL l = 0; l < elemTags[t].size(); l++) {
+					const OCP_ULL bId = elemNodeTags[t][2 * l];
+					const OCP_ULL eId = elemNodeTags[t][2 * l + 1];
 					edges.insert(Edge(bId - 1, eId - 1, elemTags[t][l], physicalName, physicalIndex));
 					lineTag++;
 				}
@@ -184,13 +184,13 @@ void GMSHGrid::InputGrid2D(const string& file)
 				if (elemTypes[t] == 2)  np = 3;  // for triangle
 				else                    np = 4;  // for quadrangle
 
-				vector<OCP_USI> indexFace(np);
-				for (OCP_USI l = 0; l < elemTags[t].size(); l++) {
+				vector<OCP_ULL> indexFace(np);
+				for (OCP_ULL l = 0; l < elemTags[t].size(); l++) {
 					indexFace.clear();					
 
 					for (USI i = 0; i < np; i++) {
-						const OCP_USI bId = elemNodeTags[t][np * l + (i % np)];
-						const OCP_USI eId = elemNodeTags[t][np * l + (i + 1) % np];
+						const OCP_ULL bId = elemNodeTags[t][np * l + (i % np)];
+						const OCP_ULL eId = elemNodeTags[t][np * l + (i + 1) % np];
 
 						auto iter = edges.find(Edge(bId - 1, eId - 1));
 						if (iter == edges.end()) {
@@ -240,8 +240,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			element.boundary   += (e.physical) + " & ";
 			element.boundIndex += e.phyIndex;
 			// Calculate effective area
-			const OCP_USI   bId       = element.p[e.faceIndex[1]];
-			const OCP_USI   eId       = element.p[(e.faceIndex[1] + 1) % (element.p.size())];
+			const OCP_ULL   bId       = element.p[e.faceIndex[1]];
+			const OCP_ULL   eId       = element.p[(e.faceIndex[1] + 1) % (element.p.size())];
 			const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
 			const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
 			const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };
@@ -255,8 +255,8 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 			for (USI i = 0; i < 2; i++) {
 				const Polygon& element = elements[e.faceIndex[2 * i]];
 				// Calculate effective area
-				const OCP_USI   bId       = element.p[e.faceIndex[2 * i + 1]];
-				const OCP_USI   eId       = element.p[(e.faceIndex[2 * i + 1] + 1) % (element.p.size())];
+				const OCP_ULL   bId       = element.p[e.faceIndex[2 * i + 1]];
+				const OCP_ULL   eId       = element.p[(e.faceIndex[2 * i + 1] + 1) % (element.p.size())];
 				const Point3D&& edgeNode0 = Point3D(&points[3 * bId]);
 				const Point3D&& edgeNode1 = Point3D(&points[3 * eId]);
 				const Point3D&& edgeNormal{ -(edgeNode0 - edgeNode1).y, (edgeNode0 - edgeNode1).x, 0 };

@@ -27,8 +27,8 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
     Psurf = paramWell.Psurf;
     Tsurf = paramWell.Tsurf;
  
-    const vector<OCP_USI> my_well = domain.GetWell();
-    numWell                       = my_well.size();
+    const auto my_well = domain.GetWell();
+    numWell            = my_well.size();
 
     if (paramWell.thermal) {
         for (USI w = 0; w < numWell; w++) {

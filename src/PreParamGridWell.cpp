@@ -165,7 +165,7 @@ void PreParamGridWell::PostProcessInput()
         ntg.resize(numGrid, 1.0);
     }
 
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         poro[n] *= ntg[n];
     }
 
@@ -405,9 +405,9 @@ void PreParamGridWell::InputGrid(ifstream& ifs, string& keyword)
                     }
                     else {
                         const USI     len = str.size();
-                        const OCP_USI num = stoi(str.substr(0, pos));
+                        const OCP_ULL num = stoi(str.substr(0, pos));
                         const OCP_DBL val = stod(str.substr(pos + 1, len - (pos + 1)));
-                        for (USI i = 0; i < num; i++) objPtr->push_back(val);
+                        for (OCP_ULL i = 0; i < num; i++) objPtr->push_back(val);
                     }
                 }
             }
@@ -429,9 +429,9 @@ void PreParamGridWell::InputGrid(ifstream& ifs, string& keyword)
                     }
                     else {
                         USI     len = str.size();
-                        OCP_USI num = stoi(str.substr(0, pos));
+                        OCP_ULL num = stoi(str.substr(0, pos));
                         USI val = stoi(str.substr(pos + 1, len - (pos + 1)));
-                        for (USI i = 0; i < num; i++) objPtr->push_back(val);
+                        for (OCP_ULL i = 0; i < num; i++) objPtr->push_back(val);
                     }
                 }
             }
@@ -476,7 +476,7 @@ void PreParamGridWell::InputGMSHPRO(ifstream& ifs)
     kx.resize(numGrid);
     ky.resize(numGrid);
     kz.resize(numGrid);
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         poro[n] = gmshGrid.facies[gmshGrid.elements[n].phyIndex].poro;
         kx[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].kx;
         ky[n]   = gmshGrid.facies[gmshGrid.elements[n].phyIndex].ky;
@@ -661,8 +661,8 @@ vector<USI>* PreParamGridWell::FindPtr(const string& varName, const USI&)
 template <typename T>
 void PreParamGridWell::setVal(vector<T>& obj, const T& val, const vector<USI>& index)
 {
-    const OCP_USI nxny = nx * ny;
-    OCP_USI id = 0;
+    const OCP_ULL nxny = nx * ny;
+    OCP_ULL id = 0;
 
     for (USI k = index[4]; k <= index[5]; k++) {
         for (USI j = index[2]; j <= index[3]; j++) {
@@ -681,8 +681,8 @@ void PreParamGridWell::CopyVal(vector<T>& obj,
     const vector<USI>& index)
 {
 
-    const OCP_USI nxny = nx * ny;
-    OCP_USI id = 0;
+    const OCP_ULL nxny = nx * ny;
+    OCP_ULL id = 0;
 
     for (USI k = index[4]; k <= index[5]; k++) {
         for (USI j = index[2]; j <= index[3]; j++) {
@@ -699,9 +699,8 @@ void PreParamGridWell::MultiplyVal(vector<OCP_DBL>& obj,
     const OCP_DBL& val,
     const vector<USI>& index)
 {
-
-    const OCP_USI nxny = nx * ny;
-    OCP_USI id = 0;
+    const OCP_ULL nxny = nx * ny;
+    OCP_ULL id = 0;
 
     for (USI k = index[4]; k <= index[5]; k++) {
         for (USI j = index[2]; j <= index[3]; j++) {
@@ -781,20 +780,21 @@ void PreParamGridWell::SetupOrthogonalGrid()
 void PreParamGridWell::CalDepthVOrthogonalGrid()
 {
     depth.resize(numGrid, 0);
-    const OCP_USI nxny = nx * ny;
+    const OCP_ULL nxny = nx * ny;
+    OCP_ULL id;
     // 0th layer
     for (USI j = 0; j < ny; j++) {
         for (USI i = 0; i < nx; i++) {
-            OCP_USI id = j * nx + i;
+            id = j * nx + i;
             depth[id] = tops[id] + dz[id] / 2;
         }
     }
     // 1th - (nz-1)th layer
     for (USI k = 1; k < nz; k++) {
-        OCP_USI knxny = k * nxny;
+        OCP_ULL knxny = k * nxny;
         for (USI j = 0; j < ny; j++) {
             for (USI i = 0; i < nx; i++) {
-                OCP_USI id = knxny + j * nx + i;
+                id = knxny + j * nx + i;
                 depth[id] = depth[id - nxny] + dz[id - nxny] / 2 + dz[id] / 2;
             }
         }
@@ -805,7 +805,7 @@ void PreParamGridWell::CalDepthVOrthogonalGrid()
     }
 
     v.resize(numGrid);
-    for (OCP_USI i = 0; i < numGrid; i++) v[i] = dx[i] * dy[i] * dz[i];
+    for (OCP_ULL i = 0; i < numGrid; i++) v[i] = dx[i] * dy[i] * dz[i];
 }
 
 void PreParamGridWell::SetupActiveConnOrthogonalGrid()
@@ -823,14 +823,14 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridSM()
 {
     gNeighbor.resize(activeGridNum);
     // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
+    for (OCP_ULL n = 0; n < activeGridNum; n++) {
         gNeighbor[n].reserve(6);
     }
 
     // Begin Id and End Id in Grid, bIdg < eIdg
-    OCP_USI       bIdg, eIdg, bIdb, eIdb;
+    OCP_ULL       bIdg, eIdg, bIdb, eIdb;
     OCP_DBL       areaB, areaE;
-    const OCP_USI nxny = nx * ny;
+    const OCP_ULL nxny = nx * ny;
 
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
@@ -892,14 +892,14 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
 
     gNeighbor.resize(activeGridNum);
     // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
+    for (OCP_ULL n = 0; n < activeGridNum; n++) {
         gNeighbor[n].reserve(6);
     }
 
     // Begin Id and End Id in Grid, bIdg < eIdg
-    OCP_USI       bIdg, eIdg, bIdb, eIdb;
+    OCP_ULL       bIdg, eIdg, bIdb, eIdb;
     OCP_DBL       areaB, areaE;
-    const OCP_USI nxny = nx * ny;
+    const OCP_ULL nxny = nx * ny;
 
     for (USI k = nz; k < 2 * nz; k++) {
         for (USI j = 0; j < ny; j++) {
@@ -975,15 +975,15 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     if (!ifUseVtk)  return;
 
     vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
-    vector<OCP_USI> cell_points; ///< numpoints, points index
+    vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
     cell_points.reserve(activeGridNum * 9);
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
-    OCP_USI         pIndex = 0;
+    OCP_ULL         pIndex = 0;
     OCP_DBL         tmpX, tmpY;
-    OCP_USI         id;
+    OCP_ULL         id;
     for (USI k = 0; k < nz; k++) {
         tmpY = 0;
         for (USI j = 0; j < ny; j++) {
@@ -1102,21 +1102,21 @@ void PreParamGridWell::SetupActiveConnCornerGridSM(const OCP_COORD& CoTmp)
 {
     gNeighbor.resize(activeGridNum);
     // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
+    for (OCP_ULL n = 0; n < activeGridNum; n++) {
         gNeighbor[n].reserve(10);
     }
 
-    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_ULL bIdg, eIdg, bIdb, eIdb;
     OCP_DBL areaB, areaE;
-    for (OCP_USI n = 0; n < CoTmp.numConn; n++) {
+    for (OCP_ULL n = 0; n < CoTmp.numConn; n++) {
         const GeneralConnect& ConnTmp = CoTmp.connect[n];
 
         bIdg = ConnTmp.begin;
         eIdg = ConnTmp.end;
 
         if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
-            bIdb = map_All2Act[bIdg].GetId();
-            eIdb = map_All2Act[eIdg].GetId();
+            bIdb  = map_All2Act[bIdg].GetId();
+            eIdb  = map_All2Act[eIdg].GetId();
             areaB = ConnTmp.Ad_dd_begin;
             areaE = ConnTmp.Ad_dd_end;
             gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnTmp.directionType, areaB, areaE));
@@ -1130,13 +1130,13 @@ void PreParamGridWell::SetupActiveConnCornerGridDP(const OCP_COORD& CoTmp)
     // for fracture connections
     gNeighbor.resize(activeGridNum);
     // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
+    for (OCP_ULL n = 0; n < activeGridNum; n++) {
         gNeighbor[n].reserve(10);
     }
 
-    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_ULL bIdg, eIdg, bIdb, eIdb;
     OCP_DBL areaB, areaE;
-    for (OCP_USI n = 0; n < CoTmp.numConn; n++) {
+    for (OCP_ULL n = 0; n < CoTmp.numConn; n++) {
         const GeneralConnect& ConnTmp = CoTmp.connect[n];
 
         bIdg = ConnTmp.begin + numGridM;
@@ -1174,14 +1174,14 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
     if (!ifUseVtk)  return;
 
     vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
-    vector<OCP_USI> cell_points; ///< numpoints, points index
+    vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
     cell_points.reserve(activeGridNum * 9);
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
-    OCP_USI pIndex = 0;
-    OCP_USI id;
+    OCP_ULL pIndex = 0;
+    OCP_ULL id;
     for (USI k = 0; k < nz; k++) {
         for (USI j = 0; j < ny; j++) {
             for (USI i = 0; i < nx; i++) {
@@ -1257,7 +1257,7 @@ void PreParamGridWell::SetupBasicGmshGrid()
     ROCKNUM.resize(numGrid);
 
     if (gmshGrid.dimen == 2) {
-        for (OCP_USI n = 0; n < numGridM; n++) {
+        for (OCP_ULL n = 0; n < numGridM; n++) {
             v[n]          = gmshGrid.elements[n].area * gmshGrid.thickness;
             depth[n]      = gmshGrid.elements[n].center.y; /// Use y-coordinate
             SATNUM[n]     = gmshGrid.elements[n].phyIndex;
@@ -1274,11 +1274,11 @@ void PreParamGridWell::SetupActiveConnGmshGrid()
 {
     gNeighbor.resize(activeGridNum);
     // PreAllocate
-    for (OCP_USI n = 0; n < activeGridNum; n++) {
+    for (OCP_ULL n = 0; n < activeGridNum; n++) {
         gNeighbor[n].reserve(10);
     }
 
-    OCP_USI bIdg, eIdg, bIdb, eIdb;
+    OCP_ULL bIdg, eIdg, bIdb, eIdb;
     OCP_DBL areaB, areaE;
     for (const auto& e : gmshGrid.edges) {
        
@@ -1305,12 +1305,12 @@ void PreParamGridWell::OutputPointsGmshGrid()
     if (!ifUseVtk)  return;
 
     const vector<OCP_DBL>& points_xyz = gmshGrid.points;  ///< x,y,z coordinates
-    vector<OCP_USI>        cell_points;                   ///< numpoints, points index
+    vector<OCP_ULL>        cell_points;                   ///< numpoints, points index
     vector<USI>            cell_type;                     ///< type of cell
     cell_points.reserve(activeGridNum * 5);
     cell_type.reserve(activeGridNum);
 
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         if (map_All2Act[n].IsAct()) {
 
             const auto& ep = gmshGrid.elements[n].p;
@@ -1338,12 +1338,12 @@ void PreParamGridWell::OutputPointsGmshGrid()
 void PreParamGridWell::SetLocationStructral()
 {
     boundIndex.resize(numGrid);
-    const OCP_USI uplim   = nx * ny;
-    const OCP_USI downlim = nx * ny * (nz - 1);
-    for (OCP_USI n = 0; n < uplim; n++) {
+    const OCP_ULL uplim   = nx * ny;
+    const OCP_ULL downlim = nx * ny * (nz - 1);
+    for (OCP_ULL n = 0; n < uplim; n++) {
         boundIndex[n] = 1;
     }
-    for (OCP_USI n = downlim; n < nx * ny * nz; n++) {
+    for (OCP_ULL n = downlim; n < nx * ny * nz; n++) {
         boundIndex[n] = 2;
     }
 }
@@ -1371,8 +1371,8 @@ void PreParamGridWell::CalActiveGridIsoT(const OCP_DBL& e1, const OCP_DBL& e2)
 {
     map_Act2All.reserve(numGrid);
     map_All2Act.resize(numGrid);
-    OCP_USI count = 0;
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    OCP_ULL count = 0;
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         if (ACTNUM[n] == 0 || poro[n] < e1 || v[n] < e2) {
             map_All2Act[n] = GB_Pair(OCP_FALSE, 0);
             ACTNUM[n] = 0;
@@ -1396,9 +1396,9 @@ void PreParamGridWell::CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2)
     map_Act2All.reserve(numGrid);
     map_All2Act.resize(numGrid);
     map_All2Flu.resize(numGrid);
-    OCP_USI activeCount = 0;
-    OCP_USI fluidCount = 0;
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    OCP_ULL activeCount = 0;
+    OCP_ULL fluidCount = 0;
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         if (ACTNUM[n] == 0 || v[n] < e1) {
             map_All2Act[n] = GB_Pair(OCP_FALSE, 0);
             map_All2Flu[n] = GB_Pair(OCP_FALSE, 0);
@@ -1428,7 +1428,7 @@ void PreParamGridWell::CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2)
 void PreParamGridWell::SetupTransMult()
 {
     if (!multZ.empty()) {
-        for (OCP_USI n = 0; n < numGrid; n++) {
+        for (OCP_ULL n = 0; n < numGrid; n++) {
             for (auto& c : gNeighbor[n]) {
                 if (c.ID() < n) continue;
                 if (c.Direct() == ConnDirect::zp) {
@@ -1459,7 +1459,7 @@ void PreParamGridWell::SetupConnWellGrid()
     for (USI w = 0; w < numWell; w++) {
         const USI numPerf = well[w].GetPerfNum();
         for (USI p = 0; p < numPerf; p++) {
-            const OCP_USI pId = GetPerfLocation(well[w], p);
+            const OCP_ULL pId = GetPerfLocation(well[w], p);
             if (map_All2Flu[pId].IsAct()) {
                 connWellGrid[w].push_back(map_All2Act[pId].GetId());
                 // for well-connection, areaB and areaE contains its active perforation index and trans if necessary
@@ -1472,7 +1472,7 @@ void PreParamGridWell::SetupConnWellGrid()
     }
 
 
-    const OCP_USI numTotal = activeGridNum + numWell;
+    const OCP_ULL numTotal = activeGridNum + numWell;
     // Add well-grid connections to gNeighbor
     gNeighbor.resize(numTotal);
     for (USI w = 0; w < numWell; w++) {
@@ -1483,14 +1483,14 @@ void PreParamGridWell::SetupConnWellGrid()
     gNeighbor.shrink_to_fit();
 
     numNeighbor.resize(numTotal);
-    for (OCP_USI n = 0; n < numTotal; n++) {
+    for (OCP_ULL n = 0; n < numTotal; n++) {
         numNeighbor[n] = gNeighbor[n].size();
     }
     
 }
 
 
-OCP_USI PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
+OCP_ULL PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
 {
     if (gridType >= GridType::structured && gridType < GridType::unstructured) {
         return (well.K_perf[p] - 1) * (nx * ny) + (well.J_perf[p] - 1) * nx + (well.I_perf[p] - 1);
@@ -1499,9 +1499,9 @@ OCP_USI PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
     else if (gridType >= GridType::unstructured) {
         // find the element whose center is closest to the perforation first
         OCP_DBL mindis = 1E8;
-        OCP_USI bId    = 0;
+        OCP_ULL bId    = 0;
         const Point3D&& pl = Point3D(well.X_perf[p], well.Y_perf[p], well.Z_perf[p]);
-        for (OCP_USI n = 0; n < gmshGrid.elements.size(); n++) {
+        for (OCP_ULL n = 0; n < gmshGrid.elements.size(); n++) {
             const auto& e = gmshGrid.elements[n];
             const OCP_DBL dis = (e.center - pl) * (e.center - pl);
             if (dis < mindis) {
@@ -1539,7 +1539,7 @@ void PreParamGridWell::OutputBaiscInfo() const
     OCP_DBL dzMax = 0;
     OCP_DBL dzMin = 1E8;
 
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         if (depthMax < depth[n]) {
             depthMax = depth[n];
         }
@@ -1612,11 +1612,11 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(depth);
     vector<vector<ConnPair>>().swap(gNeighbor);
     vector<USI>().swap(numNeighbor);
-    vector<OCP_USI>().swap(map_Act2All);
+    vector<OCP_ULL>().swap(map_Act2All);
     vector<GB_Pair>().swap(map_All2Act);
     vector<GB_Pair>().swap(map_All2Flu);
 
-    vector<vector<OCP_USI>>().swap(connWellGrid);
+    vector<vector<OCP_ULL>>().swap(connWellGrid);
 }
 
 

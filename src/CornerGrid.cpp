@@ -19,7 +19,7 @@ void ConnGrid::Allocate(const USI& max_neighbor)
     halfConn.resize(maxConn);
 }
 
-void ConnGrid::AddHalfConn(const OCP_USI& n,
+void ConnGrid::AddHalfConn(const OCP_ULL& n,
                            const Point3D& area,
                            const Point3D& d,
                            const ConnDirect&     direction,
@@ -108,7 +108,7 @@ OCP_BOOL OCP_COORD::InputCOORDDATA(const vector<OCP_DBL>& coord)
 {
     // See Eclipse -- COORD
     OCP_BOOL flag = OCP_FALSE;
-    OCP_USI  iter = 0;
+    OCP_ULL  iter = 0;
 
     for (USI J = 0; J < ny + 1; J++) {
         for (USI I = 0; I < nx + 1; I++) {
@@ -133,7 +133,7 @@ OCP_BOOL OCP_COORD::InputZCORNDATA(const vector<OCP_DBL>& zcorn)
 {
     // See Eclipse -- ZCORN
     OCP_BOOL flag = OCP_FALSE;
-    OCP_USI  iter = 0;
+    OCP_ULL  iter = 0;
 
     for (USI K = 0; K < nz; K++) {
         for (USI J = 0; J < ny; J++) {
@@ -244,12 +244,12 @@ void OCP_COORD::SetAllFlags(const HexahedronFace& oFace, const HexahedronFace& F
 
 void OCP_COORD::SetupCornerPoints()
 {
-    OCP_USI cindex, oindex; // current block index and the other block index
-    OCP_USI nxny = nx * ny;
+    OCP_ULL cindex, oindex; // current block index and the other block index
+    OCP_ULL nxny = nx * ny;
 
     // allocate memoery for connections
     vector<ConnGrid> blockconn(numGrid);
-    for (OCP_USI iloop = 0; iloop < numGrid; iloop++) {
+    for (OCP_ULL iloop = 0; iloop < numGrid; iloop++) {
         blockconn[iloop].Allocate(10);
     }
 
@@ -386,7 +386,7 @@ void OCP_COORD::SetupCornerPoints()
     }
 
     // find neighbor and calculate transmissibility
-    OCP_USI num_conn = 0; // record the num of connection, a->b & b->a are both included
+    OCP_ULL num_conn = 0;         // record the num of connection, a->b & b->a are both included
     Point3D Pcenter, Pface, Pc2f; // center of Hexahedron
     HexahedronFace Face, oFace;   // current face, the other face
     HexahedronFace FaceP, oFaceP; // Projection of Face and the other face
@@ -1137,10 +1137,10 @@ void OCP_COORD::SetupCornerPoints()
     //    calculate the x,y,z direction transmissibilities of each block and save them
     //
     // make the connections
-    OCP_USI iter_conn = 0;
-    for (OCP_USI n = 0; n < numGrid; n++) {
+    OCP_ULL iter_conn = 0;
+    for (OCP_ULL n = 0; n < numGrid; n++) {
         for (USI j = 0; j < blockconn[n].nConn; j++) {
-            OCP_USI nn = blockconn[n].halfConn[j].neigh;
+            OCP_ULL nn = blockconn[n].halfConn[j].neigh;
             USI jj;
             for (jj = 0; jj < blockconn[nn].nConn; jj++) {
                 if (blockconn[nn].halfConn[jj].neigh == n) {

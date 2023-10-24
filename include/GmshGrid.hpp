@@ -34,7 +34,7 @@ using namespace std;
 class Edge
 {
 public:
-    Edge(const OCP_USI& b, const OCP_USI& e) {
+    Edge(const OCP_ULL& b, const OCP_ULL& e) {
         if (b < e) {
             bId = b;
             eId = e;
@@ -44,34 +44,34 @@ public:
             eId = b;
         }
     }
-    Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in, const OCP_USI& face, const OCP_USI& localEdge) : Edge(b, e) {
+    Edge(const OCP_ULL& b, const OCP_ULL& e, const OCP_ULL& tag_in, const OCP_ULL& face, const OCP_ULL& localEdge) : Edge(b, e) {
         tag = tag_in;
         faceIndex.push_back(face);
         faceIndex.push_back(localEdge);
     }
-    Edge(const OCP_USI& b, const OCP_USI& e, const OCP_USI& tag_in, const string& physical_in, const USI& phyIndex_in) : Edge(b, e) {
+    Edge(const OCP_ULL& b, const OCP_ULL& e, const OCP_ULL& tag_in, const string& physical_in, const USI& phyIndex_in) : Edge(b, e) {
         tag      = tag_in;
         physical = physical_in;
         phyIndex = pow(2, phyIndex_in);
     }
-    OCP_BOOL operator <(const Edge& e) const {
+    auto operator <(const Edge& e) const {
         if (bId < e.bId || (bId == e.bId && eId < e.eId)) return OCP_TRUE;
         else                                              return OCP_FALSE;
     }
 
 public:
     /// index of begin node, bId < eId
-    OCP_USI                 bId;
+    OCP_ULL                 bId;
     /// index of end node
-    OCP_USI                 eId;
+    OCP_ULL                 eId;
     /// tag of edge(for debug)
-    OCP_USI                 tag;
+    OCP_ULL                 tag;
     /// physical info(for debug)
     string                  physical;
     /// physical info binary encoding
     OCP_USI                 phyIndex{ 0 };
     /// index of connected face and local index of edge
-    mutable vector<OCP_USI> faceIndex;
+    mutable vector<OCP_ULL> faceIndex;
     /// effective area from bId
     mutable vector<OCP_DBL> area;
 };
@@ -81,7 +81,7 @@ class Polygon
 {
 public:
     /// constructor
-    Polygon(const vector<OCP_USI>& pIndex, const OCP_USI& tag_in, const string& phyinfo, const OCP_USI& index);
+    Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index);
     /// Calculate the center
     void CalCenter(const vector<OCP_DBL>& points);
     /// Calculate the area
@@ -91,9 +91,9 @@ public:
 
 public:   
     /// index of points(Store in order or reverse order)
-    vector<OCP_USI> p;
+    vector<OCP_ULL> p;
     /// tag of face (for debug)
-    OCP_USI         tag;
+    OCP_ULL         tag;
     /// physical info (for debug)
     string          physical;
     /// physical Index

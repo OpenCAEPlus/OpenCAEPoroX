@@ -40,18 +40,18 @@ public:
     /// Default constructor.
     GB_Pair() = default;
     /// Constructor with given information.
-    GB_Pair(const OCP_BOOL& act, const OCP_USI& i)
+    GB_Pair(const OCP_BOOL& act, const OCP_ULL& i)
         : activity(act)
         , index(i) {};
 
     /// Return whether this cell is active or not.
-    OCP_BOOL IsAct() const { return activity; }
+    auto IsAct() const { return activity; }
     /// Return the index of this cell among active cells.
-    OCP_USI GetId() const { return index; }
+    auto GetId() const { return index; }
 
 private:
     OCP_BOOL activity; ///< Activeness of a grid cell.
-    OCP_USI  index;    ///< Active index of grid if active
+    OCP_ULL  index;    ///< Active index of grid if active
 };
 
 
@@ -60,7 +60,7 @@ class ConnPair
 {
 public:
     ConnPair() = default;
-    ConnPair(const OCP_USI& Id,
+    ConnPair(const OCP_ULL& Id,
         const OCP_INT&      Wgt,
         const ConnDirect&   direct,
         const OCP_DBL&      AreaB,
@@ -80,7 +80,7 @@ public:
 
 protected:
     /// index of a neighboring cell
-    OCP_USI    id;
+    OCP_ULL    id;
     /// weight of edge
     OCP_INT    wgt;   
     /// direction of connection
@@ -189,11 +189,11 @@ protected:
     /// Orthogonal or Corner grid              
     GridType        gridType{ GridType::orthogonal };
     /// Num of grids(numGridM + numGridF)
-    OCP_USI         numGrid{ 0 };
+    OCP_ULL         numGrid{ 0 };
     /// Num of matrix grid
-    OCP_USI         numGridM{ 0 };
+    OCP_ULL         numGridM{ 0 };
     /// Num of fracture grid
-    OCP_USI         numGridF{ 0 };
+    OCP_ULL         numGridF{ 0 };
     /// thermal model or isothermal model
     OCPModel        model{ OCPModel::none };
 
@@ -336,13 +336,13 @@ protected:
     vector<USI>              numNeighbor; 
 
     /// Num of active grid.
-    OCP_USI                  activeGridNum; 
+    OCP_ULL                  activeGridNum;
     /// Index mapping from active grid to all grid
-    vector<OCP_USI>          map_Act2All;
+    vector<OCP_ULL>          map_Act2All;
     /// Mapping from grid to active all grid
     vector<GB_Pair>          map_All2Act; 
     /// Num of fluid grids.
-    OCP_USI                  fluidGridNum; 
+    OCP_ULL                  fluidGridNum;
     /// Mapping from all grid to fluid grid
     vector<GB_Pair>          map_All2Flu;
 
@@ -369,13 +369,13 @@ protected:
     /// Setup connections between wells and active grids
     void SetupConnWellGrid();
     /// Return the index of bulk perforated by well
-    OCP_USI GetPerfLocation(const WellParam& well, const USI& p);
+    OCP_ULL GetPerfLocation(const WellParam& well, const USI& p);
 
 protected:
     /// Num of wells
     USI                     numWell;  
     /// Connections between wells and active grids
-    vector<vector<OCP_USI>> connWellGrid; 
+    vector<vector<OCP_ULL>> connWellGrid;
 
 
     /////////////////////////////////////////////////////////////////////

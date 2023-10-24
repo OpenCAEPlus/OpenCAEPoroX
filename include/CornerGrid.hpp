@@ -26,10 +26,10 @@ const USI     MAX_NEIGHBOR = 80;    ///< Max number of  neighbors allowed
 class HalfConn
 {
 public:
-    OCP_DBL Ad_dd;
-    Point3D d;
-    OCP_USI neigh;
-    ConnDirect     directionType; 
+    OCP_DBL    Ad_dd;
+    Point3D    d;
+    OCP_ULL    neigh;
+    ConnDirect directionType; 
 };
 
 /// all connections
@@ -39,7 +39,7 @@ public:
     USI              nConn, maxConn;
     vector<HalfConn> halfConn;
     void             Allocate(const USI& max_neighbor);
-    void             AddHalfConn(const OCP_USI& n,
+    void             AddHalfConn(const OCP_ULL& n,
                                  const Point3D& area,
                                  const Point3D& d,
                                  const ConnDirect&     direction,
@@ -50,10 +50,10 @@ public:
 class GeneralConnect
 {
 public:
-    OCP_USI begin, end;
-    ConnDirect     directionType;
-    OCP_DBL Ad_dd_begin;
-    OCP_DBL Ad_dd_end;
+    OCP_ULL    begin, end;
+    ConnDirect directionType;
+    OCP_DBL    Ad_dd_begin;
+    OCP_DBL    Ad_dd_end;
 };
 
 /// corner grid
@@ -80,9 +80,9 @@ private:
     OCP_DBL****   ZCORNDATA;
     Hexahedron*** cornerPoints;
 
-    OCP_USI         numGrid;
-    OCP_USI         numConn;
-    OCP_USI         numConnMax;
+    OCP_ULL         numGrid;
+    OCP_ULL         numConn;
+    OCP_ULL         numConnMax;
     vector<OCP_DBL> v;
     vector<OCP_DBL> depth;
     vector<OCP_DBL> dx;

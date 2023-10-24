@@ -50,35 +50,35 @@ public:
 protected:
 	void InitParam();
 
-	MPI_Comm      myComm;
-	OCP_INT       numproc, myrank;
+	MPI_Comm    myComm;
+	OCP_INT     numproc, myrank;
 
 
-	OCP_INT       numWellTotal;     ///< num of total wells
-	OCP_INT       numElementTotal;  ///< num of total grid(wells are included)	
-	OCP_INT       numElementLocal;  ///< num of local grid(wells are included)
-	OCP_INT       numEdgesLocal;    ///< num of local edge
-	OCP_INT*      numEdges;         ///< num of each process' edge
-	OCP_INT		  maxNumVtx;        ///< max num of vertex for all processes
-	OCP_INT		  maxNumEdges;      ///< max num of edges  for all processes
+	idx_t       numWellTotal;     ///< num of total wells
+	idx_t       numElementTotal;  ///< num of total grid(wells are included)	
+	idx_t       numElementLocal;  ///< num of local grid(wells are included)
+	idx_t       numEdgesLocal;    ///< num of local edge
+	idx_t*      numEdges;         ///< num of each process' edge
+	idx_t		maxNumVtx;        ///< max num of vertex for all processes
+	idx_t		maxNumEdges;      ///< max num of edges  for all processes
 
 	
 
 	// graph for parmetis
-	idx_t*        vtxdist;
-	idx_t*        xadj;
-	idx_t*        adjncy;
-	idx_t*        vwgt;
-	idx_t*        adjwgt;
-	idx_t         wgtflag;
-	idx_t         numflag;
-	idx_t         ncon;
-	idx_t         nparts;
-	real_t*       tpwgts;
-	real_t        ubvec;
-	idx_t*        options;
-	idx_t         edgecut;
-	idx_t*        part;
+	idx_t*     vtxdist;
+	idx_t*     xadj;
+	idx_t*     adjncy;
+	idx_t*     vwgt;
+	idx_t*     adjwgt;
+	idx_t      wgtflag;
+	idx_t      numflag;
+	idx_t      ncon;
+	idx_t      nparts;
+	real_t*    tpwgts;
+	real_t     ubvec;
+	idx_t*     options;
+	idx_t      edgecut;
+	idx_t*     part;
 
 
 	mutable vector<vector<idx_t>> elementCSR;

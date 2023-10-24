@@ -17,8 +17,9 @@
 
  // Build-in data type
 typedef unsigned int       USI;      ///< Generic unsigned integer
-typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
 typedef unsigned int       OCP_USI;  ///< Long unsigned integer
+typedef long long          OCP_SLL;  ///< Long long signed integer
+typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
 typedef int                INT;      ///< Generic signed integer
 typedef int                OCP_INT;  ///< Long integer
 typedef double             OCP_DBL;  ///< Double precision

@@ -57,24 +57,22 @@ class Output4Vtk
 
 public:
     /// create a new file and write common information
-    OCP_USI InitASCII(const string& dir, 
-                      const string& myFile,
-                      const string& shortInfo) const;
+    OCP_ULL InitASCII(const string& dir, const string& myFile, const string& shortInfo) const;
     template <typename T>
     void OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                  const string&    dataName,
                                  const string&    dataType,
                                  const vector<T>  tmpV,
-                                 const OCP_USI&   bId,
-                                 const OCP_USI&   nb,
+                                 const OCP_ULL&   bId,
+                                 const OCP_ULL&   nb,
                                  const USI&       digits) const;
 
 public:
-    static void OutputGridInfo(const string& dir, const OCP_USI& nG, const vector<OCP_DBL>& points_xyz,
-                               const vector<OCP_USI>& cell_points, const vector<USI>& cell_type);
+    static void OutputGridInfo(const string& dir, const OCP_ULL& nG, const vector<OCP_DBL>& points_xyz,
+                               const vector<OCP_ULL>& cell_points, const vector<USI>& cell_type);
 
 protected:
-    void InputGridInfo(const string& dir, OCP_USI& nG, OCP_USI& nP, vector<OCP_DBL>& points_xyz, vector<OCP_USI>& cell_points, vector<USI>& cell_type) const;
+    void InputGridInfo(const string& dir, OCP_ULL& nG, OCP_ULL& nP, vector<OCP_DBL>& points_xyz, vector<OCP_ULL>& cell_points, vector<USI>& cell_type) const;
 
 protected:
     static const string tmpFile;
@@ -86,14 +84,14 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                          const string&    dataName,
                                          const string&    dataType,
                                          const vector<T>  tmpV,                        
-                                         const OCP_USI&   bId,
-                                         const OCP_USI&   nb, 
+                                         const OCP_ULL&   bId,
+                                         const OCP_ULL&   nb,
                                          const USI&       digits) const
 {
     outVtk << "\n" << VTK_SCALARS << " " << dataName << " " << dataType << " " << 1;
     outVtk << "\n" << VTK_LOOKUP_TABLE << " " << VTK_DEFAULT << "\n";
     outVtk << fixed << setprecision(digits);
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_ULL n = 0; n < nb; n++) {
         outVtk << tmpV[bId + n] << "\n";
     }
 }

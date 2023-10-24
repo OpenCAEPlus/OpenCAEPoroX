@@ -264,11 +264,11 @@ public:
                          const vector<GB_Pair>& gbPair,
                          const bool&            useActive,
                          const OCP_DBL&         alpha = 1.0) const;
-    void GetIJKGrid(USI& i, USI& j, USI& k, const OCP_USI& n) const;
+    void GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const;
 
 private:
     OCP_BOOL          useRPT{OCP_FALSE};
-    OCP_USI           numGrid;
+    OCP_ULL           numGrid;
     OCP_USI           nx;
     OCP_USI           ny;
     USI               IJKspace;
@@ -286,14 +286,14 @@ void Out4RPT::PrintRPT_Scalar(ofstream&              myRPT,
                               const OCP_DBL&         alpha) const
 {
     USI     I, J, K;
-    OCP_USI bId;
+    OCP_ULL bId;
 
     myRPT << OCP_SEP01(50) << "\n";
     myRPT << dataName << "                   " << fixed << setprecision(3) << days
           << "  DAYS";
 
     if (useActive) {
-        for (OCP_USI n = 0; n < numGrid; n++) {
+        for (OCP_ULL n = 0; n < numGrid; n++) {
             if (n % nx == 0) myRPT << "\n";
             if (n % (nx * ny) == 0) myRPT << "\n\n";
 
@@ -311,7 +311,7 @@ void Out4RPT::PrintRPT_Scalar(ofstream&              myRPT,
             }
         }
     } else {
-        for (OCP_USI n = 0; n < numGrid; n++) {
+        for (OCP_ULL n = 0; n < numGrid; n++) {
             if (n % nx == 0) myRPT << "\n";
             if (n % (nx * ny) == 0) myRPT << "\n\n";
 
@@ -347,7 +347,7 @@ private:
     string            myFile;            ///< output file name
 
     /// number of grids
-    mutable OCP_USI   numGrid;
+    mutable OCP_ULL   numGrid;
 };
 
 /// The OCPOutput class manages different kinds of ways to output information.

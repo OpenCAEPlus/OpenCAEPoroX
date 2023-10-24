@@ -49,10 +49,10 @@ class Domain
 
 public:
 	void Setup(const Partition& part, const PreParamGridWell& gridwell);
-	vector<OCP_USI> GetWell() const { return well; }
-	OCP_USI GetNumGridTotal() const { return numElementTotal - numWellTotal; }
-	OCP_USI GetNumGridInterior()const { return numGridInterior; }
-	const vector<OCP_USI>& GetGrid()const { return grid; }
+	auto GetNumGridTotal() const { return numElementTotal - numWellTotal; }
+	auto GetNumGridInterior() const { return numGridInterior; }
+	auto GetWell() const { return well; }
+	const auto& GetGrid() const { return grid; }
 
 public:
 	MPI_Comm                     myComm;
@@ -60,7 +60,7 @@ public:
 
 protected:
 	/// Num of Total Elements(grids + wells)
-	OCP_USI numElementTotal; 
+	OCP_ULL numElementTotal; 
 	/// Num of Total Wells
 	OCP_USI numWellTotal; 
 	/// Num of local Elements: numGridInterior + numWellLocal
@@ -78,7 +78,7 @@ protected:
 	vector<vector<idx_t>>   elementCSR;  
 	///< global index of interior grid & ghost grid
 	vector<OCP_USI>         grid;        
-	/// well's global index(index starts from zero) (useless now)
+	/// well's global index(index starts from zero)
 	vector<OCP_USI>         well; 
 
 	/// Well's global index(start from zero), perfortions' index(start from zero) and location(bulks' local index) of perforation

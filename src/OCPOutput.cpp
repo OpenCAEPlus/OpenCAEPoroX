@@ -1323,7 +1323,7 @@ void Out4RPT::InputParam(const OutputRPTParam& RPTparam)
 //    outRPT.close();
 //}
 
-void Out4RPT::GetIJKGrid(USI& i, USI& j, USI& k, const OCP_USI& n) const
+void Out4RPT::GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const
 {
     // i,j,k begin from 1
     // n must be the index of grids instead bulks
@@ -1525,7 +1525,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             // Ouput partition
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
 
-            OCP_USI bId = 0;
+            OCP_ULL bId = 0;
             if (bgp.PRE) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
                 bId += numGrid;
@@ -1578,7 +1578,7 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         source.close();
 
         dest << "\n" << VTK_CELL_DATA << " " << numGrid;
-        OCP_USI bId = 0;
+        OCP_ULL bId = 0;
         if (bgp.PRE) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, bId, numGrid, 3);
             bId += numGrid;
