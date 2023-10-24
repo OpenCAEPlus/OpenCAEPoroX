@@ -16,7 +16,7 @@
 #include <string>
 
 
-#define OCPINTTYPEWIDTH 64
+#define OCPINTTYPEWIDTH 32
 
 
 #if OCPINTTYPEWIDTH == 32

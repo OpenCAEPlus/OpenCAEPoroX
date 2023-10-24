@@ -125,24 +125,11 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
         OCP_INT  maxNumElement = 0;
         OCP_INT  maxNumEdge    = 0;
-
-
-        OCP_ULL* dislps               = new OCP_ULL[numproc + 1]();
-        OCP_USI* numGridInterior_proc = new OCP_USI[numproc]();
-        for (USI p = 1; p < numproc; p++) {
-            dislps[p + 1]           = numIgridEdgeproc[3 * p] + dislps[p];
-            numGridInterior_proc[p] = numIgridEdgeproc[3 * p + 1];         
-            maxNumElement           = max(maxNumElement, numIgridEdgeproc[3 * p]);
-            maxNumEdge              = max(maxNumEdge, numIgridEdgeproc[3 * p + 2]);
+        for (USI p = 1; p < numproc; p++) {       
+            maxNumElement = max(maxNumElement, numIgridEdgeproc[3 * p]);
+            maxNumEdge    = max(maxNumEdge, numIgridEdgeproc[3 * p + 2]);
         }
-        delete[] numIgridEdgeproc;
-
-        OCP_ULL* iGridproc = new OCP_ULL[dislps[numproc]];
-        for (USI p = 1; p < numproc; p++) {
-            MPI_Status status;
-            MPI_Recv(&iGridproc[dislps[p]], dislps[p + 1] - dislps[p], OCPMPI_ULL, p, p, myComm, &status);
-        }
-
+        OCP_ULL* iGridproc = new OCP_ULL[maxNumElement];
 
         // Send vars and conns to other process      
         vector<vector<OCP_CHAR>> send_buffer(1);
@@ -160,6 +147,10 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
         int          send_flag = 1;
 
         for (OCP_USI p = 1; p < numproc; p++) {
+
+            MPI_Status status;
+            MPI_Recv(iGridproc, numIgridEdgeproc[3 * p], OCPMPI_ULL, p, 0, myComm, &status);
+
             // get non-working buffer
             OCP_USI ws;
             for (ws = 0; ws < send_buffer.size(); ws++) {
@@ -178,8 +169,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             proc_buffer_c.push_back(ws);
 
             // grid
-            const OCP_USI  numGrid   = dislps[p + 1] - dislps[p];
-            const OCP_ULL* gridIndex = &iGridproc[dislps[p]];
+            const OCP_USI  numGrid   = numIgridEdgeproc[3 * p];
+            const OCP_ULL* gridIndex = iGridproc;
             vector<OCP_ULL> gridIndexA(numGrid);
             for (OCP_USI n = 0; n < numGrid; n++) {
                 gridIndexA[n] = grid.map_Act2All[gridIndex[n]];
@@ -209,7 +200,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             OCP_DBL* conn_ptr = (OCP_DBL*)usi_ptr;
             OCP_USI send_size = numGrid * send_var.numByte_total;
             OCP_USI conn_size = 0;
-            for (OCP_USI n = 0; n < numGridInterior_proc[p]; n++) {
+            for (OCP_USI n = 0; n < numIgridEdgeproc[3 * p + 1]; n++) {
                 for (const auto& gn : grid.gNeighbor[gridIndex[n]]) {
                     conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.Direct());
                     conn_ptr[conn_size++] = gn.AreaB();
@@ -217,8 +208,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                     conn_ptr[conn_size++] = gn.TransMult();
                 }
             }        
-            send_size += conn_size * sizeof(OCP_DBL);
-         
+            send_size += conn_size * sizeof(OCP_DBL);        
             // send
             MPI_Isend((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm, &request[p - 1]);
             // MPI_Send((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm);
@@ -239,9 +229,8 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             proc_buffer_l.clear();
         }
 
-        delete[] iGridproc;       
-        delete[] dislps;
-        delete[] numGridInterior_proc;
+        delete[] numIgridEdgeproc;
+        delete[] iGridproc;
 
         vector<OCP_BOOL>().swap(work_state);
         vector<OCP_USI>().swap(proc_buffer_c);
@@ -334,7 +323,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 
         MPI_Gather(numIgridEdge, 3, OCPMPI_INT, 0, 3, OCPMPI_INT, MASTER_PROCESS, myComm);
             
-        MPI_Send(domain.grid.data(), numIgridEdge[0], OCPMPI_ULL, MASTER_PROCESS, myrank, myComm);
+        MPI_Send(domain.grid.data(), numIgridEdge[0], OCPMPI_ULL, MASTER_PROCESS, 0, myComm);
 
         // recv vars to from master process
         // decode first
