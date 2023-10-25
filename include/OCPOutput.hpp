@@ -346,7 +346,7 @@ private:
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
 
-    /// number of grids
+    /// total number of grids
     mutable OCP_ULL   numGrid;
 };
 

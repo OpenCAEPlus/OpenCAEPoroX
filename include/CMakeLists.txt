@@ -27,6 +27,7 @@ target_sources(
 		 OCPBoundary.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
+		 OCPDataType.hpp
 		 OCPEoS.hpp
 		 OCPFlow.hpp
 		 OCPFlowMethod.hpp
@@ -49,6 +50,7 @@ target_sources(
 		 OCPSurfaceTension.hpp
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
+		 OCPUnits.hpp
 		 OptionalModules.hpp
 		 Output4Vtk.hpp
 		 PVTModule.hpp

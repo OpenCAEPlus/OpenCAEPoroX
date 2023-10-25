@@ -56,7 +56,7 @@ void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
 {
 
     const USI blockSize = blockdim * blockdim;
-    vector<OCP_INT> tmpJ;
+    vector<OCP_SLL> tmpJ;
     // Assemble iA, jA, A
     iA[0] = 0;
     for (OCP_USI i = 1; i < dim + 1; i++) {

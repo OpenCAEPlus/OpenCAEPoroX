@@ -54,21 +54,21 @@ public:
 protected:
 
     // CSR/BSR   
-    int                     blockdim;   ///< block dim              
-    vector<double>          A;          ///< value
-    vector<OCP_USI>         iA;         ///< row ptr
-    vector<OCP_USI>         jA;         ///< col index  
-    double*                 b;          ///< rhs
-    double*                 x;          ///< solution
+    OCP_INT                 blockdim;   ///< block dim              
+    vector<OCP_DBL>         A;          ///< value
+    vector<OCP_SLL>         iA;         ///< row ptr
+    vector<OCP_SLL>         jA;         ///< col index  
+    OCP_DBL*                b;          ///< rhs
+    OCP_DBL*                x;          ///< solution
 
     // Communication
     MPI_Comm                myComm;       ///< Communicator
-    int                     numproc;      ///< num of process
-    int                     myrank;       ///< current rank
+    OCP_INT                 numproc;      ///< num of process
+    OCP_INT                 myrank;       ///< current rank
     const vector<OCP_ULL>*  global_index; ///< global index
-    vector<OCP_ULL>         allBegin;     ///< begin for all process(self-include) 
-    vector<OCP_ULL>         allEnd;       ///< end for all process(self-include)
-    vector<int>             allEle;       ///< num of elements for each proc
+    vector<OCP_SLL>         allBegin;     ///< begin for all process(self-include) 
+    vector<OCP_SLL>         allEnd;       ///< end for all process(self-include)
+    vector<OCP_INT>         allEle;       ///< num of elements for each proc
 };
 
 
