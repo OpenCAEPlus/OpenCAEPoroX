@@ -55,7 +55,7 @@ void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, cons
 			OCP_WARNING("HEATLOSS is IGNORED in ISOTHERMAL MODEL!");
 			return;
 		}
-		vs.SetNb(bvs.nb);
+		vs.SetNb(bvs.nbI);
 
 		INT obIndex = -1;
 		if (rs_param.hLoss.obUse) {
@@ -69,8 +69,8 @@ void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, cons
 			hlM.push_back(new HeatLossMethod01(rs_param.hLoss.ubK, rs_param.hLoss.ubC, vs));
 			ubIndex = hlM.size() - 1;
 		}
-		mIndex.resize(bvs.nb, -1);
-		for (OCP_USI n = 0; n < bvs.nb; n++) {
+		mIndex.resize(vs.nb, -1);
+		for (OCP_USI n = 0; n < vs.nb; n++) {
 			if (boundIndex[n] == 1 && rs_param.hLoss.obUse) {
 				mIndex[n] = obIndex;
 			}
@@ -85,7 +85,7 @@ void HeatLoss::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, cons
 void HeatLoss::CalHeatLoss(const BulkVarSet& bvs, const OCP_DBL& t, const OCP_DBL& dt)
 {
 	if (ifUse) {
-		for (OCP_USI n = 0; n < bvs.nb; n++) {
+		for (OCP_USI n = 0; n < vs.nb; n++) {
 			if (mIndex[n] >= 0) {
 				hlM[mIndex[n]]->CalHeatLoss(n, vs, bvs, t, dt);
 			}			
