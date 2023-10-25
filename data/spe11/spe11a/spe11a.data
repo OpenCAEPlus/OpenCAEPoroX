@@ -54,6 +54,8 @@ LINEAR01  0   0
 
 VTKSCHED
 PRESSURE
+SGAS
+SWAT
 /
 
 
@@ -61,16 +63,3 @@ METHOD
 FIM  bsr.fasp
 /
 
-
-TUNING
--- Init     max    min   incre   chop    cut
-   1E-5     1E-4    1E-6      5    0.3    0.3                    /
---  dPlim  dSlim   dNlim   dVerrlim
-     300     1    0.3    0.001                               /
--- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
-       20    1E-3   200    0.2    1      1E-2    0.01          /
-/
-
-TSTEP
-0.001
-/

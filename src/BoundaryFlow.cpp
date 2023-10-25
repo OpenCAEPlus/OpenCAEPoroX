@@ -18,7 +18,7 @@ void BoundaryFlow::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, 
 
 	if (rs_param.BDparam.size() > 0) {
 		ifUse = OCP_TRUE;
-		mIndex.resize(bvs.nbI);
+		mIndex.resize(bvs.nbI, -1);
 
 		for (const auto& bP : rs_param.BDparam) {
 			if (bP.constP) {
@@ -32,6 +32,9 @@ void BoundaryFlow::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, 
 			fill(boundCode.begin(), boundCode.end(), 0.0);
 			for (OCP_INT i = bLen - 1; i >= 0; i--) {
 				boundCode[i] = (((boundIndex[n] >> i) & 1));
+			}
+			if (boundCode[3] == 1) {
+				mIndex[n] = 0;
 			}
 		}
 	}

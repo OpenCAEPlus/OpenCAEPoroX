@@ -27,6 +27,8 @@ using namespace std;
 
 class OCPBoundary
 {
+	friend class BulkAccumuTerm01;
+
 public:
 	void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
 		heatLoss.Setup(rs_param, bvs, boundIndex);

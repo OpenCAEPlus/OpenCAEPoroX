@@ -77,9 +77,13 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
                 // Print Summary and critical information at every time step
                 output.PrintInfo();
             }
+
+            if (ctrl.StopSim)  break;
         }
         output.PrintInfoSched(rs, ctrl, timer.Stop());
         // rs.allWells.ShowWellStatus(rs.bulk);
+
+        if (ctrl.StopSim)  break;
     }
     rs.OutInfoFinal();
     OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
@@ -108,8 +112,13 @@ const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
-            OCP_ABORT("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
+            if(CURRENT_RANK == MASTER_PROCESS)
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+            ctrl.StopSim = OCP_TRUE;
+            break;
+        }
+
         // Assemble linear system
         IsoTSolver.AssembleMat(rs, ctrl);
         // Solve linear system
@@ -133,8 +142,12 @@ const OCPNRsuite& Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
 
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP)
-            OCP_ABORT("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
+            if (CURRENT_RANK == MASTER_PROCESS)
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+            ctrl.StopSim = OCP_TRUE;
+            break;
+        }
         // Assemble linear system
         TSolver.AssembleMat(rs, ctrl);
         // Solve linear system

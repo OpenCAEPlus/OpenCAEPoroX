@@ -66,8 +66,15 @@ protected:
 
 class BoundaryFlow
 {
+
+    friend class BulkAccumuTerm01;
 public:
     BoundaryFlow() = default;
+    auto IfUse(const OCP_USI& n) const {
+        if (!ifUse)              return OCP_FALSE;
+        else if (mIndex[n] < 0)  return OCP_FALSE;
+        else                     return OCP_TRUE;
+    }
     void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, const vector<string>& boundName, const vector<USI>& boundIndex);
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }
     void UpdateLastTimeStep() { if (ifUse)  vs.UpdateLastTimeStep(); }

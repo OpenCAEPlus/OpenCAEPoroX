@@ -247,6 +247,8 @@ public:
     ControlTime time;
     /// NR control    
     ControlNR   NR;
+    /// Stop simulation
+    OCP_BOOL    StopSim{ OCP_FALSE };
 
 
 public:  

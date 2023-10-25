@@ -27,6 +27,13 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const Bul
 	for (USI i = 0; i < bvs.nc; i++) {
 		res[i + 1] = bvs.Ni[bId * bvs.nc + i] - bvs.lNi[bId * bvs.nc + i];
 	}
+
+    if (optM->boundary.boundaryFlow.IfUse(bId)) {
+        const OCP_DBL dP = (bvs.P[bId] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
+            (1.1 - GRAVITY_FACTOR * 9.98E+02 * -1.2);
+        res[2] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * dP;
+    }
+
 	return res;
 }
 
@@ -40,6 +47,12 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const B
 	for (USI i = 1; i < dim; i++) {
 		dFdXp[i * dim + i] = 1;
 	}
+
+
+    if (optM->boundary.boundaryFlow.IfUse(bId)) {
+        dFdXp[2 * dim + 0] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * 1.0;
+    }
+
 
 	return dFdXp;
 }

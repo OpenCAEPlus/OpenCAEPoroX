@@ -149,7 +149,7 @@ ReservoirState Bulk::CheckNi()
         if (vs.Ni[n] < 0) {
             OCP_USI bId = n / vs.nc;
             if (vs.Ni[n] > -1E-3 * vs.Nt[bId] && OCP_FALSE) {
-                vs.Ni[n] = 1E-8 * vs.Nt[bId];
+                vs.Ni[n] = 1E-20 * vs.Nt[bId];
             } else {
                 USI                cId = n - bId * vs.nc;
                 std::ostringstream NiStringSci;
