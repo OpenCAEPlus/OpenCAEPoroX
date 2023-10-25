@@ -430,15 +430,15 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
     const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
 
-    const USI numWell = rs.GetNumOpenWell();
-    const BulkConn& conn = rs.conn;
-    const OCP_USI   nb   = bvs.nbI;
+    const USI       numWell = rs.GetNumOpenWell();
+    const BulkConn& conn    = rs.conn;
+    const OCP_USI   nbI     = bvs.nbI;
 
-    ls.AddDim(nb);
+    ls.AddDim(nbI);
 
     // accumulate term
     OCP_DBL val, rhs;
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < nbI; n++) {
         bk.ACCm.GetAccumuTerm()->CalValRhsIMPEC(n, bvs, dt, val, rhs);
         ls.NewDiag(n, val);
         ls.AddRhs(n, rhs);
@@ -464,7 +464,7 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
         rhse   = dt * Flux->GetRhse();
 
 
-        if (eId < nb) {
+        if (eId < nbI) {
             // interior grid
             ls.AddDiag(bId, valbb);
             ls.AddDiag(eId, valee);
@@ -540,7 +540,7 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     // Bulk
     // interior first, ghost second
     OCP_USI bId = 0;
-    OCP_USI eId = bk.GetInteriorBulkNum();
+    OCP_USI eId = bvs.nbI;
     for (USI p = 0; p < 2; p++) {
 
         for (OCP_USI n = bId; n < eId; n++) {
@@ -1112,7 +1112,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
     const USI numWell = rs.GetNumOpenWell();
 
     const BulkConn& conn   = rs.conn;
-    const OCP_USI   nb     = bvs.nbI;
+    const OCP_USI   nbI    = bvs.nbI;
     const USI       np     = bvs.np;
     const USI       nc     = bvs.nc;
     const USI       ncol   = nc + 1;
@@ -1120,11 +1120,11 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
     const USI       bsize  = ncol * ncol;
     const USI       bsize2 = ncol * ncol2;
 
-    ls.AddDim(nb);
+    ls.AddDim(nbI);
 
 
     // Accumulation term
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < nbI; n++) {
         ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
@@ -1149,7 +1149,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
         // End - Begin -- insert
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             Dscalar(bsize, -1, bmat.data());
             ls.NewOffDiag(eId, bId, bmat);
@@ -1167,7 +1167,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
         
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId, bmat);
@@ -1253,7 +1253,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     OCP_DBL         choptmp = 0;
 
     OCP_USI bId = 0;
-    OCP_USI eId = bk.GetInteriorBulkNum();
+    OCP_USI eId = bvs.nbI;
 
     // interior first, ghost second
     for (USI p = 0; p < 2; p++) {
@@ -1888,25 +1888,25 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
 {
     const USI numWell = rs.GetNumOpenWell();
 
-    const Bulk& bk = rs.bulk;
-    const BulkVarSet& bvs = bk.vs;
-    const BulkConn& conn    = rs.conn;
-    const OCP_USI   nb      = bvs.nbI;
-    const USI       np      = bvs.np;
-    const USI       nc      = bvs.nc;
-    const USI       ncol    = nc + 1;
-    const USI       ncol2   = np * nc + np;
-    const USI       bsize   = ncol * ncol;
-    const USI       bsize2  = ncol * ncol2;
+    const Bulk&       bk      = rs.bulk;
+    const BulkVarSet& bvs     = bk.vs;
+    const BulkConn&   conn    = rs.conn;
+    const OCP_USI     nbI     = bvs.nbI;
+    const USI         np      = bvs.np;
+    const USI         nc      = bvs.nc;
+    const USI         ncol    = nc + 1;
+    const USI         ncol2   = np * nc + np;
+    const USI         bsize   = ncol * ncol;
+    const USI         bsize2  = ncol * ncol2;
 
-    ls.AddDim(nb);
+    ls.AddDim(nbI);
 
     vector<OCP_DBL> bmat(bsize, 0);
     // Accumulation term
     for (USI i = 1; i < nc + 1; i++) {
         bmat[i * ncol + i] = 1;
     }
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < nbI; n++) {
         bmat[0] = bvs.v[n] * bvs.poroP[n] - bvs.vfP[n];
         for (USI i = 0; i < nc; i++) {
             bmat[i + 1] = -bvs.vfi[n * nc + i];
@@ -1944,7 +1944,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
         // End - Begin -- insert
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             Dscalar(bsize, -1, bmat.data());
             ls.NewOffDiag(eId, bId, bmat);
@@ -1964,7 +1964,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
         }
         Dscalar(bsize, dt, bmat.data());
 
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId, bmat);
@@ -2033,7 +2033,7 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
     OCP_DBL         choptmp = 0;
 
     OCP_USI bId = 0;
-    OCP_USI eId = bk.GetInteriorBulkNum();
+    OCP_USI eId = bvs.nbI;
 
     for (USI p = 0; p < 2; p++) {
 

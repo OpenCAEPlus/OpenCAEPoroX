@@ -1237,9 +1237,8 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 void PreParamGridWell::SetupGmshGrid()
 {
     SetupBasicGmshGrid();
-    CalActiveGrid(-1E-12, -1E-12);
+    CalActiveGrid(1E-12, 1E-12);
     SetupActiveConnGmshGrid();
-
     OutputPointsGmshGrid();
 }
 

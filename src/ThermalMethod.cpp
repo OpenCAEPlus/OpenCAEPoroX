@@ -683,7 +683,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     const Bulk&     bk     = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
     const BulkConn& conn   = rs.conn;
-    const OCP_USI   nb     = bvs.nbI;
+    const OCP_USI   nbI    = bvs.nbI;
     const USI       np     = bvs.np;
     const USI       nc     = bvs.nc;
     const USI       ncol   = nc + 2;
@@ -691,11 +691,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     const USI       bsize  = ncol * ncol;
     const USI       bsize2 = ncol * ncol2;
 
-    ls.AddDim(nb);
+    ls.AddDim(nbI);
 
    
     // Accumulation term
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < nbI; n++) {
         ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
@@ -720,7 +720,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
         // End - Begin -- insert
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             Dscalar(bsize, -1, bmat.data());
             ls.NewOffDiag(eId, bId, bmat);
@@ -739,7 +739,7 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 
         Dscalar(bsize, dt, bmat.data());
 
-        if (eId < nb) {
+        if (eId < nbI) {
             // Interior grid
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId, bmat);
@@ -778,7 +778,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
 
     const Domain&   domain = rs.domain;
     Bulk&           bk     = rs.bulk;
-    BulkVarSet& bvs = bk.vs;
+    BulkVarSet&     bvs    = bk.vs;
     const OCP_USI   nb     = bvs.nb;
     const USI       np     = bvs.np;
     const USI       nc     = bvs.nc;
@@ -819,7 +819,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
     OCP_DBL         choptmp = 0;
 
     OCP_USI bId = 0;
-    OCP_USI eId = bk.GetInteriorBulkNum();
+    OCP_USI eId = bvs.nbI;
 
     // interior first, ghost second
     for (USI p = bId; p < eId; p++) {
