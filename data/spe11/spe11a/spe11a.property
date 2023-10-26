@@ -155,7 +155,7 @@ I1     Solvent   OPEN    RATE       0.0072            10000 /
 
 TUNING
 -- Init     max    min   incre   chop    cut
-   1E-6     1E-5    1E-6      5    0.3    0.3                    /
+   1E-6     1E-4    1E-6      5    0.3    0.3                    /
 --  dPlim  dSlim   dNlim   dVerrlim
      300     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
@@ -163,7 +163,7 @@ TUNING
 /
 
 TSTEP
-100*1E-4
+100*0.0010416
 /
 
 
@@ -174,5 +174,16 @@ I*     Solvent   OPEN    RATE       0.0072            10000 /
 /
 
 TSTEP
-1E-4
+100*0.0010416
+/
+
+
+WCONINJE
+--d
+--name type   openflag  mode  surface_rate(m3/day)    BHP
+I*     Solvent   CLOSE    RATE       0.0072            10000 /
+/
+
+TSTEP
+100*0.007917
 /

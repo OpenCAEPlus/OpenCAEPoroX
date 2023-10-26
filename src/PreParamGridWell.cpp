@@ -1271,6 +1271,12 @@ void PreParamGridWell::SetupBasicGmshGrid()
 
 void PreParamGridWell::SetupActiveConnGmshGrid()
 {
+
+    OCP_DBL thickNess = 1.0;
+    if (gmshGrid.dimen == 2) {
+        thickNess = gmshGrid.thickness;
+    }
+
     gNeighbor.resize(activeGridNum);
     // PreAllocate
     for (OCP_ULL n = 0; n < activeGridNum; n++) {
@@ -1289,8 +1295,8 @@ void PreParamGridWell::SetupActiveConnGmshGrid()
         if (map_All2Act[bIdg].IsAct() && map_All2Act[eIdg].IsAct()) {
             bIdb  = map_All2Act[bIdg].GetId();
             eIdb  = map_All2Act[eIdg].GetId();
-            areaB = e.area[0];
-            areaE = e.area[1];
+            areaB = e.area[0] * thickNess;
+            areaE = e.area[1] * thickNess;
             gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::usg, areaB, areaE));
             gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::usg, areaE, areaB));
         }

@@ -69,7 +69,6 @@ void PeacemanWell::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
     SetupUnit();
     SetupOpts(sols);
-
     // Perf
     for (USI p = 0; p < numPerf; p++) {
         perf[p].state = WellState::open;
