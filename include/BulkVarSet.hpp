@@ -124,6 +124,8 @@ public:
 
     /// Index of oil, gas, water(neigative = inexisting)
     INT                 o, g, w;
+    /// Index of wetting phase, r is one of o,g,w -- for test now
+    INT                 r;
     /// Temperature
     vector<OCP_DBL>     T;
     /// Pressure

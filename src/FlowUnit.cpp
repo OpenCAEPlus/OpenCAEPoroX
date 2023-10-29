@@ -17,6 +17,18 @@
 ///////////////////////////////////////////////
 
 
+FlowUnit::FlowUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+{
+    flow = new OCPFlow(rs_param, i);
+    // for miscible
+    misCurve      = &opts.misCur;
+    mcMethodIndex = misCurve->Setup(flow, &opts.misFac);
+    // for scalePcow
+    scalePcow     = &opts.scalePcow;
+    spMethodIndex = scalePcow->Setup(flow);
+}
+
+
 void FlowUnit::SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const
 {
     scalePcow->SetScaleVal(bId, spMethodIndex, Swinout, Pcowin);

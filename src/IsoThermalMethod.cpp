@@ -932,6 +932,16 @@ void IsoT_FIM::CalFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
+        //if (n == 12637) {
+        //    bvs.Ni[n * 2];
+        //    bvs.Ni[n * 2 + 1];
+        //    cout << bvs.S[n * 2] << endl;
+        //    cout << bvs.S[n * 2 + 1] << endl;
+        //    cout << bvs.Pj[n * 2] << endl;
+        //    cout << bvs.Pj[n * 2 + 1] << endl;
+        //    int a = 0;
+        //}
+
         bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
         PassFlashValue(bk, n);
     }
@@ -986,7 +996,7 @@ void IsoT_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
 void IsoT_FIM::CalKrPc(Bulk& bk) const
 {
     BulkVarSet& bvs = bk.vs;
-    const USI& np = bvs.np;
+    const USI&  np  = bvs.np;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         auto SAT = bk.SATm.GetSAT(n);
 

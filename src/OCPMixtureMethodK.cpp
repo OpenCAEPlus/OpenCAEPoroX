@@ -887,98 +887,133 @@ void OCPMixtureMethodK_GW01::FlashDer(OCPMixtureVarSet& vs)
 	vs.Nt = vs.Ni[0] + vs.Ni[1];
 	OCP_DBL dummy;
 	const OCP_DBL rgw = vs.Ni[0] / vs.Nt;
-	if (rgw < xGw) {
-		// water is unsaturated
-		vs.phaseExist[0] = OCP_FALSE;
-		vs.phaseExist[1] = OCP_TRUE;
+	const OCP_DBL rwg = vs.Ni[1] / vs.Nt;
 
-		vs.x[1 * 2 + 0] = rgw;
-		vs.x[1 * 2 + 1] = 1 - rgw;
-
-		// correct the water phase density
-		garciaw.CalRhoDer(vs.T, rgw, 0, vs.rho[1], vs.rhoP[1], vs.rhox[1 * 2 + 0]);
-
-		vs.xi = vs.rho;
-		vs.xiP = vs.rhoP;
-		vs.xix = vs.rhox;
-
-		vs.vj[0] = 0;
-		vs.vj[1] = vs.Nt / vs.rho[1];
-		vs.Vf = vs.vj[1];
-		vs.S[0] = 0.0;
-		vs.S[1] = 1.0;
-
-		vs.vjP[1] = -vs.Ni[1] * vs.rhoP[1] / (vs.rho[1] * vs.rho[1]);
-		vs.vfP = vs.vjP[1];
-
-		vs.vji[1][0] = (vs.rho[1] + vs.rhox[1 * 2 + 0] * vs.Ni[1] / vs.Nt) / (vs.rho[1] * vs.rho[1]);
-		vs.vji[1][1] = (vs.rho[1] - vs.rhox[1 * 2 + 0] * vs.Ni[0] / vs.Nt) / (vs.rho[1] * vs.rho[1]);
-		vs.vfi[0] = vs.vji[1][0];
-		vs.vfi[1] = vs.vji[1][1];
-
-		vs.dXsdXp[4 * 3 + 1] = vs.Ni[1] / pow(vs.Nt, 2);   // d XGw / d Ng
-		vs.dXsdXp[4 * 3 + 2] = -vs.Ni[0] / pow(vs.Nt, 2);  // d XGw / d Nw
-		vs.dXsdXp[5 * 3 + 2] = -vs.dXsdXp[4 * 3 + 1];      // d XWw / d Ng
-		vs.dXsdXp[5 * 3 + 2] = -vs.dXsdXp[4 * 3 + 2];      // d XWw / d Nw
-
-	}
-	else {
-		// water is saturated and gas is always saturated(now)
+	if (rwg < xWg) {
+		// gas is unsaturated, water is inexist
 		vs.phaseExist[0] = OCP_TRUE;
-		vs.phaseExist[1] = OCP_TRUE;
+		vs.phaseExist[1] = OCP_FALSE;
 
 		vs.x[0 * 2 + 0] = 1 - xWg;
 		vs.x[0 * 2 + 1] = xWg;
-		vs.x[1 * 2 + 0] = xGw;
-		vs.x[1 * 2 + 1] = 1 - xGw;
 
-		// correct the water phase density
-		garciaw.CalRhoDer(vs.T, xGw, xGwP, vs.rho[1], vs.rhoP[1], vs.rhox[1 * 2 + 0]);
-
-		vs.xi = vs.rho;
+		vs.xi  = vs.rho;
 		vs.xiP = vs.rhoP;
 		vs.xix = vs.rhox;
 
-		// calculate phase mass first
-		vs.nj[0] = (vs.Ni[1] - vs.Nt * (1 - xGw)) / (xWg - (1 - xGw));
-		vs.nj[1] = vs.Nt - vs.nj[0];
+		vs.vj[0] = vs.Nt / vs.rho[0];
+		vs.vj[1] = 0;
+		vs.Vf    = vs.vj[0];
+		vs.S[0]  = 1.0;
+		vs.S[1]  = 0.0;
 
-		vs.vj[0] = vs.nj[0] / vs.rho[0];
-		vs.vj[1] = vs.nj[1] / vs.rho[1];
-		vs.Vf = vs.vj[0] + vs.vj[1];
-		vs.S[0] = vs.vj[0] / vs.Vf;
-		vs.S[1] = vs.vj[1] / vs.Vf;
+		vs.vjP[0] = -vs.Nt * vs.rhoP[0] / (vs.rho[0] * vs.rho[0]);
+		vs.vfP    = vs.vjP[0];
 
-		const OCP_DBL n0P = (vs.Nt * xGwP - vs.nj[0] * (xWgP + xGwP)) / (xWg - (1 - xGw));
-		const OCP_DBL n1P = -n0P;
-		vs.vjP[0] = (n0P * vs.rho[0] + vs.nj[0] * vs.rhoP[0]) / (vs.rho[0] * vs.rho[0]);
-		vs.vjP[1] = (n1P * vs.rho[1] + vs.nj[1] * vs.rhoP[1]) / (vs.rho[1] * vs.rho[1]);
-		vs.vfP = vs.vjP[0] + vs.vjP[1];
+		vs.vji[0][0] = 1 / vs.rho[0];
+		vs.vji[0][1] = 1 / vs.rho[0];
+		vs.vfi[0] = vs.vji[0][0];
+		vs.vfi[1] = vs.vji[0][1];
 
-		const OCP_DBL n0N0 = -(1 - xGw) / (xWg - (1 - xGw));
-		const OCP_DBL n0N1 = xGw / (xWg - (1 - xGw));
-		const OCP_DBL n1N0 = 1 - n0N0;
-		const OCP_DBL n1N1 = 1 - n0N1;
-		vs.vji[0][0] = n0N0 / vs.rho[0];
-		vs.vji[0][1] = n0N1 / vs.rho[0];
-		vs.vji[1][0] = n1N0 / vs.rho[1];
-		vs.vji[1][1] = n1N1 / vs.rho[1];
+		vs.dXsdXp[2 * 3 + 1] = vs.Ni[1] / pow(vs.Nt, 2);    // d XGg / d Ng
+		vs.dXsdXp[2 * 3 + 2] = -vs.Ni[0] / pow(vs.Nt, 2);   // d XGg / d Nw
+		vs.dXsdXp[3 * 3 + 2] = -vs.dXsdXp[2 * 3 + 1];       // d XWg / d Ng
+		vs.dXsdXp[3 * 3 + 2] = -vs.dXsdXp[2 * 3 + 2];       // d XWg / d Nw
+	}
+	else {
+		if (rgw < xGw) {
+			// water is unsaturated
+			vs.phaseExist[0] = OCP_FALSE;
+			vs.phaseExist[1] = OCP_TRUE;
 
-		vs.vfi[0] = vs.vji[0][0] + vs.vji[1][0];
-		vs.vfi[1] = vs.vji[0][1] + vs.vji[1][1];
+			vs.x[1 * 2 + 0] = rgw;
+			vs.x[1 * 2 + 1] = 1 - rgw;
 
-		vs.dXsdXp[0 * 3 + 0] = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.Vf;           // dSg / dP
-		vs.dXsdXp[0 * 3 + 1] = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.Vf;     // dSg / dNg
-		vs.dXsdXp[0 * 3 + 2] = (vs.vji[0][1] - vs.S[0] * vs.vfi[1]) / vs.Vf;     // dSg / dNw
+			// correct the water phase density
+			garciaw.CalRhoDer(vs.T, rgw, 0, vs.rho[1], vs.rhoP[1], vs.rhox[1 * 2 + 0]);
 
-		vs.dXsdXp[1 * 3 + 0] = (vs.vjP[1] - vs.S[1] * vs.vfP) / vs.Vf;           // dSw / dP  
-		vs.dXsdXp[1 * 3 + 1] = (vs.vji[1][0] - vs.S[1] * vs.vfi[0]) / vs.Vf;     // dSw / dNg
-		vs.dXsdXp[1 * 3 + 2] = (vs.vji[1][1] - vs.S[1] * vs.vfi[1]) / vs.Vf;     // dSw / dNw
+			vs.xi  = vs.rho;
+			vs.xiP = vs.rhoP;
+			vs.xix = vs.rhox;
 
-		vs.dXsdXp[2 * 3 + 0] = -xWgP;                                            // dXGg / dP
-		vs.dXsdXp[3 * 3 + 0] = xWgP;                                             // dXWg / dP
-		vs.dXsdXp[4 * 3 + 0] = xGw;                                              // dXGw / dP
-		vs.dXsdXp[5 * 3 + 0] = -xGw;                                             // dXWw / dP
+			vs.vj[0] = 0;
+			vs.vj[1] = vs.Nt / vs.rho[1];
+			vs.Vf    = vs.vj[1];
+			vs.S[0]  = 0.0;
+			vs.S[1]  = 1.0;
+
+			vs.vjP[1] = -vs.Nt * vs.rhoP[1] / (vs.rho[1] * vs.rho[1]);
+			vs.vfP    = vs.vjP[1];
+
+			vs.vji[1][0] = (vs.rho[1] + vs.rhox[1 * 2 + 0] * vs.Ni[1] / vs.Nt) / (vs.rho[1] * vs.rho[1]);
+			vs.vji[1][1] = (vs.rho[1] - vs.rhox[1 * 2 + 0] * vs.Ni[0] / vs.Nt) / (vs.rho[1] * vs.rho[1]);
+			vs.vfi[0]    = vs.vji[1][0];
+			vs.vfi[1]    = vs.vji[1][1];
+
+			vs.dXsdXp[4 * 3 + 1] = vs.Ni[1] / pow(vs.Nt, 2);   // d XGw / d Ng
+			vs.dXsdXp[4 * 3 + 2] = -vs.Ni[0] / pow(vs.Nt, 2);  // d XGw / d Nw
+			vs.dXsdXp[5 * 3 + 2] = -vs.dXsdXp[4 * 3 + 1];      // d XWw / d Ng
+			vs.dXsdXp[5 * 3 + 2] = -vs.dXsdXp[4 * 3 + 2];      // d XWw / d Nw
+
+		}
+		else {
+			// water is saturated and gas is always saturated(now)
+			vs.phaseExist[0] = OCP_TRUE;
+			vs.phaseExist[1] = OCP_TRUE;
+
+			vs.x[0 * 2 + 0] = 1 - xWg;
+			vs.x[0 * 2 + 1] = xWg;
+			vs.x[1 * 2 + 0] = xGw;
+			vs.x[1 * 2 + 1] = 1 - xGw;
+
+			// correct the water phase density
+			garciaw.CalRhoDer(vs.T, xGw, xGwP, vs.rho[1], vs.rhoP[1], vs.rhox[1 * 2 + 0]);
+
+			vs.xi = vs.rho;
+			vs.xiP = vs.rhoP;
+			vs.xix = vs.rhox;
+
+			// calculate phase mass first
+			vs.nj[0] = (vs.Ni[1] - vs.Nt * (1 - xGw)) / (xWg - (1 - xGw));
+			vs.nj[1] = vs.Nt - vs.nj[0];
+
+			vs.vj[0] = vs.nj[0] / vs.rho[0];
+			vs.vj[1] = vs.nj[1] / vs.rho[1];
+			vs.Vf = vs.vj[0] + vs.vj[1];
+			vs.S[0] = vs.vj[0] / vs.Vf;
+			vs.S[1] = vs.vj[1] / vs.Vf;
+
+			const OCP_DBL n0P = (vs.Nt * xGwP - vs.nj[0] * (xWgP + xGwP)) / (xWg - (1 - xGw));
+			const OCP_DBL n1P = -n0P;
+			vs.vjP[0] = (n0P * vs.rho[0] + vs.nj[0] * vs.rhoP[0]) / (vs.rho[0] * vs.rho[0]);
+			vs.vjP[1] = (n1P * vs.rho[1] + vs.nj[1] * vs.rhoP[1]) / (vs.rho[1] * vs.rho[1]);
+			vs.vfP = vs.vjP[0] + vs.vjP[1];
+
+			const OCP_DBL n0N0 = -(1 - xGw) / (xWg - (1 - xGw));
+			const OCP_DBL n0N1 = xGw / (xWg - (1 - xGw));
+			const OCP_DBL n1N0 = 1 - n0N0;
+			const OCP_DBL n1N1 = 1 - n0N1;
+			vs.vji[0][0] = n0N0 / vs.rho[0];
+			vs.vji[0][1] = n0N1 / vs.rho[0];
+			vs.vji[1][0] = n1N0 / vs.rho[1];
+			vs.vji[1][1] = n1N1 / vs.rho[1];
+
+			vs.vfi[0] = vs.vji[0][0] + vs.vji[1][0];
+			vs.vfi[1] = vs.vji[0][1] + vs.vji[1][1];
+
+			vs.dXsdXp[0 * 3 + 0] = (vs.vjP[0] - vs.S[0] * vs.vfP) / vs.Vf;           // dSg / dP
+			vs.dXsdXp[0 * 3 + 1] = (vs.vji[0][0] - vs.S[0] * vs.vfi[0]) / vs.Vf;     // dSg / dNg
+			vs.dXsdXp[0 * 3 + 2] = (vs.vji[0][1] - vs.S[0] * vs.vfi[1]) / vs.Vf;     // dSg / dNw
+
+			vs.dXsdXp[1 * 3 + 0] = (vs.vjP[1] - vs.S[1] * vs.vfP) / vs.Vf;           // dSw / dP  
+			vs.dXsdXp[1 * 3 + 1] = (vs.vji[1][0] - vs.S[1] * vs.vfi[0]) / vs.Vf;     // dSw / dNg
+			vs.dXsdXp[1 * 3 + 2] = (vs.vji[1][1] - vs.S[1] * vs.vfi[1]) / vs.Vf;     // dSw / dNw
+
+			vs.dXsdXp[2 * 3 + 0] = -xWgP;                                            // dXGg / dP
+			vs.dXsdXp[3 * 3 + 0] = xWgP;                                             // dXWg / dP
+			vs.dXsdXp[4 * 3 + 0] = xGw;                                              // dXGw / dP
+			vs.dXsdXp[5 * 3 + 0] = -xGw;                                             // dXWw / dP
+		}
 	}
 }
 

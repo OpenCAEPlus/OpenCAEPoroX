@@ -78,6 +78,10 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 
 
         //if (j == 0 && upblock[0] == 12637) {
+        //    bvs.Pj[bId_np_j];
+        //    bvs.Pj[bId_np_j + 1];
+        //    bvs.Pj[eId_np_j];
+        //    bvs.Pj[eId_np_j + 1];
         //    if (bId == 12637 || eId == 12637) {
         //        OCP_DBL tP, oP;
         //        if (bId == 12637) {

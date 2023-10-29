@@ -212,8 +212,9 @@ void OCPFlowMethod_GW01::CalKrPc(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	bc.CalKrPcN(vs.S[g], vs.kr[g], vs.Pc[g]);
-	bc.CalKrPcW(vs.S[w], vs.kr[w], vs.Pc[w]);
+	// wetting phase is water
+	bc.CalKrPcN(vs.S[g], vs.kr[g], vs.Pc[w]);
+	bc.CalKrPcW(vs.S[w], vs.kr[w], vs.Pc[g]);
 }
 
 
@@ -222,8 +223,11 @@ void OCPFlowMethod_GW01::CalKrPcDer(OCPFlowVarSet& vs)
 	const INT& g = vs.g;
 	const INT& w = vs.w;
 
-	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pc[g], vs.dKrdS[vs.gg], vs.dPcdS[vs.gg]);
-	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pc[w], vs.dKrdS[vs.ww], vs.dPcdS[vs.ww]);
+	// wetting phase is water
+	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pc[w], vs.dKrdS[vs.gg], vs.dPcdS[vs.wg]);
+	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pc[g], vs.dKrdS[vs.ww], vs.dPcdS[vs.gw]);
+
+
 }
 
 

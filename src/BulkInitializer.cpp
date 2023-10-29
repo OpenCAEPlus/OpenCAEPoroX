@@ -104,7 +104,7 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 	/// calculate initial pressure for each bulk
 	numNodes = 100;
 	const OCP_DBL tabdz = (1.2 - 0) / (numNodes - 1);
-	vector<OCP_DBL> Ztmp(numNodes, -1.2);
+	vector<OCP_DBL> Ztmp(numNodes, Dref);
 	vector<OCP_DBL> Potmp(numNodes, 0);
 	vector<OCP_DBL> Pgtmp(numNodes, 0);
 	vector<OCP_DBL> Pwtmp(numNodes, 0);
@@ -136,7 +136,7 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 		}
 		
 		DepthP.Eval_All(0, bvs.depth[n], data);
-		bvs.P[n] = data[2];
+		bvs.P[n] = data[3];
 		bvs.Pj[n * bvs.np + bvs.g] = data[2];
 		bvs.Pj[n * bvs.np + bvs.w] = data[3];
 

@@ -29,7 +29,7 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const Bul
 	}
 
     if (optM->boundary.boundaryFlow.IfUse(bId)) {
-        const OCP_DBL dP = (bvs.P[bId] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
+        const OCP_DBL dP = (bvs.Pj[bId * 2 + 1] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
             (1.1 - GRAVITY_FACTOR * 9.98E+02 * -1.2);
         res[2] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * dP;
     }
