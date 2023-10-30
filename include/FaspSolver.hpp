@@ -175,7 +175,7 @@ private:
                     dBSRmat* Asc,
                     dvector* fsc,
                     ivector* order,
-                    double*  Dmatvec,
+                    OCP_DBL*  Dmatvec,
                     int      decouple_type);
 
 private:

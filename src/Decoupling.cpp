@@ -12,37 +12,34 @@
 #include "DenseMat.hpp"
 #include "FaspSolver.hpp"
 
-#define SHORT  short
-#define INT    int   
-#define LONG   long  
-#define REAL   double
+
 
 // ABF decoupling method
-static void decouple_abf(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_abf(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
     // Create a link to dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks D and their inverse
         for (k = IA[i]; k < IA[i + 1]; ++k) {
             if (JA[k] == i) {
-                memcpy(diaginv + i * nb2, val + k * nb2, nb2 * sizeof(REAL));
+                memcpy(diaginv + i * nb2, val + k * nb2, nb2 * sizeof(OCP_DBL));
                 fasp_smat_inv(diaginv + i * nb2, nb);
             }
         }
@@ -55,25 +52,25 @@ static void decouple_abf(dBSRmat* A, REAL* diaginv, dBSRmat* B)
 }
 
 // Analytical decoupling method
-static void decouple_anl(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_anl(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
     // Create a dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // form the diagonal sub-blocks for analytical decoupling
@@ -94,33 +91,33 @@ static void decouple_anl(dBSRmat* A, REAL* diaginv, dBSRmat* B)
     } // end of main loop
 }
 
-static void decouple_truetrans(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_truetrans(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, l, m;
+    OCP_INT i, k, l, m;
 
     // Create a dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
-    REAL *mat1, *mat2;
-    mat1 = new REAL[nb2];
-    mat2 = new REAL[nb2];
+    OCP_DBL *mat1, *mat2;
+    mat1 = new OCP_DBL[nb2];
+    mat2 = new OCP_DBL[nb2];
 
     // Dset0(nb2*ROW, diaginv);
     for (i = 0; i < ROW; ++i) {
-        double Tt = 0.0;
+        OCP_DBL Tt = 0.0;
         // get the diagonal sub-blocks
         // mat2 is OCP_TRUE-IMPES matrix.
         fasp_smat_identity(mat2, nb, nb2);
@@ -151,34 +148,34 @@ static void decouple_truetrans(dBSRmat* A, REAL* diaginv, dBSRmat* B)
     delete mat2;
 }
 
-static void decouple_truetrans_alg(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_truetrans_alg(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, l, m;
+    OCP_INT i, k, l, m;
 
     // Create a link to dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
-    REAL *mat1, *mat2;
-    mat1 = new REAL[nb2];
-    mat2 = new REAL[nb2];
+    OCP_DBL *mat1, *mat2;
+    mat1 = new OCP_DBL[nb2];
+    mat2 = new OCP_DBL[nb2];
 
     // Dset0(nb2*ROW, diaginv);
     for (i = 0; i < ROW; ++i) {
         for (k = IA[i]; k < IA[i + 1]; ++k) {
-            double Tt = 0.0;
+            OCP_DBL Tt = 0.0;
             if (JA[k] == i) {
                 m = k * nb2;
                 fasp_smat_identity(mat2, nb, nb2);
@@ -212,32 +209,32 @@ static void decouple_truetrans_alg(dBSRmat* A, REAL* diaginv, dBSRmat* B)
 }
 
 // Semi-analytical decoupling method
-static void decouple_abftrue(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_abftrue(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
     // Create a dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks
         for (k = IA[i]; k < IA[i + 1]; ++k) {
             if (JA[k] == i) {
                 // Form the ABF part first
-                memcpy(diaginv + i * nb2, val + k * nb2, nb2 * sizeof(REAL));
+                memcpy(diaginv + i * nb2, val + k * nb2, nb2 * sizeof(OCP_DBL));
                 fasp_smat_inv(diaginv + i * nb2, nb);
                 // Replace the first line with analytical decoupling
                 m                = k * nb2;
@@ -255,25 +252,25 @@ static void decouple_abftrue(dBSRmat* A, REAL* diaginv, dBSRmat* B)
     } // end of main loop
 }
 
-static void decouple_true_scale(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_true_scale(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
     // Create a dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks
@@ -295,25 +292,25 @@ static void decouple_true_scale(dBSRmat* A, REAL* diaginv, dBSRmat* B)
     } // end of main loop
 }
 
-static void decouple_rotate(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_rotate(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
     // Create a dBSRmat 'B'
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks
@@ -343,24 +340,24 @@ static void decouple_rotate(dBSRmat* A, REAL* diaginv, dBSRmat* B)
 }
 
 // Quasi-IMPES decoupling method
-static void decouple_quasi(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_quasi(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks
@@ -383,24 +380,24 @@ static void decouple_quasi(dBSRmat* A, REAL* diaginv, dBSRmat* B)
 }
 
 // What's the difference with decouple_anl?
-static void decouple_trueabf(dBSRmat* A, REAL* diaginv, dBSRmat* B)
+static void decouple_trueabf(dBSRmat* A, OCP_DBL* diaginv, dBSRmat* B)
 {
     // members of A
-    const INT  ROW = A->ROW;
-    const INT  NNZ = A->NNZ;
-    const INT  nb  = A->nb;
-    const INT  nb2 = nb * nb;
-    const INT* IA  = A->IA;
-    const INT* JA  = A->JA;
-    REAL*      val = A->val;
+    const OCP_INT  ROW = A->ROW;
+    const OCP_INT  NNZ = A->NNZ;
+    const OCP_INT  nb  = A->nb;
+    const OCP_INT  nb2 = nb * nb;
+    const OCP_INT* IA  = A->IA;
+    const OCP_INT* JA  = A->JA;
+    OCP_DBL*      val = A->val;
 
-    INT i, k, m;
+    OCP_INT i, k, m;
 
-    INT*  IAb  = B->IA;
-    INT*  JAb  = B->JA;
-    REAL* valb = B->val;
-    memcpy(IAb, IA, (ROW + 1) * sizeof(INT));
-    memcpy(JAb, JA, NNZ * sizeof(INT));
+    OCP_INT*  IAb  = B->IA;
+    OCP_INT*  JAb  = B->JA;
+    OCP_DBL* valb = B->val;
+    memcpy(IAb, IA, (ROW + 1) * sizeof(OCP_INT));
+    memcpy(JAb, JA, NNZ * sizeof(OCP_INT));
 
     for (i = 0; i < ROW; ++i) {
         // get the diagonal sub-blocks
@@ -427,12 +424,12 @@ void VectorFaspSolver::Decoupling(dBSRmat* Absr,
                                   dBSRmat* Asc,
                                   dvector* fsc,
                                   ivector* order,
-                                  double*  Dmatvec,
+                                  OCP_DBL*  Dmatvec,
                                   int      decoupleType)
 {
     int              nrow = Absr->ROW;
     int              nb   = Absr->nb;
-    double*          Dmat = Dmatvec;
+    OCP_DBL*         Dmat = Dmatvec;
     precond_diag_bsr diagA;
 
     // Natural ordering
