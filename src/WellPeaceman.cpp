@@ -1274,14 +1274,14 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
         fill(dQdXpW.begin(), dQdXpW.end(), 0.0);
         fill(dQdXsB.begin(), dQdXsB.end(), 0.0);
 
-        dP = bvs.P[n] - bhp - dG[p];
-
         for (USI j = 0; j < np; j++) {
             n_np_j = n * np + j;
             if (!bvs.phaseExist[n_np_j]) continue;
 
             mu = bvs.mu[n_np_j];
             muP = bvs.muP[n_np_j];
+
+            dP = bvs.P[n] - bhp - dG[p];
 
             for (USI i = 0; i < nc; i++) {
                 // dQ / dP

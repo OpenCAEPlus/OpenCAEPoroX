@@ -755,6 +755,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
+
     if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
@@ -933,8 +934,8 @@ void IsoT_FIM::CalFlash(Bulk& bk)
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
         //if (n == 12637) {
-        //    bvs.Ni[n * 2];
-        //    bvs.Ni[n * 2 + 1];
+        //    cout << bvs.Ni[n * 2] << endl;
+        //    cout << bvs.Ni[n * 2 + 1] << endl;
         //    cout << bvs.S[n * 2] << endl;
         //    cout << bvs.S[n * 2 + 1] << endl;
         //    cout << bvs.Pj[n * 2] << endl;
@@ -1042,6 +1043,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
         fluxnum   = conn.iteratorConn[c].FluxNum();
         auto Flux = conn.flux[fluxnum];
 
+
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
@@ -1130,6 +1132,12 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         eId       = conn.iteratorConn[c].EId();
         fluxnum   = conn.iteratorConn[c].FluxNum();
         auto Flux = conn.flux[fluxnum];     
+
+
+        //if (bId == 12637 || eId == 12637) {
+        //    int a = 1;
+        //}
+
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
@@ -1238,7 +1246,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrlNR.DSmax();
-    // const OCP_DBL dPmaxlim = ctrlNR.dPmax;
+    const OCP_DBL dPmaxlim = ctrlNR.DPmax();
 
     vector<OCP_DBL> dtmp(row, 0);
     OCP_DBL         chopmin = 1;
@@ -1291,8 +1299,8 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 			}
 
 			// dP
-			// choptmp = dPmaxlim / fabs(dP);
-			// chopmin = min(chopmin, choptmp);
+			//choptmp = dPmaxlim / fabs(u[n * col]);
+			//chopmin = min(chopmin, choptmp);
 			bvs.P[n] += u[n * col]; // seems better
 
 			// dNi

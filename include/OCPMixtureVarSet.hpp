@@ -75,8 +75,11 @@ public:
             g = -1;
             break;
         case OCPMixtureType::BO_GW:
-            g = 0;
-            w = 1;
+            //g = 0;
+            //w = 1;
+            //o = -1;
+            w = 0;
+            g = 1;
             o = -1;
             break;
         case OCPMixtureType::BO_OGW:

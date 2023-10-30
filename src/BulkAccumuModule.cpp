@@ -23,15 +23,17 @@ BulkAccumuTerm01::BulkAccumuTerm01(const BulkVarSet& bvs, const OptionalModules*
 
 const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const
 {
+    fill(res.begin(), res.end(), 0.0);
+
 	res[0] = bvs.rockVp[bId] - bvs.vf[bId];
 	for (USI i = 0; i < bvs.nc; i++) {
 		res[i + 1] = bvs.Ni[bId * bvs.nc + i] - bvs.lNi[bId * bvs.nc + i];
 	}
 
     if (optM->boundary.boundaryFlow.IfUse(bId)) {
-        const OCP_DBL dP = (bvs.Pj[bId * 2 + 1] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
+        const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
             (1.1 - GRAVITY_FACTOR * 9.98E+02 * -1.2);
-        res[2] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * dP;
+        res[1 + bvs.w] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * dP;
     }
 
 	return res;
@@ -40,6 +42,8 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const Bul
 
 const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const
 {
+    fill(dFdXp.begin(), dFdXp.end(), 0.0);
+
 	dFdXp[0] = bvs.v[bId] * bvs.poroP[bId] - bvs.vfP[bId];
 	for (USI i = 0; i < bvs.nc; i++) {
 		dFdXp[i + 1] = -bvs.vfi[bId * bvs.nc + i];
@@ -48,11 +52,9 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const B
 		dFdXp[i * dim + i] = 1;
 	}
 
-
     if (optM->boundary.boundaryFlow.IfUse(bId)) {
-        dFdXp[2 * dim + 0] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * 1.0;
+        dFdXp[(1 + bvs.w) * dim + 0] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * 1.0;
     }
-
 
 	return dFdXp;
 }
@@ -76,6 +78,8 @@ BulkAccumuTerm02::BulkAccumuTerm02(const BulkVarSet& bvs, const OptionalModules*
 
 const vector<OCP_DBL>& BulkAccumuTerm02::CalResFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const
 {
+    fill(res.begin(), res.end(), 0.0);
+
     const USI& nc = bvs.nc;
     if (bvs.cType[bId] == BulkContent::rf) {
         // Fluid bulk
@@ -105,6 +109,9 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CalResFIM(const OCP_USI& bId, const Bul
 
 const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const
 {
+
+    fill(dFdXp.begin(), dFdXp.end(), 0.0);
+
     const USI& nc = bvs.nc;
     if (bvs.cType[bId] == BulkContent::rf) {
         // Volume consevation

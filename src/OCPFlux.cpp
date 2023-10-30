@@ -76,6 +76,16 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
             flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
         }
 
+        //if (bId == 12637 || eId == 12637) {
+        //    dP = ((bvs.Pj[bId_np_j] + bvs.Pc[bId_np_j + 1]) - GRAVITY_FACTOR * rho[j] * bvs.depth[bId]) -
+        //        ((bvs.Pj[eId_np_j] + bvs.Pc[eId_np_j + 1]) - GRAVITY_FACTOR * rho[j] * bvs.depth[eId]);
+        //    bvs.P[bId];
+        //    bvs.P[eId];
+        //    bvs.Pc[bId_np_j + 1];
+        //    bvs.Pc[eId_np_j + 1];
+        //    int a = 1;
+        //}
+
 
         //if (j == 0 && upblock[0] == 12637) {
         //    bvs.Pj[bId_np_j];

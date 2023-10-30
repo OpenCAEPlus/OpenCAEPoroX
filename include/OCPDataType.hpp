@@ -47,7 +47,6 @@ typedef unsigned int       OCP_BOOL; ///< OCP_BOOL in OCP
 typedef char               OCP_CHAR; ///< Char
 
 
-
 #define OCPMPI_DBL         MPI_DOUBLE
 #define OCPMPI_INT         MPI_INT
 #define OCPMPI_ENUM        MPI_UNSIGNED

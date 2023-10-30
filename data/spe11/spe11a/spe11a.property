@@ -131,7 +131,7 @@ TSURF
 
 
 WELLSTRE
-Solvent 1 0 /
+Solvent 0 1 /
 /
 
 
@@ -159,7 +159,7 @@ TUNING
 --  dPlim  dSlim   dNlim   dVerrlim
      300     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
-       5    1E-3   200    0.2    1E-2      1E-3    0.01          /
+       20    1E-12   1E-2    0.2    1E-2      1E-3    0.01          /
 /
 
 TSTEP

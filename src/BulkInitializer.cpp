@@ -97,7 +97,7 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 	// all water phase and all water component
 	const OCP_DBL         Dref = -1.2;
 	const OCP_DBL         Pref = 1.1;
-	const vector<OCP_DBL> tmpInitZi{ 0, 1 };
+	const vector<OCP_DBL> tmpInitZi{ 1, 0 };
 
 	auto PVT = PVTm.GetPVT(0);
 
