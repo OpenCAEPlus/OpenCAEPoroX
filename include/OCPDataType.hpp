@@ -36,18 +36,33 @@ typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
 #endif
 
 
+#define OCPFLOATTYPEWIDTH 64
+
+
+#if OCPFLOATTYPEWIDTH == 64
+
+typedef double             OCP_DBL;  ///< Double precision
+#define OCPMPI_DBL         MPI_DOUBLE
+
+#elif OCPFLOATTYPEWIDTH == 128
+
+typedef long double        OCP_DBL;  ///< Long Double precision
+#define OCPMPI_DBL         MPI_LONG_DOUBLE;
+
+#endif
+
+
  // Build-in data type
 typedef unsigned int       USI;      ///< Generic unsigned integer
 typedef unsigned int       OCP_USI;  ///< unsigned integer
 typedef int                INT;      ///< Generic signed integer
 typedef int                OCP_INT;  ///< integer
-typedef double             OCP_DBL;  ///< Double precision
 typedef float              OCP_SIN;  ///< Single precision
 typedef unsigned int       OCP_BOOL; ///< OCP_BOOL in OCP
 typedef char               OCP_CHAR; ///< Char
 
 
-#define OCPMPI_DBL         MPI_DOUBLE
+
 #define OCPMPI_INT         MPI_INT
 #define OCPMPI_ENUM        MPI_UNSIGNED
 #define OCPMPI_BOOL        MPI_UNSIGNED
