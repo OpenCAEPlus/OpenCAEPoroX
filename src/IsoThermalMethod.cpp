@@ -1300,8 +1300,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 			// compute the chop
 			fill(dtmp.begin(), dtmp.end(), 0.0);
 
-			DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1,
-				dtmp.data());
+			OCP_aAxpby(row, col, 1.0, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1.0, dtmp.data());
 
 			for (USI j = 0; j < np; j++) {
 				choptmp = 1;
@@ -2093,8 +2092,7 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
             chopmin = 1;
             // compute the chop
             fill(dtmp.begin(), dtmp.end(), 0.0);
-            DaAxpby(row, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP],
-                u.data() + n * col, 1, dtmp.data());
+            OCP_aAxpby(row, col, 1.0, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1.0, dtmp.data());
 
             for (USI j = 0; j < np; j++) {
                 choptmp = 1;

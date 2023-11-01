@@ -339,7 +339,8 @@ void OCPMixtureMethodComp::AssembleMatVfiVfp_full01()
         OCP_DBL* fugNj = &lnfugN[epIndex[j]][0];
         for (USI i = 0; i < NC; i++) {
             // for ith components
-            Dcopy(NC, bId, fugNj);
+            copy(fugNj, fugNj + NC, bId);
+
             bId    += (NP - 1 - j) * NC;
             bId[i] = 1.0;
             bId    += (1 + j) * NC;
@@ -352,7 +353,7 @@ void OCPMixtureMethodComp::AssembleMatVfiVfp_full01()
     OCP_DBL* fugNj = &lnfugN[epIndex[NP - 1]][0];
     for (USI i = 0; i < NC; i++) {
         for (USI j = 0; j < NP - 1; j++) {
-            Dcopy(NC, bId, fugNj);
+            copy(fugNj, fugNj + NC, bId);
             bId += NC;
         }
         Dscalar((NP - 1) * NC, -1.0, bId - (NP - 1) * NC);

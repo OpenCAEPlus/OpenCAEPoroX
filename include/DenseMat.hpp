@@ -17,6 +17,8 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <math.h>
+#include <numeric>
 #include "OCPDataType.hpp"
 
 using namespace std;
@@ -108,93 +110,141 @@ void ssyevd_(const char* jobz,
 }
 
 
-/// Calculate the minimal eigenvalue for symmetric matrix with mkl lapack
-void CalEigenSY(const int& N, float* A, float* w, float* work, const int& lwork);
+/// Computes L1-norm of a vector.
+OCP_DBL Dnorm1(const INT& N, OCP_DBL* x);
 
-/// Calculate the minimal eigenvalue for symmetric matrix with mkl lapack
-// void MinEigenS(const int& N, float* a, float* w);
+/// Computes L1-norm of a vector.
+template <typename T1, typename T2>
+T2 OCP_norm1(const T1& n, const T2* x)
+{
+    T2 tmp = 0;
+    for (T1 i = 0; i < n; i++) {
+        tmp += fabs(x[i]);
+    }
+    return tmp;
+}
 
-/// Copy a double vector from src to dst.
-void Dcopy(const int& N, double* dst, const double* src);
 
-/// Dot product of two double vectors stored as pointers.
-double Ddot(int n, double* a, double* b);
+/// Computes L2-norm of a vector.
+OCP_DBL Dnorm2(const INT& N, OCP_DBL* x);
 
-/// Computes the L1-norm of a vector.
-double Dnorm1(const int& N, double* x);
+/// Computes L2-norm of a vector.
+template <typename T1, typename T2>
+T2 OCP_norm2(const T1& n, const T2* x)
+{
+    T2 tmp = 0;
+    for (T1 i = 0; i < n; i++) {
+        tmp += x[i] * x[i];
+    }
+    return sqrt(tmp);
+}
 
-/// Computes the L2-norm of a vector.
-double Dnorm2(const int& N, double* x);
 
 /// Scales a vector by a constant.
-void Dscalar(const int& n, const double& alpha, double* x);
+void Dscalar(const INT& n, const OCP_DBL& alpha, OCP_DBL* x);
+
+/// Computes x = ax
+template <typename T1, typename T2>
+void OCP_scale(const T1& n, const T2& a, T2* x)
+{
+    for (T1 i = 0; i < n; i++) {
+        x[i] *= a;
+    }
+}
+
 
 /// Constant times a vector plus a vector.
-void Daxpy(const int& n, const double& alpha, const double* x, double* y);
+void Daxpy(const INT& n, const OCP_DBL& alpha, const OCP_DBL* x, OCP_DBL* y);
+
+/// Computes y = ax + y
+template <typename T1, typename T2>
+void OCP_axpy(const T1& n, const T2& a, const T2* x, T2* y)
+{
+    for (T1 i = 0; i < n; i++) {
+        y[i] += a * x[i];
+    }
+}
+
 
 /// Computes C' = alpha B'A' + beta C', all matrices are column-major.
-void DaABpbC(const int&    m,
-             const int&    n,
-             const int&    k,
-             const double& alpha,
-             const double* A,
-             const double* B,
-             const double& beta,
-             double*       C);
+void DaABpbC(const INT&    m,
+             const INT&    n,
+             const INT&    k,
+             const OCP_DBL& alpha,
+             const OCP_DBL* A,
+             const OCP_DBL* B,
+             const OCP_DBL& beta,
+             OCP_DBL*       C);
 
-// test
-void myDABpC(const int&    m,
-             const int&    n,
-             const int&    k,
-             const double* A,
-             const double* B,
-             double*       C);
-void myDABpCp(const int&    m,
-              const int&    n,
-              const int&    k,
-              const double* A,
-              const double* B,
-              double*       C,
-              const int*    flag,
-              const int     N);
-void myDABpCp1(const int&    m,
-               const int&    n,
-               const int&    k,
-               const double* A,
-               const double* B,
-               double*       C,
-               const int*    flag,
-               const int     N);
-void myDABpCp2(const int&    m,
-               const int&    n,
-               const int&    k,
-               const double* A,
-               const double* B,
-               double*       C,
-               const int*    flag,
-               const int     N);
+/// Computes C = AB + C
+template <typename T1, typename T2>
+void OCP_ABpC(const T1& m, const T1& n, const T1& k, const T2* A, const T2* B, T2* C)
+{
+    // C = AB + C
+    // A: m*k  B:k*n  C:m*n
+    // all matrix are row majored matrices
 
-/// Computes y = a A x + b y.
-void DaAxpby(const int&    m,
-             const int&    n,
-             const double& a,
-             const double* A,
-             const double* x,
-             const double& b,
-             double*       y);
+    for (T1 i = 0; i < m; i++) {
+        for (T1 j = 0; j < n; j++) {
+            for (T1 l = 0; l < k; l++) {
+                C[i * n + j] += A[i * k + l] * B[l * n + j];
+            }
+        }
+    }
+}
+
+
+/// Computes y = a A x + b y
+template <typename T1, typename T2>
+void OCP_aAxpby(const T1& m, const T1& n, const T2& a, const T2* A, const T2* x, const T2& b, T2* y)
+{
+	for (T1 i = 0; i < m; i++) {
+		y[i] = b * y[i];
+		for (T1 j = 0; j < n; j++) {
+			y[i] += a * A[i * n + j] * x[j];
+		}
+	}
+}
 
 /// Calls dgesv to solve the linear system for general matrices.
-void LUSolve(const int& nrhs, const int& N, double* A, double* b, int* pivot);
+void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot);
 
 /// Calls dsysy to solve the linear system for symm matrices.
-int SYSSolve(const int&  nrhs,
-             const char* uplo,
-             const int&  N,
-             double*     A,
-             double*     b,
-             int*        pivot,
-             double*     work,
-             const int&  lwork);
+INT SYSSolve(const INT& nrhs, const OCP_CHAR* uplo, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot, OCP_DBL* work, const INT& lwork);
+
+/// Calculate the minimal eigenvalue for symmetric matrix with mkl lapack
+void CalEigenSY(const INT& N, OCP_SIN* A, OCP_SIN* w, OCP_SIN* work, const INT& lwork);
+
+
+void myDABpCp(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
+
+void myDABpCp1(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
+
+void myDABpCp2(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
 
 /// Prints a vector.
 template <typename T>
@@ -205,6 +255,7 @@ void PrintDX(const int& N, const T* x)
     }
     cout << endl;
 }
+
 
 /// check NaN
 template <typename T>
@@ -217,6 +268,7 @@ bool CheckNan(const int& N, const T* x)
     }
     return true;
 }
+
 
 /// swap value instead of pointer
 template <typename T>

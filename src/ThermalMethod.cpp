@@ -408,8 +408,8 @@ void T_FIM::PassFlashValue(Bulk& bk, const OCP_USI& n)
         bvs.Ufi[n * nc + i] = PVT->GetUfi(i);
     }
 
-    Dcopy(bvs.lendSdP, &bvs.dSec_dPri[n * bvs.lendSdP],
-          &PVT->GetDXsDXp()[0]);
+    copy(PVT->GetDXsDXp().begin(), PVT->GetDXsDXp().end(), &bvs.dSec_dPri[n * bvs.lendSdP]);
+
 }
 
 void T_FIM::CalKrPc(Bulk& bk) const
@@ -833,7 +833,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
                 chopmin = 1;
                 // compute the chop
                 fill(dtmp.begin(), dtmp.end(), 0.0);
-                DaAxpby(np, col, 1, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1,
+                OCP_aAxpby(np, col, 1.0, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1.0,
                     dtmp.data());
 
                 for (USI j = 0; j < np; j++) {
