@@ -95,15 +95,15 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 
 	OCP_FUNCNAME;
 	// all water phase and all water component
-	const OCP_DBL         Dref = -1.2;
-	const OCP_DBL         Pref = 1.1;
+	const OCP_DBL         Dref = -1.2 * 1E2;
+	const OCP_DBL         Pref = PRESSURE_STD;
 	const vector<OCP_DBL> tmpInitZi{ 1, 0 };
 
 	auto PVT = PVTm.GetPVT(0);
 
 	/// calculate initial pressure for each bulk
 	numNodes = 100;
-	const OCP_DBL tabdz = (1.2 - 0) / (numNodes - 1);
+	const OCP_DBL tabdz = (fabs(Dref) - 0) / (numNodes - 1);
 	vector<OCP_DBL> Ztmp(numNodes, Dref);
 	vector<OCP_DBL> Potmp(numNodes, 0);
 	vector<OCP_DBL> Pgtmp(numNodes, 0);

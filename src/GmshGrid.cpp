@@ -110,6 +110,10 @@ void GMSHGrid::InputGrid2D(const string& file)
 	std::vector<double> nodeParams;
 	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
 
+	for (auto& p : points) {
+		p *= 100;
+	}
+
 	// Get all the elementary entities in the model, as a vector of (dimension, tag) pairs:
 	gmsh::vectorpair entities;
 	gmsh::model::getEntities(entities);

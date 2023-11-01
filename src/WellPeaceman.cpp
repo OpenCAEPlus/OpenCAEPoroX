@@ -336,6 +336,7 @@ void PeacemanWell::CalWI(const Bulk& bk)
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
             }
             else {
+                // perf[p].WI = PI * perf[p].radius * perf[p].radius * bvs.rockKx[perf[p].location];
                 perf[p].WI = PI * perf[p].radius * perf[p].radius;
             }
 
@@ -1361,6 +1362,107 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
         }
     }
 }
+
+
+
+//void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const
+//{
+//    const BulkVarSet& bvs = bk.vs;
+//
+//    const USI ncol = nc + 1;
+//    const USI ncol2 = np * nc + np;
+//    const USI bsize = ncol * ncol;
+//    const USI bsize2 = ncol * ncol2;
+//    OCP_USI   n_np_j;
+//
+//    vector<OCP_DBL> bmat(bsize, 0);
+//    vector<OCP_DBL> bmat2(bsize, 0);
+//    vector<OCP_DBL> dQdXpB(bsize, 0);
+//    vector<OCP_DBL> dQdXpW(bsize, 0);
+//    vector<OCP_DBL> dQdXsB(bsize2, 0);
+//
+//    OCP_DBL mu, muP, dP, transIJ;
+//
+//    const OCP_USI wId = ls.AddDim(1) - 1;
+//    ls.NewDiag(wId, bmat);
+//
+//    CalFactor(bk);
+//
+//    for (USI p = 0; p < numPerf; p++) {
+//        const OCP_USI n = perf[p].location;
+//        fill(dQdXpB.begin(), dQdXpB.end(), 0.0);
+//        fill(dQdXpW.begin(), dQdXpW.end(), 0.0);
+//        fill(dQdXsB.begin(), dQdXsB.end(), 0.0);
+//
+//
+//		dP = bvs.P[n] - bhp - dG[p];
+//
+//		for (USI i = 0; i < nc; i++) {
+//			// dQ / dP
+//			transIJ = perf[p].transINJ * perf[p].xi * opt.injZi[i];
+//			dQdXpB[(i + 1) * ncol] += transIJ;
+//			dQdXpW[(i + 1) * ncol] += -transIJ;
+//		}
+//
+//        // Bulk to Well
+//        bmat = dQdXpB;
+//        DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
+//            bmat.data());
+//        Dscalar(bsize, dt, bmat.data());
+//        // Bulk - Bulk -- add
+//        ls.AddDiag(n, bmat);
+//
+//        // Bulk - Well -- insert
+//        bmat = dQdXpW;
+//        Dscalar(bsize, dt, bmat.data());
+//        ls.NewOffDiag(n, wId, bmat);
+//
+//        // Well
+//        switch (opt.mode) {
+//        case WellOptMode::irate:
+//        case WellOptMode::orate:
+//        case WellOptMode::grate:
+//        case WellOptMode::wrate:
+//        case WellOptMode::lrate:
+//            // Well - Well -- add
+//            fill(bmat.begin(), bmat.end(), 0.0);
+//            for (USI i = 0; i < nc; i++) {
+//                bmat[0] += dQdXpW[(i + 1) * ncol] * factor[i];
+//                bmat[(i + 1) * ncol + i + 1] = 1;
+//            }
+//            ls.AddDiag(wId, bmat);
+//
+//            // Well - Bulk -- insert
+//            bmat = dQdXpB;
+//            DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2],
+//                1, bmat.data());
+//            fill(bmat2.begin(), bmat2.end(), 0.0);
+//            for (USI i = 0; i < nc; i++) {
+//                Daxpy(ncol, factor[i], bmat.data() + (i + 1) * ncol, bmat2.data());
+//            }
+//            ls.NewOffDiag(wId, n, bmat2);
+//            break;
+//
+//        case WellOptMode::bhp:
+//            // Well - Well -- add
+//            fill(bmat.begin(), bmat.end(), 0.0);
+//            for (USI i = 0; i < ncol; i++) {
+//                bmat[i * ncol + i] = 1;
+//            }
+//            ls.AddDiag(wId, bmat);
+//
+//            // Well - Bulk -- insert
+//            fill(bmat.begin(), bmat.end(), 0.0);
+//            ls.NewOffDiag(wId, n, bmat);
+//            break;
+//
+//        default:
+//            OCP_ABORT("Wrong Well Opt mode!");
+//            break;
+//        }
+//    }
+//}
+
 
 
 void PeacemanWellIsoT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const

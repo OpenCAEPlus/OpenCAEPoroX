@@ -112,7 +112,7 @@ const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP * 1E-10) {
             if(CURRENT_RANK == MASTER_PROCESS)
                 OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
             ctrl.StopSim = OCP_TRUE;

@@ -31,9 +31,12 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const Bul
 	}
 
     if (optM->boundary.boundaryFlow.IfUse(bId)) {
-        const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * 9.98E+02 * bvs.depth[bId]) -
-            (1.1 - GRAVITY_FACTOR * 9.98E+02 * -1.2);
-        res[1 + bvs.w] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * dP;
+        const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * bvs.depth[bId]) -
+            (METRIC_PRESSURE_STD - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * -1.2E2);
+        const OCP_DBL tmp = dt * CONV_DARCY * optM->boundary.boundArea[bId] * bvs.rockKx[bId] * bvs.kr[bId * 2 + 0] / bvs.mu[bId * 2 + 0] * dP;
+        res[1 + bvs.w] += tmp;
+        
+        // cout << scientific << setprecision(10) << dP << "   " << bvs.Ni[bId * 2] << "   " << tmp << endl;
     }
 
 	return res;
@@ -53,7 +56,13 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const B
 	}
 
     if (optM->boundary.boundaryFlow.IfUse(bId)) {
-        dFdXp[(1 + bvs.w) * dim + 0] = dt * CONV_DARCY * optM->boundary.boundArea[bId] * 1.0 / 1E-8 * 1.0;
+        const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * bvs.depth[bId]) -
+            (METRIC_PRESSURE_STD - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * -1.2E2);
+        OCP_DBL tmp = dt * CONV_DARCY * optM->boundary.boundArea[bId]
+            * bvs.kr[bId * 2 + 0] / bvs.mu[bId * 2 + 0] * (1.0 - GRAVITY_FACTOR * bvs.rhoP[bId * 2 + 0] * bvs.depth[bId]
+                + GRAVITY_FACTOR * bvs.rhoP[bId * 2 + 0] * bvs.depth[bId] * -1.2E2);
+        tmp += -dt * CONV_DARCY * optM->boundary.boundArea[bId] * bvs.kr[bId * 2 + 0] * dP * bvs.muP[bId * 2 + 0] / (bvs.mu[bId * 2 + 0] * bvs.mu[bId * 2 + 0]);
+        dFdXp[(1 + bvs.w) * dim + 0] += tmp;
     }
 
 	return dFdXp;

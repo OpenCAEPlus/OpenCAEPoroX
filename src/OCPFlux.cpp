@@ -77,12 +77,14 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         }
 
         //if (bId == 12637 || eId == 12637) {
-        //    dP = ((bvs.Pj[bId_np_j] + bvs.Pc[bId_np_j + 1]) - GRAVITY_FACTOR * rho[j] * bvs.depth[bId]) -
-        //        ((bvs.Pj[eId_np_j] + bvs.Pc[eId_np_j + 1]) - GRAVITY_FACTOR * rho[j] * bvs.depth[eId]);
+        //    bvs.xij[uId_np_j * nc + 0];
+        //    bvs.xij[uId_np_j * nc + 1];
         //    bvs.P[bId];
         //    bvs.P[eId];
-        //    bvs.Pc[bId_np_j + 1];
-        //    bvs.Pc[eId_np_j + 1];
+        //    bvs.Pc[bId_np_j];
+        //    bvs.Pc[eId_np_j];
+        //    bvs.S[bId_np_j];
+        //    bvs.S[eId_np_j];
         //    int a = 1;
         //}
 

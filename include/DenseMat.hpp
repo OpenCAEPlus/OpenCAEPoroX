@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include "OCPDataType.hpp"
 
 using namespace std;
 

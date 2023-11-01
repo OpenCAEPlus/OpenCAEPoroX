@@ -924,6 +924,17 @@ void IsoT_FIM::InitFlash(Bulk& bk)
             bvs.Ni[n * bvs.nc + i] = PVT->GetNi(i);
         }
         PassFlashValue(bk, n);
+
+
+        //if (n == 12637) {
+        //    cout << scientific << setprecision(6);
+        //    cout << "Vf : " << bvs.vf[n] << endl;
+        //    cout << "NW : " << bvs.Ni[n * 2] << endl;
+        //    cout << "NG : " << bvs.Ni[n * 2 + 1] << endl;
+        //    cout << "Sw : " << bvs.S[n * 2] << endl;
+        //    cout << "Sg : " << bvs.S[n * 2 + 1] << endl;
+        //    int a = 0;
+        //}
     }
 }
 
@@ -934,17 +945,22 @@ void IsoT_FIM::CalFlash(Bulk& bk)
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
         //if (n == 12637) {
-        //    cout << bvs.Ni[n * 2] << endl;
-        //    cout << bvs.Ni[n * 2 + 1] << endl;
-        //    cout << bvs.S[n * 2] << endl;
-        //    cout << bvs.S[n * 2 + 1] << endl;
-        //    cout << bvs.Pj[n * 2] << endl;
-        //    cout << bvs.Pj[n * 2 + 1] << endl;
         //    int a = 0;
         //}
 
         bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
         PassFlashValue(bk, n);
+
+
+        //if (n == 12637) {
+        //    cout << scientific << setprecision(6);
+        //    cout << "Vf : " << bvs.vf[n] << endl;
+        //    cout << "NW : " << bvs.Ni[n * 2] << endl;
+        //    cout << "NG : " << bvs.Ni[n * 2 + 1] << endl;
+        //    cout << "Sw : " << bvs.S[n * 2] << endl;
+        //    cout << "Sg : " << bvs.S[n * 2 + 1] << endl;
+        //    int a = 0;
+        //}
     }
 }
 
@@ -1001,6 +1017,11 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         auto SAT = bk.SATm.GetSAT(n);
 
+
+        //if (n == 12637) {
+        //    int a = 0;
+        //}
+
         const OCP_USI bId = n * np;
         SAT->CalKrPcFIM(n, &bvs.S[bId]);
         copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
@@ -1042,6 +1063,13 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
         eId       = conn.iteratorConn[c].EId();
         fluxnum   = conn.iteratorConn[c].FluxNum();
         auto Flux = conn.flux[fluxnum];
+
+
+
+        //if (bId == 12637 || eId == 12637) {
+        //    //continue;
+        //}
+
 
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
@@ -1135,7 +1163,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
 
         //if (bId == 12637 || eId == 12637) {
-        //    int a = 1;
+        //    //continue;
         //}
 
 
@@ -1262,6 +1290,11 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 
 		for (OCP_USI n = bId; n < eId; n++) {
 			// const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+
+            //if (n == 12637) {
+            //    int a = 1;
+            //}
+
 
 			chopmin = 1;
 			// compute the chop

@@ -296,7 +296,7 @@ protected:
 	/// If use this model
 	OCP_BOOL      ifUse{ OCP_FALSE };
 	/// molecular weight
-	const OCP_DBL MWCO2{ 44.1E-3 };
+	const OCP_DBL MWCO2{ 44.01E-0 };
 };
 
 

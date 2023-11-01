@@ -70,26 +70,58 @@ const OCP_DBL FIELD_TEMPERATURE_STD = 60;
 // Metric Units
 ////////////////////////////////////////////////
 
+///// 1 [m3] = 1 [m3]
+//const OCP_DBL METRIC_CONV1           = 1.0;
+///// 0 [C] = 273.15 [K]
+//const OCP_DBL METRIC_CONV2           = 273.15;
+///// 1 [kj] = 0.01 [bar]，[m3]
+//const OCP_DBL METRIC_CONV3           = 0.01;
+///// 1 [kg-M]/[m3] = 0.001 [gm-M]/[cc]
+//const OCP_DBL METRIC_CONV4           = 0.001;
+///// Gas constant ([m3]，[bars]/[K]/[kg-M])
+//const OCP_DBL METRIC_GAS_CONSTANT    = 0.083143;
+///// Gravity constant ([m2]，[bars]/[kg])
+//const OCP_DBL METRIC_GRAVITY_FACTOR  = 0.0000980665;
+///// Darcy constant  (([m3/day]，[cP])/([md]，[m]，[bars]))
+//// const OCP_DBL METRIC_DARCY           = 0.008527;
+//const OCP_DBL METRIC_DARCY           = 1.0;
+///// Density of water at standard condition ([kg]/[m3]) 
+//const OCP_DBL METRIC_RHOW_STD        = 999.014;
+///// Density of air at standard condition ([kg]/[m3]) 
+//const OCP_DBL METRIC_RHOAIR_STD      = 1.2232;
+///// Atmospheric pressure ([barsa])
+//const OCP_DBL METRIC_PRESSURE_STD    = 1.01325;
+///// Standard temperature ([C])
+//const OCP_DBL METRIC_TEMPERATURE_STD = 20;
+
+
+////////////////////////////////////////////////
+// Metric Units SPE11 ( pressure - pa  1 bar = 1E5 pa; mass kg or g)
+////////////////////////////////////////////////
+
 /// 1 [m3] = 1 [m3]
-const OCP_DBL METRIC_CONV1           = 1.0;
+const OCP_DBL METRIC_CONV1 = 1.0;
 /// 0 [C] = 273.15 [K]
-const OCP_DBL METRIC_CONV2           = 273.15;
-/// 1 [kj] = 0.01 [bar]，[m3]
-const OCP_DBL METRIC_CONV3           = 0.01;
+const OCP_DBL METRIC_CONV2 = 273.15;
+/// 1 [kj] = 0.01 * 1E5 [pa]，[m3]
+const OCP_DBL METRIC_CONV3 = 0.01 * 1E5;
 /// 1 [kg-M]/[m3] = 0.001 [gm-M]/[cc]
-const OCP_DBL METRIC_CONV4           = 0.001;
-/// Gas constant ([m3]，[bars]/[K]/[kg-M])
-const OCP_DBL METRIC_GAS_CONSTANT    = 0.083143;
-/// Gravity constant ([m2]，[bars]/[kg])
-const OCP_DBL METRIC_GRAVITY_FACTOR  = 0.0000980665;
-/// Darcy constant  (([m3/day]，[cP])/([md]，[m]，[bars]))
-const OCP_DBL METRIC_DARCY           = 0.008527 * METRIC_CONV1;
+const OCP_DBL METRIC_CONV4 = 0.001;
+/// Gas constant ([m3]，[pa]/[K]/[kg-M])
+const OCP_DBL METRIC_GAS_CONSTANT = 0.083143 * 1E5;
+/// Gravity constant ([m2]，[pa]/[kg])
+//const OCP_DBL METRIC_GRAVITY_FACTOR = 0.0000980665 * 1E5;
+/// Gravity constant ([cm2]，[pa]/[g])
+const OCP_DBL METRIC_GRAVITY_FACTOR = 0.0000980665 * 1E5 *1E1;
+/// Darcy constant  (([m3/day]，[cP])/([md]，[m]，[pa]))
+// const OCP_DBL METRIC_DARCY = 0.008527 / 1E5;
+const OCP_DBL METRIC_DARCY = 1.0;
 /// Density of water at standard condition ([kg]/[m3]) 
-const OCP_DBL METRIC_RHOW_STD        = 999.014;
+const OCP_DBL METRIC_RHOW_STD = 999.014;
 /// Density of air at standard condition ([kg]/[m3]) 
-const OCP_DBL METRIC_RHOAIR_STD      = 1.2232;
-/// Atmospheric pressure ([barsa])
-const OCP_DBL METRIC_PRESSURE_STD    = 1.013;
+const OCP_DBL METRIC_RHOAIR_STD = 1.2232;
+/// Atmospheric pressure ([pa])
+const OCP_DBL METRIC_PRESSURE_STD = 1.01325 * 1E5;
 /// Standard temperature ([C])
 const OCP_DBL METRIC_TEMPERATURE_STD = 20;
 
