@@ -126,9 +126,7 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 	if (CURRENT_RANK == MASTER_PROCESS) {
 		OCP_INFO("Set Initial Partition -- end");
 		OCP_INFO("ParMetis Partition -- begin");
-	}
-		
-
+	}	
 
 	GetWallTime timer;
 	timer.Start();
@@ -145,7 +143,6 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 	delete[] options;
 	// Free Memory
 	//////////////////////////////////////////////////////
-
 
 	if (CURRENT_RANK == MASTER_PROCESS) {
 		OCP_INFO("ParMetis Partition -- end");

@@ -417,19 +417,23 @@ void ParamWell::InputUNWEIGHT(ifstream& ifs)
 {
     assert(criticalTime.size() > 0);
 
-    cout << "\n---------------------" << endl
-         << "UNWEIGHT"
-         << "\n---------------------" << endl;
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
+        cout << "\n---------------------" << endl
+            << "UNWEIGHT"
+            << "\n---------------------" << endl;
+    }
 
     const USI      num = well.size();
     vector<string> vbuf;
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
-        for (const auto& s : vbuf) {
-            cout << s << "   ";
+        if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
+            for (const auto& s : vbuf) {
+                cout << s << "   ";
+            }
+            cout << endl;
         }
-        cout << endl;
 
         DealDefault(vbuf);
         string            src        = vbuf[0];

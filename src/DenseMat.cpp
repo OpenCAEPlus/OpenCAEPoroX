@@ -15,37 +15,47 @@
 // WARNING: absolute sum!
 OCP_DBL Dnorm1(const INT& N, OCP_DBL* x)
 {
-
+#if OCPFLOATTYPEWIDTH == 64   
+    const INT incx = 1;
+    return dasum_(&N, x, &incx);
+#else
     return OCP_norm1(N, x);
-    //const INT incx = 1;
-    //return dasum_(&N, x, &incx);
+#endif
 }
 
 OCP_DBL Dnorm2(const INT& N, OCP_DBL* x)
 {
+#if OCPFLOATTYPEWIDTH == 64
+    const INT incx = 1;
+    return dnrm2_(&N, x, &incx);
+#else
     return OCP_norm2(N, x);
-    //const INT incx = 1;
-    //return dnrm2_(&N, x, &incx);
+#endif
 }
 
 void Dscalar(const INT& n, const OCP_DBL& alpha, OCP_DBL* x)
 {
 
+#if OCPFLOATTYPEWIDTH == 64
+    // x = a x
+    const int incx = 1;
+    dscal_(&n, &alpha, x, &incx);
+#else
     OCP_scale(n, alpha, x);
+#endif
 
-    //// x = a x
-    //const int incx = 1;
-    //dscal_(&n, &alpha, x, &incx);
 }
 
 void Daxpy(const INT& n, const OCP_DBL& alpha, const OCP_DBL* x, OCP_DBL* y)
 {
 
+#if OCPFLOATTYPEWIDTH == 64
+    // y= ax +y
+    const int incx = 1, incy = 1;
+    daxpy_(&n, &alpha, x, &incx, y, &incy);
+#else
     OCP_axpy(n, alpha, x, y);
-
-    //// y= ax +y
-    //const int incx = 1, incy = 1;
-    //daxpy_(&n, &alpha, x, &incx, y, &incy);
+#endif
 }
 
 void DaABpbC(const INT&    m,
@@ -65,19 +75,21 @@ void DaABpbC(const INT&    m,
      *  A' in col-order in Fortran = A in row-order in C/Cpp
      */
 
-    OCP_ABpC(m, n, k, A, B, C);
+#if OCPFLOATTYPEWIDTH == 64
+    const char transa = 'N', transb = 'N';
+    dgemm_(&transa, &transb, &n, &m, &k, &alpha, B, &n, A, &k, &beta, C, &n);
 
-    //const char transa = 'N', transb = 'N';
-    //dgemm_(&transa, &transb, &n, &m, &k, &alpha, B, &n, A, &k, &beta, C, &n);
+#else
+    OCP_ABpC(m, n, k, A, B, C);
+#endif
 }
 
 
 void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot)
 {
-    INT info;
 
 #if OCPFLOATTYPEWIDTH == 64
-
+    INT info;
     dgesv_(&N, &nrhs, A, &N, pivot, b, &N, &info);
 
     if (info < 0) {
@@ -85,7 +97,6 @@ void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot)
     } else if (info > 0) {
         cout << "Singular Matrix !" << endl;
     }
-
 
 #else
     OCP_ABORT("NOT AVAILABLE!");
@@ -95,28 +106,27 @@ void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot)
 
 INT SYSSolve(const INT& nrhs, const OCP_CHAR* uplo, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot, OCP_DBL* work, const INT& lwork)
 {
-    INT info;
 
 #if OCPFLOATTYPEWIDTH == 64
-
+    INT info;
     dsysv_(uplo, &N, &nrhs, A, &N, pivot, b, &N, work, &lwork, &info);
     if (info < 0) {
         cout << "Wrong Input !" << endl;
     } else if (info > 0) {
         cout << "Singular Matrix !" << endl;
     }
-
+    return info;
 #else
     OCP_ABORT("NOT AVAILABLE!");
 
 #endif
-
-    return info;
 }
 
 
 void CalEigenSY(const INT& N, OCP_SIN* A, OCP_SIN* w, OCP_SIN* work, const INT& lwork)
 {
+
+#if OCPFLOATTYPEWIDTH == 64
     INT  info;
     INT  iwork[1] = { 0 };
     INT  liwork = 1;
@@ -127,8 +137,12 @@ void CalEigenSY(const INT& N, OCP_SIN* A, OCP_SIN* w, OCP_SIN* work, const INT& 
     if (info > 0) {
         cout << "failed to compute eigenvalues!" << endl;
     }
-}
 
+#else
+    OCP_ABORT("NOT AVAILABLE!");
+
+#endif
+}
 
 
 void myDABpCp(const int& m,

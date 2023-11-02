@@ -806,8 +806,6 @@ OCPMixtureMethodK_GW01::OCPMixtureMethodK_GW01(const ParamReservoir& rs_param, c
 	PVTH2O.Setup(rs_param.PVTH2O.data[i]);
 
 	garciaw.Setup(rs_param.GARCIAW);
-	// garciaw.Setup(OCP_FALSE);
-
 }
 
 
@@ -818,12 +816,6 @@ void OCPMixtureMethodK_GW01::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs
 	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
 	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
 	copy(&bvs.Pj[bId * bvs.np], &bvs.Pj[bId * bvs.np] + bvs.np, mvs.Pj.begin());
-
-
-	//if (bId == 12637) {
-	//	mvs.S[0] = 0.00;
-	//	mvs.S[1] = 1.00;
-	//}
 }
 
 

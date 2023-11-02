@@ -2,12 +2,12 @@
 GMSHPRO
 Facies 1
 *PORO 0.44
-*PERM 4E-11
+*PERM 4E-7
 BCPERM
 *SWIMM    0.32
 *SNIMM    0.10
-*PENTRY   1.5E-2
-*PCMAX    0.95
+*PENTRY   1.5E3
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -16,12 +16,12 @@ END
 
 Facies 2
 *PORO 0.43
-*PERM 5E-10
+*PERM 5E-6
 BCPERM
 *SWIMM    0.14
 *SNIMM    0.10
-*PENTRY   3E-3
-*PCMAX    0.95
+*PENTRY   3E2
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -30,12 +30,12 @@ END
 
 Facies 3
 *PORO 0.44
-*PERM 1E-9
+*PERM 1E-5
 BCPERM
 *SWIMM    0.12
 *SNIMM    0.10
-*PENTRY   1E-3
-*PCMAX    0.95
+*PENTRY   1E2
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -44,12 +44,12 @@ END
 
 Facies 4
 *PORO 0.45
-*PERM 2E-9
+*PERM 2E-5
 BCPERM
 *SWIMM    0.12
 *SNIMM    0.10
-*PENTRY   2.5E-4
-*PCMAX    0.95
+*PENTRY   2.5E1
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -58,12 +58,12 @@ END
 
 Facies 5
 *PORO 0.43
-*PERM 4E-9
+*PERM 4E-5
 BCPERM
 *SWIMM    0.12
 *SNIMM    0.10
-*PENTRY   1E-4
-*PCMAX    0.95
+*PENTRY   1E1
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -72,12 +72,12 @@ END
 
 Facies 6
 *PORO 0.46
-*PERM 1E-8
+*PERM 1E-4
 BCPERM
 *SWIMM    0.10
 *SNIMM    0.10
-*PENTRY   1E-5
-*PCMAX    0.95
+*PENTRY   1E0
+*PCMAX    9.5E4
 *CWREPERM 2
 *CNREPERM 2
 *CPC      2
@@ -98,14 +98,14 @@ BCPERM
 /
 END
 
-THICKNESS  1E-2
+THICKNESS  1
 
 GMSHPROEND
 
 
 BOUNDARY
 *NAME  Top_Boundary
-CONSTP 1.1
+CONSTP 1.1E5
 /
 BOUNDARYEND
 
@@ -123,7 +123,7 @@ ZMFVD
 /
 
 PSURF
-1.1
+1.1E5
 
 TSURF
 20
@@ -135,55 +135,72 @@ Solvent 0 1 /
 /
 
 
+TUNING
+-- Init     max      min      incre   chop    cut
+   0.1     5      0.1      5    0.3    0.3                    /
+--  dPlim  dSlim   dNlim   dVerrlim
+     1E4     1    0.3    0.001                                /
+-- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
+       10    1E-2   200    0.2    1E2      1E-2     0.01          /
+/
+
+
 WELSPECS
-I1 Field 0.9 0.3 0 GAS COORDINATE 
-I2 Field 1.7 0.7 0 GAS COORDINATE 
+I1 Field 90  30 0 GAS COORDINATE 
+I2 Field 170 70 0 GAS COORDINATE 
 /
 
 COMPDAT
-'I*'   3*  1*   1.8E-3   3*   /
+'I*'   3*  1*   1.8E-1   3*   /
 /
 
 
 WCONINJE
 --d
---name type   openflag  mode  surface_rate(m3/day)    BHP
-I1     Solvent   OPEN    RATE       0.0072            10000 /
+--name type   openflag  mode  surface_rate(g/s)    BHP
+I1     Solvent   OPEN    RATE       1.7E-4            1E20 /
+/
+
+
+
+TSTEP
+100*90
+/
+
+
+WCONINJE
+--d
+--name type   openflag  mode  surface_rate(g/s)    BHP
+I*     Solvent   OPEN    RATE       1.7E-4            1E20 /
+/
+
+TSTEP
+100*90
+/
+
+
+WCONINJE
+--d
+--name type   openflag  mode  surface_rate(g/s)    BHP
+I*     Solvent   CLOSE    RATE       1.7E-4            1E20 /
 /
 
 
 
 TUNING
--- Init     max    min   incre   chop    cut
-   1E-10     1E-4    1E-10      5    0.3    0.3                    /
+-- Init     max      min      incre   chop    cut
+   0.1         10      0.1      5    0.3    0.3                    /
 --  dPlim  dSlim   dNlim   dVerrlim
-     300     1    0.3    0.001                               /
+     1E5     1    0.3    0.001                               /
 -- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
-       5    1E-3   1E-2    0.2    1E-2      1E-3    0.01          /
+       10    1E-2   200    0.2    1E2      1E-2     0.01         /
 /
+
 
 TSTEP
-100*0.0010416
+100*684
 /
 
-
-WCONINJE
---d
---name type   openflag  mode  surface_rate(m3/day)    BHP
-I*     Solvent   OPEN    RATE       0.0072            10000 /
-/
-
-TSTEP
-100*0.0010416
-/
-
-
-WCONINJE
---d
---name type   openflag  mode  surface_rate(m3/day)    BHP
-I*     Solvent   CLOSE    RATE       0.0072            10000 /
-/
-
-TSTEP
-100*0.007917
+MAXSTIME
+600
 /
