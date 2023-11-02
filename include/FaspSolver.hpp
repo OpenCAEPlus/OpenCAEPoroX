@@ -9,6 +9,9 @@
  *-----------------------------------------------------------------------------------
  */
 
+
+#if WITH_FASP
+
 #ifndef __FASPSOLVER_HEADER__
 #define __FASPSOLVER_HEADER__
 
@@ -219,6 +222,8 @@ private:
 };
 
 #endif // __FASPSOLVER_HEADER__
+
+#endif // WITH_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

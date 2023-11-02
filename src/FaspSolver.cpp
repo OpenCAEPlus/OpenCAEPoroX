@@ -9,6 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
+#if WITH_FASP
+
 #include <math.h>
 
 #include "FaspSolver.hpp"
@@ -585,6 +587,8 @@ OCP_INT VectorFaspSolver::Solve()
 
     return status;
 }
+
+#endif // WITH_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

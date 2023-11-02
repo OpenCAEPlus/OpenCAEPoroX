@@ -9,6 +9,12 @@
  *-----------------------------------------------------------------------------------
  */
 
+
+#if WITH_FASP
+
+
+
+
 #include "DenseMat.hpp"
 #include "FaspSolver.hpp"
 
@@ -480,6 +486,9 @@ void VectorFaspSolver::Decoupling(dBSRmat* Absr,
     diagA.nb       = nb;
     fasp_precond_dbsr_diag(b->val, fsc->val, &diagA);
 }
+
+
+#endif // WITH_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
