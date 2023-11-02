@@ -78,12 +78,12 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
                 output.PrintInfo();
             }
 
+            if (timer.Stop() > ctrl.MaxSimTime * TIME_S2MS) ctrl.StopSim = OCP_TRUE;
             if (ctrl.StopSim)  break;
         }
         output.PrintInfoSched(rs, ctrl, timer.Stop());
-        // rs.allWells.ShowWellStatus(rs.bulk);
-
-        if (ctrl.StopSim)  break;
+        // rs.allWells.ShowWellStatus(rs.bulk);     
+        if (ctrl.StopSim)        break;
     }
     rs.OutInfoFinal();
     OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
@@ -112,9 +112,9 @@ const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
     
     // Time marching with adaptive time stepsize
     while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP * 1E-10) {
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
             if(CURRENT_RANK == MASTER_PROCESS)
-                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
             ctrl.StopSim = OCP_TRUE;
             break;
         }
@@ -144,7 +144,7 @@ const OCPNRsuite& Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
     while (OCP_TRUE) {
         if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
             if (CURRENT_RANK == MASTER_PROCESS)
-                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + " days");
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
             ctrl.StopSim = OCP_TRUE;
             break;
         }

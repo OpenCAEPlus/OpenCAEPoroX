@@ -249,6 +249,8 @@ public:
     ControlNR   NR;
     /// Stop simulation
     OCP_BOOL    StopSim{ OCP_FALSE };
+    /// Stop time
+    OCP_DBL     MaxSimTime{ 1E20 };
 
 
 public:  

@@ -23,7 +23,7 @@ spe11a.property
 /
 
 
---PVTCO2
+PVTCO2
 -- pressure (bar)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)        H2O in gas (mass-fraction)
 1.0000000000E+04	1.8065535600E-04	1.4667000000E-05	1.1086601150E-01
 2.0000000000E+04	3.6150069200E-04	1.4667800000E-05	5.1375875138E-02
@@ -128,7 +128,7 @@ spe11a.property
 /
 
 
-PVTCO2
+--PVTCO2
 -- pressure (bar)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)        H2O in gas (mass-fraction)
 1.0000000000E+04	1.8065535600E-04	1.4667000000E-05	0
 2.0000000000E+04	3.6150069200E-04	1.4667800000E-05	0
@@ -233,8 +233,8 @@ PVTCO2
 /
 
 
---PVTH2O
--- pressure (pa)     density(pure phase) ([kg/m3]) 	viscosibility(pure phase) (pa·s)         CO2 in water (mass-fraction)
+PVTH2O
+-- pressure (pa)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)         CO2 in water (mass-fraction)
 1.0000000000E+04	9.9816531130E-01	1.0016240000E-03	1.2596327063E-04
 2.0000000000E+04	9.9816989310E-01	1.0016210000E-03	2.9004264202E-04
 3.0000000000E+04	9.9817447470E-01	1.0016180000E-03	4.5388712734E-04
@@ -338,8 +338,8 @@ PVTCO2
 /
 
 
-PVTH2O
--- pressure (pa)     density(pure phase) ([kg/m3]) 	viscosibility(pure phase) (pa·s)         CO2 in water (mass-fraction)
+--PVTH2O
+-- pressure (pa)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)         CO2 in water (mass-fraction)
 1.0000000000E+04	9.9816531130E-01	1.0016240000E-03	0
 2.0000000000E+04	9.9816989310E-01	1.0016210000E-03	0
 3.0000000000E+04	9.9817447470E-01	1.0016180000E-03	0

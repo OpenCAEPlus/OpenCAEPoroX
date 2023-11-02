@@ -87,33 +87,6 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         //    bvs.S[eId_np_j];
         //    int a = 1;
         //}
-
-
-        //if (j == 0 && upblock[0] == 12637) {
-        //    bvs.Pj[bId_np_j];
-        //    bvs.Pj[bId_np_j + 1];
-        //    bvs.Pj[eId_np_j];
-        //    bvs.Pj[eId_np_j + 1];
-        //    if (bId == 12637 || eId == 12637) {
-        //        OCP_DBL tP, oP;
-        //        if (bId == 12637) {
-        //            tP = bvs.P[bId];
-        //            oP = bvs.P[eId];
-        //        }
-        //        else {
-        //            tP = bvs.P[eId];
-        //            oP = bvs.P[bId];
-        //        }
-        //        OCP_DBL dPtmp = (bId == 12637 ? dP : -dP);
-        //        cout << bId << "   " << "   " << eId << "   " <<
-        //            scientific << setprecision(6) << dPtmp << "   "
-        //            << bvs.S[12637 * 2] << "   " << bvs.kr[12637 * 2] << "   "
-        //            << tP << "   " << oP << "   " << bvs.xij[12637 * 4 + 0] << "   "
-        //            << bvs.xij[12637 * 4 + 1] << "   " << flux_ni[0];
-        //        cout << endl;
-        //    }
-        //}
-
     }
 }
 

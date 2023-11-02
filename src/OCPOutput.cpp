@@ -1614,9 +1614,17 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
 
 void OCPOutput::InputParam(const ParamOutput& paramOutput)
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Output Params -- begin");
+    }
+
     summary.InputParam(paramOutput.summary);
     out4RPT.InputParam(paramOutput.outRPTParam);
     out4VTK.InputParam(paramOutput.outVTKParam);
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Output Params -- end");
+    }
 }
 
 void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain)
@@ -1665,7 +1673,7 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
         cout << "Timestep " << setw(6) << left << iters.GetNumTimeStep() << ": " << fixed
-             << setw(10) << setprecision(3) << right << days << " Days"
+             << setw(10) << setprecision(3) << right << days << TIMEUNIT
              << "    Wall time: " << time / TIME_S2MS << " Sec" << endl;
     }
 
@@ -1699,10 +1707,10 @@ void OCPOutput::PostProcess() const
 void OCPOutput::PrintCurrentTimeIter(const OCPControl& ctrl) const
 {
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### DEBUG: " << setprecision(3) << fixed << ctrl.time.GetCurrentTime()
-            << " Days";
+        cout << "### DEBUG: " << setprecision(3) << scientific << ctrl.time.GetCurrentTime()
+            << TIMEUNIT;
         cout << ",  NR: " << iters.GetNRt() << ",  LS: " << iters.GetLSt()
-            << ",  Last dt: " << ctrl.time.GetLastDt() << " Days" << endl;
+            << ",  Last dt: " << ctrl.time.GetLastDt() << TIMEUNIT << endl;
     }
 }
 

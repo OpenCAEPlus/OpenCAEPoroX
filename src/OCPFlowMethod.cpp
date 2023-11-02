@@ -227,9 +227,6 @@ void OCPFlowMethod_GW01::CalKrPcDer(OCPFlowVarSet& vs)
 	bc.CalKrPcDerN(vs.S[g], vs.kr[g], vs.Pc[w], vs.dKrdS[vs.gg], vs.dPcdS[vs.wg]);
 	bc.CalKrPcDerW(vs.S[w], vs.kr[w], vs.Pc[g], vs.dKrdS[vs.ww], vs.dPcdS[vs.gw]);
 
-
-	//fill(vs.Pc.begin(), vs.Pc.end(), 0.0);
-	//fill(vs.dPcdS.begin(), vs.dPcdS.end(), 0.0);
 }
 
 

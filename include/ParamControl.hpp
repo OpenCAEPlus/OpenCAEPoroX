@@ -60,6 +60,8 @@ public:
     vector<TuningPair> tuning_T;  
     /// Tuning.
     TUNING             tuning;      
+    /// Max simulation time
+    OCP_DBL            MaxSimTime{ 1E20 };
 
     /// Critical time records the important time points, at those times, the process of
     /// simulation should be carefully treated, for example, the boundary conditions
@@ -76,6 +78,8 @@ public:
     void InitTuning();
     /// Input the Keyword: METHOD.
     void InputMETHOD(ifstream& ifs);
+    /// Input Maximum simulation time
+    void InpuMaxSimTime(ifstream& ifs);
     /// Input the Keyword: TUNING.
     void InputTUNING(ifstream& ifs);
     /// Display the Tuning.

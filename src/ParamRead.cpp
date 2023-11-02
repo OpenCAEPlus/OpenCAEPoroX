@@ -38,12 +38,20 @@ void ParamRead::GetDirAndName()
 /// This is the general interface for reading input files.
 void ParamRead::ReadInputFile(const string& filename)
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Reservoir Param -- begin");
+    }
+
     inputFile = filename;
     GetDirAndName();
     Init();
     ReadFile(inputFile);
     CheckParam();  
     SetUnit(paramRs.unitType);
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Reservoir Param -- end");
+    }
 }
 
 /// Read parameters from a file, which is called in ReadInputFile.
@@ -63,13 +71,13 @@ void ParamRead::ReadFile(const string& filename)
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
 
             case Map_Str2Int("FIELD", 5):
-                if (CURRENT_RANK == MASTER_PROCESS)
+                if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
                     cout << "FIELD" << endl;
                 paramRs.unitType = "FIELD";
                 break;
 
             case Map_Str2Int("METRIC", 6):
-                if (CURRENT_RANK == MASTER_PROCESS)
+                if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
                     cout << "METRIC" << endl;
                 paramRs.unitType = "METRIC";
                 break;
@@ -329,6 +337,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputBoundary(ifs);
                 break;
 
+            case Map_Str2Int("MAXSTIME", 8):
+                paramControl.InpuMaxSimTime(ifs);
+                break;
+
             default: // skip non-keywords
                 break;
         }
@@ -356,7 +368,7 @@ void ParamRead::ReadINCLUDE(ifstream& ifs)
 /// Check parameters in paramRs and paramWell.
 void ParamRead::CheckParam()
 {
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << endl
             << "=========================================" << endl
             << "Check reading parameters from input data!" << endl

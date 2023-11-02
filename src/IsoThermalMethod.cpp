@@ -944,10 +944,6 @@ void IsoT_FIM::CalFlash(Bulk& bk)
 
     for (OCP_USI n = 0; n < bvs.nb; n++) {
 
-        //if (n == 12637) {
-        //    int a = 0;
-        //}
-
         bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
         PassFlashValue(bk, n);
 
@@ -1016,11 +1012,6 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     const USI&  np  = bvs.np;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
         auto SAT = bk.SATm.GetSAT(n);
-
-
-        //if (n == 12637) {
-        //    int a = 0;
-        //}
 
         const OCP_USI bId = n * np;
         SAT->CalKrPcFIM(n, &bvs.S[bId]);
@@ -1290,11 +1281,6 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 
 		for (OCP_USI n = bId; n < eId; n++) {
 			// const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
-
-            //if (n == 12637) {
-            //    int a = 1;
-            //}
-
 
 			chopmin = 1;
 			// compute the chop

@@ -68,6 +68,15 @@
     } while (false)
 #endif
 
+
+/// Print Important Information
+#define OCP_INFO(msg)                                                               \
+    do {                                                                            \
+        std::cout << "###INFO: " << msg << "!\n";                                   \
+    } while (false)                                                                    
+
+
+
 /// Print Function Name
 #ifndef OCPFUNCNAME
 #define OCP_FUNCNAME                                                                   \

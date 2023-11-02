@@ -28,6 +28,10 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 		return;
 	}
 	
+	if (CURRENT_RANK == MASTER_PROCESS)
+		OCP_INFO("Set Initial Partition -- begin");
+
+
 	///////////////////////////////////////////////////////
 	// Calculate vtxdist
 	///////////////////////////////////////////////////////
@@ -119,6 +123,13 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 		MPI_Recv(xadj, numElementLocal + 1 + 2 * numEdgesLocal, IDX_T, MASTER_PROCESS, 0, myComm, &status);
 	}
 
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("Set Initial Partition -- end");
+		OCP_INFO("ParMetis Partition -- begin");
+	}
+		
+
+
 	GetWallTime timer;
 	timer.Start();
 	
@@ -134,6 +145,11 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 	delete[] options;
 	// Free Memory
 	//////////////////////////////////////////////////////
+
+
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("ParMetis Partition -- end");
+	}
 }
 
 
@@ -156,6 +172,10 @@ void Partition::InitParam()
 void Partition::SetDistribution()
 {
 	if (numproc == 1)  return;
+
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("Set Distribution -- begin");
+	}
 
 	// now from partition to distribution
 	// Setup elementCSR
@@ -369,6 +389,11 @@ void Partition::SetDistribution()
 	}
 
 	MPI_Barrier(myComm);
+
+
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("Set Distribution -- end");
+	}
 }
 
 

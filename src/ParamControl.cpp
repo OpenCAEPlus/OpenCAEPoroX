@@ -116,13 +116,25 @@ void ParamControl::InputMETHOD(ifstream& ifs)
 
     if (vbuf.size() > 1) lsFile = vbuf[1];
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "METHOD"
             << "\n---------------------" << endl;
         cout << "   " << method << "  " << lsFile << endl;
     }
 }
+
+
+void ParamControl::InpuMaxSimTime(ifstream& ifs)
+{
+    vector<string> vbuf;
+    ReadLine(ifs, vbuf, OCP_FALSE);
+
+    MaxSimTime = stod(vbuf[0]);
+
+    OCP_INFO("Max Simulation time : " + to_string(MaxSimTime) + " Sec");
+}
+
 
 /// Read TUNING parameters.
 void ParamControl::InputTUNING(ifstream& ifs)
@@ -151,7 +163,7 @@ void ParamControl::InputTUNING(ifstream& ifs)
 
     tuning_T.push_back(TuningPair(d, tmp));
 
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         DisplayTuning();
 }
 

@@ -59,6 +59,10 @@ OCP_INT Reservoir::GetSendVarInfo(const VarInfoGrid& varInfo, VarInfoGrid& send_
 void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 {
 
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Master Process Distribute Grid Params -- begin");
+    }
+
     const PreParamGridWell& grid = mygrid;
 
     /////////////////////////////////////////////////////////////////////////
@@ -497,14 +501,27 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
 #endif
   
     MPI_Barrier(myComm);
+
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Master Process Distribute Grid Params -- end");
+    }
 }
 
 
 void Reservoir::InputDistParamOthers(const ParamRead& param)
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Reservoir Params -- begin");
+    }
+
     bulk.InputParam(param.paramRs);
     conn.InputParam(param.paramRs, bulk);
     allWells.InputParam(param.paramWell, domain);
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Reservoir Params -- end");
+    }
 }
 
 

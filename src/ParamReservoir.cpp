@@ -178,7 +178,7 @@ void ParamReservoir::InputCOMPS(ifstream& ifs)
     comsParam.numCom = numCom;
     comsParam.Init();
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << endl << "COMPS" << endl;
         cout << numCom << endl;
     }
@@ -193,7 +193,7 @@ void ParamReservoir::InputRTEMP(ifstream& ifs)
     if (vbuf[0] == "/") return;
     rsTemp = stod(vbuf[0]);
 
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         cout << "RTEMP\n" << rsTemp << endl << endl;
 }
 
@@ -223,7 +223,7 @@ void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
     }
     if (!tmpTab[0].empty()) obj->data.push_back(tmpTab);
 
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         obj->DisplayTable();
 }
 
@@ -259,7 +259,7 @@ void ParamReservoir::InputTABLE2(ifstream& ifs, const string& tabName)
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCK(ifstream& ifs)
 {
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         cout << "\n---------------------" << endl
             << "ROCK"
             << "\n---------------------" << endl;
@@ -283,7 +283,7 @@ void ParamReservoir::InputROCK(ifstream& ifs)
         }
         rockSet.push_back(rock);
 
-        if (CURRENT_RANK == MASTER_PROCESS)
+        if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
             cout << "   " << rock.type << "   " << rock.Pref << "   " << rock.cp1 << "   "
                 << rock.cp2 << endl;
     }
@@ -292,7 +292,7 @@ void ParamReservoir::InputROCK(ifstream& ifs)
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCKT(ifstream& ifs)
 {
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         cout << "\n---------------------" << endl
             << "ROCKT"
             << "\n---------------------" << endl;
@@ -330,7 +330,7 @@ void ParamReservoir::InputROCKT(ifstream& ifs)
     }
     rockSet.push_back(rock);
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "*PORFORM   " << rock.type << endl;
         cout << "*PRPOR     " << rock.Pref << endl;
         cout << "*TRPOR     " << rock.Tref << endl;
@@ -345,7 +345,7 @@ void ParamReservoir::InputROCKT(ifstream& ifs)
 
 void ParamReservoir::InputHLOSS(ifstream& ifs)
 {
-    if (CURRENT_RANK == MASTER_PROCESS)
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         cout << "\n---------------------" << endl
             << "HLOSSPROR"
             << "\n---------------------" << endl;
@@ -372,7 +372,7 @@ void ParamReservoir::InputHLOSS(ifstream& ifs)
             index += 3;
         }
     }
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "*OVERBUR   " << hLoss.obC << "   " << hLoss.obK << endl;
         cout << "*UNDERBUR  " << hLoss.ubC << "   " << hLoss.ubK << endl;
     }
@@ -449,7 +449,7 @@ void ParamReservoir::InputMISCSTR(ifstream& ifs)
             miscstr.surTenExp = stod(vbuf[3]);
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "MISCSTR"
             << "\n---------------------" << endl;
@@ -476,7 +476,7 @@ void ParamReservoir::InputGRAVITY(ifstream& ifs)
         }
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "GRAVITY"
             << "\n---------------------" << endl;
@@ -502,7 +502,7 @@ void ParamReservoir::InputDENSITY(ifstream& ifs)
         }
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "DENSITY"
             << "\n---------------------" << endl;
@@ -528,7 +528,7 @@ void ParamReservoir::InputTHCON(ifstream& ifs, const string& keyword)
         thconr = stod(vbuf[0]);
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "THCONO\n" << thcono << endl << endl;
         cout << "THCONG\n" << thcong << endl << endl;
         cout << "THCONW\n" << thconw << endl << endl;
@@ -552,7 +552,7 @@ void ParamReservoir::InputEQUIL(ifstream& ifs)
 
     EQUIL.push_back(tmpEQUIL);
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "EQUIL"
             << "\n---------------------" << endl;
@@ -577,7 +577,7 @@ void ParamReservoir::InputTABDIMS(ifstream& ifs)
     comsParam.NTPVT = NTPVT  = stoi(vbuf[1]);
     NTROOC = stoi(vbuf[2]);
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "TABDIMS"
             << "\n---------------------" << endl;
@@ -872,7 +872,7 @@ void ComponentParam::InputRefPR(ifstream& ifs, const string& keyword)
         if (objPtr->size() >= NTPVT) break;
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << keyword << endl;
         for (USI i = 0; i < NTPVT; i++) {
             cout << objPtr->at(i) << "   ";
@@ -937,7 +937,7 @@ void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
         }
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << keyword << endl;
         for (USI i = 0; i < NTPVT; i++) {
             for (auto& v : objPtr->data[i]) {
@@ -965,7 +965,7 @@ void ComponentParam::InputCNAMES(ifstream& ifs)
         if (vbuf.back() == "/") break;
     }
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "CNAMES" << endl;
         for (USI i = 0; i < numCom; i++) {
             cout << Cname[i] << "   ";
@@ -984,7 +984,7 @@ void ComponentParam::InputLBCCOEF(ifstream& ifs)
     }
 
 
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "LBCCOEF" << endl;
         for (USI i = 0; i < 5; i++) {
             cout << LBCcoef[i] << "   ";
@@ -1012,11 +1012,11 @@ void ComponentParam::InputBIC(ifstream& ifs)
         for (auto& v : vbuf) {
             if (v != "/") {
                 BIC[nReg].push_back(stod(v));
-                if (CURRENT_RANK == MASTER_PROCESS)
+                if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
                     cout << setw(10) << BIC[nReg].back();
             }
         }
-        if (CURRENT_RANK == MASTER_PROCESS)
+        if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
             cout << endl;
         if (vbuf.back() == "/") {
             nReg++;
@@ -1036,7 +1036,7 @@ void ComponentParam::InputSSMSTA(ifstream& ifs)
         SSMparamSTA.push_back(vbuf[i]);
     }
     
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         for (int i = 0; i < len; i++) {
             cout << SSMparamSTA[i] << "   ";
         }
@@ -1053,7 +1053,7 @@ void ComponentParam::InputNRSTA(ifstream& ifs)
         NRparamSTA.push_back(vbuf[i]);
     }
     
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         for (int i = 0; i < 2; i++) {
             cout << NRparamSTA[i] << "   ";
         }
@@ -1070,7 +1070,7 @@ void ComponentParam::InputSSMSP(ifstream& ifs)
         SSMparamSP.push_back(vbuf[i]);
     }
     
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         for (USI i = 0; i < 2; i++) {
             cout << SSMparamSP[i] << "   ";
         }
@@ -1087,7 +1087,7 @@ void ComponentParam::InputNRSP(ifstream& ifs)
         NRparamSP.push_back(vbuf[i]);
     }
     
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         for (USI i = 0; i < 2; i++) {
             cout << NRparamSP[i] << "   ";
         }
@@ -1104,7 +1104,7 @@ void ComponentParam::InputRR(ifstream& ifs)
         RRparam.push_back(vbuf[i]);
     }
     
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         for (USI i = 0; i < 2; i++) {
             cout << RRparam[i] << "   ";
         }

@@ -133,7 +133,8 @@ enum class ReservoirState : USI
 
 
 // Parallel Module
-const USI MASTER_PROCESS = 0; ///< master process
+const USI MASTER_PROCESS  = 0; ///< master process
+const OCP_BOOL PRINTINPUT = OCP_FALSE;
 
 
 /**

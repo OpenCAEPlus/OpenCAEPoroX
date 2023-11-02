@@ -63,7 +63,9 @@ const OCP_DBL FIELD_RHOAIR_STD      = 0.076362;
 /// Atmospheric pressure ([psia])
 const OCP_DBL FIELD_PRESSURE_STD    = 14.7;
 /// Standard temperature ([F])
-const OCP_DBL FIELD_TEMPERATURE_STD = 60;        
+const OCP_DBL FIELD_TEMPERATURE_STD = 60;       
+/// Time unit
+const string  FIELD_TIME            = " Day ";
 
 
 ////////////////////////////////////////////////
@@ -115,7 +117,8 @@ const OCP_DBL METRIC_GAS_CONSTANT = 0.083143 * 1E5;
 const OCP_DBL METRIC_GRAVITY_FACTOR = 0.0000980665 * 1E5 *1E1;
 /// Darcy constant  (([m3/day]¡¤[cP])/([md]¡¤[m]¡¤[pa]))
 // const OCP_DBL METRIC_DARCY = 0.008527 / 1E5;
-const OCP_DBL METRIC_DARCY = 1.0;
+// [s]
+const OCP_DBL METRIC_DARCY = 1;
 /// Density of water at standard condition ([kg]/[m3]) 
 const OCP_DBL METRIC_RHOW_STD = 999.014;
 /// Density of air at standard condition ([kg]/[m3]) 
@@ -124,6 +127,8 @@ const OCP_DBL METRIC_RHOAIR_STD = 1.2232;
 const OCP_DBL METRIC_PRESSURE_STD = 1.01325 * 1E5;
 /// Standard temperature ([C])
 const OCP_DBL METRIC_TEMPERATURE_STD = 20;
+/// Time unit
+const string METRIC_TIME = " Sec ";
 
 
 
@@ -161,7 +166,7 @@ extern OCP_DBL CONV5;
 /// [lbm]/[ft3] -> [gm-M]/[cc], [kg-M]/[m3] -> [gm-M]/[cc]
 extern OCP_DBL CONV6;
 
-
+extern string TIMEUNIT;
 
 #endif // __OPENCAEPORO_UNITS_HEADER__
 

@@ -33,6 +33,11 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
 /// Call setup procedures for reservoir, output, and linear solver.
 void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Setup Simulator -- begin");
+    }
+
+
     const Domain& domain = reservoir.GetDomain();
 
     GetWallTime timer;
@@ -72,12 +77,21 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 
     OCPTIME_SETUP_SIM = finalTime;
     OCPTIME_TOTAL     += OCPTIME_SETUP_SIM;
+
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Setup Simulator -- end");
+    }
 }
 
 
 /// Initialize the reservoir class.
 void OpenCAEPoroX::InitReservoir()
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Initialize Resevoir -- begin");
+    }
+
     GetWallTime timer;
     timer.Start();
 
@@ -92,6 +106,11 @@ void OpenCAEPoroX::InitReservoir()
 
     OCPTIME_INIT_RESERVOIR = finalTime;
     OCPTIME_TOTAL          += OCPTIME_INIT_RESERVOIR;
+
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Initialize Resevoir -- end");
+    }
 }
 
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
@@ -147,7 +166,7 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
 
         // print numbers of steps
         cout << "Final time:                  " << right << fixed << setprecision(3)
-            << setw(fixWidth) << control.time.GetCurrentTime() << " (Days)" << endl;
+            << setw(fixWidth) << control.time.GetCurrentTime() << "(" + TIMEUNIT + ")" << endl;
         cout << " - Avg time step size ......." << setw(fixWidth)
             << control.time.GetCurrentTime() / output.iters.GetNumTimeStep() << " (" << output.iters.GetNumTimeStep()
             << " steps)" << endl;
@@ -280,11 +299,11 @@ void OpenCAEPoroX::OutputTimeProcess() const
             // Calculate standard variance
             for (OCP_USI p = 0; p < domain.numproc; p++) {
                 for (USI n = 0; n < record_var_num; n++) {
-                    staVar[n].val[1] += pow((record_total[p * record_var_num + n] - staVar[n].val[0]), 2);
+                    staVar[n].val[1] += pow((record_total[p * record_var_num + n] - staVar[n].val[0]), static_cast<OCP_DBL>(2));
                 }
             }
             for (USI n = 0; n < record_var_num; n++) {
-                staVar[n].val[1] = pow(staVar[n].val[1] / domain.numproc, 0.5);
+                staVar[n].val[1] = pow(staVar[n].val[1] / domain.numproc, static_cast<OCP_DBL>(0.5));
             }
 
             // output general information to screen

@@ -42,6 +42,11 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		return;
 	}
 
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("Set Domain -- begin");
+	}
+
+
 	// Setup Domain
 	elementCSR.swap(part.elementCSR);	
 	numElementTotal = part.numElementTotal;
@@ -214,6 +219,11 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		myFile.close();
 	}
 	//////////////////////////////////////////////////////////////
+
+
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("Set Domain -- end");
+	}
 }
 
 

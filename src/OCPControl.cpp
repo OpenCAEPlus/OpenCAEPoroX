@@ -146,8 +146,8 @@ void ControlTime::CutDt(const OCP_DBL& fac)
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         cout << "### WARNING: Cut time step size: " << fixed
-            << setprecision(3) << ldt << " days -> "
-            << setprecision(3) << current_dt << " days !\n";
+            << setprecision(3) << ldt << TIMEUNIT +  " -> "
+            << setprecision(3) << current_dt << TIMEUNIT + "!\n";
     }
 }
 
@@ -174,9 +174,9 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
     }
 
     if (CURRENT_RANK == MASTER_PROCESS) {
-		cout << "### WARNING: Cut time step size: " << fixed
-			<< setprecision(3) << ldt << " days -> "
-			<< setprecision(3) << current_dt << " days !\n";
+        cout << "### WARNING: Cut time step size: " << fixed
+            << setprecision(3) << ldt << TIMEUNIT + " -> "
+            << setprecision(3) << current_dt << TIMEUNIT + "!\n";
     }
 }
 
@@ -348,6 +348,11 @@ OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_li
 
 void OCPControl::InputParam(const ParamControl& CtrlParam)
 {
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Control Params -- begin");
+    }
+
+
     model   = CtrlParam.model;
     workDir = CtrlParam.workDir;
     ocpFile = CtrlParam.fileName;
@@ -364,6 +369,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     lsFile = CtrlParam.lsFile;
     
+    MaxSimTime = CtrlParam.MaxSimTime;
 
     const USI   n = CtrlParam.tuning_T.size();
     vector<USI> ctrlCriticalTime(n + 1);
@@ -376,6 +382,11 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
             time.SetCtrlParam(CtrlParam.tuning_T[i], CtrlParam.criticalTime, d);
             NR.SetCtrlParam(CtrlParam.tuning_T[i].Tuning[2]);
         }
+    }
+
+
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Input Control Params -- end");
     }
 }
 

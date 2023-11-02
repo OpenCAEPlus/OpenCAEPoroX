@@ -32,7 +32,7 @@ void SetUnit(const string& ut)
 		CONV4           = FIELD_CONV3;
 		CONV5           = FIELD_CONV4;
 		CONV6           = FIELD_CONV5;
-
+		TIMEUNIT        = FIELD_TIME;
 	}
 	else if (ut == "METRIC") {
 
@@ -51,6 +51,7 @@ void SetUnit(const string& ut)
 		CONV4           = METRIC_CONV2;
 		CONV5           = METRIC_CONV3;
 		CONV6           = METRIC_CONV4;
+		TIMEUNIT        = METRIC_TIME;
 	}
 	else {
 		OCP_ABORT("Unit Type is not available!");
@@ -92,6 +93,8 @@ OCP_DBL CONV4            = FIELD_CONV3;
 OCP_DBL CONV5            = FIELD_CONV4;
 /// [lbm]/[ft3] -> [gm-M]/[cc], [kg-M]/[m3] -> [gm-M]/[cc]
 OCP_DBL CONV6            = FIELD_CONV5;
+
+string TIMEUNIT          = FIELD_TIME;
 
 
 /*----------------------------------------------------------------------------*/

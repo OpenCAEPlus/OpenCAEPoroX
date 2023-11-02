@@ -14,10 +14,14 @@
 
 void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
 {
+    OCP_INFO("Input Grid File -- begin");
+
     workdir = myWorkdir;
     Input(myFile);
     CheckInput();
     PostProcessInput();
+
+    OCP_INFO("Input Grid File -- end");
 }
 
 
@@ -181,8 +185,6 @@ void PreParamGridWell::PostProcessInput()
 
 void PreParamGridWell::InputMODEL(ifstream& ifs)
 {
-    cout << "MODEL" << endl;
-
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     if (vbuf[0] == "THERMAL") {
@@ -196,13 +198,15 @@ void PreParamGridWell::InputMODEL(ifstream& ifs)
         OCP_ABORT("WRONG MODEL in keyword MODEL!");
     }
 
-    cout << vbuf[0] << endl << endl;
+    if (PRINTINPUT) {
+        cout << "MODEL" << endl;
+        cout << vbuf[0] << endl << endl;
+    }
 }
 
 
 void PreParamGridWell::InputDIMENS(ifstream& ifs)
 {
-    cout << "DIMENS" << endl;
 
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
@@ -215,15 +219,21 @@ void PreParamGridWell::InputDIMENS(ifstream& ifs)
 
     numGrid = numGridM + numGridF;
 
-    cout << setw(6) << nx << setw(6) << ny << setw(6) << nz << endl << endl;
+    if (PRINTINPUT) {
+        cout << "DIMENS" << endl;
+        cout << setw(6) << nx << setw(6) << ny << setw(6) << nz << endl << endl;
+    }
 }
 
 
 void PreParamGridWell::InputEQUALS(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-        << "EQUALS"
-        << "\n---------------------" << endl;
+
+    if (PRINTINPUT) {
+        cout << "\n---------------------" << endl
+            << "EQUALS"
+            << "\n---------------------" << endl;
+    }
 
     vector<USI>    index(6, 0);
     vector<string> vbuf;
@@ -252,11 +262,13 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
             OCP_ABORT("WRONG Range in " + objName + " in EQUALS!");
         }
 
-        cout << setw(8) << vbuf[0] << setw(16) << vbuf[1];
-        for (USI i = 0; i < 6; i++) {
-            cout << setw(6) << index[i] + 1;
+        if (PRINTINPUT) {
+            cout << setw(8) << vbuf[0] << setw(16) << vbuf[1];
+            for (USI i = 0; i < 6; i++) {
+                cout << setw(6) << index[i] + 1;
+            }
+            cout << endl;
         }
-        cout << endl;
 
         
         {
@@ -284,15 +296,19 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
         OCP_ABORT("WRONG Item " + objName + " in EQUALS!");
     }
 
-    cout << "/" << endl;
+    if (PRINTINPUT) {
+        cout << "/" << endl;
+    }
 }
 
 
 void PreParamGridWell::InputCOPY(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-        << "COPY"
-        << "\n---------------------" << endl;
+    if (PRINTINPUT) {
+        cout << "\n---------------------" << endl
+            << "COPY"
+            << "\n---------------------" << endl;
+    }
 
     vector<string> vbuf;
     vector<USI>    index(6, 0);
@@ -311,11 +327,13 @@ void PreParamGridWell::InputCOPY(ifstream& ifs)
             if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
         }
 
-        cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
-        for (USI i = 0; i < 6; i++) {
-            cout << setw(6) << index[i] + 1;
+        if (PRINTINPUT) {
+            cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
+            for (USI i = 0; i < 6; i++) {
+                cout << setw(6) << index[i] + 1;
+            }
+            cout << endl;
         }
-        cout << endl;
 
         {
             auto srcPtr = FindPtr(srcName, (OCP_DBL)0);
@@ -344,9 +362,11 @@ void PreParamGridWell::InputCOPY(ifstream& ifs)
 
 void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
 {
-    cout << "\n---------------------" << endl
-        << "MULTIPLY"
-        << "\n---------------------" << endl;
+    if (PRINTINPUT) {
+        cout << "\n---------------------" << endl
+            << "MULTIPLY"
+            << "\n---------------------" << endl;
+    }
 
 
     vector<string> vbuf;
@@ -378,11 +398,13 @@ void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
             OCP_ABORT("Wrong object name: " + objName);
         }
 
-        cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
-        for (USI i = 0; i < 6; i++) {
-            cout << setw(6) << index[i] + 1;
+        if (PRINTINPUT) {
+            cout << setw(8) << vbuf[0] << setw(8) << vbuf[1];
+            for (USI i = 0; i < 6; i++) {
+                cout << setw(6) << index[i] + 1;
+            }
+            cout << endl;
         }
-        cout << endl;
     }
 }
 
@@ -734,9 +756,13 @@ void InitialReservoir::CheckData(const OCP_USI& numGrid)
 
 void PreParamGridWell::Setup()
 {
+    OCP_INFO("Setup Grid -- begin");
+
     SetupGrid();
     SetupConnWellGrid();
     initR.CheckData(numGrid);
+
+    OCP_INFO("Setup Grid -- end");
 }
 
 

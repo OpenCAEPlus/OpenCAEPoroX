@@ -336,8 +336,8 @@ void PeacemanWell::CalWI(const Bulk& bk)
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
             }
             else {
-                // perf[p].WI = PI * perf[p].radius * perf[p].radius * bvs.rockKx[perf[p].location];
-                perf[p].WI = PI * perf[p].radius * perf[p].radius;
+                perf[p].WI = PI * perf[p].radius * perf[p].radius * bvs.rockKx[perf[p].location];
+                // perf[p].WI = PI * perf[p].radius * perf[p].radius;
             }
 
             perf[p].WI *= CONV_DARCY;
