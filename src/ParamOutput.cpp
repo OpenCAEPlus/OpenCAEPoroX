@@ -272,6 +272,9 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("PCW", 3):
                     tmpBgpp->PCW = OCP_TRUE;
                     break;
+                case Map_Str2Int("CO2", 3):
+                    tmpBgpp->CO2 = OCP_TRUE;
+                    break;
                 default:
                     break;
             }

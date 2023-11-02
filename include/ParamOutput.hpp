@@ -111,6 +111,7 @@ public:
     OCP_BOOL XMF{OCP_FALSE};  ///< liquid component mole fractions.
     OCP_BOOL YMF{OCP_FALSE};  ///< gas component mole fractions.
     OCP_BOOL PCW{OCP_FALSE};  ///< capillary pressure: Po - Pw.
+    OCP_BOOL CO2{OCP_FALSE};  ///< CO2 Concentration
 };
 
 /// OutputRPTParam is a part of ParamOutput, it's used to control the output of detailed

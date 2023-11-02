@@ -999,6 +999,7 @@ void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param
     XMF  = param.XMF;
     YMF  = param.YMF;
     PCW  = param.PCW;
+    CO2  = param.CO2;
 }
 
 
@@ -1051,6 +1052,7 @@ void BasicGridProperty::Check(const Reservoir& rs)
     if (XMF)      bgpnum++;
     if (YMF)      bgpnum++;
     if (PCW)      bgpnum++;
+    if (CO2)      bgpnum++;
 }
 
 
@@ -1380,34 +1382,43 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     if (!useVTK)         return;
     if (bgp.bgpnum == 0) return;
 
-    const BulkVarSet& bcv = rs.bulk.vs;
+    const BulkVarSet& bvs = rs.bulk.vs;
 
-    const auto nb     = bcv.nbI;
-    const auto np     = bcv.np;
-    const auto OIndex = bcv.o;
-    const auto GIndex = bcv.g;
-    const auto WIndex = bcv.w;
+    const auto nb     = bvs.nbI;
+    const auto np     = bvs.np;
+    const auto nc     = bvs.nc;
+    const auto OIndex = bvs.o;
+    const auto GIndex = bvs.g;
+    const auto WIndex = bvs.w;
 
     ofstream outF(myFile, ios::app | ios::binary);
     vector<OCP_DBL> tmpV(nb);
     // output    
     if (bgp.PRE)
-        outF.write((const OCP_CHAR*)&bcv.P[0], nb * sizeof(bcv.P[0]));
+        outF.write((const OCP_CHAR*)&bvs.P[0], nb * sizeof(bvs.P[0]));
     if (bgp.SOIL) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bcv.S[n * np + OIndex];
+            tmpV[n] = bvs.S[n * np + OIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SGAS) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bcv.S[n * np + GIndex];
+            tmpV[n] = bvs.S[n * np + GIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SWAT) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bcv.S[n * np + WIndex];
+            tmpV[n] = bvs.S[n * np + WIndex];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
+
+    // add CO2 concentration for SPE11
+    if (bgp.CO2) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = bvs.rho[n * np + WIndex] * bvs.xij[(n * np + WIndex) * nc + GIndex];
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
+
              
     outF.close();
 }
@@ -1491,6 +1502,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr    += numGrid;
                     tamVap_ptr += numGridLoc;
                 }
+                if (bgp.CO2) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr    += numGrid;
+                    tamVap_ptr += numGridLoc;
+                }
 
                 index++;
                 if (inV.eof()) {
@@ -1540,6 +1558,10 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             }
             if (bgp.SWAT) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                bId += numGrid;
+            }
+            if (bgp.CO2) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
                 bId += numGrid;
             }
 
@@ -1593,6 +1615,10 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
         if (bgp.SWAT) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
+        }
+        if (bgp.CO2) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, tmpVal, bId, numGrid, 3);
             bId += numGrid;
         }
 
