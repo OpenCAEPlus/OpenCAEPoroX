@@ -38,6 +38,8 @@ void FaspSolver::SetupParam(const string& dir, const string& file)
         fasp_param_input(myfile.data(), &inParam);
     }
     fasp_param_init(&inParam, &itsParam, &amgParam, &iluParam, &swzParam);
+    //cout << endl << "OCP long double : " << sizeof(OCP_DBL) << endl;
+    //cout << endl << sizeof(_Quad) << endl;
 }
 
 void ScalarFaspSolver::Allocate(const OCP_USI&     max_nnz,

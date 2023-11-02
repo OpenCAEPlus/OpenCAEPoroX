@@ -19,12 +19,29 @@
 #include <string>
 #include <vector>
 
+// OpenCAEPoroX header files
+#include "LinearSolver.hpp"
+
 // faspsolver header files
 extern "C" {
+
+#if OCPFLOATTYPEWIDTH == 64
+
 #define SHORT  short
 #define INT    int   
 #define LONG   long  
 #define REAL   double
+
+#endif // OCPFLOATTYPEWIDTH == 64
+
+#if OCPFLOATTYPEWIDTH == 128
+
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   long double
+
+#endif // OCPFLOATTYPEWIDTH == 128
 
 #include "fasp.h"
 #include "fasp_block.h"
@@ -47,10 +64,24 @@ extern "C" {
 // fasp4blkoil header files
 #if WITH_FASP4BLKOIL
 extern "C" {
-#define SHORT  short    // conflict with mpi
-#define INT    int      // conflict with mpi
-#define LONG   long     // conflict with mpi
-#define REAL   double   // conflict with mpi
+
+#if OCPFLOATTYPEWIDTH == 64
+
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   double
+
+#endif // OCPFLOATTYPEWIDTH == 64
+
+#if OCPFLOATTYPEWIDTH == 128
+
+#define SHORT  short
+#define INT    int   
+#define LONG   long  
+#define REAL   long double
+
+#endif // OCPFLOATTYPEWIDTH == 128
 
 #include "fasp4blkoil.h"
 #include "fasp4blkoil_functs.h"
@@ -68,9 +99,6 @@ extern "C" {
 #include "fasp4cuda.h"
 #include "fasp4cuda_functs.h"
 #endif
-
-// OpenCAEPoroX header files
-#include "LinearSolver.hpp"
 
 using namespace std;
 

@@ -185,10 +185,12 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 
     if (false) {}
 #ifdef WITH_PARDISO
+#if OCPFLOATTYPEWIDTH == 64
     else if (lsMethod == "pardiso") {
         if (blockDim > 1)    LS = new VectorPardisoSolver(blockDim);
         else                 LS = new PardisoSolver(blockDim);
     }
+#endif
 #endif // WITH_PARDISO
 #ifdef WITH_SAMG
     else if (lsMethod == "samg") {

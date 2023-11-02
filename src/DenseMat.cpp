@@ -76,6 +76,8 @@ void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot)
 {
     INT info;
 
+#if OCPFLOATTYPEWIDTH == 64
+
     dgesv_(&N, &nrhs, A, &N, pivot, b, &N, &info);
 
     if (info < 0) {
@@ -83,11 +85,19 @@ void LUSolve(const INT& nrhs, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot)
     } else if (info > 0) {
         cout << "Singular Matrix !" << endl;
     }
+
+
+#else
+    OCP_ABORT("NOT AVAILABLE!");
+
+#endif
 }
 
 INT SYSSolve(const INT& nrhs, const OCP_CHAR* uplo, const INT& N, OCP_DBL* A, OCP_DBL* b, INT* pivot, OCP_DBL* work, const INT& lwork)
 {
     INT info;
+
+#if OCPFLOATTYPEWIDTH == 64
 
     dsysv_(uplo, &N, &nrhs, A, &N, pivot, b, &N, work, &lwork, &info);
     if (info < 0) {
@@ -95,6 +105,11 @@ INT SYSSolve(const INT& nrhs, const OCP_CHAR* uplo, const INT& N, OCP_DBL* A, OC
     } else if (info > 0) {
         cout << "Singular Matrix !" << endl;
     }
+
+#else
+    OCP_ABORT("NOT AVAILABLE!");
+
+#endif
 
     return info;
 }

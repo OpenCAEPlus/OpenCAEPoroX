@@ -108,7 +108,23 @@ void GMSHGrid::InputGrid2D(const string& file)
 	// Get all mesh nodes
 	std::vector<std::size_t> nodeTags;
 	std::vector<double> nodeParams;
+
+#if OCPFLOATTYPEWIDTH == 128
+
+	vector<double>        pointsTmp;
+	gmsh::model::mesh::getNodes(nodeTags, pointsTmp, nodeParams, -1, -1);
+
+	points.resize(pointsTmp.size());
+	for (OCP_ULL i = 0; i < pointsTmp.size(); i++) {
+		points[i] = static_cast<OCP_DBL>(pointsTmp[i]);
+	}
+	vector<double>().swap(pointsTmp);
+
+#else
 	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
+
+#endif
+
 
 	for (auto& p : points) {
 		p *= 100;

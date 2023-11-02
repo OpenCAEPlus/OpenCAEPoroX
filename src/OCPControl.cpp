@@ -242,11 +242,11 @@ void ControlTime::CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<
 		}
 		else if (s == "iter") {
 			if (NRs.GetIterNR() < 5)
-				factor = min(factor, 2.0);
+				factor = min(factor, static_cast<OCP_DBL>(2.0));
 			else if (NRs.GetIterNR() > 10)
-				factor = min(factor, 0.5);
+				factor = min(factor, static_cast<OCP_DBL>(0.5));
 			else
-				factor = min(factor, 1.5);
+				factor = min(factor, static_cast<OCP_DBL>(1.5));
 		}
 		else {
 			OCP_ABORT("Iterm not recognized!");

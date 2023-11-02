@@ -26,6 +26,8 @@
 
 #include "LinearSolver.hpp"
 
+#if    OCPFLOATTYPEWIDTH == 64
+
 
 #ifdef MKL_ILP64
 #define MPI_DT MPI_LONG
@@ -120,9 +122,8 @@ public:
 };
 
 
-#endif
-
-
+#endif // OCPFLOATTYPEWIDTH == 64
+#endif // __PARDISOSOLVER_HEADER__ 
 #endif // WITH_PARDISO
 
  /*----------------------------------------------------------------------------*/

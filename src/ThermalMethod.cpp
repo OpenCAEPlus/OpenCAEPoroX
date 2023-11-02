@@ -833,7 +833,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
                 chopmin = 1;
                 // compute the chop
                 fill(dtmp.begin(), dtmp.end(), 0.0);
-                OCP_aAxpby(np, col, 1.0, &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, 1.0,
+                OCP_aAxpby(np, col, static_cast<OCP_DBL>(1.0), &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, static_cast<OCP_DBL>(1.0),
                     dtmp.data());
 
                 for (USI j = 0; j < np; j++) {

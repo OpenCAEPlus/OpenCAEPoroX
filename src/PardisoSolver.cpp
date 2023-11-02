@@ -13,6 +13,8 @@
 
 #include "PardisoSolver.hpp"
 
+#if    OCPFLOATTYPEWIDTH == 64
+
 
 void PardisoSolver::SetupParam(const string& dir, const string& file)
 {
@@ -242,6 +244,7 @@ void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
     x = u.data();
 }
 
+#endif // OCPFLOATTYPEWIDTH == 64
 #endif // WITH_PARDISO
 
  /*----------------------------------------------------------------------------*/

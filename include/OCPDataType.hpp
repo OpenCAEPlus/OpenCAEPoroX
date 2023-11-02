@@ -41,13 +41,18 @@ typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
 
 #if OCPFLOATTYPEWIDTH == 64
 
-typedef double             OCP_DBL;  ///< Double precision
+typedef double             OCP_DBL;  ///< float 64 precision
 #define OCPMPI_DBL         MPI_DOUBLE
 
-#elif OCPFLOATTYPEWIDTH == 128
+#elif  OCPFLOATTYPEWIDTH == 128
+#ifdef BOOST_MATH_USE_FLOAT128
 
-typedef long double        OCP_DBL;  ///< Long Double precision
-#define OCPMPI_DBL         MPI_LONG_DOUBLE;
+#include<boost/cstdfloat.hpp>
+
+typedef _Quad              OCP_DBL;  ///< float 128 precision
+#define OCPMPI_DBL         MPI_LONG_DOUBLE
+
+#endif
 
 #endif
 
@@ -60,7 +65,6 @@ typedef int                OCP_INT;  ///< integer
 typedef float              OCP_SIN;  ///< Single precision
 typedef unsigned int       OCP_BOOL; ///< OCP_BOOL in OCP
 typedef char               OCP_CHAR; ///< Char
-
 
 
 #define OCPMPI_INT         MPI_INT

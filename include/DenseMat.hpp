@@ -20,6 +20,7 @@
 #include <math.h>
 #include <numeric>
 #include "OCPDataType.hpp"
+#include "UtilError.hpp"
 
 using namespace std;
 

@@ -31,7 +31,7 @@ void MisFacMethod01::CalculateMiscibleFactor(const OCP_USI& bId, const SurTenVar
         mfvs.Fp[bId] = -1.0;
     }
     else {             // Miscible
-        mfvs.Fk[bId] = min(1.0, pow(st / stref, fkExp));
+        mfvs.Fk[bId] = min(static_cast<OCP_DBL>(1.0), pow(st / stref, fkExp));
         mfvs.Fp[bId] = min(stPcf, st / stref);
     }
 }

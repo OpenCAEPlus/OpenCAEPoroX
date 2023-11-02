@@ -952,7 +952,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
             for (OCP_USI n = 0; n < rowNum; n++) {
                 ReadLine(ifs, buffer, OCP_FALSE);
                 for (USI i = 2; i < buffer.size(); i++) {
-                    sumdata->at(i).val[n] = max(sumdata->at(i).val[n], stod(buffer[i]));
+                    sumdata->at(i).val[n] = max(sumdata->at(i).val[n], static_cast<OCP_DBL>(stod(buffer[i])));
                 }
             }
         }
