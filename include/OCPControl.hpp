@@ -149,7 +149,7 @@ protected:
     /// current time step
     OCP_DBL                  current_dt;
     /// last time step
-    OCP_DBL                  last_dt;
+    OCP_DBL                  last_dt{ 0 };
     /// current time
     OCP_DBL                  current_time{ 0 };
 };
