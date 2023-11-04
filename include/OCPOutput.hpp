@@ -245,6 +245,7 @@ private:
     OCP_BOOL YMF{OCP_FALSE};  ///< gas component mole fractions.
     OCP_BOOL PCW{OCP_FALSE};  ///< capillary pressure: Po - Pw.
     OCP_BOOL CO2{ OCP_FALSE };///< CO2 Concentration
+    OCP_BOOL SATNUM{ OCP_FALSE }; ///< SAT region
 
     USI             bgpnum;   ///< num of Basic grid information to be printed
 };

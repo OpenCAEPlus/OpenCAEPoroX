@@ -149,7 +149,7 @@ ReservoirState Bulk::CheckNi()
         if (vs.Ni[n] < 0) {
             OCP_USI bId = n / vs.nc;
             if (((vs.Ni[n] > -1E-5 * vs.Nt[bId]) ||
-                (vs.lNi[n] < 1E-5 * vs.Nt[bId] && OCP_FALSE)) && OCP_FALSE) {
+                (vs.lNi[n] < 1E-3 * vs.Nt[bId] && OCP_FALSE)) && OCP_FALSE) {
                 vs.Ni[n] = 1E-40 * vs.Nt[bId];
             } else {
                 USI                cId = n - bId * vs.nc;
@@ -160,8 +160,9 @@ ReservoirState Bulk::CheckNi()
                 std::ostringstream NtStringSci;
                 NtStringSci << std::scientific << vs.Nt[bId];
                 OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
-                            std::to_string(bId) + "] = " + NiStringSci.str() 
-                    + ", lNi = " + lNiStringSci.str() + ", Nt = " + NtStringSci.str());
+                    std::to_string(bId) + "] = " + NiStringSci.str()
+                    + ", lNi = " + lNiStringSci.str() + ", Nt = " + NtStringSci.str() 
+                    + "  " + to_string(SATm.GetSATNUM(bId)));
 
                 return ReservoirState::bulk_negative_N;
             }

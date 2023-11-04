@@ -118,7 +118,6 @@ const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
             ctrl.StopSim = OCP_TRUE;
             break;
         }
-
         // Assemble linear system
         IsoTSolver.AssembleMat(rs, ctrl);
         // Solve linear system

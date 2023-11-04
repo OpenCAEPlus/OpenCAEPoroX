@@ -42,6 +42,7 @@ public:
     }
     auto GetSAT(const OCP_USI& n) const { return &SATs[SATNUM[n]]; }
     auto& GetSATNUM() { return SATNUM; }
+    auto GetSATNUM(const OCP_USI& n) const { return SATNUM[n]; }
     auto GetNTSFUN() { return NTSFUN; }
 
 protected:

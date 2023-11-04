@@ -1000,6 +1000,7 @@ void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param
     YMF  = param.YMF;
     PCW  = param.PCW;
     CO2  = param.CO2;
+    SATNUM = param.SATNUM;
 }
 
 
@@ -1053,6 +1054,7 @@ void BasicGridProperty::Check(const Reservoir& rs)
     if (YMF)      bgpnum++;
     if (PCW)      bgpnum++;
     if (CO2)      bgpnum++;
+    if (SATNUM)   bgpnum++;
 }
 
 
@@ -1419,6 +1421,13 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
 
+    // add SAT region for SPE11
+    if (bgp.SATNUM) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = static_cast<OCP_DBL>(rs.bulk.SATm.GetSATNUM(n));
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
+
              
     outF.close();
 }
@@ -1509,6 +1518,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr    += numGrid;
                     tamVap_ptr += numGridLoc;
                 }
+                if (bgp.SATNUM) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tamVap_ptr[n];
+                    }
+                    workPtr += numGrid;
+                    tamVap_ptr += numGridLoc;
+                }
 
                 index++;
                 if (inV.eof()) {
@@ -1549,19 +1565,23 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                 bId += numGrid;
             }
             if (bgp.SOIL) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.SGAS) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.SWAT) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.CO2) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
+                bId += numGrid;
+            }
+            if (bgp.SATNUM) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_UNSIGNED_INT, gridVal[i], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1606,19 +1626,23 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
             bId += numGrid;
         }
         if (bgp.SOIL) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, bId, numGrid, 6);
             bId += numGrid;
         }
         if (bgp.SGAS) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, tmpVal, bId, numGrid, 6);
             bId += numGrid;
         }
         if (bgp.SWAT) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, tmpVal, bId, numGrid, 6);
             bId += numGrid;
         }
         if (bgp.CO2) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, tmpVal, bId, numGrid, 6);
+            bId += numGrid;
+        }
+        if (bgp.SATNUM) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_UNSIGNED_INT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
 
