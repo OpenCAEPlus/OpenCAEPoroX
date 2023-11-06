@@ -99,18 +99,13 @@ void OpenCAEPoroX::InitReservoir()
 
     double finalTime = timer.Stop() / TIME_S2MS;
     if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
-        cout << endl
-             << "Initialization done. Wall time : " << fixed << setprecision(3)
-             << finalTime << " Sec" << endl;
+        std::ostringstream initTime;
+        initTime << fixed << setprecision(3) << finalTime;
+        OCP_INFO("Initialize Resevoir -- end. Wall time : " + to_string(finalTime) + " Sec");
     }
 
     OCPTIME_INIT_RESERVOIR = finalTime;
     OCPTIME_TOTAL          += OCPTIME_INIT_RESERVOIR;
-
-
-    if (CURRENT_RANK == MASTER_PROCESS) {
-        OCP_INFO("Initialize Resevoir -- end");
-    }
 }
 
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.

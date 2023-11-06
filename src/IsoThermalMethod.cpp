@@ -1107,12 +1107,13 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
 
     // Accumulation term
+    vector<OCP_DBL> bmat(bsize, 0);
     for (OCP_USI n = 0; n < nbI; n++) {
         ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
     // flux term
-    vector<OCP_DBL> bmat(bsize, 0);
+    
     OCP_USI  bId, eId;
     USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
