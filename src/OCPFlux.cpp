@@ -76,17 +76,6 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
             flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
         }
 
-        //if (bId == 12637 || eId == 12637) {
-        //    bvs.xij[uId_np_j * nc + 0];
-        //    bvs.xij[uId_np_j * nc + 1];
-        //    bvs.P[bId];
-        //    bvs.P[eId];
-        //    bvs.Pc[bId_np_j];
-        //    bvs.Pc[eId_np_j];
-        //    bvs.S[bId_np_j];
-        //    bvs.S[eId_np_j];
-        //    int a = 1;
-        //}
     }
 }
 

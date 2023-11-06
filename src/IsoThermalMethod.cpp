@@ -935,15 +935,6 @@ void IsoT_FIM::CalFlash(Bulk& bk)
 
         bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
         PassFlashValue(bk, n);
-
-        //if (n == 12637) {
-        //    cout << scientific << setprecision(6);
-        //    cout << "Vf : " << bvs.vf[n] << endl;
-        //    cout << "NW : " << bvs.Ni[n * 2] << endl;
-        //    cout << "NG : " << bvs.Ni[n * 2 + 1] << endl;
-        //    cout << "Sw : " << bvs.S[n * 2] << endl;
-        //    cout << "Sg : " << bvs.S[n * 2 + 1] << endl;
-        //}
     }
 }
 
@@ -1042,14 +1033,6 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
         fluxnum   = conn.iteratorConn[c].FluxNum();
         auto Flux = conn.flux[fluxnum];
 
-
-
-        //if (bId == 12637 || eId == 12637) {
-        //    //continue;
-        //}
-
-
-
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
@@ -1138,12 +1121,6 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         eId       = conn.iteratorConn[c].EId();
         fluxnum   = conn.iteratorConn[c].FluxNum();
         auto Flux = conn.flux[fluxnum];     
-
-
-        //if (bId == 12637 || eId == 12637) {
-        //    //continue;
-        //}
-
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
