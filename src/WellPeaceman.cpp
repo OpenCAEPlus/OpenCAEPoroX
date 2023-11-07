@@ -1309,6 +1309,7 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
         DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
+
         // Bulk - Bulk -- add
         ls.AddDiag(n, bmat);
 
@@ -1336,6 +1337,7 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
             bmat = dQdXpB;
             DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2],
                 1, bmat.data());
+
             fill(bmat2.begin(), bmat2.end(), 0.0);
             for (USI i = 0; i < nc; i++) {
                 Daxpy(ncol, factor[i], bmat.data() + (i + 1) * ncol, bmat2.data());

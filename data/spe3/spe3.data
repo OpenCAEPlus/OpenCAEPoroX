@@ -208,7 +208,7 @@ TUNING
 /
 
 METHOD
-AIMc bsr.fasp
+FIM  bsr.fasp
 /
 
 -- Scenario One  ------------------------------------------------

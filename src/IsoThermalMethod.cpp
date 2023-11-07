@@ -1129,6 +1129,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
             bmat.data());
         Dscalar(bsize, dt, bmat.data());
+
         // Assemble
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);

@@ -131,8 +131,9 @@ void ParamControl::InpuMaxSimTime(ifstream& ifs)
     ReadLine(ifs, vbuf, OCP_FALSE);
 
     MaxSimTime = stod(vbuf[0]);
-
-    OCP_INFO("Max Simulation time : " + to_string(MaxSimTime) + " Sec");
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Max Simulation time : " + to_string(MaxSimTime) + " Sec");
+    }
 }
 
 

@@ -1,0 +1,258 @@
+
+NCNP
+8  2
+/
+
+ZI
+0.0172 0.4958 0.0736 0.1302 0.0606 0.0786 0.0938 0.0502
+/
+
+
+BIC
+-- 
+-- Binary Interaction Coefficients (Reservoir EoS)
+-- 
+     0.1
+     0.1 0.001397103
+     0.1 0.007994138 0.002735656
+     0.1 0.014451577 0.006958493 0.000981341
+    0.11 0.020197978 0.011153295 0.00289082 0.000506201
+    0.11 0.037885027 0.025293845 0.011691142 0.005960569 0.003008941
+    0.11 0.074377073 0.057137713 0.036238508 0.025763035 0.019260626 0.007212963
+/
+
+RR
+#Rachford Rice equation parameters
+#maxit tolerance
+30	1e-12
+/
+
+SSMSTA
+#Successive substitution in Stablility Analysis
+#maxit tolerance
+200	1e-12 1e-8
+/
+
+NRSTA
+#Newton Raphson in Stablility Analysis
+#maxit tolerance
+55 1e-12
+/
+
+
+SSMSP
+#Successive substitution in Phase Split
+#maxit tolerance
+200	1E-6
+/
+
+NRSP
+#Newton Raphson in Phase Split
+#maxit tolerance
+55  1e-12
+/
+
+
+
+STCOND
+-- 
+-- Standard Conditions
+-- 
+          60        14.7
+/
+
+
+PVTW
+-- 
+-- Water PVT Properties
+-- 
+265    1.0598 2.565e-006    0.4013         01
+/
+ 
+DENSITY
+-- 
+-- Fluid Densities at Surface Conditions
+-- 
+          1*      62.4        1*
+/
+
+
+
+RTEMP
+-- 
+-- Initial Reservoir Temperature
+-- 
+         290
+/
+ 
+CNAMES
+-- 
+-- Component Names
+-- 
+   'CO2'  'C1N2'  'C2H2S'  'C3-C5'  'C6C7'  'C8C10' 'C11-C19'  'C20P'
+/
+
+VCRIT
+-- 
+-- Critical Volumes (Reservoir EoS)
+-- 
+      1.506747
+      1.585363
+      2.372397
+      4.171775
+      5.847981
+      7.452992
+      13.47266
+      33.76175
+/
+
+TCRIT
+-- 
+-- Critical Temperatures (Reservoir EoS)
+-- 
+        547.56
+    341.760006
+    549.779994
+    762.060006
+       993.114
+   1108.115622
+      1155.996
+   1428.185412
+/
+
+PCRIT
+-- 
+-- Critical Pressures (Reservoir EoS)
+-- 
+   1069.873723
+   665.2123238
+   708.6324641
+   543.6718921
+   444.9582576
+           355
+   269.7021236
+     221.02784
+/
+
+MW
+-- 
+-- Molecular Weights (Reservoir EoS)
+-- 
+         44.01
+         16.12
+         30.07
+         57.27
+     91.649867
+     119.16259
+        192.23
+           414
+/
+
+ACF
+-- 
+-- Acentric Factors (Reservoir EoS)
+-- 
+         0.225
+        0.0084
+         0.098
+        0.1979
+    0.33219292
+       0.46828
+    0.62346543
+     1.0485583
+/
+
+OMEGAA
+-- 
+-- Overrides default Ωa values
+-- 
+       0.45724
+       0.45724
+       0.45724
+       0.45724
+    0.45723553
+    0.45723553
+       0.48037
+       0.48329
+/
+
+OMEGAB
+-- 
+-- Overrides default Ωb values
+-- 
+        0.0778
+        0.0778
+        0.0778
+        0.0778
+   0.077796074
+   0.077796074
+        0.0778
+        0.0778
+/
+
+PARACHOR
+-- 
+-- Component Parachors
+-- 
+     126.49116
+      40.09592
+     83.736849
+     166.36642
+     266.09566
+      341.9879
+     528.20768
+      948.7488
+/
+
+SSHIFT
+-- 
+-- EoS Volume Shift (Reservoir EoS)
+-- 
+       0.06924
+      -0.09394
+      -0.04316
+      -0.18535
+     0.0591138
+     0.0975179
+     -0.078701
+    -0.0921514
+/
+
+
+VCRITVIS
+-- 
+-- Critical Volumes for Viscosity Calc (Reservoir EoS)
+-- 
+--      1.506747
+--      1.585363
+--      2.372397
+--      4.171775
+--      5.847981
+--      7.452992
+--      13.47266
+--      33.76175
+--/
+      1.261197
+      1.271875
+      1.423438
+      2.503065
+      3.510278
+      10.44748
+      13.10742
+      20.25705
+/
+
+
+LBCCOEF
+--
+-- Lorentz-Bray-Clark Viscosity Correlation Coefficients
+--
+0.1023 0.023364 0.058533 -0.040758 0.0093324
+/
+
+ZMFVD
+-- 
+-- Total Composition vs Depth
+
+1000.0   0.0172  0.4958  0.0736  0.1302  0.0606  0.0786  0.0938  0.0502
+/
