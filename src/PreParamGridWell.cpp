@@ -756,18 +756,20 @@ void InitialReservoir::CheckData(const OCP_USI& numGrid)
 
 void PreParamGridWell::Setup()
 {
-    OCP_INFO("Setup Grid -- begin");
+    OCP_INFO("Setup Grid and Well -- begin");
 
     SetupGrid();
     SetupConnWellGrid();
     initR.CheckData(numGrid);
 
-    OCP_INFO("Setup Grid -- end");
+    OCP_INFO("Setup Grid and Well -- end");
 }
 
 
 void PreParamGridWell::SetupGrid()
 {
+    OCP_INFO("Setup Grid -- begin");
+
     switch (gridType) 
     {
     case GridType::orthogonal:
@@ -790,21 +792,29 @@ void PreParamGridWell::SetupGrid()
     }
 
     SetupTransMult();
+
+    OCP_INFO("Setup Grid -- end");
 }
 
 
 void PreParamGridWell::SetupOrthogonalGrid()
 {
+    OCP_INFO("Setup Orthogonal Grid -- begin");
+
     // x -> y -> z
     CalDepthVOrthogonalGrid();
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnOrthogonalGrid();
 
     OutputPointsOrthogonalGrid();
+
+    OCP_INFO("Setup Orthogonal Grid -- end");
 }
 
 void PreParamGridWell::CalDepthVOrthogonalGrid()
 {
+    OCP_INFO("Calculate Depth and Volume -- begin");
+
     depth.resize(numGrid, 0);
     const OCP_ULL nxny = nx * ny;
     OCP_ULL id;
@@ -832,16 +842,22 @@ void PreParamGridWell::CalDepthVOrthogonalGrid()
 
     v.resize(numGrid);
     for (OCP_ULL i = 0; i < numGrid; i++) v[i] = dx[i] * dy[i] * dz[i];
+
+    OCP_INFO("Calculate Depth and Volume -- end");
 }
 
 void PreParamGridWell::SetupActiveConnOrthogonalGrid()
 {
+    OCP_INFO("Setup Active Grid Connections -- begin");
+
     if (DUALPORO) {
         SetupActiveConnOrthogonalGridDP();
     }
     else {
         SetupActiveConnOrthogonalGridSM();
     }
+
+    OCP_INFO("Setup Active Grid Connections -- end");
 }
 
 
@@ -1000,6 +1016,8 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 {
     if (!ifUseVtk)  return;
 
+    OCP_INFO("Ouput Orthogonal Grid points for vtk -- begin");
+
     vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
     vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
@@ -1064,6 +1082,8 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
 
     Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
+
+    OCP_INFO("Ouput Orthogonal Grid points for vtk -- end");
 }
 
 
@@ -1382,6 +1402,8 @@ void PreParamGridWell::SetLocationStructral()
 
 void PreParamGridWell::CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2)
 {
+    OCP_INFO("Select Active Grid -- begin");
+
     switch (model)
     {
     case OCPModel::isothermal:
@@ -1393,6 +1415,8 @@ void PreParamGridWell::CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2)
     default:
         OCP_ABORT("WRONG Grid Model!");
     }
+
+    OCP_INFO("Select Active Grid -- end");
 }
 
 
@@ -1483,6 +1507,7 @@ void PreParamGridWell::SetupTransMult()
 
 void PreParamGridWell::SetupConnWellGrid()
 {
+    OCP_INFO("Setup Connection between Grid and Well -- begin");
 
     // Attention that all wells should be active -- own at least one connections to active grid
     numWell = well.size();
@@ -1518,6 +1543,7 @@ void PreParamGridWell::SetupConnWellGrid()
         numNeighbor[n] = gNeighbor[n].size();
     }
     
+    OCP_INFO("Setup Connection between Grid and Well -- end");
 }
 
 

@@ -217,36 +217,6 @@ INT SYSSolve(const INT& nrhs, const OCP_CHAR* uplo, const INT& N, OCP_DBL* A, OC
 void CalEigenSY(const INT& N, OCP_SIN* A, OCP_SIN* w, OCP_SIN* work, const INT& lwork);
 
 
-void myDABpCp(const int& m,
-    const int& n,
-    const int& k,
-    const double* A,
-    const double* B,
-    double* C,
-    const int* flag,
-    const int     N);
-
-
-void myDABpCp1(const int& m,
-    const int& n,
-    const int& k,
-    const double* A,
-    const double* B,
-    double* C,
-    const int* flag,
-    const int     N);
-
-
-void myDABpCp2(const int& m,
-    const int& n,
-    const int& k,
-    const double* A,
-    const double* B,
-    double* C,
-    const int* flag,
-    const int     N);
-
-
 /// Prints a vector.
 template <typename T>
 void PrintDX(const int& N, const T* x)
@@ -281,6 +251,38 @@ inline void OCPSwap(T a, T b, const int& n, T w)
         b[i] = w[i];
     }
 }
+
+
+void myDABpCp(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
+
+void myDABpCp1(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
+
+void myDABpCp2(const int& m,
+    const int& n,
+    const int& k,
+    const double* A,
+    const double* B,
+    double* C,
+    const int* flag,
+    const int     N);
+
+
 
 #endif
 
