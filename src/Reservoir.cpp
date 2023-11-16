@@ -177,7 +177,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             const OCP_ULL* gridIndex = iGridproc;
             vector<OCP_ULL> gridIndexA(numGrid);
             for (OCP_USI n = 0; n < numGrid; n++) {
-                gridIndexA[n] = grid.map_Act2All[gridIndex[n]];
+                gridIndexA[n] = grid.actGC.map_Act2All[gridIndex[n]];
             }
 
             // dbl
@@ -247,7 +247,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             const OCP_DBL* src = s.src_ptr->data();           
             OCP_DBL*       dst = s.dst_ptr->data();
             for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
-                dst[n] = src[grid.map_Act2All[domain.grid[n]]];
+                dst[n] = src[grid.actGC.map_Act2All[domain.grid[n]]];
             }
         }
         // usi
@@ -256,7 +256,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             const OCP_USI* src = s.src_ptr->data();
             OCP_USI*       dst = s.dst_ptr->data();
             for (OCP_USI n = 0; n < bulk.vs.nb; n++) {
-                dst[n] = src[grid.map_Act2All[domain.grid[n]]];
+                dst[n] = src[grid.actGC.map_Act2All[domain.grid[n]]];
             }
         }
 

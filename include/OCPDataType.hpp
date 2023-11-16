@@ -28,8 +28,9 @@ typedef unsigned int       OCP_ULL;  ///< Long long unsigned integer
 
 #elif OCPINTTYPEWIDTH == 64
 typedef long long          OCP_SLL;  ///< Long long signed integer
-//typedef PetscInt64         OCP_SLL;  ///< Long long signed integer
+// typedef PetscInt64        OCP_SLL;  ///< Long long signed integer
 typedef unsigned long long OCP_ULL;  ///< Long long unsigned integer
+// typedef PetscInt64        OCP_ULL;  ///< Long long unsigned integer
 
 #define OCPMPI_SLL         MPI_LONG_LONG_INT
 #define OCPMPI_ULL         MPI_UNSIGNED_LONG_LONG

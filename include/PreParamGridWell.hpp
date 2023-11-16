@@ -31,27 +31,41 @@
 using namespace std;
 
 
-/// Active cell indicator and its index among active cells.
-//  Note: GB_Pair contains two variables, which indicates if a grid cell is active or
-//  not and its index among active cells if it is active.
-class GB_Pair
+class ActiveGridCheck
 {
 public:
-    /// Default constructor.
-    GB_Pair() = default;
-    /// Constructor with given information.
-    GB_Pair(const OCP_BOOL& act, const OCP_ULL& i)
-        : activity(act)
-        , index(i) {};
+    OCP_ULL CheckActivity(const OCPModel& Model, const OCP_DBL& ev, const OCP_DBL& ep,
+                          const vector<OCP_DBL>& v, const vector<OCP_DBL>& poro);
+    OCP_BOOL IfFluid(const OCP_ULL& n, const OCP_DBL& poro);
+    void FreeSomeMemory();
 
-    /// Return whether this cell is active or not.
-    auto IsAct() const { return activity; }
-    /// Return the index of this cell among active cells.
-    auto GetId() const { return index; }
+public:
+    /// if ACTNUM is all 1
+    OCP_BOOL        allAct{ OCP_FALSE };
+    /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
+    vector<USI>     ACTNUM;
 
-private:
-    OCP_BOOL activity; ///< Activeness of a grid cell.
-    OCP_ULL  index;    ///< Active index of grid if active
+public:
+    /// number or grid
+    OCP_ULL         numGrid;
+    /// number of active grid
+    OCP_ULL         activeGridNum;
+    /// Index mapping from active grid to all grid
+    vector<OCP_ULL> map_Act2All;
+    /// Mapping from grid to active all grid
+    vector<OCP_SLL> map_All2Act;
+
+protected:
+    /// model for check
+    OCPModel        model;
+    /// volume limit
+    OCP_DBL         eV;
+    /// porosity limit
+    OCP_DBL         eP;
+
+protected:
+    void CheckActivityIsoT(const vector<OCP_DBL>& v, const vector<OCP_DBL>& poro);
+    void CheckActivityT(const vector<OCP_DBL>& v, const vector<OCP_DBL>& poro);
 };
 
 
@@ -239,8 +253,6 @@ protected:
     /// transmissibility multipliers in Z-direction
     vector<OCP_DBL> multZ;
 
-    /// Activity of grid from input file: numGridLocal: 0 = inactive, 1 = active.
-    vector<USI>     ACTNUM; 
     /// Records the index of SAT region for each grid.  
     vector<USI>     SATNUM;  
     /// Records the index of PVT region for each grid.
@@ -254,6 +266,9 @@ protected:
 
     // Initial Condition
     InitialReservoir initR;
+
+    /// grid activity check
+    ActiveGridCheck  actGC;
 
     // Well
     vector<WellParam> well;
@@ -314,11 +329,7 @@ protected:
 
     /// For General Grid
     /// Calculate the activity of grid cells
-    void CalActiveGrid(const OCP_DBL& e1, const OCP_DBL& e2);
-    /// Calculate the activity of grid cells for isothermal model
-    void CalActiveGridIsoT(const OCP_DBL& e1, const OCP_DBL& e2);
-    /// Calculate the activity of grid cells for Thermal model
-    void CalActiveGridT(const OCP_DBL& e1, const OCP_DBL& e2);
+    void CalActiveGrid(const OCP_DBL& ev, const OCP_DBL& ep);
     /// Setup Transmissibility multipliers
     void SetupTransMult();
 
@@ -337,15 +348,6 @@ protected:
 
     /// Num of active grid.
     OCP_ULL                  activeGridNum;
-    /// Index mapping from active grid to all grid
-    vector<OCP_ULL>          map_Act2All;
-    /// Mapping from grid to active all grid
-    vector<GB_Pair>          map_All2Act; 
-    /// Num of fluid grids.
-    OCP_ULL                  fluidGridNum;
-    /// Mapping from all grid to fluid grid
-    vector<GB_Pair>          map_All2Flu;
-
 
     /////////////////////////////////////////////////////////////////////
     // Dual Porosity Option
