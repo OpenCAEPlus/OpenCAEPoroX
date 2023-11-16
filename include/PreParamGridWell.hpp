@@ -343,8 +343,6 @@ protected:
     // Connections
     /// Neighboring information of active grid.
     vector<vector<ConnPair>> gNeighbor; 
-    /// Num of neighbor
-    vector<USI>              numNeighbor; 
 
     /// Num of active grid.
     OCP_ULL                  activeGridNum;

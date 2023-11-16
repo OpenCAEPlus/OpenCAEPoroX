@@ -72,7 +72,7 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 		maxNumEdges = 0;
 		for (OCP_INT p = 0; p < numproc; p++) {			
 			for (idx_t n = vtxdist[p]; n < vtxdist[p + 1]; n++) {
-				numEdges[p] += grid.numNeighbor[n];				
+				numEdges[p] += grid.gNeighbor[n].size();
 			}
 			maxNumVtx   = max(maxNumVtx, (vtxdist[p + 1] - vtxdist[p]));
 			maxNumEdges = max(maxNumEdges, numEdges[p]);			

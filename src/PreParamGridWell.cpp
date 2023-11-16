@@ -1536,11 +1536,6 @@ void PreParamGridWell::SetupConnWellGrid()
         }
     }
     gNeighbor.shrink_to_fit();
-
-    numNeighbor.resize(numTotal);
-    for (OCP_ULL n = 0; n < numTotal; n++) {
-        numNeighbor[n] = gNeighbor[n].size();
-    }
     
     OCP_INFO("Setup Connection between Grid and Well -- end");
 }
@@ -1664,7 +1659,6 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(v);
     vector<OCP_DBL>().swap(depth);
     vector<vector<ConnPair>>().swap(gNeighbor);
-    vector<USI>().swap(numNeighbor);
     vector<OCP_ULL>().swap(actGC.map_Act2All);
 
     vector<vector<OCP_ULL>>().swap(connWellGrid);
