@@ -26,7 +26,7 @@ extern OCP_DBL OCPTIME_READPARAM;			///< Time for Inputting Reservoir Params
 extern OCP_DBL OCPTIME_SETUP_SIM;			///< Time for Setuping Simulator
 extern OCP_DBL OCPTIME_INIT_RESERVOIR;		///< Time for Reservoir Initializing
 extern OCP_DBL OCPTIME_ASSEMBLE_MAT;		///< Time for Matrix Assembling
-extern OCP_DBL OCPTIME_ASSEMBLE_MAT_FOR_LS; ///< Time for Matrix Assembling used in external linear solver
+extern OCP_DBL OCPTIME_CONVERT_MAT_FOR_LS_IF; ///< Time for Matrix Assembling used in external linear solver
 extern OCP_DBL OCPTIME_LSOLVER;				///< Time for Linear Solver
 extern OCP_DBL OCPTIME_NRSTEP;				///< Time for NR step
 extern OCP_DBL OCPTIME_NRSTEPC;             ///< Time for main calculation in NRstep

@@ -62,7 +62,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     // Solve linear system  
     timer.Start();

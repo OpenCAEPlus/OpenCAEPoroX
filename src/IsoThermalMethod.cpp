@@ -87,7 +87,7 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
     
     timer.Start();
     int status = ls.Solve();
@@ -718,7 +718,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     // Solve linear system
     
@@ -1496,7 +1496,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_ASSEMBLE_MAT_FOR_LS += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     timer.Start();
     int status = ls.Solve();
