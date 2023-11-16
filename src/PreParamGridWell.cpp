@@ -165,12 +165,12 @@ void PreParamGridWell::PostProcessInput()
 {
     if (ntg.size() != numGrid) {
         OCP_WARNING("NTG will be set to 1 !");
-        ntg.clear();
-        ntg.resize(numGrid, 1.0);
+        vector<OCP_DBL>().swap(ntg);
     }
-
-    for (OCP_ULL n = 0; n < numGrid; n++) {
-        poro[n] *= ntg[n];
+    else {
+        for (OCP_ULL n = 0; n < numGrid; n++) {
+            poro[n] *= ntg[n];
+        }
     }
 
     if (actGC.ACTNUM.size() != numGrid) {
@@ -921,6 +921,8 @@ void PreParamGridWell::CalDepthVOrthogonalGrid()
     v.resize(numGrid);
     for (OCP_ULL i = 0; i < numGrid; i++) v[i] = dx[i] * dy[i] * dz[i];
 
+    vector<OCP_DBL>().swap(tops);
+
     OCP_INFO("Calculate Depth and Volume -- end");
 }
 
@@ -1637,7 +1639,6 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(dx);
     vector<OCP_DBL>().swap(dy);
     vector<OCP_DBL>().swap(dz);
-    vector<OCP_DBL>().swap(tops);
     vector<OCP_DBL>().swap(ntg);
     vector<OCP_DBL>().swap(poro);
     vector<OCP_DBL>().swap(kx);

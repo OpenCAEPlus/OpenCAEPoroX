@@ -502,6 +502,12 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
   
     MPI_Barrier(myComm);
 
+    // check
+    if (bulk.vs.ntg.size() != bulk.vs.nb) {
+        bulk.vs.ntg.clear();
+        bulk.vs.ntg.resize(bulk.vs.nb, 1.0);
+    }
+
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Master Process Distribute Grid Params -- end");
