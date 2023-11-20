@@ -19,7 +19,7 @@ TABDIMS
 1   1   1
 
 DIMENS
-625  625  6
+1600  1600  400
 
 EQLDIMS
 1 20 /
@@ -33,9 +33,9 @@ START
 GRID    ================================================================
 
 EQUALS
-'DX'         48       6*                  /
-'DY'         48       6*                  /
-'DZ'         50       6*                  /
+'DX'         10      6*                  /
+'DY'         10      6*                  /
+'DZ'         0.5        6*                  /
 'PORO'      0.3       6*                  /
 'PERMX'     500       4*       1      2   /
 'PERMX'      50       4*       3      4   /
@@ -194,11 +194,11 @@ FIM petsc
 
 WELSPECS
 --name  group   I   J  depth_ref phase_ref -- I J -(x,y), start 1
-'INJE1'   'G'   312      312      1*    'OIL'   /
+'INJE1'   'G'   800       800      1*    'OIL'   /
 'PROD1'   'G'   1         1       1*    'OIL'   /
-'PROD2'   'G'   1        625     1*    'OIL'   /
-'PROD3'   'G'   625       1       1*    'OIL'   /
-'PROD4'   'G'   625      625     1*    'OIL'   /
+'PROD2'   'G'   1        1600     1*    'OIL'   /
+'PROD3'   'G'   1600       1       1*    'OIL'   /
+'PROD4'   'G'   1600       1600     1*    'OIL'   /
 /
 
 WELLSTRE
@@ -207,8 +207,8 @@ Solvent 1 0 0 0 0 0 0 0 /
 
 COMPDAT
 --name   I J   K1  K2 
-'INJE*'    2*    1   2          1*   0.5   3*    /
-'PROD*'    2*    5   6          1*   0.5   3*   /
+'INJE*'    2*    1    200          1*   0.5   3*    /
+'PROD*'    2*    201   400          1*   0.5   3*   /
 /
 
 
@@ -224,7 +224,7 @@ WCONINJE
 --Start production only ----------------------------------------------
 
 TSTEP
-100
+1000
 /
 
 END

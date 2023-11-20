@@ -152,7 +152,7 @@ class ScalarFaspSolver : public FaspSolver
 public:
     ScalarFaspSolver() { blockdim = 1; }
 
-private:
+protected:
     /// Allocate memory for the linear system.
     void Allocate(const OCP_USI&     max_nnz,
                   const OCP_USI&     maxDim) override;
@@ -170,7 +170,7 @@ private:
     /// Solve the linear system.
     OCP_INT Solve() override;
 
-private:
+protected:
     dCSRmat A; ///< Matrix for scalar-value problems
     dvector b; ///< Right-hand side for scalar-value problems
     dvector x; ///< Solution for scalar-value problems
@@ -182,7 +182,7 @@ class VectorFaspSolver : public FaspSolver
 public:
     VectorFaspSolver(const USI& blockDim) { blockdim = blockDim; }
 
-private:
+protected:
     /// Allocate memory for the linear system.
     void Allocate(const OCP_USI&     max_nnz,
                   const OCP_USI&     maxDim) override;
@@ -209,7 +209,7 @@ private:
                     OCP_DBL*  Dmatvec,
                     int      decouple_type);
 
-private:
+protected:
     dBSRmat A; ///< Matrix for vector-value problems
     dvector b; ///< Right-hand side for vector-value problems
     dvector x; ///< Solution for vector-value problems

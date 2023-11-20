@@ -29,9 +29,6 @@ public:
     /// Read the params for linear solvers from an input file.
     virtual void SetupParam(const string& dir, const string& file) = 0;
 
-    /// Initialize the params for linear solvers.
-    virtual void InitParam() = 0;
-
     /// Allocate maximum memory for linear solvers.
     virtual void Allocate(const OCP_USI&     max_nnz,
                           const OCP_USI&     maxDim) = 0;
@@ -51,6 +48,10 @@ public:
 
     /// Get number of iterations.
     virtual USI GetNumIters() const = 0;
+
+protected:
+    /// Initialize the params for linear solvers.
+    virtual void InitParam() = 0;
 };
 
 #endif // __LINEARSOLVER_HEADER__
