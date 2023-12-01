@@ -22,6 +22,17 @@
 
 using namespace std;
 
+
+enum class OCPLStype : USI
+{
+    none,
+    fasp,
+    pardiso,
+    petsc,
+    samg
+};
+
+
 /// Virtual base class for linear solvers.
 class LinearSolver
 {

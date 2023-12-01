@@ -185,17 +185,19 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 
     if (false) {}
 #ifdef WITH_PARDISO
-#if OCPFLOATTYPEWIDTH == 64
+#if    OCPFLOATTYPEWIDTH == 64
     else if (lsMethod == "pardiso") {
         if (blockDim > 1)    LS = new VectorPardisoSolver(blockDim);
         else                 LS = new PardisoSolver(blockDim);
+        LStype = OCPLStype::pardiso;
     }
-#endif
+#endif // OCPFLOATTYPEWIDTH == 64
 #endif // WITH_PARDISO
 #ifdef WITH_SAMG
     else if (lsMethod == "samg") {
         if (blockDim > 1)    LS = new VectorSamgSolver(blockDim, model);
         else                 LS = new ScalarSamgSolver(model);
+        LStype = OCPLStype::samg;
     }
 #endif // WITH_SAMG
 #if WITH_FASP
@@ -203,12 +205,14 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
         if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
         if (blockDim > 1)    LS = new VectorFaspSolver(blockDim);
         else                 LS = new ScalarFaspSolver();
-}
+        LStype = OCPLStype::fasp;
+    }
 #endif // WITH_FASP
 #ifdef WITH_PETSCSOLVER
     else if (lsMethod == "petsc") {
         if (blockDim > 1)    LS = new VectorPetscSolver(blockDim, domain);
         else                 LS = new ScalarPetscSolver();
+        LStype = OCPLStype::petsc;
     }
 #endif // WITH_PETSCSOLVER
     else {
@@ -217,6 +221,18 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 
     LS->SetupParam(dir, file);
     LS->Allocate(max_nnz, maxDim);
+}
+
+
+OCP_INT LinearSystem::Solve()
+{
+    OCP_INT iters = LS->Solve();
+    if (LStype == OCPLStype::fasp) {
+        if (iters < 0) {
+            iters = -LS->GetNumIters();
+        }
+    }
+    return iters;
 }
 
 /*----------------------------------------------------------------------------*/

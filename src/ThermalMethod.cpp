@@ -67,13 +67,11 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     // Solve linear system  
     timer.Start();
     int status = ls.Solve();
-    if (status < 0) {
-        status = ls.GetNumIters();
-    }
+
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
-    NR.UpdateIter(status);
+    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     // Output A, b, x

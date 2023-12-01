@@ -90,10 +90,11 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
     
     timer.Start();
+
     int status = ls.Solve();
-    if (status < 0) {
-        status = ls.GetNumIters();
-    }
+    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+
+    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     //OCP_INT myrank = rs.domain.myrank;
@@ -104,9 +105,7 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     //OCP_ABORT("Stop");
 #endif // DEBUG
 
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
-    NR.UpdateIter(status);
 
 #ifdef DEBUG
     // ls.OutputSolution("testx_IMPEC.out");
@@ -724,13 +723,10 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     
     timer.Start();
     int status = ls.Solve();
-    if (status < 0) {
-        status = ls.GetNumIters();
-    }
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
-    NR.UpdateIter(status);
+    NR.UpdateIter(abs(status));
 
      
 #ifdef DEBUG
@@ -1500,9 +1496,10 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 
     timer.Start();
     int status = ls.Solve();
-    if (status < 0) {
-        status = ls.GetNumIters();
-    }
+
+    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+
+    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     //OCP_INT myrank = rs.domain.myrank;
@@ -1513,9 +1510,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     // ls.CheckSolution();
 #endif // DEBUG
 
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
-    NR.UpdateIter(status);
 
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);

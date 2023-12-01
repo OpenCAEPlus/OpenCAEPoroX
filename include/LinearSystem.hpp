@@ -60,7 +60,7 @@ public:
     /// Assemble Mat for Linear Solver.
     void AssembleMatLinearSolver() { LS->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
-    OCP_INT Solve() { return LS->Solve(); }
+    OCP_INT Solve();
 
     /// Setup dimensions.
     OCP_USI AddDim(const OCP_USI& n)
@@ -129,8 +129,6 @@ public:
     void AssembleRhsAccumulate(const vector<OCP_DBL>& rhs);
     /// Assign Rhs by Copying.
     void AssembleRhsCopy(const vector<OCP_DBL>& rhs);
-    /// Return the number of iterations.
-    USI GetNumIters() { return LS->GetNumIters(); }
     /// Setup Domain
     void SetupDomain(const Domain& d) { domain = &d; }
     /// Calculate Global start
@@ -155,8 +153,8 @@ protected:
     vector<OCP_DBL>         b;           ///< Right-hand side of linear system.
     vector<OCP_DBL>         u;           ///< Solution of linear system.
 
-    string solveDir; ///< Current workdir.
-
+    string    solveDir; ///< Current workdir.
+    OCPLStype LStype{ OCPLStype::none };
     
     const Domain* domain;
     LinearSolver* LS;
