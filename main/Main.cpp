@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <mpi.h>
+#include <cstring>
 
 // OpenCAEPoroX header files
 #include "OCP.hpp"
