@@ -1,0 +1,61 @@
+name: OpenCAEPoroX
+id: opencaeporox
+type: starter
+builder: cmake
+licenses: ["LGPL"]
+default:
+  version: 0.1.0
+  preset: "linux-intel-Release"
+  configuration: "default"
+  scripts: ["prepare","publish_bin","publish_src"]
+versions:
+  - id: 0.1.0
+    default: "intel-Debug"
+    configurations: [intel-Debug, intel-Release]
+    scripts: ["prepare"]
+configurations: #
+  - id: default
+    run: configurations/default
+    arguments: ["linux-intel-Debug"]
+    dependencies: ["lapack","hypre","parmetis","petsc","fasp","poro_petsc_solver"]
+dependencies:
+  - id: lapack
+    uid: lapack
+    type: external
+    default:
+      version: "3.11.0"
+      configuration: "default"
+  - id: hypre
+    uid: hypre
+    type: external
+    default:
+      version: "2.28.0"
+      configuration: "default"
+  - id: parmetis
+    uid: parmetis
+    type: external
+    default:
+      version: "4.0.3"
+      configuration: "int64"
+  - id: petsc
+    uid: petsc
+    type: external
+    default:
+      version: "3.20.1"
+      configuration: "int64"
+  - id: fasp
+    uid: fasp
+    type: external
+    default:
+      version: "2.2.1"
+      configuration: "default"
+  - id: poro_petsc_solver
+    uid: poro_petsc_solver
+    type: toolkit
+    default:
+      version: "0.1.0"
+      configuration: "default"
+scripts:
+  - id: "prepare"
+    run: scripts/prepare
+    arguments: ["@version","@uid"]
