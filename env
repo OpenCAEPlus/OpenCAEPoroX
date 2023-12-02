@@ -1,0 +1,11 @@
+export OCP_CC=mpiicx
+export OCP_CXX=mpiicpx
+export OCP_FC=mpiifort
+
+export OCP_COMPILER=intel
+export OCP_HYPRE_DIR=~/ocp/external/hypre/2.28.0/install/intel/default
+export OCP_PETSC_DIR=~/ocp/external/petsc/3.20.1/install/intel/int64
+export OCP_PARMETIS_DIR=~/ocp/external/parmetis/4.0.3/install/intel/int64
+export OCP_LAPACK_DIR=~/ocp/external/lapack/3.11.0/install/intel/default
+export OCP_FASP_DIR=~/ocp/external/fasp/2.2.1/install/intel/default
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$OCP_PETSC_DIR/lib/pkgconfig:$OCP_LAPACK_DIR/lib/pkgconfig
