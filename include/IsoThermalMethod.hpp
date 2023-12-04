@@ -28,10 +28,14 @@ public:
     void CalRock(Bulk& bk) const;
     /// Get NRsuite
     const OCPNRsuite& GetNRsuite() const { return NR; }
+    virtual void ExchangeSolutionP(Reservoir& rs) const;
+    virtual void ExchangeSolutionNi(Reservoir& rs) const;
 
 protected:
     /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
+    /// If use as a preconditioner for other method
+    OCP_BOOL        preM{ OCP_FALSE };
 };
 
 /// IsoT_IMPEC is IMPEC (implicit pressure explict saturation) method.
@@ -119,7 +123,7 @@ protected:
     /// Calculate relative permeability and capillary pressure needed for FIM
     void CalKrPc(Bulk& bk) const;
     /// Calculate residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
+    virtual void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     /// Assemble linear system for wells
     void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Reset variables to last time step
@@ -193,7 +197,7 @@ protected:
 };
 
 
-class IsoT_FIMddm : protected IsoT_FIM
+class IsoT_FIMddm : public IsoT_FIM
 {
 public:
     /// Finish a Newton-Raphson iteration.
@@ -201,13 +205,16 @@ public:
 
 protected:
     /// Calculate residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt);
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0) override;
 
 private:
     /// Assemble linear system for bulks
-    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const override;
     /// Update P, Ni, BHP after linear system is solved
-    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
+
+protected:
+    OCP_DBL global_res0;
 };
 
 

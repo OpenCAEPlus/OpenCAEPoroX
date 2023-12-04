@@ -113,6 +113,11 @@ void ParamControl::InputMETHOD(ifstream& ifs)
         method      = "AIMc";
         lsFile = "./bsr.fasp";
     }
+    else if (vbuf[0] == "FIMddm") {
+        method = "FIMddm";
+        lsFile = "./bsr.fasp";
+    }
+
 
     if (vbuf.size() > 1) lsFile = vbuf[1];
 

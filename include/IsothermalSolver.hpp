@@ -44,6 +44,7 @@ private:
     IsoT_IMPEC   impec;
     IsoT_FIM     fim;
     IsoT_AIMc    aimc;
+    IsoT_FIMddm  fim_ddm;
 };
 
 #endif /* end if __ISOTHERMALSOLVER_HEADER__ */

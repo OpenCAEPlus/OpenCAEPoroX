@@ -363,6 +363,8 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
         method = OCPNLMethod::FIM;
     } else if (CtrlParam.method == "AIMc") {
         method = OCPNLMethod::AIMc;
+    } else if (CtrlParam.method == "FIMddm") {
+        method = OCPNLMethod::FIMddm;
     } else {
         OCP_ABORT("Wrong method specified!");
     }

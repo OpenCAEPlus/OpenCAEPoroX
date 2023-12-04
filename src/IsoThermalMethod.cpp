@@ -29,6 +29,64 @@ void IsothermalMethod::CalRock(Bulk& bk) const
     }
 }
 
+
+void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
+{
+    // Exchange Ghost P
+    const Domain& domain = rs.domain;
+    BulkVarSet&   bvs    = rs.bulk.vs;
+
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&bvs.P[rel[1]], (rel[2] - rel[1]), OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>& s = send_buffer[i];
+        s.resize(1 + (sel.size() - 1));
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            s[1 + j] = bvs.P[sel[j]];
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+    }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+}
+
+
+void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
+{
+    // Exchange Ghost Ni
+    const Domain& domain = rs.domain;
+    BulkVarSet&   bvs    = rs.bulk.vs;
+    const USI     nc     = bvs.nc;
+
+    for (USI i = 0; i < domain.numRecvProc; i++) {
+        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+    }
+
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (USI i = 0; i < domain.numSendProc; i++) {
+        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+        vector<OCP_DBL>& s = send_buffer[i];
+        s.resize(1 + (sel.size() - 1) * nc);
+        s[0] = sel[0];
+        for (USI j = 1; j < sel.size(); j++) {
+            const OCP_DBL* bId = &bvs.Ni[0] + sel[j] * nc;
+            copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
+        }
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+    }
+
+    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+}
+
 ////////////////////////////////////////////
 // IsoT_IMPEC
 ////////////////////////////////////////////
@@ -397,29 +455,7 @@ void IsoT_IMPEC::MassConserve(Reservoir& rs, const OCP_DBL& dt) const
         }
     }
 
-    // Exchange Ghost Ni
-    const Domain& domain = rs.domain;
-
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
-    }
-
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
-        s.resize(1 + (sel.size() - 1) * nc);
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            const OCP_DBL* bId = &bvs.Ni[0] + sel[j] * nc;
-            copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
-        }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
-    }
-
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
-    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    ExchangeSolutionNi(rs);
 }
 
 void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
@@ -2135,7 +2171,167 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
 ////////////////////////////////////////////
 
 
+OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
+{
+    if (preM) {
+        // check residual for each local nonlinear equations
+        NR.CalMaxChangeNR(rs);
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
+
+        if (conflag == OCPNRStateC::converge) {
+            if (!NR.CheckPhysical(rs, { "WellP" })) {
+                ctrl.time.CutDt(NR);
+                ResetToLastTimeStep(rs, ctrl);
+                return OCP_FALSE;
+            }
+            else {
+                // exchange solution
+                ExchangeSolutionP(rs);
+                ExchangeSolutionNi(rs);
+                return OCP_TRUE;
+            }
+        }
+        else if (conflag == OCPNRStateC::not_converge) {
+            ctrl.time.CutDt();
+            ResetToLastTimeStep(rs, ctrl);
+            return OCP_FALSE;
+        }
+        else {
+            return OCP_FALSE;
+        }
+    }
+    else {
+        // check residual for global nonlinear equations
+        // exchange solution
+        ExchangeSolutionP(rs);
+        ExchangeSolutionNi(rs);
+        IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+        NR.res.maxRelRes0_V = global_res0;
+
+        NR.CalMaxChangeNR(rs);
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
+        if (conflag == OCPNRStateC::converge) {
+            if (!NR.CheckPhysical(rs, { "WellP" })) {
+                ctrl.time.CutDt(NR);
+                ResetToLastTimeStep(rs, ctrl);
+                return OCP_FALSE;
+            }
+            else {
+                return OCP_TRUE;
+            }
+        }
+        else if (conflag == OCPNRStateC::not_converge) {
+            ctrl.time.CutDt();
+            ResetToLastTimeStep(rs, ctrl);
+            return OCP_FALSE;
+        }
+        else {
+            return OCP_FALSE;
+        }
+    }
+}
+
+
+/// Calculate residual
+/// 1. Use Dirichlet boundary with fixed pressure at last time setp(now)
+/// 2. Use Dirichlet boundary with fixed flow rate at last time setp(to do)
+void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
+{
+    const Bulk& bk = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
+
+    const USI nb = bvs.nbI;
+    const USI np = bvs.np;
+    const USI nc = bvs.nc;
+    const USI len = nc + 1;
+
+    OCPNRresidual& res = NR.res;
+
+    res.SetZero();
+
+    // Accumalation Term
+    for (OCP_USI n = 0; n < nb; n++) {
+        const vector<OCP_DBL>& r = bk.ACCm.GetAccumuTerm()->CalResFIM(n, bvs, dt);
+        copy(r.begin(), r.end(), &res.resAbs[n * len]);
+    }
+
+    // Flux Term
+    OCP_USI         bId, eId;
+    BulkConn& conn = rs.conn;
+    BulkConnVarSet& bcvs = conn.vs;
+    USI             fluxnum;
+    for (OCP_USI c = 0; c < conn.numConn; c++) {
+
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
+        fluxnum = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
+
+        Flux->CalFlux(conn.iteratorConn[c], bk);
+        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
+
+        if (eId < nb) {
+            for (USI i = 0; i < nc; i++) {
+                res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
+                res.resAbs[eId * len + 1 + i] -= dt * Flux->GetFluxNi()[i];
+            }
+        }
+        else {
+            for (USI i = 0; i < nc; i++) {
+                res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
+            }
+        }
+    }
+
+    // Well to Bulk, Well
+    USI wId = nb * len;
+    for (const auto& wl : rs.allWells.wells) {
+        wl->CalResFIM(wId, res, bk, dt);
+    }
+
+    // Calculate RelRes
+    OCP_DBL tmp;
+    for (OCP_USI n = 0; n < nb; n++) {
+
+        for (USI i = 0; i < len; i++) {
+            tmp = fabs(res.resAbs[n * len + i] / bvs.rockVp[n]);
+            if (res.maxRelRes_V < tmp) {
+                res.maxRelRes_V = tmp;
+                res.maxId_V = n;
+            }
+            res.resRelV[n] += tmp * tmp;
+        }
+        res.resRelV[n] = sqrt(res.resRelV[n]);
+
+        for (USI i = 1; i < len; i++) {
+            tmp = fabs(res.resAbs[n * len + i] / bvs.Nt[n]);
+            if (res.maxRelRes_N < tmp) {
+                res.maxRelRes_N = tmp;
+                res.maxId_N = n;
+            }
+            res.resRelN[n] += tmp * tmp;
+        }
+        res.resRelN[n] = sqrt(res.resRelN[n]);
+    }
+
+    Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
+
+    if (initRes0) {
+        res.maxRelRes0_V = res.maxRelRes_V;
+    
+        GetWallTime timer;
+        timer.Start();
+        MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    }
+}
+
+
 /// Assemble linear system for bulks
+/// 1. Use Dirichlet boundary with fixed pressure at last time setp(now)
+/// 2. Use Dirichlet boundary with fixed flow rate at last time setp(to do)
 void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
 {
     const Bulk&       bk  = rs.bulk;
@@ -2216,6 +2412,98 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
         }
 #endif
     }
+}
+
+/// Only get local solution
+void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR)
+{
+    const auto& domain = rs.domain;
+    auto&       bk     = rs.bulk;
+    auto&       bvs    = bk.vs;
+    const auto  nb     = bvs.nb;
+    const auto  np     = bvs.np;
+    const auto  nc     = bvs.nc;
+    const auto  row    = np * (nc + 1);
+    const auto  col    = nc + 1;
+
+    // Well first
+    USI wId = bvs.nbI * col;
+    for (auto& wl : rs.allWells.wells) {
+        wl->GetSolutionFIM(u, wId);
+    }
+
+    GetWallTime timerT;         ///< total timer
+    GetWallTime timerC;         ///< calculation timer
+    OCP_DBL     time_cal = 0;   ///< calculation time
+    timerT.Start();
+
+
+    // Bulk
+    const OCP_DBL dSmaxlim = ctrlNR.DSmax();
+    const OCP_DBL dPmaxlim = ctrlNR.DPmax();
+
+    vector<OCP_DBL> dtmp(row, 0);
+    OCP_DBL         chopmin = 1;
+    OCP_DBL         choptmp = 0;
+
+    OCP_USI bId = 0;
+    OCP_USI eId = bvs.nbI;
+
+    // interior first, ghost second
+    timerC.Start();
+    
+    for (OCP_USI n = bId; n < eId; n++) {
+        // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+    
+        chopmin = 1;
+        // compute the chop
+        fill(dtmp.begin(), dtmp.end(), 0.0);
+    
+        OCP_aAxpby(row, col, static_cast<OCP_DBL>(1.0), &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, static_cast<OCP_DBL>(1.0), dtmp.data());
+    
+        for (USI j = 0; j < np; j++) {
+            choptmp = 1;
+            if (fabs(dtmp[j]) > dSmaxlim) {
+                choptmp = dSmaxlim / fabs(dtmp[j]);
+            }
+            else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
+                choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
+            }
+            // if (fabs(S[n_np_j] - scm[j]) > TINY &&
+            //     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
+            //     choptmp *= min(1.0, -((S[n_np_j] - scm[j]) / (choptmp * dtmp[js])));
+            chopmin = min(chopmin, choptmp);
+        }
+    
+        // dS
+        for (USI j = 0; j < np; j++) {
+            bvs.S[n * np + j] += chopmin * dtmp[j];
+        }
+    
+        // dxij
+        USI js = np;
+        for (USI j = 0; j < np; j++) {
+            for (USI i = 0; i < bvs.nc; i++) {
+                bvs.xij[(n * np + j) * nc + i] += chopmin * dtmp[js];
+                js++;
+            }
+        }
+    
+        // dP
+        //choptmp = dPmaxlim / fabs(u[n * col]);
+        //chopmin = min(chopmin, choptmp);
+        bvs.P[n] += u[n * col]; // seems better
+    
+        // dNi
+        for (USI i = 0; i < nc; i++) {
+            bvs.Ni[n * nc + i] += chopmin * u[n * col + 1 + i];
+    
+            // if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
+            //     bvs.Ni[n * nc + i] = 1E-20;
+            // }
+        }
+    } 
+    time_cal += timerC.Stop();
 }
 
 

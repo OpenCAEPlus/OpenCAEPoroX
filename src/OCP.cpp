@@ -128,6 +128,11 @@ void OpenCAEPoroX::RunSimulation()
                 cout << "\nDynamic simulation with AIMc\n" << endl;
             }
             break;
+        case OCPNLMethod::FIMddm:
+            if (control.printLevel >= PRINT_MIN) {
+                cout << "\nDynamic simulation with FIM_DDM\n" << endl;
+            }
+            break;
         default:
             OCP_ABORT("Wrong method type is used!");
         }
