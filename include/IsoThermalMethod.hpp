@@ -36,6 +36,8 @@ protected:
     OCPNRsuite      NR;
     /// If use as a preconditioner for other method
     OCP_BOOL        preM{ OCP_FALSE };
+    /// Index of linear solver method
+    USI             wls;
 };
 
 /// IsoT_IMPEC is IMPEC (implicit pressure explict saturation) method.

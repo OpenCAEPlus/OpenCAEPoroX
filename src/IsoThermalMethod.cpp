@@ -143,13 +143,13 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
-    ls.AssembleMatLinearSolver();
+    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
+    ls.AssembleMatLinearSolver(wls);
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
     
     timer.Start();
 
-    int status = ls.Solve();
+    int status = ls.Solve(wls);
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
     NR.UpdateIter(abs(status));
@@ -308,7 +308,7 @@ void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(1);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
@@ -751,14 +751,14 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
     GetWallTime timer;
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
-    ls.AssembleMatLinearSolver();
+    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
+    ls.AssembleMatLinearSolver(wls);
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     // Solve linear system
     
     timer.Start();
-    int status = ls.Solve();
+    int status = ls.Solve(wls);
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
@@ -941,7 +941,7 @@ void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 1);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void IsoT_FIM::InitFlash(Bulk& bk)
@@ -1537,12 +1537,12 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
-    ls.AssembleMatLinearSolver();
+    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
+    ls.AssembleMatLinearSolver(wls);
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     timer.Start();
-    int status = ls.Solve();
+    int status = ls.Solve(wls);
 
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 

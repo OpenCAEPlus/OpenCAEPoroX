@@ -57,11 +57,11 @@ public:
 
     // Linear Solver
     /// Setup LinearSolver.
-    void SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
+    USI SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
     /// Assemble Mat for Linear Solver.
-    void AssembleMatLinearSolver() { LS[wls]->AssembleMat(colId, val, dim, b, u); }
+    void AssembleMatLinearSolver(const USI& wls) { LS[wls]->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
-    OCP_INT Solve();
+    OCP_INT Solve(const USI& wls);
 
     /// Setup dimensions.
     OCP_USI AddDim(const OCP_USI& n)
@@ -133,7 +133,7 @@ public:
     /// Setup Domain
     void SetupDomain(const Domain& d) { domain = &d; }
     /// Calculate Global start
-    void CalCommTerm(const USI& actWellNum) {
+    void CalCommTerm(const USI& actWellNum, const USI& wls) {
         LS[wls]->CalCommTerm(actWellNum, domain);
     }
 
@@ -162,8 +162,6 @@ protected:
     vector<OCPLStype>     LStype;
     /// LS sets
     vector<LinearSolver*> LS;
-    /// index of working LS
-    USI                   wls{ 0 };
 
 };
 

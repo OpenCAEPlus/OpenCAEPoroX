@@ -60,13 +60,13 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 
     // Assemble external linear solver with internal A and b
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
-    ls.AssembleMatLinearSolver();
+    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
+    ls.AssembleMatLinearSolver(wls);
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     // Solve linear system  
     timer.Start();
-    int status = ls.Solve();
+    int status = ls.Solve(wls);
 
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
@@ -280,7 +280,7 @@ void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 2);
     ls.AllocateColMem();
-    ls.SetupLinearSolver(OCPModel::thermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::thermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
 }
 
 void T_FIM::InitRock(Bulk& bk) const

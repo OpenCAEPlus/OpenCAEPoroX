@@ -54,6 +54,8 @@ protected:
 protected:
     /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
+    /// Index of linear solver method
+    USI             wls;
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

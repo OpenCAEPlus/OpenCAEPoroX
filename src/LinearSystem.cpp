@@ -170,7 +170,7 @@ void LinearSystem::CheckSolution() const
 }
 
 /// Setup LinearSolver
-void LinearSystem::SetupLinearSolver(const OCPModel& model,
+USI LinearSystem::SetupLinearSolver(const OCPModel& model,
                                      const string&   dir,
                                      const string&   file)
 {
@@ -221,10 +221,12 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 
     LS.back()->SetupParam(dir, file);
     LS.back()->Allocate(max_nnz, maxDim);
+
+    return LS.size() - 1;
 }
 
 
-OCP_INT LinearSystem::Solve()
+OCP_INT LinearSystem::Solve(const USI& wls)
 {
     OCP_INT iters = LS[wls]->Solve();
     if (LStype[wls] == OCPLStype::fasp) {
