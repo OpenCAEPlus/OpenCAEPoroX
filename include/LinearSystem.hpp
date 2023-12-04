@@ -59,7 +59,7 @@ public:
     /// Setup LinearSolver.
     void SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
     /// Assemble Mat for Linear Solver.
-    void AssembleMatLinearSolver() { LS->AssembleMat(colId, val, dim, b, u); }
+    void AssembleMatLinearSolver() { LS[wls]->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
     OCP_INT Solve();
 
@@ -134,7 +134,7 @@ public:
     void SetupDomain(const Domain& d) { domain = &d; }
     /// Calculate Global start
     void CalCommTerm(const USI& actWellNum) {
-        LS->CalCommTerm(actWellNum, domain);
+        LS[wls]->CalCommTerm(actWellNum, domain);
     }
 
 protected:
@@ -155,10 +155,16 @@ protected:
     vector<OCP_DBL>         u;           ///< Solution of linear system.
 
     string    solveDir; ///< Current workdir.
-    OCPLStype LStype{ OCPLStype::none };
     
     const Domain* domain;
-    LinearSolver* LS;
+
+    /// LStype sets
+    vector<OCPLStype>     LStype;
+    /// LS sets
+    vector<LinearSolver*> LS;
+    /// index of working LS
+    USI                   wls{ 0 };
+
 };
 
 #endif /* end if __LINEARSOLVER_HEADER__ */

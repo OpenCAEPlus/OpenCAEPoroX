@@ -187,49 +187,49 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 #ifdef WITH_PARDISO
 #if    OCPFLOATTYPEWIDTH == 64
     else if (lsMethod == "pardiso") {
-        if (blockDim > 1)    LS = new VectorPardisoSolver(blockDim);
-        else                 LS = new PardisoSolver(blockDim);
-        LStype = OCPLStype::pardiso;
+        if (blockDim > 1)    LS.push_back(new VectorPardisoSolver(blockDim));
+        else                 LS.push_back(new PardisoSolver(blockDim));
+        LStype.push_back(OCPLStype::pardiso);
     }
 #endif // OCPFLOATTYPEWIDTH == 64
 #endif // WITH_PARDISO
 #ifdef WITH_SAMG
     else if (lsMethod == "samg") {
-        if (blockDim > 1)    LS = new VectorSamgSolver(blockDim, model);
-        else                 LS = new ScalarSamgSolver(model);
-        LStype = OCPLStype::samg;
+        if (blockDim > 1)    LS.push_back(VectorSamgSolver(blockDim, model));
+        else                 LS.push_back(ScalarSamgSolver(model));
+        LStype.push_back(OCPLStype::samg);
     }
 #endif // WITH_SAMG
 #if WITH_FASP
     else if (lsMethod == "fasp") {
         // if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
-        if (blockDim > 1)    LS = new VectorFaspSolver(blockDim);
-        else                 LS = new ScalarFaspSolver();
-        LStype = OCPLStype::fasp;
+        if (blockDim > 1)    LS.push_back(new VectorFaspSolver(blockDim));
+        else                 LS.push_back(new ScalarFaspSolver());
+        LStype.push_back(OCPLStype::fasp);
     }
 #endif // WITH_FASP
 #ifdef WITH_PETSCSOLVER
     else if (lsMethod == "petsc") {
-        if (blockDim > 1)    LS = new VectorPetscSolver(blockDim, domain);
-        else                 LS = new ScalarPetscSolver();
-        LStype = OCPLStype::petsc;
+        if (blockDim > 1)    LS.push_back(new VectorPetscSolver(blockDim, domain));
+        else                 LS.push_back(new ScalarPetscSolver());
+        LStype.push_back(OCPLStype::petsc);
     }
 #endif // WITH_PETSCSOLVER
     else {
         OCP_ABORT("Wrong Linear Solver Type " + lsMethod + " !");
     }
 
-    LS->SetupParam(dir, file);
-    LS->Allocate(max_nnz, maxDim);
+    LS.back()->SetupParam(dir, file);
+    LS.back()->Allocate(max_nnz, maxDim);
 }
 
 
 OCP_INT LinearSystem::Solve()
 {
-    OCP_INT iters = LS->Solve();
-    if (LStype == OCPLStype::fasp) {
+    OCP_INT iters = LS[wls]->Solve();
+    if (LStype[wls] == OCPLStype::fasp) {
         if (iters < 0) {
-            iters = -LS->GetNumIters();
+            iters = -LS[wls]->GetNumIters();
         }
     }
     return iters;
