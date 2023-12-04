@@ -133,9 +133,9 @@ private:
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Assemble linear system for bulks
-    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    virtual void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
-    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
+    virtual void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
 };
 
 
@@ -193,7 +193,22 @@ protected:
 };
 
 
+class IsoT_FIMddm : protected IsoT_FIM
+{
+public:
+    /// Finish a Newton-Raphson iteration.
+    OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
 
+protected:
+    /// Calculate residual
+    void CalRes(Reservoir& rs, const OCP_DBL& dt);
+
+private:
+    /// Assemble linear system for bulks
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    /// Update P, Ni, BHP after linear system is solved
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
+};
 
 
 

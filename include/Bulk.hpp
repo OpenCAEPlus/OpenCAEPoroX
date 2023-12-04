@@ -85,6 +85,7 @@ class Bulk
     friend class IsoT_IMPEC;
     friend class IsoT_FIM;
     friend class IsoT_AIMc;
+    friend class IsoT_FIMddm;
     friend class T_FIM;
 
     /////////////////////////////////////////////////////////////////////

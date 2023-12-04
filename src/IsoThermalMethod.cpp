@@ -2118,6 +2118,97 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
     rs.bulk.vs.lvj   = rs.bulk.vs.vj;
 }
 
+
+////////////////////////////////////////////
+// IsoT_FIMddm
+////////////////////////////////////////////
+
+
+/// Assemble linear system for bulks
+void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
+{
+    const Bulk&       bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
+
+    const USI numWell = rs.GetNumOpenWell();
+
+    const BulkConn& conn = rs.conn;
+    const OCP_USI   nbI = bvs.nbI;
+    const USI       np = bvs.np;
+    const USI       nc = bvs.nc;
+    const USI       ncol = nc + 1;
+    const USI       ncol2 = np * nc + np;
+    const USI       bsize = ncol * ncol;
+    const USI       bsize2 = ncol * ncol2;
+
+    ls.AddDim(nbI);
+
+
+    // Accumulation term
+    vector<OCP_DBL> bmat(bsize, 0);
+    for (OCP_USI n = 0; n < nbI; n++) {
+        ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
+    }
+
+    // flux term
+
+    OCP_USI  bId, eId;
+    USI      fluxnum;
+    for (OCP_USI c = 0; c < conn.numConn; c++) {
+
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
+        fluxnum = conn.iteratorConn[c].FluxNum();
+        auto Flux = conn.flux[fluxnum];
+
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
+
+        bmat = Flux->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+            bmat.data());
+        Dscalar(bsize, dt, bmat.data());
+
+        // Assemble
+        // Begin - Begin -- add
+        ls.AddDiag(bId, bmat);
+        // End - Begin -- insert
+        if (eId < nbI) {
+            // Interior grid
+            Dscalar(bsize, -1, bmat.data());
+            ls.NewOffDiag(eId, bId, bmat);
+        }
+
+#ifdef OCP_NANCHECK
+        if (!CheckNan(bmat.size(), &bmat[0])) {
+            OCP_ABORT("INF or INF in bmat !");
+        }
+#endif
+
+        if (eId < nbI) {
+            // End
+            bmat = Flux->GetdFdXpE();
+            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+                bmat.data());
+            Dscalar(bsize, dt, bmat.data());
+
+            // Interior grid
+            // Begin - End -- insert
+            ls.NewOffDiag(bId, eId, bmat);
+            // End - End -- add
+            Dscalar(bsize, -1, bmat.data());
+            ls.AddDiag(eId, bmat);
+        }
+
+#ifdef OCP_NANCHECK
+        if (!CheckNan(bmat.size(), &bmat[0])) {
+            OCP_ABORT("INF or INF in bmat !");
+        }
+#endif
+    }
+}
+
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
