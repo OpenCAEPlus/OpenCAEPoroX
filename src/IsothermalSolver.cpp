@@ -17,13 +17,13 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
     method = ctrl.GetMethod();
 
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.Setup(rs, LSolver, ctrl);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.Setup(rs, LSolver, ctrl);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.Setup(rs, LSolver, ctrl);
             break;
         default:
@@ -36,13 +36,13 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 void IsothermalSolver::InitReservoir(Reservoir& rs)
 {
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.InitReservoir(rs);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.InitReservoir(rs);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.InitReservoir(rs);
             break;
         default:
@@ -55,13 +55,13 @@ void IsothermalSolver::InitReservoir(Reservoir& rs)
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.Prepare(rs, ctrl);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
         default:
@@ -79,13 +79,13 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
     timer.Start();
 
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.AssembleMat(LSolver, rs, dt);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.AssembleMat(LSolver, rs, dt);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.AssembleMat(LSolver, rs, dt);
             break;
         default:
@@ -100,13 +100,13 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 { 
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.SolveLinearSystem(LSolver, rs, ctrl);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.SolveLinearSystem(LSolver, rs, ctrl);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.SolveLinearSystem(LSolver, rs, ctrl);
             break;
         default:
@@ -124,13 +124,13 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     timer.Start();
 
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             flag = impec.UpdateProperty(rs, ctrl);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             flag = fim.UpdateProperty(rs, ctrl);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             flag = aimc.UpdateProperty(rs, ctrl);
             break;
         default:
@@ -147,11 +147,11 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             return impec.FinishNR(rs);
-        case FIM:
+        case OCPNLMethod::FIM:
             return fim.FinishNR(rs, ctrl);
-        case AIMc:
+        case OCPNLMethod::AIMc:
             return aimc.FinishNR(rs, ctrl);
         default:
             OCP_ABORT("Wrong method type!");
@@ -163,13 +163,13 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
     switch (method) {
-        case IMPEC:
+        case OCPNLMethod::IMPEC:
             impec.FinishStep(rs, ctrl);
             break;
-        case FIM:
+        case OCPNLMethod::FIM:
             fim.FinishStep(rs, ctrl);
             break;
-        case AIMc:
+        case OCPNLMethod::AIMc:
             aimc.FinishStep(rs, ctrl);
             break;
         default:
@@ -181,13 +181,13 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 const OCPNRsuite& IsothermalSolver::GetNRsuite() const
 {
     switch (method) {
-    case IMPEC:
+    case OCPNLMethod::IMPEC:
         return impec.GetNRsuite();
         break;
-    case FIM:
+    case OCPNLMethod::FIM:
         return fim.GetNRsuite();
         break;
-    case AIMc:
+    case OCPNLMethod::AIMc:
         return aimc.GetNRsuite();
         break;
     default:

@@ -39,9 +39,8 @@ public:
     const OCPNRsuite& GetNRsuite() const;
 
 private:
-    USI          method = FIM;
+    OCPNLMethod  method{ OCPNLMethod::FIM };
     LinearSystem LSolver;
-    LinearSystem auxLSolver;
     IsoT_IMPEC   impec;
     IsoT_FIM     fim;
     IsoT_AIMc    aimc;

@@ -32,17 +32,17 @@ public:
 
 public:
     /// If use fastcontrol
-    OCP_BOOL ifUse{ OCP_FALSE };
+    OCP_BOOL    ifUse{ OCP_FALSE };
     /// IMPEC, FIM or AIM
-    USI      method;
+    OCPNLMethod method;
     /// length of the first time step beginning the next TSTEP
-    OCP_DBL  timeInit;
+    OCP_DBL     timeInit;
     /// Maximum time step during running
-    OCP_DBL  timeMax;
+    OCP_DBL     timeMax;
     /// Minimum time step during running
-    OCP_DBL  timeMin;
+    OCP_DBL     timeMin;
     /// Print level
-    USI      printLevel{ 0 };
+    USI         printLevel{ 0 };
 };
 
 
@@ -269,15 +269,15 @@ public:
 
 protected:
     /// model: isothermal, thermal
-    OCPModel model{ OCPModel::none };
+    OCPModel    model{ OCPModel::none };
     /// Discrete method
-    USI      method;
+    OCPNLMethod method;
     /// Current work directory
-    string   workDir;
+    string      workDir;
     /// Current file name
-    string   ocpFile;
+    string      ocpFile;
     /// File name of linear Solver
-    string   lsFile;
+    string      lsFile;
 };
 
 #endif /* end if __OCPControl_HEADER__ */

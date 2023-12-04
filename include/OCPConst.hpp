@@ -69,10 +69,15 @@ enum class OCPModel : USI
     thermal
 };
 
-// Solution methods
-const USI IMPEC = 1; ///< Solution method = IMPEC
-const USI FIM   = 2; ///< Solution method = FIM
-const USI AIMc  = 3; ///< Adaptive implicit ---- Collins
+
+/// method to solve nonlinear equations
+enum class OCPNLMethod : USI
+{
+    IMPEC,
+    FIM,
+    AIMc,
+    FIMddm
+};
 
 
 enum class ConnDirect : USI
