@@ -119,7 +119,7 @@ protected:
     /// Calculate relative permeability and capillary pressure needed for FIM
     void CalKrPc(Bulk& bk) const;
     /// Calculate residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt);
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     /// Assemble linear system for wells
     void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Reset variables to last time step

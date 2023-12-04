@@ -36,7 +36,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
 void T_FIM::Prepare(Reservoir& rs, const OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
 }
@@ -108,7 +108,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
 
     return OCP_TRUE;
 }
@@ -494,7 +494,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Iters
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
 
     NR.InitStep(rs.bulk.GetVarSet());
     NR.ResetIter();
@@ -561,7 +561,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     rs.bulk.optMs.UpdateLastTimeStep();
 }
 
-void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
+void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 {
     const Bulk& bk   = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -670,6 +670,16 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
         }
     }
     Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
+
+    if (initRes0) {
+        GetWallTime timer;
+        timer.Start();
+
+        OCP_DBL tmploc = res.maxRelRes_V;
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    }
 }
 
 void T_FIM::AssembleMatBulks(LinearSystem&    ls,

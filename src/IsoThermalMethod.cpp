@@ -688,7 +688,7 @@ void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
-    CalRes(rs, dt);
+    CalRes(rs, dt, OCP_TRUE);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
 }
@@ -767,7 +767,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(rs.bulk);
 
     // Update residual
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
 
     return OCP_TRUE;
 }
@@ -997,7 +997,7 @@ void IsoT_FIM::CalKrPc(Bulk& bk) const
     }
 }
 
-void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
+void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 {
     const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -1079,6 +1079,17 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt)
     }
 
     Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
+
+    if (initRes0) {
+        GetWallTime timer;
+        timer.Start();
+
+        OCP_DBL tmploc = res.maxRelRes_V;
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    }
+
 }
 
 void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
@@ -1355,7 +1366,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.optMs.ResetToLastTimeStep();
 
     // Residual
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
 
     NR.InitStep(rs.bulk.GetVarSet());
     NR.ResetIter();
@@ -1457,7 +1468,7 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, dt);
+    CalRes(rs, dt, OCP_TRUE);
 
     // Set FIM Bulk
     NR.CalCFL(rs, dt, OCP_FALSE);
@@ -1535,7 +1546,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
     return OCP_TRUE;
 }
 

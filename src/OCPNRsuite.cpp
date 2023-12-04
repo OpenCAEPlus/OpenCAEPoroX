@@ -69,15 +69,6 @@ void OCPNRsuite::Setup(const BulkVarSet& bvs, const Domain& domain)
 
 void OCPNRsuite::InitStep(const BulkVarSet& bvs)
 {
-    GetWallTime timer;
-    timer.Start();
-    
-    OCP_DBL tmploc = res.maxRelRes_V;
-    MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, myComm);
-    
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
-
-
     lP = bvs.lP;
     lT = bvs.lT;
     lN = bvs.lNi;
