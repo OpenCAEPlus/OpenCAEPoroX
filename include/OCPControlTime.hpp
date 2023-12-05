@@ -94,7 +94,7 @@ public:
     void CutDt(const OCP_DBL& fac = -1);
     void CutDt(const OCPNRsuite& NRs);
     /// Set param for next TSTEP
-    void SetNextTSTEP(const USI& i, const AllWells& wells);
+    void SetNextTSTEP(const USI& i, const OCP_BOOL& wellOptChange_loc);
     /// Calculate next time step
     void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Get total simulation time

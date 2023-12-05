@@ -1,5 +1,5 @@
-/*! \file    OCPControlMethod.cpp
- *  \brief   OCPControlMethod class definition
+/*! \file    ControlMethod.cpp
+ *  \brief   ControlMethod class definition
  *  \author  Shizhe Li
  *  \date    Dec/05/2023
  *
@@ -8,6 +8,9 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
+
+#include "OCPControlMethod.hpp"
+
 
 
 

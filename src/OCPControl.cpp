@@ -99,10 +99,10 @@ void OCPControl::Setup(const Domain& domain)
 }
 
 
-void OCPControl::ApplyControl(const USI& i, const Reservoir& rs)
+void OCPControl::ApplyControl(const USI& i, const OCP_BOOL& wellOptChange_loc)
 {
     /// Apply ith tuning for ith TSTEP
-    time.SetNextTSTEP(i, rs.allWells);
+    time.SetNextTSTEP(i, wellOptChange_loc);
     NR.SetNextTSTEP(i);
 }
 

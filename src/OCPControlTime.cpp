@@ -85,7 +85,7 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
 }
 
 
-void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
+void ControlTime::SetNextTSTEP(const USI& i, const OCP_BOOL& wellOptChange_loc)
 {
     wp = &ps[i];
 
@@ -94,8 +94,7 @@ void ControlTime::SetNextTSTEP(const USI& i, const AllWells& wells)
     timer.Start();
 
     OCP_BOOL       wellOptChange;
-    const OCP_BOOL wellChange_loc = wells.GetWellOptChange();
-    MPI_Allreduce(&wellChange_loc, &wellOptChange, 1, OCPMPI_BOOL, MPI_LAND, myComm);
+    MPI_Allreduce(&wellOptChange_loc, &wellOptChange, 1, OCPMPI_BOOL, MPI_LAND, myComm);
 
     timer.Stop();
 

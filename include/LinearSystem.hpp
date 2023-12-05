@@ -22,6 +22,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "Domain.hpp"
+#include "OCPControlMethod.hpp"
 #include "DenseMat.hpp"
 #include "PardisoSolver.hpp"
 #include "SamgSolver.hpp"

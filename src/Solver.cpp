@@ -68,7 +68,7 @@ void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
     output.PrintInfoSched(rs, ctrl, timer.Stop());
     for (USI d = 0; d < ctrl.time.GetNumTstepInterval(); d++) {
         rs.ApplyControl(d);
-        ctrl.ApplyControl(d, rs);
+        ctrl.ApplyControl(d, rs.allWells.GetWellOptChange());
         while (!ctrl.time.IfEnd()) {
             output.PrintCurrentTimeIter(ctrl);
             const OCPNRsuite& NR = GoOneStep(rs, ctrl);

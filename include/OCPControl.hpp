@@ -34,7 +34,7 @@ public:
     /// Setup Comm
     void Setup(const Domain& domain);
     /// Apply control for time step i.
-    void ApplyControl(const USI& i, const Reservoir& rs);
+    void ApplyControl(const USI& i, const OCP_BOOL& wellOptChange_loc);
     /// Check if converge
     OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         return NR.CheckConverge(NRs, il);
@@ -50,11 +50,13 @@ public:
 
 public:
     /// Print level
-    USI         printLevel{0};
+    USI           printLevel{0};
     /// Time control 
-    ControlTime time;
+    ControlTime   time;
     /// NR control    
-    ControlNR   NR;
+    ControlNR     NR;
+    /// Solver Method control
+    ControlMethod SM;
     /// Stop simulation
     OCP_BOOL    StopSim{ OCP_FALSE };
     /// Stop time

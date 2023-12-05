@@ -1,5 +1,5 @@
-/*! \file    OCPControlMethod.hpp
- *  \brief   OCPControlMethod class declaration
+/*! \file    ControlMethod.hpp
+ *  \brief   ControlMethod class declaration
  *  \author  Shizhe Li
  *  \date    Dec/05/2023
  *
@@ -22,8 +22,8 @@
 using namespace std;
 
 
-/// All parameters used for solution control
-class OCPControlMethod
+/// control the usage of solver method
+class ControlMethod
 {
     friend class OCPControl;
 public:
@@ -37,8 +37,6 @@ public:
     auto GetOCPFile() const { return ocpFile; }
     /// Get linear solver file name.
     auto GetLsFile() const { return lsFile; }
-    /// Setup fast Control.
-    void SetupFastControl(const USI& argc, const char* optset[]);
 
 protected:
     /// model: isothermal, thermal
