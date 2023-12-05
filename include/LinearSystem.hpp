@@ -37,10 +37,7 @@ class LinearSystem
 {
 
 public:
-    /// Allocate memory for linear system with max possible number of rows.
-    void AllocateRowMem(const USI& nb);
-    /// Allocate memory for linear system with max possible number of columns.
-    void AllocateColMem();
+    void Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb);
     /// Clear the internal matrix data for scalar-value problems.
     void ClearData();
 
@@ -56,8 +53,6 @@ public:
     void OutputSolution(const string& filename) const;
 
     // Linear Solver
-    /// Setup LinearSolver.
-    USI SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
     /// Assemble Mat for Linear Solver.
     void AssembleMatLinearSolver(const USI& wls) { LS[wls]->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
@@ -130,12 +125,22 @@ public:
     void AssembleRhsAccumulate(const vector<OCP_DBL>& rhs);
     /// Assign Rhs by Copying.
     void AssembleRhsCopy(const vector<OCP_DBL>& rhs);
-    /// Setup Domain
-    void SetupDomain(const Domain& d) { domain = &d; }
+
     /// Calculate Global start
     void CalCommTerm(const USI& actWellNum, const USI& wls) {
         LS[wls]->CalCommTerm(actWellNum, domain);
     }
+
+
+public:
+    /// Allocate memory for linear system with max possible number of rows.
+    void AllocateRowMem(const USI& nb);
+    /// Allocate memory for linear system with max possible number of columns.
+    void AllocateColMem();
+    /// Setup LinearSolver.
+    USI SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
+    /// Setup Domain
+    void SetupDomain(const Domain& d) { domain = &d; }
 
 protected:
     // Used for internal mat structure.

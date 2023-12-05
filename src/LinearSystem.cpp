@@ -10,6 +10,13 @@
 
 #include "LinearSystem.hpp"
 
+
+void LinearSystem::Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb)
+{
+
+}
+
+
 void LinearSystem::AllocateRowMem(const USI& nb)
 {
     blockSize = nb * nb;
