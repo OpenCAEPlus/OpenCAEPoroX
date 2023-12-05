@@ -124,8 +124,6 @@ void IsoT_IMPEC::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateReservoir(rs);
     // Allocate Memory of Matrix for IMPEC
     AllocateLinearSystem(ls, rs, ctrl);
-
-    ifSetup = OCP_TRUE;
 }
 
 /// Initialize reservoir
@@ -337,7 +335,7 @@ void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(1);
     ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
 }
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
@@ -731,8 +729,6 @@ void IsoT_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateReservoir(rs);
     // Allocate memory for linear system
     AllocateLinearSystem(ls, rs, ctrl);
-
-    ifSetup = OCP_TRUE;
 }
 
 void IsoT_FIM::InitReservoir(Reservoir& rs)
@@ -979,7 +975,7 @@ void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 1);
     ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
 }
 
 void IsoT_FIM::InitFlash(Bulk& bk)
@@ -1501,8 +1497,6 @@ void IsoT_AIMc::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     SetupNeighbor(rs);
     // Allocate memory for internal matrix structure
     IsoT_FIM::AllocateLinearSystem(ls, rs, ctrl);
-
-    ifSetup = OCP_TRUE;
 }
 
 

@@ -30,12 +30,11 @@ public:
     const OCPNRsuite& GetNRsuite() const { return NR; }
     virtual void ExchangeSolutionP(Reservoir& rs) const;
     virtual void ExchangeSolutionNi(Reservoir& rs) const;
+    void SetPreMethod(const OCP_BOOL& flag) { preM = flag; }
 
 protected:
     /// If use as a preconditioner for other method
     OCP_BOOL        preM{ OCP_FALSE };
-    /// If setup
-    OCP_BOOL        ifSetup{ OCP_FALSE };
     /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
     /// Index of linear solver method

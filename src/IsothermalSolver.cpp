@@ -11,12 +11,19 @@
 
 #include "IsothermalSolver.hpp"
 
-/// Setup solution methods, including IMPEC and FIM.
+/// Setup solution methods used including solver and preconditioner
 void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 {
-    method = ctrl.GetMethod();
+    const auto& methods = ctrl.GetMethod();
+    mainMethod = methods[0];
+    curMethod  = mainMethod;
+    if (methods.size() > 1) {
+        preMethod = methods[1];
+        curMethod = preMethod;
+    }
 
-    switch (method) {
+    for (USI i = 0; i < methods.size(); i++) {
+        switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.Setup(rs, LSolver, ctrl);
             break;
@@ -31,6 +38,7 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
             break;
         default:
             OCP_ABORT("Wrong method type!");
+        }
     }
 }
 
@@ -38,7 +46,7 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 /// Setup solution methods, including IMPEC and FIM.
 void IsothermalSolver::InitReservoir(Reservoir& rs)
 {
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.InitReservoir(rs);
             break;
@@ -60,7 +68,7 @@ void IsothermalSolver::InitReservoir(Reservoir& rs)
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.Prepare(rs, ctrl);
             break;
@@ -87,7 +95,7 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
     GetWallTime timer;
     timer.Start();
 
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.AssembleMat(LSolver, rs, dt);
             break;
@@ -111,7 +119,7 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 /// Solve linear systems for IMPEC and FIM.
 void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 { 
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.SolveLinearSystem(LSolver, rs, ctrl);
             break;
@@ -138,7 +146,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     GetWallTime timer;
     timer.Start();
 
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             flag = impec.UpdateProperty(rs, ctrl);
             break;
@@ -164,7 +172,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 /// Finish up Newton-Raphson iteration for IMPEC and FIM.
 OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             return impec.FinishNR(rs);
         case OCPNLMethod::FIM:
@@ -182,7 +190,7 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 /// Finish up time step for IMPEC and FIM.
 void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
-    switch (method) {
+    switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.FinishStep(rs, ctrl);
             break;
@@ -203,7 +211,7 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 
 const OCPNRsuite& IsothermalSolver::GetNRsuite() const
 {
-    switch (method) {
+    switch (curMethod) {
     case OCPNLMethod::IMPEC:
         return impec.GetNRsuite();
         break;

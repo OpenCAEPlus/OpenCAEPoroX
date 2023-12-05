@@ -73,6 +73,7 @@ enum class OCPModel : USI
 /// method to solve nonlinear equations
 enum class OCPNLMethod : USI
 {
+    none,
     IMPEC,
     FIM,
     AIMc,

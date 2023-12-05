@@ -89,14 +89,14 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 {
     FastControl ctrlFast(argc, optset);
     if (ctrlFast.ifUse) {
-        method = ctrlFast.method;
-        switch (method) {
+        method.push_back(ctrlFast.method);
+        switch (method[0]) {
         case OCPNLMethod::IMPEC:
-            lsFile = "./csr.fasp";
+            lsFile.push_back("./csr.fasp");
             break;
         case OCPNLMethod::AIMc:
         case OCPNLMethod::FIM:
-            lsFile = "./bsr.fasp";
+            lsFile.push_back("./bsr.fasp");
             break;
         default:
             OCP_ABORT("Wrong method specified from command line!");
@@ -357,16 +357,22 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     workDir = CtrlParam.workDir;
     ocpFile = CtrlParam.fileName;
 
-    if (CtrlParam.method == "IMPEC") {
-        method = OCPNLMethod::IMPEC;
-    } else if (CtrlParam.method == "FIM") {
-        method = OCPNLMethod::FIM;
-    } else if (CtrlParam.method == "AIMc") {
-        method = OCPNLMethod::AIMc;
-    } else if (CtrlParam.method == "FIMddm") {
-        method = OCPNLMethod::FIMddm;
-    } else {
-        OCP_ABORT("Wrong method specified!");
+    for (const auto& m : CtrlParam.method) {
+        if (m == "IMPEC") {
+            method.push_back(OCPNLMethod::IMPEC);
+        }
+        else if (m == "FIM") {
+            method.push_back(OCPNLMethod::FIM);
+        }
+        else if (m == "AIMc") {
+            method.push_back(OCPNLMethod::AIMc);
+        }
+        else if (m == "FIMddm") {
+            method.push_back(OCPNLMethod::FIMddm);
+        }
+        else {
+            OCP_ABORT("Wrong method specified!");
+        }
     }
 
     lsFile = CtrlParam.lsFile;

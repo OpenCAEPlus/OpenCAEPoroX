@@ -282,7 +282,7 @@ void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
     ls.SetupDomain(rs.domain);
     ls.AllocateRowMem(rs.GetComNum() + 2);
     ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::thermal, ctrl.GetWorkDir(), ctrl.GetLsFile());
+    wls = ls.SetupLinearSolver(OCPModel::thermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
 }
 
 void T_FIM::InitRock(Bulk& bk) const

@@ -112,30 +112,30 @@ void OpenCAEPoroX::InitReservoir()
 void OpenCAEPoroX::RunSimulation()
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
-        switch (control.GetMethod()) {
-        case OCPNLMethod::IMPEC:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << "\nDynamic simulation with IMPEC\n" << endl;
-            }
-            break;
-        case OCPNLMethod::FIM:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << "\nDynamic simulation with FIM\n" << endl;
-            }
-            break;
-        case OCPNLMethod::AIMc:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << "\nDynamic simulation with AIMc\n" << endl;
-            }
-            break;
-        case OCPNLMethod::FIMddm:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << "\nDynamic simulation with FIM_DDM\n" << endl;
-            }
-            break;
-        default:
-            OCP_ABORT("Wrong method type is used!");
-        }
+        //switch (control.GetMethod()) {
+        //case OCPNLMethod::IMPEC:
+        //    if (control.printLevel >= PRINT_MIN) {
+        //        cout << "\nDynamic simulation with IMPEC\n" << endl;
+        //    }
+        //    break;
+        //case OCPNLMethod::FIM:
+        //    if (control.printLevel >= PRINT_MIN) {
+        //        cout << "\nDynamic simulation with FIM\n" << endl;
+        //    }
+        //    break;
+        //case OCPNLMethod::AIMc:
+        //    if (control.printLevel >= PRINT_MIN) {
+        //        cout << "\nDynamic simulation with AIMc\n" << endl;
+        //    }
+        //    break;
+        //case OCPNLMethod::FIMddm:
+        //    if (control.printLevel >= PRINT_MIN) {
+        //        cout << "\nDynamic simulation with FIM_DDM\n" << endl;
+        //    }
+        //    break;
+        //default:
+        //    OCP_ABORT("Wrong method type is used!");
+        //}
     }
 
     solver.RunSimulation(reservoir, control, output);

@@ -269,15 +269,16 @@ public:
 
 protected:
     /// model: isothermal, thermal
-    OCPModel    model{ OCPModel::none };
+    OCPModel            model{ OCPModel::none };
     /// Discrete method
-    OCPNLMethod method;
-    /// Current work directory
-    string      workDir;
-    /// Current file name
-    string      ocpFile;
+    vector<OCPNLMethod> method;
     /// File name of linear Solver
-    string      lsFile;
+    vector<string>      lsFile;
+    /// Current work directory
+    string              workDir;
+    /// Current file name
+    string              ocpFile;
+
 };
 
 #endif /* end if __OCPControl_HEADER__ */

@@ -52,10 +52,10 @@ public:
     string             workDir;   
     /// Current file name
     string             fileName;               
-    /// Discretization method for fluid equations.
-    string             method;    
-    /// linear solver input file.
-    string             lsFile; 
+    /// Discretization methods for fluid equations, solver and preconditioner
+    vector<string>     method{ "FIM" };
+    /// linear solver input file for methods
+    vector<string>     lsFile{ "bsr.fasp" };
     /// Tuning set.
     vector<TuningPair> tuning_T;  
     /// Tuning.
@@ -72,8 +72,6 @@ public:
     void Init(string& indir, string& inFileName);
     /// Init the critical time.
     void InitTime() { criticalTime.push_back(0); };
-    /// Determine the default discrete method.
-    void InitMethod();
     /// Determine the default Tuning.
     void InitTuning();
     /// Input the Keyword: METHOD.

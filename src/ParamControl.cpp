@@ -17,17 +17,10 @@ void ParamControl::Init(string& indir, string& inFileName)
     workDir  = indir;
     fileName = inFileName;
 
-    InitMethod();
     InitTime();
     InitTuning();
 }
 
-/// Initialize with default solution method and linear solver.
-void ParamControl::InitMethod()
-{
-    method      = "IMPEC";
-    lsFile = "./csr.fasp";
-}
 
 /// Initialize TUNING parameters.
 void ParamControl::InitTuning()
@@ -45,7 +38,7 @@ void ParamControl::InitTuning()
     tuning[0][5] = 0.3;   //* Factor by which timestep is cut after convergence failure
     tuning[0][6] = 0.1;   // ???
     tuning[0][7] = 1.25;  // Maximum increase factor after a convergence failure
-    tuning[0][8] = (method == "IMPEC") ? 0.2 : 1E20; // ???
+    tuning[0][8] = (method[0] == "IMPEC") ? 0.2 : 1E20; // ???
     tuning[0][9] = -1; // Maximum next time stepsize following a well modification
 
     // Timestepping controls, * means this param is available
@@ -53,21 +46,21 @@ void ParamControl::InitTuning()
     // So they're used to calculate change factor of time step by predicting linearly.
     tuning[1].resize(13);
     //* dPlim: ideal maximum Pressure change at next time step.
-    tuning[1][0] = (method == "IMPEC") ? 200.0 : 300.0;
+    tuning[1][0] = (method[0] == "IMPEC") ? 200.0 : 300.0;
     //* dSlim: ideal maximum Saturation change at next time step.
-    tuning[1][1] = (method == "IMPEC") ? 0.2 : 0.2;
+    tuning[1][1] = (method[0] == "IMPEC") ? 0.2 : 0.2;
     //* dNlim: ideal maximum relative Ni(moles of components) change at next time step.
     tuning[1][2] = 0.3; // Target material balance error
     //* dVerrlim: ideal maximum relative Verr(error between fluid and pore) change at
     // next time step.
-    tuning[1][3] = (method == "IMPEC") ? 1E-3 : 1E-3;
+    tuning[1][3] = (method[0] == "IMPEC") ? 1E-3 : 1E-3;
 
     tuning[1][4] = 10.0; // Maximum time truncation error
     // Maximum non-linear convergence error
-    tuning[1][5] = (method == "IMPEC") ? 0.75 : 0.01;
+    tuning[1][5] = (method[0] == "IMPEC") ? 0.75 : 0.01;
     tuning[1][6] = 1E-6; // Maximum material balance error
     // Maximum linear convergence error
-    tuning[1][7]  = (method == "IMPEC") ? 1E-4 : 1E-3;
+    tuning[1][7]  = (method[0] == "IMPEC") ? 1E-4 : 1E-3;
     tuning[1][8]  = 1E-3;  // Maximum well flow rate convergence error
     tuning[1][9]  = 0.025; // Target Fluid-in-place error for LGR runs
     tuning[1][10] = -1;    // Target surfactant change (Surfactant Model only)
@@ -78,7 +71,7 @@ void ParamControl::InitTuning()
     // Nonlinear Solver controls, * means this param is available
     tuning[2].resize(10);
     //* Maximum number of Newton iterations in a timestep
-    tuning[2][0] = (method == "IMPEC") ? 1 : 10;
+    tuning[2][0] = (method[0] == "IMPEC") ? 1 : 10;
     //* Maximum non-linear convergence error
     tuning[2][1] = 1e-3;
     //* Maximum Pressure change in a Newton iteration
@@ -94,7 +87,7 @@ void ParamControl::InitTuning()
 
     tuning[2][7] = 1E6; // Maximum saturation change at last Newton iteration
     // Target maximum pressure change in a timestep
-    tuning[2][8] = (method == "IMPEC") ? 100 : 1E6;
+    tuning[2][8] = (method[0] == "IMPEC") ? 100 : 1E6;
     tuning[2][9] = -1; // Maximum tolerable pressure change in a timestep
 }
 
@@ -105,27 +98,25 @@ void ParamControl::InputMETHOD(ifstream& ifs)
     ReadLine(ifs, vbuf, OCP_FALSE);
     if (vbuf[0] == "/") return;
 
-    if (vbuf[0] == "FIM") {
-        method      = "FIM";
-        lsFile = "./bsr.fasp";
+    // main solver
+    if (vbuf.size() >= 2) {
+        method[0] = vbuf[0];
+        lsFile[0] = vbuf[1];
     }
-    else if (vbuf[0] == "AIMc") {
-        method      = "AIMc";
-        lsFile = "./bsr.fasp";
+    // preconditioner exists
+    if (vbuf.size() >= 4) {
+        method.push_back(vbuf[2]);
+        lsFile.push_back(vbuf[3]);
     }
-    else if (vbuf[0] == "FIMddm") {
-        method = "FIMddm";
-        lsFile = "./bsr.fasp";
-    }
-
-
-    if (vbuf.size() > 1) lsFile = vbuf[1];
 
     if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
         cout << "\n---------------------" << endl
             << "METHOD"
             << "\n---------------------" << endl;
-        cout << "   " << method << "  " << lsFile << endl;
+        for (USI i = 0; i < method.size(); i++) {
+            cout << method[i] << "  " << lsFile[i] << "  ";
+        }
+        cout << endl;
     }
 }
 
