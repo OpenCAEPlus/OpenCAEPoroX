@@ -32,10 +32,12 @@ public:
     virtual void ExchangeSolutionNi(Reservoir& rs) const;
 
 protected:
-    /// Newton-Raphson iteration suite
-    OCPNRsuite      NR;
     /// If use as a preconditioner for other method
     OCP_BOOL        preM{ OCP_FALSE };
+    /// If setup
+    OCP_BOOL        ifSetup{ OCP_FALSE };
+    /// Newton-Raphson iteration suite
+    OCPNRsuite      NR;
     /// Index of linear solver method
     USI             wls;
 };
@@ -214,6 +216,7 @@ private:
     void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const override;
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
+    /// Update property for ghost grid
 
 protected:
     OCP_DBL global_res0;

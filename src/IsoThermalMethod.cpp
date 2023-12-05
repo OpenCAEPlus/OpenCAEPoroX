@@ -48,7 +48,7 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
         s.resize(1 + (sel.size() - 1));
         s[0] = sel[0];
         for (USI j = 1; j < sel.size(); j++) {
-            s[1 + j] = bvs.P[sel[j]];
+            s[j] = bvs.P[sel[j]];
         }
         MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
     }
@@ -56,6 +56,33 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
+
+
+//void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
+//{
+//    // Exchange Ghost P
+//    const Domain& domain = rs.domain;
+//    BulkVarSet& bvs = rs.bulk.vs;
+//
+//
+//    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+//    for (USI i = 0; i < domain.numSendProc; i++) {
+//        const vector<OCP_USI>& sel = domain.send_element_loc[i];
+//        vector<OCP_DBL>& s = send_buffer[i];
+//        s.resize(1 + (sel.size() - 1));
+//        s[0] = sel[0];
+//        for (USI j = 1; j < sel.size(); j++) {
+//            s[j] = bvs.P[sel[j]];
+//        }
+//        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+//    }
+//
+//    MPI_Status status;
+//    for (USI i = 0; i < domain.numRecvProc; i++) {
+//        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
+//        MPI_Recv(&bvs.P[rel[1]], (rel[2] - rel[1]), OCPMPI_DBL, rel[0], 0, domain.myComm, &status);
+//    }
+//}
 
 
 void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
@@ -97,6 +124,8 @@ void IsoT_IMPEC::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateReservoir(rs);
     // Allocate Memory of Matrix for IMPEC
     AllocateLinearSystem(ls, rs, ctrl);
+
+    ifSetup = OCP_TRUE;
 }
 
 /// Initialize reservoir
@@ -702,6 +731,8 @@ void IsoT_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     AllocateReservoir(rs);
     // Allocate memory for linear system
     AllocateLinearSystem(ls, rs, ctrl);
+
+    ifSetup = OCP_TRUE;
 }
 
 void IsoT_FIM::InitReservoir(Reservoir& rs)
@@ -755,16 +786,19 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     ls.AssembleMatLinearSolver(wls);
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
+
     // Solve linear system
-    
+    //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_A_ddm.out",
+    //    "proc" + to_string(CURRENT_RANK) + "_b_ddm.out");
+
     timer.Start();
     int status = ls.Solve(wls);
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
-
     NR.UpdateIter(abs(status));
 
-     
+    // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
+
 #ifdef DEBUG
     // Output A, b, x
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
@@ -772,10 +806,14 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     //MPI_Barrier(rs.domain.myComm);
     //OCP_ABORT("Stop");
     //
-    //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
+    // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
     // Check if inf or nan occurs in solution
     // ls.CheckSolution();
 #endif // DEBUG
+
+
+    //MPI_Barrier(rs.domain.myComm);
+    //OCP_ABORT("Stop");
 
     // Get solution from linear system to Reservoir
     timer.Start();
@@ -1463,6 +1501,8 @@ void IsoT_AIMc::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
     SetupNeighbor(rs);
     // Allocate memory for internal matrix structure
     IsoT_FIM::AllocateLinearSystem(ls, rs, ctrl);
+
+    ifSetup = OCP_TRUE;
 }
 
 
@@ -2205,8 +2245,13 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         // exchange solution
         ExchangeSolutionP(rs);
         ExchangeSolutionNi(rs);
-        IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+        UpdateProperty(rs, ctrl);
+
         NR.res.maxRelRes0_V = global_res0;
+        IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+        
+        // cout << scientific << setprecision(3);
+        // cout << CURRENT_RANK << "   " << global_res0 << "   " << NR.res.maxRelRes_V << endl;
 
         NR.CalMaxChangeNR(rs);
         const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });

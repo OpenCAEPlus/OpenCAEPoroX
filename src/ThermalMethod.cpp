@@ -15,6 +15,8 @@ void T_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
 {
     AllocateReservoir(rs);
     AllocateLinearSystem(ls, rs, ctrl);
+
+    ifSetup = OCP_TRUE;
 }
 
 void T_FIM::InitReservoir(Reservoir& rs)

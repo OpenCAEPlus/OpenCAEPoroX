@@ -52,6 +52,8 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
+    /// If setup
+    OCP_BOOL        ifSetup{ OCP_FALSE };
     /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
     /// Index of linear solver method
