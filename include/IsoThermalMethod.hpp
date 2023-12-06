@@ -31,6 +31,8 @@ public:
     virtual void ExchangeSolutionP(Reservoir& rs) const;
     virtual void ExchangeSolutionNi(Reservoir& rs) const;
     void SetPreMethod(const OCP_BOOL& flag) { preM = flag; }
+    void SetWorkLS(const USI& w) { wls = w; }
+    USI  GetWorkLS()const { return wls; }
 
 protected:
     /// If use as a preconditioner for other method
@@ -46,7 +48,7 @@ class IsoT_IMPEC : virtual public IsothermalMethod
 {
 public:
     /// Setup IMPEC
-    void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
+    void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Init
     void InitReservoir(Reservoir& rs) const;
     /// Prepare for Assembling matrix.
@@ -72,8 +74,6 @@ protected:
 private:
     /// Allocate memory for reservoir
     void AllocateReservoir(Reservoir& rs);
-    /// Allocate memory for linear system
-    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Calculate flux between bulks and wells
@@ -100,7 +100,7 @@ class IsoT_FIM : virtual public IsothermalMethod
 {
 public:
     /// Setup FIM
-    void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
+    void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Init
     void InitReservoir(Reservoir& rs);
     /// Prepare for Assembling matrix.
@@ -119,8 +119,6 @@ public:
 protected:
     /// Allocate memory for reservoir
     void AllocateReservoir(Reservoir& rs);
-    /// Allocate memory for linear system
-    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     /// Pass value needed for FIM from flash to bulk
     void PassFlashValue(Bulk& bk, const OCP_USI& n);
     /// Calculate relative permeability and capillary pressure needed for FIM
@@ -146,11 +144,11 @@ private:
 };
 
 
-class IsoT_AIMc : protected IsoT_IMPEC, protected IsoT_FIM
+class IsoT_AIMc : public IsoT_IMPEC, public IsoT_FIM
 {
 public:
     /// Setup AIMc
-    void Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
+    void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Setup neighbor
     void SetupNeighbor(Reservoir& rs);
     /// Init

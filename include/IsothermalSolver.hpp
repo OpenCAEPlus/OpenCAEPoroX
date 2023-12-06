@@ -41,8 +41,7 @@ public:
 private:
     /// current method
     OCPNLMethod  curMethod{ OCPNLMethod::none };
-    OCPNLMethod  mainMethod{ OCPNLMethod::none };
-    OCPNLMethod  preMethod{ OCPNLMethod::none };
+
     LinearSystem LSolver;
     IsoT_IMPEC   impec;
     IsoT_FIM     fim;

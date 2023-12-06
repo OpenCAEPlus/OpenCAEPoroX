@@ -64,26 +64,16 @@ public:
 
 
 public:  
-    /// Get model
-    auto GetModel() const { return model; }
-    /// Get type of the solution method.
-    auto GetMethod() const { return method; }
     /// Get work dir name.
     auto GetWorkDir() const { return workDir; }
     /// Get OCP file name.
     auto GetOCPFile() const { return ocpFile; }
-    /// Get linear solver file name.
-    auto GetLsFile() const { return lsFile; }
     /// Setup fast Control.
     void SetupFastControl(const USI& argc, const char* optset[]);
+    /// Output model information
+    void OutputModelMethodInfo() const;
 
 protected:
-    /// model: isothermal, thermal
-    OCPModel            model{ OCPModel::none };
-    /// Discrete method
-    vector<OCPNLMethod> method;
-    /// File name of linear Solver
-    vector<string>      lsFile;
     /// Current work directory
     string              workDir;
     /// Current file name

@@ -11,16 +11,22 @@
 #include "LinearSystem.hpp"
 
 
-void LinearSystem::Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb)
+USI LinearSystem::Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb)
 {
+    solveDir  = dir;
+    domain    = &d;
+    blockSize = nb * nb;
+    blockDim  = nb;
+    AllocateRowMem();
+    AllocateColMem();
+    SetupLinearSolver(model, file);
 
+    return LS.size() - 1;
 }
 
 
-void LinearSystem::AllocateRowMem(const USI& nb)
+void LinearSystem::AllocateRowMem()
 {
-    blockSize = nb * nb;
-    blockDim  = nb;
     maxDim    = domain->numElementLocal;
     dim       = 0;
     colId.resize(maxDim);
@@ -177,12 +183,10 @@ void LinearSystem::CheckSolution() const
 }
 
 /// Setup LinearSolver
-USI LinearSystem::SetupLinearSolver(const OCPModel& model,
-                                     const string&   dir,
-                                     const string&   file)
+void LinearSystem::SetupLinearSolver(const OCPModel& model,
+                                     const string& lsFile)
 {
-    solveDir = dir;
-    string lsMethod = file;
+    string lsMethod = lsFile;
     auto pos = lsMethod.find_last_of('.');
     if (pos != string::npos) {
         // given params
@@ -226,19 +230,17 @@ USI LinearSystem::SetupLinearSolver(const OCPModel& model,
         OCP_ABORT("Wrong Linear Solver Type " + lsMethod + " !");
     }
 
-    LS.back()->SetupParam(dir, file);
+    LS.back()->SetupParam(solveDir, lsFile);
     LS.back()->Allocate(max_nnz, maxDim);
-
-    return LS.size() - 1;
 }
 
 
-OCP_INT LinearSystem::Solve(const USI& wls)
+OCP_INT LinearSystem::Solve()
 {
-    OCP_INT iters = LS[wls]->Solve();
-    if (LStype[wls] == OCPLStype::fasp) {
+    OCP_INT iters = LS[wIndex]->Solve();
+    if (LStype[wIndex] == OCPLStype::fasp) {
         if (iters < 0) {
-            iters = -LS[wls]->GetNumIters();
+            iters = -LS[wIndex]->GetNumIters();
         }
     }
     return iters;

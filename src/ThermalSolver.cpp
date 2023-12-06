@@ -14,7 +14,8 @@
 
 void ThermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 {
-    fim.Setup(rs, LSolver, ctrl);
+    fim.Setup(rs, ctrl);
+    fim.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(0), rs.GetDomain(), rs.GetComNum() + 2));
 }
 
 void ThermalSolver::InitReservoir(Reservoir& rs) { fim.InitReservoir(rs); }

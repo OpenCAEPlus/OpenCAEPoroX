@@ -16,23 +16,11 @@ void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
 {
     FastControl ctrlFast(argc, optset);
     if (ctrlFast.ifUse) {
-        method.push_back(ctrlFast.method);
-        switch (method[0]) {
-        case OCPNLMethod::IMPEC:
-            lsFile.push_back("./csr.fasp");
-            break;
-        case OCPNLMethod::AIMc:
-        case OCPNLMethod::FIM:
-            lsFile.push_back("./bsr.fasp");
-            break;
-        default:
-            OCP_ABORT("Wrong method specified from command line!");
-            break;
-        }
         time.SetFastControl(ctrlFast);
     }
     printLevel = ctrlFast.printLevel;
 }
+
 
 
 void OCPControl::InputParam(const ParamControl& CtrlParam)
@@ -41,32 +29,11 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
         OCP_INFO("Input Control Params -- begin");
     }
 
-
-    model   = CtrlParam.model;
     workDir = CtrlParam.workDir;
-    ocpFile = CtrlParam.fileName;
-
-    for (const auto& m : CtrlParam.method) {
-        if (m == "IMPEC") {
-            method.push_back(OCPNLMethod::IMPEC);
-        }
-        else if (m == "FIM") {
-            method.push_back(OCPNLMethod::FIM);
-        }
-        else if (m == "AIMc") {
-            method.push_back(OCPNLMethod::AIMc);
-        }
-        else if (m == "FIMddm") {
-            method.push_back(OCPNLMethod::FIMddm);
-        }
-        else {
-            OCP_ABORT("Wrong method specified!");
-        }
-    }
-
-    lsFile = CtrlParam.lsFile;
-    
+    ocpFile = CtrlParam.fileName;    
     MaxSimTime = CtrlParam.MaxSimTime;
+
+    SM.SetCtrlParam(CtrlParam);
 
     const USI   n = CtrlParam.tuning_T.size();
     vector<USI> ctrlCriticalTime(n + 1);
@@ -96,6 +63,12 @@ void OCPControl::Setup(const Domain& domain)
 
     time.SetupComm(domain);
     NR.SetupComm(domain);
+}
+
+
+void OCPControl::OutputModelMethodInfo() const
+{
+    SM.OutputInfo(printLevel);
 }
 
 

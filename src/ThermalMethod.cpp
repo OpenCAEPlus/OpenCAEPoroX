@@ -11,12 +11,9 @@
 
 #include "ThermalMethod.hpp"
 
-void T_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
+void T_FIM::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     AllocateReservoir(rs);
-    AllocateLinearSystem(ls, rs, ctrl);
-
-    ifSetup = OCP_TRUE;
 }
 
 void T_FIM::InitReservoir(Reservoir& rs)
@@ -47,6 +44,8 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
                         const Reservoir& rs,
                         const OCP_DBL&   dt)
 {
+    ls.SetWorkLS(wls);
+
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     ls.AssembleRhsCopy(NR.res.resAbs);
@@ -54,6 +53,8 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
+    ls.SetWorkLS(wls);
+
 #ifdef DEBUG
     ls.CheckEquation();
 #endif // DEBUG
@@ -62,13 +63,13 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 
     // Assemble external linear solver with internal A and b
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
-    ls.AssembleMatLinearSolver(wls);
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     // Solve linear system  
     timer.Start();
-    int status = ls.Solve(wls);
+    int status = ls.Solve();
 
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
@@ -275,15 +276,6 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     NR.Setup(OCP_TRUE, bvs, rs.allWells.numWell, rs.domain);
 }
 
-void T_FIM::AllocateLinearSystem(LinearSystem&     ls,
-                                 const Reservoir&  rs,
-                                 const OCPControl& ctrl)
-{
-    ls.SetupDomain(rs.domain);
-    ls.AllocateRowMem(rs.GetComNum() + 2);
-    ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::thermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
-}
 
 void T_FIM::InitRock(Bulk& bk) const
 {

@@ -118,12 +118,10 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
 // IsoT_IMPEC
 ////////////////////////////////////////////
 
-void IsoT_IMPEC::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
+void IsoT_IMPEC::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     // Allocate Memory of auxiliary variables for IMPEC
     AllocateReservoir(rs);
-    // Allocate Memory of Matrix for IMPEC
-    AllocateLinearSystem(ls, rs, ctrl);
 }
 
 /// Initialize reservoir
@@ -157,12 +155,15 @@ void IsoT_IMPEC::AssembleMat(LinearSystem&    ls,
                              const Reservoir& rs,
                              const OCP_DBL&   dt) const
 {
+    ls.SetWorkLS(wls);
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
 }
 
 void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
+    ls.SetWorkLS(wls);
+
 #ifdef DEBUG
     ls.CheckEquation();
 #endif // DEBUG
@@ -170,13 +171,13 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
-    ls.AssembleMatLinearSolver(wls);
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
     
     timer.Start();
 
-    int status = ls.Solve(wls);
+    int status = ls.Solve();
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 
     NR.UpdateIter(abs(status));
@@ -328,15 +329,6 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     NR.Setup(bvs, rs.domain);
 }
 
-void IsoT_IMPEC::AllocateLinearSystem(LinearSystem&     ls,
-                                      const Reservoir&  rs,
-                                      const OCPControl& ctrl)
-{
-    ls.SetupDomain(rs.domain);
-    ls.AllocateRowMem(1);
-    ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
-}
 
 void IsoT_IMPEC::InitFlash(Bulk& bk) const
 {
@@ -723,12 +715,10 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 // IsoT_FIM
 ////////////////////////////////////////////
 
-void IsoT_FIM::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
+void IsoT_FIM::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     // Allocate memory for reservoir
     AllocateReservoir(rs);
-    // Allocate memory for linear system
-    AllocateLinearSystem(ls, rs, ctrl);
 }
 
 void IsoT_FIM::InitReservoir(Reservoir& rs)
@@ -760,6 +750,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
                            const Reservoir& rs,
                            const OCP_DBL&   dt) const
 {
+    ls.SetWorkLS(wls);
     // Assemble matrix
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
@@ -771,6 +762,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
                                  OCPControl&   ctrl)
 {
+    ls.SetWorkLS(wls);
+
 #ifdef DEBUG
     // Check if inf or nan occurs in A and b
     ls.CheckEquation();
@@ -778,8 +771,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
     GetWallTime timer;
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
-    ls.AssembleMatLinearSolver(wls);
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
 
@@ -788,7 +781,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     //    "proc" + to_string(CURRENT_RANK) + "_b_ddm.out");
 
     timer.Start();
-    int status = ls.Solve(wls);
+    int status = ls.Solve();
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
     NR.UpdateIter(abs(status));
@@ -968,15 +961,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     NR.Setup(OCP_FALSE, bvs, rs.allWells.numWell, rs.domain);
 }
 
-void IsoT_FIM::AllocateLinearSystem(LinearSystem&     ls,
-                                    const Reservoir&  rs,
-                                    const OCPControl& ctrl)
-{
-    ls.SetupDomain(rs.domain);
-    ls.AllocateRowMem(rs.GetComNum() + 1);
-    ls.AllocateColMem();
-    wls = ls.SetupLinearSolver(OCPModel::isothermal, ctrl.GetWorkDir(), ctrl.GetLsFile()[0]);
-}
 
 void IsoT_FIM::InitFlash(Bulk& bk)
 {
@@ -1489,14 +1473,12 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
 // IsoT_AIMc
 ////////////////////////////////////////////
 
-void IsoT_AIMc::Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl)
+void IsoT_AIMc::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     // Allocate Bulk and BulkConn Memory
     AllocateReservoir(rs);
     // Setup neighbor
     SetupNeighbor(rs);
-    // Allocate memory for internal matrix structure
-    IsoT_FIM::AllocateLinearSystem(ls, rs, ctrl);
 }
 
 
@@ -1557,6 +1539,7 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
                             const Reservoir& rs,
                             const OCP_DBL&   dt) const
 {
+    ls.SetWorkLS(wls);
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
     ls.AssembleRhsCopy(NR.res.resAbs);
@@ -1564,6 +1547,8 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
+    ls.SetWorkLS(wls);
+
 #ifdef DEBUG
     ls.CheckEquation();
 #endif // DEBUG
@@ -1571,12 +1556,12 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell(), wls);
-    ls.AssembleMatLinearSolver(wls);
+    ls.CalCommTerm(rs.GetNumOpenWell());
+    ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
 
     timer.Start();
-    int status = ls.Solve(wls);
+    int status = ls.Solve();
 
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
 

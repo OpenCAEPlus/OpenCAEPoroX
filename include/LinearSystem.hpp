@@ -38,7 +38,10 @@ class LinearSystem
 {
 
 public:
-    void Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb);
+    /// Setup linear system
+    USI Setup(const OCPModel& model, const string& dir, const string& file, const Domain& d, const USI& nb);
+    /// Set work LS
+    void SetWorkLS(const USI& i) { wIndex = i; };
     /// Clear the internal matrix data for scalar-value problems.
     void ClearData();
 
@@ -55,9 +58,9 @@ public:
 
     // Linear Solver
     /// Assemble Mat for Linear Solver.
-    void AssembleMatLinearSolver(const USI& wls) { LS[wls]->AssembleMat(colId, val, dim, b, u); }
+    void AssembleMatLinearSolver() { LS[wIndex]->AssembleMat(colId, val, dim, b, u); }
     /// Solve the Linear System.
-    OCP_INT Solve(const USI& wls);
+    OCP_INT Solve();
 
     /// Setup dimensions.
     OCP_USI AddDim(const OCP_USI& n)
@@ -128,39 +131,48 @@ public:
     void AssembleRhsCopy(const vector<OCP_DBL>& rhs);
 
     /// Calculate Global start
-    void CalCommTerm(const USI& actWellNum, const USI& wls) {
-        LS[wls]->CalCommTerm(actWellNum, domain);
+    void CalCommTerm(const USI& actWellNum) {
+        LS[wIndex]->CalCommTerm(actWellNum, domain);
     }
 
 
-public:
+protected:
     /// Allocate memory for linear system with max possible number of rows.
-    void AllocateRowMem(const USI& nb);
+    void AllocateRowMem();
     /// Allocate memory for linear system with max possible number of columns.
     void AllocateColMem();
     /// Setup LinearSolver.
-    USI SetupLinearSolver(const OCPModel& model, const string& dir, const string& file);
-    /// Setup Domain
-    void SetupDomain(const Domain& d) { domain = &d; }
+    void SetupLinearSolver(const OCPModel& model, const string& lsFile);
 
 protected:
+    /// working index of LS
+    USI wIndex;
     // Used for internal mat structure.
-    USI blockDim;  ///< Dimens of small block matrix.
-    USI blockSize; ///< Size of small block matrix. // TODO: Is it blockDim*blockDim?
+    /// Dimens of small block matrix.
+    USI blockDim;
+    /// Size of small block matrix.
+    USI blockSize; 
 
     // maxDim: fixed and used to allocate memory at the beginning of simulation;
     // dim:    might change during simulation but always less than maxDim.
-    OCP_USI maxDim; ///< Maximal possible dimension of matrix.
-    OCP_USI dim;    ///< Actual dimension of matrix.
-    OCP_USI max_nnz; ///< maximum nnz
+    /// Maximal possible dimension of matrix.
+    OCP_USI maxDim; 
+    /// Actual dimension of matrix.
+    OCP_USI dim;    
+    /// maximum nnz
+    OCP_USI max_nnz; 
 
     // The following values are stored for each row.
-    vector<vector<OCP_USI>> colId;       ///< Column indices of nonzero entry.
-    vector<vector<OCP_DBL>> val;         ///< Nonzero values.
-    vector<OCP_DBL>         b;           ///< Right-hand side of linear system.
-    vector<OCP_DBL>         u;           ///< Solution of linear system.
-
-    string    solveDir; ///< Current workdir.
+    /// Column indices of nonzero entry.
+    vector<vector<OCP_USI>> colId;       
+    /// Nonzero values.
+    vector<vector<OCP_DBL>> val;         
+    /// Right-hand side of linear system.
+    vector<OCP_DBL>         b;           
+    /// Solution of linear system.
+    vector<OCP_DBL>         u;           
+    /// Current workdir.
+    string    solveDir; 
     
     const Domain* domain;
 

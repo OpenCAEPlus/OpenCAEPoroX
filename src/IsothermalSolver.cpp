@@ -14,32 +14,32 @@
 /// Setup solution methods used including solver and preconditioner
 void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
 {
-    const auto& methods = ctrl.GetMethod();
-    mainMethod = methods[0];
-    curMethod  = mainMethod;
-    if (methods.size() > 1) {
-        preMethod = methods[1];
-        curMethod = preMethod;
-    }
+    const auto& methods = ctrl.SM.GetMethod();
 
     for (USI i = 0; i < methods.size(); i++) {
-        switch (curMethod) {
-        case OCPNLMethod::IMPEC:
-            impec.Setup(rs, LSolver, ctrl);
+        switch (methods[i]) {
+        case OCPNLMethod::IMPEC:        
+            impec.Setup(rs, ctrl);
+            impec.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), 1));
             break;
         case OCPNLMethod::FIM:
-            fim.Setup(rs, LSolver, ctrl);
+            fim.Setup(rs, ctrl);
+            fim.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
             break;
         case OCPNLMethod::AIMc:
-            aimc.Setup(rs, LSolver, ctrl);
+            aimc.Setup(rs, ctrl);
+            aimc.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
             break;
         case OCPNLMethod::FIMddm:
-            fim_ddm.IsoT_FIM::Setup(rs, LSolver, ctrl);
+            fim_ddm.IsoT_FIM::Setup(rs, ctrl);
+            fim_ddm.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
             break;
         default:
             OCP_ABORT("Wrong method type!");
         }
+
     }
+    curMethod = methods[0];
 }
 
 

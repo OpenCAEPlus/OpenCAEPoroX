@@ -23,7 +23,7 @@
 class T_FIM
 {
 public:
-    void     Setup(Reservoir& rs, LinearSystem& ls, const OCPControl& ctrl);
+    void     Setup(Reservoir& rs, const OCPControl& ctrl);
     void     InitReservoir(Reservoir& rs);
     void     Prepare(Reservoir& rs, const OCPControl& ctrl);
     void     AssembleMat(LinearSystem&    ls,
@@ -34,10 +34,11 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     void     FinishStep(Reservoir& rs, OCPControl& ctrl);
     const OCPNRsuite& GetNRsuite() const { return NR; }
+    void SetWorkLS(const USI& w) { wls = w; }
+    USI  GetWorkLS()const { return wls; }
 
 protected:
     void AllocateReservoir(Reservoir& rs);
-    void AllocateLinearSystem(LinearSystem& ls, const Reservoir& rs, const OCPControl& ctrl);
     void InitRock(Bulk& bk) const;
     void CalRock(Bulk& bk) const;
     void InitFlash(Bulk& bk);
@@ -52,8 +53,6 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    /// If setup
-    OCP_BOOL        ifSetup{ OCP_FALSE };
     /// Newton-Raphson iteration suite
     OCPNRsuite      NR;
     /// Index of linear solver method

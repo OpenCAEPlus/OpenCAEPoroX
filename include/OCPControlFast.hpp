@@ -17,10 +17,6 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "ParamControl.hpp"
-#include "OCPControlTime.hpp"
-#include "OCPControlNR.hpp"
-#include "OCPControlMethod.hpp"
 
 using namespace std;
 

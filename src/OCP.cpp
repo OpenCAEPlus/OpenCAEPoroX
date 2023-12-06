@@ -37,36 +37,19 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
         OCP_INFO("Setup Simulator -- begin");
     }
 
-
     const Domain& domain = reservoir.GetDomain();
 
     GetWallTime timer;
     timer.Start();
 
     control.SetupFastControl(argc, options); // Read Fast control
-
-    if (CURRENT_RANK == MASTER_PROCESS) {
-        switch (control.GetModel()) {
-        case OCPModel::isothermal:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << endl << "Dynamic simulation for isothermal models" << endl;
-            }
-            break;
-        case OCPModel::thermal:
-            if (control.printLevel >= PRINT_MIN) {
-                cout << endl << "Dynamic simulation for thermal models" << endl;
-            }
-            break;
-        default:
-            OCP_ABORT("Wrong model type specified!");
-        }
-    }
+    control.Setup(domain);
 
     solver.Setup(reservoir, control); // Setup static info for solver
 
     output.Setup(reservoir, control, domain); // Setup output for dynamic simulation
 
-    control.Setup(domain);
+    control.OutputModelMethodInfo();
 
     double finalTime = timer.Stop() / TIME_S2MS;
     if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
@@ -111,33 +94,6 @@ void OpenCAEPoroX::InitReservoir()
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
 void OpenCAEPoroX::RunSimulation()
 {
-    if (CURRENT_RANK == MASTER_PROCESS) {
-        //switch (control.GetMethod()) {
-        //case OCPNLMethod::IMPEC:
-        //    if (control.printLevel >= PRINT_MIN) {
-        //        cout << "\nDynamic simulation with IMPEC\n" << endl;
-        //    }
-        //    break;
-        //case OCPNLMethod::FIM:
-        //    if (control.printLevel >= PRINT_MIN) {
-        //        cout << "\nDynamic simulation with FIM\n" << endl;
-        //    }
-        //    break;
-        //case OCPNLMethod::AIMc:
-        //    if (control.printLevel >= PRINT_MIN) {
-        //        cout << "\nDynamic simulation with AIMc\n" << endl;
-        //    }
-        //    break;
-        //case OCPNLMethod::FIMddm:
-        //    if (control.printLevel >= PRINT_MIN) {
-        //        cout << "\nDynamic simulation with FIM_DDM\n" << endl;
-        //    }
-        //    break;
-        //default:
-        //    OCP_ABORT("Wrong method type is used!");
-        //}
-    }
-
     solver.RunSimulation(reservoir, control, output);
 }
 
