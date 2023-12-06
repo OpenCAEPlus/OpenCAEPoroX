@@ -164,10 +164,6 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 {
     ls.SetWorkLS(wls);
 
-#ifdef DEBUG
-    ls.CheckEquation();
-#endif // DEBUG
-
     GetWallTime timer;
 
     timer.Start();
@@ -189,12 +185,6 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     //ls.OutputSolution("proc" + to_string(myrank) + "_testx_IMPEC.out");
     //MPI_Barrier(rs.domain.myComm);
     //OCP_ABORT("Stop");
-#endif // DEBUG
-
-
-
-#ifdef DEBUG
-    // ls.OutputSolution("testx_IMPEC.out");
 #endif // DEBUG
 
     timer.Start();
@@ -755,7 +745,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     // Assemble rhs -- from residual
-    ls.AssembleRhsCopy(NR.res.resAbs);
+    ls.CopyRhs(NR.res.resAbs);
 }
 
 void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
@@ -763,11 +753,6 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  OCPControl&   ctrl)
 {
     ls.SetWorkLS(wls);
-
-#ifdef DEBUG
-    // Check if inf or nan occurs in A and b
-    ls.CheckEquation();
-#endif // DEBUG
 
     GetWallTime timer;
     timer.Start();
@@ -794,10 +779,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
     //MPI_Barrier(rs.domain.myComm);
     //OCP_ABORT("Stop");
-    //
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
-    // Check if inf or nan occurs in solution
-    // ls.CheckSolution();
 #endif // DEBUG
 
 
@@ -1173,8 +1155,7 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
     }
 
-    // flux term
-    
+    // flux term  
     OCP_USI  bId, eId;
     USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
@@ -1542,16 +1523,12 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
     ls.SetWorkLS(wls);
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(NR.res.resAbs);
+    ls.CopyRhs(NR.res.resAbs);
 }
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
     ls.SetWorkLS(wls);
-
-#ifdef DEBUG
-    ls.CheckEquation();
-#endif // DEBUG
 
     GetWallTime timer;
 
@@ -1573,10 +1550,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_AIMc.out");
     //MPI_Barrier(rs.domain.myComm);
     //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_AIMc.out");
-    // ls.CheckSolution();
 #endif // DEBUG
-
-
 
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);

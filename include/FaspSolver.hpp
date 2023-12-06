@@ -141,31 +141,23 @@ public:
     AMG_param   amgParam;  ///< Parameters for AMG method
     ILU_param   iluParam;  ///< Parameters for ILU method
     SWZ_param   swzParam;  ///< Parameters for Schwarz method
-
-protected:
-    USI         blockdim;
 };
 
 /// Scalar solvers in CSR format from FASP.
 class ScalarFaspSolver : public FaspSolver
 {
 public:
-    ScalarFaspSolver() { blockdim = 1; }
+    ScalarFaspSolver() {};
 
 protected:
     /// Allocate memory for the linear system.
-    void Allocate(const OCP_USI&     max_nnz,
-                  const OCP_USI&     maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     /// Initialize the Params for linear solver.
     void InitParam() override;
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>&     colId,
-                     const vector<vector<OCP_DBL>>& val,
-                     const OCP_USI&                 dim,
-                     vector<OCP_DBL>&               rhs,
-                     vector<OCP_DBL>&               u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;
@@ -180,22 +172,17 @@ protected:
 class VectorFaspSolver : public FaspSolver
 {
 public:
-    VectorFaspSolver(const USI& blockDim) { blockdim = blockDim; }
+    VectorFaspSolver() {};
 
 protected:
     /// Allocate memory for the linear system.
-    void Allocate(const OCP_USI&     max_nnz,
-                  const OCP_USI&     maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     /// Initialize the Params for linear solver.
     void InitParam() override;
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>&     colId,
-                     const vector<vector<OCP_DBL>>& val,
-                     const OCP_USI&                 dim,
-                     vector<OCP_DBL>&               rhs,
-                     vector<OCP_DBL>&               u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;

@@ -48,16 +48,12 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
 
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
-    ls.AssembleRhsCopy(NR.res.resAbs);
+    ls.CopyRhs(NR.res.resAbs);
 }
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
     ls.SetWorkLS(wls);
-
-#ifdef DEBUG
-    ls.CheckEquation();
-#endif // DEBUG
 
     GetWallTime timer;
 
@@ -81,7 +77,6 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
      //ls.OutputLinearSystem("testA_FIMT.out", "testb_FIMT.out");
      //ls.OutputSolution("testx_FIMT.out");
     // Check if inf or nan occurs in solution
-    ls.CheckSolution();
 #endif // DEBUG
     
     timer.Start();

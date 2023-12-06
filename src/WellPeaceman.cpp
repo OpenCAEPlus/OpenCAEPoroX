@@ -1663,7 +1663,7 @@ void PeacemanWellIsoT::AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, con
     case WellOptMode::bhp:
         ls.AddDiag(wId, dt);
         ls.AddRhs(wId, dt * opt.tarBHP);
-        ls.AssignGuess(wId, opt.tarBHP);
+        ls.SetGuess(wId, opt.tarBHP);
         break;
     default:
         OCP_ABORT("Wrong well option mode!");
@@ -1745,7 +1745,7 @@ void PeacemanWellIsoT::AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, co
     case WellOptMode::bhp:
         ls.AddDiag(wId, dt);
         ls.AddRhs(wId, dt * opt.tarBHP);
-        ls.AssignGuess(wId, opt.tarBHP);
+        ls.SetGuess(wId, opt.tarBHP);
         break;
     default:
         OCP_ABORT("Wrong well option mode!");

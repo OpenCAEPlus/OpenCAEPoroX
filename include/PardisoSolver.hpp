@@ -44,8 +44,7 @@ using namespace std;
 class PardisoSolver : public LinearSolver
 {
 public:
-    PardisoSolver() = default;
-    PardisoSolver(const USI& blockDim) { blockdim = blockDim; }
+    PardisoSolver() {};
 
     /// Set parameters.
     void SetupParam(const string& dir, const string& file) override;
@@ -54,17 +53,13 @@ public:
     void InitParam() override;
 
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-        const vector<vector<OCP_DBL>>& val,
-        const OCP_USI& dim,
-        vector<OCP_DBL>& rhs,
-        vector<OCP_DBL>& u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;
@@ -88,7 +83,7 @@ protected:
     MKL_INT   idum;               ///< Integer dummy
 
     // CSR/BSR Matrix
-    MKL_INT          blockdim;
+    MKL_INT          nb;
     vector<MKL_INT>  iA;
     vector<MKL_INT>  jA;
     vector<double>   A;
@@ -105,19 +100,15 @@ class VectorPardisoSolver : public PardisoSolver
 {
 public:
 
-    VectorPardisoSolver(const USI& blockDim) { blockdim = blockDim; }
+    VectorPardisoSolver() {};
 
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-        const vector<vector<OCP_DBL>>& val,
-        const OCP_USI& dim,
-        vector<OCP_DBL>& rhs,
-        vector<OCP_DBL>& u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 
 };
 

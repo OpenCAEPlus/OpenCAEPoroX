@@ -35,7 +35,7 @@ public:
     void InitParam() override;
 
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
@@ -49,7 +49,7 @@ public:
 protected:
 
     // CSR Mat
-    SAMG_INT            blockdim;
+    SAMG_INT            nb;
     vector<SAMG_INT>    iA;
     vector<SAMG_INT>    jA;
     vector<SAMG_REAL>   A;
@@ -65,7 +65,7 @@ protected:
     SAMG_INT           ndip;         ///< size of ip
     vector<SAMG_INT>   iu;           ///< variable-to-unknown pointer: nnu
     vector<SAMG_INT>   ip;           ///< variable-to-point pointer: nnu
-    vector<SAMG_INT>   iu_tmp;       ///< template of iu: blockdim
+    vector<SAMG_INT>   iu_tmp;       ///< template of iu: nb
     vector<SAMG_INT>   nunknown_description;
     
     // comunication
@@ -114,7 +114,7 @@ class ScalarSamgSolver : public SamgSolver
 {
 public:
     ScalarSamgSolver(const OCPModel& model) {
-        blockdim = 1;
+        nb       = 1;
         nsys     = 1;
         ndiu     = 1;
         ndip     = 1;
@@ -122,11 +122,7 @@ public:
     }
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-        const vector<vector<OCP_DBL>>& val,
-        const OCP_USI& dim,
-        vector<OCP_DBL>& rhs,
-        vector<OCP_DBL>& u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 };
 
 // Convert Internal mat(bsr-like) to CSR mat 
@@ -134,11 +130,11 @@ class VectorSamgSolver : public SamgSolver
 {
 public:
     VectorSamgSolver(const USI& blockDim, const OCPModel& model) {
-        blockdim = blockDim;
-        nsys     = blockdim;
-        iu_tmp.resize(blockdim);
+        nb = blockDim;
+        nsys     = nb;
+        iu_tmp.resize(nb);
         ifirst   = 1;   // zero solution as initial guess
-        for (USI i = 0; i < blockdim; i++)  iu_tmp[i] = i + 1;
+        for (USI i = 0; i < nb; i++)  iu_tmp[i] = i + 1;
         if (model == OCPModel::isothermal) {
             nunknown_description.resize(nsys, 2);
             nunknown_description[0] = 0;          // Pressure
@@ -151,11 +147,7 @@ public:
         else                            OCP_ABORT("Wrong Model for SAMG Solver!");              
     }
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-        const vector<vector<OCP_DBL>>& val,
-        const OCP_USI& dim,
-        vector<OCP_DBL>& rhs,
-        vector<OCP_DBL>& u) override;
+    void AssembleMat(OCPMatrix& mat) override;
 };
 
 #endif 

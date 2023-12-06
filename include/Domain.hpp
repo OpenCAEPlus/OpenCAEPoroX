@@ -37,6 +37,7 @@ class Domain
 	friend class Well;
 	friend class PeacemanWell;
 	friend class LinearSystem;
+	friend class OCPMatrix;
 
 	// Method(tmp)
 	friend class IsoT_IMPEC;

@@ -41,15 +41,16 @@ void PardisoSolver::InitParam()
 }
 
 
-void PardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
+void PardisoSolver::Allocate(const OCPMatrix& mat)
 {
-    if (blockdim > 1) {
-        iparm[37] = blockdim * blockdim;
+    nb = mat.nb;
+    if (nb > 1) {
+        iparm[37] = nb * nb;
     }
 
-    iA.resize(maxDim + 1);
-    jA.resize(max_nnz);
-    A.resize(max_nnz * blockdim * blockdim);
+    iA.resize(mat.maxDim + 1);
+    jA.resize(mat.max_nnz);
+    A.resize(mat.max_nnz * nb * nb);
 }
 
 
@@ -79,29 +80,25 @@ void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
 
 /// Assemble coefficient matrix.
-void PardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
-    const vector<vector<OCP_DBL>>& val,
-    const OCP_USI& dim,
-    vector<OCP_DBL>& rhs,
-    vector<OCP_DBL>& u)
+void PardisoSolver::AssembleMat(OCPMatrix& mat)
 {
-    const USI blockSize = blockdim * blockdim;
+    const USI blockSize = nb * nb;
     vector<USI> tmp;  
     // Assemble iA, jA, A
     iA[0] = 0;
-    for (OCP_USI i = 1; i < dim + 1; i++) {
-        const USI nnzR = colId[i - 1].size();
+    for (OCP_USI i = 1; i < mat.dim + 1; i++) {
+        const USI nnzR = mat.colId[i - 1].size();
 
         iA[i] = iA[i - 1] + nnzR;
         // reorder
-        tmp = colId[i - 1];
+        tmp = mat.colId[i - 1];
         for (auto& t : tmp)    t = global_index->at(t);
         sort(tmp.begin(), tmp.end());
         for (USI j0 = 0; j0 < nnzR; j0++) {
             jA[iA[i - 1] + j0] = tmp[j0];
             for (USI j1 = 0; j1 < nnzR; j1++) {
-                if (global_index->at(colId[i - 1][j1]) == tmp[j0]) {
-                    const OCP_DBL* begin = &val[i - 1][0] + j1 * blockSize;
+                if (global_index->at(mat.colId[i - 1][j1]) == tmp[j0]) {
+                    const OCP_DBL* begin = &mat.val[i - 1][0] + j1 * blockSize;
                     const OCP_DBL* end = begin + blockSize;
                     copy(begin, end, &A[(iA[i - 1] + j0) * blockSize]);
                     break;
@@ -111,8 +108,8 @@ void PardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
     }
 
 
-    b = rhs.data();
-    x = u.data();
+    b = mat.b.data();
+    x = mat.u.data();
 }
 
 
@@ -167,11 +164,12 @@ OCP_INT PardisoSolver::Solve()
 
 
 /// Allocate memoery for pardiso solver
-void VectorPardisoSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
+void VectorPardisoSolver::Allocate(const OCPMatrix& mat)
 {
-    iA.resize(maxDim * blockdim + 1);
-    jA.resize(max_nnz * blockdim * blockdim);
-    A.resize(max_nnz * blockdim * blockdim);
+    nb = mat.nb;
+    iA.resize(mat.maxDim * nb + 1);
+    jA.resize(mat.max_nnz * nb * nb);
+    A.resize(mat.max_nnz * nb * nb);
 }
 
 
@@ -184,11 +182,11 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
     const OCP_INT numElementLoc   = actWellNum + numGridInterior;
     const OCP_INT global_end      = global_index->at(numElementLoc - 1);
 
-    iparm[40] = (global_end - numElementLoc + 1) * blockdim;  // global begin (included)
-    iparm[41] = (global_end + 1) * blockdim - 1;              // global end   (included)
+    iparm[40] = (global_end - numElementLoc + 1) * nb;  // global begin (included)
+    iparm[41] = (global_end + 1) * nb - 1;              // global end   (included)
 
     // Get Dimension
-    N = (global_end + 1) * blockdim;
+    N = (global_end + 1) * nb;
 
     GetWallTime timer;
     timer.Start();
@@ -200,38 +198,34 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
 
 
 /// Assemble coefficient matrix.
-void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
-    const vector<vector<OCP_DBL>>& val,
-    const OCP_USI& dim,
-    vector<OCP_DBL>& rhs,
-    vector<OCP_DBL>& u)
+void VectorPardisoSolver::AssembleMat(OCPMatrix& mat)
 {
-    const USI blockSize = blockdim * blockdim;
+    const USI blockSize = nb * nb;
     vector<USI> tmp;
     // Assemble iA, jA, A
     iA[0] = 0;
-    for (OCP_USI i = 1; i < dim + 1; i++) {
-        const USI nnzR = colId[i - 1].size();
-        const OCP_USI bId = (i - 1) * blockdim;
+    for (OCP_USI i = 1; i < mat.dim + 1; i++) {
+        const USI nnzR = mat.colId[i - 1].size();
+        const OCP_USI bId = (i - 1) * nb;
 
-        for (USI c = 0; c < blockdim; c++)
-            iA[bId + c + 1] = iA[bId + c] + nnzR * blockdim;
+        for (USI c = 0; c < nb; c++)
+            iA[bId + c + 1] = iA[bId + c] + nnzR * nb;
        
         // reorder
-        tmp = colId[i - 1];
+        tmp = mat.colId[i - 1];
         for (auto& t : tmp)    t = global_index->at(t);
         sort(tmp.begin(), tmp.end());
         for (USI j0 = 0; j0 < nnzR; j0++) {
             for (USI j1 = 0; j1 < nnzR; j1++) {
-                if (global_index->at(colId[i - 1][j1]) == tmp[j0]) {
+                if (global_index->at(mat.colId[i - 1][j1]) == tmp[j0]) {
 
-                    for (USI c = 0; c < blockdim; c++) {
-                        for (USI c1 = 0; c1 < blockdim; c1++)
-                            jA[iA[bId + c] + j0 * blockdim + c1] = tmp[j0] * blockdim + c1;
+                    for (USI c = 0; c < nb; c++) {
+                        for (USI c1 = 0; c1 < nb; c1++)
+                            jA[iA[bId + c] + j0 * nb + c1] = tmp[j0] * nb + c1;
 
-                        const OCP_DBL* begin = &val[i - 1][0] + j1 * blockSize + c * blockdim;
-                        const OCP_DBL* end = begin + blockdim;
-                        copy(begin, end, &A[iA[bId + c] + j0 * blockdim]);
+                        const OCP_DBL* begin = &mat.val[i - 1][0] + j1 * blockSize + c * nb;
+                        const OCP_DBL* end = begin + nb;
+                        copy(begin, end, &A[iA[bId + c] + j0 * nb]);
                     }
                         
                     break;
@@ -240,8 +234,8 @@ void VectorPardisoSolver::AssembleMat(const vector<vector<USI>>& colId,
         }
     }
 
-    b = rhs.data();
-    x = u.data();
+    b = mat.b.data();
+    x = mat.u.data();
 }
 
 #endif // OCPFLOATTYPEWIDTH == 64

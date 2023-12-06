@@ -36,17 +36,13 @@ public:
     void InitParam() override {};
 
     /// Allocate memoery for pardiso solver
-    void Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim) override;
+    void Allocate(const OCPMatrix& mat) override;
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
     /// Assemble coefficient matrix.
-    void AssembleMat(const vector<vector<USI>>& colId,
-                     const vector<vector<OCP_DBL>>& val,
-                     const OCP_USI& dim,
-                     vector<OCP_DBL>& rhs,
-                     vector<OCP_DBL>& u) override; 
+    void AssembleMat(OCPMatrix& mat) override;
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return 1; }
@@ -54,7 +50,7 @@ public:
 protected:
 
     // CSR/BSR   
-    OCP_INT                 blockdim;   ///< block dim              
+    OCP_INT                 nb;         ///< block dim              
     vector<OCP_DBL>         A;          ///< value
     vector<OCP_SLL>         iA;         ///< row ptr
     vector<OCP_SLL>         jA;         ///< col index  
@@ -75,7 +71,7 @@ protected:
 class ScalarPetscSolver : public PetscSolver
 {
 public:
-    ScalarPetscSolver() { blockdim = 1; }
+    ScalarPetscSolver() {};
     /// Solve the linear system.
     OCP_INT Solve() override;
 
@@ -84,8 +80,7 @@ public:
 class VectorPetscSolver : public PetscSolver
 {
 public:
-    VectorPetscSolver(const USI& blockDim, const Domain* domain) { 
-        blockdim = blockDim; 
+    VectorPetscSolver(const Domain* domain) { 
         myComm  = domain->myComm;
         numproc = domain->numproc;
         myrank  = domain->myrank;

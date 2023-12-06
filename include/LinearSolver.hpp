@@ -19,6 +19,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "Domain.hpp"
+#include "OCPMatrix.hpp"
 
 using namespace std;
 
@@ -41,18 +42,13 @@ public:
     virtual void SetupParam(const string& dir, const string& file) = 0;
 
     /// Allocate maximum memory for linear solvers.
-    virtual void Allocate(const OCP_USI&     max_nnz,
-                          const OCP_USI&     maxDim) = 0;
+    virtual void Allocate(const OCPMatrix& mat) = 0;
 
     /// Calculate terms used in communication
     virtual void CalCommTerm(const USI& actWellNum, const Domain* domain) = 0;
 
     /// Assemble matrix for linear solver from the internal matrix data.
-    virtual void AssembleMat(const vector<vector<USI>>&     colId,
-                             const vector<vector<OCP_DBL>>& val,
-                             const OCP_USI&                 dim,
-                             vector<OCP_DBL>&               rhs,
-                             vector<OCP_DBL>&               u) = 0;
+    virtual void AssembleMat(OCPMatrix& mat) = 0;
 
     /// Solve the linear system and return the number of iterations.
     virtual OCP_INT Solve() = 0;

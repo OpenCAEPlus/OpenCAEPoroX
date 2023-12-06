@@ -17,11 +17,12 @@
 
 
  /// Allocate memoery for pardiso solver
-void PetscSolver::Allocate(const OCP_USI& max_nnz, const OCP_USI& maxDim)
+void PetscSolver::Allocate(const OCPMatrix& mat)
 {
-    A.resize(max_nnz * blockdim * blockdim);
-    iA.resize(maxDim + 1);
-    jA.resize(max_nnz);
+    nb = mat.nb;
+    A.resize(mat.max_nnz * nb * nb);
+    iA.resize(mat.maxDim + 1);
+    jA.resize(mat.max_nnz);
 }
 
 
@@ -48,33 +49,29 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
 
 /// Assemble coefficient matrix.
-void PetscSolver::AssembleMat(const vector<vector<USI>>& colId,
-    const vector<vector<OCP_DBL>>& val,
-    const OCP_USI& dim,
-    vector<OCP_DBL>& rhs,
-    vector<OCP_DBL>& u)
+void PetscSolver::AssembleMat(OCPMatrix& mat)
 {
 
-    const USI blockSize = blockdim * blockdim;
+    const USI blockSize = nb * nb;
     vector<OCP_SLL> tmpJ;
     // Assemble iA, jA, A
     iA[0] = 0;
-    for (OCP_USI i = 1; i < dim + 1; i++) {
-        const USI nnzR = colId[i - 1].size();
+    for (OCP_USI i = 1; i < mat.dim + 1; i++) {
+        const USI nnzR = mat.colId[i - 1].size();
 
         tmpJ.resize(nnzR);
         for (USI j = 0; j < nnzR; j++) {
-            tmpJ[j] = global_index->at(colId[i - 1][j]);
+            tmpJ[j] = global_index->at(mat.colId[i - 1][j]);
         }
 
         iA[i] = iA[i - 1] + nnzR;
         copy(tmpJ.begin(), tmpJ.end(), &jA[iA[i - 1]]);
-        copy(val[i - 1].begin(), val[i - 1].end(), &A[(iA[i - 1]) * blockSize]);
+        copy(mat.val[i - 1].begin(), mat.val[i - 1].end(), &A[(iA[i - 1]) * blockSize]);
     }
 
 
-    b = rhs.data();
-    x = u.data();
+    b = mat.b.data();
+    x = mat.u.data();
 }
 
 
@@ -86,7 +83,7 @@ OCP_INT ScalarPetscSolver::Solve()
 
 OCP_INT VectorPetscSolver::Solve()
 {
-    return FIM_solver_p(myrank, numproc, blockdim, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
+    return FIM_solver_p(myrank, numproc, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
 #endif // WITH_PETSCSOLVER

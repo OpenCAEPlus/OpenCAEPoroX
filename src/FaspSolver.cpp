@@ -44,10 +44,9 @@ void FaspSolver::SetupParam(const string& dir, const string& file)
     //cout << endl << sizeof(_Quad) << endl;
 }
 
-void ScalarFaspSolver::Allocate(const OCP_USI&     max_nnz,
-                                const OCP_USI&     maxDim)
+void ScalarFaspSolver::Allocate(const OCPMatrix& mat)
 {
-    A = fasp_dcsr_create(maxDim, maxDim, max_nnz);
+    A = fasp_dcsr_create(mat.maxDim, mat.maxDim, mat.max_nnz);
 }
 
 void ScalarFaspSolver::InitParam()
@@ -118,48 +117,32 @@ void ScalarFaspSolver::InitParam()
     inParam.AMG_smooth_restriction = ON;
 }
 
-void ScalarFaspSolver::AssembleMat(const vector<vector<USI>>&     colId,
-                                   const vector<vector<OCP_DBL>>& val,
-                                   const OCP_USI&                 dim,
-                                   vector<OCP_DBL>&               rhs,
-                                   vector<OCP_DBL>&               u)
+void ScalarFaspSolver::AssembleMat(OCPMatrix& mat)
 {
     // b & x
-    b.row = dim;
-    b.val = rhs.data();
-    x.row = dim;
-    x.val = u.data();
+    b.row = mat.dim;
+    b.val = mat.b.data();
+    x.row = mat.dim;
+    x.val = mat.u.data();
     // A
     OCP_USI nnz = 0;
-    for (OCP_USI i = 0; i < dim; i++) {
-        nnz += colId[i].size();
+    for (OCP_USI i = 0; i < mat.dim; i++) {
+        nnz += mat.colId[i].size();
     }
 
-    A.row = dim;
-    A.col = dim;
+    A.row = mat.dim;
+    A.col = mat.dim;
     A.nnz = nnz;
 
     // IA
     A.IA[0]       = 0;
-    for (OCP_USI i = 1; i < dim + 1; i++) {
-        USI nnz_Row = colId[i - 1].size();
+    for (OCP_USI i = 1; i < mat.dim + 1; i++) {
+        USI nnz_Row = mat.colId[i - 1].size();
         A.IA[i]     = A.IA[i - 1] + nnz_Row;
 
-        copy(colId[i - 1].begin(), colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
-        copy(val[i - 1].begin(), val[i - 1].end(), &A.val[A.IA[i - 1]]);
+        copy(mat.colId[i - 1].begin(), mat.colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
+        copy(mat.val[i - 1].begin(), mat.val[i - 1].end(), &A.val[A.IA[i - 1]]);
     }
-
-#ifdef DEBUG
-    // check x and b  ----  for test
-    for (int i = 0; i < dim; i++) {
-        if (!isfinite(b.val[i])) OCP_ABORT("sFasp b is infinite!");
-        if (!isfinite(x.val[i])) OCP_ABORT("sFasp x is infinite!");
-    }
-    // check A ----  for test
-    for (int i = 0; i < nnz; i++) {
-        if (!isfinite(A.val[i])) OCP_ABORT("sFasp A is infinite!");
-    }
-#endif // DEBUG
 }
 
 OCP_INT ScalarFaspSolver::Solve()
@@ -269,14 +252,13 @@ OCP_INT ScalarFaspSolver::Solve()
     return status;
 }
 
-void VectorFaspSolver::Allocate(const OCP_USI&     max_nnz,
-                                const OCP_USI&     maxDim)
+void VectorFaspSolver::Allocate(const OCPMatrix& mat)
 {
-    A     = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockdim, 0);
-    Asc   = fasp_dbsr_create(maxDim, maxDim, max_nnz, blockdim, 0);
-    fsc   = fasp_dvec_create(maxDim * blockdim);
-    order = fasp_ivec_create(maxDim);
-    Dmat.resize(maxDim * blockdim * blockdim);
+    A     = fasp_dbsr_create(mat.maxDim, mat.maxDim, mat.max_nnz, mat.nb, 0);
+    Asc   = fasp_dbsr_create(mat.maxDim, mat.maxDim, mat.max_nnz, mat.nb, 0);
+    fsc   = fasp_dvec_create(mat.maxDim * mat.nb);
+    order = fasp_ivec_create(mat.maxDim);
+    Dmat.resize(mat.maxDim * mat.nb * mat.nb);
 }
 
 void VectorFaspSolver::InitParam()
@@ -348,18 +330,14 @@ void VectorFaspSolver::InitParam()
     inParam.AMG_smooth_restriction = ON;
 }
 
-void VectorFaspSolver::AssembleMat(const vector<vector<USI>>&     colId,
-                                   const vector<vector<OCP_DBL>>& val,
-                                   const OCP_USI&                 dim,
-                                   vector<OCP_DBL>&               rhs,
-                                   vector<OCP_DBL>&               u)
+void VectorFaspSolver::AssembleMat(OCPMatrix& mat)
 {
-    const OCP_USI nrow = dim * blockdim;
+    const OCP_USI nrow = mat.dim * mat.nb;
     // b & x
     b.row = nrow;
-    b.val = rhs.data();
+    b.val = mat.b.data();
     x.row = nrow;
-    x.val = u.data(); // x will be set to zero later
+    x.val = mat.u.data(); // x will be set to zero later
 
     // fsc & order
     fsc.row   = nrow;
@@ -367,44 +345,31 @@ void VectorFaspSolver::AssembleMat(const vector<vector<USI>>&     colId,
 
     // nnz
     OCP_USI nnz = 0;
-    for (OCP_USI i = 0; i < dim; i++) {
-        nnz += colId[i].size();
+    for (OCP_USI i = 0; i < mat.dim; i++) {
+        nnz += mat.colId[i].size();
     }
 
     // Asc
-    Asc.ROW = dim;
-    Asc.COL = dim;
-    Asc.nb  = blockdim;
+    Asc.ROW = mat.dim;
+    Asc.COL = mat.dim;
+    Asc.nb  = mat.nb;
     Asc.NNZ = nnz;
 
     // A
-    A.ROW = dim;
-    A.COL = dim;
-    A.nb  = blockdim;
+    A.ROW = mat.dim;
+    A.COL = mat.dim;
+    A.nb  = mat.nb;
     A.NNZ = nnz;
 
-    const USI block_size = blockdim * blockdim;
+    const USI block_size = mat.nb * mat.nb;
     A.IA[0] = 0;
-    for (OCP_USI i = 1; i < dim + 1; i++) {
-        USI nnb_Row = colId[i - 1].size();
+    for (OCP_USI i = 1; i < mat.dim + 1; i++) {
+        USI nnb_Row = mat.colId[i - 1].size();
         A.IA[i]     = A.IA[i - 1] + nnb_Row;
 
-        copy(colId[i - 1].begin(), colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
-        copy(val[i - 1].begin(), val[i - 1].end(), &A.val[A.IA[i - 1] * block_size]);
+        copy(mat.colId[i - 1].begin(), mat.colId[i - 1].end(), &A.JA[A.IA[i - 1]]);
+        copy(mat.val[i - 1].begin(), mat.val[i - 1].end(), &A.val[A.IA[i - 1] * block_size]);
     }
-
-#ifdef DEBUG
-    // check x and b  ----  for test
-    for (int i = 0; i < nrow; i++) {
-        if (!isfinite(b.val[i])) OCP_ABORT("vFasp b is infinite!");
-        if (!isfinite(x.val[i])) OCP_ABORT("vFasp x is infinite!");
-    }
-    // check A ----  for test
-    const OCP_USI len = A.NNZ * blockdim * blockdim;
-    for (int i = 0; i < len; i++) {
-        if (!isfinite(A.val[i])) OCP_ABORT("vFasp A is infinite!");
-    }
-#endif // DEBUG
 }
 
 OCP_INT VectorFaspSolver::Solve()
