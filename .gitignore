@@ -63,3 +63,4 @@ x86/
 build/
 cmake/
 !install-*.sh
+!createdoc.sh
