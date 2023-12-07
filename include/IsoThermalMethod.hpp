@@ -115,6 +115,8 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
+    /// Calculate initial residual
+    void CalRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_TRUE); }
 
 protected:
     /// Allocate memory for reservoir
@@ -208,12 +210,17 @@ protected:
     /// Calculate residual
     void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0) override;
 
-private:
+protected:
     /// Assemble linear system for bulks
     void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const override;
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
     /// Update property for ghost grid
+    void UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl);
+    void CalFlashBoundary(Bulk& bk);
+    void CalKrPcBoundary(Bulk& bk) const;
+    void CalRockBoundary(Bulk& bk) const;
+
 
 protected:
     OCP_DBL global_res0;

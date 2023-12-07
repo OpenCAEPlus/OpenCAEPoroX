@@ -2182,6 +2182,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
                 // exchange solution
                 ExchangeSolutionP(rs);
                 ExchangeSolutionNi(rs);
+                UpdatePropertyBoundary(rs, ctrl);
                 return OCP_TRUE;
             }
         }
@@ -2199,7 +2200,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         // exchange solution
         ExchangeSolutionP(rs);
         ExchangeSolutionNi(rs);
-        UpdateProperty(rs, ctrl);
+        UpdatePropertyBoundary(rs, ctrl);
 
         NR.res.maxRelRes0_V = global_res0;
         IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
@@ -2503,6 +2504,58 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
         }
     } 
     time_cal += timerC.Stop();
+}
+
+
+void IsoT_FIMddm::UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl)
+{
+    CalFlashBoundary(rs.bulk);
+    CalKrPcBoundary(rs.bulk);
+    CalRockBoundary(rs.bulk);
+}
+
+
+void IsoT_FIMddm::CalFlashBoundary(Bulk& bk)
+{
+    const BulkVarSet& bvs = bk.vs;
+
+    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
+
+        bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
+        PassFlashValue(bk, n);
+    }
+}
+
+
+void IsoT_FIMddm::CalKrPcBoundary(Bulk& bk) const
+{
+    BulkVarSet& bvs = bk.vs;
+    const USI& np = bvs.np;
+    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
+        auto SAT = bk.SATm.GetSAT(n);
+
+        const OCP_USI bId = n * np;
+        SAT->CalKrPcFIM(n, &bvs.S[bId]);
+        copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
+        copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
+        copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+        copy(SAT->GetdPcdS().begin(), SAT->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+        for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
+    }
+}
+
+
+void IsoT_FIMddm::CalRockBoundary(Bulk& bk) const
+{
+    auto& bvs = bk.vs;
+    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
+        auto ROCK = bk.ROCKm.GetROCK(n);
+
+        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], BulkContent::rf);
+        bvs.poro[n] = ROCK->GetPoro();
+        bvs.poroP[n] = ROCK->GetdPorodP();
+        bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
+    }
 }
 
 
