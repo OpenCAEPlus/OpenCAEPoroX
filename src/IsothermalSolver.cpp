@@ -20,26 +20,27 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
         switch (methods[i]) {
         case OCPNLMethod::IMPEC:        
             impec.Setup(rs, ctrl);
-            impec.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), 1));
+            impec.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), 1), i);
             break;
         case OCPNLMethod::FIM:
             fim.Setup(rs, ctrl);
-            fim.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
+            fim.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1), i);
             break;
         case OCPNLMethod::AIMc:
             aimc.Setup(rs, ctrl);
-            aimc.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
+            aimc.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1), i);
             break;
         case OCPNLMethod::FIMddm:
             fim_ddm.IsoT_FIM::Setup(rs, ctrl);
-            fim_ddm.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1));
+            fim_ddm.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1), i);
             break;
         default:
             OCP_ABORT("Wrong method type!");
         }
-
     }
-    curMethod = methods[0];
+
+    mainMethod = methods[0];
+    curMethod  = ctrl.SM.InitMethod();
 }
 
 
@@ -172,17 +173,34 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 /// Finish up Newton-Raphson iteration for IMPEC and FIM.
 OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
+    OCP_BOOL conFlag = OCP_FALSE;
+
     switch (curMethod) {
         case OCPNLMethod::IMPEC:
-            return impec.FinishNR(rs);
+            conFlag = impec.FinishNR(rs);
+            break;
         case OCPNLMethod::FIM:
-            return fim.FinishNR(rs, ctrl);
+            conFlag = fim.FinishNR(rs, ctrl);
+            break;
         case OCPNLMethod::AIMc:
-            return aimc.FinishNR(rs, ctrl);
+            conFlag = aimc.FinishNR(rs, ctrl);
+            break;
         case OCPNLMethod::FIMddm:
-            return fim_ddm.FinishNR(rs, ctrl);
+            conFlag = fim_ddm.FinishNR(rs, ctrl);
+            break;
         default:
             OCP_ABORT("Wrong method type!");
+    }
+
+    if (conFlag) {
+        if (curMethod == mainMethod) {
+            return OCP_TRUE;
+        }
+        curMethod = ctrl.SM.SwitchMethod();
+        return OCP_FALSE;
+    }
+    else {
+        return OCP_FALSE;
     }
 }
 

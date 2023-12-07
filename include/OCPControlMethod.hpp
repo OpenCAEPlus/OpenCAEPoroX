@@ -33,22 +33,16 @@ public:
     void SetCtrlParam(const ParamControl& CtrlParam);
     /// Set fast control
     void SetFastControl(const FastControl& fCtrl);
+    /// Initialize calling sequence of methods
+    OCPNLMethod InitMethod() const;
     /// Switch to main method
-    auto SwitchMethod() const;
+    OCPNLMethod SwitchMethod() const;
     /// Output model and method info
     void OutputInfo(const USI& pl) const;
     /// Get model
     auto GetModel() const { return model; }
     /// Get type of the solution method.
     auto GetMethod() const { return method; }
-    /// Get ith methode
-    auto GetMethod(const USI& i) const { return method[i]; }
-    /// Get type of the main method.
-    auto GetMainMethod() const { return mainMethod; }
-    /// Get type of the preconditioner method.
-    auto GetPreMethod() const { return preMethod; }
-    /// Get linear solver file name.
-    auto GetLsFile() const { return lsFile; }
     /// Get ith ls file
     auto GetLsFile(const USI& i) const { return lsFile[i]; }
     /// Get work dir name.
@@ -59,14 +53,12 @@ protected:
     string              workDir;
     /// model: isothermal, thermal
     OCPModel            model{ OCPModel::none };
-    /// Discrete method
+    /// Index of working method
+    mutable USI         wIndex;
+    /// main method is placed in the front following by the preconditioner method sequentially
     vector<OCPNLMethod> method;
     /// File name of linear Solver
     vector<string>      lsFile;
-    /// main method
-    OCPNLMethod         mainMethod{ OCPNLMethod::none };
-    /// pre method
-    OCPNLMethod         preMethod{ OCPNLMethod::none };
 };
 
 #endif /* end if __OCPControlMethod_HEADER__ */

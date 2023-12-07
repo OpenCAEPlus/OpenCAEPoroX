@@ -35,8 +35,6 @@ void ControlMethod::SetCtrlParam(const ParamControl& CtrlParam)
     lsFile  = CtrlParam.lsFile;
 
     if (method.size() == 0)  OCP_ABORT("METHOD is not input correctly!");
-    if (method.size() == 1)  mainMethod = method[0];
-    if (method.size() == 2)  preMethod  = method[1];
 }
 
 
@@ -61,9 +59,27 @@ void ControlMethod::SetFastControl(const FastControl& fCtrl)
 }
 
 
-auto ControlMethod::SwitchMethod() const
+OCPNLMethod ControlMethod::InitMethod() const
 {
+    if (method.size() > 1) {
+        wIndex = 1;
+        return method[wIndex];
+    }
+    else {
+        return method[0];
+    }
+}
 
+
+OCPNLMethod ControlMethod::SwitchMethod() const
+{
+    if (method.size() > 1) {
+        wIndex = (++wIndex) % (method.size());
+        return method[wIndex];
+    }
+    else {
+        return method[0];
+    }
 }
 
 
@@ -87,7 +103,7 @@ void ControlMethod::OutputInfo(const USI& pl) const
 
         cout << "\nDynamic simulation with ";
         cout << "main method ";
-        switch (mainMethod)
+        switch (method[0])
         {
         case OCPNLMethod::FIM:
             cout << "FIM ";
@@ -104,27 +120,29 @@ void ControlMethod::OutputInfo(const USI& pl) const
         default:
             break;
         }
-        if (preMethod == OCPNLMethod::none) {
+        if (method.size() == 1) {
             cout << "!" << endl;
         }
         else {
-            cout << "preconditioned by ";
-            switch (preMethod)
-            {
-            case OCPNLMethod::FIM:
-                cout << "FIM ";
-                break;
-            case OCPNLMethod::IMPEC:
-                cout << "IMPEC ";
-                break;
-            case OCPNLMethod::AIMc:
-                cout << "AIMc ";
-                break;
-            case OCPNLMethod::FIMddm:
-                cout << "FIMddm ";
-                break;
-            default:
-                break;
+            for (USI i = 1; i < method.size(); i++) {
+                cout << "preconditioned by ";
+                switch (method[i])
+                {
+                case OCPNLMethod::FIM:
+                    cout << "FIM ";
+                    break;
+                case OCPNLMethod::IMPEC:
+                    cout << "IMPEC ";
+                    break;
+                case OCPNLMethod::AIMc:
+                    cout << "AIMc ";
+                    break;
+                case OCPNLMethod::FIMddm:
+                    cout << "FIMddm ";
+                    break;
+                default:
+                    break;
+                }
             }
             cout << "!" << endl;
         }

@@ -31,7 +31,7 @@ public:
     virtual void ExchangeSolutionP(Reservoir& rs) const;
     virtual void ExchangeSolutionNi(Reservoir& rs) const;
     void SetPreMethod(const OCP_BOOL& flag) { preM = flag; }
-    void SetWorkLS(const USI& w) { wls = w; }
+    void SetWorkLS(const USI& w, const USI& i);
     USI  GetWorkLS()const { return wls; }
 
 protected:

@@ -11,6 +11,14 @@
 
 #include "ThermalMethod.hpp"
 
+
+void T_FIM::SetWorkLS(const USI& w, const USI& i)
+{
+    wls = w;
+    if (i > 0) preM = OCP_TRUE;
+}
+
+
 void T_FIM::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     AllocateReservoir(rs);
@@ -44,8 +52,6 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
                         const Reservoir& rs,
                         const OCP_DBL&   dt)
 {
-    ls.SetWorkLS(wls);
-
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     ls.CopyRhs(NR.res.resAbs);
@@ -53,8 +59,6 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
-    ls.SetWorkLS(wls);
-
     GetWallTime timer;
 
     // Assemble external linear solver with internal A and b

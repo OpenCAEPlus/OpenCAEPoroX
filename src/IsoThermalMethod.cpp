@@ -114,6 +114,15 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
+
+void IsothermalMethod::SetWorkLS(const USI& w, const USI& i) 
+{
+    wls = w; 
+    if (i > 0) preM = OCP_TRUE;
+}
+
+
+
 ////////////////////////////////////////////
 // IsoT_IMPEC
 ////////////////////////////////////////////
@@ -155,15 +164,12 @@ void IsoT_IMPEC::AssembleMat(LinearSystem&    ls,
                              const Reservoir& rs,
                              const OCP_DBL&   dt) const
 {
-    ls.SetWorkLS(wls);
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
 }
 
 void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
-    ls.SetWorkLS(wls);
-
     GetWallTime timer;
 
     timer.Start();
@@ -740,7 +746,6 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
                            const Reservoir& rs,
                            const OCP_DBL&   dt) const
 {
-    ls.SetWorkLS(wls);
     // Assemble matrix
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
@@ -752,8 +757,6 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
                                  OCPControl&   ctrl)
 {
-    ls.SetWorkLS(wls);
-
     GetWallTime timer;
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
@@ -769,6 +772,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     int status = ls.Solve();
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+
     NR.UpdateIter(abs(status));
 
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
@@ -1520,7 +1524,6 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
                             const Reservoir& rs,
                             const OCP_DBL&   dt) const
 {
-    ls.SetWorkLS(wls);
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
     ls.CopyRhs(NR.res.resAbs);
@@ -1528,8 +1531,6 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
-    ls.SetWorkLS(wls);
-
     GetWallTime timer;
 
     timer.Start();

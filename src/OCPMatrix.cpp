@@ -15,8 +15,11 @@
 void OCPMatrix::Allocate(const Domain& domain, const USI& blockdim)
 {
     SetBlockDim(blockdim);
-    AllocateRowMem(domain);
-    AllocateColMem(domain);
+    if (nb > maxNb) {
+        AllocateRowMem(domain);
+        AllocateColMem(domain);
+    }
+    maxNb = max(nb, maxNb);
 }
 
 

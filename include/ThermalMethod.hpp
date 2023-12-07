@@ -34,7 +34,7 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     void     FinishStep(Reservoir& rs, OCPControl& ctrl);
     const OCPNRsuite& GetNRsuite() const { return NR; }
-    void SetWorkLS(const USI& w) { wls = w; }
+    void SetWorkLS(const USI& w, const USI& i);
     USI  GetWorkLS()const { return wls; }
 
 protected:
@@ -53,10 +53,12 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    /// Newton-Raphson iteration suite
-    OCPNRsuite      NR;
+    /// If use as a preconditioner for other method
+    OCP_BOOL        preM{ OCP_FALSE };
     /// Index of linear solver method
     USI             wls;
+    /// Newton-Raphson iteration suite
+    OCPNRsuite      NR;
 };
 
 #endif /* end if __THERMALMETHOD_HEADER__ */

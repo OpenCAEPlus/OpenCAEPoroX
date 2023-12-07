@@ -86,7 +86,7 @@ public:
 
 protected:
     /// working index of LS
-    USI                   wIndex;  
+    USI                   wIndex{ 0 };
     /// Current workdir.
     string                solveDir; 
     /// domain decomposition information

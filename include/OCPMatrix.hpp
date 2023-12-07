@@ -75,10 +75,13 @@ public:
     void CheckSolution() const;
 
 public:
+    
     /// Dimens of small block matrix.
     USI nb;
     /// Size of small block matrix.
     USI nb2;
+    /// maximum nb, for reusage of matrix
+    USI maxNb{ 0 };
 
     /// Maximal possible dimension of matrix.
     OCP_USI maxDim;
