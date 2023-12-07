@@ -24,12 +24,16 @@ target_sources(
 		  OCP.cpp
 		  OCPBoundary.cpp
 		  OCPControl.cpp
+		  OCPControlMethod.cpp
+		  OCPControlNR.cpp
+		  OCPControlTime.cpp
 		  OCPEoS.cpp
 		  OCPFlow.cpp
 		  OCPFlowMethod.cpp
 		  OCPFlux.cpp
 		  OCPFuncPVT.cpp
 		  OCPFuncSAT.cpp
+		  OCPMatrix.cpp
 		  OCPMiscible.cpp
 		  OCPMixture.cpp
 		  OCPMixtureMethodComp.cpp

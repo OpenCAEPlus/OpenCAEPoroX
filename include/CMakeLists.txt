@@ -10,6 +10,7 @@ target_sources(
 		 BulkConnVarSet.hpp
 		 BulkInitializer.hpp
 		 BulkVarSet.hpp
+		 CMakeLists.txt
 		 CornerGrid.hpp
 		 DenseMat.hpp
 		 Domain.hpp
@@ -27,6 +28,10 @@ target_sources(
 		 OCPBoundary.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
+		 OCPControlFast.hpp
+		 OCPControlMethod.hpp
+		 OCPControlNR.hpp
+		 OCPControlTime.hpp
 		 OCPDataType.hpp
 		 OCPEoS.hpp
 		 OCPFlow.hpp
@@ -36,6 +41,7 @@ target_sources(
 		 OCPFuncPVT.hpp
 		 OCPFuncSAT.hpp
 		 OCPFuncTable.hpp
+		 OCPMatrix.hpp
 		 OCPMiscible.hpp
 		 OCPMixture.hpp
 		 OCPMixtureMethodComp.hpp
