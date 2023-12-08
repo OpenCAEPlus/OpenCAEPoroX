@@ -38,14 +38,20 @@ find "$folder" -type f -name "*.hpp" | while read file; do
         mkdir -p "$doc_dir"
     fi
 
+    done_file="good/$(basename ${file})"
+    if [ -f "$done_file" ]; then
+        echo "Skipping already processed file: $(basename ${file})"
+        continue
+    fi
+
     # Create documentation using bito and save it in document folder
     # file2write="$doc_dir/$(basename "${file%.*}").md"
     file2write="$doc_dir/$(basename ${file})"
     echo "Creating documentation in: " $file2write
     # The below command does not work and gives following error
     # Only "-p" flag is applicable for this command. Remove any additional flags and then try again.
-#    bito -p docprmt.txt -f "$file" >> "$file2write"
-     cat $file | bito -p ./prompts/chinese.txt > $file2write
+    #    bito -p docprmt.txt -f "$file" >> "$file2write"
+    cat $file | bito -p ./prompts/chinese.txt >$file2write
 done
 
 echo "Documentation created in $doc_folder"
