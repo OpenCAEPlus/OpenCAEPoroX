@@ -20,6 +20,7 @@
 using namespace std;
 
 
+/// Type of content within a bulk
 enum class BulkContent : USI
 {
     /// all rock
@@ -29,6 +30,7 @@ enum class BulkContent : USI
 };
 
 
+/// Basic variable set of bulk, which contains all needed variables for a basic simulation
 class BulkVarSet
 {
 
@@ -39,11 +41,11 @@ class BulkVarSet
 public:
     /// Number of bulks
     OCP_USI nb;  
-    /// Number of bulks inside
+    /// Number of interior bulks
     OCP_USI nbI; 
-    /// Number of phase
+    /// Number of phases
     USI     np;
-    /// Number of component
+    /// Number of components
     USI     nc;          
 
 	/////////////////////////////////////////////////////////////////////
@@ -51,11 +53,11 @@ public:
 	/////////////////////////////////////////////////////////////////////
 
 public:
-    /// Size of cell in x-direction
+    /// Size of cell along x-direction
     vector<OCP_DBL>    dx;
-    /// Size of cell in y-direction
+    /// Size of cell along y-direction
     vector<OCP_DBL>    dy;
-    /// Size of cell in z-direction
+    /// Size of cell along z-direction
     vector<OCP_DBL>    dz;
     /// Volume of bulk
     vector<OCP_DBL>    v;
@@ -66,15 +68,15 @@ public:
     vector<OCP_DBL>    ntg;
     /// initial rock porosity(*ntg)
     vector<OCP_DBL>    poroInit;
-    /// rock porosity(* ntg)
+    /// rock porosity(*ntg)
     vector<OCP_DBL>    poro;
     /// pore volume = Vgrid * poro
     vector<OCP_DBL>    rockVp;
-    /// rock permeability along the x direction
+    /// rock permeability along x-direction
     vector<OCP_DBL>    rockKx;
-    /// rock permeability along the y direction
+    /// rock permeability along x-direction
     vector<OCP_DBL>    rockKy;
-    /// rock permeability along the z direction
+    /// rock permeability along x-direction
     vector<OCP_DBL>    rockKz;
     /// sigma factor used in dual porosity matrix-fracture coupling term
     vector<OCP_DBL>    sigma;
@@ -85,13 +87,13 @@ public:
     /// Enthalpy of rock
     vector<OCP_DBL>    Hr;
 
-    /// last poro
+    /// poro at the previous time step
     vector<OCP_DBL>    lporo;   
-    /// last rockVp    
+    /// rockVp at the previous time step     
     vector<OCP_DBL>    lrockVp;
-    /// last vr        
+    /// vr at the previous time step         
     vector<OCP_DBL>    lvr;
-    /// last Hr        
+    /// Hr at the previous time step        
     vector<OCP_DBL>    lHr;    
 
     /// d poro / d P
@@ -105,15 +107,15 @@ public:
     /// dHr / dT
     vector<OCP_DBL>    HrT;
 
-    /// last poroP
+    /// poroP at the previous time step
     vector<OCP_DBL>    lporoP;
-    /// last poroT
+    /// poroT at the previous time step
     vector<OCP_DBL>    lporoT;
-    /// last vrp
+    /// vrp at the previous time step
     vector<OCP_DBL>    lvrP;
-    /// last vrT
+    /// vrT at the previous time step
     vector<OCP_DBL>    lvrT;
-    /// last HrT
+    /// HrT at the previous time step
     vector<OCP_DBL>    lHrT;
 
     /////////////////////////////////////////////////////////////////////
@@ -163,39 +165,39 @@ public:
     /// Enthalpy of phase
     vector<OCP_DBL>     H;
          
-    /// last T
+    /// T at the previous time step
     vector<OCP_DBL>     lT;
-    /// last P          
+    /// P at the previous time step     
     vector<OCP_DBL>     lP;
-    /// last vf         
+    /// vf at the previous time step          
     vector<OCP_DBL>     lvf;
-    /// last Nt         
+    /// Nt at the previous time step        
     vector<OCP_DBL>     lNt;
-    /// last Ni         
+    /// Ni at the previous time step        
     vector<OCP_DBL>     lNi; 
-    /// last phaseExist
+    /// phaseExist at the previous time step
     vector<OCP_BOOL>    lphaseExist;
-    /// last S
+    /// S at the previous time step
     vector<OCP_DBL>     lS;  
-    /// last vj         
+    /// vj at the previous time step        
     vector<OCP_DBL>     lvj;
-    /// last xij        
+    /// xij at the previous time step       
     vector<OCP_DBL>     lxij; 
-    /// last xi         
+    /// xi at the previous time step        
     vector<OCP_DBL>     lxi; 
-    /// last rho        
+    /// rho at the previous time step       
     vector<OCP_DBL>     lrho;        
-    /// last mu
+    /// mu at the previous time step
     vector<OCP_DBL>     lmu; 
-    /// last kr         
+    /// kr at the previous time step        
     vector<OCP_DBL>     lkr;
-    /// last Pc         
+    /// Pc at the previous time step        
     vector<OCP_DBL>     lPc;
-    /// last Pj         
+    /// Pj at the previous time step        
     vector<OCP_DBL>     lPj; 
-    /// last Uf          
+    /// Uf at the previous time step         
     vector<OCP_DBL>     lUf;
-    /// last H          
+    /// H at the previous time step         
     vector<OCP_DBL>     lH;       
 
     /// d vf / d P
@@ -237,50 +239,50 @@ public:
     /// d H / d xij     
     vector<OCP_DBL>     Hx;    
                         
-    /// last vfP        
+    /// vfP at the previous time step         
     vector<OCP_DBL>     lvfP;
-    /// last vfT        
+    /// vfT at the previous time step        
     vector<OCP_DBL>     lvfT;
-    /// last vfi        
+    /// vfi at the previous time step        
     vector<OCP_DBL>     lvfi;
-    /// last xiP        
+    /// xiP at the previous time step        
     vector<OCP_DBL>     lxiP;
-    /// last xiT        
+    /// xiT at the previous time step        
     vector<OCP_DBL>     lxiT;
-    /// last xix        
+    /// xix at the previous time step        
     vector<OCP_DBL>     lxix;
-    /// last rhoP       
+    /// rhoP at the previous time step       
     vector<OCP_DBL>     lrhoP;
-    /// last rhoT       
+    /// rhoT at the previous time step       
     vector<OCP_DBL>     lrhoT; 
-    /// last rhox       
+    /// rhox at the previous time step       
     vector<OCP_DBL>     lrhox;    
-    /// last muP        
+    /// muP at the previous time step        
     vector<OCP_DBL>     lmuP; 
-    /// last muT        
+    /// muT at the previous time step        
     vector<OCP_DBL>     lmuT; 
-    /// last mux        
+    /// mux at the previous time step        
     vector<OCP_DBL>     lmux; 
-    /// last dPcdS      
+    /// dPcdS at the previous time step     
     vector<OCP_DBL>     ldPcdS;
-    /// last dKrdS      
+    /// dKrdS at the previous time step       
     vector<OCP_DBL>     ldKrdS; 
-    /// last UfP        
+    /// UfP at the previous time step        
     vector<OCP_DBL>     lUfP;
-    /// last UfT        
+    /// UfT at the previous time step        
     vector<OCP_DBL>     lUfT;
-    /// last Ufi        
+    /// Ufi at the previous time step        
     vector<OCP_DBL>     lUfi;
-    /// last HT      
+    /// HT at the previous time step      
     vector<OCP_DBL>     lHT; 
-    /// last Hx         
+    /// Hx at the previous time step         
     vector<OCP_DBL>     lHx; 
 
     /// length of dSec_dPri.
     USI                 lendSdP;
     /// d Secondary variable / d Primary variable.
     vector<OCP_DBL>     dSec_dPri;  
-    /// last dSec_dPri
+    /// dSec_dPri at the previous time step 
     vector<OCP_DBL>     ldSec_dPri;    
    
     /// content type of bulk, all rock, rock and fluid
