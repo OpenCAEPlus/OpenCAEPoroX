@@ -37,19 +37,24 @@ class OCP_PVTW : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVTW() = default;
+	/// Setup PVTW table functions
 	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoWin, const OCP_DBL& stdVwin) {
 		OCPFuncTable::Setup(src);
 		stdRhoW = stdRhoWin;
 		stdVw   = stdVwin;
 	}
-
+	/// Calculate the molar density of water phase
 	OCP_DBL CalXiW(const OCP_DBL& P) const { return 1 / CONV1 / (CalBw(P) * stdVw);}
+	/// Calculate the mass density of water phase
 	OCP_DBL CalRhoW(const OCP_DBL& P) const { return stdRhoW / CalBw(P); }
+	/// Calculate the molar density, mass density, viscosity and corresponding derivatives of water phase
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
 		               OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 
 protected:
+	/// Calculate formation volume factor of water phase 
 	OCP_DBL CalBw(const OCP_DBL& P) const;
+	/// Calculate formation volume factor, viscosity and corresponding derivatives of water phase 
 	void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 	
 protected:
@@ -82,6 +87,7 @@ class OCP_PVCO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVCO() = default;
+	/// Setup PVCO table functions
 	void Setup(const vector<vector<OCP_DBL>>& src, 
 		const OCP_DBL& stdRhoOin, const OCP_DBL& stdRhoGin,
 		const OCP_DBL& stdVoin,   const OCP_DBL& stdVgin) {
@@ -91,23 +97,24 @@ public:
 		stdVo   = stdVoin;
 		stdVg   = stdVgin;
 	}
-	
+	/// Calculate the mass density of oil phase
 	OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const;
+	/// Calculate the molar density of oil phase
 	OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) const;
-	/// For saturated oil
+	/// Calculate the mass density, molar density, viscosity, gas-oil ratio and corresponding derivatives of saturated oil phase
 	void CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, OCP_DBL& rs,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP) const;
-	/// For unsaturated oil
+	/// Calculate the mass density, molar density, viscosity and corresponding derivatives of unsaturated oil phase
 	void CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs) const;
-	/// For saturated oil
+	/// Calculate the gas-oil ration saturated oil phase
 	OCP_DBL CalRs(const OCP_DBL& P) const { return table.Eval(0, P, 1); }	
 
 protected:
-	/// For saturated oil
+	/// Calculate the gas-oil ratio, formation volume factor, viscosity and corresponding derivatives of saturated oil phase
 	void CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
 		OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP) const;
-	/// For unsaturated oil
+	/// Calculate the gas-oil ratio, formation volume factor, viscosity and corresponding derivatives of unsaturated oil phase
 	void CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, 
 					   OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs) const;
 
@@ -138,18 +145,24 @@ class OCP_PVDG : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDG() = default;
+	/// Setup PVDG table functions
 	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoGin, const OCP_DBL& stdVgin) {
 		OCPFuncTable::Setup(src);
 		stdRhoG = stdRhoGin;
 		stdVg   = stdVgin;
 	}
+	/// Calculate the molar density of gas phase
 	OCP_DBL CalXiG(const OCP_DBL& P) const { return 1 / CONV1 / (CalBg(P) * stdVg); }
+	/// Calculate the mass density of gas phase
 	OCP_DBL CalRhoG(const OCP_DBL& P) const { return CONV3 * stdRhoG / CalBg(P);}
+	/// Calculate the mass density, molar density, viscosity and corresponding derivatives of gas phase
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 					   OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 
 protected:
+	/// Calculate formation volume factor of gas phase
 	OCP_DBL CalBg(const OCP_DBL& P) const;
+	/// Calculate formation volume factor, viscosity and corresponding derivatives of gas phase 
 	void CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 
 protected:
@@ -175,18 +188,24 @@ class OCP_PVDO : public OCPFuncTable
 public:
 	/// default constructor
 	OCP_PVDO() = default;
+	/// Setup PVDO table functions
 	virtual void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) {
 		OCPFuncTable::Setup(src);
 		stdRhoO = stdRhoOin;
 		stdVo   = stdVoin;
 	}
+	/// Calculate the molar density of oil phase
 	virtual OCP_DBL CalXiO(const OCP_DBL& P) const { return 1 / CONV1 / (CalBo(P) * stdVo); }
+	/// Calculate the mass density of oil phase
 	virtual OCP_DBL CalRhoO(const OCP_DBL& P) const { return stdRhoO / CalBo(P); }
+	/// Calculate the mass density, molar density, viscosity and corresponding derivatives of oil phase
 	virtual void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 	
 protected:
+	/// Calculate formation volume factor of oil phase
 	OCP_DBL CalBo(const OCP_DBL& P) const;
+	/// Calculate formation volume factor, viscosity and corresponding derivatives of oil phase 
 	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
 
 protected:
@@ -214,6 +233,7 @@ class OCP_PVCDO : public OCP_PVDO
 public:
 	/// default constructor
 	OCP_PVCDO() = default;
+	/// Setup PVCDO table functions
 	void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) override {
 		Pref  = src[0][0];
 		Bref  = src[1][0];
@@ -223,13 +243,18 @@ public:
 		stdRhoO = stdRhoOin;
 		stdVo   = stdVoin;
 	}
+	/// Calculate the molar density of oil phase
 	OCP_DBL CalXiO(const OCP_DBL& P) const override { return 1 / CONV1 / (CalBo(P) * stdVo); }
+	/// Calculate the mass density of oil phase
 	OCP_DBL CalRhoO(const OCP_DBL& P) const override { return stdRhoO / CalBo(P); }
+	/// Calculate the mass density, molar density, viscosity and corresponding derivatives of oil phase
 	void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
 		OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const override;
 
 protected:
+	/// Calculate formation volume factor of oil phase
 	OCP_DBL CalBo(const OCP_DBL& P) const;
+	/// Calculate formation volume factor, viscosity and corresponding derivatives of oil phase 
 	void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
 
 protected:
@@ -304,6 +329,7 @@ protected:
 // Viscosity Calculation
 /////////////////////////////////////////////////////
 
+/// Params for viscosity calculation
 class ViscosityParams
 {
 public:
@@ -337,7 +363,9 @@ class ViscosityMethod
 {
 public:
 	ViscosityMethod() = default;
+	/// Calculate viscosity
 	virtual OCP_DBL CalViscosity(const ViscosityParams& vp) = 0;
+	/// Calculate viscosity and derivatives
 	virtual OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) = 0;
 
 protected:
@@ -358,7 +386,9 @@ class ViscosityMethod01 : public ViscosityMethod
 {
 public:
 	ViscosityMethod01(const Table2& tab);
+	/// Calculate viscosity
 	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	/// Calculate viscosity and derivatives
 	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
@@ -373,7 +403,9 @@ class ViscosityMethod02 : public ViscosityMethod
 {
 public:
 	ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP_DBL>& bv);
+	/// Calculate viscosity
 	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	/// Calculate viscosity and derivatives
 	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
@@ -388,7 +420,9 @@ class ViscosityMethod03 : public ViscosityMethod
 {
 public:
 	ViscosityMethod03(const ComponentParam& param, const USI& tarId);
+	/// Calculate viscosity
 	OCP_DBL CalViscosity(const ViscosityParams& vp) override;
+	/// Calculate viscosity and derivatives
 	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
@@ -421,14 +455,18 @@ class ViscosityCalculation
 {
 public:
 	ViscosityCalculation() = default;
+	/// Setup calculations
 	void Setup(const ComponentParam& param, const USI& tarId);
+	/// Calculate viscosity
 	OCP_DBL CalViscosity(const ViscosityParams& vp) {
 		return vM->CalViscosity(vp); 
 	}
+	/// Calculate viscosity and derivatives
 	OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) {
 		return vM->CalViscosity(vp, muP, muT, mux);
 	}
 protected:
+	/// viscosity calculation method
 	ViscosityMethod* vM;
 };
 
@@ -442,7 +480,9 @@ class EnthalpyMethod
 {
 public:
 	EnthalpyMethod() = default;
+	/// Calculate Enthalpy
 	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const = 0;
+	/// Calculate Enthalpy and derivatives
 	virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const = 0;
 };
 
@@ -453,7 +493,9 @@ class EnthalpyMethod01 : public EnthalpyMethod
 public:
 	EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
 				     const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in);
+	/// Calculate Enthalpy
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
+	/// Calculate Enthalpy and derivatives
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
@@ -481,7 +523,9 @@ public:
 		const vector<OCP_DBL>& cpg3in, const vector<OCP_DBL>& cpg4in, 
 		const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin, 
 		const vector<OCP_DBL>& evin);
+	/// Calculate Enthalpy
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
+	/// Calculate Enthalpy and derivatives
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
@@ -491,13 +535,13 @@ protected:
 	vector<OCP_DBL> Tcrit;
 	/// num of components
 	USI             nc;
-	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F
+	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol/F
 	vector<OCP_DBL> cpg1;
-	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^2
+	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol/F^2
 	vector<OCP_DBL> cpg2;
-	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^3
+	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol/F^3
 	vector<OCP_DBL> cpg3;
-	/// Coefficients in the component liquid enthalpy calculations, Btu/lbmol/F^4
+	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol/F^4
 	vector<OCP_DBL> cpg4;
 	/// Coefficients in the component gas enthalpy calculations, Btu/lbmol
 	vector<OCP_DBL> hvapr;
@@ -512,9 +556,12 @@ class EnthalpyCalculation
 {
 public:
 	void Setup(const ComponentParam& param, const USI& tarId);
+	/// Calculate Enthalpy
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const { return eM->CalEnthalpy(T, zi); }
+	/// Calculate Enthalpy and derivatives
 	OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const { return eM->CalEnthalpy(T, zi, HT, Hz); }
 protected:
+	/// method for enthalpy calculation
 	EnthalpyMethod* eM;
 };
 
