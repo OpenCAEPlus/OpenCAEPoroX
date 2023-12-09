@@ -24,7 +24,7 @@ using namespace std;
 // SWOF
 /////////////////////////////////////////////////////
 
-
+/// Saturation table function SWOF, used to calculate oil and water's permeability and capillary
 class OCP_SWOF : public OCPFuncTable
 {
 	/// 0th column: The water saturation (Sw)
@@ -81,6 +81,8 @@ public:
 // SGOF
 /////////////////////////////////////////////////////
 
+
+/// Saturation table function SGOF, used to calculate oil and gas's permeability and capillary
 class OCP_SGOF : public OCPFuncTable
 {
 	/// 0th column: The gas saturation (Sg)
@@ -128,6 +130,7 @@ public:
 // SOF3
 /////////////////////////////////////////////////////
 
+/// Saturation table function SGOF, used to calculate oil, gas and water's permeability
 class OCP_SOF3 : public OCPFuncTable
 {
 	/// 0th column: The oil saturation (So)
@@ -161,6 +164,7 @@ public:
 // SGFN
 /////////////////////////////////////////////////////
 
+/// Saturation table function SGFN, used to calculate oil and gas's permeability and capillary pressure
 class OCP_SGFN : public OCPFuncTable
 {
 	/// 0th column: The gas saturation (Sg)
@@ -168,8 +172,6 @@ class OCP_SGFN : public OCPFuncTable
 	/// 3th column: The corresponding oil-gas capillary pressure (Pcgo = Pg - Po)
 public:
 	OCP_SGFN() = default;
-	/// Return the oil relative permeability in the presence of connate water only
-	OCP_DBL  GetKrocw() const { return table.GetCol(1).back(); }
 	/// Return corresponding Sg with Pcgo
 	OCP_DBL  CalSg(const OCP_DBL& Pcgo) const { return table.Eval(2, Pcgo, 0); }
 	/// Return corresponding Pcgo with Sg
@@ -183,7 +185,7 @@ public:
 		krg  = data[1];
 		Pcgo = data[2];
 	}
-	/// /// Return corresponding Krg, Pcgo and derivatives with Sg 
+	/// Return corresponding Krg, Pcgo and derivatives with Sg 
 	void     CalKrgPcgoDer(const OCP_DBL& Sg, OCP_DBL& krg, OCP_DBL& Pcgo,
 		OCP_DBL& dKrgdSg, OCP_DBL& dPcgodSg) const {
 		table.Eval_All(0, Sg, data, cdata);
@@ -199,6 +201,8 @@ public:
 // SWFN
 /////////////////////////////////////////////////////
 
+
+/// Saturation table function SGFN, used to calculate oil and water's permeability and capillary pressure
 class OCP_SWFN : public OCPFuncTable
 {
 	/// 0th column: The water saturation (Sw)
@@ -227,7 +231,7 @@ public:
 		krw  = data[1];
 		Pcwo = -data[2];
 	}
-	/// /// Return corresponding Krw, Pcwo and derivatives with Sw 
+	/// Return corresponding Krw, Pcwo and derivatives with Sw 
 	void     CalKrwPcwoDer(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& Pcwo,
 		OCP_DBL& dKrwdSw, OCP_DBL& dPcwodSw) const {
 		table.Eval_All(0, Sw, data, cdata);
@@ -298,7 +302,9 @@ class OCP3POilPerMethod01 : public OCP3POilPerMethod
 {
 public:
 	OCP3POilPerMethod01() = default;
+	/// Calculate oil relative permeability 
 	void CalOilPer(OCPFlowVarSet& vs) override;
+	/// Calculate oil relative permeability and derivatives
 	void CalOilPerDer(OCPFlowVarSet& vs) override;
 };
 
@@ -313,7 +319,9 @@ class OCP3POILPerMethod02 : public OCP3POilPerMethod
 {
 public:
 	OCP3POILPerMethod02() = default;
+	/// Calculate oil relative permeability
 	void CalOilPer(OCPFlowVarSet& vs) override;
+	/// Calculate oil relative permeability and derivatives
 	void CalOilPerDer(OCPFlowVarSet& vs) override;
 };
 
@@ -321,19 +329,19 @@ public:
 class OCP3POilPerCalculation
 {
 public:
+	/// Setup calculations
 	void Setup(const USI& i) {
 		if (i == 1) pM = new OCP3POilPerMethod01();
 		else        pM = new OCP3POILPerMethod02();
 	}
+	/// Calculate oil relative permeability
 	void CalOilPer(OCPFlowVarSet& vs) { pM->CalOilPer(vs); }
+	/// Calculate oil relative permeability and derivatives
 	void CalOilPerDer(OCPFlowVarSet& vs) { pM->CalOilPerDer(vs); }
 
 protected:
 	OCP3POilPerMethod* pM;
 };
-
-
-
 
 
 #endif // __OCPFUNCSAT_HEADER__
