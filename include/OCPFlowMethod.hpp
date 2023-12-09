@@ -19,6 +19,8 @@
 using namespace std;
 
 
+/// Used to calculate the properties of flow, for example, phase relative permeability,
+/// capillary pressure and some derived properties
 class OCPFlowMethod
 {
 public:
@@ -53,7 +55,7 @@ public:
 /////////////////////////////////////////////////////
 
 
-/// Use SGOF, SWOF
+/// Use SGOF, SWOF to calculate phase flow properties in oil-gas-water situation
 class OCPFlowMethod_OGW01 : public OCPFlowMethod
 {
 public:
@@ -73,15 +75,19 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
+    /// generate table of water saturation vs. Pcgw
     void Generate_SWPCWG();
 
 protected:
+    /// table SGOF
     OCP_SGOF                SGOF;
+    /// table SWOF
     OCP_SWOF                SWOF;
-    /// auxiliary table: saturation of water vs. Pcgw
+    /// table SWPCGW(auxiliary table: water saturation vs. Pcgw)
     OCPTable                SWPCGW;
 
 protected:
+    /// calculations for oil relative permeability in oil-gas-water flow situation
     OCP3POilPerCalculation  opC;
 };
 
@@ -91,7 +97,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use SOF3, SGFN, SWFN
+/// Use SOF3, SGFN, SWFN to calculate phase flow properties in oil-gas-water situation
 class OCPFlowMethod_OGW02 : public OCPFlowMethod
 {
 public:
@@ -114,17 +120,22 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGFN.CalKrg(Sg, dKrgdSg); }
 
 protected:
+    /// generate table of water saturation vs. Pcgw
     void Generate_SWPCWG();
 
 protected:
+    /// table SOF3
     OCP_SOF3            SOF3;
+    /// table SGFN
     OCP_SGFN            SGFN;
+    /// table SWPCGW(auxiliary table: water saturation vs. Pcgw)
     OCP_SWFN            SWFN;
     /// auxiliary table: saturation of water vs. Pcgw
     OCPTable            SWPCGW; 
 
 
 protected:
+    /// calculations for oil relative permeability in oil-gas-water flow situation
     OCP3POilPerCalculation  opC;
 };
 
@@ -134,7 +145,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use SWOF
+/// Use SWOF to calculate phase flow properties in oil-water situation
 class OCPFlowMethod_OW01 : public OCPFlowMethod
 {
 public:
@@ -152,6 +163,7 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
 
 protected:
+    /// table SWOF
     OCP_SWOF            SWOF;
 };
 
@@ -161,7 +173,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use SGOF
+/// Use SGOF to calculate phase flow properties in oil-gas situation
 class OCPFlowMethod_OG01 : public OCPFlowMethod
 {
 public:
@@ -179,6 +191,7 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
+    /// table SGOF
     OCP_SGOF            SGOF;
 };
 
@@ -188,7 +201,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use Brooks-Corey type model
+/// Use Brooks-Corey type model to calculate phase flow properties in gas-water situation
 class OCPFlowMethod_GW01 : public OCPFlowMethod
 {
 public:
@@ -209,6 +222,7 @@ public:
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
 
 protected:
+    /// Brooks-Corey type model
     BrooksCorey   bc;
 };
 
