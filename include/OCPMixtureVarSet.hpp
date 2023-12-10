@@ -18,7 +18,7 @@
 
 using namespace std;
 
-
+/// mixture types
 enum class OCPMixtureType : USI
 {
     /// single phase
@@ -39,7 +39,7 @@ enum class OCPMixtureType : USI
     THERMALK_OW
 };
 
-
+/// phase types
 enum class PhaseType : USI
 {
     /// oil phase
@@ -56,6 +56,7 @@ class OCPMixtureVarSet
 {
 public:
     OCPMixtureVarSet() = default;
+    /// Init mixture varset
     void Init(const OCPMixtureType& mixType, const USI& numPhase, const USI& numCom) {
         mixtureType = mixType;
         np = numPhase;
@@ -155,6 +156,7 @@ public:
     }
 
 public:
+    /// get molar fraction of phase j
     const OCP_DBL* GetXj(const USI& j) const { return &x[j * nc]; }
 
 public:
@@ -163,7 +165,7 @@ public:
     // Index of phases
     /// oil, gas, water
     INT                     o, g, w;
-    /// liquid              
+    /// liquid index             
     vector<INT>             l;
 
     /// num of phase, components
