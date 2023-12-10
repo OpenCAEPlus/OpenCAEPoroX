@@ -68,7 +68,7 @@ public:
 /////////////////////////////////////////////////////
 
 
-/// Use PVDO and PVTW
+/// Use PVDO and PVTW to calculate oil-water mixture property
 // Note that Vo,std, Vw,std are assumed to be 1
 class OCPMixtureMethodK_OW01 : public OCPMixtureMethodK
 {
@@ -167,7 +167,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use PVDO and PVTW
+/// Use PVDO and PVTW to calculate oil-gas-water mixture property
 // Note that Vo,std, Vg,std, Vw,std are assumed to be 1
 class OCPMixtureMethodK_OGW01 : public OCPMixtureMethodK
 {
@@ -219,7 +219,7 @@ protected:
 /////////////////////////////////////////////////////
 
 
-/// Use PVTCO2 and PVTH2O
+/// Use PVTCO2 and PVTH2O to calculate gas-water mixture property
 /// Here, molar density(xi) is the mass density(rho)
 class OCPMixtureMethodK_GW01 : public OCPMixtureMethodK
 {
