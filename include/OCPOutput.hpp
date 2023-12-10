@@ -50,6 +50,7 @@ public:
         K = src.K;
         return *this;
     }
+    /// index along x,y,z direction
     USI I, J, K;
 };
 
@@ -70,10 +71,12 @@ public:
         obj.assign(src.obj.begin(), src.obj.end());
         return *this;
     }
+    /// if use
     OCP_BOOL  activity{OCP_FALSE};
+    /// object under current item
     vector<T> obj;
-    vector<USI>
-        index; ///< Records the index of bulk or well, whose properties will be printed
+    /// Records the index of bulk or well, whose properties will be printed
+    vector<USI> index; 
 };
 
 
@@ -223,31 +226,31 @@ public:
     void Check(const Reservoir& rs);
 
 private:
-    OCP_BOOL PRE{OCP_FALSE};  ///< Pressure of grids.
-    OCP_BOOL PGAS{OCP_FALSE}; ///< Gas pressure of grids.
-    OCP_BOOL PWAT{OCP_FALSE}; ///< Water pressure of grids.
-    OCP_BOOL SOIL{OCP_FALSE}; ///< Oil saturation of grids.
-    OCP_BOOL SGAS{OCP_FALSE}; ///< Gas saturation of grids.
-    OCP_BOOL SWAT{OCP_FALSE}; ///< Water saturation of grids.
-    OCP_BOOL DENO{OCP_FALSE}; ///< Oil density of grids.
-    OCP_BOOL DENG{OCP_FALSE}; ///< Gas density of grids.
-    OCP_BOOL DENW{OCP_FALSE}; ///< Water density of grids.
-    OCP_BOOL KRO{OCP_FALSE};  ///< Oil relative permeability of grids.
-    OCP_BOOL KRG{OCP_FALSE};  ///< Gas relative permeability of grids.
-    OCP_BOOL KRW{OCP_FALSE};  ///< Water relative permeability of grids.
-    OCP_BOOL BOIL{OCP_FALSE}; ///< Oil reservoir molar densities of grids.
-    OCP_BOOL BGAS{OCP_FALSE}; ///< Gas reservoir molar densities of grids.
-    OCP_BOOL BWAT{OCP_FALSE}; ///< Water reservoir molar densities of grids.
-    OCP_BOOL VOIL{OCP_FALSE}; ///< Oil viscosity of grids.
-    OCP_BOOL VGAS{OCP_FALSE}; ///< Gas viscosity of grids.
-    OCP_BOOL VWAT{OCP_FALSE}; ///< Water viscosity of grids.
-    OCP_BOOL XMF{OCP_FALSE};  ///< liquid component mole fractions.
-    OCP_BOOL YMF{OCP_FALSE};  ///< gas component mole fractions.
-    OCP_BOOL PCW{OCP_FALSE};  ///< capillary pressure: Po - Pw.
-    OCP_BOOL CO2{ OCP_FALSE };///< CO2 Concentration
+    OCP_BOOL PRE{OCP_FALSE};      ///< Pressure of grids.
+    OCP_BOOL PGAS{OCP_FALSE};     ///< Gas pressure of grids.
+    OCP_BOOL PWAT{OCP_FALSE};     ///< Water pressure of grids.
+    OCP_BOOL SOIL{OCP_FALSE};     ///< Oil saturation of grids.
+    OCP_BOOL SGAS{OCP_FALSE};     ///< Gas saturation of grids.
+    OCP_BOOL SWAT{OCP_FALSE};     ///< Water saturation of grids.
+    OCP_BOOL DENO{OCP_FALSE};     ///< Oil density of grids.
+    OCP_BOOL DENG{OCP_FALSE};     ///< Gas density of grids.
+    OCP_BOOL DENW{OCP_FALSE};     ///< Water density of grids.
+    OCP_BOOL KRO{OCP_FALSE};      ///< Oil relative permeability of grids.
+    OCP_BOOL KRG{OCP_FALSE};      ///< Gas relative permeability of grids.
+    OCP_BOOL KRW{OCP_FALSE};      ///< Water relative permeability of grids.
+    OCP_BOOL BOIL{OCP_FALSE};     ///< Oil reservoir molar densities of grids.
+    OCP_BOOL BGAS{OCP_FALSE};     ///< Gas reservoir molar densities of grids.
+    OCP_BOOL BWAT{OCP_FALSE};     ///< Water reservoir molar densities of grids.
+    OCP_BOOL VOIL{OCP_FALSE};     ///< Oil viscosity of grids.
+    OCP_BOOL VGAS{OCP_FALSE};     ///< Gas viscosity of grids.
+    OCP_BOOL VWAT{OCP_FALSE};     ///< Water viscosity of grids.
+    OCP_BOOL XMF{OCP_FALSE};      ///< liquid component mole fractions.
+    OCP_BOOL YMF{OCP_FALSE};      ///< gas component mole fractions.
+    OCP_BOOL PCW{OCP_FALSE};      ///< capillary pressure: Po - Pw.
+    OCP_BOOL CO2{ OCP_FALSE };    ///< CO2 Concentration in water phase
     OCP_BOOL SATNUM{ OCP_FALSE }; ///< SAT region
 
-    USI             bgpnum;   ///< num of Basic grid information to be printed
+    USI             bgpnum;       ///< num of Basic grid information to be printed
 };
 
 /// Collect more detailed information of each time step.
@@ -280,10 +283,12 @@ public:
     void PrintVTK(const Reservoir& rs) const;
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
+
+protected:
     void PostProcessP(const string& dir, const string& filename, const OCP_INT& numproc) const;
     void PostProcessS(const string& dir, const string& filename) const;
 
-private:
+protected:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk
     BasicGridProperty bgp;               ///< Basic grid information
     Output4Vtk        out4vtk;           ///< Output for vtk
@@ -297,7 +302,7 @@ private:
 //  Note: The most commonly used is the summary file, which usually gives the
 //  information of bulks and wells in each time step, such as average pressure, oil
 //  production rate of wells. If other information at critical dates is of interest, you
-//  can chose the PRT file (TODO). Also, some infomation will be printed on the screen
+//  can chose the PRT/VTK file. Also, some infomation will be printed on the screen
 //  at the critical dates to make sure the program is at the right way.
 class OCPOutput
 {
