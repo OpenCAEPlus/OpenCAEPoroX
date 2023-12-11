@@ -287,12 +287,16 @@ public:
 class Miscstr
 {
 public:
-    // vector<OCP_DBL> surTenRef;
+    /// if use
     OCP_BOOL        ifMiscible{ OCP_FALSE };
-    OCP_DBL         surTenRef{ -1 };  ///< reference surface tension - flow is immiscible when the surface tension is greater than or equal to this value.
-    OCP_DBL         surTenEpt{ -1 };  ///< maximum surface tension expected, it should be greater than surTenRef.
-    OCP_DBL         surTenPc{ -1 };   ///< maximum surface tension used to scale the input capillary pressure curves.
-    OCP_DBL         surTenExp{ 0.25 };  ///< exponent of the surface tension ratio
+    /// reference surface tension - flow is immiscible when the surface tension is greater than or equal to this value.
+    OCP_DBL         surTenRef{ -1 };
+    /// maximum surface tension expected, it should be greater than surTenRef.
+    OCP_DBL         surTenEpt{ -1 };  
+    /// maximum surface tension used to scale the input capillary pressure curves.
+    OCP_DBL         surTenPc{ -1 }; 
+    /// exponent of the surface tension ratio
+    OCP_DBL         surTenExp{ 0.25 };  
 };
 
 
