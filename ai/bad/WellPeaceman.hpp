@@ -21,219 +21,154 @@
 
 using namespace std;
 
-/// Peaceman Well Model class 
+/// Peaceman井模型模块
 PeacemanWell : public Well{
 public:
-    /*! \brief Input the param of perforations.
-     *  \param well The well parameters.
-     *  \param domain The domain parameters.
-     *  \param wId The well ID.
-     */
+    /// 输入射孔信息
     void InputPerfo(const WellParam& well, const Domain& domain, const USI& wId) override;
 
-    /*! \brief Setup the well after Grid and Bulk finish setup.
-     *  \param bk The bulk parameters.
-     *  \param sols The vector of solvent parameters.
-     */
+    /// 组装井
     void Setup(const Bulk& bk, const vector<SolventINJ>& sols) override;
     
-    /*! \brief Initialize Well Pressure.
-     *  \param bk The bulk parameters.
-     */
+    /// 初始化井压力
     void InitWellP(const Bulk& bk) override;
 
-    /*! \brief Check if well operation mode would be changed.
-     *  \param bk The bulk parameters.
-     */
+    /// 检查井控制模式
     void CheckOptMode(const Bulk& bk) override;
 
-    /*! \brief Calculate Flux and initialize values which will not be changed during this time step.
-     *  \param bk The bulk parameters.
-     */
+    /// 时间步开始计算井流量
     void CalFluxInit(const Bulk& bk) override;
 
-    /*! \brief Calculate Flux.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算井流量
     void CalFlux(const Bulk& bk) override;
 
-    /*! \brief Check if abnormal Pressure occurs.
-     *  \param bk The bulk parameters.
-     *  \return The reservoir state.
-     */
+    /// 检查井压力
     ReservoirState CheckP(const Bulk& bk) override;
 
-    /*! \brief Calculate flow rate of moles of phases for injection well and production well.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// 计算产量注入量
     void CalIPRate(const Bulk& bk, const OCP_DBL& dt) override;
 
-    /*! \brief Calculate max change of well pressure between two time step.
-     *  \return The max change of well pressure.
-     */
+    /// 计算时间步内最大变化
     OCP_DBL CalMaxChangeTime() const override;
 
-    /*! \brief Calculate max change of well pressure between two NR step.
-     *  \return The max change of well pressure.
-     */
+    /// 计算牛顿步内最大变化
     OCP_DBL CalMaxChangeNR() override;
 
-    /*! \brief Reset to last time step.
-     *  \param bk The bulk parameters.
-     */
+    /// 重置为上一个时间步井状态
     void ResetToLastTimeStep(const Bulk& bk) override;
 
-    /*! \brief Update last time step.
-     */
+    /// 保存当前时间步井状态
     void UpdateLastTimeStep() override;
 
 protected:
-    /*! \brief Calculate Well Index with Peaceman model.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算井指数
     void CalWI(const Bulk& bk);
 
-    /*! \brief Calculate transmissibility for each phase in perforations.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算井传导率
     void CalTrans(const Bulk& bk);
 
-    /*! \brief Calculate the flux for each perforations.
-     *  \param bk The bulk parameters.
-     *  \param ReCalXi The boolean value indicating if Xi needs to be recalculated.
-     */
+    /// 计算井流量
     void CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi);
 
-    /*! \brief Calculate flow rate of moles of phases for injection well with maxBHP.
-     *  \param bk The bulk parameters.
-     *  \return The flow rate of moles of phases for injection well.
-     */
+    /// 计算最大注入速率
     OCP_DBL CalInjRateMaxBHP(const Bulk& bk);
 
-    /*! \brief Calculate flow rate of moles of phases for production well with minBHP.
-     *  \param bk The bulk parameters.
-     *  \return The flow rate of moles of phases for production well.
-     */
+    /// 计算最大注入速率
     OCP_DBL CalProdRateMinBHP(const Bulk& bk);
 
-    /*! \brief Calculate flow rate of moles of phases for injection well with calculated qi_lbmol.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// 计算注入流量
     void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
 
-    /*! \brief Calculate flow rate of moles of phases for production well with calculated qi_lbmol.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// 计算生产流量
     void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
 
-    /*! \brief Check if cross flow happens.
-     *  \param bk The bulk parameters.
-     *  \return The reservoir state.
-     */
+    /// 检查交叉流
     ReservoirState CheckCrossFlow(const Bulk& bk);
 
-    /*! \brief Calculate the production weight.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算生产注入因子
     void CalFactor(const Bulk& bk) const;
 
-    /*! \brief Calculate pressure difference between well and perforations.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算射孔压差
     void CaldG(const Bulk& bk);
 
-    /*! \brief Calculate pressure difference between well and perforations for Injection.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算注入井射孔压差
     void CalInjdG(const Bulk& bk);
 
-    /*! \brief Calculate pressure difference between well and perforations for Production.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算生产井射孔压差
     void CalProddG(const Bulk& bk);
 
-    /*! \brief Calculate pressure difference between well and perforations for Production.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算生产井射孔压差方法1
     void CalProddG01(const Bulk& bk);
 
-    /*! \brief Calculate pressure difference between well and perforations for Production.
-     *  \param bk The bulk parameters.
-     */
+    /// 计算生产井射孔压差方法2
     void CalProddG02(const Bulk& bk);
 
-    /*! \brief Calculate pressure of perforations.
-     */
+    /// 计算射孔压力
     void CalPerfP() { for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p]; }
 
 protected:
-    /// difference of pressure between well and perforation: numPerf.
-    vector<OCP_DBL> dG;
 
-    /// components mole number -> target phase volume
-    mutable vector<OCP_DBL> factor;
+    vector<OCP_DBL> dG;               ///< 射孔压差
+    mutable vector<OCP_DBL> factor;   ///< 注入生产因子
 };
 
-class PeacemanWellIsoT : public PeacemanWell{
+class PeacemanWellIsoT : public PeacemanWell
+{
 public:
-    /*! \brief Calculate residual for implicit time stepping.
-     *  \param wId The well ID.
-     *  \param res The residual parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// FIM方法计算井残差
     void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
-
-    /*! \brief Get the solution for implicit time stepping.
-     *  \param u The vector of solution parameters.
-     *  \param wId The well ID.
-     */
+    /// FIM方法获取井解
     void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
-
-    /*! \brief Assemble the matrix for implicit time stepping.
-     *  \param ls The linear system parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// FIM方法装配井矩阵
     void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
-
 protected:
-    /*! \brief Assemble the matrix for injection well in implicit time stepping.
-     *  \param ls The linear system parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// FIM方法装配注入井矩阵
     void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
-
-    /*! \brief Assemble the matrix for production well in implicit time stepping.
-     *  \param ls The linear system parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// FIM方法装配生产井矩阵
     void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 public:
-    /*! \brief Get the solution for IMPEC time stepping.
-     *  \param u The vector of solution parameters.
-     *  \param wId The well ID.
-     */
+    /// IMPEC方法获取井解
     void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override;
-
-    /*! \brief Assemble the matrix for IMPEC time stepping.
-     *  \param ls The linear system parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
+    /// IMPEC方法装配井矩阵
     void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
-
 protected:
-    /*! \brief Assemble the matrix for injection well in IMPEC time stepping.
-     *  \param ls The linear system parameters.
-     *  \param bk The bulk parameters.
-     *  \param dt The time step.
-     */
-    void AssembleMatInjIMPEC(LinearSystem&
+    /// IMPEC方法装配注入井矩阵
+    void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    /// IMPEC方法装配生产井矩阵
+    void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
+};
+
+
+class PeacemanWellT : public PeacemanWell
+{
+public:
+    /// FIM方法计算热流井残差
+    void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
+    /// FIM方法获取热流井解
+    void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
+    /// FIM方法装配热流井矩阵
+    void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
+protected:
+    /// FIM方法装配热流注入井矩阵
+    void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+    /// FIM方法装配热流生产井矩阵
+    void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
+
+public:
+    /// 不可用
+    void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override { OCP_ABORT("NOT USED!"); }
+    /// 不可用
+    void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override { OCP_ABORT("NOT USED!"); }
+};
+
+#endif /* end if __WELLPEACEMAN_HEADER__ */
+
+/*----------------------------------------------------------------------------*/
+/*  Brief Change History of This File                                         */
+/*----------------------------------------------------------------------------*/
+/*  Author              Date             Actions                              */
+/*----------------------------------------------------------------------------*/
+/*  Shizhe Li           Aug/17/2023      Create file                          */
+/*----------------------------------------------------------------------------*/
