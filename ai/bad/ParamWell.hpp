@@ -85,53 +85,103 @@ public:
 class WellParam
 {
 public:
-    // 函数声明略去，根据实际代码补充
+    /// 输入结构网格下的井参数
+    WellParam(vector<string>& info);
+    /// 输入非结构网格下的井参数
+    WellParam(vector<string>& info, const string& unstructured);
+    /// 输入COMPDAT关键字
+    void InputCOMPDAT(vector<string>& vbuf);
+    /// 输入结构网格下的COMPDAT关键字
+    void InputCOMPDATS(vector<string>& vbuf);
+    /// 输入非结构网格下的COMPDAT关键字
+    void InputCOMPDATUS(vector<string>& vbuf);
+    /// 获取射孔数量
+    USI GetPerfNum() const { return max(I_perf.size(), X_perf.size()); }
 
-    // 静态信息
-    GridType gridType;    ///< 网格类型
-    string   name;        ///< 油井名称
-    string   group{ "FEILD" }; ///< 油井所属的组
-    USI      I;           ///< 结构化网格中油井头的I索引
-    USI      J;           ///< 结构化网格中油井头的J索引
-    OCP_DBL  depth{ -1.0 }; ///< 油井头的深度
-    OCP_DBL  X;           ///< 非结构化网格中油井头的x坐标
-    OCP_DBL  Y;           ///< 非结构化网格中油井头的y坐标
-    OCP_DBL  Z;           ///< 非结构化网格中油井头的z坐标
+    GridType gridType;             ///< 网格类型
+    string   name;                 ///< 井名字
+    string   group{ "FEILD" };     ///< 井所在井组
+    USI      I;                    ///< 结构网格下X方向索引
+    USI      J;                    ///< 结构网格下Y方向索引
+    OCP_DBL  depth{ -1.0 };        ///< 井参考深度
+    OCP_DBL  X;                    ///< 非结构网格下X坐标
+    OCP_DBL  Y;                    ///< 非结构网格下Y坐标
+    OCP_DBL  Z;                    ///< 非结构网格下Z坐标
 
-    // 动态信息
-    vector<WellOptPair> optParam; ///< 油井的操作参数序列
+    vector<USI>     I_perf;        ///< 结构网格下射孔X方向索引
+    vector<USI>     J_perf;        ///< 结构网格下射孔Y方向索引
+    vector<USI>     K_perf;        ///< 结构网格下射孔Z方向索引
+    vector<OCP_DBL> X_perf;        ///< 非结构网格下射孔X坐标
+    vector<OCP_DBL> Y_perf;        ///< 非结构网格下射孔Y坐标
+    vector<OCP_DBL> Z_perf;        ///< 非结构网格下射孔Z坐标
+    vector<OCP_DBL> WI;            ///< 井射孔指数
+    vector<OCP_DBL> diameter;      ///< 井射孔直径
+    vector<OCP_DBL> kh;            ///< 井射孔kh系数
+    vector<OCP_DBL> skinFactor;    ///< 井射孔因子
+    vector<string>  direction;     ///< 井射孔方向
+    OCP_BOOL        ifUseUnweight{ OCP_FALSE }; ///< 是否使用非加权因子
+
+    // dynamic infomation
+    vector<WellOptPair> optParam;
 };
 
-/*!
- * \class   Solvent
- * \brief   描述从INJ注入到储层的流体组分的摩尔分数
- */
+/// 注入物数据结构
 class Solvent
 {
 public:
-    // 函数声明略去，根据实际代码补充
-
-    string          name;     ///< 溶剂名称
-    vector<OCP_DBL> comRatio; ///< 组件比例
+    /// 默认构造函数
+    Solvent() = default;
+    /// 构造函数
+    Solvent(const vector<string>& vbuf);
+    /// 井名字
+    string          name;
+    /// 组成比例
+    vector<OCP_DBL> comRatio;
 };
 
-/*!
- * \class   ParamWell
- * \brief   用于存储从输入文件中获取的油井信息的内部结构
- *
- * ParamWell类是一个中间接口，独立于主模拟器。在所有文件输入完成后，其中的参数将传递给相应的模块。
- */
+/// 井参数
 class ParamWell
 {
 public:
-    // 函数声明略去，根据实际代码补充
+    OCP_BOOL          thermal{ OCP_FALSE };   ///< 是否使用热流
+    vector<WellParam> well;                   ///< 井参数
+    vector<OCP_DBL>   criticalTime;           ///< TSETP时间
+    vector<Solvent>   solSet;                 ///< 注入物序列
+    OCP_DBL           Psurf;                  ///< 表面压力
+    OCP_DBL           Tsurf;                  ///< 表面温度
 
-    OCP_BOOL          thermal{ OCP_FALSE }; ///< 是否使用热模型
-    vector<WellParam> well;                 ///< 所有油井的信息
-    vector<OCP_DBL>   criticalTime;         ///< 用户给定的关键时间记录
-    vector<Solvent>   solSet;               ///< 溶剂集合
-    OCP_DBL           Psurf;                ///< 表面压力
-    OCP_DBL           Tsurf;                ///< 表面温度
+    /// 初始化井参数
+    void Init();
+    /// 初始化TSTEP
+    void InitTime() { criticalTime.push_back(0); };
+    /// 输入WELSPECS
+    void InputWELSPECS(ifstream& ifs);
+    /// 输入COMPDAT
+    void InputCOMPDAT(ifstream& ifs);
+    /// 输入WCONINJE
+    void InputWCONINJE(ifstream& ifs);
+    /// 输入WCONPROD
+    void InputWCONPROD(ifstream& ifs);
+    /// 输入TSTEP
+    void InputTSTEP(ifstream& ifs);
+    /// 输入WELTARG
+    void InputWELTARG(ifstream& ifs);
+    /// 输入WTEMP
+    void InputWTEMP(ifstream& ifs);
+    /// 输入UNWEIGHT
+    void InputUNWEIGHT(ifstream& ifs);
+    /// 输入WELLSTRE
+    void InputWELLSTRE(ifstream& ifs);
+    /// 输入PSURF
+    void InputPSURF(ifstream& ifs);
+    /// 输入TSURF
+    void InputTSURF(ifstream& ifs);
+    /// 检查输入参数
+    void CheckParam() const;
+    /// 检查输入射孔
+    void CheckPerf() const;
+    /// 检查注入流体
+    void CheckINJFluid() const;
 };
 
 #endif /* end if __PARAMWELL_HEADER__ */
