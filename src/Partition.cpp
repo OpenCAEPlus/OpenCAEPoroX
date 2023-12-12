@@ -198,13 +198,9 @@ void Partition::SetDistribution()
 		for (idx_t j = xadj[i]; j < xadj[i + 1]; j++) {
 			if (adjncy[j] < vtxdist[myrank] || adjncy[j] >= vtxdist[myrank + 1]) {
 				// adjncy[j] is not in current proc, find its process
-				// estimate first
-				idx_t p = adjncy[j] / numElementLocal;  // p must be an signed int
+				idx_t p = 0;
 				if (adjncy[j] >= vtxdist[p]) {
 					while (adjncy[j] >= vtxdist[p + 1]) { p++; }
-				}
-				else {
-					while (adjncy[j] < vtxdist[--p]) {}
 				}
 				// adjncy[j] is in proc p now (p != myrank)
 				idx_t k = 0;

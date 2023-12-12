@@ -143,9 +143,7 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
 
 
     //cout << scientific << setprecision(6) << res.maxRelRes0_V << "   " << res.maxRelRes_V << "   "
-    //    << res.maxRelRes_N << "   " << res.maxWellRelRes_mol << "   ";
-    //cout << "dPB: " << dPBmaxNR.back() << "   dPW: " << dPWmaxNR.back()
-    //    << "    dS : " << dSmaxNR.back() << endl;
+    //    << res.maxRelRes_N << "   " << res.maxWellRelRes_mol << "   " << endl;
 }
 
 

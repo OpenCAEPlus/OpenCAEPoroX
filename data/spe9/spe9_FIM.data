@@ -2555,7 +2555,7 @@ WBHP
 SCHEDULE   =====================================================================
   
 VTKSCHED
-PRES  SOIL SGAS SWAT 
+PRES SOIL SGAS SWAT 
 /
   
 WELSPECS
