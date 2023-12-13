@@ -1,5 +1,5 @@
 /*! \file    ParamReservoir.hpp
- *  \brief   ÓÍ²Ø²ÎÊıÊäÈë¹ÜÀíÄ£¿é
+ *  \brief   æ²¹è—å‚æ•°è¾“å…¥ç®¡ç†æ¨¡å—
  *  \author  Shizhe Li
  *  \date    Oct/01/2021
  *
@@ -23,387 +23,387 @@
 
 using namespace std;
 
-/// Ò»Î¬±í¸ñĞÍ²ÎÊıÊı¾İ½á¹¹
+/// ä¸€ç»´è¡¨æ ¼å‹å‚æ•°æ•°æ®ç»“æ„
 class TableSet
 {
 public:
-    /// ´òÓ¡±í¸ñµ½ÆÁÄ»
+    /// æ‰“å°è¡¨æ ¼åˆ°å±å¹•
     void DisplayTable() const;
 
 public:
-    string                          name;       ///< ±í¸ñÃû×Ö
-    USI                             colNum;     ///< Ãû×Ö
-    vector<vector<vector<OCP_DBL>>> data;       ///< Ãû×Ö
+    string                          name;       ///< è¡¨æ ¼åå­—
+    USI                             colNum;     ///< åå­—
+    vector<vector<vector<OCP_DBL>>> data;       ///< åå­—
 };
 
-/// ¶şÎ¬±í¸ñĞÍ²ÎÊıÊı¾İ½á¹¹
+/// äºŒç»´è¡¨æ ¼å‹å‚æ•°æ•°æ®ç»“æ„
 class Table2
 {
 public:
-    /// ¹¹Ôìº¯Êı
+    /// æ„é€ å‡½æ•°
     Table2(const USI& n) { data.resize(n); }
-    /// ÉèÖÃ±í¸ñµÄÁĞÊı
+    /// è®¾ç½®è¡¨æ ¼çš„åˆ—æ•°
     void SetColNum() { colNum = data[0].size(); }
 public:
 
-    string                          refName;       ///< µÚÒ»Î¬±äÁ¿Ãû×Ö
-    vector<OCP_DBL>                 refData;       ///< µÚÒ»Î¬±äÁ¿Êı¾İ
-    USI                             colNum;        ///< µÚ¶şÎ¬ÁĞÊı
-    vector<vector<vector<OCP_DBL>>> data;          ///< ±í¸ñÊı¾İ
+    string                          refName;       ///< ç¬¬ä¸€ç»´å˜é‡åå­—
+    vector<OCP_DBL>                 refData;       ///< ç¬¬ä¸€ç»´å˜é‡æ•°æ®
+    USI                             colNum;        ///< ç¬¬äºŒç»´åˆ—æ•°
+    vector<vector<vector<OCP_DBL>>> data;          ///< è¡¨æ ¼æ•°æ®
 };
 
 
-/// ¶şÎ¬±í¸ñĞòÁĞ
+/// äºŒç»´è¡¨æ ¼åºåˆ—
 class Table2Set
 {
 public:
-    string           name;   ///< ±í¸ñÃû×Ö
-    vector<Table2>   data;   ///< ±í¸ñĞòÁĞ
+    string           name;   ///< è¡¨æ ¼åå­—
+    vector<Table2>   data;   ///< è¡¨æ ¼åºåˆ—
 };
 
-/// ÈÈËğÊ§²ÎÊı
+/// çƒ­æŸå¤±å‚æ•°
 class HLoss
 {
 public:
-    OCP_BOOL ifHLoss{ OCP_FALSE }; ///< ÊÇ·ñÊ¹ÓÃ
-    OCP_BOOL obUse{ OCP_FALSE };   ///< ÊÇ·ñÊ¹ÓÃ¸²²ãÈÈËğÊ§
-    OCP_DBL  obC{ -1 };            ///< ¸²²ãÈÈËğÊ§²ÎÊı
-    OCP_DBL  obK{ -1 };            ///< ¸²²ãÈÈËğÊ§²ÎÊı 
-    OCP_BOOL ubUse{ OCP_FALSE };   ///< ÊÇ·ñÊ¹ÓÃµÍ²ãÈÈËğÊ§ 
-    OCP_DBL  ubC{ -1 };            ///< µ×²ãÈÈËğÊ§²ÎÊı 
-    OCP_DBL  ubK{ -1 };            ///< µ×²ãÈÈËğÊ§²ÎÊı 
+    OCP_BOOL ifHLoss{ OCP_FALSE }; ///< æ˜¯å¦ä½¿ç”¨
+    OCP_BOOL obUse{ OCP_FALSE };   ///< æ˜¯å¦ä½¿ç”¨è¦†å±‚çƒ­æŸå¤±
+    OCP_DBL  obC{ -1 };            ///< è¦†å±‚çƒ­æŸå¤±å‚æ•°
+    OCP_DBL  obK{ -1 };            ///< è¦†å±‚çƒ­æŸå¤±å‚æ•° 
+    OCP_BOOL ubUse{ OCP_FALSE };   ///< æ˜¯å¦ä½¿ç”¨ä½å±‚çƒ­æŸå¤± 
+    OCP_DBL  ubC{ -1 };            ///< åº•å±‚çƒ­æŸå¤±å‚æ•° 
+    OCP_DBL  ubK{ -1 };            ///< åº•å±‚çƒ­æŸå¤±å‚æ•° 
 };
 
-/// ÑÒĞÔ²ÎÊı
+/// å²©æ€§å‚æ•°
 class RockParam
 {
 public:
-    string   type{ "LINEAR" };      ///< Ñ¹ËõÀàĞÍ
-    OCP_DBL  Pref{ 14.7 };          ///< ²Î¿¼Ñ¹Á¦
-    OCP_DBL  Tref{ 60 };            ///< ²Î¿¼ÎÂ¶È
-    OCP_DBL  cp1{ 3.406E-6 };       ///< Ò»½×Ñ¹ËõÏµÊı
-    OCP_DBL  cp2{ 0 };              ///< ¶ş½×Ñ¹ËõÏµÊı
-    OCP_DBL  ct{ 0 };               ///< ÈÈÅòÕÍÏµÊı
-    OCP_DBL  cpt{ 0 };              ///< ÈÈÅòÕÍÏµÊı
-    OCP_BOOL ConstRock{ OCP_TRUE }; ///< ÑÒÊ¯Ìå»ıÊÇ·ñÎª³£Êı
-    OCP_DBL HCP1{ 35 };             ///< ÑÒÊ¯ìÊÏµÊı
-    OCP_DBL HCP2{ 0 };              ///< ÑÒÊ¯ìÊÏµÊı
+    string   type{ "LINEAR" };      ///< å‹ç¼©ç±»å‹
+    OCP_DBL  Pref{ 14.7 };          ///< å‚è€ƒå‹åŠ›
+    OCP_DBL  Tref{ 60 };            ///< å‚è€ƒæ¸©åº¦
+    OCP_DBL  cp1{ 3.406E-6 };       ///< ä¸€é˜¶å‹ç¼©ç³»æ•°
+    OCP_DBL  cp2{ 0 };              ///< äºŒé˜¶å‹ç¼©ç³»æ•°
+    OCP_DBL  ct{ 0 };               ///< çƒ­è†¨èƒ€ç³»æ•°
+    OCP_DBL  cpt{ 0 };              ///< çƒ­è†¨èƒ€ç³»æ•°
+    OCP_BOOL ConstRock{ OCP_TRUE }; ///< å²©çŸ³ä½“ç§¯æ˜¯å¦ä¸ºå¸¸æ•°
+    OCP_DBL HCP1{ 35 };             ///< å²©çŸ³ç„“ç³»æ•°
+    OCP_DBL HCP2{ 0 };              ///< å²©çŸ³ç„“ç³»æ•°
 };
 
 
-/// ³õÊ¼ÓÍ²ØÆ½ºâ¼ÆËã
+/// åˆå§‹æ²¹è—å¹³è¡¡è®¡ç®—
 class EQUILParam
 {
 public:
-    vector<OCP_DBL> data; ///< Æ½ºâ²ÎÊı
+    vector<OCP_DBL> data; ///< å¹³è¡¡å‚æ•°
 };
 
 
-/// Brooks-Corey Ïà¶ÔÉøÍ¸ÂÊÃ«¹ÜÁ¦Ä£ĞÍ
+/// Brooks-Corey ç›¸å¯¹æ¸—é€ç‡æ¯›ç®¡åŠ›æ¨¡å‹
 class BrooksCoreyParam
 {
 public:
-    OCP_DBL sw_imm;     ///< ²»¿ÉÒÆ¶¯µÄÈóÊªÏà±¥ºÍ¶È
-    OCP_DBL sn_imm;     ///< ²»¿ÉÒÆ¶¯µÄ·ÇÈóÊªÏà±¥ºÍ¶È
-    OCP_DBL Pentry;     ///< ÆøÏà½øÈëÑ¹Á¦
-    OCP_DBL Pcmax;      ///< ×î´óÆøË®Ã«¹ÜÁ¦
-    OCP_DBL Cw_kr;      ///< ÈóÊªÏàÏà¶ÔÉøÍ¸ÂÊÖ¸Êı
-    OCP_DBL Cn_kr;      ///< ·ÇÈóÊªÏàÏà¶ÔÉøÍ¸ÂÊÖ¸Êı
-    OCP_DBL C_pc;       ///< Ã«¹ÜÁ¦Ö¸Êı
+    OCP_DBL sw_imm;     ///< ä¸å¯ç§»åŠ¨çš„æ¶¦æ¹¿ç›¸é¥±å’Œåº¦
+    OCP_DBL sn_imm;     ///< ä¸å¯ç§»åŠ¨çš„éæ¶¦æ¹¿ç›¸é¥±å’Œåº¦
+    OCP_DBL Pentry;     ///< æ°”ç›¸è¿›å…¥å‹åŠ›
+    OCP_DBL Pcmax;      ///< æœ€å¤§æ°”æ°´æ¯›ç®¡åŠ›
+    OCP_DBL Cw_kr;      ///< æ¶¦æ¹¿ç›¸ç›¸å¯¹æ¸—é€ç‡æŒ‡æ•°
+    OCP_DBL Cn_kr;      ///< éæ¶¦æ¹¿ç›¸ç›¸å¯¹æ¸—é€ç‡æŒ‡æ•°
+    OCP_DBL C_pc;       ///< æ¯›ç®¡åŠ›æŒ‡æ•°
 };
 
 
-/// ±ß½çÌõ¼ş²ÎÊı
+/// è¾¹ç•Œæ¡ä»¶å‚æ•°
 class BoundaryParam
 {
 public:
-    /// ¹¹Ôìº¯Êı
+    /// æ„é€ å‡½æ•°
     BoundaryParam(const string& Name) : name(Name) {}
 
-    string   name;                     ///< ±ß½çÃû×Ö
-    OCP_BOOL constP{ OCP_FALSE };      ///< ÊÇ·ñ³£Ñ¹¿ØÖÆ
-    OCP_DBL  P;                        ///< ³£Ñ¹¿ØÖÆµÄÑ¹Á¦Öµ
+    string   name;                     ///< è¾¹ç•Œåå­—
+    OCP_BOOL constP{ OCP_FALSE };      ///< æ˜¯å¦å¸¸å‹æ§åˆ¶
+    OCP_DBL  P;                        ///< å¸¸å‹æ§åˆ¶çš„å‹åŠ›å€¼
 };
 
 
-/// ²ÎÊı½á¹¹1
+/// å‚æ•°ç»“æ„1
 template <typename T>
 class Type_A_r
 {
 public:
-    OCP_BOOL  activity{ OCP_FALSE }; ///< ÊÇ·ñÊ¹ÓÃ
-    vector<T> data;                  ///< ²ÎÊıÊı¾İ
+    OCP_BOOL  activity{ OCP_FALSE }; ///< æ˜¯å¦ä½¿ç”¨
+    vector<T> data;                  ///< å‚æ•°æ•°æ®
 };
 
-/// ×é·ÖÀà²ÎÊı
+/// ç»„åˆ†ç±»å‚æ•°
 class ComponentParam
 {
 public:
     // Basic params
-    /// ³õÊ¼»¯²ÎÊı
+    /// åˆå§‹åŒ–å‚æ•°
     void Init();
-    /// ¶ÁÈë×é·ÖĞÅÏ¢
+    /// è¯»å…¥ç»„åˆ†ä¿¡æ¯
     void InputCOMPONENTS(ifstream& ifs, const string& keyword);
-    /// ×é·Ö±äÁ¿Ö¸Õë²éÕÒÆ÷1
+    /// ç»„åˆ†å˜é‡æŒ‡é’ˆæŸ¥æ‰¾å™¨1
     Type_A_r<vector<OCP_DBL>>* FindPtr01(const string& varName);
-    /// ¶ÁÈë²Î¿¼Ñ¹Á¦ºÍ²Î¿¼ÎÂ¶È
+    /// è¯»å…¥å‚è€ƒå‹åŠ›å’Œå‚è€ƒæ¸©åº¦
     void InputRefPR(ifstream& ifs, const string& keyword);
-    /// ×é·Ö±äÁ¿Ö¸Õë²éÕÒÆ÷2
+    /// ç»„åˆ†å˜é‡æŒ‡é’ˆæŸ¥æ‰¾å™¨2
     vector<OCP_DBL>* FindPtr02(const string& varName);
-    /// ¶ÁÈëÌş×é·ÖÃû×Ö
+    /// è¯»å…¥çƒƒç»„åˆ†åå­—
     void InputCNAMES(ifstream& ifs);
-    /// ¶ÁÈëLBCÏµÊı
+    /// è¯»å…¥LBCç³»æ•°
     void InputLBCCOEF(ifstream& ifs);
-    /// ¶ÁÈëBICÏµÊı
+    /// è¯»å…¥BICç³»æ•°
     void InputBIC(ifstream& ifs);
-    /// ¶ÁÈëÎÈ¶¨ĞÔ·ÖÎöµÄSSM²ÎÊı
+    /// è¯»å…¥ç¨³å®šæ€§åˆ†æçš„SSMå‚æ•°
     void InputSSMSTA(ifstream& ifs);
-    /// ¶ÁÈëÎÈ¶¨ĞÔ·ÖÎöµÄNR²ÎÊı
+    /// è¯»å…¥ç¨³å®šæ€§åˆ†æçš„NRå‚æ•°
     void InputNRSTA(ifstream& ifs);
-    /// ¶ÁÈëÏà·ÖÁÑ¼ÆËãµÄSSM²ÎÊı
+    /// è¯»å…¥ç›¸åˆ†è£‚è®¡ç®—çš„SSMå‚æ•°
     void InputSSMSP(ifstream& ifs);
-    /// ¶ÁÈëÏà·ÖÁÑ¼ÆËãµÄNR²ÎÊı
+    /// è¯»å…¥ç›¸åˆ†è£‚è®¡ç®—çš„NRå‚æ•°
     void InputNRSP(ifstream& ifs);
-    /// ¶ÁÈëRR·½³ÌµÄÇó½â²ÎÊı
+    /// è¯»å…¥RRæ–¹ç¨‹çš„æ±‚è§£å‚æ•°
     void InputRR(ifstream& ifs);
 
 public:
-    USI            NTPVT;               ///< PVTÇøÓò
-    USI            numCom{ 0 };         ///< ÏàÆ½ºâ¼ÆËãµÄ×é·ÖÊı
-    USI            numPhase{ 2 };       ///< ÏàÆ½ºâ¼ÆËãµÄ×î´óÏàÊı
-    vector<string> Cname;               ///< ×é·ÖµÄÃû×Ö
-    Type_A_r<vector<OCP_DBL>> Tc;       ///< ×é·ÖÁÙ½çÎÂ¶È
-    Type_A_r<vector<OCP_DBL>> Pc;       ///< ×é·ÖÁÙ½çÑ¹Á¦
-    Type_A_r<vector<OCP_DBL>> Vc;       ///< ×é·ÖÁÙ½çÌå»ı
-    Type_A_r<vector<OCP_DBL>> Zc;       ///< ×é·ÖÁÙ½çÑ¹ËõÒò×Ó
-    Type_A_r<vector<OCP_DBL>> MW;       ///< ×é·Ö·Ö×ÓÖÊÁ¿
-    Type_A_r<vector<OCP_DBL>> Acf;      ///< ×é·ÖÆ«ĞÄÒò×Ó
-    Type_A_r<vector<OCP_DBL>> OmegaA;   ///< PR-EoSÏµÊı
-    Type_A_r<vector<OCP_DBL>> OmegaB;   ///< PR-EoSÏµÊı
-    Type_A_r<vector<OCP_DBL>> Vshift;   ///< ×é·ÖÌå»ı±ä»»ÏµÊı
+    USI            NTPVT;               ///< PVTåŒºåŸŸ
+    USI            numCom{ 0 };         ///< ç›¸å¹³è¡¡è®¡ç®—çš„ç»„åˆ†æ•°
+    USI            numPhase{ 2 };       ///< ç›¸å¹³è¡¡è®¡ç®—çš„æœ€å¤§ç›¸æ•°
+    vector<string> Cname;               ///< ç»„åˆ†çš„åå­—
+    Type_A_r<vector<OCP_DBL>> Tc;       ///< ç»„åˆ†ä¸´ç•Œæ¸©åº¦
+    Type_A_r<vector<OCP_DBL>> Pc;       ///< ç»„åˆ†ä¸´ç•Œå‹åŠ›
+    Type_A_r<vector<OCP_DBL>> Vc;       ///< ç»„åˆ†ä¸´ç•Œä½“ç§¯
+    Type_A_r<vector<OCP_DBL>> Zc;       ///< ç»„åˆ†ä¸´ç•Œå‹ç¼©å› å­
+    Type_A_r<vector<OCP_DBL>> MW;       ///< ç»„åˆ†åˆ†å­è´¨é‡
+    Type_A_r<vector<OCP_DBL>> Acf;      ///< ç»„åˆ†åå¿ƒå› å­
+    Type_A_r<vector<OCP_DBL>> OmegaA;   ///< PR-EoSç³»æ•°
+    Type_A_r<vector<OCP_DBL>> OmegaB;   ///< PR-EoSç³»æ•°
+    Type_A_r<vector<OCP_DBL>> Vshift;   ///< ç»„åˆ†ä½“ç§¯å˜æ¢ç³»æ•°
     Type_A_r<vector<OCP_DBL>> parachor; ///< parachor
 
     // for viscosity calculation
-    Type_A_r<vector<OCP_DBL>> Vcvis;    ///< Õ³¶È¼ÆËãÁÙ½çÌå»ı
-    Type_A_r<vector<OCP_DBL>> Zcvis;    ///< Õ³¶È¼ÆËãÑ¹ËõÒò×Ó
-    vector<OCP_DBL>           LBCcoef;  ///< LBCÕ³¶È¼ÆËãÏµÊı
-    vector<vector<OCP_DBL>>   BIC;      ///< BIC²ÎÊı
+    Type_A_r<vector<OCP_DBL>> Vcvis;    ///< ç²˜åº¦è®¡ç®—ä¸´ç•Œä½“ç§¯
+    Type_A_r<vector<OCP_DBL>> Zcvis;    ///< ç²˜åº¦è®¡ç®—å‹ç¼©å› å­
+    vector<OCP_DBL>           LBCcoef;  ///< LBCç²˜åº¦è®¡ç®—ç³»æ•°
+    vector<vector<OCP_DBL>>   BIC;      ///< BICå‚æ•°
 
     // Thermal only
-    Type_A_r<vector<OCP_DBL>> molden;   ///< ²Î¿¼ÎÂ¶ÈÑ¹Á¦ÏÂµÄÄ¦¶ûÅ¨¶È
-    Type_A_r<vector<OCP_DBL>> cp;       ///< ×é·ÖÑ¹ËõÏµÊı
-    Type_A_r<vector<OCP_DBL>> ct1;      ///< µÚÒ»ÈÈÅòÕÍÏµÊı
-    Type_A_r<vector<OCP_DBL>> ct2;      ///< µÚÒ»ÈÈÅòÕÍÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpt;      ///< ÎÂ¶ÈÑ¹Á¦ÒÀÀµÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpl1;     ///< ÒºÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpl2;     ///< ÒºÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpl3;     ///< ÒºÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpl4;     ///< ÒºÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpg1;     ///< ÆøÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpg2;     ///< ÆøÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpg3;     ///< ÆøÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> cpg4;     ///< ÆøÏàìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> hvapr;    ///< Õô·¢ìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> hvr;      ///< Õô·¢ìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> ev;       ///< Õô·¢ìÊ¼ÆËãÏµÊı
-    Type_A_r<vector<OCP_DBL>> avisc;    ///< ÒºÏà×é·ÖµÄÕ³¶È¹ØÁª²ÎÊı 
-    Type_A_r<vector<OCP_DBL>> bvisc;    ///< ÒºÏà×é·ÖµÄÕ³¶È¹ØÁª²ÎÊı 
-    Type_A_r<vector<OCP_DBL>> avg;      ///< ÆøÏà×é·ÖµÄÕ³¶È¹ØÁª²ÎÊı 
-    Type_A_r<vector<OCP_DBL>> bvg;      ///< ÆøÏà×é·ÖµÄÕ³¶È¹ØÁª²ÎÊı 
+    Type_A_r<vector<OCP_DBL>> molden;   ///< å‚è€ƒæ¸©åº¦å‹åŠ›ä¸‹çš„æ‘©å°”æµ“åº¦
+    Type_A_r<vector<OCP_DBL>> cp;       ///< ç»„åˆ†å‹ç¼©ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> ct1;      ///< ç¬¬ä¸€çƒ­è†¨èƒ€ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> ct2;      ///< ç¬¬ä¸€çƒ­è†¨èƒ€ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpt;      ///< æ¸©åº¦å‹åŠ›ä¾èµ–ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpl1;     ///< æ¶²ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpl2;     ///< æ¶²ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpl3;     ///< æ¶²ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpl4;     ///< æ¶²ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpg1;     ///< æ°”ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpg2;     ///< æ°”ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpg3;     ///< æ°”ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> cpg4;     ///< æ°”ç›¸ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> hvapr;    ///< è’¸å‘ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> hvr;      ///< è’¸å‘ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> ev;       ///< è’¸å‘ç„“è®¡ç®—ç³»æ•°
+    Type_A_r<vector<OCP_DBL>> avisc;    ///< æ¶²ç›¸ç»„åˆ†çš„ç²˜åº¦å…³è”å‚æ•° 
+    Type_A_r<vector<OCP_DBL>> bvisc;    ///< æ¶²ç›¸ç»„åˆ†çš„ç²˜åº¦å…³è”å‚æ•° 
+    Type_A_r<vector<OCP_DBL>> avg;      ///< æ°”ç›¸ç»„åˆ†çš„ç²˜åº¦å…³è”å‚æ•° 
+    Type_A_r<vector<OCP_DBL>> bvg;      ///< æ°”ç›¸ç»„åˆ†çš„ç²˜åº¦å…³è”å‚æ•° 
 
 
-    Table2Set viscTab;                  ///< Õ³¶ÈÎÂ¶ÈÑ¹Á¦ÒÀÀµ±í
+    Table2Set viscTab;                  ///< ç²˜åº¦æ¸©åº¦å‹åŠ›ä¾èµ–è¡¨
 
-    vector<OCP_DBL> Pref;               ///< ²Î¿¼Ñ¹Á¦
-    vector<OCP_DBL> Tref;               ///< ²Î¿¼ÎÂ¶È
-    vector<string> SSMparamSTA;         ///< ÎÈ¶¨ĞÔ·ÖÎöSSM²ÎÊı
-    vector<string> NRparamSTA;          ///< ÎÈ¶¨ĞÔ·ÖÎöNR²ÎÊı
-    vector<string> SSMparamSP;          ///< Ïà·ÖÁÑ¼ÆËãSSM²ÎÊı
-    vector<string> NRparamSP;           ///< Ïà·ÖÁÑ¼ÆËãNR²ÎÊı
-    vector<string> RRparam;             ///< RRÇó½â²ÎÊı
+    vector<OCP_DBL> Pref;               ///< å‚è€ƒå‹åŠ›
+    vector<OCP_DBL> Tref;               ///< å‚è€ƒæ¸©åº¦
+    vector<string> SSMparamSTA;         ///< ç¨³å®šæ€§åˆ†æSSMå‚æ•°
+    vector<string> NRparamSTA;          ///< ç¨³å®šæ€§åˆ†æNRå‚æ•°
+    vector<string> SSMparamSP;          ///< ç›¸åˆ†è£‚è®¡ç®—SSMå‚æ•°
+    vector<string> NRparamSP;           ///< ç›¸åˆ†è£‚è®¡ç®—NRå‚æ•°
+    vector<string> RRparam;             ///< RRæ±‚è§£å‚æ•°
 };
 
 
-/// »ìÈÜ¿ØÖÆ²ÎÊı
+/// æ··æº¶æ§åˆ¶å‚æ•°
 class Miscstr
 {
 public:
-    OCP_BOOL        ifMiscible{ OCP_FALSE };///< ÊÇ·ñÊ¹ÓÃ»ìÈÜ
-    OCP_DBL         surTenRef{ -1 };        ///< ²Î¿¼±íÃæÕÅÁ¿
-    OCP_DBL         surTenEpt{ -1 };        ///< ±íÃæÕÅÁ¿Ïà¹Ø²ÎÊı
-    OCP_DBL         surTenPc{ -1 };         ///< ±íÃæÕÅÁ¿Ïà¹Ø²ÎÊı
-    OCP_DBL         surTenExp{ 0.25 };      ///< ±íÃæÕÅÁ¿Ïà¹Ø²ÎÊı
+    OCP_BOOL        ifMiscible{ OCP_FALSE };///< æ˜¯å¦ä½¿ç”¨æ··æº¶
+    OCP_DBL         surTenRef{ -1 };        ///< å‚è€ƒè¡¨é¢å¼ é‡
+    OCP_DBL         surTenEpt{ -1 };        ///< è¡¨é¢å¼ é‡ç›¸å…³å‚æ•°
+    OCP_DBL         surTenPc{ -1 };         ///< è¡¨é¢å¼ é‡ç›¸å…³å‚æ•°
+    OCP_DBL         surTenExp{ 0.25 };      ///< è¡¨é¢å¼ é‡ç›¸å…³å‚æ•°
 };
 
 
-/// ÓÍ²ØÊäÈë²ÎÊıÄ£¿é
+/// æ²¹è—è¾“å…¥å‚æ•°æ¨¡å—
 class ParamReservoir
 {
 
 public:
 
-    string                   unitType;    ///< µ¥Î»ÀàĞÍ
+    string                   unitType;    ///< å•ä½ç±»å‹
                                           
-    OCP_DBL                  rsTemp;      ///< ÓÍ²Ø³õÊ¼ÎÂ¶È
-    vector<RockParam>        rockSet;     ///< ÑÒÊ¯²ÎÊı¼¯
-    HLoss                    hLoss;       ///< ÈÈËğÊ§²ÎÊı¼¯
-    Miscstr                  miscstr;     ///< »ìÈÜ¿ØÖÆ²ÎÊı¼¯
-    vector<BrooksCoreyParam> BCparam;     ///< Brooks-CoreyÄ£ĞÍ²ÎÊı¼¯
-    vector<BoundaryParam>    BDparam;     ///< ±ß½çÌõ¼ş²ÎÊı¼¯
+    OCP_DBL                  rsTemp;      ///< æ²¹è—åˆå§‹æ¸©åº¦
+    vector<RockParam>        rockSet;     ///< å²©çŸ³å‚æ•°é›†
+    HLoss                    hLoss;       ///< çƒ­æŸå¤±å‚æ•°é›†
+    Miscstr                  miscstr;     ///< æ··æº¶æ§åˆ¶å‚æ•°é›†
+    vector<BrooksCoreyParam> BCparam;     ///< Brooks-Coreyæ¨¡å‹å‚æ•°é›†
+    vector<BoundaryParam>    BDparam;     ///< è¾¹ç•Œæ¡ä»¶å‚æ•°é›†
 
-    Type_A_r<OCP_DBL> density;             ///< ±êÌ¬ÏÂ¸÷ÏàÃÜ¶È
-    Type_A_r<OCP_DBL> gravity;             ///< ±êÌ¬ÏÂ¸÷ÏàÖØÁ¦ÏµÊı
-    OCP_BOOL          ifThcon{ OCP_FALSE };///< ÊÇ·ñÊ¹ÓÃÈÈ´«µ¼
-    OCP_DBL           thcono{ 24 };        ///< ÓÍÏàÈÈ´«µ¼ÏµÊı
-    OCP_DBL           thcong{ 24 };        ///< ÆøÏàÈÈ´«µ¼ÏµÊı
-    OCP_DBL           thconw{ 24 };        ///< Ë®ÏàÈÈ´«µ¼ÏµÊı
-    OCP_DBL           thconr{ 24 };        ///< ÑÒÊ¯ÈÈ´«µ¼ÏµÊı
+    Type_A_r<OCP_DBL> density;             ///< æ ‡æ€ä¸‹å„ç›¸å¯†åº¦
+    Type_A_r<OCP_DBL> gravity;             ///< æ ‡æ€ä¸‹å„ç›¸é‡åŠ›ç³»æ•°
+    OCP_BOOL          ifThcon{ OCP_FALSE };///< æ˜¯å¦ä½¿ç”¨çƒ­ä¼ å¯¼
+    OCP_DBL           thcono{ 24 };        ///< æ²¹ç›¸çƒ­ä¼ å¯¼ç³»æ•°
+    OCP_DBL           thcong{ 24 };        ///< æ°”ç›¸çƒ­ä¼ å¯¼ç³»æ•°
+    OCP_DBL           thconw{ 24 };        ///< æ°´ç›¸çƒ­ä¼ å¯¼ç³»æ•°
+    OCP_DBL           thconr{ 24 };        ///< å²©çŸ³çƒ­ä¼ å¯¼ç³»æ•°
 
     // mixture Models
-    OCP_BOOL blackOil{ OCP_FALSE }; ///< ÊÇ·ñÊ¹ÓÃºÚÓÍÄ£ĞÍ
-    OCP_BOOL comps{ OCP_FALSE };    ///< ÊÇ·ñÊ¹ÓÃ×é·ÖÄ£ĞÍ
-    OCP_BOOL thermal{ OCP_FALSE };  ///< ÊÇ·ñÊ¹ÓÃÈÈÁ÷Ä£ĞÍ
-    OCP_BOOL oil{ OCP_FALSE };      ///< ÓÍÏàÊÇ·ñ´æÔÚ
-    OCP_BOOL gas{ OCP_FALSE };      ///< ÆøÏàÊÇ·ñ´æÔÚ
-    OCP_BOOL water{ OCP_FALSE };    ///< Ë®ÏàÊÇ·ñ´æÔÚ
-    OCP_BOOL disGas{ OCP_FALSE };   ///< ÓÍÏàÈÜ½âÆøÊÇ·ñ´æÔÚ
+    OCP_BOOL blackOil{ OCP_FALSE }; ///< æ˜¯å¦ä½¿ç”¨é»‘æ²¹æ¨¡å‹
+    OCP_BOOL comps{ OCP_FALSE };    ///< æ˜¯å¦ä½¿ç”¨ç»„åˆ†æ¨¡å‹
+    OCP_BOOL thermal{ OCP_FALSE };  ///< æ˜¯å¦ä½¿ç”¨çƒ­æµæ¨¡å‹
+    OCP_BOOL oil{ OCP_FALSE };      ///< æ²¹ç›¸æ˜¯å¦å­˜åœ¨
+    OCP_BOOL gas{ OCP_FALSE };      ///< æ°”ç›¸æ˜¯å¦å­˜åœ¨
+    OCP_BOOL water{ OCP_FALSE };    ///< æ°´ç›¸æ˜¯å¦å­˜åœ¨
+    OCP_BOOL disGas{ OCP_FALSE };   ///< æ²¹ç›¸æº¶è§£æ°”æ˜¯å¦å­˜åœ¨
 
     // flow model
-    OCP_BOOL GRAVDR{ OCP_FALSE };   ///< ÊÇ·ñÒªÔÚË«¿×Ä£ĞÍÖĞÊ¹ÓÃÖØÁ¦³ÙÖÍ
+    OCP_BOOL GRAVDR{ OCP_FALSE };   ///< æ˜¯å¦è¦åœ¨åŒå­”æ¨¡å‹ä¸­ä½¿ç”¨é‡åŠ›è¿Ÿæ»
 
-    ComponentParam comsParam;       ///< ×é·Ö±äÁ¿²ÎÊı¼¯
+    ComponentParam comsParam;       ///< ç»„åˆ†å˜é‡å‚æ•°é›†
 
     // SAT Region & PVT Region
-    USI               NTSFUN{ 1 }; ///< ±¥ºÍ¶ÈÇøÓòÊı
-    USI               NTPVT{ 1 };  ///< PVTÇøÓò
-    USI               NTROOC{ 1 }; ///< ÑÒÊ¯ÇøÓò
+    USI               NTSFUN{ 1 }; ///< é¥±å’Œåº¦åŒºåŸŸæ•°
+    USI               NTPVT{ 1 };  ///< PVTåŒºåŸŸ
+    USI               NTROOC{ 1 }; ///< å²©çŸ³åŒºåŸŸ
 
-    TableSet SWFN_T;               ///< SWFN±í¸ñ
-    TableSet SWOF_T;               ///< SWOF±í¸ñ
-    TableSet SGFN_T;               ///< SGFN±í¸ñ
-    TableSet SGOF_T;               ///< SGOF±í¸ñ
-    TableSet SOF3_T;               ///< SOF3±í¸ñ
-    TableSet PBVD_T;               ///< PBVD±í¸ñ
+    TableSet SWFN_T;               ///< SWFNè¡¨æ ¼
+    TableSet SWOF_T;               ///< SWOFè¡¨æ ¼
+    TableSet SGFN_T;               ///< SGFNè¡¨æ ¼
+    TableSet SGOF_T;               ///< SGOFè¡¨æ ¼
+    TableSet SOF3_T;               ///< SOF3è¡¨æ ¼
+    TableSet PBVD_T;               ///< PBVDè¡¨æ ¼
     // initial zi vs depth
-    TableSet           ZMFVD_T;  ///< ZMFVD±í¸ñ
-    TableSet           TEMPVD_T; ///< TEMPVD±í¸ñ
-    vector<EQUILParam> EQUIL;    ///< Æ½ºâÌõ¼ş²ÎÊı
+    TableSet           ZMFVD_T;  ///< ZMFVDè¡¨æ ¼
+    TableSet           TEMPVD_T; ///< TEMPVDè¡¨æ ¼
+    vector<EQUILParam> EQUIL;    ///< å¹³è¡¡æ¡ä»¶å‚æ•°
 
     // PVT properties
-    USI numPhase;     ///< ÏàÊı
-    USI numCom;       ///< ×é·ÖÊı
-    TableSet PVCO_T;  ///< PVCO±í¸ñ
-    TableSet PVDO_T;  ///< PVDO±í¸ñ
-    TableSet PVCDO_T; ///< PVCDO±í¸ñ
-    TableSet PVDG_T;  ///< PVDG±í¸ñ
-    TableSet PVTW_T;  ///< PVTW±í¸ñ
+    USI numPhase;     ///< ç›¸æ•°
+    USI numCom;       ///< ç»„åˆ†æ•°
+    TableSet PVCO_T;  ///< PVCOè¡¨æ ¼
+    TableSet PVDO_T;  ///< PVDOè¡¨æ ¼
+    TableSet PVCDO_T; ///< PVCDOè¡¨æ ¼
+    TableSet PVDG_T;  ///< PVDGè¡¨æ ¼
+    TableSet PVTW_T;  ///< PVTWè¡¨æ ¼
 
 
-    OCP_BOOL  GARCIAW{ OCP_FALSE };   ///< ÊÇ·ñÊ¹ÓÃGARCIAW·½·¨
-    Table2Set PVTH2O;                 ///< PVTH2O±í¸ñ
-    Table2Set PVTCO2;                 ///< PVTCO2±í¸ñ
-    OCP_DBL   Psurf;                  ///< µØ±íÑ¹Á¦
-    OCP_DBL   Tsurf;                  ///< µØ±íÎÂ¶È
+    OCP_BOOL  GARCIAW{ OCP_FALSE };   ///< æ˜¯å¦ä½¿ç”¨GARCIAWæ–¹æ³•
+    Table2Set PVTH2O;                 ///< PVTH2Oè¡¨æ ¼
+    Table2Set PVTCO2;                 ///< PVTCO2è¡¨æ ¼
+    OCP_DBL   Psurf;                  ///< åœ°è¡¨å‹åŠ›
+    OCP_DBL   Tsurf;                  ///< åœ°è¡¨æ¸©åº¦
 
 public:
 
-    /// ±í¸ñÑ°Ö·º¯Êı1
+    /// è¡¨æ ¼å¯»å€å‡½æ•°1
     TableSet* FindPtrTable(const string& varName);
-    /// ±í¸ñÑ°Ö·º¯Êı2
+    /// è¡¨æ ¼å¯»å€å‡½æ•°2
     Table2Set* FindPtrTable2(const string& varName);
 
-    /// ²¿·ÖÓÍ²Ø²ÎÊı³õÊ¼»¯
+    /// éƒ¨åˆ†æ²¹è—å‚æ•°åˆå§‹åŒ–
     void Init();
 
-    /// ÓÍ²Ø±í¸ñ³õÊ¼»¯
+    /// æ²¹è—è¡¨æ ¼åˆå§‹åŒ–
     void InitTable();
 
-    /// ÊäÈë×é·Ö²ÎÊı
+    /// è¾“å…¥ç»„åˆ†å‚æ•°
     void InputCOMPS(ifstream& ifs);
 
-    /// ÊäÈëÓÍ²Ø³õÊ¼ÎÂ¶È
+    /// è¾“å…¥æ²¹è—åˆå§‹æ¸©åº¦
     void InputRTEMP(ifstream& ifs);
 
-    /// ÊäÈëÒ»Î¬±í¸ñ
+    /// è¾“å…¥ä¸€ç»´è¡¨æ ¼
     void InputTABLE(ifstream& ifs, const string& tabName);
-    /// ÊäÈë¶şÎ¬±í¸ñ
+    /// è¾“å…¥äºŒç»´è¡¨æ ¼
     void InputTABLE2(ifstream& ifs, const string& tabName);
 
-    /// ÊäÈëµÈÎÂÑÒÊ¯²ÎÊı
+    /// è¾“å…¥ç­‰æ¸©å²©çŸ³å‚æ•°
     void InputROCK(ifstream& ifs);
-    /// ÊäÈë·ÇµÈÎÂÑÒÊ¯²ÎÊı
+    /// è¾“å…¥éç­‰æ¸©å²©çŸ³å‚æ•°
     void InputROCKT(ifstream& ifs);
-    /// ÊäÈëÈÈËğÊ§²ÎÊı
+    /// è¾“å…¥çƒ­æŸå¤±å‚æ•°
     void InputHLOSS(ifstream& ifs);
-    /// ÊäÈëBrooks-CoreyÄ£ĞÍ²ÎÊı
+    /// è¾“å…¥Brooks-Coreyæ¨¡å‹å‚æ•°
     void InputBrooksCorey(ifstream& ifs);
 
-    /// ÊäÈë»ìÈÜ¿ØÖÆ²ÎÊı
+    /// è¾“å…¥æ··æº¶æ§åˆ¶å‚æ•°
     void InputMISCSTR(ifstream& ifs);
 
-    /// ÊäÈëÖØÁ¦²ÎÊı
+    /// è¾“å…¥é‡åŠ›å‚æ•°
     void InputGRAVITY(ifstream& ifs);
 
-    /// ÊäÈëÃÜ¶È²ÎÊı
+    /// è¾“å…¥å¯†åº¦å‚æ•°
     void InputDENSITY(ifstream& ifs);
 
-    /// ÊäÈëÈÈ´«µ¼²ÎÊı
+    /// è¾“å…¥çƒ­ä¼ å¯¼å‚æ•°
     void InputTHCON(ifstream& ifs, const string& keyword);
 
-    /// ÊäÈëÆ½ºâ³õÊ¼»¯²ÎÊı
+    /// è¾“å…¥å¹³è¡¡åˆå§‹åŒ–å‚æ•°
     void InputEQUIL(ifstream& ifs);
 
-    /// ÊäÈëÇøÓòÊı
+    /// è¾“å…¥åŒºåŸŸæ•°
     void InputTABDIMS(ifstream& ifs);
 
-    /// ÊäÈë×é·ÖÊı
+    /// è¾“å…¥ç»„åˆ†æ•°
     void InputNCOMPS(ifstream& ifs) {
         vector<string> vbuf;
         ReadLine(ifs, vbuf);
         comsParam.numCom = stoi(vbuf[0]);
         numCom = comsParam.numCom;
     }
-    /// ÊäÈë×é·ÖÃû×Ö
+    /// è¾“å…¥ç»„åˆ†åå­—
     void InputCNAMES(ifstream& ifs) { comsParam.InputCNAMES(ifs); };
-    /// ÊäÈë×é·Ö²ÎÊı
+    /// è¾“å…¥ç»„åˆ†å‚æ•°
     void InputCOMPONENTS(ifstream& ifs, const string& keyword)
     {
         comsParam.InputCOMPONENTS(ifs, keyword);
     }
-    /// ÊäÈëLBCÕ³¶È²ÎÊı
+    /// è¾“å…¥LBCç²˜åº¦å‚æ•°
     void InputLBCCOEF(ifstream& ifs) { comsParam.InputLBCCOEF(ifs); }
-    /// ÊäÈëBIC²ÎÊı
+    /// è¾“å…¥BICå‚æ•°
     void InputBIC(ifstream& ifs) { comsParam.InputBIC(ifs); };
-    /// ÊäÈë×é·Ö²Î¿¼Ñ¹Á¦
+    /// è¾“å…¥ç»„åˆ†å‚è€ƒå‹åŠ›
     void InputRefPR(ifstream& ifs, const string& keyword)
     {
         comsParam.InputRefPR(ifs, keyword);
     };
 
-    /// ÊäÈëÎÈ¶¨ĞÔ·ÖÎöSSM²ÎÊı
+    /// è¾“å…¥ç¨³å®šæ€§åˆ†æSSMå‚æ•°
     void InputSSMSTA(ifstream& ifs) { comsParam.InputSSMSTA(ifs); };
-    /// ÊäÈëÎÈ¶¨ĞÔ·ÖÎöNR²ÎÊı
+    /// è¾“å…¥ç¨³å®šæ€§åˆ†æNRå‚æ•°
     void InputNRSTA(ifstream& ifs) { comsParam.InputNRSTA(ifs); };
-    /// ÊäÈëÏà·ÖÁÑ¼ÆËãSSM²ÎÊı
+    /// è¾“å…¥ç›¸åˆ†è£‚è®¡ç®—SSMå‚æ•°
     void InputSSMSP(ifstream& ifs) { comsParam.InputSSMSP(ifs); };
-    /// ÊäÈëÏà·ÖÁÑ¼ÆËãNR²ÎÊı
+    /// è¾“å…¥ç›¸åˆ†è£‚è®¡ç®—NRå‚æ•°
     void InputNRSP(ifstream& ifs) { comsParam.InputNRSP(ifs); };
-    /// ÊäÈëRR·½³ÌÇó½â²ÎÊı
+    /// è¾“å…¥RRæ–¹ç¨‹æ±‚è§£å‚æ•°
     void InputRR(ifstream& ifs) { comsParam.InputRR(ifs); };
 
-    /// ÊäÈë±ß½ç²ÎÊı
+    /// è¾“å…¥è¾¹ç•Œå‚æ•°
     void InputBoundary(ifstream& ifs);
 
-    /// ¼ì²é²ÎÊıÊäÈëÕıÈ·ĞÔ
+    /// æ£€æŸ¥å‚æ•°è¾“å…¥æ­£ç¡®æ€§
     void CheckParam();
 
-    /// ¼ì²éÑÒÊ¯²ÎÊıÊäÈëÕıÈ·ĞÔ
+    /// æ£€æŸ¥å²©çŸ³å‚æ•°è¾“å…¥æ­£ç¡®æ€§
     void CheckRock();
 
-    /// ¼ì²éCPL²ÎÊıÊäÈëÕıÈ·ĞÔ
+    /// æ£€æŸ¥CPLå‚æ•°è¾“å…¥æ­£ç¡®æ€§
     void CheckCPL();
 
-    /// ¼ì²éCPL²ÎÊıÊäÈëÕıÈ·ĞÔ
+    /// æ£€æŸ¥CPLå‚æ•°è¾“å…¥æ­£ç¡®æ€§
     void CheckCPG();
 };
 

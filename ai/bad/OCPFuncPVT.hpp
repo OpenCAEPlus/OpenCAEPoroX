@@ -17,243 +17,243 @@
 #include "UtilMath.hpp"
 using namespace std;
 
-/** @defgroup PVT ����
-* @brief ���ڼ��������PVT����
-* @details �������ڶ����͵�PVT���������Ǹ�����������PVT�������ܶȣ�ճ�ȵ�
+/** @defgroup PVT 函数
+* @brief 用于计算流体的PVT性质
+* @details 包含了众多类型的PVT函数，他们负责计算流体的PVT性质如密度，粘度等
 * @{
 */
 
-/** @brief ˮ�����ʱ�����(PVTW)
-* @details ����ˮ����ܶȣ�ճ�ȵ����ʣ������ǹ���ˮ��ѹ���ĺ���
+/** @brief 水相性质表格函数(PVTW)
+* @details 计算水相的密度，粘度等性质，他们是关于水相压力的函数
 */
 class OCP_PVTW : public OCPFuncTable
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         OCP_PVTW() = default; 
 
-        //! ����PVT����
+        //! 建立PVT表格
         void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoWin, const OCP_DBL& stdVwin);
         
-        //! ����ˮ���Ħ��Ũ��
+        //! 计算水相的摩尔浓度
         OCP_DBL CalXiW(const OCP_DBL& P) const;  
 
-        //! ����ˮ����ܶ�
+        //! 计算水相的密度
         OCP_DBL CalRhoW(const OCP_DBL& P) const;
 
-        //! ����ˮ��������ܶȣ�Ħ��Ũ�ȣ�ճ���Լ���صĵ�������
+        //! 计算水相的质量密度，摩尔浓度，粘度以及相关的导数性质
         void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
                            OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
 
     protected:
-        //! ����ˮ�������仯ϵ��
+        //! 计算水相的体积变化系数
         OCP_DBL CalBw(const OCP_DBL& P) const;
 
-        //! ����ˮ�������仯ϵ����ճ�ȵȵ���
+        //! 计算水相的体积变化系数，粘度等导数
         void CalBwMuwDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, OCP_DBL& bP, OCP_DBL& muP) const;
 
     protected:
-        //! ��̬��ˮ����ܶ�
+        //! 标态下水相的密度
         OCP_DBL stdRhoW;
         
-        //! ��̬��ˮ���Ħ�����
+        //! 标态下水相的摩尔体积
         OCP_DBL stdVw;  
 };
 
-/** @brief ��ѹ���Ļ��͵�PVT���� 
-* @details ����������ܶȣ�ճ�ȵ����ʣ������ǹ�������ѹ���ĺ���
+/** @brief 可压缩的活油的PVT性质 
+* @details 计算油相的密度，粘度等性质，他们是关于油相压力的函数
 */
 class OCP_PVCO : public OCPFuncTable  
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         OCP_PVCO() = default;
 
-        //! ����PVCO����
+        //! 建立PVCO表格
         void Setup(const vector<vector<OCP_DBL>>& src, const OCP_DBL& stdRhoOin, 
                    const OCP_DBL& stdRhoGin, const OCP_DBL& stdVoin, const OCP_DBL& stdVgin);
         
-        //! ����������ܶ�
+        //! 计算油相的密度
         OCP_DBL CalRhoO(const OCP_DBL& P, const OCP_DBL& Pb) const;
 
-        //! ���������Ħ��Ũ��
+        //! 计算油相的摩尔浓度
         OCP_DBL CalXiO(const OCP_DBL& P, const OCP_DBL& Pb) const;
 
-        //! ���㱥��������ܶȣ�Ħ��Ũ�ȣ�ճ�ȣ����ͱȼ���Ӧ�ĵ���
+        //! 计算饱和油相的密度，摩尔浓度，粘度，气油比及相应的导数
         void CalRhoXiMuRsDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu, 
                              OCP_DBL& rs, OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, OCP_DBL& rsP) const;
                              
-        //! ���㲻����������ܶȣ�Ħ��Ũ�ȣ�ճ�ȼ���Ӧ�ĵ���
+        //! 计算不饱和油相的密度，摩尔浓度，粘度及相应的导数
         void CalRhoXiMuDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, 
                            OCP_DBL& mu, OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP, 
                            OCP_DBL& rhoRs, OCP_DBL& xiRs, OCP_DBL& muRs) const;
                            
-        //! ���㱥����������ͱ�
+        //! 计算饱和油相的气油比
         OCP_DBL CalRs(const OCP_DBL& P) const;
 
     protected:
-        //! ���㱥����������ͱȣ�����仯���ӣ�ճ�ȣ�����Ӧ�ĵ��� 
+        //! 计算饱和油相的气油比，体积变化因子，粘度，及相应的导数 
         void CalRsBoMuoDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& rs, OCP_DBL& mu,
                            OCP_DBL& bP, OCP_DBL& rsP, OCP_DBL& muP) const;
                            
-        //! ���㲻�������������仯���ӣ�ճ�ȣ�����Ӧ�ĵ���
+        //! 计算不饱和油相的体积变化因子，粘度，及相应的导数
         void CalBoMuoDer(const OCP_DBL& rs, const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu,  
                          OCP_DBL& bP, OCP_DBL& muP, OCP_DBL& bRs, OCP_DBL& muRs) const;
                          
     protected:
-        //! ��̬�������ܶ�
+        //! 标态下油相密度
         OCP_DBL stdRhoO;   
         
-        //! ��̬�������ܶ�
+        //! 标态下气相密度
         OCP_DBL stdRhoG;
         
-        //! ��̬������Ħ�����
+        //! 标态下油相摩尔体积
         OCP_DBL stdVo;
         
-        //! ��̬������Ħ�����
+        //! 标态下气相摩尔体积
         OCP_DBL stdVg;              
 };
 
-/** @brief ���������PVT����
-* @details �������������ܶȣ�ճ�ȵ����ʣ������ǹ�������ѹ���ĺ���
+/** @brief 干燥气相的PVT性质
+* @details 计算干燥气相的密度，粘度等性质，他们是关于油相压力的函数
 */
 class OCP_PVDG : public OCPFuncTable
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         OCP_PVDG() = default;
 
-        //! ����PVDG������
+        //! 建立PVDG表格函数
         void Setup(const vector<vector<OCP_DBL>>& src, 
                    const OCP_DBL& stdRhoGin, const OCP_DBL& stdVgin);
                    
-        //! ���������Ħ��Ũ��
+        //! 计算气相的摩尔浓度
         OCP_DBL CalXiG(const OCP_DBL& P) const;
 
-        //! ����������ܶ�
+        //! 计算气相的密度
         OCP_DBL CalRhoG(const OCP_DBL& P) const;
 
-        //! ����������ܶȣ�Ħ��Ũ�ȣ�ճ�ȣ�����Ӧ�ĵ��� 
+        //! 计算气相的密度，摩尔浓度，粘度，及相应的导数 
         void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, OCP_DBL& mu,
                            OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
                            
     protected:
-        //! �������������仯���� 
+        //! 计算气相的体积变化因子 
         OCP_DBL CalBg(const OCP_DBL& P) const;
 
-        //! �������������仯���ӣ�ճ�Ⱥ���Ӧ�ĵ���
+        //! 计算气相的体积变化因子，粘度和相应的导数
         void CalBgMugDer(const OCP_DBL& P, OCP_DBL& b, OCP_DBL& mu, 
                          OCP_DBL& bP, OCP_DBL& muP) const;
                          
     protected:
-        //! ��̬��������ܶ�
+        //! 标态下气相的密度
         OCP_DBL stdRhoG;
         
-        //! ��̬�������Ħ�����
+        //! 标态下气相的摩尔体积
         OCP_DBL stdVg;
 };
 
-/** @brief ���͵�PVT����
-* @details ������������ܶȣ�ճ�ȵ����ʣ������ǹ�������ѹ���ĺ���
+/** @brief 死油的PVT性质
+* @details 计算死油相的密度，粘度等性质，他们是关于油相压力的函数
 */  
 class OCP_PVDO : public OCPFuncTable
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         OCP_PVDO() = default;
 
-        //! ����PVDO������
+        //! 建立PVDO表格函数
         virtual void Setup(const vector<vector<OCP_DBL>>& src, 
                            const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin);
                            
-        //! ���������Ħ��Ũ��
+        //! 计算油相的摩尔浓度
         virtual OCP_DBL CalXiO(const OCP_DBL& P) const;
 
-        //! ����������ܶ�
+        //! 计算油相的密度
         virtual OCP_DBL CalRhoO(const OCP_DBL& P) const;
 
-        //! ����������ܶȣ�Ħ��Ũ�ȣ�ճ�ȣ�����Ӧ�ĵ���
+        //! 计算油相的密度，摩尔浓度，粘度，及相应的导数
         virtual void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, 
                                    OCP_DBL& mu, OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const;
                                    
     protected:
-        //! �������������仯����  
+        //! 计算油相的体积变化因子  
         virtual OCP_DBL CalBo(const OCP_DBL& P) const;
 
-        //! ���㲻�������������仯���ӣ�ճ�ȣ�����Ӧ�ĵ���
+        //! 计算不饱和油相的体积变化因子，粘度，及相应的导数
         virtual void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, 
                                  OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
                                  
     protected:
-        //! ��̬��������ܶ�
+        //! 标态下油相的密度
         OCP_DBL stdRhoO;    
         
-        //! ��̬�������Ħ�����
+        //! 标态下油相的摩尔体积
         OCP_DBL stdVo;     
 };
 
-/** @brief ���͵�PVT����(��ѹ��ϵ��Ϊ����)
-* @details ������������ܶȣ�ճ�ȵ����ʣ������ǹ�������ѹ���ĺ�������ѹ��ϵ��Ϊ����
+/** @brief 死油的PVT性质(可压性系数为常数)
+* @details 计算死油相的密度，粘度等性质，他们是关于油相压力的函数，可压缩系数为常数
 */
 class OCP_PVCDO : public OCP_PVDO
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         OCP_PVCDO() = default;
 
-        //! ����PVCDO������
+        //! 建立PVCDO表格函数
         void Setup(const vector<vector<OCP_DBL>>& src, 
                    const OCP_DBL& stdRhoOin, const OCP_DBL& stdVoin) override;
                    
-        //! ���������Ħ��Ũ��
+        //! 计算油相的摩尔浓度
         OCP_DBL CalXiO(const OCP_DBL& P) const override;
 
-        //! ����������ܶ�
+        //! 计算油相的密度
         OCP_DBL CalRhoO(const OCP_DBL& P) const override;
 
-        //! ����������ܶȣ�Ħ��Ũ�ȣ�ճ�ȣ�����Ӧ�ĵ���
+        //! 计算油相的密度，摩尔浓度，粘度，及相应的导数
         void CalRhoXiMuDer(const OCP_DBL& P, OCP_DBL& rho, OCP_DBL& xi, 
                            OCP_DBL& mu, OCP_DBL& rhoP, OCP_DBL& xiP, OCP_DBL& muP) const override;
                            
     protected:
-        //! �������������仯����
+        //! 计算油相的体积变化因子
         OCP_DBL CalBo(const OCP_DBL& P) const;
 
-        //! ���㲻�������������仯���ӣ�ճ�ȣ�����Ӧ�ĵ��� 
+        //! 计算不饱和油相的体积变化因子，粘度，及相应的导数 
         void CalBoMuoDer(const OCP_DBL& P, OCP_DBL& bo, OCP_DBL& muo, 
                          OCP_DBL& dBodP, OCP_DBL& dMuodP) const;
                          
     protected:
-        //! �ο�ѹ��
+        //! 参考压力
         OCP_DBL Pref;
         
-        //! �ο�ѹ���µ���������仯����
+        //! 参考压力下的油相体积变化因子
         OCP_DBL Bref;
         
-        //! �ο�ѹ���µ������ѹ����ϵ��
+        //! 参考压力下的油相可压缩性系数
         OCP_DBL Cb;
         
-        //! �ο�ѹ���µ�����ճ��
+        //! 参考压力下的油相粘度
         OCP_DBL muref;
         
-        //! �ο�ѹ���µ�����ճ��ϵ��  
+        //! 参考压力下的油相粘度系数  
         OCP_DBL Cmu;
 };
 
-/** @brief һ��3άPVT���񣬱����������¶Ⱥ�ѹ���仯 
-* @details ����������ܶȣ�ճ�ȵ����ʣ������ǹ�������ѹ�����¶ȵĺ���
+/** @brief 一般3维PVT表格，变量性质随温度和压力变化 
+* @details 计算流体的密度，粘度等性质，他们是关于流体压力和温度的函数
 */
 class OCP_PVT2 : public OCPFuncTable2
 {
     public:
-        //! ���������ܶ�
+        //! 计算流体密度
         OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& T) const;
 
-        //! �����ܶȣ�ճ�Ⱥ��ܽ��
+        //! 计算密度，粘度和溶解度
         void CalRhoMuSol(const OCP_DBL& P, const OCP_DBL& T, 
                          OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol) const;
                          
-        //! �����ܶȣ�ճ�Ⱥ��ܽ�Ⱥ���Ӧ�ĵ���
+        //! 计算密度，粘度和溶解度和相应的导数
         void CalRhoMuSolDer(const OCP_DBL& P, const OCP_DBL& T, 
                             OCP_DBL& rho, OCP_DBL& mu, OCP_DBL& sol,
                             OCP_DBL& rhoP, OCP_DBL& muP, OCP_DBL& solP) const;
@@ -263,257 +263,257 @@ class OCP_PVT2 : public OCPFuncTable2
 typedef OCP_PVT2 OCP_PVTCO2; 
 typedef OCP_PVT2 OCP_PVTH2O;
 
-/** @brief Garciaw ģ�� 
-* @details �����ܽ���CO2��ˮ���ܶ�
+/** @brief Garciaw 模型 
+* @details 计算溶解了CO2的水相密度
 */
 class Garciaw
 {
     public:
-        //! ����Garciawģ�� 
+        //! 建立Garciaw模型 
         void Setup(const OCP_BOOL& flag);
 
-        //! �Ƿ�ʹ�ø�ģ��
+        //! 是否使用该模型
         auto IfUse() const;
 
-        //! ����ˮ���ܶ�
+        //! 计算水相密度
         void CalRho(const OCP_DBL& T, const OCP_DBL& xGw, OCP_DBL& rhow) const;
 
-        //! ����ˮ���ܶȺ���صĵ��� 
+        //! 计算水相密度和相关的导数 
         void CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP, 
                        OCP_DBL& rhow, OCP_DBL& rhowP, OCP_DBL& drhow_dxGw) const;
                        
-        //! ����ˮ���ܶȺ���صĵ��� 
+        //! 计算水相密度和相关的导数 
         void CalRhoDer(const OCP_DBL& T, const OCP_DBL& xGw, const OCP_DBL& xGwP,  
                        const OCP_DBL& xGwT, OCP_DBL& rhow, OCP_DBL& rhowP, 
                        OCP_DBL& rhowT, OCP_DBL& drhow_dxGw) const;
                        
     protected:
-        OCP_BOOL ifUse;      ///< �Ƿ�ʹ�ø�ģ��       
-        const OCP_DBL MWCO2; ///< ������̼�������� 
+        OCP_BOOL ifUse;      ///< 是否使用该模型       
+        const OCP_DBL MWCO2; ///< 二氧化碳分子质量 
 };
 
-/** @brief ճ�ȼ��������  
+/** @brief 粘度计算参数集  
 */
 class ViscosityParams 
 {
     public:
-        //! ���캯��
+        //! 构造函数
         ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin, const OCP_DBL* xin);
 
-        //! ���캯�� 
+        //! 构造函数 
         ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin, 
                         const OCP_DBL* xin, const OCP_DBL* xiin);
                         
-        //! ���캯��
+        //! 构造函数
         ViscosityParams(const OCP_DBL* Pin, const OCP_DBL* Tin,
                         const OCP_DBL* xin, const OCP_DBL* xiin,  
                         const OCP_DBL* xiPin, const OCP_DBL* xiTin,
                         const OCP_DBL* xixin);
                         
     public:
-        const OCP_DBL* P;     ///< ѹ��
-        const OCP_DBL* T;     ///< �¶�
-        const OCP_DBL* x;     ///< ���Ħ������
-        const OCP_DBL* xi;    ///< Ħ��Ũ��
-        const OCP_DBL* xiP;   ///< Ħ��Ũ�ȶ�ѹ���ĵ���
-        const OCP_DBL* xiT;   ///< Ħ��Ũ�ȶ��¶ȵĵ���
-        const OCP_DBL* xix;   ///< Ħ��Ũ�ȶ�Ħ�������ĵ���
+        const OCP_DBL* P;     ///< 压力
+        const OCP_DBL* T;     ///< 温度
+        const OCP_DBL* x;     ///< 组分摩尔分数
+        const OCP_DBL* xi;    ///< 摩尔浓度
+        const OCP_DBL* xiP;   ///< 摩尔浓度对压力的导数
+        const OCP_DBL* xiT;   ///< 摩尔浓度对温度的导数
+        const OCP_DBL* xix;   ///< 摩尔浓度对摩尔分数的导数
 };
 
-/** @brief ճ�ȼ��㷽�� 
+/** @brief 粘度计算方法 
 */
 class ViscosityMethod 
 {
     public:
-        //! Ĭ�Ϲ��캯��
+        //! 默认构造函数
         ViscosityMethod() = default;
 
-        //! ����ճ��
+        //! 计算粘度
         virtual OCP_DBL CalViscosity(const ViscosityParams& vp) = 0;
 
-        //! ����ճ�Ⱥ���Ӧ�ĵ��� 
+        //! 计算粘度和相应的导数 
         virtual OCP_DBL CalViscosity(const ViscosityParams& vp, 
                                      OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) = 0;
                                      
     protected:
-        USI nc;                ///< �����
-        vector<OCP_DBL> muc;   ///< ��ֵ�ճ��
-        vector<OCP_DBL> mucP;  ///< ��ֵ�ճ�ȶ�ѹ���ĵ���
-        vector<OCP_DBL> mucT;  ///< ��ֵ�ճ�ȶ��¶ȵĵ���
+        USI nc;                ///< 组分数
+        vector<OCP_DBL> muc;   ///< 组分的粘度
+        vector<OCP_DBL> mucP;  ///< 组分的粘度对压力的导数
+        vector<OCP_DBL> mucT;  ///< 组分的粘度对温度的导数
 };
 
-/** @brief ������ֵ�ѹ���¶�������ճ�ȱ�����ճ�ȣ����Ի�Ϲ���
+/** @brief 利用组分的压力温度依赖的粘度表计算粘度，线性混合规则
 */
 class ViscosityMethod01 : public ViscosityMethod
 {
     public:
-        //! ���캯�� 
+        //! 构造函数 
         ViscosityMethod01(const Table2& tab);
 
-        //! ����ճ��
+        //! 计算粘度
         OCP_DBL CalViscosity(const ViscosityParams& vp) override;
 
-        //! ����ճ�Ⱥ���Ӧ�ĵ���
+        //! 计算粘度和相应的导数
         OCP_DBL CalViscosity(const ViscosityParams& vp,  
                              OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
                              
     protected:
-        //! ��ֵ�ѹ���¶�������ճ�ȱ�
+        //! 组分的压力温度依赖的粘度表
         OCPTable2 viscTab;
 };
 
-/** @brief ������ֵ�ճ�ȹ�����������ճ�ȣ����Ի�Ϲ���
+/** @brief 利用组分的粘度关联参数计算粘度，线性混合规则
 */ 
 class ViscosityMethod02 : public ViscosityMethod
 {
     public:
-        //! ���캯��
+        //! 构造函数
         ViscosityMethod02(const vector<OCP_DBL>& av, const vector<OCP_DBL>& bv);
 
-        //! ����ճ�� 
+        //! 计算粘度 
         OCP_DBL CalViscosity(const ViscosityParams& vp) override;
 
-        //! ����ճ�Ⱥ���Ӧ�ĵ���
+        //! 计算粘度和相应的导数
         OCP_DBL CalViscosity(const ViscosityParams& vp,  
                              OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
                              
     protected:
-        //! ��ֵ�ճ�ȹ������� 
+        //! 组分的粘度关联参数 
         vector<OCP_DBL> avisc;
         
-        //! ��ֵ�ճ�ȹ�������
+        //! 组分的粘度关联参数
         vector<OCP_DBL> bvisc;
 };
 
-/** @brief ����Lohrenz-Bray-Clark ճ�ȼ��㹫ʽ
+/** @brief 利用Lohrenz-Bray-Clark 粘度计算公式
 */
 /// Lohrenz-Bray-Clark formula 
 class ViscosityMethod03 : public ViscosityMethod
 {
 public:
     ViscosityMethod03(const ComponentParam& param, const USI& tarId);
-    /// ����ճ��
+    /// 计算粘度
     OCP_DBL CalViscosity(const ViscosityParams& vp) override;
-    /// ����ճ�Ⱥ���Ӧ�ĵ���
+    /// 计算粘度和相应的导数
     OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) override;
 
 protected:
-    USI             nc;       ///< �����
-    vector<OCP_DBL> coef;     ///< LBCϵ��
-    vector<OCP_DBL> Tc;       ///< ����ٽ��¶�
-    vector<OCP_DBL> Pc;       ///< ����ٽ�ѹ��
-    vector<OCP_DBL> Vcvis;    ///< ���ճ���ٽ����
-    vector<OCP_DBL> MWC;      ///< ��ַ�������
-    OCP_DBL MW;               ///< ���������
-    vector<OCP_DBL> sqrtMWC;  ///< ��ַ���������ƽ����
-    OCP_DBL xPc, xTc, xVc;    ///< ��������
-    vector<OCP_DBL> auxA;     ///< ��������
-    vector<OCP_DBL> auxB;     ///< ��������
+    USI             nc;       ///< 组分数
+    vector<OCP_DBL> coef;     ///< LBC系数
+    vector<OCP_DBL> Tc;       ///< 组分临界温度
+    vector<OCP_DBL> Pc;       ///< 组分临界压力
+    vector<OCP_DBL> Vcvis;    ///< 组分粘度临界体积
+    vector<OCP_DBL> MWC;      ///< 组分分子质量
+    OCP_DBL MW;               ///< 相分子质量
+    vector<OCP_DBL> sqrtMWC;  ///< 组分分子质量的平方根
+    OCP_DBL xPc, xTc, xVc;    ///< 辅助变量
+    vector<OCP_DBL> auxA;     ///< 辅助变量
+    vector<OCP_DBL> auxB;     ///< 辅助变量
 };
 
 
-/** @brief ճ�ȼ���ӿ���
+/** @brief 粘度计算接口类
 */
 class ViscosityCalculation
 {
 public:
-    /// Ĭ�Ϲ��캯��
+    /// 默认构造函数
     ViscosityCalculation() = default;
-    /// ��װ
+    /// 组装
     void Setup(const ComponentParam& param, const USI& tarId);
-    /// ����ճ��
+    /// 计算粘度
     OCP_DBL CalViscosity(const ViscosityParams& vp) {
         return vM->CalViscosity(vp);
     }
-    /// ����ճ�Ⱥ���Ӧ�ĵ���
+    /// 计算粘度和相应的导数
     OCP_DBL CalViscosity(const ViscosityParams& vp, OCP_DBL& muP, OCP_DBL& muT, OCP_DBL* mux) {
         return vM->CalViscosity(vp, muP, muT, mux);
     }
 protected:
-    ViscosityMethod* vM;  ///< ճ�ȼ��㷽����
+    ViscosityMethod* vM;  ///< 粘度计算方法集
 };
 
 
-/** @brief �ʼ��㷽��
+/** @brief 焓计算方法
 */
 class EnthalpyMethod
 {
 public:
-    /// Ĭ�Ϲ��캯��
+    /// 默认构造函数
     EnthalpyMethod() = default;
-    /// ������
+    /// 计算焓
     virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const = 0;
-    /// �����ʺ���Ӧ�ĵ���
+    /// 计算焓和相应的导数
     virtual OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const = 0;
 };
 
 
-/** @brief Һ���ʺͼ��ʼ��㷽��
+/** @brief 液相焓和简单焓计算方法
 */
 class EnthalpyMethod01 : public EnthalpyMethod
 {
 public:
-    /// ���캯��
+    /// 构造函数
     EnthalpyMethod01(const OCP_DBL& Trefin, const vector<OCP_DBL>& cpl1in, const vector<OCP_DBL>& cpl2in,
         const vector<OCP_DBL>& cpl3in, const vector<OCP_DBL>& cpl4in);
-    /// ������
+    /// 计算焓
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
-    /// �����ʺ���Ӧ�ĵ���
+    /// 计算焓和相应的导数
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
-    OCP_DBL         Tref;  ///< �ο��¶�
-    USI             nc;    ///< �����
-    vector<OCP_DBL> cpl1;  ///< Һ���ʼ���ϵ��
-    vector<OCP_DBL> cpl2;  ///< Һ���ʼ���ϵ��
-    vector<OCP_DBL> cpl3;  ///< Һ���ʼ���ϵ��
-    vector<OCP_DBL> cpl4;  ///< Һ���ʼ���ϵ��
+    OCP_DBL         Tref;  ///< 参考温度
+    USI             nc;    ///< 组分数
+    vector<OCP_DBL> cpl1;  ///< 液相焓计算系数
+    vector<OCP_DBL> cpl2;  ///< 液相焓计算系数
+    vector<OCP_DBL> cpl3;  ///< 液相焓计算系数
+    vector<OCP_DBL> cpl4;  ///< 液相焓计算系数
 };
 
 
-/** @brief �����ʼ��㷽��
+/** @brief 气相焓计算方法
 */
 class EnthalpyMethod02 : public EnthalpyMethod
 {
 public:
-    /// ���캯��
+    /// 构造函数
     EnthalpyMethod02(const OCP_DBL& Trefin, const vector<OCP_DBL>& Tcritin,
         const vector<OCP_DBL>& cpg1in, const vector<OCP_DBL>& cpg2in,
         const vector<OCP_DBL>& cpg3in, const vector<OCP_DBL>& cpg4in,
         const vector<OCP_DBL>& hvaprin, const vector<OCP_DBL>& hvrin,
         const vector<OCP_DBL>& evin);
-    /// ������
+    /// 计算焓
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override;
-    /// �����ʺ���Ӧ�ĵ���
+    /// 计算焓和相应的导数
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const override;
 
 protected:
-    OCP_DBL         Tref;    ///< �ο��¶�
-    vector<OCP_DBL> Tcrit;   ///< ����ٽ��¶�
-    USI             nc;      ///< �����
-    vector<OCP_DBL> cpg1;    ///< �����ʼ���ϵ��
-    vector<OCP_DBL> cpg2;    ///< �����ʼ���ϵ��
-    vector<OCP_DBL> cpg3;    ///< �����ʼ���ϵ��
-    vector<OCP_DBL> cpg4;    ///< �����ʼ���ϵ��
-    vector<OCP_DBL> hvapr;   ///< �����ʼ���ϵ��
-    vector<OCP_DBL> hvr;     ///< �����ʼ���ϵ��
-    vector<OCP_DBL> ev;      ///< �����ʼ���ϵ��
+    OCP_DBL         Tref;    ///< 参考温度
+    vector<OCP_DBL> Tcrit;   ///< 组分临界温度
+    USI             nc;      ///< 组分数
+    vector<OCP_DBL> cpg1;    ///< 气相焓计算系数
+    vector<OCP_DBL> cpg2;    ///< 气相焓计算系数
+    vector<OCP_DBL> cpg3;    ///< 气相焓计算系数
+    vector<OCP_DBL> cpg4;    ///< 气相焓计算系数
+    vector<OCP_DBL> hvapr;   ///< 蒸发焓计算系数
+    vector<OCP_DBL> hvr;     ///< 蒸发焓计算系数
+    vector<OCP_DBL> ev;      ///< 蒸发焓计算系数
 };
 
 
-/** @brief �ʼ���ӿ�
+/** @brief 焓计算接口
 */
 class EnthalpyCalculation
 {
 public:
-    /// ��װ����
+    /// 组装计算
     void Setup(const ComponentParam& param, const USI& tarId);
-    /// ������
+    /// 计算焓
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const { return eM->CalEnthalpy(T, zi); }
-    /// �����ʺ���Ӧ�ĵ���
+    /// 计算焓和相应的导数
     OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi, OCP_DBL& HT, OCP_DBL* Hz) const { return eM->CalEnthalpy(T, zi, HT, Hz); }
 protected:
-    EnthalpyMethod* eM; ///< �ʼ��㷽����
+    EnthalpyMethod* eM; ///< 焓计算方法集
 };
 
 

@@ -21,121 +21,121 @@
 
 using namespace std;
 
-/// Peaceman¾®Ä£ĞÍÄ£¿é
+/// Peacemanäº•æ¨¡å‹æ¨¡å—
 PeacemanWell : public Well{
 public:
-    /// ÊäÈëÉä¿×ĞÅÏ¢
+    /// è¾“å…¥å°„å­”ä¿¡æ¯
     void InputPerfo(const WellParam& well, const Domain& domain, const USI& wId) override;
 
-    /// ×é×°¾®
+    /// ç»„è£…äº•
     void Setup(const Bulk& bk, const vector<SolventINJ>& sols) override;
     
-    /// ³õÊ¼»¯¾®Ñ¹Á¦
+    /// åˆå§‹åŒ–äº•å‹åŠ›
     void InitWellP(const Bulk& bk) override;
 
-    /// ¼ì²é¾®¿ØÖÆÄ£Ê½
+    /// æ£€æŸ¥äº•æ§åˆ¶æ¨¡å¼
     void CheckOptMode(const Bulk& bk) override;
 
-    /// Ê±¼ä²½¿ªÊ¼¼ÆËã¾®Á÷Á¿
+    /// æ—¶é—´æ­¥å¼€å§‹è®¡ç®—äº•æµé‡
     void CalFluxInit(const Bulk& bk) override;
 
-    /// ¼ÆËã¾®Á÷Á¿
+    /// è®¡ç®—äº•æµé‡
     void CalFlux(const Bulk& bk) override;
 
-    /// ¼ì²é¾®Ñ¹Á¦
+    /// æ£€æŸ¥äº•å‹åŠ›
     ReservoirState CheckP(const Bulk& bk) override;
 
-    /// ¼ÆËã²úÁ¿×¢ÈëÁ¿
+    /// è®¡ç®—äº§é‡æ³¨å…¥é‡
     void CalIPRate(const Bulk& bk, const OCP_DBL& dt) override;
 
-    /// ¼ÆËãÊ±¼ä²½ÄÚ×î´ó±ä»¯
+    /// è®¡ç®—æ—¶é—´æ­¥å†…æœ€å¤§å˜åŒ–
     OCP_DBL CalMaxChangeTime() const override;
 
-    /// ¼ÆËãÅ£¶Ù²½ÄÚ×î´ó±ä»¯
+    /// è®¡ç®—ç‰›é¡¿æ­¥å†…æœ€å¤§å˜åŒ–
     OCP_DBL CalMaxChangeNR() override;
 
-    /// ÖØÖÃÎªÉÏÒ»¸öÊ±¼ä²½¾®×´Ì¬
+    /// é‡ç½®ä¸ºä¸Šä¸€ä¸ªæ—¶é—´æ­¥äº•çŠ¶æ€
     void ResetToLastTimeStep(const Bulk& bk) override;
 
-    /// ±£´æµ±Ç°Ê±¼ä²½¾®×´Ì¬
+    /// ä¿å­˜å½“å‰æ—¶é—´æ­¥äº•çŠ¶æ€
     void UpdateLastTimeStep() override;
 
 protected:
-    /// ¼ÆËã¾®Ö¸Êı
+    /// è®¡ç®—äº•æŒ‡æ•°
     void CalWI(const Bulk& bk);
 
-    /// ¼ÆËã¾®´«µ¼ÂÊ
+    /// è®¡ç®—äº•ä¼ å¯¼ç‡
     void CalTrans(const Bulk& bk);
 
-    /// ¼ÆËã¾®Á÷Á¿
+    /// è®¡ç®—äº•æµé‡
     void CalFlux(const Bulk& bk, const OCP_BOOL ReCalXi);
 
-    /// ¼ÆËã×î´ó×¢ÈëËÙÂÊ
+    /// è®¡ç®—æœ€å¤§æ³¨å…¥é€Ÿç‡
     OCP_DBL CalInjRateMaxBHP(const Bulk& bk);
 
-    /// ¼ÆËã×î´ó×¢ÈëËÙÂÊ
+    /// è®¡ç®—æœ€å¤§æ³¨å…¥é€Ÿç‡
     OCP_DBL CalProdRateMinBHP(const Bulk& bk);
 
-    /// ¼ÆËã×¢ÈëÁ÷Á¿
+    /// è®¡ç®—æ³¨å…¥æµé‡
     void CalInjQj(const Bulk& bk, const OCP_DBL& dt);
 
-    /// ¼ÆËãÉú²úÁ÷Á¿
+    /// è®¡ç®—ç”Ÿäº§æµé‡
     void CalProdQj(const Bulk& bk, const OCP_DBL& dt);
 
-    /// ¼ì²é½»²æÁ÷
+    /// æ£€æŸ¥äº¤å‰æµ
     ReservoirState CheckCrossFlow(const Bulk& bk);
 
-    /// ¼ÆËãÉú²ú×¢ÈëÒò×Ó
+    /// è®¡ç®—ç”Ÿäº§æ³¨å…¥å› å­
     void CalFactor(const Bulk& bk) const;
 
-    /// ¼ÆËãÉä¿×Ñ¹²î
+    /// è®¡ç®—å°„å­”å‹å·®
     void CaldG(const Bulk& bk);
 
-    /// ¼ÆËã×¢Èë¾®Éä¿×Ñ¹²î
+    /// è®¡ç®—æ³¨å…¥äº•å°„å­”å‹å·®
     void CalInjdG(const Bulk& bk);
 
-    /// ¼ÆËãÉú²ú¾®Éä¿×Ñ¹²î
+    /// è®¡ç®—ç”Ÿäº§äº•å°„å­”å‹å·®
     void CalProddG(const Bulk& bk);
 
-    /// ¼ÆËãÉú²ú¾®Éä¿×Ñ¹²î·½·¨1
+    /// è®¡ç®—ç”Ÿäº§äº•å°„å­”å‹å·®æ–¹æ³•1
     void CalProddG01(const Bulk& bk);
 
-    /// ¼ÆËãÉú²ú¾®Éä¿×Ñ¹²î·½·¨2
+    /// è®¡ç®—ç”Ÿäº§äº•å°„å­”å‹å·®æ–¹æ³•2
     void CalProddG02(const Bulk& bk);
 
-    /// ¼ÆËãÉä¿×Ñ¹Á¦
+    /// è®¡ç®—å°„å­”å‹åŠ›
     void CalPerfP() { for (USI p = 0; p < numPerf; p++) perf[p].P = bhp + dG[p]; }
 
 protected:
 
-    vector<OCP_DBL> dG;               ///< Éä¿×Ñ¹²î
-    mutable vector<OCP_DBL> factor;   ///< ×¢ÈëÉú²úÒò×Ó
+    vector<OCP_DBL> dG;               ///< å°„å­”å‹å·®
+    mutable vector<OCP_DBL> factor;   ///< æ³¨å…¥ç”Ÿäº§å› å­
 };
 
 class PeacemanWellIsoT : public PeacemanWell
 {
 public:
-    /// FIM·½·¨¼ÆËã¾®²Ğ²î
+    /// FIMæ–¹æ³•è®¡ç®—äº•æ®‹å·®
     void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
-    /// FIM·½·¨»ñÈ¡¾®½â
+    /// FIMæ–¹æ³•è·å–äº•è§£
     void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
-    /// FIM·½·¨×°Åä¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…äº•çŸ©é˜µ
     void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
-    /// FIM·½·¨×°Åä×¢Èë¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…æ³¨å…¥äº•çŸ©é˜µ
     void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
-    /// FIM·½·¨×°ÅäÉú²ú¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…ç”Ÿäº§äº•çŸ©é˜µ
     void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 public:
-    /// IMPEC·½·¨»ñÈ¡¾®½â
+    /// IMPECæ–¹æ³•è·å–äº•è§£
     void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override;
-    /// IMPEC·½·¨×°Åä¾®¾ØÕó
+    /// IMPECæ–¹æ³•è£…é…äº•çŸ©é˜µ
     void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
-    /// IMPEC·½·¨×°Åä×¢Èë¾®¾ØÕó
+    /// IMPECæ–¹æ³•è£…é…æ³¨å…¥äº•çŸ©é˜µ
     void AssembleMatInjIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
-    /// IMPEC·½·¨×°ÅäÉú²ú¾®¾ØÕó
+    /// IMPECæ–¹æ³•è£…é…ç”Ÿäº§äº•çŸ©é˜µ
     void AssembleMatProdIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 };
@@ -144,22 +144,22 @@ protected:
 class PeacemanWellT : public PeacemanWell
 {
 public:
-    /// FIM·½·¨¼ÆËãÈÈÁ÷¾®²Ğ²î
+    /// FIMæ–¹æ³•è®¡ç®—çƒ­æµäº•æ®‹å·®
     void CalResFIM(OCP_USI& wId, OCPNRresidual& res, const Bulk& bk, const OCP_DBL& dt) const override;
-    /// FIM·½·¨»ñÈ¡ÈÈÁ÷¾®½â
+    /// FIMæ–¹æ³•è·å–çƒ­æµäº•è§£
     void GetSolutionFIM(const vector<OCP_DBL>& u, OCP_USI& wId) override;
-    /// FIM·½·¨×°ÅäÈÈÁ÷¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…çƒ­æµäº•çŸ©é˜µ
     void AssembleMatFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override;
 protected:
-    /// FIM·½·¨×°ÅäÈÈÁ÷×¢Èë¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…çƒ­æµæ³¨å…¥äº•çŸ©é˜µ
     void AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
-    /// FIM·½·¨×°ÅäÈÈÁ÷Éú²ú¾®¾ØÕó
+    /// FIMæ–¹æ³•è£…é…çƒ­æµç”Ÿäº§äº•çŸ©é˜µ
     void AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const;
 
 public:
-    /// ²»¿ÉÓÃ
+    /// ä¸å¯ç”¨
     void GetSolutionIMPEC(const vector<OCP_DBL>& u, OCP_USI& wId) override { OCP_ABORT("NOT USED!"); }
-    /// ²»¿ÉÓÃ
+    /// ä¸å¯ç”¨
     void AssembleMatIMPEC(LinearSystem& ls, const Bulk& bk, const OCP_DBL& dt) const override { OCP_ABORT("NOT USED!"); }
 };
 
