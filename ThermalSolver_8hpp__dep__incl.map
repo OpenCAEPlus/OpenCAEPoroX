@@ -1,5 +1,0 @@
-<map id="ai/good_checked/ThermalSolver.hpp" name="ai/good_checked/ThermalSolver.hpp">
-<area shape="rect" id="node1" title="ThermalSolver类声明" alt="" coords="5,5,237,32"/>
-<area shape="rect" id="node2" href="$Solver_8hpp.html" title="求解器类的声明" alt="" coords="29,80,214,107"/>
-<area shape="rect" id="node3" href="$OCP_8hpp.html" title="OpenCAEPoroX模拟器的主头文件" alt="" coords="33,155,209,181"/>
-</map>

@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classOCPFuncTable.html" title="提供OCP表功能" alt="" coords="5,208,116,235"/>
 <area shape="rect" id="node2" href="$classOCP__PVCO.html" title="可压缩的活油的PVT性质" alt="" coords="165,5,261,32"/>
 <area shape="rect" id="node3" href="$classOCP__PVDG.html" title="干燥气相的PVT性质" alt="" coords="165,56,261,83"/>

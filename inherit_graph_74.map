@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classOCPFlux.html" title="通量计算的抽象基类" alt="" coords="5,56,81,83"/>
 <area shape="rect" id="node2" href="$classOCPFlux01.html" title="用于等温达西流量计算的类" alt="" coords="133,5,224,32"/>
 <area shape="rect" id="node3" href="$classOCPFlux02.html" title="用于等温达西流量和标准重力排水模型计算的类" alt="" coords="133,56,224,83"/>

@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classMisFacMethod.html" title="可混溶性因子计算方法的抽象基类。" alt="" coords="5,5,113,32"/>
 <area shape="rect" id="node2" href="$classMisFacMethod01.html" title="Coats表达式的实现，用于计算可混溶性因子。" alt="" coords="161,5,284,32"/>
 </map>

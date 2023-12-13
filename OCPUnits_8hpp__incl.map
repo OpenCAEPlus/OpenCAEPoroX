@@ -1,9 +1,0 @@
-<map id="ai/good_checked/OCPUnits.hpp" name="ai/good_checked/OCPUnits.hpp">
-<area shape="rect" id="node1" title="OpenCAEPoro中使用的单位" alt="" coords="35,5,244,32"/>
-<area shape="rect" id="node2" href="$OCPDataType_8hpp.html" title="OpenCAEPoro中使用的数据类型定义" alt="" coords="5,80,137,107"/>
-<area shape="rect" id="node4" href="$UtilError_8hpp.html" title="本文件包含了错误日志和警告消息的宏定义，用于在开发中快速定位和记录问题。" alt="" coords="172,80,267,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="24,155,79,181"/>
-<area shape="rect" id="node5" title=" " alt="" coords="103,155,170,181"/>
-<area shape="rect" id="node6" title=" " alt="" coords="194,155,266,181"/>
-<area shape="rect" id="node7" title=" " alt="" coords="290,155,359,181"/>
-</map>

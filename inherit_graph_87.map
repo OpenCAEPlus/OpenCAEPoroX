@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classOCPRock.html" title="OCPRock类是一个抽象类，用于定义岩石物理特性的基本接口。" alt="" coords="5,31,88,57"/>
 <area shape="rect" id="node2" href="$classOCPRockIsoT.html" title="OCPRockIsoT类是OCPRock的派生类，用于等温条件下的岩石物理特性模拟。" alt="" coords="136,5,244,32"/>
 <area shape="rect" id="node4" href="$classOCPRockT.html" title="OCPRockT类是OCPRock的派生类，用于考虑温度变化对岩石物理特性影响的模型。" alt="" coords="145,56,235,83"/>

@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classViscosityMethod.html" title="粘度计算方法" alt="" coords="5,56,124,83"/>
 <area shape="rect" id="node2" href="$classViscosityMethod01.html" title="利用组分的压力温度依赖的粘度表计算粘度，线性混合规则" alt="" coords="172,5,305,32"/>
 <area shape="rect" id="node3" href="$classViscosityMethod02.html" title="利用组分的粘度关联参数计算粘度，线性混合规则" alt="" coords="172,56,305,83"/>

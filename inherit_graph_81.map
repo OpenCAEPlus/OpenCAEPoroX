@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classOCPMixtureMethodK.html" title="OCPMixtureMethodK是一个在非EoS模型中使用的基础类。" alt="" coords="5,81,152,108"/>
 <area shape="rect" id="node2" href="$classOCPMixtureMethodK__GW01.html" title="利用PVTCO2和PVTH2O计算气水两相的混合物性质" alt="" coords="205,5,395,32"/>
 <area shape="rect" id="node3" href="$classOCPMixtureMethodK__OGW01.html" title="使用PVDO和PVTW来计算油气水三相混合物的性质" alt="" coords="200,56,400,83"/>

@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classIsothermalMethod.html" title="本类是等温方法的基类。" alt="" coords="5,5,132,32"/>
 <area shape="rect" id="node2" href="$classIsoT__IMPEC.html" title="IsoT_IMPEC是隐式压力显式饱和度(IMPEC)方法的类。" alt="" coords="180,5,279,32"/>
 </map>

@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="5,107,128,133"/>
 <area shape="rect" id="node2" href="$classOCPFlowMethod__GW01.html" title="使用 Brooks&#45;Corey 公式来计算气水两相流动情形下的相渗曲线" alt="" coords="181,5,347,32"/>
 <area shape="rect" id="node3" href="$classOCPFlowMethod__OG01.html" title="使用 SGOF 表格来计算气油两相流动情形下的相渗曲线" alt="" coords="183,56,345,83"/>

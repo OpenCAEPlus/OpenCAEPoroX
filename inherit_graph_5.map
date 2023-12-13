@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classBoundaryFlowMethod.html" title="边界流动方法基类" alt="" coords="5,5,153,32"/>
 <area shape="rect" id="node2" href="$classBoundaryFlowMethod01.html" title="常压流动方法类" alt="" coords="201,5,364,32"/>
 </map>

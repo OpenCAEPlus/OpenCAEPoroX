@@ -1,4 +1,4 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<map id="类继承关系图" name="类继承关系图">
 <area shape="rect" id="node1" href="$classBulkAccumuTerm.html" title="累积项计算的抽象基类" alt="" coords="5,31,131,57"/>
 <area shape="rect" id="node2" href="$classBulkAccumuTerm01.html" title="等温模型的累积项计算类" alt="" coords="179,5,317,32"/>
 <area shape="rect" id="node3" href="$classBulkAccumuTerm02.html" title="热力学模型的累积项计算类" alt="" coords="179,56,317,83"/>
