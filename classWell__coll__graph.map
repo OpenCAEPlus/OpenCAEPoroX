@@ -1,0 +1,6 @@
+<map id="Well" name="Well">
+<area shape="rect" id="node1" title="定义了油井及其相关操作。" alt="" coords="114,184,161,211"/>
+<area shape="rect" id="node2" href="$classOCPMixture.html" title="OCPMixture类" alt="" coords="25,95,119,121"/>
+<area shape="rect" id="node3" href="$classOCPMixtureVarSet.html" title="表示流体混合物的类" alt="" coords="5,5,139,32"/>
+<area shape="rect" id="node4" href="$classWellOpt.html" title="描述油井的操作模式" alt="" coords="143,95,211,121"/>
+</map>

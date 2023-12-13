@@ -1,0 +1,9 @@
+<map id="OCPMixtureMethodK_OGW01" name="OCPMixtureMethodK_OGW01">
+<area shape="rect" id="node1" title="使用PVDO和PVTW来计算油气水三相混合物的性质" alt="" coords="184,260,384,287"/>
+<area shape="rect" id="node2" href="$classOCPMixtureMethodK.html" title="OCPMixtureMethodK是一个在非EoS模型中使用的基础类。" alt="" coords="5,171,152,197"/>
+<area shape="rect" id="node3" href="$classOCP__PVCO.html" title="可压缩的活油的PVT性质" alt="" coords="176,171,272,197"/>
+<area shape="rect" id="node4" href="$classOCPFuncTable.html" title="提供OCP表功能" alt="" coords="290,95,401,121"/>
+<area shape="rect" id="node6" href="$classOCP__PVTW.html" title="水相性质表格函数(PVTW)" alt="" coords="297,171,394,197"/>
+<area shape="rect" id="node7" href="$classOCP__PVDG.html" title="干燥气相的PVT性质" alt="" coords="419,171,515,197"/>
+<area shape="rect" id="node5" href="$classOCPTable.html" title="OCPTable 是一个表格类，用于处理 OpenCAEPoroX 中的表格，如 PVT 表格和饱和度表格。" alt="" coords="304,5,387,32"/>
+</map>

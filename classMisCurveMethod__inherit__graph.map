@@ -1,0 +1,4 @@
+<map id="MisCurveMethod" name="MisCurveMethod">
+<area shape="rect" id="node1" title="渗透率和毛细管压力曲线校正方法的抽象基类。" alt="" coords="12,5,133,32"/>
+<area shape="rect" id="node2" href="$classMisCurveMethod01.html" title="CMG中的SIGMA方法的实现，用于曲线校正。" alt="" coords="5,80,140,107"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="BulkAccumuTerm01" name="BulkAccumuTerm01">
+<area shape="rect" id="node1" title="等温模型的累积项计算类" alt="" coords="332,528,471,555"/>
+<area shape="rect" id="node2" href="$classBulkAccumuTerm.html" title="累积项计算的抽象基类" alt="" coords="339,452,464,479"/>
+<area shape="rect" id="node3" href="$classOptionalModules.html" title="管理模拟软件中的可选模块。" alt="" coords="342,363,461,389"/>
+<area shape="rect" id="node4" href="$classOCPBoundary.html" title="用于处理石油模拟中的边界问题的类" alt="" coords="53,273,160,300"/>
+<area shape="rect" id="node5" href="$classBoundaryFlow.html" title="边界流动类" alt="" coords="34,184,139,211"/>
+<area shape="rect" id="node6" href="$classBoundaryFlowVarSet.html" title="边界流动变量集合类" alt="" coords="5,95,149,121"/>
+<area shape="rect" id="node7" href="$classMiscibleFactor.html" title="用于管理可混溶性因子计算和存储的类。" alt="" coords="269,184,376,211"/>
+<area shape="rect" id="node11" href="$classMiscibleCurve.html" title="用于管理可混溶曲线校正的类。" alt="" coords="349,273,454,300"/>
+<area shape="rect" id="node8" href="$classSurfaceTension.html" title="表面张力类" alt="" coords="173,95,285,121"/>
+<area shape="rect" id="node9" href="$classSurTenVarSet.html" title="表面张力变量集合" alt="" coords="178,5,281,32"/>
+<area shape="rect" id="node10" href="$classMisFacVarSet.html" title="用于存储可混溶性因子计算结果的类。" alt="" coords="309,95,413,121"/>
+<area shape="rect" id="node12" href="$classHeatConduct.html" title="热传导的类" alt="" coords="479,273,577,300"/>
+<area shape="rect" id="node13" href="$classHeatConductVarSet.html" title="HeatConduct的变量集合" alt="" coords="419,184,557,211"/>
+<area shape="rect" id="node14" href="$classScalePcow.html" title="缩放Pcow的类" alt="" coords="601,273,689,300"/>
+<area shape="rect" id="node15" href="$classScalePcowVarSet.html" title="缩放Pcow的变量集合类" alt="" coords="582,184,709,211"/>
+<area shape="rect" id="node16" href="$classSkipPSA.html" title=" " alt="" coords="736,273,811,300"/>
+<area shape="rect" id="node17" href="$classSkipPSAVarset.html" title=" " alt="" coords="733,184,843,211"/>
+</map>

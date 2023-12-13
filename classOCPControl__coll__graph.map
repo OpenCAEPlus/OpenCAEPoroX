@@ -1,0 +1,8 @@
+<map id="OCPControl" name="OCPControl">
+<area shape="rect" id="node1" title="用于解决控制的所有参数。" alt="" coords="132,184,225,211"/>
+<area shape="rect" id="node2" href="$classControlMethod.html" title="控制求解器方法的使用" alt="" coords="5,95,112,121"/>
+<area shape="rect" id="node3" href="$classControlNR.html" title="牛顿迭代控制类" alt="" coords="137,95,221,121"/>
+<area shape="rect" id="node4" href="$classControlNRParam.html" title="牛顿迭代控制参数类" alt="" coords="108,5,231,32"/>
+<area shape="rect" id="node5" href="$classControlTime.html" title="OCP时间控制器类" alt="" coords="255,95,348,121"/>
+<area shape="rect" id="node6" href="$classControlTimeParam.html" title="选择时间步长的参数类" alt="" coords="255,5,385,32"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="ai/good_checked/OCPPhaseEquilibrium.hpp" name="ai/good_checked/OCPPhaseEquilibrium.hpp">
+<area shape="rect" id="node1" title="OCPPhaseEquilibrium 类的声明" alt="" coords="554,5,745,47"/>
+<area shape="rect" id="node2" href="$OCPConst_8hpp.html" title="本文件包含了OpenCAEPoroX软件中使用的内建数据类型和常量的定义。" alt="" coords="594,319,705,345"/>
+<area shape="rect" id="node11" href="$OCPEoS_8hpp.html" title="OCPEoS 类声明和相关的状态方程计算功能" alt="" coords="599,95,700,121"/>
+<area shape="rect" id="node13" title=" " alt="" coords="915,319,973,345"/>
+<area shape="rect" id="node3" title=" " alt="" coords="689,543,761,569"/>
+<area shape="rect" id="node4" title=" " alt="" coords="350,468,413,495"/>
+<area shape="rect" id="node5" href="$UtilError_8hpp.html" title="本文件包含了错误日志和警告消息的宏定义，用于在开发中快速定位和记录问题。" alt="" coords="437,468,531,495"/>
+<area shape="rect" id="node8" href="$OCPDataType_8hpp.html" title="OpenCAEPoro中使用的数据类型定义" alt="" coords="555,468,687,495"/>
+<area shape="rect" id="node10" href="$OCPUnits_8hpp.html" title="OpenCAEPoro中使用的单位" alt="" coords="521,393,628,420"/>
+<area shape="rect" id="node6" title=" " alt="" coords="268,543,335,569"/>
+<area shape="rect" id="node7" title=" " alt="" coords="893,543,963,569"/>
+<area shape="rect" id="node9" title=" " alt="" coords="793,543,847,569"/>
+<area shape="rect" id="node12" href="$UtilMath_8hpp.html" title="数学实用工具类声明" alt="" coords="516,244,612,271"/>
+<area shape="rect" id="node15" href="$DenseMat_8hpp.html" title="本文件包含了小型稠密矩阵操作的函数定义。" alt="" coords="259,393,365,420"/>
+<area shape="rect" id="node17" href="$ParamReservoir_8hpp.html" title="油藏参数输入管理模块" alt="" coords="763,169,903,196"/>
+<area shape="rect" id="node14" title=" " alt="" coords="5,468,80,495"/>
+<area shape="rect" id="node16" title=" " alt="" coords="155,468,223,495"/>
+<area shape="rect" id="node18" title=" " alt="" coords="997,319,1064,345"/>
+<area shape="rect" id="node19" href="$UtilInput_8hpp.html" title="本文件提供了用于输入文件的基础工具。" alt="" coords="1071,244,1167,271"/>
+<area shape="rect" id="node20" href="$UtilOutput_8hpp.html" title="用于输出文件的基础工具集。" alt="" coords="737,244,844,271"/>
+</map>

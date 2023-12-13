@@ -1,0 +1,4 @@
+<map id="BulkConnTransMethod01" name="BulkConnTransMethod01">
+<area shape="rect" id="node1" title="BulkConnTransMethod的派生类，实现特定的传输计算方法。" alt="" coords="5,80,175,107"/>
+<area shape="rect" id="node2" href="$classBulkConnTransMethod.html" title="体积连接传输方法的基类。" alt="" coords="13,5,167,32"/>
+</map>

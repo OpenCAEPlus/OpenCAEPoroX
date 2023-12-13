@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classPEIterTol.html" title="迭代容忍度参数类" alt="" coords="5,107,81,133"/>
+<area shape="rect" id="node2" href="$classNRparamSP.html" title="相分裂计算中NR的参数类" alt="" coords="137,5,233,32"/>
+<area shape="rect" id="node3" href="$classNRparamSTA.html" title="相稳定性分析中NR（Newton&#45;Raphson）的参数类" alt="" coords="134,56,237,83"/>
+<area shape="rect" id="node4" href="$classRRparam.html" title="解Rachford&#45;Rice方程的参数类" alt="" coords="146,107,225,133"/>
+<area shape="rect" id="node5" href="$classSSMparamSP.html" title="相分裂计算中SSM的参数类" alt="" coords="133,157,238,184"/>
+<area shape="rect" id="node6" href="$classSSMparamSTA.html" title="相稳定性分析中SSM（Successive Substitution Method）的参数类" alt="" coords="129,208,241,235"/>
+</map>

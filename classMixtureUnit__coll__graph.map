@@ -1,0 +1,9 @@
+<map id="MixtureUnit" name="MixtureUnit">
+<area shape="rect" id="node1" title="MixtureUnit 是一个抽象类，包含用于闪蒸计算的所有信息，包括变量和函数。 它可以计算质量密度等相的属性，具有与bulks中的数据结构相同。" alt="" coords="170,273,259,300"/>
+<area shape="rect" id="node2" href="$classOCPMixture.html" title="OCPMixture类" alt="" coords="95,184,190,211"/>
+<area shape="rect" id="node3" href="$classOCPMixtureVarSet.html" title="表示流体混合物的类" alt="" coords="5,95,139,121"/>
+<area shape="rect" id="node4" href="$classMiscibleFactor.html" title="用于管理可混溶性因子计算和存储的类。" alt="" coords="307,184,413,211"/>
+<area shape="rect" id="node5" href="$classSurfaceTension.html" title="表面张力类" alt="" coords="183,95,295,121"/>
+<area shape="rect" id="node6" href="$classSurTenVarSet.html" title="表面张力变量集合" alt="" coords="187,5,290,32"/>
+<area shape="rect" id="node7" href="$classMisFacVarSet.html" title="用于存储可混溶性因子计算结果的类。" alt="" coords="319,95,423,121"/>
+</map>

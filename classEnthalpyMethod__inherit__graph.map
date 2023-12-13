@@ -1,0 +1,5 @@
+<map id="EnthalpyMethod" name="EnthalpyMethod">
+<area shape="rect" id="node1" title="焓计算方法" alt="" coords="90,5,206,32"/>
+<area shape="rect" id="node2" href="$classEnthalpyMethod01.html" title="液相焓和简单焓计算方法" alt="" coords="5,80,136,107"/>
+<area shape="rect" id="node3" href="$classEnthalpyMethod02.html" title="气相焓计算方法" alt="" coords="160,80,291,107"/>
+</map>

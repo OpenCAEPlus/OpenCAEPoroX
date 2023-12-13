@@ -1,0 +1,4 @@
+<map id="OCPRockIsoT" name="OCPRockIsoT">
+<area shape="rect" id="node1" title="OCPRockIsoT类是OCPRock的派生类，用于等温条件下的岩石物理特性模拟。" alt="" coords="5,80,113,107"/>
+<area shape="rect" id="node2" href="$classOCPRock.html" title="OCPRock类是一个抽象类，用于定义岩石物理特性的基本接口。" alt="" coords="18,5,101,32"/>
+</map>

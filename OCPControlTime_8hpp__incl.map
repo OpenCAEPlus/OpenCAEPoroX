@@ -1,0 +1,52 @@
+<map id="ai/good_checked/OCPControlTime.hpp" name="ai/good_checked/OCPControlTime.hpp">
+<area shape="rect" id="node1" title="OCPControlTime类的声明" alt="" coords="687,5,881,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="429,991,488,1017"/>
+<area shape="rect" id="node3" href="$OCPConst_8hpp.html" title="本文件包含了OpenCAEPoroX软件中使用的内建数据类型和常量的定义。" alt="" coords="1879,991,1990,1017"/>
+<area shape="rect" id="node12" href="$ParamControl_8hpp.html" title="ParamControl 类的声明" alt="" coords="893,841,1019,868"/>
+<area shape="rect" id="node17" href="$OCPControlFast_8hpp.html" title="快速控制类FastControl的声明" alt="" coords="1940,916,2084,943"/>
+<area shape="rect" id="node18" href="$OCPNRsuite_8hpp.html" title="非线性迭代中使用的数据结构" alt="" coords="722,95,846,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="2137,1215,2209,1241"/>
+<area shape="rect" id="node5" title=" " alt="" coords="2023,1065,2086,1092"/>
+<area shape="rect" id="node6" href="$UtilError_8hpp.html" title="本文件包含了错误日志和警告消息的宏定义，用于在开发中快速定位和记录问题。" alt="" coords="1943,1140,2038,1167"/>
+<area shape="rect" id="node9" href="$OCPDataType_8hpp.html" title="OpenCAEPoro中使用的数据类型定义" alt="" coords="1759,1140,1891,1167"/>
+<area shape="rect" id="node11" href="$OCPUnits_8hpp.html" title="OpenCAEPoro中使用的单位" alt="" coords="1791,1065,1897,1092"/>
+<area shape="rect" id="node7" title=" " alt="" coords="2445,1215,2512,1241"/>
+<area shape="rect" id="node8" title=" " alt="" coords="868,1215,937,1241"/>
+<area shape="rect" id="node10" title=" " alt="" coords="1549,1215,1603,1241"/>
+<area shape="rect" id="node13" title=" " alt="" coords="1279,916,1345,943"/>
+<area shape="rect" id="node14" title=" " alt="" coords="1183,991,1249,1017"/>
+<area shape="rect" id="node15" href="$UtilInput_8hpp.html" title="本文件提供了用于输入文件的基础工具。" alt="" coords="855,916,951,943"/>
+<area shape="rect" id="node16" href="$UtilOutput_8hpp.html" title="用于输出文件的基础工具集。" alt="" coords="673,916,780,943"/>
+<area shape="rect" id="node19" href="$Reservoir_8hpp.html" title="油藏类声明" alt="" coords="733,169,835,196"/>
+<area shape="rect" id="node20" href="$AllWells_8hpp.html" title="AllWells类声明" alt="" coords="1278,244,1373,271"/>
+<area shape="rect" id="node23" href="$Bulk_8hpp.html" title="Bulk类和BulkTypeAIM类的声明" alt="" coords="1099,468,1173,495"/>
+<area shape="rect" id="node46" href="$BulkConn_8hpp.html" title="BulkConn类的声明" alt="" coords="643,319,747,345"/>
+<area shape="rect" id="node48" href="$ParamRead_8hpp.html" title="本文件包含ParamRead类的声明" alt="" coords="921,767,1037,793"/>
+<area shape="rect" id="node50" href="$PreProcess_8hpp.html" title="预处理模块的头文件，用于OpenCAEPoroX模拟器的输入网格参数处理、网格划分和域的设置" alt="" coords="2147,543,2261,569"/>
+<area shape="rect" id="node21" href="$ParamReservoir_8hpp.html" title="油藏参数输入管理模块" alt="" coords="581,841,721,868"/>
+<area shape="rect" id="node22" href="$Well_8hpp.html" title="本文件包含Well类的声明" alt="" coords="1715,393,1787,420"/>
+<area shape="rect" id="node45" href="$WellPeaceman_8hpp.html" title="WellPeacema class declaration." alt="" coords="1461,319,1595,345"/>
+<area shape="rect" id="node24" href="$DenseMat_8hpp.html" title="本文件包含了小型稠密矩阵操作的函数定义。" alt="" coords="2324,991,2431,1017"/>
+<area shape="rect" id="node28" href="$LinearSystem_8hpp.html" title="线性系统求解类的声明" alt="" coords="1586,916,1713,943"/>
+<area shape="rect" id="node32" href="$ParamWell_8hpp.html" title="ParamWell类声明文件" alt="" coords="1043,841,1154,868"/>
+<area shape="rect" id="node41" href="$WellOpt_8hpp.html" title="本文件包含了WellOpt类的声明" alt="" coords="384,543,477,569"/>
+<area shape="rect" id="node42" href="$OCPMixture_8hpp.html" title="OCPMixture类声明" alt="" coords="297,617,415,644"/>
+<area shape="rect" id="node43" href="$WellPerf_8hpp.html" title="本文件包含了Perforation类的声明。" alt="" coords="333,468,429,495"/>
+<area shape="rect" id="node44" href="$OCPNRresidual_8hpp.html" title="本文件包含了在非线性迭代中使用的数据结构" alt="" coords="1420,916,1561,943"/>
+<area shape="rect" id="node26" href="$FlowUnit_8hpp.html" title="流体单元类的声明" alt="" coords="880,692,979,719"/>
+<area shape="rect" id="node27" href="$OptionalModules_8hpp.html" title="OptionalModules 类声明文件" alt="" coords="448,767,592,793"/>
+<area shape="rect" id="node29" href="$Domain_8hpp.html" title="域类声明" alt="" coords="2066,617,2158,644"/>
+<area shape="rect" id="node31" href="$PreParamGridWell_8hpp.html" title="预处理参数网格和井的类声明" alt="" coords="1860,767,2015,793"/>
+<area shape="rect" id="node35" href="$BulkVarSet_8hpp.html" title="此文件包含BulkVarSet类的声明" alt="" coords="1280,692,1392,719"/>
+<area shape="rect" id="node36" href="$PVTModule_8hpp.html" title="PVT模块类声明" alt="" coords="1373,617,1488,644"/>
+<area shape="rect" id="node37" href="$SATModule_8hpp.html" title="SATModule类声明" alt="" coords="1133,617,1248,644"/>
+<area shape="rect" id="node38" href="$ROCKModule_8hpp.html" title="ROCK模块类的声明" alt="" coords="931,617,1059,644"/>
+<area shape="rect" id="node39" href="$BulkInitializer_8hpp.html" title="BulkInitializer类声明" alt="" coords="1174,543,1298,569"/>
+<area shape="rect" id="node40" href="$BulkAccumuModule_8hpp.html" title="BulkAccumuModule 类的声明" alt="" coords="643,617,805,644"/>
+<area shape="rect" id="node25" title=" " alt="" coords="2465,1065,2540,1092"/>
+<area shape="rect" id="node30" href="$Partition_8hpp.html" title="本文件包含Partition类的声明。" alt="" coords="2242,692,2337,719"/>
+<area shape="rect" id="node33" href="$UtilTiming_8hpp.html" title="本文件包含了计时功能的类和方法声明，用于测量程序运行的墙钟时间和CPU周期。" alt="" coords="2596,1140,2703,1167"/>
+<area shape="rect" id="node34" href="$OCPTimeRecord_8hpp.html" title="时间记录项" alt="" coords="2191,767,2337,793"/>
+<area shape="rect" id="node47" href="$OCPFlux_8hpp.html" title="OCPFlux 类的声明" alt="" coords="595,393,696,420"/>
+<area shape="rect" id="node49" href="$ParamOutput_8hpp.html" title="本文件包含了ParamOutput类的声明与相关辅助结构体的定义。" alt="" coords="745,841,869,868"/>
+</map>

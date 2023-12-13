@@ -1,0 +1,4 @@
+<map id="ViscosityMethod03" name="ViscosityMethod03">
+<area shape="rect" id="node1" title="利用Lohrenz&#45;Bray&#45;Clark 粘度计算公式" alt="" coords="5,80,139,107"/>
+<area shape="rect" id="node2" href="$classViscosityMethod.html" title="粘度计算方法" alt="" coords="13,5,131,32"/>
+</map>

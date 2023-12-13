@@ -1,0 +1,11 @@
+<map id="OCPFlowMethod_OGW02" name="OCPFlowMethod_OGW02">
+<area shape="rect" id="node1" title="使用 SOF3, SGFN, SWFN 表格来计算油气水三相流动情形下的相渗曲线" alt="" coords="224,273,400,300"/>
+<area shape="rect" id="node2" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="5,184,128,211"/>
+<area shape="rect" id="node3" href="$classOCP__SWFN.html" title="SWFN表格" alt="" coords="203,184,301,211"/>
+<area shape="rect" id="node4" href="$classOCPFuncTable.html" title="提供OCP表功能" alt="" coords="245,95,355,121"/>
+<area shape="rect" id="node6" href="$classOCP__SGFN.html" title="SGFN表格" alt="" coords="326,184,421,211"/>
+<area shape="rect" id="node9" href="$classOCP__SOF3.html" title="SOF3表格" alt="" coords="445,184,537,211"/>
+<area shape="rect" id="node5" href="$classOCPTable.html" title="OCPTable 是一个表格类，用于处理 OpenCAEPoroX 中的表格，如 PVT 表格和饱和度表格。" alt="" coords="145,5,228,32"/>
+<area shape="rect" id="node7" href="$classOCP3POilPerCalculation.html" title="油相相对渗透率计算模块" alt="" coords="561,184,729,211"/>
+<area shape="rect" id="node8" href="$classOCP3POilPerMethod.html" title="油相相对渗透率计算方法" alt="" coords="572,95,719,121"/>
+</map>

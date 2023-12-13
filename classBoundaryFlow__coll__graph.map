@@ -1,0 +1,4 @@
+<map id="BoundaryFlow" name="BoundaryFlow">
+<area shape="rect" id="node1" title="边界流动类" alt="" coords="25,95,130,121"/>
+<area shape="rect" id="node2" href="$classBoundaryFlowVarSet.html" title="边界流动变量集合类" alt="" coords="5,5,149,32"/>
+</map>

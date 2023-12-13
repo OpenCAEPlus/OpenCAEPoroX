@@ -1,0 +1,10 @@
+<map id="ParamReservoir" name="ParamReservoir">
+<area shape="rect" id="node1" title="油藏输入参数模块" alt="" coords="284,495,400,521"/>
+<area shape="rect" id="node2" href="$classTableSet.html" title="一维表格型参数数据结构" alt="" coords="5,257,79,284"/>
+<area shape="rect" id="node3" href="$classMiscstr.html" title="混溶控制参数" alt="" coords="103,257,168,284"/>
+<area shape="rect" id="node4" href="$classType__A__r.html" title=" " alt="" coords="193,257,355,284"/>
+<area shape="rect" id="node5" href="$classHLoss.html" title="热损失参数" alt="" coords="380,257,440,284"/>
+<area shape="rect" id="node6" href="$classTable2Set.html" title="二维表格序列" alt="" coords="449,13,529,39"/>
+<area shape="rect" id="node7" href="$classComponentParam.html" title="组分类参数" alt="" coords="571,257,697,284"/>
+<area shape="rect" id="node8" href="$classType__A__r.html" title=" " alt="" coords="553,5,720,47"/>
+</map>

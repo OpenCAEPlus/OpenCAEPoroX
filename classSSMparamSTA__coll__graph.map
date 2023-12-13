@@ -1,0 +1,4 @@
+<map id="SSMparamSTA" name="SSMparamSTA">
+<area shape="rect" id="node1" title="相稳定性分析中SSM（Successive Substitution Method）的参数类" alt="" coords="5,80,117,107"/>
+<area shape="rect" id="node2" href="$classPEIterTol.html" title="迭代容忍度参数类" alt="" coords="23,5,99,32"/>
+</map>

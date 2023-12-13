@@ -1,0 +1,4 @@
+<map id="ControlNR" name="ControlNR">
+<area shape="rect" id="node1" title="牛顿迭代控制类" alt="" coords="25,95,109,121"/>
+<area shape="rect" id="node2" href="$classControlNRParam.html" title="牛顿迭代控制参数类" alt="" coords="5,5,128,32"/>
+</map>

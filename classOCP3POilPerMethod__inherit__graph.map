@@ -1,0 +1,5 @@
+<map id="OCP3POilPerMethod" name="OCP3POilPerMethod">
+<area shape="rect" id="node1" title="油相相对渗透率计算方法" alt="" coords="108,5,255,32"/>
+<area shape="rect" id="node2" href="$classOCP3POILPerMethod02.html" title="ECLIPSE 默认公式" alt="" coords="5,80,171,107"/>
+<area shape="rect" id="node3" href="$classOCP3POilPerMethod01.html" title="STONE2 公式" alt="" coords="195,80,355,107"/>
+</map>

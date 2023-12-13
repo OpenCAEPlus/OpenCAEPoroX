@@ -1,0 +1,17 @@
+<map id="SkipPSAMethod01" name="SkipPSAMethod01">
+<area shape="rect" id="node1" title=" " alt="" coords="201,439,333,465"/>
+<area shape="rect" id="node2" href="$classSkipPSAMethod.html" title=" " alt="" coords="186,349,305,376"/>
+<area shape="rect" id="node3" href="$classOCPMixtureMethodComp.html" title="组分方法基类" alt="" coords="329,349,501,376"/>
+<area shape="rect" id="node4" href="$classViscosityCalculation.html" title="粘度计算接口类" alt="" coords="173,260,315,287"/>
+<area shape="rect" id="node5" href="$classViscosityMethod.html" title="粘度计算方法" alt="" coords="185,171,303,197"/>
+<area shape="rect" id="node6" href="$classOCPPhaseEquilibrium.html" title="相平衡计算类" alt="" coords="339,260,491,287"/>
+<area shape="rect" id="node7" href="$classFlashCtrl.html" title="闪蒸控制类" alt="" coords="333,171,408,197"/>
+<area shape="rect" id="node8" href="$classSSMparamSTA.html" title="相稳定性分析中SSM（Successive Substitution Method）的参数类" alt="" coords="5,81,117,108"/>
+<area shape="rect" id="node9" href="$classPEIterTol.html" title="迭代容忍度参数类" alt="" coords="275,5,351,32"/>
+<area shape="rect" id="node10" href="$classNRparamSP.html" title="相分裂计算中NR的参数类" alt="" coords="141,81,237,108"/>
+<area shape="rect" id="node11" href="$classNRparamSTA.html" title="相稳定性分析中NR（Newton&#45;Raphson）的参数类" alt="" coords="262,81,365,108"/>
+<area shape="rect" id="node12" href="$classSSMparamSP.html" title="相分裂计算中SSM的参数类" alt="" coords="389,81,494,108"/>
+<area shape="rect" id="node13" href="$classRRparam.html" title="解Rachford&#45;Rice方程的参数类" alt="" coords="518,81,597,108"/>
+<area shape="rect" id="node14" href="$classEoSCalculation.html" title="提供状态方程计算的功能类" alt="" coords="483,171,595,197"/>
+<area shape="rect" id="node15" href="$classEoS.html" title="抽象基类，定义了状态方程必须实现的接口" alt="" coords="621,81,667,108"/>
+</map>

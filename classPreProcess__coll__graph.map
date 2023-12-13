@@ -1,0 +1,8 @@
+<map id="PreProcess" name="PreProcess">
+<area shape="rect" id="node1" title="预处理类，负责输入网格参数的读取、网格划分以及域的定义。" alt="" coords="108,184,199,211"/>
+<area shape="rect" id="node2" href="$classDomain.html" title="Domain类负责在分区后的新分布。 所有元素（井）都是活跃的，所有连接（射孔）都是活跃的， 死亡元素被排除，因此全局索引也是针对活跃元素的。" alt="" coords="5,95,72,121"/>
+<area shape="rect" id="node3" href="$classPreParamGridWell.html" title="输入网格信息和井几何信息的类" alt="" coords="97,95,226,121"/>
+<area shape="rect" id="node4" href="$classActiveGridCheck.html" title="检查网格活动性的类" alt="" coords="30,5,151,32"/>
+<area shape="rect" id="node5" href="$classInitialReservoir.html" title="描述初始储层条件的类" alt="" coords="176,5,285,32"/>
+<area shape="rect" id="node6" href="$classPartition.html" title="使用parmetis进行图分割，分割的数量与处理器的数量相同，在分割之后将变得无用。" alt="" coords="258,95,329,121"/>
+</map>

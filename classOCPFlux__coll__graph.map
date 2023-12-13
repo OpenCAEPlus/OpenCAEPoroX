@@ -1,0 +1,5 @@
+<map id="OCPFlux" name="OCPFlux">
+<area shape="rect" id="node1" title="通量计算的抽象基类" alt="" coords="45,184,121,211"/>
+<area shape="rect" id="node2" href="$classBulkConnTrans.html" title="体积连接传输的主要类。" alt="" coords="27,95,139,121"/>
+<area shape="rect" id="node3" href="$classBulkConnTransMethod.html" title="体积连接传输方法的基类。" alt="" coords="5,5,160,32"/>
+</map>

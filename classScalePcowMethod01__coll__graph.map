@@ -1,0 +1,7 @@
+<map id="ScalePcowMethod01" name="ScalePcowMethod01">
+<area shape="rect" id="node1" title="用于缩放水渗透率曲线的方法类" alt="" coords="19,184,165,211"/>
+<area shape="rect" id="node2" href="$classScalePcowMethod.html" title="用于缩放水渗透率曲线的方法类" alt="" coords="5,95,136,121"/>
+<area shape="rect" id="node3" href="$classOCPFlow.html" title="模拟油气水三相流动的类，以油为参考相" alt="" coords="161,95,239,121"/>
+<area shape="rect" id="node4" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="67,5,189,32"/>
+<area shape="rect" id="node5" href="$classOCPFlowVarSet.html" title="流体变量集合类" alt="" coords="214,5,333,32"/>
+</map>

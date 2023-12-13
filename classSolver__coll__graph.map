@@ -1,0 +1,11 @@
+<map id="Solver" name="Solver">
+<area shape="rect" id="node1" title="求解器类，用于油藏模拟的整体求解方法。" alt="" coords="232,377,291,404"/>
+<area shape="rect" id="node2" href="$classThermalSolver.html" title="ThermalSolver类用于流体解决方法。" alt="" coords="139,288,245,315"/>
+<area shape="rect" id="node3" href="$classLinearSystem.html" title="离散系统的线性求解器。" alt="" coords="89,184,191,211"/>
+<area shape="rect" id="node4" href="$classDomain.html" title="Domain类负责在分区后的新分布。 所有元素（井）都是活跃的，所有连接（射孔）都是活跃的， 死亡元素被排除，因此全局索引也是针对活跃元素的。" alt="" coords="5,95,72,121"/>
+<area shape="rect" id="node5" href="$classOCPMatrix.html" title="OCP中的内部矩阵格式" alt="" coords="97,95,183,121"/>
+<area shape="rect" id="node6" href="$classT__FIM.html" title="热法模拟类" alt="" coords="218,184,278,211"/>
+<area shape="rect" id="node7" href="$classOCPNRsuite.html" title="非线性求解的NR数据集" alt="" coords="208,95,307,121"/>
+<area shape="rect" id="node8" href="$classOCPNRresidual.html" title="非线性迭代残差数据结构类" alt="" coords="199,5,315,32"/>
+<area shape="rect" id="node9" href="$classIsothermalSolver.html" title="用于流体解决方法的IsothermalSolver类。" alt="" coords="269,288,389,315"/>
+</map>

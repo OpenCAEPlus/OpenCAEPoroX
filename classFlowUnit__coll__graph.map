@@ -1,0 +1,13 @@
+<map id="FlowUnit" name="FlowUnit">
+<area shape="rect" id="node1" title="用于处理与饱和度表相关的计算，如相对渗透率和毛细压力。" alt="" coords="232,363,307,389"/>
+<area shape="rect" id="node2" href="$classMiscibleCurve.html" title="用于管理可混溶曲线校正的类。" alt="" coords="90,273,195,300"/>
+<area shape="rect" id="node3" href="$classMiscibleFactor.html" title="用于管理可混溶性因子计算和存储的类。" alt="" coords="75,184,181,211"/>
+<area shape="rect" id="node4" href="$classSurfaceTension.html" title="表面张力类" alt="" coords="5,95,117,121"/>
+<area shape="rect" id="node5" href="$classSurTenVarSet.html" title="表面张力变量集合" alt="" coords="10,5,113,32"/>
+<area shape="rect" id="node6" href="$classMisFacVarSet.html" title="用于存储可混溶性因子计算结果的类。" alt="" coords="141,95,245,121"/>
+<area shape="rect" id="node7" href="$classScalePcow.html" title="缩放Pcow的类" alt="" coords="225,273,313,300"/>
+<area shape="rect" id="node8" href="$classScalePcowVarSet.html" title="缩放Pcow的变量集合类" alt="" coords="206,184,333,211"/>
+<area shape="rect" id="node9" href="$classOCPFlow.html" title="模拟油气水三相流动的类，以油为参考相" alt="" coords="379,273,458,300"/>
+<area shape="rect" id="node10" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="357,184,480,211"/>
+<area shape="rect" id="node11" href="$classOCPFlowVarSet.html" title="流体变量集合类" alt="" coords="505,184,623,211"/>
+</map>

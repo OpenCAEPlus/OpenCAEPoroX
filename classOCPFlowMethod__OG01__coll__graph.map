@@ -1,0 +1,7 @@
+<map id="OCPFlowMethod_OG01" name="OCPFlowMethod_OG01">
+<area shape="rect" id="node1" title="使用 SGOF 表格来计算气油两相流动情形下的相渗曲线" alt="" coords="7,260,169,287"/>
+<area shape="rect" id="node2" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="5,171,128,197"/>
+<area shape="rect" id="node3" href="$classOCP__SGOF.html" title="SGOF表格" alt="" coords="153,171,247,197"/>
+<area shape="rect" id="node4" href="$classOCPFuncTable.html" title="提供OCP表功能" alt="" coords="145,95,255,121"/>
+<area shape="rect" id="node5" href="$classOCPTable.html" title="OCPTable 是一个表格类，用于处理 OpenCAEPoroX 中的表格，如 PVT 表格和饱和度表格。" alt="" coords="159,5,241,32"/>
+</map>

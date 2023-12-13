@@ -1,0 +1,8 @@
+<map id="PEIterTol" name="PEIterTol">
+<area shape="rect" id="node1" title="迭代容忍度参数类" alt="" coords="254,5,330,32"/>
+<area shape="rect" id="node2" href="$classNRparamSP.html" title="相分裂计算中NR的参数类" alt="" coords="5,80,101,107"/>
+<area shape="rect" id="node3" href="$classNRparamSTA.html" title="相稳定性分析中NR（Newton&#45;Raphson）的参数类" alt="" coords="126,80,229,107"/>
+<area shape="rect" id="node4" href="$classRRparam.html" title="解Rachford&#45;Rice方程的参数类" alt="" coords="253,80,331,107"/>
+<area shape="rect" id="node5" href="$classSSMparamSP.html" title="相分裂计算中SSM的参数类" alt="" coords="355,80,461,107"/>
+<area shape="rect" id="node6" href="$classSSMparamSTA.html" title="相稳定性分析中SSM（Successive Substitution Method）的参数类" alt="" coords="484,80,596,107"/>
+</map>

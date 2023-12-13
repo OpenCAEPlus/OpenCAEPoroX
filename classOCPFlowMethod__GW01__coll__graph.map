@@ -1,0 +1,5 @@
+<map id="OCPFlowMethod_GW01" name="OCPFlowMethod_GW01">
+<area shape="rect" id="node1" title="使用 Brooks&#45;Corey 公式来计算气水两相流动情形下的相渗曲线" alt="" coords="50,95,217,121"/>
+<area shape="rect" id="node2" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="5,5,128,32"/>
+<area shape="rect" id="node3" href="$classBrooksCorey.html" title="Brooks&#45;Corey模型" alt="" coords="152,5,251,32"/>
+</map>

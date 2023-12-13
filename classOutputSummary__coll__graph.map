@@ -1,0 +1,5 @@
+<map id="OutputSummary" name="OutputSummary">
+<area shape="rect" id="node1" title="包含所有SUMMARY信息，这些信息指示了哪些结果将被打印到摘要输出文件中。" alt="" coords="39,241,156,268"/>
+<area shape="rect" id="node2" href="$classType__B__o.html" title="用于存储坐标形式内容的关键字。" alt="" coords="5,5,85,32"/>
+<area shape="rect" id="node3" href="$classType__A__o.html" title="用于存储字符串形式内容的关键字。" alt="" coords="109,5,189,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="OCPFlowMethod_OGW02" name="OCPFlowMethod_OGW02">
+<area shape="rect" id="node1" title="使用 SOF3, SGFN, SWFN 表格来计算油气水三相流动情形下的相渗曲线" alt="" coords="5,80,181,107"/>
+<area shape="rect" id="node2" href="$classOCPFlowMethod.html" title="抽象基类，用于定义计算相对渗透率和毛细管压力的接口" alt="" coords="32,5,155,32"/>
+</map>

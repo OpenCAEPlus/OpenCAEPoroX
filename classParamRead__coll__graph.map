@@ -1,0 +1,20 @@
+<map id="ParamRead" name="ParamRead">
+<area shape="rect" id="node1" title="ParamRead类用于从输入文件中读取参数的预处理单元。" alt="" coords="817,915,908,941"/>
+<area shape="rect" id="node2" href="$classParamReservoir.html" title="油藏输入参数模块" alt="" coords="571,297,687,324"/>
+<area shape="rect" id="node3" href="$classTableSet.html" title="一维表格型参数数据结构" alt="" coords="317,141,390,168"/>
+<area shape="rect" id="node4" href="$classMiscstr.html" title="混溶控制参数" alt="" coords="321,192,386,219"/>
+<area shape="rect" id="node5" href="$classType__A__r.html" title=" " alt="" coords="272,247,435,273"/>
+<area shape="rect" id="node6" href="$classHLoss.html" title="热损失参数" alt="" coords="323,297,383,324"/>
+<area shape="rect" id="node7" href="$classTable2Set.html" title="二维表格序列" alt="" coords="49,381,129,408"/>
+<area shape="rect" id="node8" href="$classComponentParam.html" title="组分类参数" alt="" coords="290,425,417,452"/>
+<area shape="rect" id="node9" href="$classType__A__r.html" title=" " alt="" coords="5,583,172,625"/>
+<area shape="rect" id="node10" href="$classParamOutput.html" title="ParamOutput是一个内部结构，用于存储从输入文件中获取的输出信息。" alt="" coords="579,887,678,913"/>
+<area shape="rect" id="node11" href="$classOutputSummary.html" title="包含所有SUMMARY信息，这些信息指示了哪些结果将被打印到摘要输出文件中。" alt="" coords="295,861,412,888"/>
+<area shape="rect" id="node12" href="$classType__B__o.html" title="用于存储坐标形式内容的关键字。" alt="" coords="49,680,129,707"/>
+<area shape="rect" id="node13" href="$classType__A__o.html" title="用于存储字符串形式内容的关键字。" alt="" coords="49,872,129,899"/>
+<area shape="rect" id="node14" href="$classOutputVTKParam.html" title="OutputVTKParam用于控制VTK格式输出的参数。" alt="" coords="291,912,416,939"/>
+<area shape="rect" id="node15" href="$classBasicGridPropertyParam.html" title="基础网格属性参数。" alt="" coords="5,943,172,969"/>
+<area shape="rect" id="node16" href="$classOutputRPTParam.html" title="OutputRPTParam是ParamOutput的一部分，用于控制详细油藏信息的输出。" alt="" coords="290,963,417,989"/>
+<area shape="rect" id="node17" href="$classParamWell.html" title="井参数" alt="" coords="586,937,671,964"/>
+<area shape="rect" id="node18" href="$classParamControl.html" title="ParamControl 类包含模拟控制相关的参数，例如使用哪种离散方法， 使用哪个线性求解器文件，时间步长如何变化等。" alt="" coords="577,988,680,1015"/>
+</map>

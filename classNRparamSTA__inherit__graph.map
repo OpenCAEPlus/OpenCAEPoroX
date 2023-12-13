@@ -1,0 +1,4 @@
+<map id="NRparamSTA" name="NRparamSTA">
+<area shape="rect" id="node1" title="相稳定性分析中NR（Newton&#45;Raphson）的参数类" alt="" coords="5,80,108,107"/>
+<area shape="rect" id="node2" href="$classPEIterTol.html" title="迭代容忍度参数类" alt="" coords="19,5,95,32"/>
+</map>

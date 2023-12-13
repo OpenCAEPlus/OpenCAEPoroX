@@ -1,0 +1,5 @@
+<map id="LinearSystem" name="LinearSystem">
+<area shape="rect" id="node1" title="离散系统的线性求解器。" alt="" coords="38,95,141,121"/>
+<area shape="rect" id="node2" href="$classDomain.html" title="Domain类负责在分区后的新分布。 所有元素（井）都是活跃的，所有连接（射孔）都是活跃的， 死亡元素被排除，因此全局索引也是针对活跃元素的。" alt="" coords="5,5,72,32"/>
+<area shape="rect" id="node3" href="$classOCPMatrix.html" title="OCP中的内部矩阵格式" alt="" coords="97,5,183,32"/>
+</map>

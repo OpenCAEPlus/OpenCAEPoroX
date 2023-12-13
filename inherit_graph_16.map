@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classBulkConnTransMethod.html" title="体积连接传输方法的基类。" alt="" coords="5,5,160,32"/>
+<area shape="rect" id="node2" href="$classBulkConnTransMethod01.html" title="BulkConnTransMethod的派生类，实现特定的传输计算方法。" alt="" coords="208,5,377,32"/>
+</map>

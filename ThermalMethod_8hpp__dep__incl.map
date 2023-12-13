@@ -1,0 +1,6 @@
+<map id="ai/good_checked/ThermalMethod.hpp" name="ai/good_checked/ThermalMethod.hpp">
+<area shape="rect" id="node1" title="热法模拟类的声明" alt="" coords="5,5,244,32"/>
+<area shape="rect" id="node2" href="$ThermalSolver_8hpp.html" title="ThermalSolver类声明" alt="" coords="9,80,241,107"/>
+<area shape="rect" id="node3" href="$Solver_8hpp.html" title="求解器类的声明" alt="" coords="32,155,217,181"/>
+<area shape="rect" id="node4" href="$OCP_8hpp.html" title="OpenCAEPoroX模拟器的主头文件" alt="" coords="37,229,213,256"/>
+</map>

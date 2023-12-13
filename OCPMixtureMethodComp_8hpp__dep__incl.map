@@ -1,0 +1,34 @@
+<map id="ai/good_checked/OCPMixtureMethodComp.hpp" name="ai/good_checked/OCPMixtureMethodComp.hpp">
+<area shape="rect" id="node1" title="OCPMixtureMethodComp 类声明" alt="" coords="501,5,697,47"/>
+<area shape="rect" id="node2" href="$AcceleratePEC_8hpp.html" title="AcceleratePEC类声明（AcceleratePEC class declaration）" alt="" coords="440,95,627,136"/>
+<area shape="rect" id="node29" href="$OCPMixture_8hpp.html" title="OCPMixture类声明" alt="" coords="588,273,809,300"/>
+<area shape="rect" id="node3" href="$OptionalModules_8hpp.html" title="OptionalModules 类声明文件" alt="" coords="414,184,586,225"/>
+<area shape="rect" id="node4" href="$Bulk_8hpp.html" title="Bulk类和BulkTypeAIM类的声明" alt="" coords="321,587,495,613"/>
+<area shape="rect" id="node23" href="$BulkAccumuModule_8hpp.html" title="BulkAccumuModule 类的声明" alt="" coords="625,348,823,389"/>
+<area shape="rect" id="node24" href="$FlowUnit_8hpp.html" title="流体单元类的声明" alt="" coords="93,355,294,382"/>
+<area shape="rect" id="node27" href="$MixtureUnit_8hpp.html" title="MixtureUnit 类的声明" alt="" coords="384,355,600,382"/>
+<area shape="rect" id="node32" href="$ROCKModule_8hpp.html" title="ROCK模块类的声明" alt="" coords="231,273,462,300"/>
+<area shape="rect" id="node5" href="$BulkConn_8hpp.html" title="BulkConn类的声明" alt="" coords="329,825,535,852"/>
+<area shape="rect" id="node6" href="$Reservoir_8hpp.html" title="油藏类声明" alt="" coords="485,900,689,927"/>
+<area shape="rect" id="node18" href="$BulkConnTrans_8hpp.html" title="本文件包含BulkConnTrans类的声明以及相关方法。" alt="" coords="317,661,499,703"/>
+<area shape="rect" id="node19" href="$OCPFlux_8hpp.html" title="OCPFlux 类的声明" alt="" coords="331,751,533,777"/>
+<area shape="rect" id="node20" href="$Well_8hpp.html" title="本文件包含Well类的声明" alt="" coords="798,669,973,695"/>
+<area shape="rect" id="node7" href="$OCPOutput_8hpp.html" title="本文件包含OCPOutput类的声明，用于管理OpenCAEPoroX软件的输出信息。" alt="" coords="309,1310,520,1337"/>
+<area shape="rect" id="node8" href="$OCP_8hpp.html" title="OpenCAEPoroX模拟器的主头文件" alt="" coords="460,1467,636,1493"/>
+<area shape="rect" id="node10" href="$IsoThermalMethod_8hpp_source.html" title=" " alt="" coords="543,1213,732,1255"/>
+<area shape="rect" id="node12" href="$OCPNRsuite_8hpp.html" title="非线性迭代中使用的数据结构" alt="" coords="659,975,885,1001"/>
+<area shape="rect" id="node15" href="$ThermalMethod_8hpp.html" title="热法模拟类的声明" alt="" coords="1057,1221,1295,1247"/>
+<area shape="rect" id="node9" href="$Solver_8hpp.html" title="求解器类的声明" alt="" coords="499,1392,685,1419"/>
+<area shape="rect" id="node11" href="$IsothermalSolver_8hpp.html" title="IsothermalSolver类的声明" alt="" coords="545,1303,730,1344"/>
+<area shape="rect" id="node13" href="$OCPControlNR_8hpp.html" title="OCPControlNR类的声明，用于控制牛顿迭代过程的参数和行为。" alt="" coords="675,1049,869,1091"/>
+<area shape="rect" id="node17" href="$OCPControlTime_8hpp.html" title="OCPControlTime类的声明" alt="" coords="893,1049,1088,1091"/>
+<area shape="rect" id="node14" href="$OCPControl_8hpp.html" title="OCPControl类的声明，用于管理和控制模拟过程中的各种参数。" alt="" coords="817,1139,1037,1165"/>
+<area shape="rect" id="node16" href="$ThermalSolver_8hpp.html" title="ThermalSolver类声明" alt="" coords="755,1310,987,1337"/>
+<area shape="rect" id="node21" href="$WellPeaceman_8hpp.html" title="WellPeacema class declaration." alt="" coords="859,751,1088,777"/>
+<area shape="rect" id="node22" href="$AllWells_8hpp.html" title="AllWells类声明" alt="" coords="723,825,919,852"/>
+<area shape="rect" id="node25" href="$SATModule_8hpp.html" title="SATModule类声明" alt="" coords="93,437,309,464"/>
+<area shape="rect" id="node26" href="$BulkInitializer_8hpp.html" title="BulkInitializer类声明" alt="" coords="144,512,371,539"/>
+<area shape="rect" id="node28" href="$PVTModule_8hpp.html" title="PVT模块类声明" alt="" coords="385,437,602,464"/>
+<area shape="rect" id="node30" href="$WellOpt_8hpp.html" title="本文件包含了WellOpt类的声明" alt="" coords="897,512,1092,539"/>
+<area shape="rect" id="node31" href="$WellPerf_8hpp.html" title="本文件包含了Perforation类的声明。" alt="" coords="947,587,1146,613"/>
+</map>

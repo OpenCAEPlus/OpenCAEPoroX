@@ -1,0 +1,5 @@
+<map id="BulkAccumuTerm" name="BulkAccumuTerm">
+<area shape="rect" id="node1" title="累积项计算的抽象基类" alt="" coords="93,5,219,32"/>
+<area shape="rect" id="node2" href="$classBulkAccumuTerm01.html" title="等温模型的累积项计算类" alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node3" href="$classBulkAccumuTerm02.html" title="热力学模型的累积项计算类" alt="" coords="168,80,307,107"/>
+</map>
