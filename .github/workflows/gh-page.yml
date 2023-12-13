@@ -1,0 +1,34 @@
+name: Github pages
+on:
+    push:
+        branches:
+            - 'main'
+env:
+    CI: false
+jobs:
+    gh-page-publish:
+        runs-on: [self-hosted, Linux]
+        permissions:
+            contents: write
+        steps:
+            - name: Basic info
+              run: |
+                  echo "Build for ${{ github.ref }} branch in ${{ github.repository }} repository."
+                  echo "Job triggered by ${{ github.event_name }}, on self-hosted ${{ runner.os }}."  
+                    echo "Log level: ${{ github.event.inputs.logLevel }}"
+                  echo "Tags: ${{ github.event.inputs.tags }}"
+            - name: Check out repository
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+            - name: Build doc
+              run: |
+                cd docs
+                doxygen
+            - name: Doxygen html for github page
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                publish_dir: ./docs/html
+            - name: remove build folder
+              run: rm -rf "${HOME}/actions_github_pages_*"

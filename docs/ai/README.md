@@ -13,5 +13,5 @@ bito config --edit
 
 ## Run bito
 ```
-./createdoc.sh ../include
+./createdoc.sh ../../include
 ```
