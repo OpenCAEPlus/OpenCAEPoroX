@@ -1,11 +1,12 @@
 var indexSectionsWithContent =
 {
-  0: "_abcdefghijklmnopqrstuvwxyz关函基打输",
+  0: "_abcdefghijklmnopqrstuvwxyz关函基打软输",
   1: "abcdefghilmnoprstvw关基打输",
   2: "abcdefghilmnoprstuvwx",
   3: "_abcdefghijklmnopqrstuvwxyz",
   4: "copr",
-  5: "函"
+  5: "函",
+  6: "软"
 };
 
 var indexSectionNames =
@@ -15,7 +16,8 @@ var indexSectionNames =
   2: "functions",
   3: "variables",
   4: "related",
-  5: "groups"
+  5: "groups",
+  6: "pages"
 };
 
 var indexSectionLabels =
@@ -25,6 +27,7 @@ var indexSectionLabels =
   2: "函数",
   3: "变量",
   4: "友元",
-  5: "组"
+  5: "组",
+  6: "页"
 };
 
