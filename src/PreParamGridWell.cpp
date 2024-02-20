@@ -1078,6 +1078,7 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
 }
 
 
+/// no repeated points
 void PreParamGridWell::OutputPointsOrthogonalGrid()
 {
     if (!ifUseVtk)  return;
@@ -1087,70 +1088,142 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     vector<OCP_SIN> points_xyz;  ///< x,y,z coordinates
     vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
-    points_xyz.reserve(activeGridNum * 8 * 3);
+    points_xyz.reserve((nx + 1) * (ny + 1) * (nz + 1));
     cell_points.reserve(activeGridNum * 9);
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
-    OCP_ULL         pIndex = 0;
-    OCP_SIN         tmpX, tmpY;
-    OCP_ULL         id;
-    for (USI k = 0; k < nz; k++) {
-        tmpY = 0;
-        for (USI j = 0; j < ny; j++) {
+    OCP_SIN tmpX, tmpY;
+    OCP_ULL gId, pId;
+    USI     gI, gJ, gK; 
+    OCP_ULL nx1ny1 = (nx + 1) * (ny + 1);
+    OCP_DBL s;
+
+    // set points
+    for (USI k = 0; k < nz + 1; k++) {
+        if (k == nz) {
+            gK = k - 1;
+            s  = 0.5;
+        }
+        else {
+            gK = k;
+            s  = -0.5;
+        }
+        tmpY = 0;  
+        for (USI j = 0; j < ny + 1; j++) {
+            gJ   = (j == ny ? j - 1 : j);
             tmpX = 0;
-            for (USI i = 0; i < nx; i++) {
-                id = k * nx * ny + j * nx + i;
-                if (actGC.map_All2Act[id] >= 0) {
-                    points_xyz.push_back(tmpX);
-                    points_xyz.push_back(tmpY);
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+            for (USI i = 0; i < nx + 1; i++) {
+                gI  = (i == nx ? i - 1 : i);
+                gId = gK * (nx * ny) + gJ * nx + gI;
 
-                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
-                    points_xyz.push_back(tmpY);
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+                points_xyz.push_back(tmpX);
+                points_xyz.push_back(tmpY);
+                points_xyz.push_back(depth[gId] + s * dz[gId]);
 
-                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
-                    points_xyz.push_back(tmpY + static_cast<OCP_SIN>(dy[id]));
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+                tmpX += dx[gId];
 
-                    points_xyz.push_back(tmpX);
-                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
-
-                    points_xyz.push_back(tmpX);
-                    points_xyz.push_back(tmpY);
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
-
-                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
-                    points_xyz.push_back(tmpY);
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
-
-                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
-                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
-
-                    points_xyz.push_back(tmpX);
-                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
-                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
-
-
-                    cell_points.push_back(8);
-                    for (USI p = 0; p < 8; p++) {
-                        cell_points.push_back(pIndex++);
-                    }
+                // set cells
+                if (k == nz || j == ny || i == nx) {
+                    continue;
                 }
-                tmpX += dx[id];
+                if (actGC.map_All2Act[gId] >= 0) {
+                    cell_points.push_back(8);
+                    pId = gK * (nx + 1) * (ny + 1) + gJ * (nx + 1) + gI;
+                    cell_points.push_back(pId + nx1ny1);
+                    cell_points.push_back(pId + 1 + nx1ny1);
+                    cell_points.push_back(pId + 1 + (nx + 1) + nx1ny1);
+                    cell_points.push_back(pId + 1 + (nx + 1) - 1 + nx1ny1);
+                    cell_points.push_back(pId);
+                    cell_points.push_back(pId + 1);
+                    cell_points.push_back(pId + 1 + (nx + 1));
+                    cell_points.push_back(pId + 1 + (nx + 1) - 1);
+                }
             }
-            tmpY += dy[id];
+            tmpY += dy[gId];
         }
     }
 
-    OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
-
+    
     Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
 
     OCP_INFO("Ouput Orthogonal Grid points for vtk -- end");
 }
+
+
+/// massive repeated points
+//void PreParamGridWell::OutputPointsOrthogonalGrid()
+//{
+//    if (!ifUseVtk)  return;
+//
+//    OCP_INFO("Ouput Orthogonal Grid points for vtk -- begin");
+//
+//    vector<OCP_SIN> points_xyz;  ///< x,y,z coordinates
+//    vector<OCP_ULL> cell_points; ///< numpoints, points index
+//    vector<USI>     cell_type;   ///< type of cell
+//    points_xyz.reserve(activeGridNum * 8 * 3);
+//    cell_points.reserve(activeGridNum * 9);
+//    cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
+//
+//    OCP_ULL         pIndex = 0;
+//    OCP_SIN         tmpX, tmpY;
+//    OCP_ULL         id;
+//    for (USI k = 0; k < nz; k++) {
+//        tmpY = 0;
+//        for (USI j = 0; j < ny; j++) {
+//            tmpX = 0;
+//            for (USI i = 0; i < nx; i++) {
+//                id = k * nx * ny + j * nx + i;
+//                if (actGC.map_All2Act[id] >= 0) {
+//                    points_xyz.push_back(tmpX);
+//                    points_xyz.push_back(tmpY);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+//
+//                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
+//                    points_xyz.push_back(tmpY);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+//
+//                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
+//                    points_xyz.push_back(tmpY + static_cast<OCP_SIN>(dy[id]));
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+//
+//                    points_xyz.push_back(tmpX);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
+//
+//                    points_xyz.push_back(tmpX);
+//                    points_xyz.push_back(tmpY);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
+//
+//                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
+//                    points_xyz.push_back(tmpY);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
+//
+//                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
+//                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
+//
+//                    points_xyz.push_back(tmpX);
+//                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+//                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
+//
+//
+//                    cell_points.push_back(8);
+//                    for (USI p = 0; p < 8; p++) {
+//                        cell_points.push_back(pIndex++);
+//                    }
+//                }
+//                tmpX += dx[id];
+//            }
+//            tmpY += dy[id];
+//        }
+//    }
+//
+//    OCP_ASSERT(points_xyz.size() == activeGridNum * 8 * 3, "WRONG OutputPointsOrthogonalGrid!");
+//
+//    Output4Vtk::OutputGridInfo(workdir, activeGridNum, points_xyz, cell_points, cell_type);
+//
+//    OCP_INFO("Ouput Orthogonal Grid points for vtk -- end");
+//}
 
 
 void PreParamGridWell::SetupCornerGrid()

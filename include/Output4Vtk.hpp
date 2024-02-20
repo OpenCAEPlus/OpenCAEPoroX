@@ -88,7 +88,7 @@ protected:
     void InputGridInfo(const string& dir, OCP_ULL& nG, OCP_ULL& nP, vector<OCP_SIN>& points_xyz, vector<OCP_ULL>& cell_points, vector<USI>& cell_type) const;
 
 protected:
-    OCP_BOOL            ifASCII{ OCP_TRUE };
+    OCP_BOOL            ifASCII{ OCP_FALSE };
     static const string tmpFile;
 };
 
