@@ -3,6 +3,8 @@
 # you will see a ocp folder in home
 sh <(curl -s https://ocp-download.oss-cn-hongkong.aliyuncs.com/install.sh)
 
+source ~/.bashrc
+
 # Download the necessary packages
 # the -d option will only download the package, because some fixes are needed for intel compiler 
 # you will see a external folder in the ocp folder
@@ -16,7 +18,7 @@ tar -xJf ocp.tar.xz
 
 # 4. Make sure it's still located in the home folder
 # add the ocp cli to your path
-PATH=$HOME/ocp/cli/latest:$PATH
+export PATH=$HOME/ocp/cli/latest:$PATH
 
 # 5. finally, compile and install the dependencies
 export OCP_CC=mpiicx

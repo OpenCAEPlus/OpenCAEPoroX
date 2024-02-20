@@ -1377,12 +1377,16 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
             }
         }
     }
+
+    
 }
 
 void Out4VTK::PrintVTK(const Reservoir& rs) const
 {
     if (!useVTK)         return;
     if (bgp.bgpnum == 0) return;
+
+    countPrint++;
 
     const BulkVarSet& bvs = rs.bulk.vs;
 
@@ -1474,7 +1478,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
         if (bgp.bgpnum > 0) {
             tmpVal.resize(numGridLoc * bgp.bgpnum);
             USI index = 0;
-            while (OCP_TRUE) {
+            while (index < countPrint) {
                 if (index >= gridVal.size()) {
                     gridVal.push_back(vector<OCP_DBL>(bgp.bgpnum * numGrid));
 
@@ -1527,9 +1531,6 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                 }
 
                 index++;
-                if (inV.eof()) {
-                    break;
-                }
             }
         }
         inV.close();
@@ -1609,7 +1610,7 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         OCP_WARNING("Can not open " + myFile);
     }   
     USI index = 0;
-    while (OCP_TRUE) {
+    while (index < countPrint) {
 
         inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
 
@@ -1647,11 +1648,9 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
 
         dest.close();
-        if (inV.eof()) {
-            inV.close();
-            break;
-        }
     }
+
+    inV.close();
     
     if (remove(srcFile.c_str()) != 0) {
         OCP_WARNING("Failed to delete " + srcFile);

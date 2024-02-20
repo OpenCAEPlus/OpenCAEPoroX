@@ -293,6 +293,7 @@ protected:
     BasicGridProperty bgp;               ///< Basic grid information
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
+    mutable USI       countPrint{ 0 };   ///< record the count printed
 
     /// total number of grids
     mutable OCP_ULL   numGrid;
