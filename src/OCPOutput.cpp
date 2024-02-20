@@ -1376,9 +1376,7 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
                 OCP_WARNING("Fail to delete " + myFile);
             }
         }
-    }
-
-    
+    }    
 }
 
 void Out4VTK::PrintVTK(const Reservoir& rs) const
@@ -1398,41 +1396,43 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     const auto WIndex = bvs.w;
 
     ofstream outF(myFile, ios::app | ios::binary);
-    vector<OCP_DBL> tmpV(nb);
+    vector<OCP_SIN> tmpV(nb);
     // output    
-    if (bgp.PRE)
-        outF.write((const OCP_CHAR*)&bvs.P[0], nb * sizeof(bvs.P[0]));
+    if (bgp.PRE) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = static_cast<OCP_SIN>(bvs.P[n]);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }     
     if (bgp.SOIL) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bvs.S[n * np + OIndex];
+            tmpV[n] = static_cast<OCP_SIN>(bvs.S[n * np + OIndex]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SGAS) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bvs.S[n * np + GIndex];
+            tmpV[n] = static_cast<OCP_SIN>(bvs.S[n * np + GIndex]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.SWAT) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bvs.S[n * np + WIndex];
+            tmpV[n] = static_cast<OCP_SIN>(bvs.S[n * np + WIndex]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
 
     // add CO2 concentration for SPE11
     if (bgp.CO2) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = bvs.rho[n * np + WIndex] * bvs.xij[(n * np + WIndex) * nc + GIndex];
+            tmpV[n] = static_cast<OCP_SIN>(bvs.rho[n * np + WIndex] * bvs.xij[(n * np + WIndex) * nc + GIndex]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
 
     // add SAT region for SPE11
     if (bgp.SATNUM) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = static_cast<OCP_DBL>(rs.bulk.SATm.GetSATNUM(n));
+            tmpV[n] = static_cast<OCP_SIN>(rs.bulk.SATm.GetSATNUM(n));
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
-
-             
+         
     outF.close();
 }
 
@@ -1450,14 +1450,14 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 
     // Input Points
     const string srcFile = dir + "TSTEP.vtk";
-    numGrid = out4vtk.InitASCII(dir, srcFile, "RUN of " + dir + filename);
+    numGrid = out4vtk.Init(dir, srcFile, "RUN of " + dir + filename);
 
     // Input cell values    
-    vector<vector<OCP_DBL>> gridVal;        // each row is on a node of TSTEP in turn
+    vector<vector<OCP_SIN>> gridVal;        // each row is on a node of TSTEP in turn
     vector<OCP_ULL>         global_index;
     vector<OCP_USI>         mypart(numGrid);
-    OCP_DBL*                workPtr;
-    vector<OCP_DBL>         tmpVal;
+    OCP_SIN*                workPtr;
+    vector<OCP_SIN>         tmpVal;
     
 
     for (USI p = 0; p < numproc; p++) {
@@ -1480,54 +1480,54 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             USI index = 0;
             while (index < countPrint) {
                 if (index >= gridVal.size()) {
-                    gridVal.push_back(vector<OCP_DBL>(bgp.bgpnum * numGrid));
+                    gridVal.push_back(vector<OCP_SIN>(bgp.bgpnum * numGrid));
 
                 }
                 workPtr = &gridVal[index][0];
                 inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
-                const OCP_DBL* tamVap_ptr = &tmpVal[0];
+                const OCP_SIN* tmpVal_ptr = &tmpVal[0];
 
                 if (bgp.PRE) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr    += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
                 if (bgp.SOIL) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr    += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
                 if (bgp.SGAS) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr    += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
                 if (bgp.SWAT) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr    += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
                 if (bgp.CO2) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr    += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
                 if (bgp.SATNUM) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tamVap_ptr[n];
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
                     }
                     workPtr += numGrid;
-                    tamVap_ptr += numGridLoc;
+                    tmpVal_ptr += numGridLoc;
                 }
 
                 index++;
@@ -1582,7 +1582,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                 bId += numGrid;
             }
             if (bgp.SATNUM) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_UNSIGNED_INT, gridVal[i], bId, numGrid, 0);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, gridVal[i], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1600,11 +1600,11 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
     if (!useVTK) return;
 
     const string srcFile = dir + "TSTEP.vtk";
-    numGrid = out4vtk.InitASCII(dir, srcFile, "RUN of " + dir + filename);
+    numGrid = out4vtk.Init(dir, srcFile, "RUN of " + dir + filename);
  
     // Input cell values
     if (bgp.bgpnum == 0) return;
-    vector<OCP_DBL> tmpVal(bgp.bgpnum * numGrid);
+    vector<OCP_SIN> tmpVal(bgp.bgpnum * numGrid);
     ifstream inV(myFile, ios::in | ios::binary);
     if (!inV.is_open()) {
         OCP_WARNING("Can not open " + myFile);
@@ -1643,7 +1643,7 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
             bId += numGrid;
         }
         if (bgp.SATNUM) {
-            out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_UNSIGNED_INT, tmpVal, bId, numGrid, 0);
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
 

@@ -1084,7 +1084,7 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 
     OCP_INFO("Ouput Orthogonal Grid points for vtk -- begin");
 
-    vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
+    vector<OCP_SIN> points_xyz;  ///< x,y,z coordinates
     vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
@@ -1092,7 +1092,7 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
     cell_type.resize(activeGridNum, VTK_HEXAHEDRON);
 
     OCP_ULL         pIndex = 0;
-    OCP_DBL         tmpX, tmpY;
+    OCP_SIN         tmpX, tmpY;
     OCP_ULL         id;
     for (USI k = 0; k < nz; k++) {
         tmpY = 0;
@@ -1103,35 +1103,35 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
                 if (actGC.map_All2Act[id] >= 0) {
                     points_xyz.push_back(tmpX);
                     points_xyz.push_back(tmpY);
-                    points_xyz.push_back(depth[id] + dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
 
-                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
                     points_xyz.push_back(tmpY);
-                    points_xyz.push_back(depth[id] + dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
 
-                    points_xyz.push_back(tmpX + dx[id]);
-                    points_xyz.push_back(tmpY + dy[id]);
-                    points_xyz.push_back(depth[id] + dz[id] / 2);
+                    points_xyz.push_back(tmpX + static_cast<OCP_SIN>(dx[id]));
+                    points_xyz.push_back(tmpY + static_cast<OCP_SIN>(dy[id]));
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
 
                     points_xyz.push_back(tmpX);
-                    points_xyz.push_back(tmpY + dy[id]);
-                    points_xyz.push_back(depth[id] + dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] + dz[id] / 2));
 
                     points_xyz.push_back(tmpX);
                     points_xyz.push_back(tmpY);
-                    points_xyz.push_back(depth[id] - dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
 
-                    points_xyz.push_back(tmpX + dx[id]);
+                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
                     points_xyz.push_back(tmpY);
-                    points_xyz.push_back(depth[id] - dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
 
-                    points_xyz.push_back(tmpX + dx[id]);
-                    points_xyz.push_back(tmpY + dy[id]);
-                    points_xyz.push_back(depth[id] - dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(tmpX + dx[id]));
+                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
 
                     points_xyz.push_back(tmpX);
-                    points_xyz.push_back(tmpY + dy[id]);
-                    points_xyz.push_back(depth[id] - dz[id] / 2);
+                    points_xyz.push_back(static_cast<OCP_SIN>(tmpY + dy[id]));
+                    points_xyz.push_back(static_cast<OCP_SIN>(depth[id] - dz[id] / 2));
 
 
                     cell_points.push_back(8);
@@ -1288,7 +1288,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 {
     if (!ifUseVtk)  return;
 
-    vector<OCP_DBL> points_xyz;  ///< x,y,z coordinates
+    vector<OCP_SIN> points_xyz;  ///< x,y,z coordinates
     vector<OCP_ULL> cell_points; ///< numpoints, points index
     vector<USI>     cell_type;   ///< type of cell
     points_xyz.reserve(activeGridNum * 8 * 3);
@@ -1302,38 +1302,38 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
             for (USI i = 0; i < nx; i++) {
                 id = k * nx * ny + j * nx + i;
                 if (actGC.map_All2Act[id] >= 0) {
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p4.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p4.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p4.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p4.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p5.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p5.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p5.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p5.z));
+                                                                                                
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p6.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p6.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p6.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p6.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p7.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p7.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p7.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p7.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p0.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p0.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p0.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p0.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p1.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p1.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p1.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p1.z);
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p2.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p2.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p2.z));
 
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p2.z);
-
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.x);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.y);
-                    points_xyz.push_back(mycord.cornerPoints[i][j][k].p3.z);
-
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p3.x));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p3.y));
+                    points_xyz.push_back(static_cast<OCP_SIN>(mycord.cornerPoints[i][j][k].p3.z));
+                                                                                                
                     cell_points.push_back(8);
                     for (USI p = 0; p < 8; p++) {
                         cell_points.push_back(pIndex++);
@@ -1426,7 +1426,11 @@ void PreParamGridWell::OutputPointsGmshGrid()
 {
     if (!ifUseVtk)  return;
 
-    const vector<OCP_DBL>& points_xyz = gmshGrid.points;  ///< x,y,z coordinates
+    vector<OCP_SIN> points_xyz(gmshGrid.points.size());  ///< x,y,z coordinates
+    for (OCP_ULL p = 0; p < gmshGrid.points.size(); p++) {
+        points_xyz[p] = static_cast<OCP_SIN>(gmshGrid.points[p]);
+    }
+
     vector<OCP_ULL>        cell_points;                   ///< numpoints, points index
     vector<USI>            cell_type;                     ///< type of cell
     cell_points.reserve(activeGridNum * 5);
