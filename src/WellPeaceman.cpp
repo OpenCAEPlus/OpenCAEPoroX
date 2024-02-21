@@ -263,9 +263,6 @@ void PeacemanWell::CalWI(const Bulk& bk)
 
     const BulkVarSet& bvs = bk.vs;
 
-    // this fomular needs to be carefully checked !
-    // especially the dz
-
     for (USI p = 0; p < numPerf; p++) {
         if (perf[p].WI > 0) {
             perf[p].WI *= CONV1;

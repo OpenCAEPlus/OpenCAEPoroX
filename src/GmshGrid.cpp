@@ -125,7 +125,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 
 #endif
 
-
+	// from m to cm for spe11a
 	for (auto& p : points) {
 		p *= 100;
 	}

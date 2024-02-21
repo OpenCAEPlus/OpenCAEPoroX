@@ -64,3 +64,5 @@ build/
 cmake/
 !install-*.sh
 !createdoc.sh
+/data/spe11/spe11a-OG
+/data/spe11/spe11a-OG

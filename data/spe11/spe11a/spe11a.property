@@ -202,6 +202,6 @@ TSTEP
 /
 
 -- maximum simulation time (s)
---MAXSTIME
-60
+MAXSTIME
+30
 /

@@ -272,15 +272,15 @@ protected:
 
 
 /////////////////////////////////////////////////////
-// OCP_PVT2 (suitable for a class of table)
+// OCP_PVT2 (suitable for a class of table, for spe11a now)
 /////////////////////////////////////////////////////
 
 class OCP_PVT2 : public OCPFuncTable2
 {
 	/// Each sub-table has 4 columns
-	/// 0th column: The phase pressure. (P), (pa (METRIC))
-	/// 1th column: The corresponding density. (kg/m3 (METRIC))
-	/// 2th column: The corresponding viscosity. (Pa.s (METRIC))
+	/// 0th column: The phase pressure. (P), (pa)
+	/// 1th column: The corresponding density. (g/cm3)
+	/// 2th column: The corresponding viscosity. (pa¡¤s)
 	/// 3th column: e.g. The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
 
 public:
