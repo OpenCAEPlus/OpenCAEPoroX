@@ -24,7 +24,7 @@ spe11a.property
 
 
 PVTCO2
--- pressure (bar)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)        H2O in gas (mass-fraction)
+-- pressure (pa)     density(pure phase) ([g/cm3]) 	viscosibility(pure phase) (pa·s)        H2O in gas (mass-fraction)
 1.0000000000E+04	1.8065535600E-04	1.4667000000E-05	1.1086601150E-01
 2.0000000000E+04	3.6150069200E-04	1.4667800000E-05	5.1375875138E-02
 3.0000000000E+04	5.4253651900E-04	1.4668700000E-05	3.3454670631E-02

@@ -186,7 +186,7 @@ void ParamOutput::InputType_B(ifstream& ifs, Type_B_o& obj)
 
 void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
 {
-    BasicGridPropertyParam* tmpBgpp;
+    OutGridParam* tmpBgpp;
     if (keyword == "RPTSCHED") {
         outRPTParam.useRPT = OCP_TRUE;
         tmpBgpp            = &outRPTParam.bgp;

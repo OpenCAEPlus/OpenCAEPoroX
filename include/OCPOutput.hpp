@@ -215,14 +215,21 @@ private:
     vector<SumItem> Sumdata;
 };
 
+
+class OutGridProperty
+{
+
+};
+
+
 /// Basic grid properties for output
-class BasicGridProperty
+class OutGridVarSet
 {
     friend class Out4RPT;
     friend class Out4VTK;
 
 public:
-    void SetBasicGridProperty(const BasicGridPropertyParam& param);
+    void SetOutGridVarSet(const OutGridParam& param);
     void Check(const Reservoir& rs);
 
 private:
@@ -250,7 +257,7 @@ private:
     OCP_BOOL CO2{ OCP_FALSE };    ///< CO2 Concentration in water phase
     OCP_BOOL SATNUM{ OCP_FALSE }; ///< SAT region
 
-    USI             bgpnum;       ///< num of Basic grid information to be printed
+    USI      bgpnum;              ///< num of Basic grid information to be printed
 };
 
 /// Collect more detailed information of each time step.
@@ -268,7 +275,7 @@ private:
     OCP_USI           nx;
     OCP_USI           ny;
     USI               IJKspace;
-    BasicGridProperty bgp;
+    OutGridVarSet bgp;
 };
 
 
@@ -290,7 +297,7 @@ protected:
 
 protected:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk
-    BasicGridProperty bgp;               ///< Basic grid information
+    OutGridVarSet bgp;               ///< Basic grid information
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
     mutable USI       countPrint{ 0 };   ///< record the count printed

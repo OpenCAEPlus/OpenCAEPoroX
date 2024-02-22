@@ -976,7 +976,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 }
 
 
-void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param)
+void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
 {
     PRE  = param.PRE;
     PGAS = param.PGAS;
@@ -1004,7 +1004,7 @@ void BasicGridProperty::SetBasicGridProperty(const BasicGridPropertyParam& param
 }
 
 
-void BasicGridProperty::Check(const Reservoir& rs)
+void OutGridVarSet::Check(const Reservoir& rs)
 {
     // correct wrong output request
     if (!rs.IfOilExist()) {
@@ -1063,7 +1063,7 @@ void Out4RPT::InputParam(const OutputRPTParam& RPTparam)
     useRPT = RPTparam.useRPT;
     if (!useRPT) return;
 
-    bgp.SetBasicGridProperty(RPTparam.bgp);
+    bgp.SetOutGridVarSet(RPTparam.bgp);
 }
 
 //void Out4RPT::Setup(const string& dir, const Reservoir& rs)
@@ -1341,7 +1341,7 @@ void Out4VTK::InputParam(const OutputVTKParam& VTKParam)
     useVTK = VTKParam.useVTK;
     if (!useVTK) return;
 
-    bgp.SetBasicGridProperty(VTKParam.bgp);
+    bgp.SetOutGridVarSet(VTKParam.bgp);
 }
 
 void Out4VTK::Setup(const string& dir, const Reservoir& rs)

@@ -87,7 +87,7 @@ public:
     Type_B_o SWAT; ///< Water saturation of bulk.
 };
 
-class BasicGridPropertyParam
+class OutGridParam
 {
 public:
     OCP_BOOL PRE{OCP_FALSE};  ///< Pressure of grids.
@@ -122,14 +122,14 @@ class OutputRPTParam
 {
 public:
     OCP_BOOL               useRPT{OCP_FALSE};
-    BasicGridPropertyParam bgp;
+    OutGridParam bgp;
 };
 
 class OutputVTKParam
 {
 public:
     OCP_BOOL               useVTK{OCP_FALSE};
-    BasicGridPropertyParam bgp;
+    OutGridParam bgp;
 };
 
 /// ParamOutput is an internal structure used to stores the information of outputting
