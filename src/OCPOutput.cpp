@@ -978,29 +978,32 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 
 void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
 {
-    PRE  = param.PRE;
-    PGAS = param.PGAS;
-    PWAT = param.PWAT;
-    SOIL = param.SOIL;
-    SGAS = param.SGAS;
-    SWAT = param.SWAT;
-    DENO = param.DENO;
-    DENG = param.DENG;
-    DENW = param.DENW;
-    KRO  = param.KRO;
-    KRG  = param.KRG;
-    KRW  = param.KRW;
-    BOIL = param.BOIL;
-    BGAS = param.BGAS;
-    BWAT = param.BWAT;
-    VOIL = param.VOIL;
-    VGAS = param.VGAS;
-    VWAT = param.VWAT;
-    XMF  = param.XMF;
-    YMF  = param.YMF;
-    PCW  = param.PCW;
-    CO2  = param.CO2;
+    PRE    = param.PRE;
+    PGAS   = param.PGAS;
+    PWAT   = param.PWAT;
+    SOIL   = param.SOIL;
+    SGAS   = param.SGAS;
+    SWAT   = param.SWAT;
+    DENO   = param.DENO;
+    DENG   = param.DENG;
+    DENW   = param.DENW;
+    KRO    = param.KRO;
+    KRG    = param.KRG;
+    KRW    = param.KRW;
+    BOIL   = param.BOIL;
+    BGAS   = param.BGAS;
+    BWAT   = param.BWAT;
+    VOIL   = param.VOIL;
+    VGAS   = param.VGAS;
+    VWAT   = param.VWAT;
+    XMF    = param.XMF;
+    YMF    = param.YMF;
+    PCW    = param.PCW;
+    CO2    = param.CO2;
     SATNUM = param.SATNUM;
+    PERMX  = param.PERMX;
+    PERMY  = param.PERMY;
+    PERMZ  = param.PERMZ;
 }
 
 
@@ -1055,6 +1058,9 @@ void OutGridVarSet::Check(const Reservoir& rs)
     if (PCW)      bgpnum++;
     if (CO2)      bgpnum++;
     if (SATNUM)   bgpnum++;
+    if (PERMX)    bgpnum++;
+    if (PERMY)    bgpnum++;
+    if (PERMZ)    bgpnum++;
 }
 
 
@@ -1432,6 +1438,12 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
             tmpV[n] = static_cast<OCP_SIN>(rs.bulk.SATm.GetSATNUM(n));
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
+
+    if (bgp.PERMX) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = static_cast<OCP_SIN>(bvs.rockKx[n]);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
          
     outF.close();
 }
@@ -1529,6 +1541,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr += numGrid;
                     tmpVal_ptr += numGridLoc;
                 }
+                if (bgp.PERMX) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
+                    }
+                    workPtr += numGrid;
+                    tmpVal_ptr += numGridLoc;
+                }
 
                 index++;
             }
@@ -1583,6 +1602,10 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             }
             if (bgp.SATNUM) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, gridVal[i], bId, numGrid, 0);
+                bId += numGrid;
+            }
+            if (bgp.PERMX) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, gridVal[i], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1644,6 +1667,10 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
         if (bgp.SATNUM) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.PERMX) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
 

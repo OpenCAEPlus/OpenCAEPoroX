@@ -90,29 +90,32 @@ public:
 class OutGridParam
 {
 public:
-    OCP_BOOL PRE{OCP_FALSE};  ///< Pressure of grids.
-    OCP_BOOL PGAS{OCP_FALSE}; ///< Gas pressure of grids.
-    OCP_BOOL PWAT{OCP_FALSE}; ///< Water pressure of grids.
-    OCP_BOOL SOIL{OCP_FALSE}; ///< Oil saturation of grids.
-    OCP_BOOL SGAS{OCP_FALSE}; ///< Gas saturation of grids.
-    OCP_BOOL SWAT{OCP_FALSE}; ///< Water saturation of grids.
-    OCP_BOOL DENO{OCP_FALSE}; ///< Oil density of grids.
-    OCP_BOOL DENG{OCP_FALSE}; ///< Gas density of grids.
-    OCP_BOOL DENW{OCP_FALSE}; ///< Water density of grids.
-    OCP_BOOL KRO{OCP_FALSE};  ///< Oil relative permeability of grids.
-    OCP_BOOL KRG{OCP_FALSE};  ///< Gas relative permeability of grids.
-    OCP_BOOL KRW{OCP_FALSE};  ///< Water relative permeability of grids.
-    OCP_BOOL BOIL{OCP_FALSE}; ///< Oil reservoir molar densities of grids.
-    OCP_BOOL BGAS{OCP_FALSE}; ///< Gas reservoir molar densities of grids.
-    OCP_BOOL BWAT{OCP_FALSE}; ///< Water reservoir molar densities of grids.
-    OCP_BOOL VOIL{OCP_FALSE}; ///< Oil viscosity of grids.
-    OCP_BOOL VGAS{OCP_FALSE}; ///< Gas viscosity of grids.
-    OCP_BOOL VWAT{OCP_FALSE}; ///< Water viscosity of grids.
-    OCP_BOOL XMF{OCP_FALSE};  ///< liquid component mole fractions.
-    OCP_BOOL YMF{OCP_FALSE};  ///< gas component mole fractions.
-    OCP_BOOL PCW{OCP_FALSE};  ///< capillary pressure: Po - Pw.
-    OCP_BOOL CO2{OCP_FALSE};  ///< CO2 Concentration
+    OCP_BOOL PRE{OCP_FALSE};    ///< Pressure of grids.
+    OCP_BOOL PGAS{OCP_FALSE};   ///< Gas pressure of grids.
+    OCP_BOOL PWAT{OCP_FALSE};   ///< Water pressure of grids.
+    OCP_BOOL SOIL{OCP_FALSE};   ///< Oil saturation of grids.
+    OCP_BOOL SGAS{OCP_FALSE};   ///< Gas saturation of grids.
+    OCP_BOOL SWAT{OCP_FALSE};   ///< Water saturation of grids.
+    OCP_BOOL DENO{OCP_FALSE};   ///< Oil density of grids.
+    OCP_BOOL DENG{OCP_FALSE};   ///< Gas density of grids.
+    OCP_BOOL DENW{OCP_FALSE};   ///< Water density of grids.
+    OCP_BOOL KRO{OCP_FALSE};    ///< Oil relative permeability of grids.
+    OCP_BOOL KRG{OCP_FALSE};    ///< Gas relative permeability of grids.
+    OCP_BOOL KRW{OCP_FALSE};    ///< Water relative permeability of grids.
+    OCP_BOOL BOIL{OCP_FALSE};   ///< Oil reservoir molar densities of grids.
+    OCP_BOOL BGAS{OCP_FALSE};   ///< Gas reservoir molar densities of grids.
+    OCP_BOOL BWAT{OCP_FALSE};   ///< Water reservoir molar densities of grids.
+    OCP_BOOL VOIL{OCP_FALSE};   ///< Oil viscosity of grids.
+    OCP_BOOL VGAS{OCP_FALSE};   ///< Gas viscosity of grids.
+    OCP_BOOL VWAT{OCP_FALSE};   ///< Water viscosity of grids.
+    OCP_BOOL XMF{OCP_FALSE};    ///< liquid component mole fractions.
+    OCP_BOOL YMF{OCP_FALSE};    ///< gas component mole fractions.
+    OCP_BOOL PCW{OCP_FALSE};    ///< capillary pressure: Po - Pw.
+    OCP_BOOL CO2{OCP_FALSE};    ///< CO2 Concentration
     OCP_BOOL SATNUM{OCP_FALSE}; ///< SAT region
+    OCP_BOOL PERMX{OCP_FALSE};  ///< permeability of rock in x-direction
+    OCP_BOOL PERMY{OCP_FALSE};  ///< permeability of rock in y-direction
+    OCP_BOOL PERMZ{OCP_FALSE};  ///< permeability of rock in z-direction
 };
 
 /// OutputRPTParam is a part of ParamOutput, it's used to control the output of detailed

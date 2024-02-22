@@ -174,6 +174,8 @@ protected:
     void InputCOMPDAT(ifstream& ifs);
     /// Input INCLUDE
     void InputINCLUDE(ifstream& ifs);
+    /// Try to skip this keyword
+    void InputVTKSCHED(ifstream& ifs);
 
 #ifdef WITH_GMSH
     /// Input GMSH

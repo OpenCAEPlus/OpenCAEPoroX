@@ -32,6 +32,9 @@ void PreParamGridWell::Input(const string& myFilename)
         OCP_MESSAGE("Trying to open file: " << (workdir + myFilename));
         OCP_ABORT("Failed to open the input file!");
     }
+    else {
+        cout << "Reading file: " << (workdir + myFilename) << endl;
+    }
 
     while (!ifs.eof()) {
         vector<string> vbuf;
@@ -113,7 +116,7 @@ void PreParamGridWell::Input(const string& myFilename)
                 break;
 
             case Map_Str2Int("VTKSCHED", 8):
-                ifUseVtk = OCP_TRUE;
+                InputVTKSCHED(ifs);
                 break;
 
             default: // skip non-keywords
@@ -474,6 +477,18 @@ void PreParamGridWell::InputINCLUDE(ifstream& ifs)
     ReadLine(ifs, vbuf);
     DealDefault(vbuf);
     Input(vbuf[0]);
+}
+
+
+void PreParamGridWell::InputVTKSCHED(ifstream& ifs)
+{
+    ifUseVtk = OCP_TRUE;
+
+    vector<string> vbuf;
+    while (OCP_TRUE) {
+        ReadLine(ifs, vbuf);
+        if (vbuf[0] == "/")  break;
+    }
 }
 
 

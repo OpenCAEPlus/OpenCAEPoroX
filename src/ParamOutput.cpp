@@ -278,6 +278,15 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("SATNUM", 6):
                     tmpBgpp->SATNUM = OCP_TRUE;
                     break;
+                case Map_Str2Int("PERMX", 5):
+                    tmpBgpp->PERMX = OCP_TRUE;
+                    break;
+                case Map_Str2Int("PERMY", 5):
+                    tmpBgpp->PERMY = OCP_TRUE;
+                    break;
+                case Map_Str2Int("PERMZ", 5):
+                    tmpBgpp->PERMZ = OCP_TRUE;
+                    break;
                 default:
                     break;
             }

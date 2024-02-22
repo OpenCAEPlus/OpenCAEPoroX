@@ -215,10 +215,16 @@ private:
     vector<SumItem> Sumdata;
 };
 
-
-class OutGridProperty
+/// ToDo
+class OutGridVar
 {
+    friend class OutGridVarSet;
 
+protected:
+    string  name;
+         
+    USI     gap;
+    USI     offset;
 };
 
 
@@ -256,6 +262,9 @@ private:
     OCP_BOOL PCW{OCP_FALSE};      ///< capillary pressure: Po - Pw.
     OCP_BOOL CO2{ OCP_FALSE };    ///< CO2 Concentration in water phase
     OCP_BOOL SATNUM{ OCP_FALSE }; ///< SAT region
+    OCP_BOOL PERMX{ OCP_FALSE };  ///< permeability of rock in x-direction
+    OCP_BOOL PERMY{ OCP_FALSE };  ///< permeability of rock in y-direction
+    OCP_BOOL PERMZ{ OCP_FALSE };  ///< permeability of rock in z-direction
 
     USI      bgpnum;              ///< num of Basic grid information to be printed
 };
@@ -275,7 +284,7 @@ private:
     OCP_USI           nx;
     OCP_USI           ny;
     USI               IJKspace;
-    OutGridVarSet bgp;
+    OutGridVarSet     bgp;
 };
 
 
@@ -297,7 +306,7 @@ protected:
 
 protected:
     OCP_BOOL          useVTK{OCP_FALSE}; ///< If use vtk
-    OutGridVarSet bgp;               ///< Basic grid information
+    OutGridVarSet     bgp;               ///< Basic grid information
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
     mutable USI       countPrint{ 0 };   ///< record the count printed
