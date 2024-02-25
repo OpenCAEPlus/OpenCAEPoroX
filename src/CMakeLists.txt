@@ -5,7 +5,6 @@ target_sources(
 		  BoundaryFlow.cpp
 		  Bulk.cpp
 		  BulkAccumuModule.cpp
-		  BulkConn.cpp
 		  BulkConnTrans.cpp
 		  BulkInitializer.cpp
 		  CornerGrid.cpp

@@ -16,6 +16,7 @@ target_sources(
 		 Domain.hpp
 		 FaspSolver.hpp
 		 FlowUnit.hpp
+		 FLUXModule.hpp
 		 GmshGrid.hpp
 		 HeatConduct.hpp
 		 HeatLoss.hpp

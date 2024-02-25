@@ -109,7 +109,7 @@ protected:
     OCP_DBL          rhse;     
 
 public:
-    void CalBulkConnArea(BulkConnPair& bp, const Bulk& bk) { bcT.CalTrans(bp, bk); }
+    void CalTrans(BulkConnPair& bp, const Bulk& bk) { bcT.CalTrans(bp, bk); }
 protected:
     /// area calculation of bulk connection
     BulkConnTrans     bcT;

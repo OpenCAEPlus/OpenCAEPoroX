@@ -13,8 +13,7 @@
 #define __BULKCONN_HEADER__
 
 // OpenCAEPoroX header files
-#include "Bulk.hpp"
-#include "OCPFlux.hpp"
+#include "FLUXModule.hpp"
 
 using namespace std;
 
@@ -43,11 +42,23 @@ public:
 
 public:
     /// Input params
-    void InputParam(const ParamReservoir& rs_param, const Bulk& bk);
+    void InputParam(const ParamReservoir& rs_param, const Bulk& bk) {
+        FLUXm.InputParam(rs_param, iteratorConn, bk);
+    }
     /// Get variable set
     auto& GetVarSet() const { return vs; }
     /// Get num of connection
     auto GetNumConn() const { return numConn; }
+    /// Calculate transmissibility for all connections
+    void CalTrans(const Bulk& bk) {
+        for (OCP_USI c = 0; c < numConn; c++) {
+            FLUXm.GetFlux(c)->CalTrans(iteratorConn[c], bk);
+        }
+    }
+    /// Calculate diffusity for all connections
+    void CalDiff(const Bulk& bk) {
+
+    }
 
 protected:
     OCP_USI numConn; ///< Number of connections between bulks.
@@ -72,8 +83,7 @@ protected:
     // Flux
     /////////////////////////////////////////////////////////////////////
 
-
-    vector<OCPFlux*>        flux;    ///< flux term
+    FLUXModule              FLUXm; ///< flux term
 };
 
 #endif

@@ -66,7 +66,6 @@ protected:
 //  Operations on each bulk are also defined here.
 class Bulk
 {
-    friend class BulkConn;
     friend class Well;
     friend class PeacemanWell;
     friend class PeacemanWellIsoT;

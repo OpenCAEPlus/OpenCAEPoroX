@@ -27,7 +27,7 @@ void T_FIM::Setup(Reservoir& rs, const OCPControl& ctrl)
 void T_FIM::InitReservoir(Reservoir& rs)
 {
     rs.bulk.Initialize(rs.domain);
-
+    rs.conn.CalTrans(rs.bulk);
     InitRock(rs.bulk);
     CalRock(rs.bulk);
 
@@ -577,14 +577,12 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 
     BulkConn&         conn = rs.conn;
     BulkConnVarSet&   bcvs = conn.vs;
-    USI               fluxnum;
     OCP_USI           bId, eId;
 
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         bId       = conn.iteratorConn[c].BId();
         eId       = conn.iteratorConn[c].EId();
-        fluxnum   = conn.iteratorConn[c].FluxNum();
-        auto Flux = conn.flux[fluxnum];
+        auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
 
@@ -703,13 +701,11 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
     // flux term
     vector<OCP_DBL> bmat(bsize, 0);
     OCP_USI  bId, eId;
-    USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();
         eId       = conn.iteratorConn[c].EId();
-        fluxnum   = conn.iteratorConn[c].FluxNum();
-        auto Flux = conn.flux[fluxnum];
+        auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
