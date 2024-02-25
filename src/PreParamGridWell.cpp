@@ -1551,14 +1551,17 @@ void PreParamGridWell::OutputPointsGmshGrid()
 
 void PreParamGridWell::SetLocationStructral()
 {
+    boundArea.resize(numGrid);
     boundIndex.resize(numGrid);
     const OCP_ULL uplim   = nx * ny;
     const OCP_ULL downlim = nx * ny * (nz - 1);
     for (OCP_ULL n = 0; n < uplim; n++) {
         boundIndex[n] = 1;
+        boundArea[n]  = dx[n] * dy[n];
     }
     for (OCP_ULL n = downlim; n < nx * ny * nz; n++) {
         boundIndex[n] = 2;
+        boundArea[n]  = dx[n] * dy[n];
     }
 }
 

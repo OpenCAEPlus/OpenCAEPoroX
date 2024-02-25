@@ -26,15 +26,25 @@ void BoundaryFlow::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, 
 			}
 		}
 
-		const USI bLen = boundName.size();
-		vector<USI> boundCode(bLen, 0);
-		for (OCP_USI n = 0; n < bvs.nbI; n++) {
-			fill(boundCode.begin(), boundCode.end(), 0.0);
-			for (OCP_INT i = bLen - 1; i >= 0; i--) {
-				boundCode[i] = (((boundIndex[n] >> i) & 1));
+		// for spe11 now
+		if (OCP_TRUE) {
+			const USI bLen = boundName.size();
+			vector<USI> boundCode(bLen, 0);
+			for (OCP_USI n = 0; n < bvs.nbI; n++) {
+				fill(boundCode.begin(), boundCode.end(), 0.0);
+				for (OCP_INT i = bLen - 1; i >= 0; i--) {
+					boundCode[i] = (((boundIndex[n] >> i) & 1));
+				}
+				if (boundCode[3] == 1) {
+					mIndex[n] = 0;
+				}
 			}
-			if (boundCode[3] == 1) {
-				mIndex[n] = 0;
+		}
+		else {
+			for (OCP_USI n = 0; n < bvs.nbI; n++) {
+				if (boundIndex[n] == 1) {
+					mIndex[n] = 0;
+				}
 			}
 		}
 	}

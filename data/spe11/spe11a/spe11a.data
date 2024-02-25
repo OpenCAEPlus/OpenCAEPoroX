@@ -253,10 +253,12 @@ VTKSCHED
 PRESSURE
 SGAS
 CO2
+SATNUM
+PERMX
 /
 
 
 METHOD
-FIM  pardiso
+FIM  bsr.fasp
 /
 

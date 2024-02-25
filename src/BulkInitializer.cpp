@@ -85,17 +85,19 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 }
 
 
+// for spe11 now
 void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain)
 {
+	OCP_FUNCNAME;
 
-	for (OCP_USI n = 0; n < bvs.nb; n++) {
-		bvs.depth[n] *= -1;
+	if (OCP_TRUE) {
+		for (OCP_USI n = 0; n < bvs.nb; n++) {
+			bvs.depth[n] = 1.2 * 1E2 - bvs.depth[n];
+		}
 	}
 
-
-	OCP_FUNCNAME;
 	// all water phase and all water component
-	const OCP_DBL         Dref = -1.2 * 1E2;
+	const OCP_DBL         Dref = 0;
 	const OCP_DBL         Pref = PRESSURE_STD;
 	const vector<OCP_DBL> tmpInitZi{ 1, 0 };
 
@@ -103,7 +105,7 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 
 	/// calculate initial pressure for each bulk
 	numNodes = 100;
-	const OCP_DBL tabdz = (fabs(Dref) - 0) / (numNodes - 1);
+	const OCP_DBL tabdz = (1.2 * 1E2 - 0) / (numNodes - 1);
 	vector<OCP_DBL> Ztmp(numNodes, Dref);
 	vector<OCP_DBL> Potmp(numNodes, 0);
 	vector<OCP_DBL> Pgtmp(numNodes, 0);
