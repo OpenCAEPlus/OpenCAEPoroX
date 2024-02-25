@@ -586,7 +586,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
 
-        // Thermal conductive term always exists
+        // Thermal conductive term
         const auto conH = Flux->GetConductH();
         res.resAbs[bId * len + 1 + nc] += conH * dt;
         if (eId < nb) {

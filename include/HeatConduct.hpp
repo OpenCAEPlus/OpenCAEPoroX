@@ -108,6 +108,7 @@ public:
     const auto& GetVarSet() const { return vs; }
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }
     void UpdateLastTimeStep() { if (ifUse)  vs.UpdateLastTimeStep(); }
+    auto IfUse() const { return ifUse; }
 
 protected:
     /// If use heat loss
