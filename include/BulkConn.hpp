@@ -56,6 +56,12 @@ public:
         }
     }
     /// Calculate diffusity for all connections
+    void CalDiffu(const Bulk& bk) {
+        for (OCP_USI c = 0; c < numConn; c++) {
+            FLUXm.GetFlux(c)->CalDiffu(iteratorConn[c], bk);
+        }
+    }
+    /// Calculate diffusity for all connections
     void CalDiff(const Bulk& bk) {
 
     }

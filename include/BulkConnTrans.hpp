@@ -37,18 +37,49 @@ public:
 };
 
 
-
 class BulkConnTrans
 {
 public:
     BulkConnTrans() = default;
     void Setup();
-    void CalTrans(BulkConnPair& bp, const Bulk& bk) { bcaM->CalTrans(bp, bk); }
+    void CalTrans(BulkConnPair& bp, const Bulk& bk) { bctM->CalTrans(bp, bk); }
 
 protected:
     /// method for area calculation of bulk connection
-    BulkConnTransMethod* bcaM;
+    BulkConnTransMethod* bctM;
 };
+
+
+
+class BulkConnDiffuMethod
+{
+public:
+    BulkConnDiffuMethod() = default;
+    virtual void CalDiffu(BulkConnPair& bp, const Bulk& bk) = 0;
+};
+
+
+class BulkConnDiffuMethod01 : public BulkConnDiffuMethod
+{
+public:
+    BulkConnDiffuMethod01() = default;
+    void CalDiffu(BulkConnPair& bp, const Bulk& bk) override;
+};
+
+
+
+class BulkConnDiffu
+{
+public:
+    BulkConnDiffu() = default;
+    void Setup();
+    void CalDiffu(BulkConnPair& bp, const Bulk& bk) { bcdM->CalDiffu(bp, bk); }
+
+protected:
+    /// method for area calculation of bulk connection
+    BulkConnDiffuMethod* bcdM;
+};
+
 
 
 #endif /* end if __BulkConnTrans_HEADER__ */

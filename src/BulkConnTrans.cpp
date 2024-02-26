@@ -69,7 +69,67 @@ void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)
 
 void BulkConnTrans::Setup()
 {
-    bcaM = new BulkConnTransMethod01();
+    bctM = new BulkConnTransMethod01();
+}
+
+
+
+void BulkConnDiffuMethod01::CalDiffu(BulkConnPair& bp, const Bulk& bk)
+{
+    const BulkVarSet& bcv = bk.GetVarSet();
+
+    OCP_DBL T1, T2;
+    const auto& bId   = bp.bId;
+    const auto& eId   = bp.eId;
+    const auto& areaB = bp.areaB;
+    const auto& areaE = bp.areaE;
+
+    switch (bp.direction)
+    {
+    case ConnDirect::x:
+    case ConnDirect::xp:
+    case ConnDirect::xm:
+        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        bp.diffu = 1 / (1 / T1 + 1 / T2);
+        break;
+    case ConnDirect::y:
+    case ConnDirect::yp:
+    case ConnDirect::ym:
+        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        bp.diffu = 1 / (1 / T1 + 1 / T2);
+        break;
+    case ConnDirect::z:
+    case ConnDirect::zp:
+    case ConnDirect::zm:
+        T1 = bcv.poro[bId] * areaB;
+        T2 = bcv.poro[eId] * areaE;
+        bp.diffu = 1 / (1 / T1 + 1 / T2);
+        break;
+    case ConnDirect::mf:
+    case ConnDirect::fm:
+        bp.diffu = bcv.poro[bId] * bcv.v[bId] * bcv.sigma[bId];
+        break;
+    case ConnDirect::usg:
+        // homogeneous now
+        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        bp.diffu = 1 / (1 / T1 + 1 / T2);
+        break;
+    default:
+        OCP_ABORT("Wrong BulkConnType!");
+    }
+
+    if (!isfinite(bp.diffu)) {
+        OCP_ABORT("Transmissbility is NAN!");
+    }
+}
+
+
+void BulkConnDiffu::Setup()
+{
+    bcdM = new BulkConnDiffuMethod01();
 }
 
 

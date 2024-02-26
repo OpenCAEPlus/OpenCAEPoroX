@@ -27,6 +27,7 @@ using namespace std;
 class BulkConnPair
 {
     friend class BulkConnTransMethod01;
+    friend class BulkConnDiffuMethod01;
 
 public:
     /// Default constructor.
@@ -48,6 +49,7 @@ public:
     const auto& BId() const { return bId; }
     const auto& EId() const { return eId; } 
     const auto& Trans() const { return trans; }
+    const auto& Diffu() const { return diffu; }
     const auto& AreaB() const { return areaB; }
     const auto& AreaE() const { return areaE; }
     const auto& Direction() const { return direction; }
@@ -57,8 +59,10 @@ protected:
     OCP_USI    bId; 
     /// second index of a pair.
     OCP_USI    eId;
-    /// Effective area
+    /// Effective area for permeability
     OCP_DBL    trans;
+    /// Effective area for diffusity
+    OCP_DBL    diffu;
     /// Connection direction
     ConnDirect direction;
     /// Area of intersecting face from first bulk
@@ -76,6 +80,9 @@ class BulkConnVarSet
     /////////////////////////////////////////////////////////////////////
     // General Information
     /////////////////////////////////////////////////////////////////////
+
+public:
+
 
 public:
     /// Index of upwinding bulk of connections for each phase

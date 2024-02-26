@@ -58,6 +58,7 @@ protected:
     void Setup(const USI& npin, const USI& ncin) {
         Allocate(npin, ncin);
         bcT.Setup();
+        bcD.Setup();
     }
     void Allocate(const USI& npin, const USI& ncin) {
         np = npin;
@@ -109,10 +110,14 @@ protected:
     OCP_DBL          rhse;     
 
 public:
+    /// Calculate transmissibility
     void CalTrans(BulkConnPair& bp, const Bulk& bk) { bcT.CalTrans(bp, bk); }
+    /// Calculate diffusity
+    void CalDiffu(BulkConnPair& bp, const Bulk& bk) { bcD.CalDiffu(bp, bk); }
 protected:
     /// area calculation of bulk connection
     BulkConnTrans     bcT;
+    BulkConnDiffu     bcD;
 };
 
 
