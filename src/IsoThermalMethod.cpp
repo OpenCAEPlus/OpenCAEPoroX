@@ -288,12 +288,12 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     BulkConn& conn = rs.conn;
 
     conn.vs.upblock.resize(conn.numConn * np);
-    conn.vs.rho.resize(conn.numConn * np);
+    conn.vs.dP.resize(conn.numConn * np);
     conn.vs.flux_vj.resize(conn.numConn * np);
     conn.vs.flux_ni.resize(conn.numConn * nc);
 
     conn.vs.lupblock.resize(conn.numConn * np);
-    conn.vs.lrho.resize(conn.numConn * np);
+    conn.vs.ldP.resize(conn.numConn * np);
 
 
     NR.Setup(bvs, rs.domain);
@@ -404,7 +404,7 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
         copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
         copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
     }
@@ -594,7 +594,7 @@ void IsoT_IMPEC::ResetToLastTimeStep01(Reservoir& rs, OCPControl& ctrl)
     rs.bulk.vs.Pj = rs.bulk.vs.lPj;
     // Bulk Conn
     rs.conn.vs.upblock      = rs.conn.vs.lupblock;
-    rs.conn.vs.rho          = rs.conn.vs.lrho;
+    rs.conn.vs.dP           = rs.conn.vs.ldP;
 
     // Iters
     NR.ResetIter();
@@ -629,7 +629,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
 
     // Bulk Conn
     rs.conn.vs.upblock      = rs.conn.vs.lupblock;
-    rs.conn.vs.rho          = rs.conn.vs.lrho;
+    rs.conn.vs.dP           = rs.conn.vs.ldP;
 
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
@@ -673,7 +673,7 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     BulkConn& conn = rs.conn;
 
     conn.vs.lupblock    = conn.vs.upblock;
-    conn.vs.lrho        = conn.vs.rho;
+    conn.vs.ldP         = conn.vs.dP;
 
     rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
@@ -912,7 +912,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     BulkConn& conn = rs.conn;
 
     conn.vs.upblock.resize(conn.numConn* np);
-    conn.vs.rho.resize(conn.numConn* np);
+    conn.vs.dP.resize(conn.numConn* np);
     conn.vs.flux_vj.resize(conn.numConn* np);
 
 
@@ -1043,7 +1043,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
         copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
                
         if (eId < nb) {
@@ -2238,7 +2238,7 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
         copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
         copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
 
         if (eId < nb) {

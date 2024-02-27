@@ -85,10 +85,11 @@ public:
 
 
 public:
+    /// For Convection
     /// Index of upwinding bulk of connections for each phase
     vector<OCP_USI> upblock;
-    /// Mass density of phase for connections
-    vector<OCP_DBL> rho;
+    /// Pressure difference between connection bulks for each phase
+    vector<OCP_DBL> dP;
     /// Volume flow rate of phase from upblock
     vector<OCP_DBL> flux_vj;
     /// mole flow rate of components 
@@ -96,8 +97,8 @@ public:
 
     /// last upblock
     vector<OCP_USI> lupblock;
-    /// last rho
-    vector<OCP_DBL> lrho;      
+    /// last dP
+    vector<OCP_DBL> ldP;     
 
 };
 

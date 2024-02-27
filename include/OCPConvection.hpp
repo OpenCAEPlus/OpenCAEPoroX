@@ -39,7 +39,7 @@ public:
 
     
     const vector<OCP_USI>& GetUpblock() const { return upblock; }
-    const vector<OCP_DBL>& GetRho() const { return rho; }
+    const vector<OCP_DBL>& GetDP() const { return dP; }
     const vector<OCP_DBL>& GetFluxVj() const { return flux_vj; }
     const vector<OCP_DBL>& GetFluxNi() const { return flux_ni; }
     const vector<OCP_DBL>& GetFluxHj() const { return flux_Hj; }
@@ -64,7 +64,7 @@ protected:
         np = npin;
         nc = ncin;
         upblock.resize(np, 0.0);
-        rho.resize(np, 0.0);
+        dP.resize(np, 0.0);
         flux_vj.resize(np, 0.0);
         flux_ni.resize(nc, 0.0);
     }
@@ -77,8 +77,8 @@ protected:
     USI              nc;
     /// Index of upwinding bulk of connections for each phase
     vector<OCP_USI>  upblock;
-    /// Mass density of phase for connections
-    vector<OCP_DBL>  rho;
+    /// Pressure difference between connection bulks for each phase
+    vector<OCP_DBL>  dP;
     /// Volume flow rate of phase from upblock
     vector<OCP_DBL>  flux_vj;
     /// mole flow rate of components 

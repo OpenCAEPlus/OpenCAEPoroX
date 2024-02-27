@@ -268,7 +268,7 @@ void T_FIM::AllocateReservoir(Reservoir& rs)
     const OCP_USI& numConn = conn.numConn;
 
     conn.vs.upblock.resize(numConn* np);
-    conn.vs.rho.resize(numConn* np);
+    conn.vs.dP.resize(numConn* np);
     conn.vs.flux_vj.resize(numConn* np);
 
     // Allocate Residual
@@ -597,7 +597,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
         if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
             // with fluid flow
             copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-            copy(Flux->GetRho().begin(), Flux->GetRho().end(), &bcvs.rho[c * np]);
+            copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
             copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
 
 			if (eId < nb) {

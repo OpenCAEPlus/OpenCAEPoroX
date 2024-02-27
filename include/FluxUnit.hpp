@@ -68,7 +68,7 @@ public:
 
 
     const vector<OCP_USI>& GetUpblock() const { return convect->GetUpblock(); }
-    const vector<OCP_DBL>& GetRho() const { return convect->GetRho(); }
+    const vector<OCP_DBL>& GetDP() const { return convect->GetDP(); }
     const vector<OCP_DBL>& GetFluxVj() const { return convect->GetFluxVj(); }
     const vector<OCP_DBL>& GetFluxNi() const { return convect->GetFluxNi(); }
     const vector<OCP_DBL>& GetFluxHj() const { return convect->GetFluxHj(); }
