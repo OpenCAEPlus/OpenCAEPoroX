@@ -16,7 +16,7 @@
 #include <cassert>
 
 // OpenCAEPoroX header files
-#include "OCPFlux.hpp"
+#include "OCPConvection.hpp"
 
 using namespace std;
 
@@ -28,13 +28,13 @@ public:
         switch (index)
         {
         case 0:
-            flux = new OCPFlux01(np, nc);
+            convect = new OCPConvection01(np, nc);
             break;
         case 1:
-            flux = new OCPFlux02(np, nc);
+            convect = new OCPConvection02(np, nc);
             break;
         case 2:
-            flux = new OCPFluxT01(np, nc);
+            convect = new OCPConvectionT01(np, nc);
             break;
         default:
             OCP_ABORT("Wrong flux type!");
@@ -43,49 +43,49 @@ public:
     }
     /// Calculate transmissibility
     void CalTrans(BulkConnPair& bp, const Bulk& bk) const {
-        flux->CalTrans(bp, bk);
+        convect->CalTrans(bp, bk);
     }
     /// Calculate diffusity for all connections
     void CalDiffu(BulkConnPair& bp, const Bulk& bk) const {
-        flux->CalDiffu(bp, bk);
+        convect->CalDiffu(bp, bk);
     }
     /// Calculate flux of components and phases
     void CalFlux(const BulkConnPair& bp, const Bulk& bk) const {
-        flux->CalFlux(bp, bk);
+        convect->CalFlux(bp, bk);
     }
     /// Assemble matrix for FIM
     void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        flux->AssembleMatFIM(bp, c, bcvs, bk);
+        convect->AssembleMatFIM(bp, c, bcvs, bk);
     }
     /// Assemble matrix for AIM
     void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        flux->AssembleMatAIM(bp, c, bcvs, bk);
+        convect->AssembleMatAIM(bp, c, bcvs, bk);
     }
     /// Assemble matrix for IMPEC
     void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        flux->AssembleMatIMPEC(bp, c, bcvs, bk);
+        convect->AssembleMatIMPEC(bp, c, bcvs, bk);
     }
 
 
-    const vector<OCP_USI>& GetUpblock() const { return flux->GetUpblock(); }
-    const vector<OCP_DBL>& GetRho() const { return flux->GetRho(); }
-    const vector<OCP_DBL>& GetFluxVj() const { return flux->GetFluxVj(); }
-    const vector<OCP_DBL>& GetFluxNi() const { return flux->GetFluxNi(); }
-    const vector<OCP_DBL>& GetFluxHj() const { return flux->GetFluxHj(); }
-    OCP_DBL GetConductH() const { return flux->GetConductH(); }
+    const vector<OCP_USI>& GetUpblock() const { return convect->GetUpblock(); }
+    const vector<OCP_DBL>& GetRho() const { return convect->GetRho(); }
+    const vector<OCP_DBL>& GetFluxVj() const { return convect->GetFluxVj(); }
+    const vector<OCP_DBL>& GetFluxNi() const { return convect->GetFluxNi(); }
+    const vector<OCP_DBL>& GetFluxHj() const { return convect->GetFluxHj(); }
+    OCP_DBL GetConductH() const { return convect->GetConductH(); }
 
-    const vector<OCP_DBL>& GetdFdXpB() const { return flux->GetdFdXpB(); }
-    const vector<OCP_DBL>& GetdFdXpE() const { return flux->GetdFdXpE(); }
-    const vector<OCP_DBL>& GetdFdXsB() const { return flux->GetdFdXsB(); }
-    const vector<OCP_DBL>& GetdFdXsE() const { return flux->GetdFdXsE(); }
-    OCP_DBL GetValbb() const { return flux->GetValbb(); }            
-    OCP_DBL GetValee() const { return flux->GetValee(); }
-    OCP_DBL GetRhsb() const { return  flux->GetRhsb(); }
-    OCP_DBL GetRhse() const { return  flux->GetRhse(); }
+    const vector<OCP_DBL>& GetdFdXpB() const { return convect->GetdFdXpB(); }
+    const vector<OCP_DBL>& GetdFdXpE() const { return convect->GetdFdXpE(); }
+    const vector<OCP_DBL>& GetdFdXsB() const { return convect->GetdFdXsB(); }
+    const vector<OCP_DBL>& GetdFdXsE() const { return convect->GetdFdXsE(); }
+    OCP_DBL GetValbb() const { return convect->GetValbb(); }            
+    OCP_DBL GetValee() const { return convect->GetValee(); }
+    OCP_DBL GetRhsb() const { return  convect->GetRhsb(); }
+    OCP_DBL GetRhse() const { return  convect->GetRhse(); }
 
 protected:
 
-	OCPFlux* flux;
+	OCPConvection* convect;
 
 };
 

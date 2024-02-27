@@ -1,5 +1,5 @@
-/*! \file    OCPFlux.hpp
- *  \brief   OCPFlux class declaration
+/*! \file    OCPConvection.hpp
+ *  \brief   OCPConvection class declaration
  *  \author  Shizhe Li
  *  \date    May/10/2023
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPFLUX_HEADER__
-#define __OCPFLUX_HEADER__
+#ifndef __OCPCONVECTION_HEADER__
+#define __OCPCONVECTION_HEADER__
 
  // Standard header files
 #include <vector>
@@ -23,11 +23,11 @@
 using namespace std;
 
 
-class OCPFlux
+class OCPConvection
 {
 
 public:
-    OCPFlux() = default;
+    OCPConvection() = default;
     /// Calculate flux of components and phases
     virtual void CalFlux(const BulkConnPair& bp, const Bulk& bk) = 0;
     /// Assemble matrix for FIM
@@ -122,11 +122,11 @@ protected:
 
 
 /// For Isothermal darcy flux
-class OCPFlux01 : public OCPFlux
+class OCPConvection01 : public OCPConvection
 {
 public:
-    OCPFlux01() = default;
-    OCPFlux01(const USI& npin, const USI& ncin) {
+    OCPConvection01() = default;
+    OCPConvection01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
         dFdXpB.resize((nc + 1) * (nc + 1));
         dFdXpE.resize((nc + 1) * (nc + 1));
@@ -141,11 +141,11 @@ public:
 
 
 /// For Isothermal darcy flux with standard gravity drainage model
-class OCPFlux02 : public OCPFlux
+class OCPConvection02 : public OCPConvection
 {
 public:
-    OCPFlux02() = default;
-    OCPFlux02(const USI& npin, const USI& ncin) {
+    OCPConvection02() = default;
+    OCPConvection02(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
         dFdXpB.resize((nc + 1) * (nc + 1));
         dFdXpE.resize((nc + 1) * (nc + 1));
@@ -160,11 +160,11 @@ public:
 
 
 /// For thermal darcy flux
-class OCPFluxT01 : public OCPFlux
+class OCPConvectionT01 : public OCPConvection
 {
 public:
-    OCPFluxT01() = default;
-    OCPFluxT01(const USI& npin, const USI& ncin) {
+    OCPConvectionT01() = default;
+    OCPConvectionT01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
         flux_Hj.resize(np);
         dFdXpB.resize((nc + 2) * (nc + 2));

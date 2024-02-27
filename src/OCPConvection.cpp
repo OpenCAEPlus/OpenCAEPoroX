@@ -1,5 +1,5 @@
-/*! \file    OCPFlux.cpp
- *  \brief   OCPFlux class declaration
+/*! \file    OCPConvection.cpp
+ *  \brief   OCPConvection class declaration
  *  \author  Shizhe Li
  *  \date    May/10/2023
  *
@@ -11,15 +11,15 @@
 
 
 // OpenCAEPoroX header files
-#include "OCPFlux.hpp"
+#include "OCPConvection.hpp"
 
 
 ////////////////////////////////////////////
-// OCPFlux01
+// OCPConvection01
 ////////////////////////////////////////////
 
 
-void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
 	// Calculte upblock, rho, flux_vj, flux_ni
 
@@ -80,7 +80,7 @@ void OCPFlux01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 }
 
 
-void OCPFlux01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -189,7 +189,7 @@ void OCPFlux01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
 }
 
 
-void OCPFlux01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -454,7 +454,7 @@ void OCPFlux01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const B
 }
 
 
-void OCPFlux01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
     
@@ -491,11 +491,11 @@ void OCPFlux01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const
 
 
 ////////////////////////////////////////////
-// OCPFlux02
+// OCPConvection02
 ////////////////////////////////////////////
 
 
-void OCPFlux02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
     // Calculte upblock, rho, flux_vj, flux_ni
 
@@ -569,7 +569,7 @@ void OCPFlux02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
     }
 }
 
-void OCPFlux02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
     const BulkVarSet& bvs = bk.vs;
 
@@ -692,11 +692,11 @@ void OCPFlux02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const B
 
 
 ////////////////////////////////////////////
-// OCPFluxT01
+// OCPConvectionT01
 ////////////////////////////////////////////
 
 
-void OCPFluxT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 {
     // Calculte upblock, rho, flux_vj, flux_ni, conduct_H
    
@@ -774,7 +774,7 @@ void OCPFluxT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
 }
 
 
-void OCPFluxT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
 {
 
     fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
