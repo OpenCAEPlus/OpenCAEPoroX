@@ -403,9 +403,9 @@ void IsoT_IMPEC::CalBulkFlux(Reservoir& rs) const
         auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
-        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
-        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
+        copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+        copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
         copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
     }
 }
@@ -1042,9 +1042,9 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
-        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
-        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
+        copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+        copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
                
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {               
@@ -2237,9 +2237,9 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
         auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
-        copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-        copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
-        copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
+        copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+        copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+        copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
 
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {

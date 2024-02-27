@@ -596,9 +596,9 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 
         if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
             // with fluid flow
-            copy(Flux->GetUpblock().begin(), Flux->GetUpblock().end(), &bcvs.upblock[c * np]);
-            copy(Flux->GetDP().begin(), Flux->GetDP().end(), &bcvs.dP[c * np]);
-            copy(Flux->GetFluxVj().begin(), Flux->GetFluxVj().end(), &bcvs.flux_vj[c * np]);
+            copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+            copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+            copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
 
 			if (eId < nb) {
 				// Interior grid
@@ -607,8 +607,8 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 					res.resAbs[eId * len + 1 + i] -= dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
-                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
-                    res.resAbs[eId * len + 1 + nc] -= dt * Flux->GetFluxHj()[j];
+                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetConvectHj()[j];
+                    res.resAbs[eId * len + 1 + nc] -= dt * Flux->GetConvectHj()[j];
                 }
 			}
 			else {
@@ -617,7 +617,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 					res.resAbs[bId * len + 1 + i] += dt * Flux->GetFluxNi()[i];
 				}
                 for (USI j = 0; j < np; j++) {
-                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetFluxHj()[j];
+                    res.resAbs[bId * len + 1 + nc] += dt * Flux->GetConvectHj()[j];
                 }				
 			}
         }

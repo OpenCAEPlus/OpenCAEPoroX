@@ -29,30 +29,20 @@ class OCPConvection
 public:
     OCPConvection() = default;
     /// Calculate flux of components and phases
-    virtual void CalFlux(const BulkConnPair& bp, const Bulk& bk) = 0;
+    virtual void CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs) = 0;
     /// Assemble matrix for FIM
-    virtual void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
+    virtual void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) = 0;
     /// Assemble matrix for AIM
-    virtual void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
+    virtual void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) = 0;
     /// Assemble matrix for IMPEC
-    virtual void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) = 0;
+    virtual void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) = 0;
 
     
     const vector<OCP_USI>& GetUpblock() const { return upblock; }
     const vector<OCP_DBL>& GetDP() const { return dP; }
-    const vector<OCP_DBL>& GetFluxVj() const { return flux_vj; }
-    const vector<OCP_DBL>& GetFluxNi() const { return flux_ni; }
-    const vector<OCP_DBL>& GetFluxHj() const { return flux_Hj; }
+    const vector<OCP_DBL>& GetVj() const { return vj; }
+    const vector<OCP_DBL>& GetHj() const { return Hj; }
     OCP_DBL GetConductH() const { return conduct_H; }
-
-    const vector<OCP_DBL>& GetdFdXpB() const { return dFdXpB; }
-    const vector<OCP_DBL>& GetdFdXpE() const { return dFdXpE; }
-    const vector<OCP_DBL>& GetdFdXsB() const { return dFdXsB; }
-    const vector<OCP_DBL>& GetdFdXsE() const { return dFdXsE; }
-    OCP_DBL GetValbb() const { return valbb; }
-    OCP_DBL GetValee() const { return valee; }
-    OCP_DBL GetRhsb() const { return  rhsb; }
-    OCP_DBL GetRhse() const { return  rhse; }
 
 protected:
     void Setup(const USI& npin, const USI& ncin) {
@@ -65,8 +55,7 @@ protected:
         nc = ncin;
         upblock.resize(np, 0.0);
         dP.resize(np, 0.0);
-        flux_vj.resize(np, 0.0);
-        flux_ni.resize(nc, 0.0);
+        vj.resize(np, 0.0);
     }
 
 protected:
@@ -80,34 +69,13 @@ protected:
     /// Pressure difference between connection bulks for each phase
     vector<OCP_DBL>  dP;
     /// Volume flow rate of phase from upblock
-    vector<OCP_DBL>  flux_vj;
-    /// mole flow rate of components 
-    vector<OCP_DBL>  flux_ni;
+    vector<OCP_DBL>  vj;
     /// enthalpy flow rate of phase from upblock
-    vector<OCP_DBL>  flux_Hj;  
+    vector<OCP_DBL>  Hj;  
 
     // thermal conduction term
     OCP_DBL          conduct_H;
-
-    // for FIM
-    /// dF / dXp for bId bulk
-    vector<OCP_DBL>  dFdXpB;
-    /// dF / dXp for eId bulk
-    vector<OCP_DBL>  dFdXpE;
-    /// dF / dXs for bId bulk
-    vector<OCP_DBL>  dFdXsB;
-    /// dF / dXs for eId bulk
-    vector<OCP_DBL>  dFdXsE;   
-
-    // for IMPEC
-    /// val in b-b, -val in b-e
-    OCP_DBL          valbb;
-    /// val in e-e, -val in e-b
-    OCP_DBL          valee; 
-    /// rhs in b
-    OCP_DBL          rhsb; 
-    /// rhs in e
-    OCP_DBL          rhse;     
+ 
 
 public:
     /// Calculate transmissibility
@@ -128,15 +96,11 @@ public:
     OCPConvection01() = default;
     OCPConvection01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
-        dFdXpB.resize((nc + 1) * (nc + 1));
-        dFdXpE.resize((nc + 1) * (nc + 1));
-        dFdXsB.resize((nc + 1) * (nc + 1) * np);
-        dFdXsE.resize((nc + 1) * (nc + 1) * np);
     }
-    void CalFlux(const BulkConnPair& bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
-    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
+    void CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override;
 };
 
 
@@ -145,17 +109,11 @@ class OCPConvection02 : public OCPConvection
 {
 public:
     OCPConvection02() = default;
-    OCPConvection02(const USI& npin, const USI& ncin) {
-        Setup(npin, ncin);
-        dFdXpB.resize((nc + 1) * (nc + 1));
-        dFdXpE.resize((nc + 1) * (nc + 1));
-        dFdXsB.resize((nc + 1) * (nc + 1) * np);
-        dFdXsE.resize((nc + 1) * (nc + 1) * np);
-    }
-    void CalFlux(const BulkConnPair& bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override { OCP_ABORT("NOT USED!"); }
-    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override { OCP_ABORT("NOT USED!"); }
+    OCPConvection02(const USI& npin, const USI& ncin) { Setup(npin, ncin); }
+    void CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override { OCP_ABORT("NOT USED!"); }
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override { OCP_ABORT("NOT USED!"); }
 };
 
 
@@ -166,20 +124,16 @@ public:
     OCPConvectionT01() = default;
     OCPConvectionT01(const USI& npin, const USI& ncin) {
         Setup(npin, ncin);
-        flux_Hj.resize(np);
-        dFdXpB.resize((nc + 2) * (nc + 2));
-        dFdXpE.resize((nc + 2) * (nc + 2));
-        dFdXsB.resize((nc + 2) * (nc + 1) * np);
-        dFdXsE.resize((nc + 2) * (nc + 1) * np);
+        Hj.resize(np);
     }
-    void CalFlux(const BulkConnPair & bp, const Bulk& bk) override;
-    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override;
-    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override{}
-    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) override{}
+    void CalFlux(const BulkConnPair & bp, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override;
+    void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override{}
+    void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs) override{}
 };
 
 
-#endif // __OCPFLUX_HEADER__
+#endif // __OCPCONVECTION_HEADER__
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

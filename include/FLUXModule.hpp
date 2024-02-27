@@ -67,7 +67,7 @@ protected:
 
 
 
-#endif /* end if __PVTMODULE_HEADER__ */
+#endif /* end if __FLUXMODULE_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

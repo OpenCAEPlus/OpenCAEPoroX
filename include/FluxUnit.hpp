@@ -28,12 +28,15 @@ public:
         switch (index)
         {
         case 0:
+            fluxvs.Allocate(np, nc, nc + 1, (nc + 1) * np);
             convect = new OCPConvection01(np, nc);
             break;
         case 1:
+            fluxvs.Allocate(np, nc, nc + 1, (nc + 1) * np);
             convect = new OCPConvection02(np, nc);
             break;
         case 2:
+            fluxvs.Allocate(np, nc, nc + 2, (nc + 1) * np);
             convect = new OCPConvectionT01(np, nc);
             break;
         default:
@@ -51,47 +54,51 @@ public:
     }
     /// Calculate flux of components and phases
     void CalFlux(const BulkConnPair& bp, const Bulk& bk) const {
-        convect->CalFlux(bp, bk);
+        fluxvs.SetZeroFluxNi();
+        convect->CalFlux(bp, bk, fluxvs);
     }
     /// Assemble matrix for FIM
     void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        convect->AssembleMatFIM(bp, c, bcvs, bk);
+        fluxvs.SetZeroFIM();
+        convect->AssembleMatFIM(bp, c, bcvs, bk, fluxvs);
     }
     /// Assemble matrix for AIM
     void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        convect->AssembleMatAIM(bp, c, bcvs, bk);
+        fluxvs.SetZeroFIM();
+        convect->AssembleMatAIM(bp, c, bcvs, bk, fluxvs);
     }
     /// Assemble matrix for IMPEC
     void AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
-        convect->AssembleMatIMPEC(bp, c, bcvs, bk);
+        fluxvs.SetZeroIMPEC();
+        convect->AssembleMatIMPEC(bp, c, bcvs, bk, fluxvs);
     }
 
 
-    const vector<OCP_USI>& GetUpblock() const { return convect->GetUpblock(); }
-    const vector<OCP_DBL>& GetDP() const { return convect->GetDP(); }
-    const vector<OCP_DBL>& GetFluxVj() const { return convect->GetFluxVj(); }
-    const vector<OCP_DBL>& GetFluxNi() const { return convect->GetFluxNi(); }
-    const vector<OCP_DBL>& GetFluxHj() const { return convect->GetFluxHj(); }
+    const vector<OCP_USI>& GetConvectUpblock() const { return convect->GetUpblock(); }
+    const vector<OCP_DBL>& GetConvectDP() const { return convect->GetDP(); }
+    const vector<OCP_DBL>& GetConvectVj() const { return convect->GetVj(); }
+    const vector<OCP_DBL>& GetConvectHj() const { return convect->GetHj(); }
     OCP_DBL GetConductH() const { return convect->GetConductH(); }
 
-    const vector<OCP_DBL>& GetdFdXpB() const { return convect->GetdFdXpB(); }
-    const vector<OCP_DBL>& GetdFdXpE() const { return convect->GetdFdXpE(); }
-    const vector<OCP_DBL>& GetdFdXsB() const { return convect->GetdFdXsB(); }
-    const vector<OCP_DBL>& GetdFdXsE() const { return convect->GetdFdXsE(); }
-    OCP_DBL GetValbb() const { return convect->GetValbb(); }            
-    OCP_DBL GetValee() const { return convect->GetValee(); }
-    OCP_DBL GetRhsb() const { return  convect->GetRhsb(); }
-    OCP_DBL GetRhse() const { return  convect->GetRhse(); }
+    const vector<OCP_DBL>& GetFluxNi() const { return fluxvs.flux_ni; }
+    const vector<OCP_DBL>& GetdFdXpB() const { return fluxvs.dFdXpB; }
+    const vector<OCP_DBL>& GetdFdXpE() const { return fluxvs.dFdXpE; }
+    const vector<OCP_DBL>& GetdFdXsB() const { return fluxvs.dFdXsB; }
+    const vector<OCP_DBL>& GetdFdXsE() const { return fluxvs.dFdXsE; }
+    OCP_DBL GetValbb() const { return fluxvs.valbb; }            
+    OCP_DBL GetValee() const { return fluxvs.valee; }
+    OCP_DBL GetRhsb() const { return  fluxvs.rhsb; }
+    OCP_DBL GetRhse() const { return  fluxvs.rhse; }
 
 protected:
-
-	OCPConvection* convect;
+    mutable FluxVarSet     fluxvs;
+	OCPConvection*         convect;
 
 };
 
 
 
-#endif /* end if __PVTMODULE_HEADER__ */
+#endif /* end if __FLUXUNIT_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

@@ -82,9 +82,6 @@ class BulkConnVarSet
     /////////////////////////////////////////////////////////////////////
 
 public:
-
-
-public:
     /// For Convection
     /// Index of upwinding bulk of connections for each phase
     vector<OCP_USI> upblock;
@@ -100,6 +97,65 @@ public:
     /// last dP
     vector<OCP_DBL> ldP;     
 
+};
+
+
+class FluxVarSet
+{
+public:
+    void Allocate(const USI& _np, const USI& _nc, const USI& n0, const USI& n1) {
+        np = _np;
+        nc = _nc;
+        flux_ni.resize(nc);
+        dFdXpB.resize(n0 * n0);
+        dFdXpE.resize(n0 * n0);
+        dFdXsB.resize(n0 * n1);
+        dFdXsE.resize(n0 * n1);
+    }
+    void SetZeroFluxNi() {
+        fill(flux_ni.begin(), flux_ni.end(), 0.0);
+    }
+    void SetZeroFIM() {
+        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
+        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
+        fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
+        fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
+    }
+    void SetZeroIMPEC() {
+        valbb = 0;
+        valee = 0;
+        rhsb = 0;
+        rhse = 0;
+    }
+
+public:
+    /// number of phase
+    USI              np;
+    /// number of components
+    USI              nc;
+
+    /// mole flow rate of components 
+    vector<OCP_DBL>  flux_ni;
+
+    // for FIM
+    /// dF / dXp for bId bulk
+    vector<OCP_DBL>  dFdXpB;
+    /// dF / dXp for eId bulk
+    vector<OCP_DBL>  dFdXpE;
+    /// dF / dXs for bId bulk
+    vector<OCP_DBL>  dFdXsB;
+    /// dF / dXs for eId bulk
+    vector<OCP_DBL>  dFdXsE;
+
+    // for IMPEC
+    /// val in b-b, -val in b-e
+    OCP_DBL          valbb;
+    /// val in e-e, -val in e-b
+    OCP_DBL          valee;
+    /// rhs in b
+    OCP_DBL          rhsb;
+    /// rhs in e
+    OCP_DBL          rhse;
 };
 
 

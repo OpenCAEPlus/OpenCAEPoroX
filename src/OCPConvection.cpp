@@ -19,13 +19,13 @@
 ////////////////////////////////////////////
 
 
-void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs)
 {
-	// Calculte upblock, rho, flux_vj, flux_ni
+	// Calculte upblock, rho, vj, flux_ni
 
     const BulkVarSet& bvs = bk.vs;
 
-    fill(flux_ni.begin(), flux_ni.end(), 0.0);
+    auto& flux_ni = fvs.flux_ni;
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -53,7 +53,7 @@ void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         else {
             upblock[j] = bId;
             dP[j]      = 0;
-            flux_vj[j] = 0;
+            vj[j] = 0;
             continue;
         }
 
@@ -66,30 +66,30 @@ void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         uId_np_j = upblock[j] * np + j;
 
         if (!bvs.phaseExist[uId_np_j]) {
-            flux_vj[j] = 0;
+            vj[j] = 0;
             continue;
         }
 
-        flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
+        vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
        
         for (USI i = 0; i < nc; i++) {
-            flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
+            flux_ni[i] += vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
         }
     }
 }
 
 
-void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
+    auto& dFdXpB = fvs.dFdXpB;
+    auto& dFdXpE = fvs.dFdXpE;
+    auto& dFdXsB = fvs.dFdXsB;
+    auto& dFdXsE = fvs.dFdXsE;
+
     const BulkVarSet& bvs = bk.vs;
 
     const USI  ncol   = nc + 1;
     const USI  ncol2  = np * nc + np;
-
-    fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-    fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-    fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-    fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
 
     const OCP_USI bId    = bp.BId();
     const OCP_USI eId    = bp.EId();
@@ -188,8 +188,13 @@ void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
 }
 
 
-void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
+    auto& dFdXpB = fvs.dFdXpB;
+    auto& dFdXpE = fvs.dFdXpE;
+    auto& dFdXsB = fvs.dFdXsB;
+    auto& dFdXsE = fvs.dFdXsE;
+
     const BulkVarSet& bvs = bk.vs;
 
     const USI  ncol   = nc + 1;
@@ -216,10 +221,6 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
 
     if (!bIdFIM && !eIdFIM) {
         // both are explicit
-
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-
         for (USI j = 0; j < np; j++) {
             uId_np_j = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
@@ -241,11 +242,6 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
     }
     else if ((bIdFIM && !eIdFIM) || (!bIdFIM && eIdFIM)) {
         // one is explicit, one is implicit
-
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-        fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-        fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
 
         OCP_BOOL uIdFIM;
         OCP_DBL  flag_be;
@@ -366,11 +362,6 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
     else {
 
         // both are implicit
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-        fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-        fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-        fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
-
         for (USI j = 0; j < np; j++) {
             uId_np_j     = bcvs.upblock[c * np + j] * np + j;
             if (!bvs.phaseExist[uId_np_j]) continue;
@@ -453,8 +444,14 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
 }
 
 
-void OCPConvection01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
+
+    auto& valbb = fvs.valbb;   
+    auto& valee = fvs.valee;
+    auto& rhsb  = fvs.rhsb;   
+    auto& rhse  = fvs.rhse;
+
     const BulkVarSet& bvs = bk.vs;
     
     const OCP_USI bId = bp.BId();
@@ -462,8 +459,6 @@ void OCPConvection01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c,
     const OCP_DBL Akd = bp.Trans();   
     const OCP_DBL dP  = bvs.P[bId] - bvs.P[eId];
      
-    valbb = 0;   valee = 0;
-    rhsb  = 0;   rhse  = 0;
 
     for (USI j = 0; j < np; j++) {
         const OCP_USI uId_np_j = bcvs.upblock[c * np + j] * np + j;        
@@ -492,13 +487,13 @@ void OCPConvection01::AssembleMatIMPEC(const BulkConnPair& bp, const OCP_USI& c,
 ////////////////////////////////////////////
 
 
-void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs)
 {
-    // Calculte upblock, rho, flux_vj, flux_ni
+    // Calculte upblock, rho, vj, flux_ni
 
     const BulkVarSet& bvs = bk.vs;
 
-    fill(flux_ni.begin(), flux_ni.end(), 0.0);
+    auto& flux_ni = fvs.flux_ni;
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -516,7 +511,7 @@ void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         if ((!exbegin) && (!exend)) {
             upblock[j] = bId;
             dP[j] = 0;
-            flux_vj[j] = 0;
+            vj[j] = 0;
             continue;
         }
 
@@ -541,29 +536,29 @@ void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk)
         uId_np_j = upblock[j] * np + j;
 
         if (!bvs.phaseExist[uId_np_j]) {
-            flux_vj[j] = 0;
+            vj[j] = 0;
             continue;
         }
 
-        flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
+        vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
 
         for (USI i = 0; i < nc; i++) {
-            flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
+            flux_ni[i] += vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
         }
     }
 }
 
-void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
+    auto& dFdXpB = fvs.dFdXpB;
+    auto& dFdXpE = fvs.dFdXpE;
+    auto& dFdXsB = fvs.dFdXsB;
+    auto& dFdXsE = fvs.dFdXsE;
+
     const BulkVarSet& bvs = bk.vs;
 
     const USI  ncol = nc + 1;
     const USI  ncol2 = np * nc + np;
-
-    fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-    fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-    fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-    fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -668,16 +663,15 @@ void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
 ////////////////////////////////////////////
 
 
-void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
+void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet& fvs)
 {
-    // Calculte upblock, rho, flux_vj, flux_ni, conduct_H
-   
-    fill(flux_ni.begin(), flux_ni.end(), 0.0);
+    // Calculte upblock, rho, vj, flux_ni, conduct_H
+    auto& flux_ni = fvs.flux_ni;
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
 
-    const BulkVarSet& bvs = bk.vs;
+    const BulkVarSet& bvs = bk.vs; 
 
     if (bk.optMs.heatConduct.IfUse()) {
         const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
@@ -716,8 +710,8 @@ void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
             else {
                 upblock[j] = bId;
                 dP[j]      = 0;
-                flux_vj[j] = 0;
-                flux_Hj[j] = 0;
+                vj[j] = 0;
+                Hj[j] = 0;
                 continue;
             }
 
@@ -730,30 +724,29 @@ void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk)
             uId_np_j = upblock[j] * np + j;
 
             if (!bvs.phaseExist[uId_np_j]) {
-                flux_vj[j] = 0;
-                flux_Hj[j] = 0;
+                vj[j] = 0;
+                Hj[j] = 0;
                 continue;
             }
 
-            flux_vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
-            flux_Hj[j] = flux_vj[j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
+            vj[j] = Akd * bvs.kr[uId_np_j] / bvs.mu[uId_np_j] * dP[j];
+            Hj[j] = vj[j] * bvs.xi[uId_np_j] * bvs.H[uId_np_j];
 
             for (USI i = 0; i < nc; i++) {
-                flux_ni[i] += flux_vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
+                flux_ni[i] += vj[j] * bvs.xi[uId_np_j] * bvs.xij[uId_np_j * nc + i];
             }
         }
     }
 }
 
 
-void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk)
+void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
+    auto& dFdXpB = fvs.dFdXpB;
+    auto& dFdXpE = fvs.dFdXpE;
+    auto& dFdXsB = fvs.dFdXsB;
+    auto& dFdXsE = fvs.dFdXsE;
 
-    fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
-    fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
-    fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
-    fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
- 
     const USI  ncol  = nc + 2;
     const USI  ncol2 = np * nc + np;
 

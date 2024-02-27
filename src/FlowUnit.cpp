@@ -20,6 +20,7 @@
 FlowUnit::FlowUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
 {
     flow = new OCPFlow(rs_param, i);
+    vs = &flow->GetVarSet();
     // for miscible
     misCurve      = &opts.misCur;
     mcMethodIndex = misCurve->Setup(flow, &opts.misFac);

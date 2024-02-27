@@ -35,14 +35,16 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return flow->CalPcgoBySg(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return flow->CalSgByPcgo(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw)  const { return flow->CalSwByPcgw(Pcgw); }
-    const vector<OCP_DBL>& GetKr() const { return flow->GetVarSet().kr; }
-    const vector<OCP_DBL>& GetPc() const { return flow->GetVarSet().Pc; }
-    const vector<OCP_DBL>& GetdKrdS() const { return flow->GetVarSet().dKrdS; }
-    const vector<OCP_DBL>& GetdPcdS() const { return flow->GetVarSet().dPcdS; }
+    const vector<OCP_DBL>& GetKr() const { return vs->kr; }
+    const vector<OCP_DBL>& GetPc() const { return vs->Pc; }
+    const vector<OCP_DBL>& GetdKrdS() const { return vs->dKrdS; }
+    const vector<OCP_DBL>& GetdPcdS() const { return vs->dPcdS; }
 
 protected:
 
-    OCPFlow*        flow;
+    OCPFlow*             flow;
+    /// variable set for mixture
+    const OCPFlowVarSet* vs;
     // For scaling the water-oil capillary pressure curves
     /// Scale Pcow
     ScalePcow*      scalePcow;
