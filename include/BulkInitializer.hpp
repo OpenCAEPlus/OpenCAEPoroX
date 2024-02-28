@@ -52,14 +52,14 @@ class BulkInitializer
 {
 public:
 	void Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType);
-    void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain);
+    void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain);
     auto& GetSwat() { return swat; }
 
 protected:
     /// initialize reservoir with hydrostatic equilibrium only
     void InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
     /// initialize reservoir with water and hydrostatic equilibrium
-    void InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain);
+    void InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain);
 
 protected:
     /// Equilibration data specification

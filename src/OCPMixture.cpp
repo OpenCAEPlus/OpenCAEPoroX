@@ -20,7 +20,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 
 
-OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts)
 {
     if (rs_param.PVTW_T.data[i].size() > 0) {
         pmMethod = new OCPMixtureMethodComp01(rs_param, i, vs);
@@ -38,7 +38,7 @@ OCPMixtureComp::OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, Opt
 /////////////////////////////////////////////////////
 
 
-OCPMixtureK::OCPMixtureK(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+OCPMixtureK::OCPMixtureK(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts)
 {
     if (rs_param.PVCO_T.data.size() > 0 &&
         rs_param.PVDG_T.data.size() > 0 &&

@@ -12,7 +12,7 @@
 
 #include "MixtureUnit.hpp"
 
-MixtureUnit::MixtureUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+MixtureUnit::MixtureUnit(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts)
 {
 	if (rs_param.comps) {
 		mix = new OCPMixtureComp(rs_param, i, opts);

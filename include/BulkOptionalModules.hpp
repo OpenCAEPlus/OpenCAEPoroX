@@ -1,5 +1,5 @@
-/*! \file    OptionalModules.hpp
- *  \brief   OptionalModules class declaration
+/*! \file    BulkOptionalModules.hpp
+ *  \brief   BulkOptionalModules class declaration
  *  \author  Shizhe Li
  *  \date    Dec/25/2022
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OPTIONALMODULE_HEADER__
-#define __OPTIONALMODULE_HEADER__
+#ifndef __BULKOPTIONALMODULE_HEADER__
+#define __BULKOPTIONALMODULE_HEADER__
 
 #include "AcceleratePEC.hpp"
 #include "OCPMiscible.hpp"
@@ -18,7 +18,7 @@
 #include "OCPBoundary.hpp"
 #include "HeatConduct.hpp"
 
-class OptionalModules
+class BulkOptionalModules
 {
     friend class MixtureUnit;
     friend class OCPMixtureComp;
@@ -107,7 +107,7 @@ public:
 
 };
 
-#endif /* end if __OptionalFeatures_HEADER__ */
+#endif /* end if __BulkOptionalFeatures_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

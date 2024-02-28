@@ -73,7 +73,7 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 }
 
 
-void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const OptionalModules& optMs, const Domain& domain)
+void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const BulkOptionalModules& optMs, const Domain& domain)
 {
 	// for hydrostatic equilibrium
 	if (EQUIL.size() > 0) {
@@ -86,7 +86,7 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 
 
 // for spe11 now
-void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const OptionalModules& optMs, const Domain& domain)
+void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain)
 {
 	OCP_FUNCNAME;
 

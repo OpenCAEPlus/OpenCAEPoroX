@@ -16,7 +16,7 @@
 
 // OpenCAEPoroX header files
 #include "ParamReservoir.hpp"
-#include "OptionalModules.hpp"
+#include "BulkOptionalModules.hpp"
 #include "OCPFlow.hpp"
 
 /// designed to deal with matters related to saturation table.
@@ -24,7 +24,7 @@
 class FlowUnit
 {
 public:
-    FlowUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    FlowUnit(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts);
 
     void SetupScale(const OCP_USI& bId, OCP_DBL& Swinout, const OCP_DBL& Pcowin) const;
     void CalKrPc(const OCP_USI& bId, const OCP_DBL* S) const;

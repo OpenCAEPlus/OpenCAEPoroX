@@ -15,7 +15,7 @@
 
 // OpenCAEPoroX header files
 #include "BulkVarSet.hpp"
-#include "OptionalModules.hpp"
+#include "BulkOptionalModules.hpp"
 
 #include <vector>
 
@@ -43,7 +43,7 @@ protected:
 	mutable vector<OCP_DBL> res;
 					      
 	// dependent module
-	const OptionalModules*  optM;
+	const BulkOptionalModules*  optM;
 };
 
 
@@ -52,7 +52,7 @@ class BulkAccumuTerm01 : public BulkAccumuTerm
 {
 public:
 	/// constructor
-	BulkAccumuTerm01(const BulkVarSet& bvs, const OptionalModules* opt);
+	BulkAccumuTerm01(const BulkVarSet& bvs, const BulkOptionalModules* opt);
 	/// Calculate residual for FIM
 	const vector<OCP_DBL>& CalResFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const override;
 	/// Calculate dFdXp for FIM
@@ -67,7 +67,7 @@ class BulkAccumuTerm02 : public BulkAccumuTerm
 {
 public:
 	/// constructor
-	BulkAccumuTerm02(const BulkVarSet& bvs, const OptionalModules* opt);
+	BulkAccumuTerm02(const BulkVarSet& bvs, const BulkOptionalModules* opt);
 	/// Calculate residual for FIM
 	const vector<OCP_DBL>& CalResFIM(const OCP_USI& bId, const BulkVarSet& bvs, const OCP_DBL& dt) const override;
 	/// Calculate dFdXp for FIM
@@ -82,7 +82,7 @@ class BulkAccumuModule
 {
 public:
 	/// Setup accumulation module
-	void Setup(const ParamReservoir& param, const BulkVarSet& bvs, const OptionalModules& opt);
+	void Setup(const ParamReservoir& param, const BulkVarSet& bvs, const BulkOptionalModules& opt);
 	/// Get accumulation term
 	const auto GetAccumuTerm() const { return bacT; }
 protected:

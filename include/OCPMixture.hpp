@@ -15,7 +15,7 @@
 
 #include "OCPMixtureMethodComp.hpp"
 #include "OCPMixtureMethodK.hpp"
-#include "OptionalModules.hpp"
+#include "BulkOptionalModules.hpp"
 
 using namespace std;
 
@@ -61,7 +61,7 @@ protected:
 class OCPMixtureComp : public OCPMixture
 {
 public:
-    OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    OCPMixtureComp(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         pmMethod->SetVarSet(P, T, Ni, vs);
         pmMethod->Flash(vs);
@@ -123,7 +123,7 @@ class OCPMixtureK : public OCPMixture
 {
 public:
     OCPMixtureK() = default;
-    OCPMixtureK(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    OCPMixtureK(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts);
     void Flash(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni) override {
         pmMethod->SetVarSet(P, T, Ni, vs);
         pmMethod->Flash(vs);

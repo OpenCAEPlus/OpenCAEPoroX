@@ -26,10 +26,10 @@ target_sources(
 		  OCPControlMethod.cpp
 		  OCPControlNR.cpp
 		  OCPControlTime.cpp
+		  OCPConvection.cpp
 		  OCPEoS.cpp
 		  OCPFlow.cpp
 		  OCPFlowMethod.cpp
-		  OCPFlux.cpp
 		  OCPFuncPVT.cpp
 		  OCPFuncSAT.cpp
 		  OCPMatrix.cpp

@@ -29,7 +29,7 @@
 #include "ROCKModule.hpp"
 #include "BulkInitializer.hpp"
 #include "BulkAccumuModule.hpp"
-#include "OptionalModules.hpp"
+#include "BulkOptionalModules.hpp"
 
 
 using namespace std;
@@ -121,7 +121,7 @@ protected:
     BulkAccumuModule  ACCm;
 
     /// optional modules
-    OptionalModules   optMs; 
+    BulkOptionalModules   optMs; 
 
 public:
     /// Return the number of bulks.

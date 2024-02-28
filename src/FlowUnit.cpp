@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////
 
 
-FlowUnit::FlowUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts)
+FlowUnit::FlowUnit(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts)
 {
     flow = new OCPFlow(rs_param, i);
     vs = &flow->GetVarSet();

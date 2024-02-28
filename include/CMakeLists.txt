@@ -9,14 +9,15 @@ target_sources(
 		 BulkConnTrans.hpp
 		 BulkConnVarSet.hpp
 		 BulkInitializer.hpp
+		 BulkOptionalModules.hpp
 		 BulkVarSet.hpp
-		 CMakeLists.txt
 		 CornerGrid.hpp
 		 DenseMat.hpp
 		 Domain.hpp
+		 FLUXModule.hpp
 		 FaspSolver.hpp
 		 FlowUnit.hpp
-		 FLUXModule.hpp
+		 FluxUnit.hpp
 		 GmshGrid.hpp
 		 HeatConduct.hpp
 		 HeatLoss.hpp
@@ -33,12 +34,12 @@ target_sources(
 		 OCPControlMethod.hpp
 		 OCPControlNR.hpp
 		 OCPControlTime.hpp
+		 OCPConvection.hpp
 		 OCPDataType.hpp
 		 OCPEoS.hpp
 		 OCPFlow.hpp
 		 OCPFlowMethod.hpp
 		 OCPFlowVarSet.hpp
-		 OCPFlux.hpp
 		 OCPFuncPVT.hpp
 		 OCPFuncSAT.hpp
 		 OCPFuncTable.hpp
@@ -58,7 +59,6 @@ target_sources(
 		 OCPTable.hpp
 		 OCPTimeRecord.hpp
 		 OCPUnits.hpp
-		 OptionalModules.hpp
 		 Output4Vtk.hpp
 		 PVTModule.hpp
 		 ParamControl.hpp

@@ -18,7 +18,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "OptionalModules.hpp"
+#include "BulkOptionalModules.hpp"
 #include "ParamReservoir.hpp"
 #include "OCPMixture.hpp"
 #include "BulkVarSet.hpp"
@@ -31,7 +31,7 @@ using namespace std;
 class MixtureUnit
 {
 public:
-    MixtureUnit(const ParamReservoir& rs_param, const USI& i, OptionalModules& opts);
+    MixtureUnit(const ParamReservoir& rs_param, const USI& i, BulkOptionalModules& opts);
     /// return type of mixture.
     auto GetMixtureType() const { return vs->mixtureType; }
     /// return the mixture.
