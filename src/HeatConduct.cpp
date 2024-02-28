@@ -73,16 +73,13 @@ OCP_DBL HeatConductMethod01::CalFlux(const HeatConductVarSet& hcvs, const BulkCo
 
 void HeatConductMethod01::AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const
 {
-    const USI& nc = bvs.nc;
-    const USI& np = bvs.np;
-
-    auto& dFdXpB = fvs.dFdXpB;
-    auto& dFdXpE = fvs.dFdXpE;
-    auto& dFdXsB = fvs.dFdXsB;
-    auto& dFdXsE = fvs.dFdXsE;
-
-    const USI     ncol  = nc + 2;
-    const USI     ncol2 = np * nc + np;
+    const USI& np     = fvs.np;
+    const USI& ncol1  = fvs.ncol1;
+    const USI& ncol2  = fvs.ncol2;
+    auto&      dFdXpB = fvs.dFdXpB;
+    auto&      dFdXpE = fvs.dFdXpE;
+    auto&      dFdXsB = fvs.dFdXsB;
+    auto&      dFdXsE = fvs.dFdXsE;
 
     const OCP_USI bId   = bp.BId();
     const OCP_USI eId   = bp.EId();
@@ -97,15 +94,15 @@ void HeatConductMethod01::AssembleFIM(const BulkConnPair& bp, const HeatConductV
 	const OCP_DBL dT = bvs.T[bId] - bvs.T[eId];
 	// Thermal Conduction
 	// dP
-	dFdXpB[(ncol - 1) * ncol] += tmpB * hcvs.ktP[bId] * dT;
-	dFdXpE[(ncol - 1) * ncol] += tmpE * hcvs.ktP[eId] * dT;
+	dFdXpB[ncol1 * ncol1 - ncol1] += tmpB * hcvs.ktP[bId] * dT;
+	dFdXpE[ncol1 * ncol1 - ncol1] += tmpE * hcvs.ktP[eId] * dT;
 	// dT
-	dFdXpB[ncol * ncol - 1] += Adkt + tmpB * hcvs.ktT[bId] * dT;
-	dFdXpE[ncol * ncol - 1] += -Adkt + tmpE * hcvs.ktT[eId] * dT;
+	dFdXpB[ncol1 * ncol1 - 1] += Adkt + tmpB * hcvs.ktT[bId] * dT;
+	dFdXpE[ncol1 * ncol1 - 1] += -Adkt + tmpE * hcvs.ktT[eId] * dT;
 	// dS
 	for (OCP_USI j = 0; j < np; j++) {
-		dFdXsB[(nc + 1) * ncol2 + j] += tmpB * hcvs.ktS[bId * np + j] * dT;
-		dFdXsE[(nc + 1) * ncol2 + j] += tmpE * hcvs.ktS[eId * np + j] * dT;
+		dFdXsB[(ncol1 - 1) * ncol2 + j] += tmpB * hcvs.ktS[bId * np + j] * dT;
+		dFdXsE[(ncol1 - 1) * ncol2 + j] += tmpE * hcvs.ktS[eId * np + j] * dT;
 	}
 }
 

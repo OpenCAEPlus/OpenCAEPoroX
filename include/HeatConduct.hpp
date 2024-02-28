@@ -58,7 +58,7 @@ public:
     USI             np;
     /// oil, gas, water index
     INT             o, g, w;
-    // thermal conduction term
+    /// thermal conduction term
     OCP_DBL         conduct_H;
     /// thermal conductivity
     vector<OCP_DBL> kt;

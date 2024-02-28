@@ -103,14 +103,17 @@ public:
 class FluxVarSet
 {
 public:
-    void Allocate(const USI& _np, const USI& _nc, const USI& n0, const USI& n1) {
-        np = _np;
-        nc = _nc;
+    void Allocate(const USI& _np, const USI& _nc, const USI& _ncol1, const USI& _ncol2) {
+        np    = _np;
+        nc    = _nc;
+        ncol1 = _ncol1;
+        ncol2 = _ncol2;
+
         flux_ni.resize(nc);
-        dFdXpB.resize(n0 * n0);
-        dFdXpE.resize(n0 * n0);
-        dFdXsB.resize(n0 * n1);
-        dFdXsE.resize(n0 * n1);
+        dFdXpB.resize(ncol1 * ncol1);
+        dFdXpE.resize(ncol1 * ncol1);
+        dFdXsB.resize(ncol1 * ncol2);
+        dFdXsE.resize(ncol1 * ncol2);
     }
     void SetZeroFluxNi() {
         fill(flux_ni.begin(), flux_ni.end(), 0.0);
@@ -138,6 +141,8 @@ public:
     vector<OCP_DBL>  flux_ni;
 
     // for FIM
+    USI              ncol1;
+    USI              ncol2;
     /// dF / dXp for bId bulk
     vector<OCP_DBL>  dFdXpB;
     /// dF / dXp for eId bulk

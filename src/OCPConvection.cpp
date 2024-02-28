@@ -81,15 +81,14 @@ void OCPConvection01::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet
 
 void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
-    auto& dFdXpB = fvs.dFdXpB;
-    auto& dFdXpE = fvs.dFdXpE;
-    auto& dFdXsB = fvs.dFdXsB;
-    auto& dFdXsE = fvs.dFdXsE;
+    const USI& ncol1  = fvs.ncol1;
+    const USI& ncol2  = fvs.ncol2;
+    auto&      dFdXpB = fvs.dFdXpB;
+    auto&      dFdXpE = fvs.dFdXpE;
+    auto&      dFdXsB = fvs.dFdXsB;
+    auto&      dFdXsE = fvs.dFdXsE;
 
     const BulkVarSet& bvs = bk.vs;
-
-    const USI  ncol   = nc + 1;
-    const USI  ncol2  = np * nc + np;
 
     const OCP_USI bId    = bp.BId();
     const OCP_USI eId    = bp.EId();
@@ -151,14 +150,14 @@ void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
             transIJ = xij * xi * transJ;
 
             // dP
-            dFdXpB[(i + 1) * ncol] += transIJ;
-            dFdXpE[(i + 1) * ncol] -= transIJ;
+            dFdXpB[(i + 1) * ncol1] += transIJ;
+            dFdXpE[(i + 1) * ncol1] -= transIJ;
 
             tmp = transJ * xiP * xij * dP;
             tmp += -transIJ * muP / mu * dP;
-            dFdXpU[(i + 1) * ncol] +=
+            dFdXpU[(i + 1) * ncol1] +=
                 (tmp - transIJ * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
-            dFdXpD[(i + 1) * ncol] +=
+            dFdXpD[(i + 1) * ncol1] +=
                 -transIJ * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
 
             // dS
@@ -190,15 +189,14 @@ void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
 
 void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
-    auto& dFdXpB = fvs.dFdXpB;
-    auto& dFdXpE = fvs.dFdXpE;
-    auto& dFdXsB = fvs.dFdXsB;
-    auto& dFdXsE = fvs.dFdXsE;
+    const USI& ncol1  = fvs.ncol1;
+    const USI& ncol2  = fvs.ncol2;
+    auto&      dFdXpB = fvs.dFdXpB;
+    auto&      dFdXpE = fvs.dFdXpE;
+    auto&      dFdXsB = fvs.dFdXsB;
+    auto&      dFdXsE = fvs.dFdXsE;
 
     const BulkVarSet& bvs = bk.vs;
-
-    const USI  ncol   = nc + 1;
-    const USI  ncol2  = np * nc + np;
 
     const OCP_USI bId    = bp.BId();
     const OCP_USI eId    = bp.EId();
@@ -232,8 +230,8 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
                 xij = bvs.xij[uId_np_j * nc + i];
                 transIJ = xij * transJ;
                 // Pressure -- Primary var
-                dFdXpB[(i + 1) * ncol] += transIJ;
-                dFdXpE[(i + 1) * ncol] -= transIJ;
+                dFdXpB[(i + 1) * ncol1] += transIJ;
+                dFdXpE[(i + 1) * ncol1] -= transIJ;
 
                 // maybe more derivatives should be considered  -- xiP, rhoP, muP
                 // test
@@ -297,13 +295,13 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
                     transIJ = xij * xi * transJ;
 
                     // Pressure -- Primary var
-                    dFdXpB[(i + 1) * ncol] += transIJ;
-                    dFdXpE[(i + 1) * ncol] -= transIJ;
+                    dFdXpB[(i + 1) * ncol1] += transIJ;
+                    dFdXpE[(i + 1) * ncol1] -= transIJ;
 
                     tmp = transIJ * (-rhoP * dGamma) * rhoWghtU;
                     tmp += xij * transJ * xiP * dP;
                     tmp += -transIJ * muP / mu * dP;
-                    dFdXpU[(i + 1) * ncol] += tmp;
+                    dFdXpU[(i + 1) * ncol1] += tmp;
 
                     // maybe more derivatives should be considered  -- xiP, rhoP, muP
 
@@ -336,10 +334,10 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
                     transIJ = xij * xi * transJ;
 
                     // Pressure -- Primary var
-                    dFdXpB[(i + 1) * ncol] += transIJ;
-                    dFdXpE[(i + 1) * ncol] -= transIJ;
+                    dFdXpB[(i + 1) * ncol1] += transIJ;
+                    dFdXpE[(i + 1) * ncol1] -= transIJ;
 
-                    dFdXpD[(i + 1) * ncol] -= transIJ * rhoP * dGamma * rhoWghtD;
+                    dFdXpD[(i + 1) * ncol1] -= transIJ * rhoP * dGamma * rhoWghtD;
 
                     // maybe more derivatives should be considered  -- xiP, rhoP, muP
 
@@ -406,14 +404,14 @@ void OCPConvection01::AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, c
                 transIJ = xij * xi * transJ;
 
                 // dP
-                dFdXpB[(i + 1) * ncol] += transIJ;
-                dFdXpE[(i + 1) * ncol] -= transIJ;
+                dFdXpB[(i + 1) * ncol1] += transIJ;
+                dFdXpE[(i + 1) * ncol1] -= transIJ;
 
                 tmp = transJ * xiP * xij * dP;
                 tmp += -transIJ * muP / mu * dP;
-                dFdXpU[(i + 1) * ncol] +=
+                dFdXpU[(i + 1) * ncol1] +=
                     (tmp - transIJ * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
-                dFdXpD[(i + 1) * ncol] +=
+                dFdXpD[(i + 1) * ncol1] +=
                     -transIJ * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
 
                 // dS
@@ -550,15 +548,14 @@ void OCPConvection02::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSet
 
 void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
-    auto& dFdXpB = fvs.dFdXpB;
-    auto& dFdXpE = fvs.dFdXpE;
-    auto& dFdXsB = fvs.dFdXsB;
-    auto& dFdXsE = fvs.dFdXsE;
+    const USI& ncol1  = fvs.ncol1;
+    const USI& ncol2  = fvs.ncol2;
+    auto&      dFdXpB = fvs.dFdXpB;
+    auto&      dFdXpE = fvs.dFdXpE;
+    auto&      dFdXsB = fvs.dFdXsB;
+    auto&      dFdXsE = fvs.dFdXsE;
 
     const BulkVarSet& bvs = bk.vs;
-
-    const USI  ncol = nc + 1;
-    const USI  ncol2 = np * nc + np;
 
     const OCP_USI bId = bp.BId();
     const OCP_USI eId = bp.EId();
@@ -621,14 +618,14 @@ void OCPConvection02::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
             transIJ = xij * xi * transJ;
 
             // dP
-            dFdXpB[(i + 1) * ncol] += transIJ;
-            dFdXpE[(i + 1) * ncol] -= transIJ;
+            dFdXpB[(i + 1) * ncol1] += transIJ;
+            dFdXpE[(i + 1) * ncol1] -= transIJ;
 
             tmp = transJ * xiP * xij * dP;
             tmp += -transIJ * muP / mu * dP;
-            dFdXpU[(i + 1) * ncol] +=
+            dFdXpU[(i + 1) * ncol1] +=
                 (tmp - transIJ * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
-            dFdXpD[(i + 1) * ncol] +=
+            dFdXpD[(i + 1) * ncol1] +=
                 -transIJ * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
 
             // dS
@@ -731,16 +728,15 @@ void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSe
 
 void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk, FluxVarSet& fvs)
 {
-    auto& dFdXpB = fvs.dFdXpB;
-    auto& dFdXpE = fvs.dFdXpE;
-    auto& dFdXsB = fvs.dFdXsB;
-    auto& dFdXsE = fvs.dFdXsE;
+    const USI& ncol1  = fvs.ncol1;
+    const USI& ncol2  = fvs.ncol2;
+    auto&      dFdXpB = fvs.dFdXpB;
+    auto&      dFdXpE = fvs.dFdXpE;
+    auto&      dFdXsB = fvs.dFdXsB;
+    auto&      dFdXsE = fvs.dFdXsE;
 
-    const USI  ncol  = nc + 2;
-    const USI  ncol2 = np * nc + np;
-
-    const OCP_USI bId   = bp.BId();
-    const OCP_USI eId   = bp.EId();
+    const OCP_USI bId = bp.BId();
+    const OCP_USI eId = bp.EId();
 
     const BulkVarSet& bvs = bk.vs;
 
@@ -811,22 +807,22 @@ void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, 
                 transIJ = transJ * xi * xij;
 
                 // dP
-                dFdXpB[(i + 1) * ncol] += transIJ;
-                dFdXpE[(i + 1) * ncol] -= transIJ;
+                dFdXpB[(i + 1) * ncol1] += transIJ;
+                dFdXpE[(i + 1) * ncol1] -= transIJ;
 
                 tmp = transJ * xiP * xij * dP;
                 tmp += -transIJ * muP / mu * dP;
-                dFdXpU[(i + 1) * ncol] +=
+                dFdXpU[(i + 1) * ncol1] +=
                     (tmp - transIJ * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
-                dFdXpD[(i + 1) * ncol] +=
+                dFdXpD[(i + 1) * ncol1] +=
                     -transIJ * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
 
                 // dT
                 tmp = transJ * xiT * xij * dP;
                 tmp += -transIJ * muT / mu * dP;
-                dFdXpU[(i + 2) * ncol - 1] +=
+                dFdXpU[(i + 2) * ncol1 - 1] +=
                     (tmp - transIJ * rhoWghtU * bvs.rhoT[uId_np_j] * dGamma);
-                dFdXpD[(i + 2) * ncol - 1] +=
+                dFdXpD[(i + 2) * ncol1 - 1] +=
                     -transIJ * rhoWghtD * bvs.rhoT[dId_np_j] * dGamma;
 
                 // dS
@@ -856,23 +852,23 @@ void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, 
             // Energy Conservation
             transH = transJ * xi * H;
             // dP
-            dFdXpB[(ncol - 1) * ncol] += transH;
-            dFdXpE[(ncol - 1) * ncol] -= transH;
+            dFdXpB[(ncol1 - 1) * ncol1] += transH;
+            dFdXpE[(ncol1 - 1) * ncol1] -= transH;
 
             tmp = transJ * xiP * H * dP;
             tmp += -transJ * xi * muP / mu * dP * H;
-            dFdXpU[(ncol - 1) * ncol] +=
+            dFdXpU[(ncol1 - 1) * ncol1] +=
                 (tmp - transH * rhoWghtU * bvs.rhoP[uId_np_j] * dGamma);
-            dFdXpD[(ncol - 1) * ncol] +=
+            dFdXpD[(ncol1 - 1) * ncol1] +=
                 -transH * rhoWghtD * bvs.rhoP[dId_np_j] * dGamma;
 
             // dT
             tmp = transJ * xiT * H * dP;
             tmp += transJ * xi * HT * dP;
             tmp += -transH * muT / mu * dP;
-            dFdXpU[ncol * ncol - 1] +=
+            dFdXpU[ncol1 * ncol1 - 1] +=
                 (tmp - transH * rhoWghtU * bvs.rhoT[uId_np_j] * dGamma);
-            dFdXpD[ncol * ncol - 1] +=
+            dFdXpD[ncol1 * ncol1 - 1] +=
                 -transH * rhoWghtD * bvs.rhoT[dId_np_j] * dGamma;
 
             // dS
