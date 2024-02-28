@@ -6,6 +6,7 @@ target_sources(
 		 Bulk.hpp
 		 BulkAccumuModule.hpp
 		 BulkConn.hpp
+		 BulkConnOptionalModules.hpp
 		 BulkConnTrans.hpp
 		 BulkConnVarSet.hpp
 		 BulkInitializer.hpp

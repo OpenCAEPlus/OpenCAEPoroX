@@ -17,6 +17,7 @@
 
 // OpenCAEPoroX header files
 #include "OCPConvection.hpp"
+#include "BulkConnOptionalModules.hpp"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ using namespace std;
 class FluxUnit
 {
 public:
-    FluxUnit(const USI& index, const USI& np, const USI& nc) {
+    FluxUnit(const USI& index, const USI& np, const USI& nc, BulkConnOptionalModules& optMs) {
         switch (index)
         {
         case 0:
@@ -37,12 +38,13 @@ public:
             break;
         case 2:
             fluxvs.Allocate(np, nc, nc + 2, (nc + 1) * np);
-            convect = new OCPConvectionT01(np, nc);
+            convect     = new OCPConvectionT01(np, nc);           
             break;
         default:
             OCP_ABORT("Wrong flux type!");
             break;
         }
+        heatConduct = &optMs.heatConduct;
     }
     /// Calculate transmissibility
     void CalTrans(BulkConnPair& bp, const Bulk& bk) const {
@@ -56,11 +58,13 @@ public:
     void CalFlux(const BulkConnPair& bp, const Bulk& bk) const {
         fluxvs.SetZeroFluxNi();
         convect->CalFlux(bp, bk, fluxvs);
+        heatConduct->CalFlux(bp, bk.GetVarSet());
     }
     /// Assemble matrix for FIM
     void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
         fluxvs.SetZeroFIM();
         convect->AssembleMatFIM(bp, c, bcvs, bk, fluxvs);
+        heatConduct->AssembleFIM(bp, bk.GetVarSet(), fluxvs);
     }
     /// Assemble matrix for AIM
     void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
@@ -78,7 +82,9 @@ public:
     const vector<OCP_DBL>& GetConvectDP() const { return convect->GetDP(); }
     const vector<OCP_DBL>& GetConvectVj() const { return convect->GetVj(); }
     const vector<OCP_DBL>& GetConvectHj() const { return convect->GetHj(); }
-    OCP_DBL GetConductH() const { return convect->GetConductH(); }
+
+
+    OCP_DBL GetConductH() const { return heatConduct->GetConductH(); }
 
     const vector<OCP_DBL>& GetFluxNi() const { return fluxvs.flux_ni; }
     const vector<OCP_DBL>& GetdFdXpB() const { return fluxvs.dFdXpB; }
@@ -93,7 +99,7 @@ public:
 protected:
     mutable FluxVarSet     fluxvs;
 	OCPConvection*         convect;
-
+    HeatConduct*           heatConduct;
 };
 
 

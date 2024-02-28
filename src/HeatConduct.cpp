@@ -11,53 +11,102 @@
 
 #include "HeatConduct.hpp"
 
-HeatConductMethod01::HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hlvs)
+HeatConductMethod01::HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hcvs)
 {
-    thconp.resize(hlvs.np);
-    if (hlvs.o >= 0) thconp[hlvs.o] = rs_param.thcono;
-    if (hlvs.g >= 0) thconp[hlvs.g] = rs_param.thcong;
-    if (hlvs.w >= 0) thconp[hlvs.w] = rs_param.thconw;
+    thconp.resize(hcvs.np);
+    if (hcvs.o >= 0) thconp[hcvs.o] = rs_param.thcono;
+    if (hcvs.g >= 0) thconp[hcvs.g] = rs_param.thcong;
+    if (hcvs.w >= 0) thconp[hcvs.w] = rs_param.thconw;
 
     thconr = rs_param.thconr;
 
 
-    hlvs.kt.resize(hlvs.nb);
-    hlvs.ktP.resize(hlvs.nb);
-    hlvs.ktT.resize(hlvs.nb);
-    hlvs.ktS.resize(hlvs.nb * hlvs.np);
+    hcvs.kt.resize(hcvs.nb);
+    hcvs.ktP.resize(hcvs.nb);
+    hcvs.ktT.resize(hcvs.nb);
+    hcvs.ktS.resize(hcvs.nb * hcvs.np);
 
-    hlvs.lkt.resize(hlvs.nb);
-    hlvs.lktP.resize(hlvs.nb);
-    hlvs.lktT.resize(hlvs.nb);
-    hlvs.lktS.resize(hlvs.nb * hlvs.np);
+    hcvs.lkt.resize(hcvs.nb);
+    hcvs.lktP.resize(hcvs.nb);
+    hcvs.lktT.resize(hcvs.nb);
+    hcvs.lktS.resize(hcvs.nb * hcvs.np);
 
 }
 
 
-void HeatConductMethod01::CalHeatConduct(const OCP_USI& bId, HeatConductVarSet& hlvs, const BulkVarSet& bvs) const
+void HeatConductMethod01::CalConductCoeff(const OCP_USI& bId, HeatConductVarSet& hcvs, const BulkVarSet& bvs) const
 {
-    const OCP_USI& np = hlvs.np;
+    const OCP_USI& np = hcvs.np;
 
     if (bvs.cType[bId] == BulkContent::rf) {
         // fluid bulk
         OCP_DBL tmp = 0;
         for (USI j = 0; j < np; j++) {
             tmp                    += bvs.S[bId * np + j] * thconp[j];
-            hlvs.ktS[bId * np + j]  = bvs.poro[bId] * thconp[j];
+            hcvs.ktS[bId * np + j]  = bvs.poro[bId] * thconp[j];
         }
-        hlvs.kt[bId]  = bvs.poro[bId] * tmp + (1 - bvs.poro[bId]) * thconr;
-        hlvs.ktP[bId] = bvs.poroP[bId] * (tmp - thconr);
-        hlvs.ktT[bId] = bvs.poroT[bId] * (tmp - thconr);
+        hcvs.kt[bId]  = bvs.poro[bId] * tmp + (1 - bvs.poro[bId]) * thconr;
+        hcvs.ktP[bId] = bvs.poroP[bId] * (tmp - thconr);
+        hcvs.ktT[bId] = bvs.poroT[bId] * (tmp - thconr);
     }
     else {
         // non fluid bulk
-        hlvs.kt[bId]  = thconr;
-        hlvs.ktP[bId] = 0;
-        hlvs.ktT[bId] = 0;
+        hcvs.kt[bId]  = thconr;
+        hcvs.ktP[bId] = 0;
+        hcvs.ktT[bId] = 0;
         for (USI j = 0; j < np; j++) {
-            hlvs.ktS[bId * np + j] = 0;
+            hcvs.ktS[bId * np + j] = 0;
         }
     }
+}
+
+
+OCP_DBL HeatConductMethod01::CalFlux(const HeatConductVarSet& hcvs, const BulkConnPair& bp, const BulkVarSet& bvs) const
+{
+    const OCP_USI bId = bp.BId();
+    const OCP_USI eId = bp.EId();
+	const OCP_DBL T1  = hcvs.kt[bId] * bp.AreaB();
+	const OCP_DBL T2  = hcvs.kt[eId] * bp.AreaE();
+	return (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
+}
+
+
+void HeatConductMethod01::AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const
+{
+    const USI& nc = bvs.nc;
+    const USI& np = bvs.np;
+
+    auto& dFdXpB = fvs.dFdXpB;
+    auto& dFdXpE = fvs.dFdXpE;
+    auto& dFdXsB = fvs.dFdXsB;
+    auto& dFdXsE = fvs.dFdXsE;
+
+    const USI     ncol  = nc + 2;
+    const USI     ncol2 = np * nc + np;
+
+    const OCP_USI bId   = bp.BId();
+    const OCP_USI eId   = bp.EId();
+    const OCP_DBL areaB = bp.AreaB();
+    const OCP_DBL areaE = bp.AreaE();
+
+	const OCP_DBL T1 = hcvs.kt[bId] * areaB;
+	const OCP_DBL T2 = hcvs.kt[eId] * areaE;
+	const OCP_DBL Adkt = 1 / (1 / T1 + 1 / T2);
+	const OCP_DBL tmpB = pow(Adkt, 2) / pow(T1, 2) * areaB;
+	const OCP_DBL tmpE = pow(Adkt, 2) / pow(T2, 2) * areaE;
+	const OCP_DBL dT = bvs.T[bId] - bvs.T[eId];
+	// Thermal Conduction
+	// dP
+	dFdXpB[(ncol - 1) * ncol] += tmpB * hcvs.ktP[bId] * dT;
+	dFdXpE[(ncol - 1) * ncol] += tmpE * hcvs.ktP[eId] * dT;
+	// dT
+	dFdXpB[ncol * ncol - 1] += Adkt + tmpB * hcvs.ktT[bId] * dT;
+	dFdXpE[ncol * ncol - 1] += -Adkt + tmpE * hcvs.ktT[eId] * dT;
+	// dS
+	for (OCP_USI j = 0; j < np; j++) {
+		dFdXsB[(nc + 1) * ncol2 + j] += tmpB * hcvs.ktS[bId * np + j] * dT;
+		dFdXsE[(nc + 1) * ncol2 + j] += tmpE * hcvs.ktS[eId * np + j] * dT;
+	}
 }
 
 
@@ -76,12 +125,31 @@ void HeatConduct::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs)
 }
 
 
-void HeatConduct::CalHeatConduct(const BulkVarSet& bvs)
+void HeatConduct::CalConductCoeff(const BulkVarSet& bvs)
 { 
     if (ifUse) {
         for (OCP_USI n = 0; n < bvs.nb; n++) {
-            hcM[0]->CalHeatConduct(n, vs, bvs);
+            hcM[0]->CalConductCoeff(n, vs, bvs);
         }
+    }
+}
+
+
+void HeatConduct::CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs)
+{
+    if (ifUse) {
+        vs.conduct_H = hcM[0]->CalFlux(vs, bp, bvs);
+    }
+    else {
+        vs.conduct_H = 0;
+    }
+}
+
+
+void HeatConduct::AssembleFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const 
+{
+    if (ifUse) {
+        hcM[0]->AssembleFIM(bp, vs, bvs, fvs);
     }
 }
 

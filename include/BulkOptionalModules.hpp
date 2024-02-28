@@ -38,7 +38,6 @@ public:
         misCur.ResetTolastTimeStep();
         scalePcow.ResetTolastTimeStep();
         boundary.ResetToLastTimeStep();
-        heatConduct.ResetToLastTimeStep();
     }
     void UpdateLastTimeStep()
     {
@@ -48,7 +47,6 @@ public:
         misCur.UpdateLastTimeStep();
         scalePcow.UpdateLastTimeStep();
         boundary.UpdateLastTimeStep();
-        heatConduct.UpdateLastTimeStep();
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -95,15 +93,12 @@ public:
 
     void SetupIndependentModule(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
         boundary.Setup(rs_param, bvs);
-        heatConduct.Setup(rs_param, bvs);
     }
 
 public:
 
     /// Boundary condition handler
     OCPBoundary    boundary;
-    /// Heat Conduct
-    HeatConduct    heatConduct;
 
 };
 

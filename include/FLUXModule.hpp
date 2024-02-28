@@ -25,18 +25,18 @@ class FLUXModule
 {
 
 public:
-    void InputParam(const ParamReservoir& rs_param, const vector<BulkConnPair>& iterConn, const Bulk& bk)
+    void InputParam(const ParamReservoir& rs_param, const vector<BulkConnPair>& iterConn, const Bulk& bk, BulkConnOptionalModules& optMs)
     {
         const USI np = bk.GetPhaseNum();
         const USI nc = bk.GetComNum();
         if (rs_param.thermal) {
-            FLUXs.push_back(FluxUnit(2, np, nc));
+            FLUXs.push_back(FluxUnit(2, np, nc, optMs));
             FLUXNUM.resize(iterConn.size(), 0);
         }
         else {
             if (rs_param.GRAVDR) {
-                FLUXs.push_back(FluxUnit(0, np, nc));
-                FLUXs.push_back(FluxUnit(1, np, nc));
+                FLUXs.push_back(FluxUnit(0, np, nc, optMs));
+                FLUXs.push_back(FluxUnit(1, np, nc, optMs));
                 FLUXNUM.resize(iterConn.size(), 0);
                 for (OCP_USI c = 0; c < iterConn.size(); c++) {
 					if (iterConn[c].Direction() == ConnDirect::mf ||
@@ -49,7 +49,7 @@ public:
                 }
             }
             else {
-                FLUXs.push_back(FluxUnit(0, np, nc));
+                FLUXs.push_back(FluxUnit(0, np, nc, optMs));
                 FLUXNUM.resize(iterConn.size(), 0);
             }
         }

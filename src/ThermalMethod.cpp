@@ -34,7 +34,7 @@ void T_FIM::InitReservoir(Reservoir& rs)
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
+    rs.conn.optMs.heatConduct.CalConductCoeff(rs.bulk.vs);
 
     rs.allWells.InitBHP(rs.bulk);
     UpdateLastTimeStep(rs);
@@ -105,7 +105,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
-    rs.bulk.optMs.heatConduct.CalHeatConduct(rs.bulk.vs);
+    rs.conn.optMs.heatConduct.CalConductCoeff(rs.bulk.vs);
     rs.bulk.optMs.boundary.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.time.GetCurrentTime() + ctrl.time.GetCurrentDt(), ctrl.time.GetCurrentDt());
 
     rs.allWells.CalFlux(rs.bulk);

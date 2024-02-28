@@ -16,7 +16,7 @@
  // OpenCAEPoroX header files
 #include "ParamReservoir.hpp"
 #include "BulkVarSet.hpp"
-
+#include "BulkConnVarSet.hpp"
 
 #include <vector>
 
@@ -58,6 +58,8 @@ public:
     USI             np;
     /// oil, gas, water index
     INT             o, g, w;
+    // thermal conduction term
+    OCP_DBL         conduct_H;
     /// thermal conductivity
     vector<OCP_DBL> kt;
     /// dkt / dP
@@ -81,15 +83,19 @@ class HeatConductMethod
 {
 public:
     HeatConductMethod() = default;
-    virtual void CalHeatConduct(const OCP_USI& bId, HeatConductVarSet& hlvs, const BulkVarSet& bvs) const = 0;
+    virtual void CalConductCoeff(const OCP_USI& bId, HeatConductVarSet& hcvs, const BulkVarSet& bvs) const = 0;
+    virtual OCP_DBL CalFlux(const HeatConductVarSet& hcvs, const BulkConnPair& bp, const BulkVarSet& bvs) const = 0;
+    virtual void AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
 };
 
 
 class HeatConductMethod01 : public HeatConductMethod
 {
 public:
-    HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hlvs);
-    void CalHeatConduct(const OCP_USI& bId, HeatConductVarSet& hlvs, const BulkVarSet& bvs) const override;
+    HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hcvs);
+    void CalConductCoeff(const OCP_USI& bId, HeatConductVarSet& hcvs, const BulkVarSet& bvs) const override;
+    OCP_DBL CalFlux(const HeatConductVarSet& hcvs, const BulkConnPair& bp, const BulkVarSet& bvs) const override;
+    void AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
 
 protected:
     /// phase thermal conductivity
@@ -104,18 +110,21 @@ class HeatConduct
 public:
     HeatConduct() = default;
     void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs);
-    void CalHeatConduct(const BulkVarSet& bvs);
+    void CalConductCoeff(const BulkVarSet& bvs);
+    void CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs);
+    void AssembleFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const;
     const auto& GetVarSet() const { return vs; }
+    auto& GetConductH() const { return vs.conduct_H; }
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }
     void UpdateLastTimeStep() { if (ifUse)  vs.UpdateLastTimeStep(); }
-    auto IfUse() const { return ifUse; }
+
 
 protected:
-    /// If use heat loss
+    /// If use heat conduction
     OCP_BOOL                   ifUse{ OCP_FALSE };
-    /// Heat loss varsets
+    /// Heat conduction varsets
     HeatConductVarSet          vs;
-    /// method for heat loss calculation
+    /// method for heat conduction calculation
     vector<HeatConductMethod*> hcM;
 };
 

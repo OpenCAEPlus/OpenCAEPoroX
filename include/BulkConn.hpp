@@ -43,7 +43,8 @@ public:
 public:
     /// Input params
     void InputParam(const ParamReservoir& rs_param, const Bulk& bk) {
-        FLUXm.InputParam(rs_param, iteratorConn, bk);
+        optMs.Setup(rs_param, bk);
+        FLUXm.InputParam(rs_param, iteratorConn, bk, optMs);      
     }
     /// Get variable set
     auto& GetVarSet() const { return vs; }
@@ -61,18 +62,16 @@ public:
             FLUXm.GetFlux(c)->CalDiffu(iteratorConn[c], bk);
         }
     }
-    /// Calculate diffusity for all connections
-    void CalDiff(const Bulk& bk) {
-
-    }
 
 protected:
-    OCP_USI numConn; ///< Number of connections between bulks.
+
+    /// Number of connections between bulks.
+    OCP_USI numConn; 
 
     /// All connections (pair of indices) between bulks: numConn.
     //  Note: In each pair, the index of first bulk is less than the second. The data
     //  in iteratorConn is generated from neighbor.
-    vector<BulkConnPair> iteratorConn;
+    vector<BulkConnPair>    iteratorConn;
 
     /// Neighboring information of each bulk: activeGridNum.
     //  Note: The i-th entry stores the i-th bulk's neighbors, which is sorted in an
@@ -83,13 +82,17 @@ protected:
     // Physical Variables
     /////////////////////////////////////////////////////////////////////
 
-    BulkConnVarSet          vs;   ///< values between connections
+    /// basic varset for bulk connections
+    BulkConnVarSet          vs;   
 
     /////////////////////////////////////////////////////////////////////
     // Flux
     /////////////////////////////////////////////////////////////////////
 
-    FLUXModule              FLUXm; ///< flux term
+    /// flux term
+    FLUXModule              FLUXm; 
+    /// optional modules
+    BulkConnOptionalModules optMs;  
 };
 
 #endif

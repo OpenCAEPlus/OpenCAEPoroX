@@ -673,17 +673,6 @@ void OCPConvectionT01::CalFlux(const BulkConnPair& bp, const Bulk& bk, FluxVarSe
 
     const BulkVarSet& bvs = bk.vs; 
 
-    if (bk.optMs.heatConduct.IfUse()) {
-        const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
-        const OCP_DBL T1 = hcvs.kt[bId] * bp.AreaB();
-        const OCP_DBL T2 = hcvs.kt[eId] * bp.AreaE();
-        conduct_H = (bvs.T[bId] - bvs.T[eId]) / (1 / T1 + 1 / T2);
-    }
-    else {
-        conduct_H = 0;
-    }
-
-
     if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
         OCP_USI       bId_np_j, eId_np_j, uId_np_j;
         OCP_BOOL      exbegin, exend;
@@ -752,32 +741,8 @@ void OCPConvectionT01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, 
 
     const OCP_USI bId   = bp.BId();
     const OCP_USI eId   = bp.EId();
-    const OCP_DBL areaB = bp.AreaB();
-    const OCP_DBL areaE = bp.AreaE();
 
     const BulkVarSet& bvs = bk.vs;
-
-    if (bk.optMs.heatConduct.IfUse()) {
-        const HeatConductVarSet& hcvs = bk.optMs.heatConduct.GetVarSet();
-        const OCP_DBL T1   = hcvs.kt[bId] * areaB;
-        const OCP_DBL T2   = hcvs.kt[eId] * areaE;
-        const OCP_DBL Adkt = 1 / (1 / T1 + 1 / T2);
-        const OCP_DBL tmpB = pow(Adkt, 2) / pow(T1, 2) * areaB;
-        const OCP_DBL tmpE = pow(Adkt, 2) / pow(T2, 2) * areaE;
-        const OCP_DBL dT   = bvs.T[bId] - bvs.T[eId];
-        // Thermal Conduction
-        // dP
-        dFdXpB[(ncol - 1) * ncol] += tmpB * hcvs.ktP[bId] * dT;
-        dFdXpE[(ncol - 1) * ncol] += tmpE * hcvs.ktP[eId] * dT;
-        // dT
-        dFdXpB[ncol * ncol - 1] += Adkt + tmpB * hcvs.ktT[bId] * dT;
-        dFdXpE[ncol * ncol - 1] += -Adkt + tmpE * hcvs.ktT[eId] * dT;
-        // dS
-        for (OCP_USI j = 0; j < np; j++) {
-            dFdXsB[(nc + 1) * ncol2 + j] += tmpB * hcvs.ktS[bId * np + j] * dT;
-            dFdXsE[(nc + 1) * ncol2 + j] += tmpE * hcvs.ktS[eId * np + j] * dT;
-        }
-    }
 
     if (bvs.cType[bId] == BulkContent::rf && bvs.cType[eId] == BulkContent::rf) {
         // Fluid Bulk Connection

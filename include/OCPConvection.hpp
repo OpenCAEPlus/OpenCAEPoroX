@@ -42,7 +42,6 @@ public:
     const vector<OCP_DBL>& GetDP() const { return dP; }
     const vector<OCP_DBL>& GetVj() const { return vj; }
     const vector<OCP_DBL>& GetHj() const { return Hj; }
-    OCP_DBL GetConductH() const { return conduct_H; }
 
 protected:
     void Setup(const USI& npin, const USI& ncin) {
@@ -71,11 +70,7 @@ protected:
     /// Volume flow rate of phase from upblock
     vector<OCP_DBL>  vj;
     /// enthalpy flow rate of phase from upblock
-    vector<OCP_DBL>  Hj;  
-
-    // thermal conduction term
-    OCP_DBL          conduct_H;
- 
+    vector<OCP_DBL>  Hj;   
 
 public:
     /// Calculate transmissibility
