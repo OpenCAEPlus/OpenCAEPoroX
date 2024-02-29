@@ -85,7 +85,7 @@ public:
     HeatConductMethod() = default;
     virtual void CalConductCoeff(const OCP_USI& bId, HeatConductVarSet& hcvs, const BulkVarSet& bvs) const = 0;
     virtual OCP_DBL CalFlux(const HeatConductVarSet& hcvs, const BulkConnPair& bp, const BulkVarSet& bvs) const = 0;
-    virtual void AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
+    virtual void AssembleMatFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
 };
 
 
@@ -95,7 +95,7 @@ public:
     HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hcvs);
     void CalConductCoeff(const OCP_USI& bId, HeatConductVarSet& hcvs, const BulkVarSet& bvs) const override;
     OCP_DBL CalFlux(const HeatConductVarSet& hcvs, const BulkConnPair& bp, const BulkVarSet& bvs) const override;
-    void AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
+    void AssembleMatFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
 
 protected:
     /// phase thermal conductivity
@@ -112,7 +112,7 @@ public:
     void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs);
     void CalConductCoeff(const BulkVarSet& bvs);
     void CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs);
-    void AssembleFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const;
+    void AssembleMatFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const;
     const auto& GetVarSet() const { return vs; }
     auto& GetConductH() const { return vs.conduct_H; }
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }

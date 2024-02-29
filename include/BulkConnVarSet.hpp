@@ -60,9 +60,9 @@ protected:
     /// second index of a pair.
     OCP_USI    eId;
     /// Effective area for permeability
-    OCP_DBL    trans;
+    OCP_DBL    trans{ 0.0 };
     /// Effective area for diffusity
-    OCP_DBL    diffu;
+    OCP_DBL    diffu{ 0.0 };
     /// Connection direction
     ConnDirect direction;
     /// Area of intersecting face from first bulk

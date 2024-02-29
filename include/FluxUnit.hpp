@@ -47,6 +47,11 @@ public:
         diffusion   = &optMs.diffusion;
         heatConduct = &optMs.heatConduct;
     }
+    /// Calculate flux coefficients
+    void CalFluxCoeff(BulkConnPair& bp, const Bulk& bk) const {
+        convect->CalTrans(bp, bk);
+        diffusion->CalDiffu(bp, bk);
+    }
     /// Calculate transmissibility
     void CalTrans(BulkConnPair& bp, const Bulk& bk) const {
         convect->CalTrans(bp, bk);
@@ -59,13 +64,15 @@ public:
     void CalFlux(const BulkConnPair& bp, const Bulk& bk) const {
         fluxvs.SetZeroFluxNi();
         convect->CalFlux(bp, bk, fluxvs);
+        diffusion->CalFlux(bp, bk.GetVarSet(), fluxvs);
         heatConduct->CalFlux(bp, bk.GetVarSet());
     }
     /// Assemble matrix for FIM
     void AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {
         fluxvs.SetZeroFIM();
         convect->AssembleMatFIM(bp, c, bcvs, bk, fluxvs);
-        heatConduct->AssembleFIM(bp, bk.GetVarSet(), fluxvs);
+        diffusion->AssembleMatFIM(bp, bk.GetVarSet(), fluxvs);
+        heatConduct->AssembleMatFIM(bp, bk.GetVarSet(), fluxvs);
     }
     /// Assemble matrix for AIM
     void AssembleMatAIM(const BulkConnPair& bp, const OCP_USI& c, const BulkConnVarSet& bcvs, const Bulk& bk) const {

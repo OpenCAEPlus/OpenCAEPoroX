@@ -51,6 +51,12 @@ public:
     auto& GetVarSet() const { return vs; }
     /// Get num of connection
     auto GetNumConn() const { return numConn; }
+    /// Calculate flux coefficients
+    void CalFluxCoeff(const Bulk& bk) {
+        for (OCP_USI c = 0; c < numConn; c++) {
+            FLUXm.GetFlux(c)->CalFluxCoeff(iteratorConn[c], bk);
+        }
+    }
     /// Calculate transmissibility for all connections
     void CalTrans(const Bulk& bk) {
         for (OCP_USI c = 0; c < numConn; c++) {

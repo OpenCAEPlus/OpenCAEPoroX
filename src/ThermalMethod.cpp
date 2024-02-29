@@ -27,13 +27,12 @@ void T_FIM::Setup(Reservoir& rs, const OCPControl& ctrl)
 void T_FIM::InitReservoir(Reservoir& rs)
 {
     rs.bulk.Initialize(rs.domain);
-    rs.conn.CalTrans(rs.bulk);
     InitRock(rs.bulk);
     CalRock(rs.bulk);
 
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
-
+    rs.conn.CalFluxCoeff(rs.bulk);
     rs.conn.optMs.heatConduct.CalConductCoeff(rs.bulk.vs);
 
     rs.allWells.InitBHP(rs.bulk);
@@ -485,6 +484,7 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.ResetToLastTimeStep(bk);
 
     rs.bulk.optMs.ResetToLastTimeStep();
+    rs.conn.optMs.ResetToLastTimeStep();
 
     // Iters
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
@@ -552,6 +552,7 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
 
     rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
+    rs.conn.optMs.UpdateLastTimeStep();
 }
 
 void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)

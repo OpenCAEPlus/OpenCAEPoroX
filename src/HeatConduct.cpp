@@ -71,7 +71,7 @@ OCP_DBL HeatConductMethod01::CalFlux(const HeatConductVarSet& hcvs, const BulkCo
 }
 
 
-void HeatConductMethod01::AssembleFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const
+void HeatConductMethod01::AssembleMatFIM(const BulkConnPair& bp, const HeatConductVarSet& hcvs, const BulkVarSet& bvs, FluxVarSet& fvs) const
 {
     const USI& np     = fvs.np;
     const USI& ncol1  = fvs.ncol1;
@@ -143,10 +143,10 @@ void HeatConduct::CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs)
 }
 
 
-void HeatConduct::AssembleFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const 
+void HeatConduct::AssembleMatFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const 
 {
     if (ifUse) {
-        hcM[0]->AssembleFIM(bp, vs, bvs, fvs);
+        hcM[0]->AssembleMatFIM(bp, vs, bvs, fvs);
     }
 }
 

@@ -121,8 +121,7 @@ void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
         }
         else {
             dId_np_j     = bId_np_j;
-            phaseExistDj = bvs.phaseExist[dId_np_j];
-                      
+            phaseExistDj = bvs.phaseExist[dId_np_j];                      
             dFdXpU       = &dFdXpE[0];
             dFdXpD       = &dFdXpB[0];
             dFdXsU       = &dFdXsE[0];
@@ -181,6 +180,7 @@ void OCPConvection01::AssembleMatFIM(const BulkConnPair& bp, const OCP_USI& c, c
                 dFdXsD[(i + 1) * ncol2 + np + j * nc + k] +=
                     -transIJ * rhoWghtD * bvs.rhox[dId_np_j * nc + k] * dGamma;
             }
+            // k = i
             dFdXsU[(i + 1) * ncol2 + np + j * nc + i] += transJ * xi * dP;
         }
     }

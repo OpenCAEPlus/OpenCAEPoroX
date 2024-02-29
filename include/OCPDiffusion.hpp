@@ -64,7 +64,7 @@ public:
     OCPDiffusionMethod() = default;
 
     virtual void CalFlux(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
-    virtual void AssembleFIM(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
+    virtual void AssembleMatFIM(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
 
 public:
     /// Calculate diffusion
@@ -73,13 +73,13 @@ protected:
     BulkConnDiffu   bcd;
 };
 
-
+// Use upstream weighting
 class OCPDiffusionMethod01 : public OCPDiffusionMethod
 {
 public:
     OCPDiffusionMethod01(const ParamReservoir& rs_param, OCPDiffusionVarSet& dvs);
     void CalFlux(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
-    void AssembleFIM(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
+    void AssembleMatFIM(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const override;
 
 protected:
     /// diffusion coefficient of components in phases
@@ -96,6 +96,7 @@ public:
     void CalDiffu(BulkConnPair& bp, const Bulk& bk);
     /// Calculate the component flux caused by diffusion
     void CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs);
+    void AssembleMatFIM(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs) const;
     const auto& GetVarSet() const { return vs; }
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }
     void UpdateLastTimeStep() { if (ifUse)  vs.UpdateLastTimeStep(); }

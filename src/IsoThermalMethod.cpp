@@ -110,13 +110,12 @@ void IsoT_IMPEC::Setup(Reservoir& rs, const OCPControl& ctrl)
 void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
 {
     rs.bulk.Initialize(rs.domain);
-    rs.conn.CalTrans(rs.bulk);
-
     CalRock(rs.bulk);
 
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
 
+    rs.conn.CalFluxCoeff(rs.bulk);
     CalBulkFlux(rs);
 
     rs.allWells.InitBHP(rs.bulk);
@@ -632,6 +631,7 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
 
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
+    rs.conn.optMs.ResetToLastTimeStep();
 
     // Iters
     NR.ResetIter();
@@ -676,6 +676,7 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
 
     rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
+    rs.conn.optMs.UpdateLastTimeStep();
 }
 
 ////////////////////////////////////////////
@@ -692,12 +693,12 @@ void IsoT_FIM::InitReservoir(Reservoir& rs)
 {
     // Calculate initial bulk pressure and temperature and water saturation
     rs.bulk.Initialize(rs.domain);
-    rs.conn.CalTrans(rs.bulk);
     // Initialize rock property
     CalRock(rs.bulk);
     // Initialize fluid properties
     InitFlash(rs.bulk);
     CalKrPc(rs.bulk);
+    rs.conn.CalFluxCoeff(rs.bulk);
     // Initialize well pressure
     rs.allWells.InitBHP(rs.bulk);
     // Update variables at last time step
@@ -1371,6 +1372,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
 
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
+    rs.conn.optMs.ResetToLastTimeStep();
 
     // Residual
     CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
@@ -1420,6 +1422,7 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
 
     rs.allWells.UpdateLastTimeStep();
     rs.bulk.optMs.UpdateLastTimeStep();
+    rs.conn.optMs.UpdateLastTimeStep();
 }
 
 ////////////////////////////////////////////
@@ -1459,12 +1462,11 @@ void IsoT_AIMc::SetupNeighbor(Reservoir& rs)
 void IsoT_AIMc::InitReservoir(Reservoir& rs)
 {
     rs.bulk.Initialize(rs.domain);
-    rs.conn.CalTrans(rs.bulk);
     CalRock(rs.bulk);
 
     IsoT_IMPEC::InitFlash(rs.bulk);
     IsoT_IMPEC::CalKrPc(rs.bulk);
-
+    rs.conn.CalFluxCoeff(rs.bulk);
     rs.allWells.InitBHP(rs.bulk);
 
     UpdateLastTimeStep(rs);
