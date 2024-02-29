@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "BulkConnTrans.hpp"
+#include "BulkConnFunc.hpp"
 
 
 void BulkConnTransMethod01::CalTrans(BulkConnPair& bp, const Bulk& bk)

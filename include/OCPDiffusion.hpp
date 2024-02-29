@@ -17,6 +17,7 @@
 #include "ParamReservoir.hpp"
 #include "BulkVarSet.hpp"
 #include "BulkConnVarSet.hpp"
+#include "BulkConnFunc.hpp"
 
 #include <vector>
 
@@ -61,8 +62,15 @@ class OCPDiffusionMethod
 {
 public:
     OCPDiffusionMethod() = default;
+
     virtual void CalFlux(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
     virtual void AssembleFIM(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const = 0;
+
+public:
+    /// Calculate diffusion
+    void CalDiffu(BulkConnPair& bp, const Bulk& bk) { bcd.CalDiffu(bp, bk); }
+protected:
+    BulkConnDiffu   bcd;
 };
 
 
@@ -84,6 +92,9 @@ class OCPDiffusion
 public:
     OCPDiffusion() = default;
     void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs);
+    /// Calculate diffusion
+    void CalDiffu(BulkConnPair& bp, const Bulk& bk);
+    /// Calculate the component flux caused by diffusion
     void CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs);
     const auto& GetVarSet() const { return vs; }
     void ResetToLastTimeStep() { if (ifUse)  vs.ResetToLastTimeStep(); }

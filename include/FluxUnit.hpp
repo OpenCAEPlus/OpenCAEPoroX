@@ -53,7 +53,7 @@ public:
     }
     /// Calculate diffusity for all connections
     void CalDiffu(BulkConnPair& bp, const Bulk& bk) const {
-        convect->CalDiffu(bp, bk);
+        diffusion->CalDiffu(bp, bk);
     }
     /// Calculate flux of components and phases
     void CalFlux(const BulkConnPair& bp, const Bulk& bk) const {

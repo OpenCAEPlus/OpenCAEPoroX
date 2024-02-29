@@ -14,6 +14,7 @@
 
 OCPDiffusionMethod01::OCPDiffusionMethod01(const ParamReservoir& rs_param, OCPDiffusionVarSet& dvs)
 {
+    bcd.Setup();
     // temp
     diffuCP.resize(2);
     diffuCP[dvs.g].resize(dvs.nc, 1.6E-1);
@@ -23,6 +24,8 @@ OCPDiffusionMethod01::OCPDiffusionMethod01(const ParamReservoir& rs_param, OCPDi
 
 void OCPDiffusionMethod01::CalFlux(const BulkConnPair& bp, const OCPDiffusionVarSet& dvs, const BulkVarSet& bvs, FluxVarSet& fvs) const
 {
+    auto& flux_ni = fvs.flux_ni;
+
 
 }
 
@@ -46,6 +49,15 @@ void OCPDiffusion::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs)
         dM.push_back(new OCPDiffusionMethod01(rs_param, vs));
     }
 }
+
+
+void OCPDiffusion::CalDiffu(BulkConnPair& bp, const Bulk& bk)
+{ 
+    if (ifUse) {
+        dM[0]->CalDiffu(bp, bk);
+    }
+}
+
 
 void OCPDiffusion::CalFlux(const BulkConnPair& bp, const BulkVarSet& bvs, FluxVarSet& fvs)
 {

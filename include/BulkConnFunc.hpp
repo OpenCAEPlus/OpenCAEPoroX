@@ -1,5 +1,5 @@
-/*! \file    BulkConnTrans.hpp
- *  \brief   BulkConnTrans class declaration
+/*! \file    BulkConnFunc.hpp
+ *  \brief   BulkConnFunc class declaration
  *  \author  Shizhe Li
  *  \date    Aug/24/2023
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __BULKCONNAREA_HEADER__
-#define __BULKCONNAREA_HEADER__
+#ifndef __BULKCONNFUNC_HEADER__
+#define __BULKCONNFUNC_HEADER__
 
 
 // OpenCAEPoroX header files
@@ -82,7 +82,7 @@ protected:
 
 
 
-#endif /* end if __BulkConnTrans_HEADER__ */
+#endif /* end if __BulkConnFunc_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

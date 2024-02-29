@@ -470,7 +470,6 @@ void IsoT_IMPEC::AssembleMatBulks(LinearSystem&    ls,
 
     // flux term
     OCP_USI bId, eId;
-    USI     fluxnum;
     OCP_DBL valbb, rhsb, valee, rhse;
 
     // Be careful when first bulk has no neighbors!
@@ -1034,7 +1033,6 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
     OCP_USI         bId, eId;
     BulkConn&       conn = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
-    USI             fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();
@@ -1133,7 +1131,6 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
     // flux term  
     OCP_USI  bId, eId;
-    USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();
@@ -1908,9 +1905,7 @@ void IsoT_AIMc::AssembleMatBulks(LinearSystem&    ls,
     // flux term
     OCP_BOOL          bIdFIM, eIdFIM;
     OCP_USI           bId, eId;
-    USI               fluxnum;
-    
-   
+      
     for (OCP_USI c = 0; c < conn.numConn; c++) {
         bId       = conn.iteratorConn[c].BId();
         eId       = conn.iteratorConn[c].EId();
@@ -2229,7 +2224,6 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
     OCP_USI         bId, eId;
     BulkConn& conn = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
-    USI             fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();
@@ -2329,7 +2323,6 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
     // flux term
 
     OCP_USI  bId, eId;
-    USI      fluxnum;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
         bId       = conn.iteratorConn[c].BId();
