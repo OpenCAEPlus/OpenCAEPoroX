@@ -82,6 +82,10 @@ class BulkConnVarSet
     /////////////////////////////////////////////////////////////////////
 
 public:
+    /// Number of connections between bulks.
+    OCP_USI         numConn;
+
+public:
     /// For Convection
     /// Index of upwinding bulk of connections for each phase
     vector<OCP_USI> upblock;

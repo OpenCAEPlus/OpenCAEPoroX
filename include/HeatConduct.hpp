@@ -99,9 +99,9 @@ public:
 
 protected:
     /// phase thermal conductivity
-    vector<OCP_DBL> thconp;
+    vector<OCP_DBL> thconP;
     /// rock thermal conductivity
-    OCP_DBL         thconr;
+    OCP_DBL         thconR;
 };
 
 

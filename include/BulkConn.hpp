@@ -43,6 +43,7 @@ public:
 public:
     /// Input params
     void InputParam(const ParamReservoir& rs_param, const Bulk& bk) {
+        vs.numConn = numConn;
         optMs.Setup(rs_param, bk);
         FLUXm.InputParam(rs_param, iteratorConn, bk, optMs);      
     }

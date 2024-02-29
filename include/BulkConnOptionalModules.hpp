@@ -13,6 +13,7 @@
 #define __BULKCONNOPTIONALMODULE_HEADER__
 
 #include "HeatConduct.hpp"
+#include "OCPDiffusion.hpp"
 
 class BulkConnOptionalModules
 {
@@ -31,12 +32,15 @@ public:
 
     void Setup(const ParamReservoir& rs_param, const Bulk& bk) {
         heatConduct.Setup(rs_param, bk.GetVarSet());
+        diffusion.Setup(rs_param, bk.GetVarSet());
     }
 
 public:
 
     /// Heat Conduct
     HeatConduct    heatConduct;
+    /// Mass diffusion
+    OCPDiffusion   diffusion;
 
 };
 

@@ -13,12 +13,12 @@
 
 HeatConductMethod01::HeatConductMethod01(const ParamReservoir& rs_param, HeatConductVarSet& hcvs)
 {
-    thconp.resize(hcvs.np);
-    if (hcvs.o >= 0) thconp[hcvs.o] = rs_param.thcono;
-    if (hcvs.g >= 0) thconp[hcvs.g] = rs_param.thcong;
-    if (hcvs.w >= 0) thconp[hcvs.w] = rs_param.thconw;
+    thconP.resize(hcvs.np);
+    if (hcvs.o >= 0) thconP[hcvs.o] = rs_param.thcono;
+    if (hcvs.g >= 0) thconP[hcvs.g] = rs_param.thcong;
+    if (hcvs.w >= 0) thconP[hcvs.w] = rs_param.thconw;
 
-    thconr = rs_param.thconr;
+    thconR = rs_param.thconr;
 
 
     hcvs.kt.resize(hcvs.nb);
@@ -42,16 +42,16 @@ void HeatConductMethod01::CalConductCoeff(const OCP_USI& bId, HeatConductVarSet&
         // fluid bulk
         OCP_DBL tmp = 0;
         for (USI j = 0; j < np; j++) {
-            tmp                    += bvs.S[bId * np + j] * thconp[j];
-            hcvs.ktS[bId * np + j]  = bvs.poro[bId] * thconp[j];
+            tmp                    += bvs.S[bId * np + j] * thconP[j];
+            hcvs.ktS[bId * np + j]  = bvs.poro[bId] * thconP[j];
         }
-        hcvs.kt[bId]  = bvs.poro[bId] * tmp + (1 - bvs.poro[bId]) * thconr;
-        hcvs.ktP[bId] = bvs.poroP[bId] * (tmp - thconr);
-        hcvs.ktT[bId] = bvs.poroT[bId] * (tmp - thconr);
+        hcvs.kt[bId]  = bvs.poro[bId] * tmp + (1 - bvs.poro[bId]) * thconR;
+        hcvs.ktP[bId] = bvs.poroP[bId] * (tmp - thconR);
+        hcvs.ktT[bId] = bvs.poroT[bId] * (tmp - thconR);
     }
     else {
         // non fluid bulk
-        hcvs.kt[bId]  = thconr;
+        hcvs.kt[bId]  = thconR;
         hcvs.ktP[bId] = 0;
         hcvs.ktT[bId] = 0;
         for (USI j = 0; j < np; j++) {

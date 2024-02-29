@@ -44,6 +44,7 @@ public:
             OCP_ABORT("Wrong flux type!");
             break;
         }
+        diffusion   = &optMs.diffusion;
         heatConduct = &optMs.heatConduct;
     }
     /// Calculate transmissibility
@@ -99,7 +100,8 @@ public:
 protected:
     mutable FluxVarSet     fluxvs;
 	OCPConvection*         convect;
-    HeatConduct*           heatConduct;
+    OCPDiffusion*          diffusion;
+    HeatConduct*           heatConduct; 
 };
 
 
