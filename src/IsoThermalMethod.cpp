@@ -629,7 +629,9 @@ void IsoT_IMPEC::ResetToLastTimeStep02(Reservoir& rs, OCPControl& ctrl)
     rs.conn.vs.upblock      = rs.conn.vs.lupblock;
     rs.conn.vs.dP           = rs.conn.vs.ldP;
 
-    // Optional Features
+    // boundary
+    rs.bulk.BOUNDm.ResetToLastTimeStep();
+    // Optional Features 
     rs.bulk.optMs.ResetToLastTimeStep();
     rs.conn.optMs.ResetToLastTimeStep();
 
@@ -669,12 +671,16 @@ void IsoT_IMPEC::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lvfP = bvs.vfP;
     bvs.lvfi = bvs.vfi;
 
+    // boundary
+    rs.bulk.BOUNDm.UpdateLastTimeStep();
+
     BulkConn& conn = rs.conn;
 
     conn.vs.lupblock    = conn.vs.upblock;
     conn.vs.ldP         = conn.vs.dP;
 
     rs.allWells.UpdateLastTimeStep();
+
     rs.bulk.optMs.UpdateLastTimeStep();
     rs.conn.optMs.UpdateLastTimeStep();
 }
@@ -1370,6 +1376,8 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     // Wells
     rs.allWells.ResetToLastTimeStep(bk);
 
+    // boundary
+    rs.bulk.BOUNDm.ResetToLastTimeStep();
     // Optional Features
     rs.bulk.optMs.ResetToLastTimeStep();
     rs.conn.optMs.ResetToLastTimeStep();
@@ -1416,11 +1424,13 @@ void IsoT_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lmux     = bvs.mux;
     bvs.ldPcdS = bvs.dPcdS;
     bvs.ldKrdS  = bvs.dKrdS;
-
+    // boundary
+    rs.bulk.BOUNDm.UpdateLastTimeStep();
     // FIM-Specified
     bvs.ldSec_dPri    = bvs.dSec_dPri;
 
     rs.allWells.UpdateLastTimeStep();
+
     rs.bulk.optMs.UpdateLastTimeStep();
     rs.conn.optMs.UpdateLastTimeStep();
 }

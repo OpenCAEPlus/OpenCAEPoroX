@@ -12,12 +12,12 @@
 #include "BulkAccumuModule.hpp"
 
 
-BulkAccumuTerm01::BulkAccumuTerm01(const BulkVarSet& bvs, const BulkOptionalModules* opt)
+BulkAccumuTerm01::BulkAccumuTerm01(const BulkVarSet& bvs, const OCPBoundary* boundary)
 {
 	dim = bvs.nc + 1;
 	dFdXp.resize(dim * dim);
 	res.resize(dim);
-	optM = opt;
+	BOUNDm = boundary;
 }
 
 
@@ -31,10 +31,10 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CalResFIM(const OCP_USI& bId, const Bul
 	}
 
     // for spe11 now
-    if (optM->boundary.boundaryFlow.IfUse(bId)) {
+    if (BOUNDm->boundaryFlow.IfUse(bId)) {
         const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * bvs.depth[bId]) -
             (PRESSURE_STD - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * 0);
-        const OCP_DBL tmp = dt * CONV_DARCY * optM->boundary.boundArea[bId] * bvs.rockKx[bId] * bvs.kr[bId * 2 + 0] / bvs.mu[bId * 2 + 0] * dP;
+        const OCP_DBL tmp = dt * CONV_DARCY * BOUNDm->boundArea[bId] * bvs.rockKx[bId] * bvs.kr[bId * 2 + 0] / bvs.mu[bId * 2 + 0] * dP;
         res[1 + bvs.w] += tmp;
         
         // cout << scientific << setprecision(10) << dP << "   " << bvs.Ni[bId * 2] << "   " << tmp << endl;
@@ -56,13 +56,13 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const B
 		dFdXp[i * dim + i] = 1;
 	}
 
-    if (optM->boundary.boundaryFlow.IfUse(bId)) {
+    if (BOUNDm->boundaryFlow.IfUse(bId)) {
         const OCP_DBL dP = (bvs.Pj[bId * 2 + 0] - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * bvs.depth[bId]) -
             (PRESSURE_STD - GRAVITY_FACTOR * bvs.rho[bId * 2 + 0] * 0);
-        OCP_DBL tmp = dt * CONV_DARCY * optM->boundary.boundArea[bId]
+        OCP_DBL tmp = dt * CONV_DARCY * BOUNDm->boundArea[bId]
             * bvs.kr[bId * 2 + 0] / bvs.mu[bId * 2 + 0] * (1.0 - GRAVITY_FACTOR * bvs.rhoP[bId * 2 + 0] * bvs.depth[bId]
                 + GRAVITY_FACTOR * bvs.rhoP[bId * 2 + 0] * bvs.depth[bId] * 0);
-        tmp += -dt * CONV_DARCY * optM->boundary.boundArea[bId] * bvs.kr[bId * 2 + 0] * dP * bvs.muP[bId * 2 + 0] / (bvs.mu[bId * 2 + 0] * bvs.mu[bId * 2 + 0]);
+        tmp += -dt * CONV_DARCY * BOUNDm->boundArea[bId] * bvs.kr[bId * 2 + 0] * dP * bvs.muP[bId * 2 + 0] / (bvs.mu[bId * 2 + 0] * bvs.mu[bId * 2 + 0]);
         dFdXp[(1 + bvs.w) * dim + 0] += tmp;
     }
 
@@ -77,12 +77,12 @@ void BulkAccumuTerm01::CalValRhsIMPEC(const OCP_USI& bId, const BulkVarSet& bvs,
 }
 
 
-BulkAccumuTerm02::BulkAccumuTerm02(const BulkVarSet& bvs, const BulkOptionalModules* opt)
+BulkAccumuTerm02::BulkAccumuTerm02(const BulkVarSet& bvs, const OCPBoundary* boundary)
 {
 	dim = bvs.nc + 2;
 	dFdXp.resize(dim * dim);
 	res.resize(dim);
-	optM = opt;
+    BOUNDm = boundary;
 }
 
 
@@ -109,9 +109,9 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CalResFIM(const OCP_USI& bId, const Bul
     }
     
     // Heat Loss
-    if (optM->boundary.heatLoss.IfUse(bId)) {
+    if (BOUNDm->heatLoss.IfUse(bId)) {
         // dT
-        res[nc + 1] += dt * optM->boundary.heatLoss.GetHl(bId);
+        res[nc + 1] += dt * BOUNDm->heatLoss.GetHl(bId);
     }
     return res;
 }
@@ -156,9 +156,9 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const B
     }
 
     // Heat Loss iterm
-    if (optM->boundary.heatLoss.IfUse(bId)) {
+    if (BOUNDm->heatLoss.IfUse(bId)) {
         // dT
-        dFdXp[dim * dim - 1] += dt * optM->boundary.heatLoss.GetHlT(bId);
+        dFdXp[dim * dim - 1] += dt * BOUNDm->heatLoss.GetHlT(bId);
     }
 
     return dFdXp;
@@ -166,10 +166,10 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const B
 
 
 /// Setup accumulation module
-void BulkAccumuModule::Setup(const ParamReservoir& param, const BulkVarSet& bvs, const BulkOptionalModules& opt)
+void BulkAccumuModule::Setup(const ParamReservoir& param, const BulkVarSet& bvs, const OCPBoundary* boundary)
 {
-    if (param.thermal) bacT = new BulkAccumuTerm02(bvs, &opt);
-    else               bacT = new BulkAccumuTerm01(bvs, &opt);
+    if (param.thermal) bacT = new BulkAccumuTerm02(bvs, boundary);
+    else               bacT = new BulkAccumuTerm01(bvs, boundary);
 }
 
 

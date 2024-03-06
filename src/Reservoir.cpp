@@ -84,9 +84,9 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
                 VarInfo<vector<OCP_DBL>>{ "DZMTRXV", &grid.dzMtrx, &bulk.vs.dzMtrx },
                 VarInfo<vector<OCP_DBL>>{ "SWAT", & grid.initR.swat, & bulk.INITm.GetSwat()},
             VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit() },
-            VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, &bulk.optMs.boundary.GetBoundaryArea() },
+            VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, &bulk.BOUNDm.GetBoundaryArea() },
     }, vector<VarInfo<vector<OCP_USI>>>{
-        VarInfo<vector<OCP_USI>>{"BOUNDARY", &grid.boundIndex, &bulk.optMs.boundary.GetBoundaryIndex() },
+        VarInfo<vector<OCP_USI>>{"BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex() },
         VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM() },
         VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM() },
         VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
@@ -472,7 +472,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             MPI_Bcast(&nameset[0], len, OCPMPI_CHAR, MASTER_PROCESS, myComm);
 
             /// Set boundary name
-            auto& boundaryName = bulk.optMs.boundary.GetBoundName();
+            auto& boundaryName = bulk.BOUNDm.GetBoundName();
             boundaryName       = names;
         }       
     }
@@ -490,7 +490,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
             MPI_Bcast(&nameset[0], len, OCPMPI_CHAR, MASTER_PROCESS, myComm);
 
             /// Set boundary name
-            auto& boundaryName = bulk.optMs.boundary.GetBoundName();
+            auto& boundaryName = bulk.BOUNDm.GetBoundName();
             USI bId = 0;
             for (USI i = 0; i < numName; i++) {
                 boundaryName.push_back(string(&nameset[bId], lenName[i]));

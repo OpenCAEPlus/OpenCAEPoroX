@@ -15,7 +15,6 @@
 #include "AcceleratePEC.hpp"
 #include "OCPMiscible.hpp"
 #include "OCPScalePcow.hpp"
-#include "OCPBoundary.hpp"
 #include "HeatConduct.hpp"
 
 class BulkOptionalModules
@@ -37,7 +36,6 @@ public:
         misFac.ResetTolastTimeStep();
         misCur.ResetTolastTimeStep();
         scalePcow.ResetTolastTimeStep();
-        boundary.ResetToLastTimeStep();
     }
     void UpdateLastTimeStep()
     {
@@ -46,7 +44,6 @@ public:
         misFac.UpdateLastTimeStep();
         misCur.UpdateLastTimeStep();
         scalePcow.UpdateLastTimeStep();
-        boundary.UpdateLastTimeStep();
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -82,24 +79,6 @@ protected:
     MiscibleCurve  misCur;
     /// Scale water-oil capillary pressure
     ScalePcow      scalePcow;
-
-
-
-/////////////////////////////////////////////////////////////////////
-// Independent Module
-/////////////////////////////////////////////////////////////////////
-
-public:
-
-    void SetupIndependentModule(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
-        boundary.Setup(rs_param, bvs);
-    }
-
-public:
-
-    /// Boundary condition handler
-    OCPBoundary    boundary;
-
 };
 
 #endif /* end if __BulkOptionalFeatures_HEADER__ */

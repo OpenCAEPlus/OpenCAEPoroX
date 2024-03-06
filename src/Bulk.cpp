@@ -31,12 +31,10 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
     PVTm.Setup(rs_param, vs, optMs);
     SATm.Setup(rs_param, vs, optMs);
     ROCKm.Setup(rs_param, vs.nb, optMs);
-
-    optMs.SetupIndependentModule(rs_param, vs);
-
+    BOUNDm.Setup(rs_param, vs);
     INITm.Setup(rs_param, PVTm.GetMixtureType());
 
-    ACCm.Setup(rs_param, vs, optMs);
+    ACCm.Setup(rs_param, vs, &BOUNDm);
 }
 
 
@@ -149,7 +147,7 @@ ReservoirState Bulk::CheckNi()
         if (vs.Ni[n] < 0) {
             OCP_USI bId = n / vs.nc;
             if (((vs.Ni[n] > -1E-5 * vs.Nt[bId]) ||
-                (vs.lNi[n] < 1E-3 * vs.Nt[bId] && OCP_FALSE)) && OCP_FALSE) {
+                (vs.lNi[n] < 1E-3 * vs.Nt[bId] && OCP_TRUE)) && OCP_TRUE) {
                 vs.Ni[n] = 1E-40 * vs.Nt[bId];
             } else {
                 USI                cId = n - bId * vs.nc;

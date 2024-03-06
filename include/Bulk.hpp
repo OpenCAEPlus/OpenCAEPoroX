@@ -108,20 +108,21 @@ public:
 
 protected:
     /// Bsaic variable set
-    BulkVarSet        vs;
-    /// PVT Module
-    PVTModule         PVTm;
-    /// SAT Module
-    SATModule         SATm;
-    /// Rock Module
-    ROCKModule        ROCKm;
-    /// Initializer
-    BulkInitializer   INITm;
+    BulkVarSet           vs;
+    /// PVT Module       
+    PVTModule            PVTm;
+    /// SAT Module       
+    SATModule            SATm;
+    /// Rock Module      
+    ROCKModule           ROCKm;
+    /// Initializer      
+    BulkInitializer      INITm;
+    /// Boundary term    
+    OCPBoundary          BOUNDm;
     /// Accumulation term
-    BulkAccumuModule  ACCm;
-
+    BulkAccumuModule     ACCm;
     /// optional modules
-    BulkOptionalModules   optMs; 
+    BulkOptionalModules  optMs; 
 
 public:
     /// Return the number of bulks.

@@ -1428,7 +1428,8 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     // add CO2 concentration for SPE11
     if (bgp.CO2) {
         for (OCP_USI n = 0; n < nb; n++)
-            tmpV[n] = static_cast<OCP_SIN>(bvs.rho[n * np + WIndex] * bvs.xij[(n * np + WIndex) * nc + GIndex]);
+            // tmpV[n] = static_cast<OCP_SIN>(bvs.rho[n * np + WIndex] * bvs.xij[(n * np + WIndex) * nc + GIndex]);
+            tmpV[n] = static_cast<OCP_SIN>(bvs.Ni[n * nc + GIndex]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
 

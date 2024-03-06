@@ -105,7 +105,7 @@ OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalKrPc(rs.bulk);
 
     rs.conn.optMs.heatConduct.CalConductCoeff(rs.bulk.vs);
-    rs.bulk.optMs.boundary.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.time.GetCurrentTime() + ctrl.time.GetCurrentDt(), ctrl.time.GetCurrentDt());
+    rs.bulk.BOUNDm.heatLoss.CalHeatLoss(rs.bulk.vs, ctrl.time.GetCurrentTime() + ctrl.time.GetCurrentDt(), ctrl.time.GetCurrentDt());
 
     rs.allWells.CalFlux(rs.bulk);
 
@@ -478,10 +478,12 @@ void T_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     bvs.HT        = bvs.lHT;
     bvs.Hx        = bvs.lHx;
     bvs.dSec_dPri = bvs.ldSec_dPri;
-
+    // boundary
+    rs.bulk.BOUNDm.ResetToLastTimeStep();
 
     // Wells
     rs.allWells.ResetToLastTimeStep(bk);
+
 
     rs.bulk.optMs.ResetToLastTimeStep();
     rs.conn.optMs.ResetToLastTimeStep();
@@ -548,9 +550,11 @@ void T_FIM::UpdateLastTimeStep(Reservoir& rs) const
     bvs.lHT        = bvs.HT;
     bvs.lHx        = bvs.Hx;
     bvs.ldSec_dPri = bvs.dSec_dPri;
-
+    // boundary
+    rs.bulk.BOUNDm.UpdateLastTimeStep();
 
     rs.allWells.UpdateLastTimeStep();
+
     rs.bulk.optMs.UpdateLastTimeStep();
     rs.conn.optMs.UpdateLastTimeStep();
 }
