@@ -118,7 +118,7 @@ protected:
     /// Initializer      
     BulkInitializer      INITm;
     /// Boundary term    
-    OCPBoundary          BOUNDm;
+    BOUNDARYModule          BOUNDm;
     /// Accumulation term
     BulkAccumuModule     ACCm;
     /// optional modules

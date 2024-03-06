@@ -21,7 +21,6 @@ target_sources(
 		  LinearSystem.cpp
 		  MixtureUnit.cpp
 		  OCP.cpp
-		  OCPBoundary.cpp
 		  OCPControl.cpp
 		  OCPControlMethod.cpp
 		  OCPControlNR.cpp

@@ -281,7 +281,7 @@ class OCP_PVT2 : public OCPFuncTable2
 	/// 0th column: The phase pressure. (P), (pa)
 	/// 1th column: The corresponding density. (g/cm3)
 	/// 2th column: The corresponding viscosity. (pa¡¤s)
-	/// 3th column: e.g. The corresponding solubility (mass fraction) of CO2 in water. (dimensionless)
+	/// 3th column: e.g. The corresponding solubility (mass/mole fraction) of CO2 in water / H2O in gas phase. (dimensionless)
 
 public:
 	/// Calculate density

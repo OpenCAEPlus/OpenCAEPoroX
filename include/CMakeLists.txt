@@ -3,6 +3,7 @@ target_sources(
   PUBLIC AcceleratePEC.hpp
 		 AllWells.hpp
 		 BoundaryFlow.hpp
+		 BOUNDARYModule.hpp
 		 Bulk.hpp
 		 BulkAccumuModule.hpp
 		 BulkConn.hpp
@@ -28,7 +29,6 @@ target_sources(
 		 LinearSystem.hpp
 		 MixtureUnit.hpp
 		 OCP.hpp
-		 OCPBoundary.hpp
 		 OCPConst.hpp
 		 OCPControl.hpp
 		 OCPControlFast.hpp

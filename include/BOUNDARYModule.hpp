@@ -1,5 +1,5 @@
-/*! \file    OCPBoundary.hpp
- *  \brief   OCPBoundary class declaration
+/*! \file    BOUNDARYModule.hpp
+ *  \brief   BOUNDARYModule class declaration
  *  \author  Shizhe Li
  *  \date    Sep/22/2023
  *
@@ -9,8 +9,8 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifndef __OCPBOUNDARY_HEADER__
-#define __OCPBOUNDARY_HEADER__
+#ifndef __BOUNDARYMODULE_HEADER__
+#define __BOUNDARYMODULE_HEADER__
 
 
 // OpenCAEPoroX header files
@@ -25,7 +25,7 @@
 using namespace std;
 
 
-class OCPBoundary
+class BOUNDARYModule
 {
 	friend class BulkAccumuTerm01;
 
@@ -60,7 +60,7 @@ protected:
 
 
 
-#endif /* end if __OCPBoundary_HEADER__ */
+#endif /* end if __BOUNDARYModuleHEADER__ */
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

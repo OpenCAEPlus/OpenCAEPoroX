@@ -12,7 +12,7 @@
 #include "BulkAccumuModule.hpp"
 
 
-BulkAccumuTerm01::BulkAccumuTerm01(const BulkVarSet& bvs, const OCPBoundary* boundary)
+BulkAccumuTerm01::BulkAccumuTerm01(const BulkVarSet& bvs, const BOUNDARYModule* boundary)
 {
 	dim = bvs.nc + 1;
 	dFdXp.resize(dim * dim);
@@ -77,7 +77,7 @@ void BulkAccumuTerm01::CalValRhsIMPEC(const OCP_USI& bId, const BulkVarSet& bvs,
 }
 
 
-BulkAccumuTerm02::BulkAccumuTerm02(const BulkVarSet& bvs, const OCPBoundary* boundary)
+BulkAccumuTerm02::BulkAccumuTerm02(const BulkVarSet& bvs, const BOUNDARYModule* boundary)
 {
 	dim = bvs.nc + 2;
 	dFdXp.resize(dim * dim);
@@ -166,7 +166,7 @@ const vector<OCP_DBL>& BulkAccumuTerm02::CaldFdXpFIM(const OCP_USI& bId, const B
 
 
 /// Setup accumulation module
-void BulkAccumuModule::Setup(const ParamReservoir& param, const BulkVarSet& bvs, const OCPBoundary* boundary)
+void BulkAccumuModule::Setup(const ParamReservoir& param, const BulkVarSet& bvs, const BOUNDARYModule* boundary)
 {
     if (param.thermal) bacT = new BulkAccumuTerm02(bvs, boundary);
     else               bacT = new BulkAccumuTerm01(bvs, boundary);
