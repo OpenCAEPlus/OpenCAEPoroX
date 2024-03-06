@@ -25,14 +25,23 @@
 using namespace std;
 
 
+class BoundaryVarSet
+{
+public:
+	vector<string>  boundName;
+	vector<USI>     boundIndex;
+	vector<OCP_DBL> boundArea;
+};
+
+
 class BOUNDARYModule
 {
 	friend class BulkAccumuTerm01;
 
 public:
 	void Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs) {
-		heatLoss.Setup(rs_param, bvs, boundIndex);
-		boundaryFlow.Setup(rs_param, bvs, boundName, boundIndex);
+		heatLoss.Setup(rs_param, bvs, vs.boundIndex);
+		boundaryFlow.Setup(rs_param, bvs, vs.boundName, vs.boundIndex);
 	}
 	void ResetToLastTimeStep() { heatLoss.ResetToLastTimeStep(); }
 	void UpdateLastTimeStep() { heatLoss.UpdateLastTimeStep(); }
@@ -45,17 +54,14 @@ public:
 	BoundaryFlow boundaryFlow;
 
 public:
-	auto& GetBoundaryIndex() { return boundIndex; }
-	auto& GetBoundaryArea() { return boundArea; }
-	auto& GetBoundName() { return boundName; }
+	auto& GetBoundaryIndex() { return vs.boundIndex; }
+	auto& GetBoundaryArea() { return vs.boundArea; }
+	auto GetBoundaryArea(const OCP_USI& n) const { return vs.boundArea[n]; }
+	auto& GetBoundName() { return vs.boundName; }
+
 
 protected:
-
-
-protected:
-	vector<string>  boundName;
-	vector<USI>     boundIndex;
-	vector<OCP_DBL> boundArea;
+	BoundaryVarSet  vs;
 };
 
 
