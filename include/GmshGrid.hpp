@@ -146,12 +146,14 @@ public:
             return 0;
         }
     }
+    void PrintElementPoint(const OCP_ULL& n) const;
 
 protected:
     void InputGrid2D(const string& file);
     void Setup();
     void CalAreaCenter2D();
     void SetupConnAreaAndBoundary2D();
+
 
 public:
     /// If use the gmsh grid

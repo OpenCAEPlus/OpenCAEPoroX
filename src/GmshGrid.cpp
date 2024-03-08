@@ -108,6 +108,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 	// Get all mesh nodes
 	std::vector<std::size_t> nodeTags;
 	std::vector<double> nodeParams;
+	vector<OCP_DBL>     pointsTmp;
 
 #if OCPFLOATTYPEWIDTH == 128
 
@@ -121,9 +122,16 @@ void GMSHGrid::InputGrid2D(const string& file)
 	vector<double>().swap(pointsTmp);
 
 #else
-	gmsh::model::mesh::getNodes(nodeTags, points, nodeParams, -1, -1);
-
+	gmsh::model::mesh::getNodes(nodeTags, pointsTmp, nodeParams, -1, -1);
 #endif
+
+	// re-order points
+	points = pointsTmp;
+	for (OCP_ULL i = 0; i < nodeTags.size(); i++) {
+		copy(&pointsTmp[i * 3], &pointsTmp[i * 3] + 3, &points[(nodeTags[i] - 1) * 3]);
+	}
+	vector<OCP_DBL>().swap(pointsTmp);
+
 
 	// from m to cm for spe11a
 	for (auto& p : points) {
@@ -204,9 +212,9 @@ void GMSHGrid::InputGrid2D(const string& file)
 				if (elemTypes[t] == 2)  np = 3;  // for triangle
 				else                    np = 4;  // for quadrangle
 
-				vector<OCP_ULL> indexFace(np);
+				vector<OCP_ULL> indexPoints(np);
 				for (OCP_ULL l = 0; l < elemTags[t].size(); l++) {
-					indexFace.clear();					
+					indexPoints.clear();					
 
 					for (USI i = 0; i < np; i++) {
 						const OCP_ULL bId = elemNodeTags[t][np * l + (i % np)];
@@ -221,10 +229,18 @@ void GMSHGrid::InputGrid2D(const string& file)
 							iter->faceIndex.push_back(i);
 						}
 
-						indexFace.push_back(elemNodeTags[t][np * l + i] - 1);
+						indexPoints.push_back(elemNodeTags[t][np * l + i] - 1);
 					}
 					faceIndex++;
-					elements.push_back(Polygon(indexFace, elemTags[t][l], physicalName, physicalIndex));
+					elements.push_back(Polygon(indexPoints, elemTags[t][l], physicalName, physicalIndex));
+					
+					//cout << "------------------------------------" << endl;
+					//for (USI i = 0; i < np; i++) {
+					//	for (USI j = 0; j < 3; j++) {
+					//		cout << points[indexPoints[i] * 3 + j] << "   ";
+					//	}
+					//	cout << endl;
+					//}
 				}
 			}
 		}
@@ -284,6 +300,17 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 				e.area.push_back(fabs((center2edge * edgeNormal) / sqrt(center2edge * center2edge)));
 			}
 		}
+	}
+}
+
+
+void GMSHGrid::PrintElementPoint(const OCP_ULL& n) const
+{
+	for (const auto& p : elements[n].p) {
+		for (USI i = 0; i < 3; i++) {
+			cout << points[p * 3 + i] << "   ";
+		}
+		cout << endl;
 	}
 }
 
