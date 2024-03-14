@@ -94,7 +94,30 @@ void OpenCAEPoroX::InitReservoir()
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
 void OpenCAEPoroX::RunSimulation()
 {
-    solver.RunSimulation(reservoir, control, output);
+    GetWallTime timer;
+    timer.Start();
+    output.PrintInfoSched(reservoir, control, timer.Stop());
+    for (USI d = 0; d < control.time.GetNumTstepInterval(); d++) {
+        reservoir.ApplyControl(d);
+        control.ApplyControl(d, reservoir.GetWellOptChange());
+        while (!control.time.IfEnd()) {
+            output.PrintCurrentTimeIter(control);
+            const OCPNRsuite& NR = solver.GoOneStep(reservoir, control);
+            output.SetVal(reservoir, control, NR);
+            if (control.printLevel >= PRINT_ALL) {
+                // Print Summary and critical information at every time step
+                output.PrintInfo();
+            }
+
+            if (timer.Stop() > control.MaxSimTime * TIME_S2MS) control.StopSim = OCP_TRUE;
+            if (control.StopSim)  break;
+        }
+        output.PrintInfoSched(reservoir, control, timer.Stop());
+        // reservoir.allWells.ShowWellStatus(reservoir.bulk);     
+        if (control.StopSim)        break;
+    }
+    reservoir.OutInfoFinal();
+    OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
 }
 
 /// Print summary information on screen and SUMMARY.out file.

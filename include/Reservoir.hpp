@@ -131,6 +131,8 @@ public:
     OCP_BOOL IfGasExist() const { return bulk.vs.g >= 0; }
     /// If water exist
     OCP_BOOL IfWatExist() const { return bulk.vs.w >= 0; }
+    /// If well operations is changed
+    OCP_BOOL GetWellOptChange() const { return allWells.GetWellOptChange(); }
 
 protected:
     Bulk             bulk;        ///< Active grid info.

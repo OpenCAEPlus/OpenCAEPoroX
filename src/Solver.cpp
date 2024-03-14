@@ -60,34 +60,6 @@ void Solver::InitReservoir(Reservoir& rs)
     }
 }
 
-/// Simulation will go through all time steps and call GoOneStep at each step.
-void Solver::RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output)
-{
-    GetWallTime timer;
-    timer.Start();
-    output.PrintInfoSched(rs, ctrl, timer.Stop());
-    for (USI d = 0; d < ctrl.time.GetNumTstepInterval(); d++) {
-        rs.ApplyControl(d);
-        ctrl.ApplyControl(d, rs.allWells.GetWellOptChange());
-        while (!ctrl.time.IfEnd()) {
-            output.PrintCurrentTimeIter(ctrl);
-            const OCPNRsuite& NR = GoOneStep(rs, ctrl);
-            output.SetVal(rs, ctrl, NR);
-            if (ctrl.printLevel >= PRINT_ALL) {
-                // Print Summary and critical information at every time step
-                output.PrintInfo();
-            }
-
-            if (timer.Stop() > ctrl.MaxSimTime * TIME_S2MS) ctrl.StopSim = OCP_TRUE;
-            if (ctrl.StopSim)  break;
-        }
-        output.PrintInfoSched(rs, ctrl, timer.Stop());
-        // rs.allWells.ShowWellStatus(rs.bulk);     
-        if (ctrl.StopSim)        break;
-    }
-    rs.OutInfoFinal();
-    OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
-}
 
 /// This is one time step of dynamic simulation in an abstract setting.
 const OCPNRsuite& Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)

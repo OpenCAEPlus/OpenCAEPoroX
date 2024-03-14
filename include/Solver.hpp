@@ -25,13 +25,10 @@ public:
     void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Initialize the reservoir.
     void InitReservoir(Reservoir& rs);
-    /// Start simulation.
-    void RunSimulation(Reservoir& rs, OCPControl& ctrl, OCPOutput& output);
-
-private:
     /// General API
     const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
 
+protected:
     /// Setup solver for isothermal model
     void SetupIsoT(Reservoir& rs, const OCPControl& ctrl);
     /// Run one time step for isothermal model

@@ -1443,6 +1443,17 @@ void PreParamGridWell::SetupGmshGrid()
     CalActiveGrid(1E-12, 1E-12);
     SetupActiveConnGmshGrid();
     OutputPointsGmshGrid();
+
+
+    // temp boundary
+    if (OCP_FALSE) {
+        for (OCP_ULL n = 0; n < numGridM; n++) {
+            if (depth[n] > 119) {
+                boundIndex[n] = 1;
+                boundArea[n]  = 1.0 * gmshGrid.thickness;
+            }
+        }
+    }
 }
 
 
