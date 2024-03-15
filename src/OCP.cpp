@@ -45,6 +45,8 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
     control.SetupFastControl(argc, options); // Read Fast control
     control.Setup(domain);
 
+    reservoir.Setup();
+
     solver.Setup(reservoir, control); // Setup static info for solver
 
     output.Setup(reservoir, control, domain); // Setup output for dynamic simulation

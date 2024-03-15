@@ -19,10 +19,10 @@ void Solver::Setup(Reservoir& rs, const OCPControl& ctrl)
     switch (model) 
     {
         case OCPModel::isothermal:
-            SetupIsoT(rs, ctrl);
+            IsoTSolver.SetupMethod(rs, ctrl);
             break;
         case OCPModel::thermal:
-            SetupT(rs, ctrl);
+            TSolver.SetupMethod(rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong model type specified!");
@@ -30,18 +30,6 @@ void Solver::Setup(Reservoir& rs, const OCPControl& ctrl)
     }
 }
 
-void Solver::SetupIsoT(Reservoir& rs, const OCPControl& ctrl)
-{
-    // Setup static infomation for reservoir
-    rs.Setup();
-    IsoTSolver.SetupMethod(rs, ctrl);
-}
-
-void Solver::SetupT(Reservoir& rs, const OCPControl& ctrl)
-{
-    rs.Setup();
-    TSolver.SetupMethod(rs, ctrl);
-}
 
 /// Initialize the reservoir setting for different solution methods.
 void Solver::InitReservoir(Reservoir& rs)
