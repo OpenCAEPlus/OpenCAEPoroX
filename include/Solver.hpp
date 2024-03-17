@@ -29,9 +29,6 @@ public:
     const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    /// Run one time step for isothermal model
-    const OCPNRsuite& GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl);
-
     /// Run one time step for ifThermal model
     const OCPNRsuite& GoOneStepT(Reservoir& rs, OCPControl& ctrl);
 

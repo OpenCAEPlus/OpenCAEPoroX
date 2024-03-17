@@ -18,14 +18,19 @@
 /// IsothermalSolver class for fluid solution method.
 class IsothermalSolver
 {
+
 public:
-    /// Setup the fluid solver.
+    /// Setup the isothermal solver.
     void SetupMethod(Reservoir& rs, const OCPControl& ctrl);
-    /// Initialize the Reservoir and prepare variables for some method.
+    /// Initialize the Reservoir.
     void InitReservoir(Reservoir& rs);
+    /// calculate one time step.
+    const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
+
+protected:
     /// Prepare for assembling Mat.
     void Prepare(Reservoir& rs, OCPControl& ctrl);
-    /// Assemble Mat.
+    /// Assemble jacobian matrix.
     void AssembleMat(const Reservoir& rs, OCPControl& ctrl);
     /// Solve the linear system in single problem.
     void SolveLinearSystem(Reservoir& rs, OCPControl& ctrl);

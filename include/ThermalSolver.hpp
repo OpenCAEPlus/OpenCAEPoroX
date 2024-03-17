@@ -18,10 +18,19 @@
 /// ThermalSolver class for fluid solution method.
 class ThermalSolver
 {
+
 public:
+    /// Setup the thermal solver.
     void SetupMethod(Reservoir& rs, const OCPControl& ctrl);
+    /// Initialize the Reservoir.
     void InitReservoir(Reservoir& rs);
+    /// calculate one time step.
+    const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
+
+protected:
+    /// Prepare for assembling Mat.
     void Prepare(Reservoir& rs, const OCPControl& ctrl);
+    /// Assemble jacobian matrix.
     void AssembleMat(const Reservoir& rs, OCPControl& ctrl);
     /// Solve the linear system in single problem.
     void SolveLinearSystem(Reservoir& rs, OCPControl& ctrl);
@@ -31,8 +40,6 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish the current time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
-    /// Get NRsuite
-    const OCPNRsuite& GetNRsuite() const;
 
 protected:
     LinearSystem LSolver;

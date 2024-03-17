@@ -55,9 +55,9 @@ const OCPNRsuite& Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     switch (model) 
     {
         case OCPModel::isothermal:
-            return GoOneStepIsoT(rs, ctrl);
+            return IsoTSolver.GoOneStep(rs, ctrl);
         case OCPModel::thermal:
-            return GoOneStepT(rs, ctrl);
+            return TSolver.GoOneStep(rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong model type specified!");
@@ -65,63 +65,6 @@ const OCPNRsuite& Solver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     }
 }
 
-const OCPNRsuite& Solver::GoOneStepIsoT(Reservoir& rs, OCPControl& ctrl)
-{
-    // Prepare for time marching
-    IsoTSolver.Prepare(rs, ctrl);
-    
-    // Time marching with adaptive time stepsize
-    while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
-            if(CURRENT_RANK == MASTER_PROCESS)
-                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
-            ctrl.StopSim = OCP_TRUE;
-            break;
-        }
-        // Assemble linear system
-        IsoTSolver.AssembleMat(rs, ctrl);
-        // Solve linear system
-        IsoTSolver.SolveLinearSystem(rs, ctrl);
-        if (!IsoTSolver.UpdateProperty(rs, ctrl)) {
-            continue;
-        }
-        if (IsoTSolver.FinishNR(rs, ctrl)) break;
-    }
-
-    // Finish current time step
-    IsoTSolver.FinishStep(rs, ctrl);
-
-    return IsoTSolver.GetNRsuite();
-}
-
-const OCPNRsuite& Solver::GoOneStepT(Reservoir& rs, OCPControl& ctrl)
-{
-    // Prepare for time marching
-    TSolver.Prepare(rs, ctrl);
-
-    // Time marching with adaptive time stepsize
-    while (OCP_TRUE) {
-        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
-            if (CURRENT_RANK == MASTER_PROCESS)
-                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
-            ctrl.StopSim = OCP_TRUE;
-            break;
-        }
-        // Assemble linear system
-        TSolver.AssembleMat(rs, ctrl);
-        // Solve linear system
-        TSolver.SolveLinearSystem(rs, ctrl);
-        if (!TSolver.UpdateProperty(rs, ctrl)) {
-            continue;
-        }
-        if (TSolver.FinishNR(rs, ctrl)) break;
-    }
-
-    // Finish current time step
-    TSolver.FinishStep(rs, ctrl);
-
-    return TSolver.GetNRsuite();
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

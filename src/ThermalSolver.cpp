@@ -25,6 +25,37 @@ void ThermalSolver::Prepare(Reservoir& rs, const OCPControl& ctrl)
     fim.Prepare(rs, ctrl);
 }
 
+
+const OCPNRsuite& ThermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
+{
+    // Prepare for time marching
+    Prepare(rs, ctrl);
+
+    // Time marching with adaptive time stepsize
+    while (OCP_TRUE) {
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
+            if (CURRENT_RANK == MASTER_PROCESS)
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
+            ctrl.StopSim = OCP_TRUE;
+            break;
+        }
+        // Assemble linear system
+        AssembleMat(rs, ctrl);
+        // Solve linear system
+        SolveLinearSystem(rs, ctrl);
+        if (!UpdateProperty(rs, ctrl)) {
+            continue;
+        }
+        if (FinishNR(rs, ctrl)) break;
+    }
+
+    // Finish current time step
+    FinishStep(rs, ctrl);
+
+    return fim.GetNRsuite();
+}
+
+
 void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 {
     GetWallTime timer;
@@ -64,10 +95,6 @@ void ThermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 }
 
 
-const OCPNRsuite& ThermalSolver::GetNRsuite() const
-{
-    return fim.GetNRsuite();
-}
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

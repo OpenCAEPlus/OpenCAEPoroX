@@ -66,6 +66,36 @@ void IsothermalSolver::InitReservoir(Reservoir& rs)
 }
 
 
+const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
+{
+    // Prepare for time marching
+    Prepare(rs, ctrl);
+
+    // Time marching with adaptive time stepsize
+    while (OCP_TRUE) {
+        if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
+            if (CURRENT_RANK == MASTER_PROCESS)
+                OCP_WARNING("Time stepsize is too small: " + to_string(ctrl.time.GetCurrentDt()) + TIMEUNIT);
+            ctrl.StopSim = OCP_TRUE;
+            break;
+        }
+        // Assemble linear system
+        AssembleMat(rs, ctrl);
+        // Solve linear system
+        SolveLinearSystem(rs, ctrl);
+        if (!UpdateProperty(rs, ctrl)) {
+            continue;
+        }
+        if (FinishNR(rs, ctrl)) break;
+    }
+
+    // Finish current time step
+    FinishStep(rs, ctrl);
+
+    return GetNRsuite();
+}
+
+
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
