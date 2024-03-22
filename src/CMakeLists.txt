@@ -24,6 +24,7 @@ target_sources(
 		  OCPControl.cpp
 		  OCPControlMethod.cpp
 		  OCPControlNR.cpp
+		  OCPControlSimTime.cpp
 		  OCPControlTime.cpp
 		  OCPConvection.cpp
 		  OCPEoS.cpp

@@ -34,6 +34,7 @@ target_sources(
 		 OCPControlFast.hpp
 		 OCPControlMethod.hpp
 		 OCPControlNR.hpp
+		 OCPControlSimTime.hpp
 		 OCPControlTime.hpp
 		 OCPConvection.hpp
 		 OCPDataType.hpp
