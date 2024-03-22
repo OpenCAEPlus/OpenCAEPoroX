@@ -13,7 +13,7 @@
 
 OCP_BOOL ControlSimTime::SetCurSimTime(const OCP_DBL& t)
 { 
-	return t > maxSimTime * TIME_S2MS;
+	return t > maxSimTime;
 }
 
 

@@ -135,7 +135,7 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 	ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt, &wgtflag, &numflag, &ncon,
 		&nparts, tpwgts, &ubvec, options, &edgecut, part, &myComm);
 
-	OCPTIME_PARMETIS += timer.Stop() / TIME_S2MS;
+	OCPTIME_PARMETIS += timer.Stop();
 
 	//////////////////////////////////////////////////////
 	// Free Memory

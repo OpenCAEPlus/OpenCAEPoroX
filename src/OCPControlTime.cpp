@@ -167,7 +167,7 @@ void ControlTime::CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<
 
     MPI_Allreduce(&dt_loc, &current_dt, 1, OCPMPI_DBL, MPI_MIN, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
     predict_dt = current_dt;
 

@@ -148,12 +148,12 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
     
     timer.Start();
 
     int status = ls.Solve();
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+    OCPTIME_LSOLVER += timer.Stop();
 
     NR.UpdateIter(abs(status));
 
@@ -168,7 +168,7 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 
     timer.Start();
     GetSolution(rs, ls.GetSolution());
-    OCPTIME_NRSTEP += timer.Stop() / TIME_S2MS;
+    OCPTIME_NRSTEP += timer.Stop();
     ls.ClearData();
 }
 
@@ -740,7 +740,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
 
 
     // Solve linear system
@@ -750,7 +750,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     timer.Start();
     int status = ls.Solve();
     // Record time, iterations
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+    OCPTIME_LSOLVER += timer.Stop();
 
     NR.UpdateIter(abs(status));
 
@@ -772,7 +772,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     // Get solution from linear system to Reservoir
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
-    OCPTIME_NRSTEP += timer.Stop() / TIME_S2MS;
+    OCPTIME_NRSTEP += timer.Stop();
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }
@@ -1108,7 +1108,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         OCP_DBL tmploc = res.maxRelRes_V;
         MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
 
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+        OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 
 }
@@ -1336,8 +1336,8 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 
-    OCPTIME_COMM_P2P += (timerT.Stop() - time_cal) / TIME_S2MS;
-    OCPTIME_NRSTEPC  += time_cal / TIME_S2MS;
+    OCPTIME_COMM_P2P += (timerT.Stop() - time_cal);
+    OCPTIME_NRSTEPC  += time_cal;
 }
 
 void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -1520,12 +1520,12 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
 
     timer.Start();
     int status = ls.Solve();
 
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+    OCPTIME_LSOLVER += timer.Stop();
 
     NR.UpdateIter(abs(status));
 
@@ -1539,7 +1539,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
-    OCPTIME_NRSTEP += timer.Stop() / TIME_S2MS;
+    OCPTIME_NRSTEP += timer.Stop();
     ls.ClearData();
 }
 
@@ -2303,7 +2303,7 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
         GetWallTime timer;
         timer.Start();
         MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+        OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 }
 

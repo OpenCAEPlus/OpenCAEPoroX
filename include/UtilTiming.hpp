@@ -44,7 +44,7 @@ public:
     inline double Stop() const
     {
         auto elapsedTime = std::chrono::steady_clock::now() - timeStamp;
-        return std::chrono::duration<double, std::milli>(elapsedTime).count();
+        return std::chrono::duration<double, std::milli>(elapsedTime).count() / 1000;
     }
 #else
     /// Start the timer
@@ -71,4 +71,5 @@ public:
 /*  Shizhe Li           Oct/01/2021      Create file                          */
 /*  Chensong Zhang      Oct/15/2021      Format file                          */
 /*  Chensong Zhang      Sep/26/2022      Do not use RTC for x86               */
+/*  Shizhe Li           Mar/22/2024      Use unit : second                    */
 /*----------------------------------------------------------------------------*/

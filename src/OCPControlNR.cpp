@@ -65,7 +65,7 @@ OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_li
     OCPNRStateC conflag;
     MPI_Allreduce(&conflag_loc, &conflag, 1, OCPMPI_ENUM, MPI_MAX, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
     if (conflag == OCPNRStateC::converge) {
         // converge

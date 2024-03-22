@@ -16,14 +16,14 @@ void GetWallTime::StopInfo(const std::string& info, std::ostream& out) const
 {
     const double duration = Stop();
     if (duration < CLOCK_USE_SEC) {
-        std::cout << info << " costs " << std::fixed << std::setprecision(3) << duration
+        std::cout << info << " costs " << std::fixed << std::setprecision(3) << duration * 1000
                   << "ms" << std::endl;
     } else if (duration < CLOCK_USE_MIN) {
         std::cout << info << " costs " << std::fixed << std::setprecision(3)
-                  << duration / 1000.0 << "s" << std::endl;
+                  << duration << "s" << std::endl;
     } else {
         std::cout << info << " costs " << std::fixed << std::setprecision(3)
-                  << duration / 60000.0 << "m" << std::endl;
+                  << duration / 60.0 << "m" << std::endl;
     }
 }
 

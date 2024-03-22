@@ -25,7 +25,7 @@ void OpenCAEPoroX::InputDistParam(const string& filename, PreProcess& prepro, co
     control.InputParam(rp.paramControl);
     output.InputParam(rp.paramOutput);
 
-    OCPTIME_READPARAM = timer.Stop() / TIME_S2MS;
+    OCPTIME_READPARAM = timer.Stop();
     OCPTIME_TOTAL     += OCPTIME_READPARAM;
 }
 
@@ -53,7 +53,7 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 
     control.OutputModelMethodInfo();
 
-    double finalTime = timer.Stop() / TIME_S2MS;
+    double finalTime = timer.Stop();
     if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
         cout << endl
              << "Setup simulation done. Wall time : " << fixed << setprecision(3)
@@ -82,7 +82,7 @@ void OpenCAEPoroX::InitReservoir()
 
     solver.InitReservoir(reservoir);
 
-    double finalTime = timer.Stop() / TIME_S2MS;
+    double finalTime = timer.Stop();
     if (control.printLevel >= PRINT_MIN && CURRENT_RANK == MASTER_PROCESS) {
         std::ostringstream initTime;
         initTime << fixed << setprecision(3) << finalTime;
@@ -119,7 +119,7 @@ void OpenCAEPoroX::RunSimulation()
         if (control.StopSim)        break;
     }
     reservoir.OutInfoFinal();
-    OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
+    OCPTIME_TOTAL += timer.Stop();
 }
 
 /// Print summary information on screen and SUMMARY.out file.
@@ -129,7 +129,7 @@ void OpenCAEPoroX::OutputResults() const
     timer.Start();
     output.PrintInfo();
     output.PostProcess();
-    OCPTIME_TOTAL += timer.Stop() / TIME_S2MS;
+    OCPTIME_TOTAL += timer.Stop();
       
     OutputTimeMain(cout.rdbuf());
     OutputTimeProcess();

@@ -64,14 +64,14 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     timer.Start();
     ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
-    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop() / TIME_S2MS;
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
 
     // Solve linear system  
     timer.Start();
     int status = ls.Solve();
 
     // Record time, iterations
-    OCPTIME_LSOLVER += timer.Stop() / TIME_S2MS;
+    OCPTIME_LSOLVER += timer.Stop();
 
     NR.UpdateIter(abs(status));
 
@@ -84,7 +84,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     
     timer.Start();
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
-    OCPTIME_NRSTEP += timer.Stop() / TIME_S2MS;
+    OCPTIME_NRSTEP += timer.Stop();
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
 }
@@ -674,7 +674,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
         OCP_DBL tmploc = res.maxRelRes_V;
         MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
 
-        OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+        OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 }
 
