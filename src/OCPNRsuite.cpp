@@ -288,15 +288,15 @@ ReservoirState OCPNRsuite::CheckCFL(const OCP_DBL& cflLim) const
 }
 
 
-OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const
+OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>& il, const OCP_DBL& dt) const
 {
     OCPNRStateP     workState_loc = OCPNRStateP::continueSol;
     ReservoirState rsState;
     for (auto& s : il) {
 
-        if (s == "BulkP")        rsState = rs.bulk.CheckP();
+        if (s == "BulkP")        rsState = rs.bulk.CheckP(dt);
         else if (s == "BulkT")   rsState = rs.bulk.CheckT();
-        else if (s == "BulkNi")  rsState = rs.bulk.CheckNi();
+        else if (s == "BulkNi")  rsState = rs.bulk.CheckNi(dt);
         else if (s == "BulkVe")  rsState = rs.bulk.CheckVe(0.01);
         else if (s == "CFL")     rsState = CheckCFL(1.0);
         else if (s == "WellP")   rsState = rs.allWells.CheckP(rs.bulk);

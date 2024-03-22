@@ -127,7 +127,7 @@ void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
     rs.allWells.PrepareWell(rs.bulk);
     NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
-    if (!NR.CheckPhysical(rs, { "CFL" })) {
+    if (!NR.CheckPhysical(rs, { "CFL" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
     }
     NR.InitIter();
@@ -176,7 +176,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
     // First check : Pressure check
-    if (!NR.CheckPhysical(rs, { "BulkP", "WellP" })) {
+    if (!NR.CheckPhysical(rs, { "BulkP", "WellP" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         NR.ResetIter();
         rs.bulk.vs.P = rs.bulk.vs.lP;
@@ -191,7 +191,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
     // Third check: Ni check
 
-    if (!NR.CheckPhysical(rs, { "CFL","BulkNi" })) {
+    if (!NR.CheckPhysical(rs, { "CFL","BulkNi" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep01(rs, ctrl);
         return OCP_FALSE;
@@ -201,7 +201,7 @@ OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk);
 
     // Fouth check: Volume error check
-    if (!NR.CheckPhysical(rs, { "BulkVe" })) {
+    if (!NR.CheckPhysical(rs, { "BulkVe" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep02(rs, ctrl);
         return OCP_FALSE;
@@ -780,7 +780,7 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
-    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
@@ -803,11 +803,15 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
 
+    if (ctrl.time.GetCurrentDt() < 5E-2 + TINY) {
+        return OCP_TRUE;
+    }
+
     NR.CalMaxChangeNR(rs);
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == OCPNRStateC::converge) {
-        if (!NR.CheckPhysical(rs, { "WellP" })) {
+        if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
@@ -1542,7 +1546,7 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
 OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
     // First check: Ni check and bulk Pressure check
-    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" })) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
@@ -1566,7 +1570,7 @@ OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
     if (conflag == OCPNRStateC::converge) {
-        if (!NR.CheckPhysical(rs, { "WellP" })) {
+        if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
@@ -2150,7 +2154,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
 
         if (conflag == OCPNRStateC::converge) {
-            if (!NR.CheckPhysical(rs, { "WellP" })) {
+            if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
                 ctrl.time.CutDt(NR);
                 ResetToLastTimeStep(rs, ctrl);
                 return OCP_FALSE;
@@ -2188,7 +2192,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         NR.CalMaxChangeNR(rs);
         const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
         if (conflag == OCPNRStateC::converge) {
-            if (!NR.CheckPhysical(rs, { "WellP" })) {
+            if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
                 ctrl.time.CutDt(NR);
                 ResetToLastTimeStep(rs, ctrl);
                 return OCP_FALSE;

@@ -49,7 +49,7 @@ void ControlTime::CutDt(const OCP_DBL& fac)
     else         current_dt *= fac;
 
     if (CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### WARNING: Cut time step size: " << fixed
+        cout << "### WARNING: Cut time step size: " << scientific
             << setprecision(3) << ldt << TIMEUNIT + " -> "
             << setprecision(3) << current_dt << TIMEUNIT + "!\n";
     }
@@ -78,7 +78,7 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
     }
 
     if (CURRENT_RANK == MASTER_PROCESS) {
-        cout << "### WARNING: Cut time step size: " << fixed
+        cout << "### WARNING: Cut time step size: " << scientific
             << setprecision(3) << ldt << TIMEUNIT + " -> "
             << setprecision(3) << current_dt << TIMEUNIT + "!\n";
     }

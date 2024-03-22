@@ -184,10 +184,12 @@ public:
 public:
     /// Check if negative P occurs
     ReservoirState CheckP() const;
+    ReservoirState CheckP(const OCP_DBL& dt);
     /// Check if negative T occurs
     ReservoirState CheckT() const;
     /// Check if negative Ni occurs
     ReservoirState CheckNi();
+    ReservoirState CheckNi(const OCP_DBL& dt);
     /// Check if relative volume error is outranged.
     ReservoirState CheckVe(const OCP_DBL& Vlim) const;
 

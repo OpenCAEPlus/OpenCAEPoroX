@@ -191,7 +191,7 @@ protected:
 
     // Check
 public:
-    OCP_BOOL CheckPhysical(Reservoir& rs, const initializer_list<string>& il) const;
+    OCP_BOOL CheckPhysical(Reservoir& rs, const initializer_list<string>& il, const OCP_DBL& dt) const;
     auto GetWorkState() const { return workState; }
 
 protected:

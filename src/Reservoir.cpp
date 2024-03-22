@@ -548,7 +548,6 @@ void Reservoir::ApplyControl(const USI& i)
 }
 
 
-
 void Reservoir::CalIPRT(const OCP_DBL& dt)
 {
     OCP_FUNCNAME;

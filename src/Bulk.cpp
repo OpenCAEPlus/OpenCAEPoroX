@@ -122,6 +122,35 @@ ReservoirState Bulk::CheckP() const
     return ReservoirState::bulk_success;
 }
 
+
+ReservoirState Bulk::CheckP(const OCP_DBL& dt)
+{
+    if (dt > 5E-2 + TINY || OCP_TRUE) {
+        return CheckP();
+    }
+    else {
+
+        OCP_USI count = 0;
+
+        for (OCP_USI n = 0; n < vs.nb; n++) {
+            if (vs.P[n] < 0) {
+                //std::ostringstream PStringSci;
+                //PStringSci << std::scientific << vs.P[n];
+                //OCP_WARNING("Negative pressure: P[" + std::to_string(n) +
+                //    "] = " + PStringSci.str());
+                vs.P[n] = vs.lP[n];
+
+                count++;
+            }
+        }
+
+        cout << "num of negative P = " << count << endl;
+
+        return ReservoirState::bulk_success;
+    }
+}
+
+
 ReservoirState Bulk::CheckT() const
 {
     for (OCP_USI n = 0; n < vs.nb; n++) {
@@ -168,6 +197,32 @@ ReservoirState Bulk::CheckNi()
     }
     return ReservoirState::bulk_success;
 }
+
+
+ReservoirState Bulk::CheckNi(const OCP_DBL& dt)
+{
+    if (dt > 5E-2 + TINY || OCP_TRUE) {
+        return CheckNi();
+    }
+    else {
+        OCP_USI count = 0;
+
+        OCP_USI len = vs.nb * vs.nc;
+        for (OCP_USI n = 0; n < len; n++) {
+            if (vs.Ni[n] < 0) {
+                OCP_USI bId = n / vs.nc;
+                vs.Ni[n] = 1E-40 * vs.Nt[bId];
+
+                count++;
+            }
+        }
+
+        cout << "num of negative Ni = " << count << endl;
+
+        return ReservoirState::bulk_success;
+    }
+}
+
 
 /// Return OCP_TRUE if all Ve < Vlim and OCP_FALSE otherwise.
 ReservoirState Bulk::CheckVe(const OCP_DBL& Vlim) const

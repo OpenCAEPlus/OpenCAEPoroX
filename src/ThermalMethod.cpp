@@ -92,7 +92,7 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
 
-    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP", "BulkT" })) {
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP", "BulkT" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);   
         return OCP_FALSE;
@@ -121,7 +121,7 @@ OCP_BOOL T_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "resT", "dT" });
 
     if (conflag == OCPNRStateC::converge) {
-        if (!NR.CheckPhysical(rs, { "WellP" })) {
+        if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;

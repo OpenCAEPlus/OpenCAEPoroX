@@ -111,7 +111,7 @@ void OpenCAEPoroX::RunSimulation()
                 output.PrintInfo();
             }
 
-            if (timer.Stop() > control.MaxSimTime * TIME_S2MS) control.StopSim = OCP_TRUE;
+            if (control.simtime.SetCurSimTime(timer.Stop())) control.StopSim = OCP_TRUE;
             if (control.StopSim)  break;
         }
         output.PrintInfoSched(reservoir, control, timer.Stop());

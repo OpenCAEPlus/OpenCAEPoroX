@@ -21,6 +21,7 @@
 #include "OCPControlTime.hpp"
 #include "OCPControlNR.hpp"
 #include "OCPControlMethod.hpp"
+#include "OCPControlSimTime.hpp"
 
 using namespace std;
 
@@ -50,17 +51,17 @@ public:
 
 public:
     /// Print level
-    USI           printLevel{0};
+    USI            printLevel{0};
     /// Time control 
-    ControlTime   time;
+    ControlTime    time;
     /// NR control    
-    ControlNR     NR;
+    ControlNR      NR;
     /// Solver Method control
-    ControlMethod SM;
+    ControlMethod  SM;
+    /// simluation time control
+    ControlSimTime simtime;
     /// Stop simulation
     OCP_BOOL    StopSim{ OCP_FALSE };
-    /// Stop time
-    OCP_DBL     MaxSimTime{ 1E20 };
 
 
 public:  
