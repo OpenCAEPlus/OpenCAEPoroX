@@ -96,6 +96,8 @@ void OpenCAEPoroX::InitReservoir()
 // Call IMPEC, FIM, AIM, etc for dynamic simulation.
 void OpenCAEPoroX::RunSimulation()
 {
+    control.simtime.Initialize();
+
     GetWallTime timer;
     timer.Start();
     output.PrintInfoSched(reservoir, control, timer.Stop());
@@ -111,7 +113,7 @@ void OpenCAEPoroX::RunSimulation()
                 output.PrintInfo();
             }
 
-            if (control.simtime.SetCurSimTime(timer.Stop())) control.StopSim = OCP_TRUE;
+            if (control.simtime.IfStop())  control.StopSim = OCP_TRUE;
             if (control.StopSim)  break;
         }
         output.PrintInfoSched(reservoir, control, timer.Stop());
@@ -161,7 +163,7 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
             << " wasted)" << endl;
 
         // print time usages
-        cout << "Simulation time:                " << setw(fixWidth) << OCPTIME_TOTAL
+        cout << "CPU time:                       " << setw(fixWidth) << OCPTIME_TOTAL
             << " (Seconds)" << endl;
         cout << " - % Input & Partition ........." << setw(fixWidth)
             << 100.0 * OCPTIME_PARTITION / OCPTIME_TOTAL << " (" << OCPTIME_PARTITION
@@ -178,23 +180,29 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << " - % Initialization ............" << setw(fixWidth)
             << 100.0 * OCPTIME_INIT_RESERVOIR / OCPTIME_TOTAL << " (" << OCPTIME_INIT_RESERVOIR
             << "s)" << endl;
-        cout << " - % Assembling ................" << setw(fixWidth)
-            << 100.0 * OCPTIME_ASSEMBLE_MAT / OCPTIME_TOTAL << " ("
+        cout << " - % Wating time ..............." << setw(fixWidth) 
+            << 100.0 * control.simtime.GetWaitingTime() / OCPTIME_TOTAL << " (" << control.simtime.GetWaitingTime()
+            << "s)" << endl;
+        cout << " - % Simulation time:           " << setw(fixWidth)
+            << 100.0 * control.simtime.GetTotalSimTime() / OCPTIME_TOTAL << " (" << control.simtime.GetTotalSimTime()
+            << "s)" << endl;
+        cout << "     - % Assembling ................" << setw(fixWidth)
+            << 100.0 * OCPTIME_ASSEMBLE_MAT / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_ASSEMBLE_MAT << "s)" << endl;
-        cout << " - % Converting for LS interface" << setw(fixWidth)
-            << 100.0 * OCPTIME_CONVERT_MAT_FOR_LS_IF / OCPTIME_TOTAL << " ("
+        cout << "     - % Converting for LS interface" << setw(fixWidth)
+            << 100.0 * OCPTIME_CONVERT_MAT_FOR_LS_IF / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_CONVERT_MAT_FOR_LS_IF << "s)" << endl;
-        cout << " - % Linear Solver ............." << setw(fixWidth)
-            << 100.0 * OCPTIME_LSOLVER / OCPTIME_TOTAL << " ("
+        cout << "     - % Linear Solver ............." << setw(fixWidth)
+            << 100.0 * OCPTIME_LSOLVER / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_LSOLVER << "s)" << endl;
-        cout << " - % Newton Step ..............." << setw(fixWidth)
-            << 100.0 * OCPTIME_NRSTEP / OCPTIME_TOTAL << " ("
+        cout << "     - % Newton Step ..............." << setw(fixWidth)
+            << 100.0 * OCPTIME_NRSTEP / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_NRSTEP << "s)" << endl;
-        cout << " - % Updating Properties ......." << setw(fixWidth)
-            << 100.0 * OCPTIME_UPDATE_GRID / OCPTIME_TOTAL << " ("
+        cout << "     - % Updating Properties ......." << setw(fixWidth)
+            << 100.0 * OCPTIME_UPDATE_GRID / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_UPDATE_GRID << "s)" << endl;
-        cout << " - % Output ...................." << setw(fixWidth)
-            << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
+        cout << "     - % Output ...................." << setw(fixWidth)
+            << 100.0 * OCPTIME_OUTPUT / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
         cout << "==================================================" << endl;
 

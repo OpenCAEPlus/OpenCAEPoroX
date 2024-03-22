@@ -14,28 +14,39 @@
 
  // Standard header files
 #include <vector>
+#include <mpi.h>
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
-#include "OCPTimeRecord.hpp"
 #include "ParamControl.hpp"
 #include "OCPControlFast.hpp"
+#include "UtilTiming.hpp"
 
 using namespace std;
 
 
-/// OCP simulation time controler, unit:second
+/// OCP simulation time controler, start from the first time step, end with the last time step
+/// unit:second, 
 class ControlSimTime
 {
 public:
-	void SetMaxSimTime(const OCP_DBL& t) { maxSimTime = t; }
-	OCP_BOOL SetCurSimTime(const OCP_DBL& t);
+	void SetNextSimTime(const OCP_DBL& t) { nextSimTime = t; }
+	void Initialize();
+	OCP_BOOL IfStop();
+	OCP_DBL GetTotalSimTime() const { return totalSimTime; }
+	OCP_DBL GetWaitingTime() const {return waitTime;}
 
 protected:
-	/// current simulation time
-	OCP_DBL  curSimTime{ 0 };
-	/// max simulation time
-	OCP_DBL  maxSimTime{ 1E20 };
+	/// total simulation time
+	OCP_DBL     totalSimTime;
+	/// next simulation time
+	OCP_DBL     nextSimTime{ 1E20 };
+	/// current simulation time from last setup
+	OCP_DBL     curSimTime{ 0 };
+	/// total waiting time
+	OCP_DBL     waitTime;
+	/// timer
+	GetWallTime timer;
 };
 
 

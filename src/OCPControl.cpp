@@ -31,7 +31,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     workDir = CtrlParam.workDir;
     ocpFile = CtrlParam.fileName;    
-    simtime.SetMaxSimTime(CtrlParam.MaxSimTime);
+    simtime.SetNextSimTime(CtrlParam.MaxSimTime);
 
     SM.SetCtrlParam(CtrlParam);
 

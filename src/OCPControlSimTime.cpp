@@ -11,9 +11,45 @@
 
 #include "OCPControlSimTime.hpp"
 
-OCP_BOOL ControlSimTime::SetCurSimTime(const OCP_DBL& t)
+
+void ControlSimTime::Initialize()
 { 
-	return t > maxSimTime;
+	timer.Start(); 
+	totalSimTime = 0;
+	curSimTime   = 0;
+	waitTime     = 0;
+}
+
+
+OCP_BOOL ControlSimTime::IfStop()
+{ 
+	curSimTime += timer.Stop();
+
+	if (curSimTime > fabs(nextSimTime)) {
+
+		totalSimTime += curSimTime;
+		curSimTime   = 0;
+
+		if (nextSimTime < 0) {
+			timer.Start();
+			if (CURRENT_RANK == MASTER_PROCESS) {
+				cout << "Input the time(sec) to continue running(check again if negative): " << endl;
+				cin >> nextSimTime;
+			}
+			MPI_Bcast(&nextSimTime, 1, OCPMPI_DBL, MASTER_PROCESS, MPI_COMM_WORLD);
+
+			waitTime += timer.Stop();
+			timer.Start();
+			return OCP_FALSE;
+		}
+		else {
+			return OCP_TRUE;
+		}
+	}
+	else {
+		timer.Start();
+		return OCP_FALSE;
+	}
 }
 
 
