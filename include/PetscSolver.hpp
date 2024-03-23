@@ -29,14 +29,6 @@ class PetscSolver : public LinearSolver
 {
 public:
     PetscSolver() = default;
-    /// Set parameters.
-    void SetupParam(const string& dir, const string& file) override {};
-
-    /// Initialize the Params for linear solver.
-    void InitParam() override {};
-
-    /// Allocate memoery for pardiso solver
-    void Allocate(const OCPMatrix& mat) override;
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
@@ -46,6 +38,11 @@ public:
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return 1; }
+
+protected:
+
+    /// Allocate memoery for pardiso solver
+    void Allocate(const OCPMatrix& mat, const Domain* domain);
 
 protected:
 
@@ -71,7 +68,7 @@ protected:
 class ScalarPetscSolver : public PetscSolver
 {
 public:
-    ScalarPetscSolver() {};
+    ScalarPetscSolver(const string& dir, const string& file, const OCPMatrix& mat, const Domain* domain) { OCP_ABORT("Inavailable!"); };
     /// Solve the linear system.
     OCP_INT Solve() override;
 
@@ -80,17 +77,9 @@ public:
 class VectorPetscSolver : public PetscSolver
 {
 public:
-    VectorPetscSolver(const Domain* domain) { 
-        myComm  = domain->myComm;
-        numproc = domain->numproc;
-        myrank  = domain->myrank;
-        allBegin.resize(numproc);
-        allEnd.resize(numproc);
-        allEle.resize(numproc);
-    }
+    VectorPetscSolver(const string& dir, const string& file, const OCPMatrix& mat, const Domain* domain);
     /// Solve the linear system.
     OCP_INT Solve() override;
-
 };
 
 #endif 

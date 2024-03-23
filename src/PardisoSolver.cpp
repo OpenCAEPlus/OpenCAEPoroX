@@ -13,44 +13,13 @@
 
 #include "PardisoSolver.hpp"
 
-#if    OCPFLOATTYPEWIDTH == 64
+#if OCPFLOATTYPEWIDTH == 64
 
 
-void PardisoSolver::SetupParam(const string& dir, const string& file)
+PardisoSolver::PardisoSolver(const string& dir, const string& file, const OCPMatrix& mat)
 {
-    InitParam();
-}
-
-
-void PardisoSolver::InitParam()
-{
-    iparm[0]  = 1;  /* Solver default parameters overriden with provided by iparm */
-    iparm[1]  = 2;  /* Use METIS for fill-in reordering */
-    iparm[5]  = 0;  /* Write solution into x */
-    iparm[7]  = 2;  /* Max number of iterative refinement steps */
-    iparm[9]  = 13; /* Perturb the pivot elements with 1E-13 */
-    iparm[10] = 1;  /* Use nonsymmetric permutation and scaling MPS */
-    iparm[12] = 1;  /* Switch on Maximum Weighted Matching algorithm (default for non-symmetric) */
-    iparm[17] = 0;  /* (closed) Output: Number of nonzeros in the factor LU */ 
-    iparm[18] = 0;  /* (closed) Output: Mflops for LU factorization */
-    iparm[26] = 1;  /* Check input data for correctness */
-    iparm[39] = 2;  /* Input: matrix/rhs/solution are distributed between MPI processes  */
-
-    /*Zero-based indexing: columns and rows indexing in arrays ia, ja, and perm starts from 0 (C-style indexing).*/
-    iparm[34] = 1;  
-}
-
-
-void PardisoSolver::Allocate(const OCPMatrix& mat)
-{
-    nb = mat.nb;
-    if (nb > 1) {
-        iparm[37] = nb * nb;
-    }
-
-    iA.resize(mat.maxDim + 1);
-    jA.resize(mat.max_nnz);
-    A.resize(mat.max_nnz * nb * nb);
+    SetupParam(dir, file);
+    Allocate(mat);
 }
 
 
@@ -163,13 +132,48 @@ OCP_INT PardisoSolver::Solve()
 }
 
 
-/// Allocate memoery for pardiso solver
-void VectorPardisoSolver::Allocate(const OCPMatrix& mat)
+void PardisoSolver::SetupParam(const string& dir, const string& file)
+{
+    InitParam();
+}
+
+
+void PardisoSolver::InitParam()
+{
+    iparm[0] = 1;  /* Solver default parameters overriden with provided by iparm */
+    iparm[1] = 2;  /* Use METIS for fill-in reordering */
+    iparm[5] = 0;  /* Write solution into x */
+    iparm[7] = 2;  /* Max number of iterative refinement steps */
+    iparm[9] = 13; /* Perturb the pivot elements with 1E-13 */
+    iparm[10] = 1;  /* Use nonsymmetric permutation and scaling MPS */
+    iparm[12] = 1;  /* Switch on Maximum Weighted Matching algorithm (default for non-symmetric) */
+    iparm[17] = 0;  /* (closed) Output: Number of nonzeros in the factor LU */
+    iparm[18] = 0;  /* (closed) Output: Mflops for LU factorization */
+    iparm[26] = 1;  /* Check input data for correctness */
+    iparm[39] = 2;  /* Input: matrix/rhs/solution are distributed between MPI processes  */
+
+    /*Zero-based indexing: columns and rows indexing in arrays ia, ja, and perm starts from 0 (C-style indexing).*/
+    iparm[34] = 1;
+}
+
+
+void PardisoSolver::Allocate(const OCPMatrix& mat)
 {
     nb = mat.nb;
-    iA.resize(mat.maxDim * nb + 1);
-    jA.resize(mat.max_nnz * nb * nb);
+    if (nb > 1) {
+        iparm[37] = nb * nb;
+    }
+
+    iA.resize(mat.maxDim + 1);
+    jA.resize(mat.max_nnz);
     A.resize(mat.max_nnz * nb * nb);
+}
+
+
+VectorPardisoSolver::VectorPardisoSolver(const string& dir, const string& file, const OCPMatrix& mat)
+{
+    SetupParam(dir, file);
+    Allocate(mat);
 }
 
 
@@ -236,6 +240,16 @@ void VectorPardisoSolver::AssembleMat(OCPMatrix& mat)
 
     b = mat.b.data();
     x = mat.u.data();
+}
+
+
+/// Allocate memoery for pardiso solver
+void VectorPardisoSolver::Allocate(const OCPMatrix& mat)
+{
+    nb = mat.nb;
+    iA.resize(mat.maxDim * nb + 1);
+    jA.resize(mat.max_nnz * nb * nb);
+    A.resize(mat.max_nnz * nb * nb);
 }
 
 #endif // OCPFLOATTYPEWIDTH == 64

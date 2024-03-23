@@ -47,40 +47,37 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 #ifdef WITH_PARDISO
 #if    OCPFLOATTYPEWIDTH == 64
     else if (lsMethod == "pardiso") {
-        if (mat.nb > 1)    LS.push_back(new VectorPardisoSolver());
-        else               LS.push_back(new PardisoSolver());
+        if (mat.nb > 1)    LS.push_back(new VectorPardisoSolver(solveDir, lsFile, mat));
+        else               LS.push_back(new PardisoSolver(solveDir, lsFile, mat));
         LStype.push_back(OCPLStype::pardiso);
     }
 #endif // OCPFLOATTYPEWIDTH == 64
 #endif // WITH_PARDISO
 #ifdef WITH_SAMG
     else if (lsMethod == "samg") {
-        if (mat.nb > 1)    LS.push_back(new VectorSamgSolver(mat.nb, model));
-        else               LS.push_back(new ScalarSamgSolver(model));
+        if (mat.nb > 1)    LS.push_back(new VectorSamgSolver(solveDir, lsFile, mat, model));
+        else               LS.push_back(new ScalarSamgSolver(solveDir, lsFile, mat, model));
         LStype.push_back(OCPLStype::samg);
     }
 #endif // WITH_SAMG
 #if WITH_FASP
     else if (lsMethod == "fasp") {
         // if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
-        if (mat.nb > 1)    LS.push_back(new VectorFaspSolver());
-        else               LS.push_back(new ScalarFaspSolver());
+        if (mat.nb > 1)    LS.push_back(new VectorFaspSolver(solveDir, lsFile, mat));
+        else               LS.push_back(new ScalarFaspSolver(solveDir, lsFile, mat));
         LStype.push_back(OCPLStype::fasp);
     }
 #endif // WITH_FASP
 #ifdef WITH_PETSCSOLVER
     else if (lsMethod == "petsc") {
-        if (mat.nb > 1)    LS.push_back(new VectorPetscSolver(domain));
-        else               LS.push_back(new ScalarPetscSolver());
+        if (mat.nb > 1)    LS.push_back(new VectorPetscSolver(solveDir, lsFile, mat, domain));
+        else               LS.push_back(new ScalarPetscSolver(solveDir, lsFile, mat, domain));
         LStype.push_back(OCPLStype::petsc);
     }
 #endif // WITH_PETSCSOLVER
     else {
         OCP_ABORT("Wrong Linear Solver Type " + lsMethod + " !");
     }
-
-    LS.back()->SetupParam(solveDir, lsFile);
-    LS.back()->Allocate(mat);
 }
 
 

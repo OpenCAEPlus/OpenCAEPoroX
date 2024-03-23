@@ -11,18 +11,26 @@
  *-----------------------------------------------------------------------------------
  */
 
+
 #ifdef WITH_PETSCSOLVER
 
 #include "PetscSolver.hpp"
 
 
  /// Allocate memoery for pardiso solver
-void PetscSolver::Allocate(const OCPMatrix& mat)
+void PetscSolver::Allocate(const OCPMatrix& mat, const Domain* domain)
 {
     nb = mat.nb;
     A.resize(mat.max_nnz * nb * nb);
     iA.resize(mat.maxDim + 1);
     jA.resize(mat.max_nnz);
+
+    myComm  = domain->myComm;
+    numproc = domain->numproc;
+    myrank  = domain->myrank;
+    allBegin.resize(numproc);
+    allEnd.resize(numproc);
+    allEle.resize(numproc);
 }
 
 
@@ -37,7 +45,7 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
     MPI_Allgather(&numElementloc, 1, MPI_INT, &allEle[0], 1, OCPMPI_INT, myComm);
 
-    OCPTIME_COMM_COLLECTIVE += timer.Stop() / TIME_S2MS;
+    OCPTIME_COMM_COLLECTIVE += timer.Stop();
     
     allBegin[0] = 0;
     allEnd[0]   = allEle[0] - 1;
@@ -78,6 +86,12 @@ void PetscSolver::AssembleMat(OCPMatrix& mat)
 OCP_INT ScalarPetscSolver::Solve()
 {
     OCP_ABORT("Inavailable!");
+}
+
+
+VectorPetscSolver::VectorPetscSolver(const string& dir, const string& file, const OCPMatrix& mat, const Domain* domain)
+{
+    Allocate(mat, domain);
 }
 
 

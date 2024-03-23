@@ -11,28 +11,19 @@
  *-----------------------------------------------------------------------------------
  */
 
+
+
 #ifdef WITH_SAMG
 
 #include "SamgSolver.hpp"
 
 
-/// Set parameters.
-void SamgSolver::SetupParam(const string& dir, const string& file)
-{
-    InitParam();
-}
-
-
-/// Initialize the Params for linear solver.
-void SamgSolver::InitParam()
-{
-
-}
-
-
 /// Allocate memoery for pardiso solver
 void SamgSolver::Allocate(const OCPMatrix& mat)
 {
+    nb   = mat.nb;
+    nsys = nb;
+
     iA.resize(mat.maxDim * nb + 1);
     jA.resize(mat.max_nnz * nb * nb);
     A.resize(mat.max_nnz * nb * nb);
@@ -102,6 +93,50 @@ void SamgSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 }
 
 
+/// Solve the linear system.
+OCP_INT SamgSolver::Solve()
+{
+    //exemplary demonstration of how to set secondary control parameters of SAMG:
+    SAMG_INT levelx = 25;
+    SAMG_SET_LEVELX(&levelx);
+
+    // SAMGP_OIL(&nnu, &nna, &nsys,
+    //           &iA[0], &jA[0], &A[0], &b[0], &x[0], iu.data(), &ndiu, ip.data(), &ndip, &samg_matrix,
+    //           &res_in, &res_out, &ncyc_done, &ierr,
+    //           &ifirst, &eps, &ncyc, &iswtch,
+    //           &a_cmplx, &g_cmplx, &p_cmplx, &w_avrge,
+    //           &chktol, &idump, &iout,
+    //           nunknown_description.data(), &noil_approach,
+    //           &noil_cyc, &noil_preparation,
+    //           &nshalo, &npsnd, iranksnd.data(), ipts.data(), isndlist.data(),
+    //           &nrhalo, &nprec, irankrec.data(), iptr.data(), ireclist.data(), &myComm);
+
+    nrhalo = -1;
+    SAMGP_PCRS_OIL(&nnu, &nna, &nsys,
+        &iA[0], &jA[0], &A[0], &b[0], &x[0], iu.data(), &ndiu, ip.data(), &ndip, &samg_matrix,
+        &res_in, &res_out, &ncyc_done, &ierr,
+        &ifirst, &eps, &ncyc, &iswtch,
+        &a_cmplx, &g_cmplx, &p_cmplx, &w_avrge,
+        &chktol, &idump, &iout,
+        nunknown_description.data(), &noil_approach,
+        &noil_cyc, &noil_preparation,
+        &nrhalo, &myComm);
+
+    return ncyc_done;
+}
+
+
+
+ScalarSamgSolver::ScalarSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model) 
+{
+    Allocate(mat);
+
+    ndiu   = 1;
+    ndip   = 1;
+    ifirst = 0;   // last solution as initial guess
+}
+
+
 /// Assemble coefficient matrix.
 void ScalarSamgSolver::AssembleMat(OCPMatrix& mat)
 {
@@ -135,36 +170,23 @@ void ScalarSamgSolver::AssembleMat(OCPMatrix& mat)
 }
 
 
-/// Solve the linear system.
-OCP_INT SamgSolver::Solve()
+VectorSamgSolver::VectorSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model)
 {
-    //exemplary demonstration of how to set secondary control parameters of SAMG:
-     SAMG_INT levelx = 25; 
-     SAMG_SET_LEVELX(&levelx);
+    Allocate(mat);
 
-    // SAMGP_OIL(&nnu, &nna, &nsys,
-    //           &iA[0], &jA[0], &A[0], &b[0], &x[0], iu.data(), &ndiu, ip.data(), &ndip, &samg_matrix,
-    //           &res_in, &res_out, &ncyc_done, &ierr,
-    //           &ifirst, &eps, &ncyc, &iswtch,
-    //           &a_cmplx, &g_cmplx, &p_cmplx, &w_avrge,
-    //           &chktol, &idump, &iout,
-    //           nunknown_description.data(), &noil_approach,
-    //           &noil_cyc, &noil_preparation,
-    //           &nshalo, &npsnd, iranksnd.data(), ipts.data(), isndlist.data(),
-    //           &nrhalo, &nprec, irankrec.data(), iptr.data(), ireclist.data(), &myComm);
-
-	nrhalo = -1;
-	SAMGP_PCRS_OIL(&nnu, &nna, &nsys,
-		&iA[0], &jA[0], &A[0], &b[0], &x[0], iu.data(), &ndiu, ip.data(), &ndip, &samg_matrix,
-		&res_in, &res_out, &ncyc_done, &ierr,
-		&ifirst, &eps, &ncyc, &iswtch,
-		&a_cmplx, &g_cmplx, &p_cmplx, &w_avrge,
-		&chktol, &idump, &iout,
-		nunknown_description.data(), &noil_approach,
-		&noil_cyc, &noil_preparation,
-		&nrhalo, &myComm);
-
-    return ncyc_done;
+    iu_tmp.resize(nb);
+    ifirst = 1;   // zero solution as initial guess
+    for (USI i = 0; i < nb; i++)  iu_tmp[i] = i + 1;
+    if (model == OCPModel::isothermal) {
+        nunknown_description.resize(nsys, 2);
+        nunknown_description[0] = 0;          // Pressure
+    }
+    else if (model == OCPModel::thermal) {
+        nunknown_description.resize(nsys, 2); // Concentration(init)
+        nunknown_description.front() = 0;     // Pressure
+        nunknown_description.back() = 100;   // Temperature           
+    }
+    else                            OCP_ABORT("Wrong Model for SAMG Solver!");
 }
 
 

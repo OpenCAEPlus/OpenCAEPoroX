@@ -44,16 +44,11 @@ using namespace std;
 class PardisoSolver : public LinearSolver
 {
 public:
-    PardisoSolver() {};
+    /// default constructor
+    PardisoSolver() = default;
 
-    /// Set parameters.
-    void SetupParam(const string& dir, const string& file) override;
-
-    /// Initialize the Params for linear solver.
-    void InitParam() override;
-
-    /// Allocate memoery for pardiso solver
-    void Allocate(const OCPMatrix& mat) override;
+    /// constructor with input param and mat
+    PardisoSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
@@ -66,6 +61,16 @@ public:
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return 1; }
+
+protected:
+    /// Set parameters.
+    void SetupParam(const string& dir, const string& file);
+
+    /// Initialize the Params for linear solver.
+    void InitParam();
+
+    /// Allocate memoery for pardiso solver
+    void Allocate(const OCPMatrix& mat);
 
 protected:
     void*     pt[64]    = { 0 };  ///< Internal solver memory pointer pt, don't modify it.
@@ -99,17 +104,18 @@ protected:
 class VectorPardisoSolver : public PardisoSolver
 {
 public:
-
-    VectorPardisoSolver() {};
-
-    /// Allocate memoery for pardiso solver
-    void Allocate(const OCPMatrix& mat) override;
-
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
+    /// constructor with input param and mat
+    VectorPardisoSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
     void AssembleMat(OCPMatrix& mat) override;
 
+    /// Calculate terms used in communication
+    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
+
+protected:
+    /// Allocate memoery for pardiso solver
+    void Allocate(const OCPMatrix& mat);
 };
 
 

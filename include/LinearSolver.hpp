@@ -38,12 +38,6 @@ enum class OCPLStype : USI
 class LinearSolver
 {
 public:
-    /// Read the params for linear solvers from an input file.
-    virtual void SetupParam(const string& dir, const string& file) = 0;
-
-    /// Allocate maximum memory for linear solvers.
-    virtual void Allocate(const OCPMatrix& mat) = 0;
-
     /// Calculate terms used in communication
     virtual void CalCommTerm(const USI& actWellNum, const Domain* domain) = 0;
 
@@ -55,10 +49,6 @@ public:
 
     /// Get number of iterations.
     virtual USI GetNumIters() const = 0;
-
-protected:
-    /// Initialize the params for linear solvers.
-    virtual void InitParam() = 0;
 };
 
 #endif // __LINEARSOLVER_HEADER__

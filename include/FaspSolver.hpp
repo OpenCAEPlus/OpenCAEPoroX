@@ -124,14 +124,17 @@ using namespace std;
 class FaspSolver : public LinearSolver
 {
 public:
-    /// Set FASP parameters.
-    void SetupParam(const string& dir, const string& file) override;
-
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override {}
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return itsParam.maxit; }
+
+protected:
+    /// Set FASP parameters.
+    void SetupParam(const string& dir, const string& file);
+
+    virtual void InitParam() = 0;
 
 public:
     string      solveDir;  ///< Current work dir
@@ -147,20 +150,21 @@ public:
 class ScalarFaspSolver : public FaspSolver
 {
 public:
-    ScalarFaspSolver() {};
-
-protected:
-    /// Allocate memory for the linear system.
-    void Allocate(const OCPMatrix& mat) override;
-
-    /// Initialize the Params for linear solver.
-    void InitParam() override;
+    ScalarFaspSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
     void AssembleMat(OCPMatrix& mat) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;
+
+protected:
+
+    /// Initialize the Params for linear solver.
+    void InitParam() override;
+
+    /// Allocate memory for the linear system.
+    void Allocate(const OCPMatrix& mat);
 
 protected:
     dCSRmat A; ///< Matrix for scalar-value problems
@@ -172,14 +176,7 @@ protected:
 class VectorFaspSolver : public FaspSolver
 {
 public:
-    VectorFaspSolver() {};
-
-protected:
-    /// Allocate memory for the linear system.
-    void Allocate(const OCPMatrix& mat) override;
-
-    /// Initialize the Params for linear solver.
-    void InitParam() override;
+    VectorFaspSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
     void AssembleMat(OCPMatrix& mat) override;
@@ -187,13 +184,21 @@ protected:
     /// Solve the linear system.
     OCP_INT Solve() override;
 
+protected:
+
+    /// Initialize the Params for linear solver.
+    void InitParam() override;
+
+    /// Allocate memory for the linear system.
+    void Allocate(const OCPMatrix& mat);
+
     /// Apply decoupling to the linear system.
     void Decoupling(dBSRmat* Absr,
                     dvector* b,
                     dBSRmat* Asc,
                     dvector* fsc,
                     ivector* order,
-                    OCP_DBL*  Dmatvec,
+                    OCP_DBL* Dmatvec,
                     int      decouple_type);
 
 protected:

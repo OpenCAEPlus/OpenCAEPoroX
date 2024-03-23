@@ -23,11 +23,10 @@ void ControlSimTime::Initialize()
 
 OCP_BOOL ControlSimTime::IfStop()
 { 
-	curSimTime += timer.Stop();
+	curSimTime   += timer.Stop();
+	totalSimTime += timer.Stop();
 
-	if (curSimTime > fabs(nextSimTime)) {
-
-		totalSimTime += curSimTime;
+	if (curSimTime > fabs(nextSimTime)) {	
 		curSimTime   = 0;
 
 		if (nextSimTime < 0) {

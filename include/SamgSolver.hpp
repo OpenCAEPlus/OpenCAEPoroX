@@ -28,15 +28,6 @@ class SamgSolver : public LinearSolver
 {
 public:
 
-    /// Set parameters.
-    void SetupParam(const string& dir, const string& file) override;
-
-    /// Initialize the Params for linear solver.
-    void InitParam() override;
-
-    /// Allocate memoery for pardiso solver
-    void Allocate(const OCPMatrix& mat) override;
-
     /// Calculate terms used in communication
     void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
 
@@ -45,6 +36,10 @@ public:
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return 1; }
+
+protected:
+    /// Allocate memoery for pardiso solver
+    void Allocate(const OCPMatrix& mat);
 
 protected:
 
@@ -113,13 +108,7 @@ protected:
 class ScalarSamgSolver : public SamgSolver
 {
 public:
-    ScalarSamgSolver(const OCPModel& model) {
-        nb       = 1;
-        nsys     = 1;
-        ndiu     = 1;
-        ndip     = 1;
-        ifirst   = 0;   // last solution as initial guess
-    }
+    ScalarSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model);
 
     /// Assemble coefficient matrix.
     void AssembleMat(OCPMatrix& mat) override;
@@ -129,23 +118,7 @@ public:
 class VectorSamgSolver : public SamgSolver
 {
 public:
-    VectorSamgSolver(const USI& blockDim, const OCPModel& model) {
-        nb = blockDim;
-        nsys     = nb;
-        iu_tmp.resize(nb);
-        ifirst   = 1;   // zero solution as initial guess
-        for (USI i = 0; i < nb; i++)  iu_tmp[i] = i + 1;
-        if (model == OCPModel::isothermal) {
-            nunknown_description.resize(nsys, 2);
-            nunknown_description[0] = 0;          // Pressure
-        }
-        else if (model == OCPModel::thermal) {
-            nunknown_description.resize(nsys, 2); // Concentration(init)
-            nunknown_description.front() = 0;     // Pressure
-            nunknown_description.back()  = 100;   // Temperature           
-        }
-        else                            OCP_ABORT("Wrong Model for SAMG Solver!");              
-    }
+    VectorSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model);
     /// Assemble coefficient matrix.
     void AssembleMat(OCPMatrix& mat) override;
 };

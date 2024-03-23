@@ -118,9 +118,8 @@ void OpenCAEPoroX::RunSimulation()
         }
         output.PrintInfoSched(reservoir, control, timer.Stop());
         // reservoir.allWells.ShowWellStatus(reservoir.bulk);     
-        if (control.StopSim)        break;
+        if (control.StopSim) break;
     }
-    reservoir.OutInfoFinal();
     OCPTIME_TOTAL += timer.Stop();
 }
 
@@ -135,6 +134,7 @@ void OpenCAEPoroX::OutputResults() const
       
     OutputTimeMain(cout.rdbuf());
     OutputTimeProcess();
+    reservoir.OutInfoFinal();
 }
 
 
@@ -201,8 +201,8 @@ void OpenCAEPoroX::OutputTimeMain(streambuf* mysb) const
         cout << "     - % Updating Properties ......." << setw(fixWidth)
             << 100.0 * OCPTIME_UPDATE_GRID / control.simtime.GetTotalSimTime() << " ("
             << OCPTIME_UPDATE_GRID << "s)" << endl;
-        cout << "     - % Output ...................." << setw(fixWidth)
-            << 100.0 * OCPTIME_OUTPUT / control.simtime.GetTotalSimTime() << " ("
+        cout << " - % Output ...................." << setw(fixWidth)
+            << 100.0 * OCPTIME_OUTPUT / OCPTIME_TOTAL << " ("
             << OCPTIME_OUTPUT << "s)" << endl;
         cout << "==================================================" << endl;
 
