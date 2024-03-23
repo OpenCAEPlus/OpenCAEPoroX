@@ -54,6 +54,8 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
     ls.CopyRhs(NR.res.resAbs);
+
+    rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
 void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -62,7 +64,6 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 
     // Assemble external linear solver with internal A and b
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
 

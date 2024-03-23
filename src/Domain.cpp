@@ -253,11 +253,11 @@ USI Domain::GetPerfNum(const OCP_USI& wId) const
 }
 
 
-const vector<OCP_ULL>* Domain::CalGlobalIndex(const USI& nw) const
+const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 {
-	global_index.resize(numGridLocal + nw);
+	global_index.resize(numGridLocal + numActWellLocal);
 
-	const OCP_ULL numElementLoc = numGridInterior + nw;
+	const OCP_ULL numElementLoc = numGridInterior + numActWellLocal;
 	OCP_ULL       global_begin;
 	OCP_ULL       global_end;
 
@@ -280,7 +280,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex(const USI& nw) const
 	// Get Ghost grid's global index by communication	
 	for (USI i = 0; i < numRecvProc; i++) {
 		const auto& rel = recv_element_loc[i];
-		const auto  bId = rel[1] + nw;
+		const auto  bId = rel[1] + numActWellLocal;
 		MPI_Irecv(&global_index[bId], rel[2] - rel[1], OCPMPI_ULL, rel[0], 0, myComm, &recv_request[i]);
 	}
 	vector<vector<OCP_ULL>> send_buffer(numSendProc);

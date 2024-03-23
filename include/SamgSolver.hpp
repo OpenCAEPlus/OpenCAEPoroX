@@ -28,9 +28,6 @@ class SamgSolver : public LinearSolver
 {
 public:
 
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
-
     /// Solve the linear system.
     OCP_INT Solve() override;
 
@@ -40,6 +37,8 @@ public:
 protected:
     /// Allocate memoery for pardiso solver
     void Allocate(const OCPMatrix& mat);
+    /// Calculate terms used in communication
+    void CalCommTerm(const Domain* domain);
 
 protected:
 
@@ -111,7 +110,7 @@ public:
     ScalarSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model);
 
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 };
 
 // Convert Internal mat(bsr-like) to CSR mat 
@@ -120,7 +119,7 @@ class VectorSamgSolver : public SamgSolver
 public:
     VectorSamgSolver(const string& dir, const string& file, const OCPMatrix& mat, const OCPModel& model);
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 };
 
 #endif 

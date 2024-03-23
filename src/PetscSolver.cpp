@@ -35,10 +35,10 @@ void PetscSolver::Allocate(const OCPMatrix& mat, const Domain* domain)
 
 
 /// Calculate terms used in communication
-void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
+void PetscSolver::CalCommTerm(const Domain* domain)
 {
-    global_index  = domain->CalGlobalIndex(actWellNum);
-    const OCP_INT numElementloc = actWellNum + domain->GetNumGridInterior();
+    global_index  = domain->CalGlobalIndex();
+    const OCP_INT numElementloc = domain->GetNumActElementForSolver();
 
     GetWallTime timer;
     timer.Start();
@@ -57,8 +57,9 @@ void PetscSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
 
 
 /// Assemble coefficient matrix.
-void PetscSolver::AssembleMat(OCPMatrix& mat)
+void PetscSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
+    CalCommTerm(domain);
 
     const USI blockSize = nb * nb;
     vector<OCP_SLL> tmpJ;

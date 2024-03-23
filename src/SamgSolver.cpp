@@ -11,8 +11,6 @@
  *-----------------------------------------------------------------------------------
  */
 
-
-
 #ifdef WITH_SAMG
 
 #include "SamgSolver.hpp"
@@ -40,12 +38,12 @@ void SamgSolver::Allocate(const OCPMatrix& mat)
 
 
 /// Calculate terms used in communication
-void SamgSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
+void SamgSolver::CalCommTerm(const Domain* domain)
 {
     // Two methods to calculate communication term
 
     // First, let SAMG calculate it automatically
-    global_index = domain->CalGlobalIndex(actWellNum);
+    global_index = domain->CalGlobalIndex();
 
     // Or Second, give it directly
     // for send
@@ -138,8 +136,10 @@ ScalarSamgSolver::ScalarSamgSolver(const string& dir, const string& file, const 
 
 
 /// Assemble coefficient matrix.
-void ScalarSamgSolver::AssembleMat(OCPMatrix& mat)
+void ScalarSamgSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
+    CalCommTerm(domain);
+
     nnu = mat.dim;
     b   = mat.b.data();
     x   = mat.u.data();
@@ -191,8 +191,10 @@ VectorSamgSolver::VectorSamgSolver(const string& dir, const string& file, const 
 
 
 /// Assemble coefficient matrix.
-void VectorSamgSolver::AssembleMat(OCPMatrix& mat)
+void VectorSamgSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
+    CalCommTerm(domain);
+
     nnu  = mat.dim * nb;
     ndiu = nnu;
     ndip = nnu;

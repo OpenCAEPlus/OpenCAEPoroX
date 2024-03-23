@@ -52,7 +52,7 @@ ScalarFaspSolver::ScalarFaspSolver(const string& dir, const string& file, const 
 }
 
 
-void ScalarFaspSolver::AssembleMat(OCPMatrix& mat)
+void ScalarFaspSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
     // b & x
     b.row = mat.dim;
@@ -270,7 +270,7 @@ VectorFaspSolver::VectorFaspSolver(const string& dir, const string& file, const 
 }
 
 
-void VectorFaspSolver::AssembleMat(OCPMatrix& mat)
+void VectorFaspSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
     const OCP_USI nrow = mat.dim * mat.nb;
     // b & x

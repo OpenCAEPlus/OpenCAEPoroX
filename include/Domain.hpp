@@ -89,12 +89,13 @@ protected:
 	/// initial global index -> local index (interior grid & ghost grid)
 	map<OCP_ULL, OCP_USI>   init_global_to_local;
 
+
 	////////////////////////////////////////
 	// Communication
 	////////////////////////////////////////
 
 public:
-	const vector<OCP_ULL>* CalGlobalIndex(const USI& nw) const;
+	const vector<OCP_ULL>* CalGlobalIndex() const;
 
 	////////////////////////////////////////
 	// Tacit Communication (Prefered, Local Index)
@@ -115,6 +116,14 @@ public:
 	////////////////////////////////////////
 
 	mutable vector<OCP_ULL>     global_index;  ///< Interior grid + active well + ghost grid in equations
+
+public:
+	OCP_USI GetNumActElementForSolver() const { return numGridInterior + numActWellLocal; }
+	void SetNumActWellLocal(const OCP_DBL& nw) const { numActWellLocal = nw; }
+
+protected:
+	/// number of active well
+	mutable USI numActWellLocal;
 
 	// Well perforations
 public:

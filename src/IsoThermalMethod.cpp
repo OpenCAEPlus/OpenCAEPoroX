@@ -139,6 +139,8 @@ void IsoT_IMPEC::AssembleMat(LinearSystem&    ls,
 {
     AssembleMatBulks(ls, rs, dt);
     AssembleMatWells(ls, rs, dt);
+
+    rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
 void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -146,7 +148,6 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
     
@@ -730,6 +731,8 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatWells(ls, rs, dt);
     // Assemble rhs -- from residual
     ls.CopyRhs(NR.res.resAbs);
+
+    rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
 void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
@@ -738,7 +741,6 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 {
     GetWallTime timer;
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
 
@@ -1511,6 +1513,8 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
     AssembleMatBulks(ls, rs, dt);
     IsoT_FIM::AssembleMatWells(ls, rs, dt);
     ls.CopyRhs(NR.res.resAbs);
+
+    rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
 void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
@@ -1518,10 +1522,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     GetWallTime timer;
 
     timer.Start();
-    ls.CalCommTerm(rs.GetNumOpenWell());
     ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
-
     timer.Start();
     int status = ls.Solve();
 

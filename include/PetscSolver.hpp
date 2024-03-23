@@ -30,11 +30,8 @@ class PetscSolver : public LinearSolver
 public:
     PetscSolver() = default;
 
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
-
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return 1; }
@@ -43,6 +40,8 @@ protected:
 
     /// Allocate memoery for pardiso solver
     void Allocate(const OCPMatrix& mat, const Domain* domain);
+    /// Calculate terms used in communication
+    void CalCommTerm(const Domain* domain);
 
 protected:
 

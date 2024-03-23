@@ -124,8 +124,6 @@ using namespace std;
 class FaspSolver : public LinearSolver
 {
 public:
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override {}
 
     /// Get number of iterations used by iterative solver.
     USI GetNumIters() const override { return itsParam.maxit; }
@@ -153,7 +151,7 @@ public:
     ScalarFaspSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;
@@ -179,7 +177,7 @@ public:
     VectorFaspSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;

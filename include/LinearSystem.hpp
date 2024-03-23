@@ -43,8 +43,6 @@ public:
     void SetWorkLS(const USI& i);
     /// Clear the internal matrix data for scalar-value problems.
     void ClearData() { mat.ClearData(); }
-    /// Calculate Global start
-    void CalCommTerm(const USI& actWellNum) { LS[wIndex]->CalCommTerm(actWellNum, domain); }
     /// Assemble Mat for Linear Solver.
     void AssembleMatLinearSolver();
     /// Solve the Linear System.

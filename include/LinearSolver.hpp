@@ -38,11 +38,8 @@ enum class OCPLStype : USI
 class LinearSolver
 {
 public:
-    /// Calculate terms used in communication
-    virtual void CalCommTerm(const USI& actWellNum, const Domain* domain) = 0;
-
     /// Assemble matrix for linear solver from the internal matrix data.
-    virtual void AssembleMat(OCPMatrix& mat) = 0;
+    virtual void AssembleMat(OCPMatrix& mat, const Domain* domain) = 0;
 
     /// Solve the linear system and return the number of iterations.
     virtual OCP_INT Solve() = 0;

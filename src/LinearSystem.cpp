@@ -86,7 +86,7 @@ void LinearSystem::AssembleMatLinearSolver()
 #ifdef DEBUG
     mat.CheckLinearSystem();
 #endif
-    LS[wIndex]->AssembleMat(mat); 
+    LS[wIndex]->AssembleMat(mat, domain); 
 }
 
 

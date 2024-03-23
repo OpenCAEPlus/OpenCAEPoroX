@@ -23,34 +23,11 @@ PardisoSolver::PardisoSolver(const string& dir, const string& file, const OCPMat
 }
 
 
-/// Calculate terms used in communication
-void PardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
-{
-
-    global_index = domain->CalGlobalIndex(actWellNum);
-
-    const OCP_INT numGridInterior = domain->GetNumGridInterior();
-    const OCP_INT numElementLoc   = actWellNum + numGridInterior;
-    const OCP_INT global_end      = global_index->at(numElementLoc - 1);
-
-    iparm[40] = global_end - numElementLoc + 1;  // global begin (included)
-    iparm[41] = global_end;                      // global end   (included)
-
-    // Get Dimension
-    N = global_end + 1;
-
-    GetWallTime timer;
-    timer.Start();
-
-    MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
-
-    OCPTIME_COMM_COLLECTIVE += timer.Stop();
-}
-
-
 /// Assemble coefficient matrix.
-void PardisoSolver::AssembleMat(OCPMatrix& mat)
+void PardisoSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
+    CalCommTerm(domain);
+
     const USI blockSize = nb * nb;
     vector<USI> tmp;  
     // Assemble iA, jA, A
@@ -170,27 +147,20 @@ void PardisoSolver::Allocate(const OCPMatrix& mat)
 }
 
 
-VectorPardisoSolver::VectorPardisoSolver(const string& dir, const string& file, const OCPMatrix& mat)
-{
-    SetupParam(dir, file);
-    Allocate(mat);
-}
-
-
 /// Calculate terms used in communication
-void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domain)
+void PardisoSolver::CalCommTerm(const Domain* domain)
 {
-    global_index = domain->CalGlobalIndex(actWellNum);
 
-    const OCP_INT numGridInterior = domain->GetNumGridInterior();
-    const OCP_INT numElementLoc   = actWellNum + numGridInterior;
-    const OCP_INT global_end      = global_index->at(numElementLoc - 1);
+    global_index = domain->CalGlobalIndex();
 
-    iparm[40] = (global_end - numElementLoc + 1) * nb;  // global begin (included)
-    iparm[41] = (global_end + 1) * nb - 1;              // global end   (included)
+    const OCP_INT numElementLoc = domain->GetNumActElementForSolver();
+    const OCP_INT global_end = global_index->at(numElementLoc - 1);
+
+    iparm[40] = global_end - numElementLoc + 1;  // global begin (included)
+    iparm[41] = global_end;                      // global end   (included)
 
     // Get Dimension
-    N = (global_end + 1) * nb;
+    N = global_end + 1;
 
     GetWallTime timer;
     timer.Start();
@@ -201,9 +171,18 @@ void VectorPardisoSolver::CalCommTerm(const USI& actWellNum, const Domain* domai
 }
 
 
-/// Assemble coefficient matrix.
-void VectorPardisoSolver::AssembleMat(OCPMatrix& mat)
+VectorPardisoSolver::VectorPardisoSolver(const string& dir, const string& file, const OCPMatrix& mat)
 {
+    SetupParam(dir, file);
+    Allocate(mat);
+}
+
+
+/// Assemble coefficient matrix.
+void VectorPardisoSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
+{
+    CalCommTerm(domain);
+
     const USI blockSize = nb * nb;
     vector<USI> tmp;
     // Assemble iA, jA, A
@@ -251,6 +230,30 @@ void VectorPardisoSolver::Allocate(const OCPMatrix& mat)
     jA.resize(mat.max_nnz * nb * nb);
     A.resize(mat.max_nnz * nb * nb);
 }
+
+
+/// Calculate terms used in communication
+void VectorPardisoSolver::CalCommTerm(const Domain* domain)
+{
+    global_index = domain->CalGlobalIndex();
+
+    const OCP_INT numElementLoc = domain->GetNumActElementForSolver();
+    const OCP_INT global_end = global_index->at(numElementLoc - 1);
+
+    iparm[40] = (global_end - numElementLoc + 1) * nb;  // global begin (included)
+    iparm[41] = (global_end + 1) * nb - 1;              // global end   (included)
+
+    // Get Dimension
+    N = (global_end + 1) * nb;
+
+    GetWallTime timer;
+    timer.Start();
+
+    MPI_Bcast(&N, 1, MPI_INT, domain->numproc - 1, domain->myComm);
+
+    OCPTIME_COMM_COLLECTIVE += timer.Stop();
+}
+
 
 #endif // OCPFLOATTYPEWIDTH == 64
 #endif // WITH_PARDISO

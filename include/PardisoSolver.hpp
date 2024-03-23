@@ -50,11 +50,8 @@ public:
     /// constructor with input param and mat
     PardisoSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
-
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 
     /// Solve the linear system.
     OCP_INT Solve() override;
@@ -71,6 +68,9 @@ protected:
 
     /// Allocate memoery for pardiso solver
     void Allocate(const OCPMatrix& mat);
+
+    /// Calculate terms used in communication
+    virtual void CalCommTerm(const Domain* domain);
 
 protected:
     void*     pt[64]    = { 0 };  ///< Internal solver memory pointer pt, don't modify it.
@@ -108,14 +108,13 @@ public:
     VectorPardisoSolver(const string& dir, const string& file, const OCPMatrix& mat);
 
     /// Assemble coefficient matrix.
-    void AssembleMat(OCPMatrix& mat) override;
-
-    /// Calculate terms used in communication
-    void CalCommTerm(const USI& actWellNum, const Domain* domain) override;
+    void AssembleMat(OCPMatrix& mat, const Domain* domain) override;
 
 protected:
     /// Allocate memoery for pardiso solver
     void Allocate(const OCPMatrix& mat);
+    /// Calculate terms used in communication
+    void CalCommTerm(const Domain* domain) override;
 };
 
 
