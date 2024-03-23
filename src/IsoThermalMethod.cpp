@@ -2428,7 +2428,7 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
     OCP_USI bId = 0;
     OCP_USI eId = bvs.nbI;
 
-    // interior first, ghost second
+    // interior only
     timerC.Start();
     
     for (OCP_USI n = bId; n < eId; n++) {

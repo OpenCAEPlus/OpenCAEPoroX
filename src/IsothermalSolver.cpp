@@ -128,15 +128,19 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 
     switch (curMethod) {
         case OCPNLMethod::IMPEC:
+            LSolver.SetWorkLS(impec.GetWorkLS());
             impec.AssembleMat(LSolver, rs, dt);
             break;
         case OCPNLMethod::FIM:
+            LSolver.SetWorkLS(fim.GetWorkLS());
             fim.AssembleMat(LSolver, rs, dt);
             break;
         case OCPNLMethod::AIMc:
+            LSolver.SetWorkLS(aimc.GetWorkLS());
             aimc.AssembleMat(LSolver, rs, dt);
             break;
         case OCPNLMethod::FIMddm:
+            LSolver.SetWorkLS(fim_ddm.GetWorkLS());
             fim_ddm.IsoT_FIM::AssembleMat(LSolver, rs, dt);
             break;
         default:
