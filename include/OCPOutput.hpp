@@ -238,7 +238,7 @@ public:
     void SetOutGridVarSet(const OutGridParam& param);
     void Check(const Reservoir& rs);
 
-private:
+protected:
     OCP_BOOL PRE{OCP_FALSE};      ///< Pressure of grids.
     OCP_BOOL PGAS{OCP_FALSE};     ///< Gas pressure of grids.
     OCP_BOOL PWAT{OCP_FALSE};     ///< Water pressure of grids.

@@ -1036,31 +1036,31 @@ void OutGridVarSet::Check(const Reservoir& rs)
 
     bgpnum = 0;
     if (PRE)      bgpnum++;
-    if (PGAS)     bgpnum++;
-    if (PWAT)     bgpnum++;
+    //if (PGAS)     bgpnum++;
+    //if (PWAT)     bgpnum++;
     if (SOIL)     bgpnum++;
     if (SGAS)     bgpnum++;
     if (SWAT)     bgpnum++;
-    if (DENO)     bgpnum++;
-    if (DENG)     bgpnum++;
-    if (DENW)     bgpnum++;
-    if (KRO)      bgpnum++;
-    if (KRG)      bgpnum++;
-    if (KRW)      bgpnum++;
-    if (BOIL)     bgpnum++;
-    if (BGAS)     bgpnum++;
-    if (BWAT)     bgpnum++;
-    if (VOIL)     bgpnum++;
-    if (VGAS)     bgpnum++;
-    if (VWAT)     bgpnum++;
-    if (XMF)      bgpnum++;
-    if (YMF)      bgpnum++;
-    if (PCW)      bgpnum++;
+    //if (DENO)     bgpnum++;
+    //if (DENG)     bgpnum++;
+    //if (DENW)     bgpnum++;
+    //if (KRO)      bgpnum++;
+    //if (KRG)      bgpnum++;
+    //if (KRW)      bgpnum++;
+    //if (BOIL)     bgpnum++;
+    //if (BGAS)     bgpnum++;
+    //if (BWAT)     bgpnum++;
+    //if (VOIL)     bgpnum++;
+    //if (VGAS)     bgpnum++;
+    //if (VWAT)     bgpnum++;
+    //if (XMF)      bgpnum++;
+    //if (YMF)      bgpnum++;
+    //if (PCW)      bgpnum++;
     if (CO2)      bgpnum++;
     if (SATNUM)   bgpnum++;
     if (PERMX)    bgpnum++;
-    if (PERMY)    bgpnum++;
-    if (PERMZ)    bgpnum++;
+    //if (PERMY)    bgpnum++;
+    //if (PERMZ)    bgpnum++;
 }
 
 
@@ -1348,6 +1348,8 @@ void Out4VTK::InputParam(const OutputVTKParam& VTKParam)
     if (!useVTK) return;
 
     bgp.SetOutGridVarSet(VTKParam.bgp);
+
+    out4vtk.Setup(VTKParam.bgp.ASCII);
 }
 
 void Out4VTK::Setup(const string& dir, const Reservoir& rs)

@@ -67,6 +67,8 @@ void SwapEnd(T* var, const OCP_ULL len)
 class Output4Vtk
 {
 public:
+    /// Setup
+    void Setup(const OCP_BOOL& ascii) { ifASCII = ascii; }
     /// create a new file and write common information
     OCP_ULL Init(const string& dir, const string& myFile, const string& shortInfo) const;
     template <typename T>

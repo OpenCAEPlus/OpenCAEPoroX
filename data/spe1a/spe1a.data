@@ -180,12 +180,10 @@ SCHEDULE  =======================================
 --RPTSCHED
 'VWAT=1' /
 
---VTKSCHED
---PRES
---DENO DENG DENW
---SOIL SGAS SWAT
---VOIL VGAS VWAT
---PCW
+VTKSCHED
+*ASCII
+*PRES
+*SOIL *SGAS *SWAT
 /
 
 WELSPECS

@@ -208,83 +208,85 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
             string keyword = vbuf[i];
 
             switch (Map_Str2Int(&keyword[0], keyword.size())) {
-                case Map_Str2Int("PRES", 4):
-                case Map_Str2Int("PRESSURE", 8):
+                case Map_Str2Int("*ASCII", 6):
+                    tmpBgpp->ASCII = OCP_TRUE;
+                    break;
+                case Map_Str2Int("*PRES", 5):
                     tmpBgpp->PRE = OCP_TRUE;
                     break;
-                case Map_Str2Int("PGAS", 4):
+                case Map_Str2Int("*PGAS", 5):
                     tmpBgpp->PGAS = OCP_TRUE;
                     break;
-                case Map_Str2Int("PWAT", 4):
+                case Map_Str2Int("*PWAT", 5):
                     tmpBgpp->PWAT = OCP_TRUE;
                     break;
-                case Map_Str2Int("SOIL", 4):
+                case Map_Str2Int("*SOIL", 5):
                     tmpBgpp->SOIL = OCP_TRUE;
                     break;
-                case Map_Str2Int("SGAS", 4):
+                case Map_Str2Int("*SGAS", 5):
                     tmpBgpp->SGAS = OCP_TRUE;
                     break;
-                case Map_Str2Int("SWAT", 4):
+                case Map_Str2Int("*SWAT", 5):
                     tmpBgpp->SWAT = OCP_TRUE;
                     break;
-                case Map_Str2Int("DENO", 4):
+                case Map_Str2Int("*DENO", 5):
                     tmpBgpp->DENO = OCP_TRUE;
                     break;
-                case Map_Str2Int("DENG", 4):
+                case Map_Str2Int("*DENG", 5):
                     tmpBgpp->DENG = OCP_TRUE;
                     break;
-                case Map_Str2Int("DENW", 4):
+                case Map_Str2Int("*DENW", 5):
                     tmpBgpp->DENW = OCP_TRUE;
                     break;
-                case Map_Str2Int("KRO", 3):
+                case Map_Str2Int("*KRO", 4):
                     tmpBgpp->KRO = OCP_TRUE;
                     break;
-                case Map_Str2Int("KRG", 3):
+                case Map_Str2Int("*KRG", 4):
                     tmpBgpp->KRG = OCP_TRUE;
                     break;
-                case Map_Str2Int("KRW", 3):
+                case Map_Str2Int("*KRW", 4):
                     tmpBgpp->KRW = OCP_TRUE;
                     break;
-                case Map_Str2Int("BOIL", 4):
+                case Map_Str2Int("*BOIL", 5):
                     tmpBgpp->BOIL = OCP_TRUE;
                     break;
-                case Map_Str2Int("BGAS", 4):
+                case Map_Str2Int("*BGAS", 5):
                     tmpBgpp->BGAS = OCP_TRUE;
                     break;
-                case Map_Str2Int("BWAT", 4):
+                case Map_Str2Int("*BWAT", 5):
                     tmpBgpp->BWAT = OCP_TRUE;
                     break;
-                case Map_Str2Int("VOIL", 4):
+                case Map_Str2Int("*VOIL", 5):
                     tmpBgpp->VOIL = OCP_TRUE;
                     break;
-                case Map_Str2Int("VGAS", 4):
+                case Map_Str2Int("*VGAS", 5):
                     tmpBgpp->VGAS = OCP_TRUE;
                     break;
-                case Map_Str2Int("VWAT", 4):
+                case Map_Str2Int("*VWAT", 5):
                     tmpBgpp->VWAT = OCP_TRUE;
                     break;
-                case Map_Str2Int("XMF", 3):
+                case Map_Str2Int("*XMF", 4):
                     tmpBgpp->XMF = OCP_TRUE;
                     break;
-                case Map_Str2Int("YMF", 3):
+                case Map_Str2Int("*YMF", 4):
                     tmpBgpp->YMF = OCP_TRUE;
                     break;
-                case Map_Str2Int("PCW", 3):
+                case Map_Str2Int("*PCW", 4):
                     tmpBgpp->PCW = OCP_TRUE;
                     break;
-                case Map_Str2Int("CO2", 3):
+                case Map_Str2Int("*CO2", 4):
                     tmpBgpp->CO2 = OCP_TRUE;
                     break;
-                case Map_Str2Int("SATNUM", 6):
+                case Map_Str2Int("*SATNUM", 7):
                     tmpBgpp->SATNUM = OCP_TRUE;
                     break;
-                case Map_Str2Int("PERMX", 5):
+                case Map_Str2Int("*PERMX", 6):
                     tmpBgpp->PERMX = OCP_TRUE;
                     break;
-                case Map_Str2Int("PERMY", 5):
+                case Map_Str2Int("*PERMY", 6):
                     tmpBgpp->PERMY = OCP_TRUE;
                     break;
-                case Map_Str2Int("PERMZ", 5):
+                case Map_Str2Int("*PERMZ", 6):
                     tmpBgpp->PERMZ = OCP_TRUE;
                     break;
                 default:
