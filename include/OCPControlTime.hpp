@@ -94,7 +94,9 @@ public:
     void CutDt(const OCP_DBL& fac = -1);
     void CutDt(const OCPNRsuite& NRs);
     /// Set param for next TSTEP
-    void SetNextTSTEP(const USI& i, const OCP_BOOL& wellOptChange_loc);
+    INT SetNextTSTEP();
+    /// Calculate initial time step for next TSTEP
+    void CalInitTimeStep4TSTEP(const OCP_BOOL& wellOptChange_loc);
     /// Calculate next time step
     void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il);
     /// Get total simulation time
@@ -115,7 +117,7 @@ public:
     /// Return last time step size.
     auto GetLastDt() const { return last_dt; }
     /// Determine whether the critical time point has been reached.
-    auto IfEnd() { return ((wp->end_time - current_time) < TINY); }
+    auto IfEndTSTEP() { return ((wp->end_time - current_time) < TINY); }
 
 protected:
     /// control param set

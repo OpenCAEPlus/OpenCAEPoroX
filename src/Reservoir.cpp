@@ -85,7 +85,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DY", &grid.dy, &bulk.vs.dy});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DZ", &grid.dz, &bulk.vs.dz});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "V", &grid.v, &bulk.vs.v});
-    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DEPTH", & grid.depth, &bulk.vs.depth});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DEPTH", &grid.depth, &bulk.vs.depth});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.vs.poroInit});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.vs.ntg});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMX", &grid.kx, &bulk.vs.rockKx});
@@ -93,7 +93,7 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMZ", &grid.kz, &bulk.vs.rockKz});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SIGMAV", &grid.sigma, &bulk.vs.sigma});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DZMTRXV", &grid.dzMtrx, &bulk.vs.dzMtrx});
-    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", & grid.boundArea, & bulk.BOUNDm.GetBoundaryArea()});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, & bulk.BOUNDm.GetBoundaryArea()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWAT", &grid.initR.swat, &bulk.INITm.GetSwat()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PRESSURE", &grid.initR.P, &bulk.INITm.GetP()});

@@ -35,7 +35,7 @@ public:
     /// Setup Comm
     void Setup(const Domain& domain);
     /// Apply control for time step i.
-    void ApplyControl(const USI& i, const OCP_BOOL& wellOptChange_loc);
+    INT ApplyControl();
     /// Check if converge
     OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         return NR.CheckConverge(NRs, il);
@@ -59,7 +59,7 @@ public:
     /// Solver Method control
     ControlMethod  SM;
     /// simluation time control
-    ControlSimTime simtime;
+    ControlSimTime simTime;
     /// Stop simulation
     OCP_BOOL    StopSim{ OCP_FALSE };
 

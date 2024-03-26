@@ -85,10 +85,22 @@ void ControlTime::CutDt(const OCPNRsuite& NRs)
 }
 
 
-void ControlTime::SetNextTSTEP(const USI& i, const OCP_BOOL& wellOptChange_loc)
-{
-    wp = &ps[i];
+INT ControlTime::SetNextTSTEP() 
+{ 
+    USI d = 0;
+    for (d = 0; d < ps.size(); d++) {
+        if (current_time > ps[d].begin_time - TINY && current_time < ps[d].end_time) {
+            wp = &ps[d];
+            return d;
+        }
+    }
 
+    return -1;
+}
+
+
+void ControlTime::CalInitTimeStep4TSTEP(const OCP_BOOL& wellOptChange_loc)
+{
     /// Set initial time step for next TSTEP
     GetWallTime timer;
     timer.Start();

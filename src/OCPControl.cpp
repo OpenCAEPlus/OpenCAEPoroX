@@ -31,7 +31,7 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     workDir = CtrlParam.workDir;
     ocpFile = CtrlParam.fileName;    
-    simtime.SetNextSimTime(CtrlParam.MaxSimTime);
+    simTime.SetNextSimTime(CtrlParam.MaxSimTime);
 
     SM.SetCtrlParam(CtrlParam);
 
@@ -72,11 +72,16 @@ void OCPControl::OutputModelMethodInfo() const
 }
 
 
-void OCPControl::ApplyControl(const USI& i, const OCP_BOOL& wellOptChange_loc)
+INT OCPControl::ApplyControl()
 {
     /// Apply ith tuning for ith TSTEP
-    time.SetNextTSTEP(i, wellOptChange_loc);
-    NR.SetNextTSTEP(i);
+    INT d = time.SetNextTSTEP();
+
+    if (d >= 0) {
+        NR.SetNextTSTEP(d);
+    }
+
+    return d;
 }
 
 
