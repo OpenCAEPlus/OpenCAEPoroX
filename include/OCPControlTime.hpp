@@ -109,7 +109,8 @@ protected:
     OCP_INT          numproc, myrank;
 
 public:
-
+    /// Set current time
+    void SetStartTime(const OCP_DBL& startT) { current_time = startT; }
     /// Return the current time.
     auto GetCurrentTime() const { return current_time; }
     /// Return current time step size.

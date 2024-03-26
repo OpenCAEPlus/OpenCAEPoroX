@@ -31,6 +31,8 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
 
     workDir = CtrlParam.workDir;
     ocpFile = CtrlParam.fileName;    
+
+    time.SetStartTime(CtrlParam.curTime);
     simTime.SetNextSimTime(CtrlParam.MaxSimTime);
 
     SM.SetCtrlParam(CtrlParam);
@@ -47,7 +49,6 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
             NR.SetCtrlParam(CtrlParam.tuning_T[i].Tuning[2]);
         }
     }
-
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Control Params -- end");

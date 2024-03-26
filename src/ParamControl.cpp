@@ -133,6 +133,19 @@ void ParamControl::InpuMaxSimTime(ifstream& ifs)
 }
 
 
+/// Input current time
+void ParamControl::InpuCurTime(ifstream& ifs)
+{
+    vector<string> vbuf;
+    ReadLine(ifs, vbuf, OCP_FALSE);
+
+    curTime = stod(vbuf[0]);
+    if (CURRENT_RANK == MASTER_PROCESS) {
+        OCP_INFO("Current time : " + to_string(curTime) + " Day");
+    }
+}
+
+
 /// Read TUNING parameters.
 void ParamControl::InputTUNING(ifstream& ifs)
 {

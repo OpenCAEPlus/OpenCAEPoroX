@@ -348,6 +348,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.InputBoundary(ifs);
                 break;
 
+            case Map_Str2Int("CURTIME", 7):
+                paramControl.InpuCurTime(ifs);
+                break;
+
             case Map_Str2Int("MAXSTIME", 8):
                 paramControl.InpuMaxSimTime(ifs);
                 break;

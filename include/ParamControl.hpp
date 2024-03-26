@@ -59,6 +59,8 @@ public:
     vector<TuningPair> tuning_T;  
     /// Tuning.
     vector<vector<OCP_DBL>> tuning;
+    /// current time
+    OCP_DBL            curTime{ 0 };
     /// Max simulation time
     OCP_DBL            MaxSimTime{ 1E20 };
 
@@ -77,6 +79,8 @@ public:
     void InputMETHOD(ifstream& ifs);
     /// Input Maximum simulation time
     void InpuMaxSimTime(ifstream& ifs);
+    /// Input current time
+    void InpuCurTime(ifstream& ifs);
     /// Input the Keyword: TUNING.
     void InputTUNING(ifstream& ifs);
     /// Display the Tuning.
