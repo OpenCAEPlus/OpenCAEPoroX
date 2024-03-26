@@ -236,10 +236,16 @@ class OutGridVarSet
 
 public:
     void SetOutGridVarSet(const OutGridParam& param);
-    void Check(const Reservoir& rs);
+    void Setup(const Bulk& bk);
 
 protected:
+    USI      nc;                  ///< num of components
+    USI      np;                  ///< num of phases
+     
+protected:
     OCP_BOOL PRE{OCP_FALSE};      ///< Pressure of grids.
+    OCP_BOOL Ni{OCP_FALSE};       ///< Moles of components of grids.
+    OCP_BOOL POIL{OCP_FALSE};     ///< Oil pressure of grids.
     OCP_BOOL PGAS{OCP_FALSE};     ///< Gas pressure of grids.
     OCP_BOOL PWAT{OCP_FALSE};     ///< Water pressure of grids.
     OCP_BOOL SOIL{OCP_FALSE};     ///< Oil saturation of grids.

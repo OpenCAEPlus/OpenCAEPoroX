@@ -92,6 +92,8 @@ class OutGridParam
 public:
     OCP_BOOL ASCII{OCP_FALSE};  ///< If output using ASCII format
     OCP_BOOL PRE{OCP_FALSE};    ///< Pressure of grids.
+    OCP_BOOL Ni{ OCP_FALSE };   ///< Moles of components of grids.
+    OCP_BOOL POIL{OCP_FALSE};   ///< Oil pressure of grids.
     OCP_BOOL PGAS{OCP_FALSE};   ///< Gas pressure of grids.
     OCP_BOOL PWAT{OCP_FALSE};   ///< Water pressure of grids.
     OCP_BOOL SOIL{OCP_FALSE};   ///< Oil saturation of grids.

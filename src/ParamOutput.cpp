@@ -214,6 +214,12 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("*PRES", 5):
                     tmpBgpp->PRE = OCP_TRUE;
                     break;
+                case Map_Str2Int("*Ni", 3):
+                    tmpBgpp->Ni = OCP_TRUE;
+                    break;
+                case Map_Str2Int("*POIL", 5):
+                    tmpBgpp->POIL = OCP_TRUE;
+                    break;
                 case Map_Str2Int("*PGAS", 5):
                     tmpBgpp->PGAS = OCP_TRUE;
                     break;

@@ -123,6 +123,8 @@ public:
     USI GetWellNum() const { return allWells.GetWellNum(); }
     /// Return the num of Components
     USI GetComNum() const { return bulk.GetComNum(); }
+    /// Return the num of Phases
+    USI GetPhaseNum() const { return bulk.GetPhaseNum(); }
     /// Return num of open well
     USI GetNumOpenWell() const { return allWells.GetNumOpenWell(); }
     /// If oil exist

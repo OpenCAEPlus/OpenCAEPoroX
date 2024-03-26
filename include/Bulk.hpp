@@ -133,7 +133,12 @@ public:
     USI GetPhaseNum() const { return vs.np; }
     /// Return the number of components.
     USI GetComNum() const { return vs.nc; }
-
+    /// If oil exist
+    OCP_BOOL IfOilExist() const { return vs.o >= 0; }
+    /// If gas exist
+    OCP_BOOL IfGasExist() const { return vs.g >= 0; }
+    /// If water exist
+    OCP_BOOL IfWatExist() const { return vs.w >= 0; }
 
 
 protected:

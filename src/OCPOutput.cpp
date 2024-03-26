@@ -979,6 +979,8 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
 {
     PRE    = param.PRE;
+    Ni     = param.Ni;
+    POIL   = param.POIL;
     PGAS   = param.PGAS;
     PWAT   = param.PWAT;
     SOIL   = param.SOIL;
@@ -1007,10 +1009,13 @@ void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
 }
 
 
-void OutGridVarSet::Check(const Reservoir& rs)
+void OutGridVarSet::Setup(const Bulk& bk)
 {
+    nc = bk.GetComNum();
+    np = bk.GetPhaseNum();
+
     // correct wrong output request
-    if (!rs.IfOilExist()) {
+    if (!bk.IfOilExist()) {
         SOIL = OCP_FALSE;
         DENO = OCP_FALSE;
         BOIL = OCP_FALSE;
@@ -1018,7 +1023,7 @@ void OutGridVarSet::Check(const Reservoir& rs)
         VOIL = OCP_FALSE;
         XMF  = OCP_FALSE;
     }
-    if (!rs.IfGasExist()) {
+    if (!bk.IfGasExist()) {
         SGAS = OCP_FALSE;
         DENG = OCP_FALSE;
         BGAS = OCP_FALSE;
@@ -1026,7 +1031,7 @@ void OutGridVarSet::Check(const Reservoir& rs)
         VGAS = OCP_FALSE;
         YMF  = OCP_FALSE;
     }
-    if (!rs.IfWatExist()) {
+    if (!bk.IfWatExist()) {
         SWAT = OCP_FALSE;
         DENW = OCP_FALSE;
         BWAT = OCP_FALSE;
@@ -1036,6 +1041,8 @@ void OutGridVarSet::Check(const Reservoir& rs)
 
     bgpnum = 0;
     if (PRE)      bgpnum++;
+    if (Ni)       bgpnum += nc;
+    //if (POIL)     bgpnum++;
     //if (PGAS)     bgpnum++;
     //if (PWAT)     bgpnum++;
     if (SOIL)     bgpnum++;
@@ -1356,7 +1363,7 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
 {
     if (!useVTK) return;
 
-    bgp.Check(rs);
+    bgp.Setup(rs.bulk);
 
     // output the gloabl index of grids belonging to current domain
     const Domain& doman = rs.domain;
@@ -1410,7 +1417,14 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
         for (OCP_USI n = 0; n < nb; n++)
             tmpV[n] = static_cast<OCP_SIN>(bvs.P[n]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
-    }     
+    }   
+    if (bgp.Ni) {
+        for (USI c = 0; c < nc; c++) {
+            for (OCP_USI n = 0; n < nb; n++)
+                tmpV[n] = static_cast<OCP_SIN>(bvs.Ni[n * nc + c]);
+            outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+        }
+    }
     if (bgp.SOIL) {
         for (OCP_USI n = 0; n < nb; n++)
             tmpV[n] = static_cast<OCP_SIN>(bvs.S[n * np + OIndex]);
@@ -1509,6 +1523,15 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr    += numGrid;
                     tmpVal_ptr += numGridLoc;
                 }
+                if (bgp.Ni) {
+                    for (USI c = 0; c < bgp.nc; c++) {
+                        for (OCP_USI n = 0; n < numGridLoc; n++) {
+                            workPtr[global_index[n]] = tmpVal_ptr[n];
+                        }
+                        workPtr += numGrid;
+                        tmpVal_ptr += numGridLoc;
+                    }
+                }
                 if (bgp.SOIL) {
                     for (OCP_USI n = 0; n < numGridLoc; n++) {
                         workPtr[global_index[n]] = tmpVal_ptr[n];
@@ -1571,8 +1594,8 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
         source.close();
     }
     else {
-        for (USI i = 0; i < numTstep; i++) {
-            const string dstFile = dir + "TSTEP" + to_string(i) + ".vtk";
+        for (USI t = 0; t < numTstep; t++) {
+            const string dstFile = dir + "TSTEP" + to_string(t) + ".vtk";
             ifstream source(srcFile, ios::binary);
             ofstream dest(dstFile, ios::binary);
             dest << source.rdbuf();
@@ -1584,31 +1607,37 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 
             OCP_ULL bId = 0;
             if (bgp.PRE) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[i], bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[t], bId, numGrid, 3);
                 bId += numGrid;
             }
+            if (bgp.Ni) {
+                for (USI c = 0; c < bgp.nc; c++) {
+                    out4vtk.OutputCELL_DATA_SCALARS(dest, "Ni-" + to_string(c), VTK_FLOAT, gridVal[t], bId, numGrid, 3);
+                    bId += numGrid;
+                }
+            }
             if (bgp.SOIL) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, gridVal[t], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.SGAS) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SGAS", VTK_FLOAT, gridVal[t], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.SWAT) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SWAT", VTK_FLOAT, gridVal[t], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.CO2) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, gridVal[i], bId, numGrid, 6);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "CO2", VTK_FLOAT, gridVal[t], bId, numGrid, 6);
                 bId += numGrid;
             }
             if (bgp.SATNUM) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, gridVal[i], bId, numGrid, 0);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "SATNUM", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
                 bId += numGrid;
             }
             if (bgp.PERMX) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, gridVal[i], bId, numGrid, 0);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1651,6 +1680,12 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         if (bgp.PRE) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, bId, numGrid, 3);
             bId += numGrid;
+        }
+        if (bgp.Ni) {
+            for (USI c = 0; c < bgp.nc; c++) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "Ni-" + to_string(c), VTK_FLOAT, tmpVal, bId, numGrid, 3);
+                bId += numGrid;
+            }
         }
         if (bgp.SOIL) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "SOIL", VTK_FLOAT, tmpVal, bId, numGrid, 6);
