@@ -31,19 +31,14 @@ public:
 };
 
 
+/// used to pass data from master process to other process
 class VarInfoGrid
 {
 public:
     VarInfoGrid() = default;
-    VarInfoGrid(const vector<VarInfo<vector<OCP_DBL>>> dbl,
-                const vector<VarInfo<vector<OCP_USI>>> usi):
-        var_dbl(dbl), var_usi(usi) { CalNumByte(); };
-    void CalNumByte() { 
-        numvar_dbl    = var_dbl.size();
-        numvar_usi    = var_usi.size();
-        numByte_dbl   = sizeof(OCP_DBL);
-        numByte_usi   = sizeof(OCP_USI);
-        numByte_total = numvar_dbl * numByte_dbl + numvar_usi * numByte_usi; }
+    void CalNumByte();
+
+public:
     vector<VarInfo<vector<OCP_DBL>>>  var_dbl;
     vector<VarInfo<vector<OCP_USI>>>  var_usi;
 

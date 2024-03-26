@@ -125,6 +125,10 @@ protected:
     vector<OCP_DBL> swatInit;
     /// if Pcow should be scaled.
     OCP_BOOL        scalePcow{ OCP_FALSE };
+    /// initial pressure
+    vector<OCP_DBL> P;
+    /// initial moles of components
+    vector<vector<OCP_DBL>> Ni;
 };
 
 

@@ -11,6 +11,17 @@
 
 #include "Reservoir.hpp"
 
+
+
+void VarInfoGrid::CalNumByte() 
+{
+    numvar_dbl = var_dbl.size();
+    numvar_usi = var_usi.size();
+    numByte_dbl = sizeof(OCP_DBL);
+    numByte_usi = sizeof(OCP_USI);
+    numByte_total = numvar_dbl * numByte_dbl + numvar_usi * numByte_usi;
+}
+
 /////////////////////////////////////////////////////////////////////
 // General
 /////////////////////////////////////////////////////////////////////
@@ -69,29 +80,29 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     // Distribute Grid-based data (lengths of all data are numGrid)
     /////////////////////////////////////////////////////////////////////////
 
-    const VarInfoGrid varInfo(vector<VarInfo<vector<OCP_DBL>>> {
-            VarInfo<vector<OCP_DBL>>{ "DX", &grid.dx, &bulk.vs.dx },
-            VarInfo<vector<OCP_DBL>>{ "DY", &grid.dy, &bulk.vs.dy },
-            VarInfo<vector<OCP_DBL>>{ "DZ", &grid.dz, &bulk.vs.dz },
-            VarInfo<vector<OCP_DBL>>{ "V", &grid.v, &bulk.vs.v },
-            VarInfo<vector<OCP_DBL>>{ "DEPTH", &grid.depth, &bulk.vs.depth },
-            VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.vs.poroInit },
-            VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.vs.ntg },
-            VarInfo<vector<OCP_DBL>>{ "PERMX", &grid.kx, &bulk.vs.rockKx },
-            VarInfo<vector<OCP_DBL>>{ "PERMY", &grid.ky, &bulk.vs.rockKy },
-            VarInfo<vector<OCP_DBL>>{ "PERMZ", &grid.kz, &bulk.vs.rockKz },
-            VarInfo<vector<OCP_DBL>>{ "SIGMAV", &grid.sigma, &bulk.vs.sigma },
-                VarInfo<vector<OCP_DBL>>{ "DZMTRXV", &grid.dzMtrx, &bulk.vs.dzMtrx },
-                VarInfo<vector<OCP_DBL>>{ "SWAT", & grid.initR.swat, & bulk.INITm.GetSwat()},
-            VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit() },
-            VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, &bulk.BOUNDm.GetBoundaryArea() },
-    }, vector<VarInfo<vector<OCP_USI>>>{
-        VarInfo<vector<OCP_USI>>{"BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex() },
-        VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM() },
-        VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM() },
-        VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM() },
-    });
+    VarInfoGrid varInfo;
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DX", &grid.dx, &bulk.vs.dx});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DY", &grid.dy, &bulk.vs.dy});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DZ", &grid.dz, &bulk.vs.dz});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "V", &grid.v, &bulk.vs.v});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DEPTH", & grid.depth, &bulk.vs.depth});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PORO", &grid.poro, &bulk.vs.poroInit});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "NTG", &grid.ntg, &bulk.vs.ntg});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMX", &grid.kx, &bulk.vs.rockKx});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMY", &grid.ky, &bulk.vs.rockKy});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMZ", &grid.kz, &bulk.vs.rockKz});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SIGMAV", &grid.sigma, &bulk.vs.sigma});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DZMTRXV", &grid.dzMtrx, &bulk.vs.dzMtrx});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWAT", &grid.initR.swat, &bulk.INITm.GetSwat()});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit()});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, &bulk.BOUNDm.GetBoundaryArea()});
 
+    varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex()});
+    varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM()});
+    varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM()});
+    varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "ROCKNUM", &grid.ROCKNUM, &bulk.ROCKm.GetROCKNUM()});
+
+    varInfo.CalNumByte();
 
     /////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////
