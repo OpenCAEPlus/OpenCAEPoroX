@@ -897,18 +897,22 @@ void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
         }
         else {
             // only active grids' var are given, convert
-            vector<OCP_DBL> tmpV(P);
+            vector<OCP_DBL> tmpV;
+            tmpV = P;
+            P.resize(agc.numGrid);
             for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
                 P[agc.map_Act2All[n]] = tmpV[n];
             }
             if (!T.empty()) {
                 tmpV = T;
+                T.resize(agc.numGrid);
                 for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
                     T[agc.map_Act2All[n]] = tmpV[n];
                 }
             }
             for (auto& ni : Ni) {
                 tmpV = ni;
+                ni.resize(agc.numGrid);
                 for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
                     ni[agc.map_Act2All[n]] = tmpV[n];
                 }
@@ -925,7 +929,6 @@ void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
 void PreParamGridWell::Setup()
 {
     OCP_INFO("Setup Grid and Well -- begin");
-
     SetupGrid();
     SetupConnWellGrid();
     initR.PostProcess(actGC);
