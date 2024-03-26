@@ -41,13 +41,13 @@ SkipPSAMethod01::SkipPSAMethod01(SkipPSAVarset& svs, const OCPMixtureMethodComp*
 
         svs.ifSetup = OCP_TRUE;
 
-        svs.flag.resize(svs.nb);
+        svs.flag.resize(svs.nb, OCP_FALSE);
         svs.P.resize(svs.nb);
         svs.T.resize(svs.nb);
         svs.minEigen.resize(svs.nb);
         svs.zi.resize(svs.nb * svs.nc);
 
-        svs.lflag.resize(svs.nb);
+        svs.lflag.resize(svs.nb, OCP_FALSE);
         svs.lP.resize(svs.nb);
         svs.lT.resize(svs.nb);
         svs.lminEigen.resize(svs.nb);

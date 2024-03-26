@@ -79,6 +79,7 @@ typedef char               OCP_CHAR; ///< Char
 
 
 #define OCPMPI_INT         MPI_INT
+#define OCPMPI_USI         MPI_UNSIGNED
 #define OCPMPI_ENUM        MPI_UNSIGNED
 #define OCPMPI_BOOL        MPI_UNSIGNED
 #define OCPMPI_CHAR        MPI_CHAR

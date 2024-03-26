@@ -40,7 +40,16 @@ void MixtureUnit::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* N
 
 void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
-	mix->InitFlash(bId, bvs);
+	if (bvs.initType == "INITPTN") {
+		mix->Flash(bId, bvs);
+	}
+	else if (bvs.initType == "EQUIL") {
+		mix->InitFlash(bId, bvs);
+	}
+	else {
+		OCP_ABORT("No matched initialization!");
+	}
+	
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
 	misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }
@@ -48,7 +57,16 @@ void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) cons
 
 void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
-	mix->InitFlashDer(bId, bvs);
+	if (bvs.initType == "INITPTN") {
+		mix->FlashDer(bId, bvs);
+	}
+	else if (bvs.initType == "EQUIL") {
+		mix->InitFlashDer(bId, bvs);
+	}
+	else {
+		OCP_ABORT("No matched initialization!");
+	}
+
 	surTen->CalSurfaceTension(bId, stMethodIndex, *vs);
 	misFac->CalMiscibleFactor(bId, mfMethodIndex);
 }

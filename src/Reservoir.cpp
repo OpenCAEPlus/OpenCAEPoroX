@@ -98,13 +98,15 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PRESSURE", &grid.initR.P, &bulk.INITm.GetP()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "TEMPERATURE", &grid.initR.T, &bulk.INITm.GetT()});
+       
+    USI nc = grid.initR.Ni.size();
+    MPI_Bcast(&nc, 1, OCPMPI_USI, MASTER_PROCESS, domain.myComm);
     auto& initNi = bulk.INITm.GetNi();
-    initNi.resize(grid.initR.Ni.size());
-    for (USI i = 0; i < initNi.size(); i++) {
+    initNi.resize(nc);
+    for (USI i = 0; i < nc; i++) {
         varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "COMPM-" + to_string(i), &grid.initR.Ni[i], &initNi[i]});
     }
     
-
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex()});
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM()});
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "PVTNUM", &grid.PVTNUM, &bulk.PVTm.GetPVTNUM()});

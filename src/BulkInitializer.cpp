@@ -76,6 +76,7 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 
 void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const BulkOptionalModules& optMs, const Domain& domain)
 {
+	bvs.initType = initType;
 	// for hydrostatic equilibrium
 	if (initType == "EQUIL") {
 		InitHydroEquil(bvs, pvtm, satm, domain);
@@ -104,6 +105,8 @@ void BulkInitializer::InitPTNi(BulkVarSet& bvs)
 			bvs.Ni[n * bvs.nc + i] = Ni[i][n];
 		}
 	}
+
+	fill(bvs.phaseExist.begin(), bvs.phaseExist.end(), OCP_FALSE);
 }
 
 

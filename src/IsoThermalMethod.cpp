@@ -253,7 +253,7 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     bvs.Pb.resize(nb);
     bvs.Pj.resize(nb * np);
     bvs.Pc.resize(nb * np);
-    bvs.phaseExist.resize(nb * np);
+    bvs.phaseExist.resize(nb * np, OCP_FALSE);
     bvs.S.resize(nb * np);
     bvs.vj.resize(nb * np);
     bvs.xij.resize(nb * np * nc);
@@ -269,7 +269,7 @@ void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
     bvs.lP.resize(nb);
     bvs.lPj.resize(nb * np);
     bvs.lPc.resize(nb * np);
-    bvs.lphaseExist.resize(nb * np);
+    bvs.lphaseExist.resize(nb * np, OCP_FALSE);
     bvs.lS.resize(nb * np);
     bvs.vj.resize(nb * np);
     bvs.lxij.resize(nb * np * nc);
@@ -868,7 +868,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.Pb.resize(nb);
     bvs.Pj.resize(nb * np);
     bvs.Pc.resize(nb * np);
-    bvs.phaseExist.resize(nb * np);
+    bvs.phaseExist.resize(nb * np, OCP_FALSE);
     bvs.S.resize(nb * np);
     bvs.xij.resize(nb * np * nc);
     bvs.rho.resize(nb * np);
@@ -883,7 +883,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     bvs.lP.resize(nb);
     bvs.lPj.resize(nb * np);
     bvs.lPc.resize(nb * np);
-    bvs.lphaseExist.resize(nb * np);
+    bvs.lphaseExist.resize(nb * np, OCP_FALSE);
     bvs.lS.resize(nb * np);
     bvs.lxij.resize(nb * np * nc);
     bvs.lrho.resize(nb * np);

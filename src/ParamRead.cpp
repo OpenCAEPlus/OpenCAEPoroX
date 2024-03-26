@@ -380,14 +380,15 @@ void ParamRead::ReadINCLUDE(ifstream& ifs)
 void ParamRead::CheckParam()
 {
     if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
-        cout << endl
-            << "=========================================" << endl
-            << "Check reading parameters from input data!" << endl
-            << "=========================================" << endl;
+        OCP_INFO("Check reading parameters from input data -- begin");
     }
 
     paramRs.CheckParam();
     paramWell.CheckParam();
+
+    if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT) {
+        OCP_INFO("Check reading parameters from input data -- end");
+    }
 }
 
 /*----------------------------------------------------------------------------*/
