@@ -112,7 +112,7 @@ protected:
     /// reference depth of well.
     OCP_DBL             depth;
     /// Well pressure in reference depth.
-    OCP_DBL             bhp;
+    OCP_DBL             bhp{-1.0};
     /// well control parameters, contains current control parameters.
     WellOpt             opt;
     /// well control parameters set.

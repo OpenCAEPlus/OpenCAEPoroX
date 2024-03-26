@@ -260,6 +260,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.Tsurf = paramWell.Tsurf;
                 break;
 
+            case Map_Str2Int("WELINITP", 8):
+                paramWell.InputWELINITP(ifs);
+                break;
+
             case Map_Str2Int("SUMMARY", 7):
                 paramOutput.InputSUMMARY(ifs);
                 break;

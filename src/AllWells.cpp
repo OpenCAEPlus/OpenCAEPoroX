@@ -54,6 +54,7 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
         wells[wdst]->Psurf         = Psurf;
         wells[wdst]->Tsurf         = Tsurf;
         wells[wdst]->ifUseUnweight = paramWell.well[wsrc].ifUseUnweight;
+        wells[wdst]->bhp           = paramWell.well[wsrc].initP;
         // opt
         wells[wdst]->optSet.resize(t);
 

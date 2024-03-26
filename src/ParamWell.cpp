@@ -495,6 +495,36 @@ void ParamWell::InputTSURF(ifstream& ifs)
     }
 }
 
+
+void ParamWell::InputWELINITP(ifstream& ifs)
+{
+    const USI      num = well.size();
+    vector<string> vbuf;
+    while (ReadLine(ifs, vbuf)) {
+        if (vbuf[0] == "/") break;
+
+        DealDefault(vbuf);
+        string            src = vbuf[0];
+        string::size_type pos = src.find("*");
+        const OCP_BOOL    fuzzyMatch = (pos != string::npos);
+        if (fuzzyMatch) {
+            src.erase(pos);
+        }
+
+        if (fuzzyMatch) {
+            for (USI w = 0; w < num; w++)
+                if (well[w].name.find(src) != string::npos)
+                    well[w].initP = stod(vbuf[1]);
+        }
+        else {
+            for (USI w = 0; w < num; w++)
+                if (well[w].name == src)
+                    well[w].initP = stod(vbuf[1]);
+        }
+    }
+}
+
+
 // check
 void ParamWell::CheckParam() const
 {

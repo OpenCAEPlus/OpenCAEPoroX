@@ -92,7 +92,10 @@ void PeacemanWell::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
 
 void PeacemanWell::InitWellP(const Bulk& bk)
 {
-    bhp = bk.vs.P[perf[0].location]; 
+    if (bhp < 0) {
+        bhp = bk.vs.P[perf[0].location];
+    }
+     
     CalPerfP();
 }
 

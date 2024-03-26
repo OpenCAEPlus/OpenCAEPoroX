@@ -31,15 +31,15 @@ class WellOptParam
 public:
     WellOptParam(string intype, vector<string>& vbuf);
     // WCONINJE & WCONPROD
-    string type;      ///< Type of well, injection or production?
-    string fluidType; ///< Type of fluid into the injection well. (injection well only)
-    string state;     ///< State of well, open or close?
-    string mode;   ///< Mode of well, Rate or BHP?
+    string type;         ///< Type of well, injection or production
+    string fluidType;    ///< Type of fluid into the injection well. (injection well only)
+    string state;        ///< State of well, open or close?
+    string mode;         ///< Mode of well, Rate or BHP?
 
-    OCP_DBL maxRate; ///< Maximum allowable flow rate into/out the well.
-    OCP_DBL maxBHP;  ///< Maximum allowable pressure in the injection well.
-    OCP_DBL minBHP;  ///< Minimum allowable pressure in the production well.
-    OCP_DBL injTemp; ///< Temperature of injected fluid.
+    OCP_DBL maxRate;     ///< Maximum allowable flow rate into/out the well.
+    OCP_DBL maxBHP;      ///< Maximum allowable pressure in the injection well.
+    OCP_DBL minBHP;      ///< Minimum allowable pressure in the production well.
+    OCP_DBL injTemp;     ///< Temperature of injected fluid.
 };
 
 /// WellOptPair contains two parts, one is the operation mode of well, the other is the
@@ -118,7 +118,8 @@ public:
     vector<string>  direction;
     /// If use unweighted injector.
     OCP_BOOL        ifUseUnweight{OCP_FALSE}; 
-
+    /// initial BHP
+    OCP_DBL initP{ -1 }; 
     // dynamic infomation
     vector<WellOptPair> optParam;
 };
@@ -189,13 +190,13 @@ public:
     void InputPSURF(ifstream& ifs);
     /// Input surface temperature
     void InputTSURF(ifstream& ifs);
-
+    /// Input initial BHP
+    void InputWELINITP(ifstream& ifs);
     // check
     /// Check if wrong params are input.
     void CheckParam() const;
     /// Check if params of Perforation is wrong.
     void CheckPerf() const;
-    void CheckINJFluid() const;
 };
 
 #endif /* end if __PARAMWELL_HEADER__ */
