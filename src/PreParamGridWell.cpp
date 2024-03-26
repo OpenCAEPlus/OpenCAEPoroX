@@ -71,6 +71,11 @@ void PreParamGridWell::Input(const string& myFilename)
                 InputMULTIPLY(ifs);
                 break;
 
+            case Map_Str2Int("INITPTN0", 8):
+            case Map_Str2Int("INITPTN1", 8):
+                initR.type = keyword;
+                break;
+
             case Map_Str2Int("DX", 2):
             case Map_Str2Int("DY", 2):
             case Map_Str2Int("DZ", 2):
@@ -91,7 +96,19 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("SIGMAV", 6):
             case Map_Str2Int("MULTZ", 5):
             case Map_Str2Int("DZMTRXV", 7):
-                InputGrid(ifs, keyword);
+            case Map_Str2Int("PRESSURE", 8):
+            case Map_Str2Int("TEMPER", 6):
+            case Map_Str2Int("COMPM-0", 7):
+            case Map_Str2Int("COMPM-1", 7):
+            case Map_Str2Int("COMPM-2", 7):
+            case Map_Str2Int("COMPM-3", 7):
+            case Map_Str2Int("COMPM-4", 7):
+            case Map_Str2Int("COMPM-5", 7):
+            case Map_Str2Int("COMPM-6", 7):
+            case Map_Str2Int("COMPM-7", 7):
+            case Map_Str2Int("COMPM-8", 7):
+            case Map_Str2Int("COMPM-9", 7):
+                InputGridParam(ifs, keyword);
                 break;
 
             case Map_Str2Int("INCLUDE", 7):
@@ -413,7 +430,7 @@ void PreParamGridWell::InputMULTIPLY(ifstream& ifs)
 }
 
 
-void PreParamGridWell::InputGrid(ifstream& ifs, string& keyword)
+void PreParamGridWell::InputGridParam(ifstream& ifs, string& keyword)
 {
     vector<string> vbuf;
 
@@ -635,17 +652,6 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         myPtr = &kz;
         break;
 
-    case Map_Str2Int("SWAT", 4):
-        initR.swat.reserve(numGrid);
-        myPtr = &initR.swat;
-        break;
-
-    case Map_Str2Int("SWATINIT", 8):
-        initR.swatInit.reserve(numGrid);
-        myPtr = &initR.swatInit;
-        initR.scalePcow = OCP_TRUE;
-        break;
-
     case Map_Str2Int("SIGMAV", 6):
         sigma.reserve(numGrid);
         myPtr = &sigma;
@@ -659,6 +665,51 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
     case Map_Str2Int("DZMTRXV", 7):
         dzMtrx.reserve(numGrid);
         myPtr = &dzMtrx;
+        break;
+
+    case Map_Str2Int("SWAT", 4):
+        initR.swat.reserve(numGrid);
+        myPtr = &initR.swat;
+        break;
+
+    case Map_Str2Int("SWATINIT", 8):
+        initR.swatInit.reserve(numGrid);
+        myPtr = &initR.swatInit;
+        initR.scalePcow = OCP_TRUE;
+        break;
+
+    case Map_Str2Int("PRESSURE", 8):
+        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+            OCP_ABORT("INITPTN0 or INITPTN1 is not defined before PRESSURE!");
+        }
+        initR.P.reserve(numGrid);
+        myPtr = &initR.P;
+        break;
+
+    case Map_Str2Int("TEMPER", 6):
+        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+            OCP_ABORT("INITPTN0 or INITPTN1 is not defined before TEMPER!");
+        }
+        initR.T.reserve(numGrid);
+        myPtr = &initR.T;
+        break;
+
+    case Map_Str2Int("COMPM-0", 7):
+    case Map_Str2Int("COMPM-1", 7):
+    case Map_Str2Int("COMPM-2", 7):
+    case Map_Str2Int("COMPM-3", 7):
+    case Map_Str2Int("COMPM-4", 7):
+    case Map_Str2Int("COMPM-5", 7):
+    case Map_Str2Int("COMPM-6", 7):
+    case Map_Str2Int("COMPM-7", 7):
+    case Map_Str2Int("COMPM-8", 7):
+    case Map_Str2Int("COMPM-9", 7):
+        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+            OCP_ABORT("INITPTN0 or INITPTN1 is not defined before COMP-*!");
+        }
+        initR.Ni.push_back(vector<OCP_DBL>{});
+        initR.Ni.back().reserve(numGrid);
+        myPtr = &initR.Ni.back();
         break;
     }
 
@@ -831,13 +882,38 @@ void ActiveGridCheck::FreeSomeMemory()
 // Initial reservoir data
 /////////////////////////////////////////////////////////////////////
 
-void InitialReservoir::CheckData(const OCP_USI& numGrid)
+void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
 {
-    if (swat.size() == 1) {
-        swat.resize(numGrid, swat[0]);
-    }
-    else if (swat.size() != 0 && swat.size() != numGrid) {
-        OCP_ABORT("SWAT is not given correctly!");
+    if (type == "INITPTN0" || type == "INITPTN1") {
+        if (P.empty()) {
+            OCP_ABORT("PRESSURE is not given!");
+        }
+        if (Ni.empty()) {
+            OCP_ABORT("COMPM-* is not given!");
+        }
+
+        if (type == "INITPTN0") {
+            // all grids' var are given, nothing to do
+        }
+        else {
+            // only active grids' var are given, convert
+            vector<OCP_DBL> tmpV(P);
+            for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
+                P[agc.map_Act2All[n]] = tmpV[n];
+            }
+            if (!T.empty()) {
+                tmpV = T;
+                for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
+                    T[agc.map_Act2All[n]] = tmpV[n];
+                }
+            }
+            for (auto& ni : Ni) {
+                tmpV = ni;
+                for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
+                    ni[agc.map_Act2All[n]] = tmpV[n];
+                }
+            }
+        }
     }
 }
 
@@ -852,7 +928,7 @@ void PreParamGridWell::Setup()
 
     SetupGrid();
     SetupConnWellGrid();
-    initR.CheckData(numGrid);
+    initR.PostProcess(actGC);
     actGC.FreeSomeMemory();
 
     OCP_INFO("Setup Grid and Well -- end");
@@ -1605,6 +1681,7 @@ void PreParamGridWell::SetupTransMult()
             }
         }
     }
+    vector<OCP_DBL>().swap(multZ);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -1745,26 +1822,26 @@ void PreParamGridWell::FreeMemory()
     vector<OCP_DBL>().swap(dx);
     vector<OCP_DBL>().swap(dy);
     vector<OCP_DBL>().swap(dz);
-    vector<OCP_DBL>().swap(ntg);
+    vector<OCP_DBL>().swap(v);
+    vector<OCP_DBL>().swap(depth);
     vector<OCP_DBL>().swap(poro);
+    vector<OCP_DBL>().swap(ntg);
     vector<OCP_DBL>().swap(kx);
     vector<OCP_DBL>().swap(ky);
     vector<OCP_DBL>().swap(kz);
     vector<OCP_DBL>().swap(sigma);
     vector<OCP_DBL>().swap(dzMtrx);
+    vector<OCP_DBL>().swap(boundArea);
     vector<OCP_DBL>().swap(initR.swat);
     vector<OCP_DBL>().swap(initR.swatInit);
-    vector<OCP_DBL>().swap(multZ);
+
     vector<USI>().swap(SATNUM);
     vector<USI>().swap(PVTNUM);
     vector<USI>().swap(ROCKNUM);
     vector<USI>().swap(boundIndex);
-    vector<OCP_DBL>().swap(boundArea);
 
     vector<WellParam>().swap(well);
 
-    vector<OCP_DBL>().swap(v);
-    vector<OCP_DBL>().swap(depth);
     vector<vector<ConnPair>>().swap(gNeighbor);
     vector<OCP_ULL>().swap(actGC.map_Act2All);
 

@@ -138,7 +138,7 @@ void ParamControl::InputTUNING(ifstream& ifs)
 {
     assert(criticalTime.size() >= 1);
 
-    TUNING         tmp(tuning);
+    vector<vector<OCP_DBL>> tmp(tuning);
     USI            d   = criticalTime.size() - 1;
     USI            row = 0;
     vector<string> vbuf;

@@ -116,9 +116,10 @@ class InitialReservoir
 
 public:
     /// check and fill in the missing data if necessary
-    void CheckData(const OCP_USI& numGrid);
+    void PostProcess(const ActiveGridCheck& agc);
 
 protected:
+    string          type{ "EQUIL" };
     /// Initial water saturation
     vector<OCP_DBL> swat;
     /// Initial water saturation in each grid and use saturation end point scaling
@@ -127,6 +128,8 @@ protected:
     OCP_BOOL        scalePcow{ OCP_FALSE };
     /// initial pressure
     vector<OCP_DBL> P;
+    /// initial temperature
+    vector<OCP_DBL> T;
     /// initial moles of components
     vector<vector<OCP_DBL>> Ni;
 };
@@ -171,7 +174,7 @@ protected:
     /// Input MULTIPLY
     void InputMULTIPLY(ifstream& ifs);
     /// Input grid property
-    void InputGrid(ifstream& ifs, string& keyword);
+    void InputGridParam(ifstream& ifs, string& keyword);
     /// Input WELSPECS
     void InputWELSPECS(ifstream& ifs);
     /// Input COMPDAT

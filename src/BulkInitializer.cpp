@@ -14,8 +14,10 @@
 
 void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType)
 {
+	initType = rs_param.initType;
+	rsTemp   = rs_param.rsTemp;
 	// for hydrostatic equilibrium
-	if (rs_param.EQUIL.size() > 0) {
+	if (initType == "EQUIL") {
 
 		Equil tmpEquil;
 
@@ -44,30 +46,29 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 		}
 
 		EQUIL.push_back(tmpEquil);
-	}
 
-
-	// Zi distribution
-	for (auto& z : rs_param.ZMFVD_T.data) {
-		initZi_Tab.push_back(OCPTable(z));
-	}
-	if (mixType == OCPMixtureType::COMP) {
-		if (initZi_Tab.empty()) {
-			OCP_ABORT("ZMFVD is MISSING in COMPOSITIONAL MODEL!");
+		// Zi distribution
+		for (auto& z : rs_param.ZMFVD_T.data) {
+			initZi_Tab.push_back(OCPTable(z));
 		}
-	}
+		if (mixType == OCPMixtureType::COMP) {
+			if (initZi_Tab.empty()) {
+				OCP_ABORT("ZMFVD is MISSING in COMPOSITIONAL MODEL!");
+			}
+		}
 
-	// Temperature distribution
-	for (auto& t : rs_param.TEMPVD_T.data) {
-		initT_Tab.push_back(OCPTable(t));
-	}
-	if (mixType == OCPMixtureType::COMP ||
-		mixType == OCPMixtureType::THERMALK_OW) {
-		if (initT_Tab.empty()) {
-			// Use RTEMP
-			initT_Tab.push_back(OCPTable(vector<vector<OCP_DBL>> {
-				vector<OCP_DBL>{0}, vector<OCP_DBL>{rs_param.rsTemp}
-			}));
+		// Temperature distribution
+		for (auto& t : rs_param.TEMPVD_T.data) {
+			initT_Tab.push_back(OCPTable(t));
+		}
+		if (mixType == OCPMixtureType::COMP ||
+			mixType == OCPMixtureType::THERMALK_OW) {
+			if (initT_Tab.empty()) {
+				// Use RTEMP
+				initT_Tab.push_back(OCPTable(vector<vector<OCP_DBL>> {
+					vector<OCP_DBL>{0}, vector<OCP_DBL>{rs_param.rsTemp}
+				}));
+			}
 		}
 	}
 }
@@ -76,11 +77,32 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const SATModule& satm, const BulkOptionalModules& optMs, const Domain& domain)
 {
 	// for hydrostatic equilibrium
-	if (EQUIL.size() > 0) {
+	if (initType == "EQUIL") {
 		InitHydroEquil(bvs, pvtm, satm, domain);
+	}
+	else if (initType == "INITPTN") {
+		InitPTNi(bvs);
 	}
 	else {
 		InitHydroEquilW(bvs, pvtm, satm, optMs, domain);
+	}
+}
+
+
+/// initialize reservoir with given P,T,Ni
+void BulkInitializer::InitPTNi(BulkVarSet& bvs)
+{
+	bvs.P = P;
+	if (T.empty()) {
+		fill(bvs.T.begin(), bvs.T.end(), rsTemp);
+	}
+	else {
+		bvs.T = T;
+	}
+	for (OCP_USI n = 0; n < bvs.nb; n++) {
+		for (USI i = 0; i < bvs.nc; i++) {
+			bvs.Ni[n * bvs.nc + i] = Ni[i][n];
+		}
 	}
 }
 

@@ -27,17 +27,16 @@
 /// 2. Time truncation and convergence controls.
 /// 3. Newton and linear iterations controls.
 /// But most of these have not been applied to current program.
-typedef vector<vector<OCP_DBL>> TUNING;
 
 /// TODO: Add Doxygen
 class TuningPair
 {
 public:
-    TuningPair(const USI& t, const TUNING& tmp)
+    TuningPair(const USI& t, const vector<vector<OCP_DBL>>& tmp)
         : d(t)
         , Tuning(tmp){};
     USI    d;
-    TUNING Tuning;
+    vector<vector<OCP_DBL>> Tuning;
 };
 
 /// ParamControl contains the param referred to control of simulation, for example,
@@ -59,7 +58,7 @@ public:
     /// Tuning set.
     vector<TuningPair> tuning_T;  
     /// Tuning.
-    TUNING             tuning;      
+    vector<vector<OCP_DBL>> tuning;
     /// Max simulation time
     OCP_DBL            MaxSimTime{ 1E20 };
 

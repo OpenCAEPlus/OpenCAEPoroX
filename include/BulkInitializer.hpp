@@ -54,25 +54,39 @@ public:
 	void Setup(const ParamReservoir& rs_param, const OCPMixtureType& mixType);
     void Initialize(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain);
     auto& GetSwat() { return swat; }
+    auto& GetP() { return P; }
+    auto& GetT() { return T; }
+    auto& GetNi() { return Ni; }
 
 protected:
+    /// initialize reservoir with given P,T,Ni
+    void InitPTNi(BulkVarSet& bvs);
     /// initialize reservoir with hydrostatic equilibrium only
     void InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
     /// initialize reservoir with water and hydrostatic equilibrium
     void InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain);
 
 protected:
+    string                   initType{"EQUIL"};
     /// Equilibration data specification
-    vector<Equil>    EQUIL;
+    vector<Equil>            EQUIL;
     /// Initial mole ratio of components vs. depth, table set
-    vector<OCPTable> initZi_Tab; 
+    vector<OCPTable>         initZi_Tab; 
     /// Initial temperature vs. depth, table set
-    vector<OCPTable> initT_Tab;
+    vector<OCPTable>         initT_Tab;
     /// number of nodes of P vs. Z table
-    USI              numNodes{ 50 };
+    USI                      numNodes{ 50 };
+    /// reservoir temperature(for constant initialization)
+    OCP_DBL                  rsTemp{-1E10};
 
     /// initial reservoir water saturation
-    vector<OCP_DBL>  swat;
+    vector<OCP_DBL>          swat;
+    /// initial pressure
+    vector<OCP_DBL>          P;
+    /// initial temperature
+    vector<OCP_DBL>          T;
+    /// initial moles(mass) of components
+    vector<vector<OCP_DBL>>  Ni;
 };
 
 

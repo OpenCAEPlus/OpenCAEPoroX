@@ -93,9 +93,17 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PERMZ", &grid.kz, &bulk.vs.rockKz});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SIGMAV", &grid.sigma, &bulk.vs.sigma});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "DZMTRXV", &grid.dzMtrx, &bulk.vs.dzMtrx});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", & grid.boundArea, & bulk.BOUNDm.GetBoundaryArea()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWAT", &grid.initR.swat, &bulk.INITm.GetSwat()});
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "SWATINIT", &grid.initR.swatInit, &bulk.optMs.scalePcow.GetSwatInit()});
-    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "BOUNDARYAREA", &grid.boundArea, &bulk.BOUNDm.GetBoundaryArea()});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PRESSURE", &grid.initR.P, &bulk.INITm.GetP()});
+    varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "TEMPERATURE", &grid.initR.T, &bulk.INITm.GetT()});
+    auto& initNi = bulk.INITm.GetNi();
+    initNi.resize(grid.initR.Ni.size());
+    for (USI i = 0; i < initNi.size(); i++) {
+        varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "COMPM-" + to_string(i), &grid.initR.Ni[i], &initNi[i]});
+    }
+    
 
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex()});
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM()});

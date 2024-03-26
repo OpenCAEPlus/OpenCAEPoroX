@@ -979,7 +979,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
 {
     PRE    = param.PRE;
-    Ni     = param.Ni;
+    COMPM  = param.COMPM;
     POIL   = param.POIL;
     PGAS   = param.PGAS;
     PWAT   = param.PWAT;
@@ -1041,7 +1041,7 @@ void OutGridVarSet::Setup(const Bulk& bk)
 
     bgpnum = 0;
     if (PRE)      bgpnum++;
-    if (Ni)       bgpnum += nc;
+    if (COMPM)    bgpnum += nc;
     //if (POIL)     bgpnum++;
     //if (PGAS)     bgpnum++;
     //if (PWAT)     bgpnum++;
@@ -1418,7 +1418,7 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
             tmpV[n] = static_cast<OCP_SIN>(bvs.P[n]);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }   
-    if (bgp.Ni) {
+    if (bgp.COMPM) {
         for (USI c = 0; c < nc; c++) {
             for (OCP_USI n = 0; n < nb; n++)
                 tmpV[n] = static_cast<OCP_SIN>(bvs.Ni[n * nc + c]);
@@ -1523,7 +1523,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr    += numGrid;
                     tmpVal_ptr += numGridLoc;
                 }
-                if (bgp.Ni) {
+                if (bgp.COMPM) {
                     for (USI c = 0; c < bgp.nc; c++) {
                         for (OCP_USI n = 0; n < numGridLoc; n++) {
                             workPtr[global_index[n]] = tmpVal_ptr[n];
@@ -1610,9 +1610,9 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[t], bId, numGrid, 3);
                 bId += numGrid;
             }
-            if (bgp.Ni) {
+            if (bgp.COMPM) {
                 for (USI c = 0; c < bgp.nc; c++) {
-                    out4vtk.OutputCELL_DATA_SCALARS(dest, "Ni-" + to_string(c), VTK_FLOAT, gridVal[t], bId, numGrid, 3);
+                    out4vtk.OutputCELL_DATA_SCALARS(dest, "COMPM-" + to_string(c), VTK_FLOAT, gridVal[t], bId, numGrid, 3);
                     bId += numGrid;
                 }
             }
@@ -1681,9 +1681,9 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, bId, numGrid, 3);
             bId += numGrid;
         }
-        if (bgp.Ni) {
+        if (bgp.COMPM) {
             for (USI c = 0; c < bgp.nc; c++) {
-                out4vtk.OutputCELL_DATA_SCALARS(dest, "Ni-" + to_string(c), VTK_FLOAT, tmpVal, bId, numGrid, 3);
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "COMPM-" + to_string(c), VTK_FLOAT, tmpVal, bId, numGrid, 3);
                 bId += numGrid;
             }
         }
