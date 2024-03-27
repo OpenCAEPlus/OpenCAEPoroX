@@ -115,12 +115,6 @@ void BulkInitializer::InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, co
 {
 	OCP_FUNCNAME;
 
-	if (OCP_TRUE) {
-		for (OCP_USI n = 0; n < bvs.nb; n++) {
-			bvs.depth[n] = 1.2 * 1E2 - bvs.depth[n];
-		}
-	}
-
 	// all water phase and all water component
 	const OCP_DBL         Dref = 0;
 	const OCP_DBL         Pref = PRESSURE_STD;

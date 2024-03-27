@@ -132,7 +132,7 @@ void OCPPhaseEquilibrium::SetInitalValue(const OCP_DBL& Pin, const OCP_DBL& Tin,
         }
     }
     else if (lNP > 2) {
-        OCP_ABORT("Not Completed!");
+        //OCP_ABORT("Not Completed!");
     }
         
 }

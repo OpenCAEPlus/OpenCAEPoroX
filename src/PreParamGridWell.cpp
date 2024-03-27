@@ -1523,14 +1523,16 @@ void PreParamGridWell::SetupGmshGrid()
     SetupActiveConnGmshGrid();
     OutputPointsGmshGrid();
 
-
     // temp boundary
-    if (OCP_FALSE) {
-        for (OCP_ULL n = 0; n < numGridM; n++) {
+    if (OCP_TRUE) {
+        for (OCP_ULL n = 0; n < numGridM; n++) {   
+           
             if (depth[n] > 119) {
                 boundIndex[n] = 1;
-                boundArea[n]  = 1.0 * gmshGrid.thickness;
+                boundArea[n]  = 1.0 * gmshGrid.thickness; 
             }
+
+            depth[n] = 1.2 * 1E2 - depth[n];
         }
     }
 }

@@ -181,8 +181,9 @@ SCHEDULE  =======================================
 'VWAT=1' /
 
 VTKSCHED
-*ASCII
+*DOUBLE
 *PRES
+*POIL *PGAS *PWAT
 *SOIL *SGAS *SWAT
 *COMPM
 *SATNUM
