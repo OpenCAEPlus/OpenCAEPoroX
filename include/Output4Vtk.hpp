@@ -134,12 +134,15 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
             OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
         }
     }
-    else {
-        T* wptr = reinterpret_cast<T*>(mptr);
+    else if (dataType == VTK_UNSIGNED_INT) {
+        USI* wptr = reinterpret_cast<USI*>(mptr);
         for (OCP_ULL n = 0; n < nb; n++) {
-            wptr[n] = static_cast<T>(tmpV[bId + n]);
+            wptr[n] = static_cast<USI>(tmpV[bId + n]);
         }
         OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
+    }
+    else {
+        OCP_ABORT("unknown data type!");
     }
 }
 

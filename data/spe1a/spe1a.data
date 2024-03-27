@@ -181,9 +181,11 @@ SCHEDULE  =======================================
 'VWAT=1' /
 
 VTKSCHED
+*ASCII
 *PRES
 *SOIL *SGAS *SWAT
 *COMPM
+*SATNUM
 /
 
 WELSPECS
