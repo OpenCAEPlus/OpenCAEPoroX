@@ -14,6 +14,12 @@
 const string Output4Vtk::tmpFile = "grid.tmpinfo";
 
 
+void Output4Vtk::Setup(const OCP_BOOL& ascii, const OCP_BOOL& use_dbl)
+{
+    ifASCII  = ascii;
+    ifDOUBLE = use_dbl;
+}
+
 
 OCP_ULL Output4Vtk::Init(const string& dir, const string& myFile, const string& shortInfo) const
 {
@@ -24,6 +30,7 @@ OCP_ULL Output4Vtk::Init(const string& dir, const string& myFile, const string& 
         return InitBINARY(dir, myFile, shortInfo);
     }
 }
+
 
 
 OCP_ULL Output4Vtk::InitASCII(const string& dir,
@@ -47,7 +54,7 @@ OCP_ULL Output4Vtk::InitASCII(const string& dir,
     outVtk << VTK_ASCII  << "\n";
     outVtk << VTK_DATASET << " " << VTK_UNSTRUCTURED_GRID << "\n";
     // Output points
-    outVtk << VTK_POINTS << " " << nP << " " << VTK_FLOAT << "\n";
+    outVtk << VTK_POINTS << " " << nP << " " << VTK_SIN << "\n";
     OCP_ULL iterP = 0;
     for (OCP_ULL n = 0; n < nP; n++) {
         outVtk << setw(12) << points_xyz[iterP]
@@ -99,7 +106,7 @@ OCP_ULL Output4Vtk::InitBINARY(const string& dir, const string& myFile, const st
     outVtk << VTK_BINARY << "\n";
     outVtk << VTK_DATASET << " " << VTK_UNSTRUCTURED_GRID << "\n";
     // Output points
-    outVtk << VTK_POINTS << " " << nP << " " << VTK_FLOAT << "\n";
+    outVtk << VTK_POINTS << " " << nP << " " << VTK_SIN << "\n";
     SwapEnd(points_xyz.data(), points_xyz.size());
     outVtk.write((const char*)&points_xyz[0], points_xyz.size() * sizeof(points_xyz[0]));
     outVtk << "\n";

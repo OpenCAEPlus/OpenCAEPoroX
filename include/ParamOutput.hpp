@@ -91,6 +91,7 @@ class OutGridParam
 {
 public:
     OCP_BOOL ASCII{OCP_FALSE};   ///< If output using ASCII format
+    OCP_DBL  DOUBLE{OCP_FALSE};  ///< If use double precision for float number
     OCP_BOOL PRE{OCP_FALSE};     ///< Pressure of grids.
     OCP_BOOL COMPM{ OCP_FALSE }; ///< Moles of components of grids.
     OCP_BOOL POIL{OCP_FALSE};    ///< Oil pressure of grids.

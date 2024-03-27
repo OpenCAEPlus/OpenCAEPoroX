@@ -21,10 +21,8 @@ using namespace std;
 #include "OCPConst.hpp"
 
 // Basic datatype
-typedef OCP_DBL VTK_DBL;
-typedef OCP_SIN VTK_SIN;
 typedef OCP_USI VTK_USI;
-typedef OCP_ULL VTK_ULL;
+
 
 // Basic Keyword
 const string  VTK_HEADER            = "# vtk DataFile Version 3.0";
@@ -49,7 +47,9 @@ const VTK_USI VTK_QUAD       = 9;
 const VTK_USI VTK_HEXAHEDRON = 12;
 
 
-const string VTK_FLOAT        = "float";
+const string VTK_FLOAT     = "byinput";
+const string VTK_SIN       = "float";
+const string VTK_DBL       = "double";
 const string VTK_UNSIGNED_INT = "unsigned_int";
 
 
@@ -68,13 +68,13 @@ class Output4Vtk
 {
 public:
     /// Setup
-    void Setup(const OCP_BOOL& ascii) { ifASCII = ascii; }
+    void Setup(const OCP_BOOL& ascii, const OCP_BOOL& use_dbl);
     /// create a new file and write common information
     OCP_ULL Init(const string& dir, const string& myFile, const string& shortInfo) const;
     template <typename T>
     void OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                  const string&    dataName,
-                                 const string&    dataType,
+                                 string           dataType,
                                  const vector<T>& tmpV,
                                  const OCP_ULL&   bId,
                                  const OCP_ULL&   nb,
@@ -88,21 +88,69 @@ protected:
     OCP_ULL InitASCII(const string& dir, const string& myFile, const string& shortInfo) const;
     OCP_ULL InitBINARY(const string& dir, const string& myFile, const string& shortInfo) const;
     void InputGridInfo(const string& dir, OCP_ULL& nG, OCP_ULL& nP, vector<OCP_SIN>& points_xyz, vector<OCP_ULL>& cell_points, vector<USI>& cell_type) const;
+    template <typename T>
+    void OutputCellValue(ofstream&        outVtk,
+                         const string&    dataName,
+                         string           dataType,
+                         T*               data,
+                         const OCP_ULL&   nb,
+                         const USI&       digits) const;
 
 protected:
-    OCP_BOOL            ifASCII{ OCP_FALSE };
-    static const string tmpFile;
+    OCP_BOOL                ifASCII{ OCP_FALSE };
+    OCP_BOOL                ifDOUBLE{ OCP_FALSE };
+    mutable vector<OCP_DBL> worksapce;
+    static const string     tmpFile;
 };
 
 
 template <typename T>
 void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
                                          const string&    dataName,
-                                         const string&    dataType,
+                                         string           dataType,
                                          const vector<T>& tmpV,
                                          const OCP_ULL&   bId,
                                          const OCP_ULL&   nb,
                                          const USI&       digits) const
+{
+    worksapce.resize(nb);
+    OCP_DBL* mptr = worksapce.data();
+
+    if (dataType == VTK_FLOAT) {
+        if (ifDOUBLE) {
+            dataType = VTK_DBL;
+            OCP_DBL* wptr = reinterpret_cast<OCP_DBL*>(mptr);
+            for (OCP_ULL n = 0; n < nb; n++) {
+                wptr[n] = static_cast<OCP_DBL>(tmpV[bId + n]);
+            }
+            OutputCellValue(outVtk, dataName, dataType, wptr, nb, 16);
+        }
+        else {
+            dataType = VTK_SIN;
+            OCP_SIN* wptr = reinterpret_cast<OCP_SIN*>(mptr);
+            for (OCP_ULL n = 0; n < nb; n++) {
+                wptr[n] = static_cast<OCP_SIN>(tmpV[bId + n]);
+            }
+            OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
+        }
+    }
+    else {
+        T* wptr = reinterpret_cast<T*>(mptr);
+        for (OCP_ULL n = 0; n < nb; n++) {
+            wptr[n] = static_cast<T>(tmpV[bId + n]);
+        }
+        OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
+    }
+}
+
+
+template <typename T>
+void Output4Vtk::OutputCellValue(ofstream&      outVtk,
+                                 const string&  dataName,
+                                 string         dataType,
+                                 T*             data,
+                                 const OCP_ULL& nb,
+                                 const USI&     digits) const
 {
     outVtk << "\n" << VTK_SCALARS << " " << dataName << " " << dataType << " " << 1;
     outVtk << "\n" << VTK_LOOKUP_TABLE << " " << VTK_DEFAULT << "\n";
@@ -110,13 +158,12 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
     if (ifASCII) {
         outVtk << fixed << setprecision(digits);
         for (OCP_ULL n = 0; n < nb; n++) {
-            outVtk << tmpV[bId + n] << "\n";
+            outVtk << data[n] << "\n";
         }
     }
     else {
-        T* tmp = const_cast<T*>(&tmpV[bId]);
-        SwapEnd(tmp, nb);
-        outVtk.write((const char*)tmp, nb * sizeof(tmp[0]));
+        SwapEnd(data, nb);
+        outVtk.write((const char*)data, nb * sizeof(data[0]));
         outVtk << "\n";
     }
 }

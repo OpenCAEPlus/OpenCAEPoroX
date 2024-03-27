@@ -211,6 +211,9 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("*ASCII", 6):
                     tmpBgpp->ASCII = OCP_TRUE;
                     break;
+                case Map_Str2Int("*DOUBLE", 7):
+                    tmpBgpp->DOUBLE = OCP_TRUE;
+                    break;
                 case Map_Str2Int("*PRES", 5):
                     tmpBgpp->PRE = OCP_TRUE;
                     break;
