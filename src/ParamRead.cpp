@@ -127,6 +127,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.initType = "INITPTN";
                 break;
 
+            case Map_Str2Int("EQUILWAT", 8):
+                paramRs.initType = "EQUILWAT";
+                break;
+
             case Map_Str2Int("RTEMP", 5):
                 paramRs.InputRTEMP(ifs);
                 break;

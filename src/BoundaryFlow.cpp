@@ -27,7 +27,7 @@ void BoundaryFlow::Setup(const ParamReservoir& rs_param, const BulkVarSet& bvs, 
 		}
 
 		// for spe11 now
-		if (OCP_TRUE) {
+		if (OCP_FALSE) {
 			const USI bLen = boundName.size();
 			vector<USI> boundCode(bLen, 0);
 			for (OCP_USI n = 0; n < bvs.nbI; n++) {

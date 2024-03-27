@@ -41,7 +41,7 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 			tmpEquil.PcGO = rs_param.EQUIL[0].data[5];
 			break;
 		default:
-			OCP_ABORT("Wrong Type!");
+			OCP_ABORT("Wrong Initialization Type!");
 			break;
 		}
 
