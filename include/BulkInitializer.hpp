@@ -57,6 +57,7 @@ public:
     auto& GetP() { return P; }
     auto& GetT() { return T; }
     auto& GetNi() { return Ni; }
+    auto& GetPj() { return Pj; }
 
 protected:
     /// initialize reservoir with given P,T,Ni
@@ -87,6 +88,8 @@ protected:
     vector<OCP_DBL>          T;
     /// initial moles(mass) of components
     vector<vector<OCP_DBL>>  Ni;
+    /// phase pressure
+    vector<vector<OCP_DBL>> Pj;
 };
 
 

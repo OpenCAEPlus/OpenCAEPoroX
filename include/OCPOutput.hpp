@@ -244,10 +244,8 @@ protected:
      
 protected:
     OCP_BOOL PRE{OCP_FALSE};      ///< Pressure of grids.
+    OCP_BOOL PHASEP{OCP_FALSE};   ///< Pressure of phases.
     OCP_BOOL COMPM{OCP_FALSE};    ///< Moles of components of grids.
-    OCP_BOOL POIL{OCP_FALSE};     ///< Oil pressure of grids.
-    OCP_BOOL PGAS{OCP_FALSE};     ///< Gas pressure of grids.
-    OCP_BOOL PWAT{OCP_FALSE};     ///< Water pressure of grids.
     OCP_BOOL SOIL{OCP_FALSE};     ///< Oil saturation of grids.
     OCP_BOOL SGAS{OCP_FALSE};     ///< Gas saturation of grids.
     OCP_BOOL SWAT{OCP_FALSE};     ///< Water saturation of grids.

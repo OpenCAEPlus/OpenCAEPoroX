@@ -94,16 +94,40 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 void BulkInitializer::InitPTNi(BulkVarSet& bvs)
 {
 	bvs.P = P;
+
 	if (T.empty()) {
 		fill(bvs.T.begin(), bvs.T.end(), rsTemp);
 	}
 	else {
 		bvs.T = T;
 	}
+
+	if (Ni.size() != bvs.nc) {
+		OCP_ABORT("Ni is not given correctly!");
+	}
 	for (OCP_USI n = 0; n < bvs.nb; n++) {
 		for (USI i = 0; i < bvs.nc; i++) {
 			bvs.Ni[n * bvs.nc + i] = Ni[i][n];
 		}
+	}
+
+	if (Pj.size() != bvs.np) {
+		OCP_ABORT("Pj is not given correctly!");
+	}
+	for (OCP_USI n = 0; n < bvs.nb; n++) {
+		for (USI j = 0; j < bvs.np; j++) {
+			bvs.Pj[n * bvs.np + j] = Pj[j][n];
+		}
+	}
+
+	// free memory
+	vector<OCP_DBL>().swap(P);
+	vector<OCP_DBL>().swap(T);
+	for (USI i = 0; i < bvs.nc; i++) {
+		vector<OCP_DBL>().swap(Ni[i]);
+	}
+	for (USI j = 0; j < bvs.np; j++) {
+		vector<OCP_DBL>().swap(Pj[j]);
 	}
 
 	fill(bvs.phaseExist.begin(), bvs.phaseExist.end(), OCP_FALSE);

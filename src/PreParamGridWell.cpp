@@ -98,6 +98,9 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("DZMTRXV", 7):
             case Map_Str2Int("PRESSURE", 8):
             case Map_Str2Int("TEMPER", 6):
+            case Map_Str2Int("PHASEP-0", 8):
+            case Map_Str2Int("PHASEP-1", 8):
+            case Map_Str2Int("PHASEP-2", 8):
             case Map_Str2Int("COMPM-0", 7):
             case Map_Str2Int("COMPM-1", 7):
             case Map_Str2Int("COMPM-2", 7):
@@ -694,6 +697,17 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         myPtr = &initR.T;
         break;
 
+    case Map_Str2Int("PHASEP-0", 8):
+    case Map_Str2Int("PHASEP-1", 8):
+    case Map_Str2Int("PHASEP-2", 8):
+        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+            OCP_ABORT("INITPTN0 or INITPTN1 is not defined before COMP-*!");
+        }
+        initR.Pj.push_back(vector<OCP_DBL>{});
+        initR.Pj.back().reserve(numGrid);
+        myPtr = &initR.Pj.back();
+        break;
+
     case Map_Str2Int("COMPM-0", 7):
     case Map_Str2Int("COMPM-1", 7):
     case Map_Str2Int("COMPM-2", 7):
@@ -898,11 +912,13 @@ void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
         else {
             // only active grids' var are given, convert
             vector<OCP_DBL> tmpV;
+
             tmpV = P;
             P.resize(agc.numGrid);
             for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
                 P[agc.map_Act2All[n]] = tmpV[n];
             }
+
             if (!T.empty()) {
                 tmpV = T;
                 T.resize(agc.numGrid);
@@ -910,11 +926,20 @@ void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
                     T[agc.map_Act2All[n]] = tmpV[n];
                 }
             }
+
             for (auto& ni : Ni) {
                 tmpV = ni;
                 ni.resize(agc.numGrid);
                 for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
                     ni[agc.map_Act2All[n]] = tmpV[n];
+                }
+            }
+
+            for (auto& pj : Pj) {
+                tmpV = pj;
+                pj.resize(agc.numGrid);
+                for (OCP_ULL n = 0; n < agc.activeGridNum; n++) {
+                    pj[agc.map_Act2All[n]] = tmpV[n];
                 }
             }
         }

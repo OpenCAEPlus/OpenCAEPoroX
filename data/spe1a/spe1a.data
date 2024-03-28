@@ -183,7 +183,7 @@ SCHEDULE  =======================================
 VTKSCHED
 *DOUBLE
 *PRES
-*POIL *PGAS *PWAT
+*PHASEP
 *SOIL *SGAS *SWAT
 *COMPM
 *SATNUM

@@ -106,6 +106,14 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
     for (USI i = 0; i < nc; i++) {
         varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "COMPM-" + to_string(i), &grid.initR.Ni[i], &initNi[i]});
     }
+
+    USI np = grid.initR.Pj.size();
+    MPI_Bcast(&np, 1, OCPMPI_USI, MASTER_PROCESS, domain.myComm);
+    auto& initPj = bulk.INITm.GetPj();
+    initPj.resize(np);
+    for (USI j = 0; j < np; j++) {
+        varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "PHASEP-" + to_string(j), &grid.initR.Pj[j], &initPj[j]});
+    }
     
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "BOUNDARY", &grid.boundIndex, &bulk.BOUNDm.GetBoundaryIndex()});
     varInfo.var_usi.push_back(VarInfo<vector<OCP_USI>>{ "SATNUM", &grid.SATNUM, &bulk.SATm.GetSATNUM()});

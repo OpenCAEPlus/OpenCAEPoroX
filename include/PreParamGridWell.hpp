@@ -132,6 +132,8 @@ protected:
     vector<OCP_DBL> T;
     /// initial moles of components
     vector<vector<OCP_DBL>> Ni;
+    /// phase pressure
+    vector<vector<OCP_DBL>> Pj;
 };
 
 
