@@ -2,13 +2,13 @@ target_sources(
   OpenCAEPoroX
   PUBLIC AcceleratePEC.hpp
 		 AllWells.hpp
-		 BoundaryFlow.hpp
 		 BOUNDARYModule.hpp
+		 BoundaryFlow.hpp
 		 Bulk.hpp
 		 BulkAccumuModule.hpp
 		 BulkConn.hpp
+		 BulkConnFunc.hpp
 		 BulkConnOptionalModules.hpp
-		 BulkConnTrans.hpp
 		 BulkConnVarSet.hpp
 		 BulkInitializer.hpp
 		 BulkOptionalModules.hpp
@@ -38,6 +38,7 @@ target_sources(
 		 OCPControlTime.hpp
 		 OCPConvection.hpp
 		 OCPDataType.hpp
+		 OCPDiffusion.hpp
 		 OCPEoS.hpp
 		 OCPFlow.hpp
 		 OCPFlowMethod.hpp

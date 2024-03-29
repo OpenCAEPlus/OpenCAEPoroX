@@ -5,7 +5,7 @@ target_sources(
 		  BoundaryFlow.cpp
 		  Bulk.cpp
 		  BulkAccumuModule.cpp
-		  BulkConnTrans.cpp
+		  BulkConnFunc.cpp
 		  BulkInitializer.cpp
 		  CornerGrid.cpp
 		  Decoupling.cpp
@@ -27,6 +27,7 @@ target_sources(
 		  OCPControlSimTime.cpp
 		  OCPControlTime.cpp
 		  OCPConvection.cpp
+		  OCPDiffusion.cpp
 		  OCPEoS.cpp
 		  OCPFlow.cpp
 		  OCPFlowMethod.cpp
