@@ -82,7 +82,9 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
         // Assemble linear system
         AssembleMat(rs, ctrl);
         // Solve linear system
-        SolveLinearSystem(rs, ctrl);
+        if (!SolveLinearSystem(rs, ctrl)) {
+            continue;
+        }
         if (!UpdateProperty(rs, ctrl)) {
             continue;
         }
@@ -152,20 +154,20 @@ void IsothermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
 
 
 /// Solve linear systems for IMPEC and FIM.
-void IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL IsothermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 { 
     switch (curMethod) {
         case OCPNLMethod::IMPEC:
-            impec.SolveLinearSystem(LSolver, rs, ctrl);
+            return impec.SolveLinearSystem(LSolver, rs, ctrl);
             break;
         case OCPNLMethod::FIM:
-            fim.SolveLinearSystem(LSolver, rs, ctrl);
+            return fim.SolveLinearSystem(LSolver, rs, ctrl);
             break;
         case OCPNLMethod::AIMc:
-            aimc.SolveLinearSystem(LSolver, rs, ctrl);
+            return aimc.SolveLinearSystem(LSolver, rs, ctrl);
             break;
         case OCPNLMethod::FIMddm:
-            fim_ddm.IsoT_FIM::SolveLinearSystem(LSolver, rs, ctrl);
+            return fim_ddm.IsoT_FIM::SolveLinearSystem(LSolver, rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong method type!");

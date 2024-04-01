@@ -143,7 +143,7 @@ void IsoT_IMPEC::AssembleMat(LinearSystem&    ls,
     rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
-void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
     GetWallTime timer;
 
@@ -155,6 +155,14 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
 
     int status = ls.Solve();
     OCPTIME_LSOLVER += timer.Stop();
+
+    if (status < 0) {
+        ls.ClearData();
+        ctrl.time.CutDt(-1.0);
+        NR.ResetIter();
+        return OCP_FALSE;
+    }
+
 
     NR.UpdateIter(abs(status));
 
@@ -171,6 +179,8 @@ void IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& 
     GetSolution(rs, ls.GetSolution());
     OCPTIME_NRSTEP += timer.Stop();
     ls.ClearData();
+
+    return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_IMPEC::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
@@ -735,7 +745,7 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
-void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
+OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
                                  OCPControl&   ctrl)
 {
@@ -753,6 +763,13 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     int status = ls.Solve();
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
+
+    if (status < 0) {
+        ls.ClearData();
+        ctrl.time.CutDt(-1.0);
+        ResetToLastTimeStep(rs, ctrl);     
+        return OCP_FALSE;
+    }
 
     NR.UpdateIter(abs(status));
 
@@ -777,6 +794,8 @@ void IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     OCPTIME_NRSTEP += timer.Stop();
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
+
+    return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
@@ -1517,7 +1536,7 @@ void IsoT_AIMc::AssembleMat(LinearSystem&    ls,
     rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
-void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
     GetWallTime timer;
 
@@ -1526,8 +1545,14 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
     timer.Start();
     int status = ls.Solve();
-
     OCPTIME_LSOLVER += timer.Stop();
+
+    if (status < 0) {
+        ls.ClearData();
+        ctrl.time.CutDt(-1.0);
+        ResetToLastTimeStep(rs, ctrl);
+        return OCP_FALSE;
+    }
 
     NR.UpdateIter(abs(status));
 
@@ -1543,6 +1568,8 @@ void IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     GetSolution(rs, ls.GetSolution(), ctrl.NR);
     OCPTIME_NRSTEP += timer.Stop();
     ls.ClearData();
+
+    return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)

@@ -42,7 +42,9 @@ const OCPNRsuite& ThermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
         // Assemble linear system
         AssembleMat(rs, ctrl);
         // Solve linear system
-        SolveLinearSystem(rs, ctrl);
+        if (!SolveLinearSystem(rs, ctrl)) {
+            continue;
+        }
         if (!UpdateProperty(rs, ctrl)) {
             continue;
         }
@@ -66,9 +68,9 @@ void ThermalSolver::AssembleMat(const Reservoir& rs, OCPControl& ctrl)
     OCPTIME_ASSEMBLE_MAT += timer.Stop();
 }
 
-void ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL ThermalSolver::SolveLinearSystem(Reservoir& rs, OCPControl& ctrl)
 {
-    fim.SolveLinearSystem(LSolver, rs, ctrl);
+    return fim.SolveLinearSystem(LSolver, rs, ctrl);
 }
 
 /// Update properties of fluid.

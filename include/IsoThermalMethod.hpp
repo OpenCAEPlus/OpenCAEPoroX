@@ -56,7 +56,7 @@ public:
     /// Assemble Matrix
     void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Solve the linear system.
-    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluids.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Determine if NR iteration finishes.
@@ -108,7 +108,7 @@ public:
     /// Assemble Matrix
     void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Solve the linear system.
-    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluids.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish a Newton-Raphson iteration.
@@ -160,7 +160,7 @@ public:
     /// Assemble Matrix
     void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Solve the linear system.
-    void SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluids.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish a Newton-Raphson iteration.

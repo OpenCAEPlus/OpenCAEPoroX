@@ -58,7 +58,7 @@ void T_FIM::AssembleMat(LinearSystem&    ls,
     rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
-void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
 {
     GetWallTime timer;
 
@@ -70,9 +70,15 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     // Solve linear system  
     timer.Start();
     int status = ls.Solve();
-
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
+
+    if (status < 0) {
+        ls.ClearData();
+        ctrl.time.CutDt(-1.0);
+        ResetToLastTimeStep(rs, ctrl);
+        return OCP_FALSE;
+    }
 
     NR.UpdateIter(abs(status));
 
@@ -88,6 +94,8 @@ void T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
     OCPTIME_NRSTEP += timer.Stop();
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
+
+    return OCP_TRUE;
 }
 
 OCP_BOOL T_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)

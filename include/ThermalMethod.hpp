@@ -29,7 +29,7 @@ public:
     void     AssembleMat(LinearSystem&    ls,
                          const Reservoir& rs,
                          const OCP_DBL&   dt);
-    void     SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     void     FinishStep(Reservoir& rs, OCPControl& ctrl);

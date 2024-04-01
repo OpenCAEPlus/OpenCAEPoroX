@@ -96,6 +96,7 @@ OCP_INT LinearSystem::Solve()
     if (LStype[wIndex] == OCPLStype::fasp) {
         if (iters < 0) {
             iters = -LS[wIndex]->GetNumIters();
+            OCP_WARNING("FASP failed! -- " + to_string(iters));
         }
     }
 

@@ -33,7 +33,7 @@ protected:
     /// Assemble jacobian matrix.
     void AssembleMat(const Reservoir& rs, OCPControl& ctrl);
     /// Solve the linear system in single problem.
-    void SolveLinearSystem(Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL SolveLinearSystem(Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluid.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish the Newton-Raphson iteration.
