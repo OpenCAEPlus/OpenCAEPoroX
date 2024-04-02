@@ -82,10 +82,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.unitType = "METRIC";
                 break;
 
-            case Map_Str2Int("SPE11AB", 7):
+            case Map_Str2Int("SPE11A", 6):
                 if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
-                    cout << "SPE11AB" << endl;
-                paramRs.unitType = "SPE11AB";
+                    cout << "SPE11A" << endl;
+                paramRs.unitType = "SPE11A";
                 break;
 
             case Map_Str2Int("BLACKOIL", 8):

@@ -53,8 +53,8 @@ void SetUnit(const string& ut)
 		//CONV6           = METRIC_CONV4;
 		//TIMEUNIT        = METRIC_TIME;
 	}
-	else if (ut == "SPE11AB") {
-		unitType        = UnitType::SPE11AB;
+	else if (ut == "SPE11A") {
+		unitType        = UnitType::SPE11A;
 
 		CONV_DARCY      = SPE11AB_DARCY;
 		GAS_CONSTANT    = SPE11AB_GAS_CONSTANT;

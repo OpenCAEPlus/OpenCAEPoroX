@@ -26,7 +26,7 @@ enum class UnitType : USI
 	/// metric units
 	METRIC,
 	/// units for spe11a and spe11b
-	SPE11AB
+	SPE11A
 };
 
 
