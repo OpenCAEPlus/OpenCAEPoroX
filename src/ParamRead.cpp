@@ -88,6 +88,12 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.unitType = "SPE11A";
                 break;
 
+            case Map_Str2Int("SPE11Amg", 8):
+                if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
+                    cout << "SPE11Amg" << endl;
+                paramRs.unitType = "SPE11Amg";
+                break;
+
             case Map_Str2Int("BLACKOIL", 8):
                 paramRs.blackOil = OCP_TRUE;
                 break;

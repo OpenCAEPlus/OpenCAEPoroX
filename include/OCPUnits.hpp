@@ -25,8 +25,10 @@ enum class UnitType : USI
 	FIELD,
 	/// metric units
 	METRIC,
-	/// units for spe11a and spe11b
-	SPE11A
+	/// units for spe11a
+	SPE11A,
+	/// units for spe11a with mg
+	SPE11Amg
 };
 
 
@@ -101,33 +103,63 @@ const OCP_DBL METRIC_TEMPERATURE_STD = 20;
 const string  METRIC_TIME           = " Day ";
 
 ////////////////////////////////////////////////
-// Metric Units SPE11 (pa,g, 1 bar = 1E5 pa)
+// Units for SPE11A (pa,g, 1 bar = 1E5 pa)
 ////////////////////////////////////////////////
 
 /// 1 [cm3] = 1 [cm3]
-const OCP_DBL SPE11AB_CONV1           = 1.0;
+const OCP_DBL SPE11A_CONV1           = 1.0;
 /// 0 [C] = 273.15 [K]
-const OCP_DBL SPE11AB_CONV2           = 273.15;
+const OCP_DBL SPE11A_CONV2           = 273.15;
 /// 1 [kj] = 0.01 * 1E5 [pa]，[m3]
-const OCP_DBL SPE11AB_CONV3           = 0.01 * 1E5;
+const OCP_DBL SPE11A_CONV3           = 0.01 * 1E5;
 /// 1 [kg-M]/[m3] = 0.001 [gm-M]/[cc]
-const OCP_DBL SPE11AB_CONV4           = 0.001;
+const OCP_DBL SPE11A_CONV4           = 0.001;
 /// Gas constant ([m3]，[pa]/[K]/[kg-M])
-const OCP_DBL SPE11AB_GAS_CONSTANT    = 0.083143 * 1E5;
+const OCP_DBL SPE11A_GAS_CONSTANT    = 0.083143 * 1E5;
 /// Gravity constant ([cm2]，[pa]/[g])  (REQUIRED)
-const OCP_DBL SPE11AB_GRAVITY_FACTOR  = 0.0000980665 * 1E5 *1E1;
+const OCP_DBL SPE11A_GRAVITY_FACTOR  = 0.0000980665 * 1E5 *1E1;
 /// Darcy constant (s，([cm2]/[cm2])/(pa，s)，pa), thus  (REQUIRED)
-const OCP_DBL SPE11AB_DARCY           = 1;
-/// Density of water at standard condition ([kg]/[m3]) 
-const OCP_DBL SPE11AB_RHOW_STD        = 999.014;
-/// Density of air at standard condition ([kg]/[m3]) 
-const OCP_DBL SPE11AB_RHOAIR_STD      = 1.2232;
+const OCP_DBL SPE11A_DARCY           = 1;
+/// Density of water at standard condition ([g]/[cm3]) 
+const OCP_DBL SPE11A_RHOW_STD        = 999.014 * 1E-3;
+/// Density of air at standard condition ([g]/[cm3]) 
+const OCP_DBL SPE11A_RHOAIR_STD      = 1.2232 * 1E-3;
 /// Atmospheric pressure ([pa])  (REQUIRED)
-const OCP_DBL SPE11AB_PRESSURE_STD    = 1.01325 * 1E5;
+const OCP_DBL SPE11A_PRESSURE_STD    = 1.01325 * 1E5;
 /// Standard temperature ([C])
-const OCP_DBL SPE11AB_TEMPERATURE_STD = 20;
+const OCP_DBL SPE11A_TEMPERATURE_STD = 20;
 /// Time unit  (REQUIRED)
-const string  SPE11AB_TIME            = " Sec ";
+const string  SPE11A_TIME            = " Sec ";
+
+
+////////////////////////////////////////////////
+// Units for SPE11A with mg (pa,g, 1 bar = 1E5 pa)
+////////////////////////////////////////////////
+
+/// 1 [cm3] = 1 [cm3]
+const OCP_DBL SPE11Amg_CONV1 = 1.0;
+/// 0 [C] = 273.15 [K]
+const OCP_DBL SPE11Amg_CONV2 = 273.15;
+/// 1 [kj] = 0.01 * 1E5 [pa]，[m3]
+const OCP_DBL SPE11Amg_CONV3 = 0.01 * 1E5;
+/// 1 [kg-M]/[m3] = 0.001 [gm-M]/[cc]
+const OCP_DBL SPE11Amg_CONV4 = 0.001;
+/// Gas constant ([m3]，[pa]/[K]/[kg-M])
+const OCP_DBL SPE11Amg_GAS_CONSTANT = 0.083143 * 1E5;
+/// Gravity constant ([cm2]，[pa]/[mg])  (REQUIRED)
+const OCP_DBL SPE11Amg_GRAVITY_FACTOR = 0.0000980665 * 1E5 * 1E1 * 1E-3;
+/// Darcy constant (s，([cm2]/[cm2])/(pa，s)，pa), thus  (REQUIRED)
+const OCP_DBL SPE11Amg_DARCY = 1;
+/// Density of water at standard condition ([mg]/[cm3]) 
+const OCP_DBL SPE11Amg_RHOW_STD = 999.014;
+/// Density of air at standard condition ([mg]/[cm3]) 
+const OCP_DBL SPE11Amg_RHOAIR_STD = 1.2232;
+/// Atmospheric pressure ([pa])  (REQUIRED)
+const OCP_DBL SPE11Amg_PRESSURE_STD = 1.01325 * 1E5;
+/// Standard temperature ([C])
+const OCP_DBL SPE11Amg_TEMPERATURE_STD = 20;
+/// Time unit  (REQUIRED)
+const string  SPE11Amg_TIME = " Sec ";
 
 
 

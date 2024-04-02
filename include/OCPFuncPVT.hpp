@@ -320,8 +320,10 @@ public:
 protected:
 	/// If use this model
 	OCP_BOOL      ifUse{ OCP_FALSE };
-	/// molecular weight
-	const OCP_DBL MWCO2{ 44.01E-0 };
+	/// molecular weight [g/mol]
+	// const OCP_DBL MWCO2{ 44.01E-0 };
+	/// molecular weight [mg/mol]
+	const OCP_DBL MWCO2{ 44.01E+3 };
 };
 
 
