@@ -98,7 +98,7 @@ VectorPetscSolver::VectorPetscSolver(const string& dir, const string& file, cons
 
 OCP_INT VectorPetscSolver::Solve()
 {
-    return FIM_solver_p(myrank, numproc, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
+//    return FIM_solver_p(myrank, numproc, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x); /// TODO 接口参数错误
 }
 
 #endif // WITH_PETSCSOLVER

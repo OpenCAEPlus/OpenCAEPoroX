@@ -12,7 +12,7 @@ endif()
 # Find required dependencies 
 include(RequiredBLAS)
 include(RequiredLAPACK)
-include(RequiredFASP)
+#include(RequiredFASP)
 
 # Find optional dependencies
 include(OptionalOPENMP)

@@ -29,6 +29,8 @@ if(USE_PETSCSOLVER)
   # try to find PETSCSOLVER
 
   find_package(PETSC)
+  target_include_directories(${PROJECT_NAME} PUBLIC "${PETSC_INCLUDE_DIRS}")
+  message("------> PETSC_INCLUDE_DIRS: ${PETSC_INCLUDE_DIRS}")
 
   if (PETSCSOLVER_FOUND)
     message(STATUS "INFO: PETSCSOLVER found")

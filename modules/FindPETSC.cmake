@@ -4,6 +4,7 @@
 
 
 set(PETSC_DIR "${PETSC_DIR}")
+message("====== petsc_dir: ${PETSC_DIR}")
 
 # Check for header file
 find_path(PETSC_INCLUDE_DIRS petsc.h
@@ -22,6 +23,7 @@ set(PETSC_LIBRARIES ${PETSC_LIBRARIES})
 
 # Standard package handling
 include(FindPackageHandleStandardArgs)
+message("====== petsc_dir: ${PETSC_DIR}")
 find_package_handle_standard_args(PETSC
     "PETSC could not be found. Check PETSC_DIR."
     PETSC_LIBRARIES PETSC_INCLUDE_DIRS)

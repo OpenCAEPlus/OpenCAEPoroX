@@ -90,6 +90,9 @@ if(BUILD_TEST)
     include(CTest)
 endif()
 
+find_package(MPI REQUIRED)
+target_include_directories(${PROJECT_NAME} PUBLIC "${MPI_CXX_INCLUDE_PATH}")
+target_link_libraries(${LIBNAME} PUBLIC MPI::MPI_CXX)
 
 if(WIN32)
 	MESSAGE(STATUS "Windows Environments Now")

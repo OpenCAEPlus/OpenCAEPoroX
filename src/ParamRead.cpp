@@ -68,6 +68,7 @@ void ParamRead::ReadFile(const string& filename)
         if (!ReadLine(ifs, vbuf)) break;
         string keyword = vbuf[0];
 
+        std::cout << "第二阶段 关键字: " << keyword << std::endl;
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
 
             case Map_Str2Int("FIELD", 5):

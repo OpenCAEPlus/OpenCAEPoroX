@@ -1,7 +1,7 @@
 # ##############################################################################
 # For PETSCSOLVERSOLVER
 # ##############################################################################
-option(USE_PETSCSOLVER "Use PETSCSOLVER" OFF)
+option(USE_PETSCSOLVER "Use PETSCSOLVER" ON)
 
 if(USE_PETSCSOLVER)
 
@@ -29,6 +29,9 @@ if(USE_PETSCSOLVER)
   # try to find PETSCSOLVER
   find_package(PETSCSOLVER)
   find_package(PETSC)
+  target_include_directories(${PROJECT_NAME} PUBLIC "${PETSC_INCLUDE_DIRS}")
+  target_include_directories(${PROJECT_NAME} PUBLIC "${PETSC_DIR}/${PETSC_ARCH}/include")
+  message("------> PETSC_INCLUDE_DIRS: ${PETSC_INCLUDE_DIRS}, HAHAHAHAH ${PETSC_DIR}/${PETSC_ARCH}/include")
 
   if (PETSCSOLVER_FOUND)
     message(STATUS "INFO: PETSCSOLVER found")
