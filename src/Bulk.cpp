@@ -22,7 +22,7 @@
 /////////////////////////////////////////////////////////////////////
 
 /// Read parameters from rs_param data structure.
-void Bulk::InputParam(const ParamReservoir& rs_param)
+void Bulk::Setup(const ParamReservoir& rs_param)
 {
     OCP_FUNCNAME;
 
@@ -35,13 +35,21 @@ void Bulk::InputParam(const ParamReservoir& rs_param)
     INITm.Setup(rs_param, PVTm.GetMixtureType());
 
     ACCm.Setup(rs_param, vs, &BOUNDm);
+
+
+    SetupOthers();
 }
 
 
 /// Setup bulk information.
-void Bulk::Setup()
+void Bulk::SetupOthers()
 {
-    OCP_FUNCNAME;
+    // check
+    if (vs.ntg.size() != vs.nb) {
+        vs.ntg.clear();
+        vs.ntg.resize(vs.nb, 1.0);
+    }
+
     if (PVTm.GetMixtureType() == OCPMixtureType::THERMALK_OW) {
         vs.cType.resize(vs.nb, BulkContent::rf);
         for (OCP_USI n = 0; n < vs.nb; n++) {

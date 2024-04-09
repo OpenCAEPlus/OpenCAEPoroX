@@ -93,10 +93,12 @@ class Bulk
 
 public:
     /// Input param from internal data structure ParamReservoir.
-    void InputParam(const ParamReservoir& rs_param);
+    void Setup(const ParamReservoir& rs_param);
 
+
+protected:
     /// Allocate memory for fluid grid for isothermal model.
-    void Setup();
+    void SetupOthers();
 
     /////////////////////////////////////////////////////////////////////
     // General Variables

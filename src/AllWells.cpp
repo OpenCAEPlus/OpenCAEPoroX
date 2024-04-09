@@ -15,7 +15,7 @@
 // General
 /////////////////////////////////////////////////////////////////////
 
-void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
+void AllWells::Setup(const ParamWell& paramWell, const Bulk& bk, const Domain& domain)
 {
 
     OCP_FUNCNAME;
@@ -85,15 +85,8 @@ void AllWells::InputParam(const ParamWell& paramWell, const Domain& domain)
                 wells[wdst]->optSet[d] = WellOpt(tmpOptParam[i].opt);
             }
         }
-    }
-}
 
-
-void AllWells::Setup(const Bulk& bk)
-{
-    OCP_FUNCNAME;
-    for (USI w = 0; w < numWell; w++) {
-        wells[w]->Setup(bk, solvents);
+        wells[wdst]->Setup(bk, solvents);
     }
 }
 

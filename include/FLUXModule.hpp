@@ -25,7 +25,7 @@ class FLUXModule
 {
 
 public:
-    void InputParam(const ParamReservoir& rs_param, const vector<BulkConnPair>& iterConn, const Bulk& bk, BulkConnOptionalModules& optMs)
+    void Setup(const ParamReservoir& rs_param, const vector<BulkConnPair>& iterConn, const Bulk& bk, BulkConnOptionalModules& optMs)
     {
         const USI np = bk.GetPhaseNum();
         const USI nc = bk.GetComNum();

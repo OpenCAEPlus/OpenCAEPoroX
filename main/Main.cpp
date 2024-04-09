@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD);
 
         // Step 2. Input reservoir information and distribute
-        simulator.InputDistParam(argv[1], preProcess, myRank);
+        simulator.SetupDistParam(argv[1], preProcess, myRank);
     }
 
     // Step 3. Setup params

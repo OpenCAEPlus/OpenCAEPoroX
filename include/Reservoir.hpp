@@ -82,16 +82,16 @@ class Reservoir
     /////////////////////////////////////////////////////////////////////
 
 public:
-    void InputParam(PreProcess& prepro, ParamRead& rsparam);
+    void Setup(PreProcess& prepro, ParamRead& rsparam);
+    const Domain& GetDomain() const { return domain; }
 
+protected:
     /// Setup Domain
     void SetupDomain(Domain& myDomain) { swap(domain, myDomain); }
     /// Grid-based, Conn-based
-    void InputDistParamGrid(PreParamGridWell& prepro);
+    void SetupDistParamGrid(PreParamGridWell& prepro);
     /// Well-based
-    void InputDistParamOthers(const ParamRead& param);
-
-    const Domain& GetDomain() const { return domain; }
+    void SetupDistParamOthers(const ParamRead& param);
 
 protected:
     // Get name and address of send_var
@@ -103,9 +103,6 @@ protected:
     /////////////////////////////////////////////////////////////////////
 
 public:
-
-    /// Setup static information for reservoir
-    void Setup();
     /// Apply the control of ith critical time point.
     void ApplyControl(const USI& i);
     /// Calculate num of Injection, Production

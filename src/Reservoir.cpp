@@ -27,11 +27,11 @@ void VarInfoGrid::CalNumByte()
 /////////////////////////////////////////////////////////////////////
 
 
-void Reservoir::InputParam(PreProcess& prepro, ParamRead& param)
+void Reservoir::Setup(PreProcess& prepro, ParamRead& param)
 {
     SetupDomain(prepro.domain);
-    InputDistParamGrid(prepro.preParamGridWell);
-    InputDistParamOthers(param);
+    SetupDistParamGrid(prepro.preParamGridWell);
+    SetupDistParamOthers(param);
 }
 
 
@@ -67,7 +67,7 @@ OCP_INT Reservoir::GetSendVarInfo(const VarInfoGrid& varInfo, VarInfoGrid& send_
 }
 
 
-void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
+void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 {
 
     if (CURRENT_RANK == MASTER_PROCESS) {
@@ -531,28 +531,21 @@ void Reservoir::InputDistParamGrid(PreParamGridWell& mygrid)
   
     MPI_Barrier(myComm);
 
-    // check
-    if (bulk.vs.ntg.size() != bulk.vs.nb) {
-        bulk.vs.ntg.clear();
-        bulk.vs.ntg.resize(bulk.vs.nb, 1.0);
-    }
-
-
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Master Process Distribute Grid Params -- end");
     }
 }
 
 
-void Reservoir::InputDistParamOthers(const ParamRead& param)
+void Reservoir::SetupDistParamOthers(const ParamRead& param)
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Reservoir Params -- begin");
     }
 
-    bulk.InputParam(param.paramRs);
-    conn.InputParam(param.paramRs, bulk);
-    allWells.InputParam(param.paramWell, domain);
+    bulk.Setup(param.paramRs);
+    conn.Setup(param.paramRs, bulk);
+    allWells.Setup(param.paramWell, bulk, domain);
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Reservoir Params -- end");
@@ -560,13 +553,6 @@ void Reservoir::InputDistParamOthers(const ParamRead& param)
 }
 
 
-void Reservoir::Setup()
-{
-    OCP_FUNCNAME;
-
-    bulk.Setup();
-    allWells.Setup(bulk);
-}
 
 void Reservoir::ApplyControl(const USI& i)
 {
