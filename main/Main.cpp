@@ -54,11 +54,11 @@ int main(int argc, char* argv[])
         PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD);
 
         // Step 2. Input reservoir information and distribute
-        simulator.SetupDistParam(argv[1], preProcess, myRank);
+        simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
     }
 
     // Step 3. Setup params
-    simulator.SetupSimulator(argc, const_cast<const char**>(argv));
+    simulator.SetupSimulator();
 
     // Step 4. Initialize the reservoir
     simulator.InitReservoir();

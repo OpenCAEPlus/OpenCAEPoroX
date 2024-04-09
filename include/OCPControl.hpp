@@ -31,9 +31,7 @@ class OCPControl
 {
 public:
     /// Input parameters for control.
-    void InputParam(const ParamControl& CtrlParam);
-    /// Setup Comm
-    void Setup(const Domain& domain);
+    void Setup(const USI& argc, const char* argv[], const ParamControl& CtrlParam, const Domain& domain);
     /// Apply control for time step i.
     INT ApplyControl();
     /// Check if converge
@@ -44,6 +42,10 @@ public:
     void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il) {
         time.CalNextTimeStep(NRs, il);
     }
+
+protected:
+    /// Setup communicator
+    void SetupComm(const Domain& domain);
 
 public:
     MPI_Comm         myComm;
@@ -69,10 +71,12 @@ public:
     auto GetWorkDir() const { return workDir; }
     /// Get OCP file name.
     auto GetOCPFile() const { return ocpFile; }
-    /// Setup fast Control.
-    void SetupFastControl(const USI& argc, const char* optset[]);
     /// Output model information
     void OutputModelMethodInfo() const;
+
+protected:
+    /// Setup fast Control.
+    void SetFastControl(const USI& argc, const char* optset[]);
 
 protected:
     /// Current work directory

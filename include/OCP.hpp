@@ -75,10 +75,10 @@ public:
     }
 
     /// Read Param from an input file.
-    void SetupDistParam(const string& filename, PreProcess& prepro, const OCP_INT& myRank);
+    void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank);
 
     /// Setup reservoir based on an internal structure.
-    void SetupSimulator(const USI& argc, const char* options[]);
+    void SetupSimulator();
 
     /// Initialize or get initial status of reservoir.
     void InitReservoir();

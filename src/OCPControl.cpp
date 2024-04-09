@@ -12,18 +12,7 @@
 #include "OCPControl.hpp"
 
 
-void OCPControl::SetupFastControl(const USI& argc, const char* optset[])
-{
-    FastControl ctrlFast(argc, optset);
-    if (ctrlFast.ifUse) {
-        time.SetFastControl(ctrlFast);
-    }
-    printLevel = ctrlFast.printLevel;
-}
-
-
-
-void OCPControl::InputParam(const ParamControl& CtrlParam)
+void OCPControl::Setup(const USI& argc, const char* argv[], const ParamControl& CtrlParam, const Domain& domain)
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Control Params -- begin");
@@ -53,10 +42,13 @@ void OCPControl::InputParam(const ParamControl& CtrlParam)
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Control Params -- end");
     }
+    SetupComm(domain);
+
+    SetFastControl(argc, argv);
 }
 
 
-void OCPControl::Setup(const Domain& domain) 
+void OCPControl::SetupComm(const Domain& domain) 
 {
     myComm  = domain.myComm;
     numproc = domain.numproc;
@@ -64,6 +56,17 @@ void OCPControl::Setup(const Domain& domain)
 
     time.SetupComm(domain);
     NR.SetupComm(domain);
+}
+
+
+void OCPControl::SetFastControl(const USI& argc, const char* optset[])
+{
+    FastControl ctrlFast(argc, optset);
+    if (ctrlFast.ifUse) {
+        time.SetFastControl(ctrlFast);
+        SM.SetFastControl(ctrlFast);
+    }
+    printLevel = ctrlFast.printLevel;
 }
 
 

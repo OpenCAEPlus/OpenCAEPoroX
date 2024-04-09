@@ -12,17 +12,17 @@
 #include "OCP.hpp"
 
 /// Read Param from input file
-void OpenCAEPoroX::SetupDistParam(const string& filename, PreProcess& prepro, const OCP_INT& myRank)
+void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank)
 {
 
     GetWallTime timer;
     timer.Start();
 
     ParamRead rp;
-    rp.ReadInputFile(filename);
+    rp.ReadInputFile(argv[1]);
 
     reservoir.Setup(prepro, rp);
-    control.InputParam(rp.paramControl);
+    control.Setup(argc, argv, rp.paramControl, reservoir.GetDomain());
     output.InputParam(rp.paramOutput);
 
     OCPTIME_READPARAM = timer.Stop();
@@ -31,7 +31,7 @@ void OpenCAEPoroX::SetupDistParam(const string& filename, PreProcess& prepro, co
 
 
 /// Call setup procedures for reservoir, output, and linear solver.
-void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
+void OpenCAEPoroX::SetupSimulator()
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Setup Simulator -- begin");
@@ -41,9 +41,6 @@ void OpenCAEPoroX::SetupSimulator(const USI& argc, const char* options[])
 
     GetWallTime timer;
     timer.Start();
-
-    control.SetupFastControl(argc, options); // Read Fast control
-    control.Setup(domain);
 
     solver.Setup(reservoir, control); // Setup static info for solver
 
