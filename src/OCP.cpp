@@ -23,7 +23,7 @@ void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProces
 
     reservoir.Setup(prepro, rp);
     control.Setup(argc, argv, rp.paramControl, reservoir.GetDomain());
-    output.InputParam(rp.paramOutput);
+    output.Setup(rp.paramOutput, control, reservoir);
 
     OCPTIME_READPARAM = timer.Stop();
     OCPTIME_TOTAL     += OCPTIME_READPARAM;
@@ -31,20 +31,16 @@ void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProces
 
 
 /// Call setup procedures for reservoir, output, and linear solver.
-void OpenCAEPoroX::SetupSimulator()
+void OpenCAEPoroX::SetupSolver()
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Setup Simulator -- begin");
     }
 
-    const Domain& domain = reservoir.GetDomain();
-
     GetWallTime timer;
     timer.Start();
 
     solver.Setup(reservoir, control); // Setup static info for solver
-
-    output.Setup(reservoir, control, domain); // Setup output for dynamic simulation
 
     control.OutputModelMethodInfo();
 

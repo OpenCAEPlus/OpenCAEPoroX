@@ -78,7 +78,7 @@ public:
     void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank);
 
     /// Setup reservoir based on an internal structure.
-    void SetupSimulator();
+    void SetupSolver();
 
     /// Initialize or get initial status of reservoir.
     void InitReservoir();

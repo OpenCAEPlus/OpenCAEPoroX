@@ -145,11 +145,8 @@ public:
 class Summary
 {
 public:
-    /// Input var names those will be printed
-    void InputParam(const OutputSummary& summary_param);
-
     /// Setup outputting structure
-    void Setup(const Reservoir& reservoir);
+    void Setup(const OutputSummary& summary_param, const Reservoir& reservoir);
 
     /// Set value for vars
     void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const ItersInfo& iters);
@@ -159,6 +156,9 @@ public:
 
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
+
+protected:
+    void SetupOutputTerm(const OutputSummary& summary_param);
 
 protected:
     vector<SumItem> Sumdata; ///< Contains all information to be printed.
@@ -235,8 +235,7 @@ class OutGridVarSet
     friend class Out4VTK;
 
 public:
-    void SetOutGridVarSet(const OutGridParam& param);
-    void Setup(const Bulk& bk);
+    void Setup(const OutGridParam& param, const Bulk& bk);
 
 protected:
     USI      nc;                  ///< num of components
@@ -274,37 +273,36 @@ protected:
 };
 
 /// Collect more detailed information of each time step.
-class Out4RPT
-{
-public:
-    void InputParam(const OutputRPTParam& RPTparam);
-    void Setup(const string& dir, const Reservoir& reservoir);
-    void PrintRPT(const string& dir, const Reservoir& rs, const OCP_DBL& days) const;
-    void GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const;
-
-private:
-    OCP_BOOL          useRPT{OCP_FALSE};
-    OCP_ULL           numGrid;
-    OCP_USI           nx;
-    OCP_USI           ny;
-    USI               IJKspace;
-    OutGridVarSet     bgp;
-};
+//class Out4RPT
+//{
+//public:
+//    void InputParam(const OutputRPTParam& RPTparam);
+//    void Setup(const string& dir, const Reservoir& reservoir);
+//    void PrintRPT(const string& dir, const Reservoir& rs, const OCP_DBL& days) const;
+//    void GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const;
+//
+//private:
+//    OCP_BOOL          useRPT{OCP_FALSE};
+//    OCP_ULL           numGrid;
+//    OCP_USI           nx;
+//    OCP_USI           ny;
+//    USI               IJKspace;
+//    OutGridVarSet     bgp;
+//};
 
 
 class Out4VTK
 {
 public:
     /// Input Params about vtk output
-    void InputParam(const OutputVTKParam& VTKParam);
-    /// Setup up vtk output
-    void Setup(const string& dir, const Reservoir& rs);
+    void Setup(const OutputVTKParam& VTKParam, const string& dir, const Reservoir& rs);
     /// Output info with the vtk format
     void PrintVTK(const Reservoir& rs) const;
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
 protected:
+    void Initialize(const string& dir, const Reservoir& rs);
     void PostProcessP(const string& dir, const string& filename, const OCP_INT& numproc) const;
     void PostProcessS(const string& dir, const string& filename) const;
 
@@ -331,19 +329,21 @@ class OCPOutput
 
 public:
     /// Input Params about output
-    void InputParam(const ParamOutput& paramOutput);
-    /// Setup all kinds of output
-    void Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain);
+    void Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, const Reservoir& rs);
     /// Assign values to be output in PrintInfo()
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR);
+    void SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR);
     /// Output info which is each time step based
     void PrintInfo() const;
     /// Output info which is Keyword TSTEP based
-    void PrintInfoSched(const Reservoir&  rs, const OCPControl& ctrl, const OCP_DBL& time) const;
+    void PrintInfoSched(const Reservoir& rs, const OCPControl& ctrl, const OCP_DBL& time) const;
     /// Post-process the output file
     void PostProcess() const;
     /// output current time step and iterations to screen
     void PrintCurrentTimeIter(const OCPControl& ctrl) const;
+
+protected:
+    /// Setup communicator
+    void SetupComm(const Domain& domain);
 
 protected:
     MPI_Comm  myComm;
@@ -356,8 +356,8 @@ protected:
     ItersInfo    iters;
     Summary      summary;
     CriticalInfo crtInfo;
-    Out4RPT      out4RPT;
     Out4VTK      out4VTK;
+    // Out4RPT      out4RPT;
 };
 
 #endif /* end if __OCPOUTPUT_HEADER__ */

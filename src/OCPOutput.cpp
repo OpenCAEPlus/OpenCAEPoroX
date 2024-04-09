@@ -22,7 +22,7 @@ void ItersInfo::Update(const OCPNRsuite& NRs)
 }
 
 
-void Summary::InputParam(const OutputSummary& summary_param)
+void Summary::SetupOutputTerm(const OutputSummary& summary_param)
 {
     FPR  = summary_param.FPR;
     FTR  = summary_param.FTR;
@@ -56,11 +56,13 @@ void Summary::InputParam(const OutputSummary& summary_param)
     SGAS = summary_param.SGAS;
     SWAT = summary_param.SWAT;
 
-    // cout << "Summary::InputParam" << endl;
 }
 
-void Summary::Setup(const Reservoir& rs)
+void Summary::Setup(const OutputSummary& summary_param, const Reservoir& rs)
 {
+
+    SetupOutputTerm(summary_param);
+
     const USI maxRowNum = 1000;
 
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
@@ -976,7 +978,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 }
 
 
-void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
+void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
 {
     PRE    = param.PRE;
     PHASEP = param.PHASEP;
@@ -1004,11 +1006,7 @@ void OutGridVarSet::SetOutGridVarSet(const OutGridParam& param)
     PERMX  = param.PERMX;
     PERMY  = param.PERMY;
     PERMZ  = param.PERMZ;
-}
 
-
-void OutGridVarSet::Setup(const Bulk& bk)
-{
     nc = bk.GetComNum();
     np = bk.GetPhaseNum();
 
@@ -1017,23 +1015,23 @@ void OutGridVarSet::Setup(const Bulk& bk)
         SOIL = OCP_FALSE;
         DENO = OCP_FALSE;
         BOIL = OCP_FALSE;
-        KRO  = OCP_FALSE;
+        KRO = OCP_FALSE;
         VOIL = OCP_FALSE;
-        XMF  = OCP_FALSE;
+        XMF = OCP_FALSE;
     }
     if (!bk.IfGasExist()) {
         SGAS = OCP_FALSE;
         DENG = OCP_FALSE;
         BGAS = OCP_FALSE;
-        KRG  = OCP_FALSE;
+        KRG = OCP_FALSE;
         VGAS = OCP_FALSE;
-        YMF  = OCP_FALSE;
+        YMF = OCP_FALSE;
     }
     if (!bk.IfWatExist()) {
         SWAT = OCP_FALSE;
         DENW = OCP_FALSE;
         BWAT = OCP_FALSE;
-        KRW  = OCP_FALSE;
+        KRW = OCP_FALSE;
         VWAT = OCP_FALSE;
     }
 
@@ -1067,13 +1065,14 @@ void OutGridVarSet::Setup(const Bulk& bk)
 }
 
 
-void Out4RPT::InputParam(const OutputRPTParam& RPTparam)
-{
-    useRPT = RPTparam.useRPT;
-    if (!useRPT) return;
 
-    bgp.SetOutGridVarSet(RPTparam.bgp);
-}
+//void Out4RPT::InputParam(const OutputRPTParam& RPTparam)
+//{
+//    useRPT = RPTparam.useRPT;
+//    if (!useRPT) return;
+//
+//    bgp.Setup(RPTparam.bgp, rs.bulk);
+//}
 
 //void Out4RPT::Setup(const string& dir, const Reservoir& rs)
 //{
@@ -1336,30 +1335,31 @@ void Out4RPT::InputParam(const OutputRPTParam& RPTparam)
 //    outRPT.close();
 //}
 
-void Out4RPT::GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const
-{
-    // i,j,k begin from 1
-    // n must be the index of grids instead bulks
-    k = n / (nx * ny) + 1;
-    j = (n - (k - 1) * nx * ny) / nx + 1;
-    i = n - (k - 1) * nx * ny - (j - 1) * nx + 1;
-}
+//void Out4RPT::GetIJKGrid(USI& i, USI& j, USI& k, const OCP_ULL& n) const
+//{
+//    // i,j,k begin from 1
+//    // n must be the index of grids instead bulks
+//    k = n / (nx * ny) + 1;
+//    j = (n - (k - 1) * nx * ny) / nx + 1;
+//    i = n - (k - 1) * nx * ny - (j - 1) * nx + 1;
+//}
 
-void Out4VTK::InputParam(const OutputVTKParam& VTKParam)
+
+void Out4VTK::Setup(const OutputVTKParam& VTKParam, const string& dir, const Reservoir& rs)
 {
     useVTK = VTKParam.useVTK;
     if (!useVTK) return;
 
-    bgp.SetOutGridVarSet(VTKParam.bgp);
-
+    bgp.Setup(VTKParam.bgp, rs.bulk);
     out4vtk.Setup(VTKParam.bgp.ASCII, VTKParam.bgp.DOUBLE);
+
+    Initialize(dir, rs);
 }
 
-void Out4VTK::Setup(const string& dir, const Reservoir& rs)
+
+void Out4VTK::Initialize(const string& dir, const Reservoir& rs)
 {
     if (!useVTK) return;
-
-    bgp.Setup(rs.bulk);
 
     // output the gloabl index of grids belonging to current domain
     const Domain& doman = rs.domain;
@@ -1389,6 +1389,7 @@ void Out4VTK::Setup(const string& dir, const Reservoir& rs)
         }
     }    
 }
+
 
 void Out4VTK::PrintVTK(const Reservoir& rs) const
 {
@@ -1749,42 +1750,40 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
 }
 
 
-void OCPOutput::InputParam(const ParamOutput& paramOutput)
+void OCPOutput::Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, const Reservoir& rs)
 {
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Output Params -- begin");
     }
 
-    summary.InputParam(paramOutput.summary);
-    out4RPT.InputParam(paramOutput.outRPTParam);
-    out4VTK.InputParam(paramOutput.outVTKParam);
+    workDir  = ctrl.GetWorkDir();
+    fileName = ctrl.GetOCPFile();
+    SetupComm(rs.GetDomain());
 
+    summary.Setup(paramOutput.summary, rs);
+    out4VTK.Setup(paramOutput.outVTKParam, workDir, rs);
+    crtInfo.Setup();
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Input Output Params -- end");
     }
 }
 
-void OCPOutput::Setup(const Reservoir& reservoir, const OCPControl& ctrl, const Domain& domain)
+
+void OCPOutput::SetupComm(const Domain& domain)
 {
     myComm  = domain.myComm;
     numproc = domain.numproc;
     myrank  = domain.myrank;
-
-    workDir  = ctrl.GetWorkDir();
-    fileName = ctrl.GetOCPFile();
-    summary.Setup(reservoir);
-    crtInfo.Setup();
-    // out4RPT.Setup(workDir, reservoir);
-    out4VTK.Setup(workDir, reservoir);
 }
 
-void OCPOutput::SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const OCPNRsuite& NR)
+
+void OCPOutput::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
 {
     GetWallTime timer;
     timer.Start();
 
     iters.Update(NR);
-    summary.SetVal(reservoir, ctrl, iters);
+    summary.SetVal(rs, ctrl, iters);
     crtInfo.SetVal(ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop();

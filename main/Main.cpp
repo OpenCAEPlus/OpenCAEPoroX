@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     }
 
     // Step 3. Setup params
-    simulator.SetupSimulator();
+    simulator.SetupSolver();
 
     // Step 4. Initialize the reservoir
     simulator.InitReservoir();
