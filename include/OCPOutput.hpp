@@ -330,10 +330,10 @@ class OCPOutput
 public:
     /// Input Params about output
     void Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, const Reservoir& rs);
-    /// Assign values to be output in PrintInfo()
-    void SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR);
+    /// Assign values to be output in PrintAtTimeStep()
+    void SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR);
     /// Output info which is each time step based
-    void PrintInfo() const;
+    void PrintAtTimeStep() const;
     /// Output info which is Keyword TSTEP based
     void PrintInfoSched(const Reservoir& rs, const OCPControl& ctrl, const OCP_DBL& time) const;
     /// Post-process the output file

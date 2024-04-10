@@ -1777,7 +1777,7 @@ void OCPOutput::SetupComm(const Domain& domain)
 }
 
 
-void OCPOutput::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
+void OCPOutput::SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
 {
     GetWallTime timer;
     timer.Start();
@@ -1789,7 +1789,7 @@ void OCPOutput::SetVal(const Reservoir& rs, const OCPControl& ctrl, const OCPNRs
     OCPTIME_OUTPUT += timer.Stop();
 }
 
-void OCPOutput::PrintInfo() const
+void OCPOutput::PrintAtTimeStep() const
 {
     GetWallTime timer;
     timer.Start();

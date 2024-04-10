@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
     }
 
-    // Step 3. Setup params
+    // Step 3. Setup solver
     simulator.SetupSolver();
 
     // Step 4. Initialize the reservoir

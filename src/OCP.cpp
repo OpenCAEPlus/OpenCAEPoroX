@@ -105,10 +105,10 @@ void OpenCAEPoroX::RunSimulation()
         while (!control.time.IfEndTSTEP()) {
             output.PrintCurrentTimeIter(control);
             const OCPNRsuite& NR = solver.GoOneStep(reservoir, control);
-            output.SetVal(reservoir, control, NR);
+            output.SetValAtTimeStep(reservoir, control, NR);
             if (control.printLevel >= PRINT_ALL) {
                 // Print Summary and critical information at every time step
-                output.PrintInfo();
+                output.PrintAtTimeStep();
             }
 
             if (control.simTime.IfStop())  control.StopSim = OCP_TRUE;
@@ -127,7 +127,7 @@ void OpenCAEPoroX::OutputResults() const
 {
     GetWallTime timer;
     timer.Start();
-    output.PrintInfo();
+    output.PrintAtTimeStep();
     output.PostProcess();
     OCPTIME_TOTAL += timer.Stop();
       
