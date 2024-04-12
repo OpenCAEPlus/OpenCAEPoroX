@@ -36,12 +36,13 @@ void PreParamGridWell::Input(const string& myFilename)
         cout << "Reading file: " << (workdir + myFilename) << endl;
     }
 
+    /// TODO 第一处关键字读取
     while (!ifs.eof()) {
         vector<string> vbuf;
         if (!ReadLine(ifs, vbuf)) break;
         string keyword = vbuf[0];
 
-        std::cout << "关键字：" << keyword << std::endl;
+        std::cout << "第一阶段 关键字：" << keyword << std::endl;
         switch (Map_Str2Int(&keyword[0], keyword.size())) 
         {
             case Map_Str2Int("MODEL", 5):
