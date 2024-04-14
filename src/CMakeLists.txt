@@ -17,7 +17,7 @@ target_sources(
 		  HeatConduct.cpp
 		  HeatLoss.cpp
 		  IsoThermalMethod.cpp
-		  IsothermalSolver.cpp
+		  IsoThermalSolver.cpp
 		  LinearSystem.cpp
 		  MixtureUnit.cpp
 		  OCP.cpp

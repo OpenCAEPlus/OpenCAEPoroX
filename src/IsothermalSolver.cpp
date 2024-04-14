@@ -1,5 +1,5 @@
-/*! \file    IsothermalSolver.cpp
- *  \brief   IsothermalSolver class definition
+/*! \file    IsoThermalSolver.cpp
+ *  \brief   IsoThermalSolver class definition
  *  \author  Shizhe Li
  *  \date    Oct/21/2021
  *
@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#include "IsothermalSolver.hpp"
+#include "IsoThermalSolver.hpp"
 
 /// Setup solution methods used including solver and preconditioner
 void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)

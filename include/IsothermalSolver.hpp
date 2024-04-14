@@ -1,5 +1,5 @@
-/*! \file    IsothermalSolver.hpp
- *  \brief   IsothermalSolver class declaration
+/*! \file    IsoThermalSolver.hpp
+ *  \brief   IsoThermalSolver class declaration
  *  \author  Shizhe Li
  *  \date    Oct/21/2021
  *

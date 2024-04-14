@@ -10,7 +10,7 @@
  */
 
 // OpenCAEPoroX header files
-#include "IsothermalSolver.hpp"
+#include "IsoThermalSolver.hpp"
 #include "ThermalSolver.hpp"
 #include "OCPOutput.hpp"
 
@@ -27,10 +27,6 @@ public:
     void InitReservoir(Reservoir& rs);
     /// General API
     const OCPNRsuite& GoOneStep(Reservoir& rs, OCPControl& ctrl);
-
-protected:
-    /// Run one time step for ifThermal model
-    const OCPNRsuite& GoOneStepT(Reservoir& rs, OCPControl& ctrl);
 
 protected:
     /// Model

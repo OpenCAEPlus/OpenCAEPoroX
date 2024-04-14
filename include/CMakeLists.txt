@@ -24,7 +24,7 @@ target_sources(
 		 HeatConduct.hpp
 		 HeatLoss.hpp
 		 IsoThermalMethod.hpp
-		 IsothermalSolver.hpp
+		 IsoThermalSolver.hpp
 		 LinearSolver.hpp
 		 LinearSystem.hpp
 		 MixtureUnit.hpp
