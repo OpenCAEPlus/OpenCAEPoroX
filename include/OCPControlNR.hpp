@@ -60,7 +60,7 @@ public:
     }
     /// Setup communicator
     void SetupComm(const Domain& domain) {
-        myComm = domain.myComm;
+        myComm = domain.global_comm;
         numproc = domain.numproc;
         myrank = domain.myrank;
     }

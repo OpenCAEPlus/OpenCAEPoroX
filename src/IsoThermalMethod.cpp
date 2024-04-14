@@ -38,7 +38,7 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bvs.P[rel[1]], (rel[2] - rel[1]), OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&bvs.P[rel[1]], (rel[2] - rel[1]), OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -50,7 +50,7 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
         for (USI j = 1; j < sel.size(); j++) {
             s[j] = bvs.P[sel[j]];
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
@@ -67,7 +67,7 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -80,7 +80,7 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
             const OCP_DBL* bId = &bvs.Ni[0] + sel[j] * nc;
             copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
@@ -171,7 +171,7 @@ OCP_BOOL IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContr
     //ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_IMPEC.out", 
     //                      "proc" + to_string(myrank) + "_testb_IMPEC.out");
     //ls.OutputSolution("proc" + to_string(myrank) + "_testx_IMPEC.out");
-    //MPI_Barrier(rs.domain.myComm);
+    //MPI_Barrier(rs.domain.global_comm);
     //OCP_ABORT("Stop");
 #endif // DEBUG
 
@@ -553,7 +553,7 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
 
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1]], rel[2] - rel[1], OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&u[rel[1]], rel[2] - rel[1], OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -565,7 +565,7 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
         for (USI j = 1; j < sel.size(); j++) {
             s[j] = u[sel[j]];
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     // Bulk
@@ -779,13 +779,13 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     // Output A, b, x
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
-    //MPI_Barrier(rs.domain.myComm);
+    //MPI_Barrier(rs.domain.global_comm);
     //OCP_ABORT("Stop");
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
 #endif // DEBUG
 
 
-    //MPI_Barrier(rs.domain.myComm);
+    //MPI_Barrier(rs.domain.global_comm);
     //OCP_ABORT("Stop");
 
     // Get solution from linear system to Reservoir
@@ -1127,7 +1127,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         timer.Start();
 
         OCP_DBL tmploc = res.maxRelRes_V;
-        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
@@ -1259,7 +1259,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
    
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -1272,7 +1272,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
              const OCP_DBL* bId = u.data() + sel[j] * col;
              copy(bId, bId + col, &s[1 + (j - 1) * col]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     // Bulk
@@ -1560,7 +1560,7 @@ OCP_BOOL IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContro
     //OCP_INT myrank = rs.domain.myrank;
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_AIMc.out",
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_AIMc.out");
-    //MPI_Barrier(rs.domain.myComm);
+    //MPI_Barrier(rs.domain.global_comm);
     //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_AIMc.out");
 #endif // DEBUG
 
@@ -1716,7 +1716,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
         vector<OCP_INT>&       r   = recv_buffer[i];
         r.resize(rel[2] - rel[1]);
-        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_INT>> send_buffer(domain.numSendProc);
@@ -1728,7 +1728,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         for (USI j = 1; j < sel.size(); j++) {
             s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
@@ -1748,7 +1748,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
         vector<OCP_INT>&       r   = recv_buffer[i];
         r.resize(rel[2] - rel[1]);
-        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     for (USI i = 0; i < domain.numSendProc; i++) {
@@ -1759,7 +1759,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         for (USI j = 1; j < sel.size(); j++) {
             s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
@@ -2038,7 +2038,7 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -2051,7 +2051,7 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
             const OCP_DBL* bId = u.data() + sel[j] * col;
             copy(bId, bId + col, &s[1 + (j - 1) * col]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     // Bulk
@@ -2331,7 +2331,7 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
     
         GetWallTime timer;
         timer.Start();
-        MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+        MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 }

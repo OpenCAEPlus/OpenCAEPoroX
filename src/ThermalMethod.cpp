@@ -681,7 +681,7 @@ void T_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
         timer.Start();
 
         OCP_DBL tmploc = res.maxRelRes_V;
-        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.myComm);
+        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
@@ -805,7 +805,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
     // Exchange Solution for ghost grid
     for (USI i = 0; i < domain.numRecvProc; i++) {
         const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.myComm, &domain.recv_request[i]);
+        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
     }
 
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
@@ -818,7 +818,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
             const OCP_DBL* bId = u.data() + sel[j] * col;
             copy(bId, bId + col, &s[1 + (j - 1) * col]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.myComm, &domain.send_request[i]);
+        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
     }
 
     // Bulk

@@ -50,7 +50,7 @@ void OCPControl::Setup(const USI& argc, const char* argv[], const ParamControl& 
 
 void OCPControl::SetupComm(const Domain& domain) 
 {
-    myComm  = domain.myComm;
+    myComm  = domain.global_comm;
     numproc = domain.numproc;
     myrank  = domain.myrank;
 

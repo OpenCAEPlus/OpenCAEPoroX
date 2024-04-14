@@ -56,8 +56,10 @@ public:
 	const auto& GetGrid() const { return grid; }
 
 public:
-	MPI_Comm                     myComm;
-	OCP_INT                      numproc, myrank;
+	MPI_Comm  global_comm;
+	OCP_INT   numproc, myrank;
+
+
 
 protected:
 	/// Num of Total Elements(grids + wells)

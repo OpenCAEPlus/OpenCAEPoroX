@@ -1771,7 +1771,7 @@ void OCPOutput::Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, co
 
 void OCPOutput::SetupComm(const Domain& domain)
 {
-    myComm  = domain.myComm;
+    myComm  = domain.global_comm;
     numproc = domain.numproc;
     myrank  = domain.myrank;
 }

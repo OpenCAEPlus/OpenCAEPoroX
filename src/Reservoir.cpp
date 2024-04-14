@@ -100,7 +100,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     varInfo.var_dbl.push_back(VarInfo<vector<OCP_DBL>>{ "TEMPERATURE", &grid.initR.T, &bulk.INITm.GetT()});
        
     USI nc = grid.initR.Ni.size();
-    MPI_Bcast(&nc, 1, OCPMPI_USI, MASTER_PROCESS, domain.myComm);
+    MPI_Bcast(&nc, 1, OCPMPI_USI, MASTER_PROCESS, domain.global_comm);
     auto& initNi = bulk.INITm.GetNi();
     initNi.resize(nc);
     for (USI i = 0; i < nc; i++) {
@@ -108,7 +108,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     }
 
     USI np = grid.initR.Pj.size();
-    MPI_Bcast(&np, 1, OCPMPI_USI, MASTER_PROCESS, domain.myComm);
+    MPI_Bcast(&np, 1, OCPMPI_USI, MASTER_PROCESS, domain.global_comm);
     auto& initPj = bulk.INITm.GetPj();
     initPj.resize(np);
     for (USI j = 0; j < np; j++) {
@@ -130,7 +130,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     bulk.vs.nb    = domain.numGridLocal;   // Interior + ghost
     bulk.vs.nbI   = domain.numGridInterior;
 
-    MPI_Comm      myComm  = domain.myComm;
+    MPI_Comm      myComm  = domain.global_comm;
     const OCP_INT numproc = domain.numproc;
     const OCP_INT myrank  = domain.myrank;
 
@@ -244,7 +244,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
             send_size += conn_size * sizeof(OCP_DBL);        
             // send
             MPI_Isend((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm, &request[p - 1]);
-            // MPI_Send((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm);
+            // MPI_Send((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, global_comm);
             // cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
 
             // update work_state(request)

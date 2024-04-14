@@ -25,7 +25,7 @@ void PetscSolver::Allocate(const OCPMatrix& mat, const Domain* domain)
     iA.resize(mat.maxDim + 1);
     jA.resize(mat.max_nnz);
 
-    myComm  = domain->myComm;
+    myComm  = domain->global_comm;
     numproc = domain->numproc;
     myrank  = domain->myrank;
     allBegin.resize(numproc);

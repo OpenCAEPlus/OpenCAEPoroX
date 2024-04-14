@@ -15,7 +15,7 @@
 
 void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 {
-	myComm  = part.myComm;	
+	global_comm  = part.myComm;	
 	numproc = part.numproc;
 	myrank  = part.myrank;
 
@@ -264,7 +264,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	GetWallTime timer;
 	timer.Start();
 
-	MPI_Scan(&numElementLoc, &global_end, 1, OCPMPI_ULL, MPI_SUM, myComm);
+	MPI_Scan(&numElementLoc, &global_end, 1, OCPMPI_ULL, MPI_SUM, global_comm);
 
 	OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
@@ -281,7 +281,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	for (USI i = 0; i < numRecvProc; i++) {
 		const auto& rel = recv_element_loc[i];
 		const auto  bId = rel[1] + numActWellLocal;
-		MPI_Irecv(&global_index[bId], rel[2] - rel[1], OCPMPI_ULL, rel[0], 0, myComm, &recv_request[i]);
+		MPI_Irecv(&global_index[bId], rel[2] - rel[1], OCPMPI_ULL, rel[0], 0, global_comm, &recv_request[i]);
 	}
 	vector<vector<OCP_ULL>> send_buffer(numSendProc);
 	for (USI i = 0; i < numSendProc; i++) {
@@ -292,7 +292,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 		for (USI j = 1; j < sel.size(); j++) {
 			s[j] = global_index[sel[j]];
 		}
-		MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_ULL, s[0], 0, myComm, &send_request[i]);
+		MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_ULL, s[0], 0, global_comm, &send_request[i]);
 	}
 
 	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);
