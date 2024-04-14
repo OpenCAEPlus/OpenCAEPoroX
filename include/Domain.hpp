@@ -55,11 +55,19 @@ public:
 	auto GetWell() const { return well; }
 	const auto& GetGrid() const { return grid; }
 
+	// for global communication
 public:
 	MPI_Comm  global_comm;
 	OCP_INT   numproc, myrank;
+	MPI_Group global_group;
 
+	// for local communication(used in some methods like ddm)
+	void SetLocalComm(const vector<OCP_USI>& bIds);
+protected:
 
+	MPI_Group     loc_group;
+	MPI_Comm      loc_comm;
+	set<OCP_INT>  loc_group_rank;
 
 protected:
 	/// Num of Total Elements(grids + wells)

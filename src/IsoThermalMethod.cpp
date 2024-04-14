@@ -1126,8 +1126,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         GetWallTime timer;
         timer.Start();
 
-        OCP_DBL tmploc = res.maxRelRes_V;
-        MPI_Allreduce(&tmploc, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
+        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
@@ -2247,12 +2246,12 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
 /// 2. Use Dirichlet boundary with fixed flow rate at last time setp(to do)
 void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 {
-    const Bulk& bk = rs.bulk;
+    const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
 
-    const USI nb = bvs.nbI;
-    const USI np = bvs.np;
-    const USI nc = bvs.nc;
+    const USI nb  = bvs.nbI;
+    const USI np  = bvs.np;
+    const USI nc  = bvs.nc;
     const USI len = nc + 1;
 
     OCPNRresidual& res = NR.res;
@@ -2347,13 +2346,13 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
 
     const USI numWell = rs.GetNumOpenWell();
 
-    const BulkConn& conn = rs.conn;
-    const OCP_USI   nbI = bvs.nbI;
-    const USI       np = bvs.np;
-    const USI       nc = bvs.nc;
-    const USI       ncol = nc + 1;
-    const USI       ncol2 = np * nc + np;
-    const USI       bsize = ncol * ncol;
+    const BulkConn& conn   = rs.conn;
+    const OCP_USI   nbI    = bvs.nbI;
+    const USI       np     = bvs.np;
+    const USI       nc     = bvs.nc;
+    const USI       ncol   = nc + 1;
+    const USI       ncol2  = np * nc + np;
+    const USI       bsize  = ncol * ncol;
     const USI       bsize2 = ncol * ncol2;
 
     ls.AddDim(nbI);

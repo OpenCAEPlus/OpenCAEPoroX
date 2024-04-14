@@ -16,9 +16,9 @@
 void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 {
 	global_comm  = part.myComm;	
-	numproc = part.numproc;
-	myrank  = part.myrank;
-
+	numproc      = part.numproc;
+	myrank       = part.myrank;
+	MPI_Comm_group(global_comm, &global_group);
 
 	if (numproc == 1) {
 		numElementTotal = part.numElementTotal;
@@ -224,6 +224,35 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	if (CURRENT_RANK == MASTER_PROCESS) {
 		OCP_INFO("Set Domain -- end");
 	}
+}
+
+
+void Domain::SetLocalComm(const vector<OCP_USI>& bIds)
+{
+	//if (MPI_GROUP_NULL != loc_group) MPI_Group_free(&loc_group);
+	//if (MPI_COMM_NULL != loc_comm) MPI_Comm_free(&loc_comm);
+
+	loc_group_rank.clear();
+	for (const auto& b : bIds) {
+		if (b < numGridInterior) {
+
+		}
+		else {
+			for (const auto& r : recv_element_loc) {
+				if (b >= r[1] && b < r[2]) {
+					loc_group_rank.insert(r[0]);
+					break;
+				}
+			}
+		}
+
+	}
+	vector<INT> tmp_rank;
+	for (const auto& r : loc_group_rank) {
+		tmp_rank.push_back(r);
+	}
+	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &loc_group);
+	MPI_Comm_create(MPI_COMM_WORLD, loc_group, &loc_comm);
 }
 
 
