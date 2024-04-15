@@ -78,7 +78,7 @@ public:
 
 public:
     /// Output the mat and rhs to fileA and fileb.
-    void OutputLinearSystem(const string& fileA, const string& fileb) const { mat.OutputLinearSystem(solveDir, fileA, fileb); }
+    void OutputLinearSystem(const string& fileA, const string& fileb) const { mat.OutputLinearSystem(domain, solveDir, fileA, fileb); }
     /// Output the solution to file
     void OutputSolution(const string& fileX) const { mat.OutputSolution(solveDir, fileX); }
 

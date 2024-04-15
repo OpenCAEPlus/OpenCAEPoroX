@@ -157,7 +157,7 @@ void OCPMatrix::CopyRhs(const vector<OCP_DBL>& rhs)
 }
 
 
-void OCPMatrix::OutputLinearSystem(const string& dir, const string& fileA, const string& fileb) const
+void OCPMatrix::OutputLinearSystem(const Domain* domain, const string& dir, const string& fileA, const string& fileb) const
 {
     string FileA = dir + fileA;
     string Fileb = dir + fileb;
@@ -186,8 +186,8 @@ void OCPMatrix::OutputLinearSystem(const string& dir, const string& fileA, const
     for (OCP_USI i = 0; i < dim; i++) {
         rowSize = colId[i].size();
         for (USI j = 0; j < rowSize; j++) {
-            // outA << domain->global_index[colId[i][j]] << "\n";
-            outA << colId[i][j] << "\n";
+            outA << domain->global_index[colId[i][j]] << "\n";
+            // outA << colId[i][j] << "\n";
         }
     }
     // val

@@ -803,22 +803,25 @@ void T_FIM::GetSolution(Reservoir&       rs,
     }
 
     // Exchange Solution for ghost grid
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&u[rv[0] * col], (rv[1] - rv[0]) * col, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
-        s.resize(1 + (sel.size() - 1) * col);
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            const OCP_DBL* bId = u.data() + sel[j] * col;
-            copy(bId, bId + col, &s[1 + (j - 1) * col]);
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * col);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = u.data() + sv1 * col;
+            sb.insert(sb.end(), bId, bId + col);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
 
     // Bulk

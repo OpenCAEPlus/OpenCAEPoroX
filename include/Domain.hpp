@@ -23,6 +23,7 @@
 
 #include <parmetis.h>
 #include <vector>
+#include <map>
 #include <unordered_map>
 
 using namespace std;
@@ -113,10 +114,10 @@ public:
 
 	USI numSendProc, numRecvProc;
 
-	vector<vector<OCP_USI>> send_element_loc;
+	map<OCP_INT, set<OCP_USI>>    send_element_loc;
 	// unordered_map<OCP_USI, vector<OCP_USI>> send_element_loc;
 	// vector<vector<OCP_CHAR>> send_buffer;
-	vector<vector<OCP_USI>> recv_element_loc;
+	map<OCP_INT, vector<OCP_USI>> recv_element_loc;
 	// vector<vector<OCP_CHAR>> recv_buffer;
 
 	mutable vector<MPI_Request>  send_request;

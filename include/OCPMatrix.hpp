@@ -64,7 +64,7 @@ public:
 
 public:
     /// output A and b to files
-    void OutputLinearSystem(const string& dir, const string& fileA, const string& fileb) const;
+    void OutputLinearSystem(const Domain* domain, const string& dir, const string& fileA, const string& fileb) const;
     /// output solution to file
     void OutputSolution(const string& dir, const string& fileU) const;
 

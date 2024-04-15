@@ -36,21 +36,24 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
     const Domain& domain = rs.domain;
     BulkVarSet&   bvs    = rs.bulk.vs;
 
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bvs.P[rel[1]], (rel[2] - rel[1]), OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&bvs.P[rv[0]], rv[1] - rv[0], OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>& s = send_buffer[i];
-        s.resize(1 + (sel.size() - 1));
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            s[j] = bvs.P[sel[j]];
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size());
+        for (const auto& sv1 : sv) {
+            sb.push_back(bvs.P[sv1]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
@@ -65,22 +68,25 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
     BulkVarSet&   bvs    = rs.bulk.vs;
     const USI     nc     = bvs.nc;
 
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&bvs.Ni[rel[1] * nc], (rel[2] - rel[1]) * nc, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&bvs.Ni[rv[0] * nc], (rv[1] - rv[0]) * nc, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>& s = send_buffer[i];
-        s.resize(1 + (sel.size() - 1) * nc);
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            const OCP_DBL* bId = &bvs.Ni[0] + sel[j] * nc;
-            copy(bId, bId + nc, &s[1 + (j - 1) * nc]);
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * nc);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = &bvs.Ni[0] + sv1 * nc;
+            sb.insert(sb.end(), bId, bId + nc);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
@@ -550,22 +556,24 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     }
 
     // Exchange Solution
-
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1]], rel[2] - rel[1], OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&u[rv[0]], rv[1] - rv[0], OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
-        s.resize(sel.size());
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            s[j] = u[sel[j]];
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size());
+        for (const auto& sv1 : sv) {
+            sb.push_back(u[sv1]);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
 
     // Bulk
@@ -776,12 +784,13 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
 
 #ifdef DEBUG
-    // Output A, b, x
-    //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
-    //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
-    //MPI_Barrier(rs.domain.global_comm);
-    //OCP_ABORT("Stop");
-    // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
+     //// Output A, b, x
+     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
+     //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
+     //MPI_Barrier(rs.domain.global_comm);
+
+     //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
+     //OCP_ABORT("Stop");
 #endif // DEBUG
 
 
@@ -1255,24 +1264,27 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     timerT.Start();
     
 
-    // Exchange Solution for ghost grid
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&u[rv[0] * col], (rv[1] - rv[0]) * col, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
-   
+
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
-        s.resize(1 + (sel.size() - 1) * col);
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-             const OCP_DBL* bId = u.data() + sel[j] * col;
-             copy(bId, bId + col, &s[1 + (j - 1) * col]);
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * col);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = u.data() + sv1 * col;
+            sb.insert(sb.end(), bId, bId + col);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
+
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrlNR.DSmax();
@@ -1710,64 +1722,78 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     // exchange information of implicity of grid
     const Domain& domain = rs.domain;
 
+
+    USI iter = 0;
     vector<vector<OCP_INT>> recv_buffer(domain.numRecvProc);
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        vector<OCP_INT>&       r   = recv_buffer[i];
-        r.resize(rel[2] - rel[1]);
-        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        auto&       rb = recv_buffer[iter];
+        rb.resize(rv[1] - rv[0]);
+        MPI_Irecv(&rb[0], rb.size(), OCPMPI_INT, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_INT>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_INT>&       s   = send_buffer[i];
-        s.resize(sel.size());
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size());
+        for (const auto& sv1 : sv) {
+            sb.push_back(bk.bulkTypeAIM.GetBulkType(sv1));
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_INT, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
+
 
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        const vector<OCP_INT>& r   = recv_buffer[i];
 
-        for (OCP_USI n = 0; n < rel[2] - rel[1]; n++) {
-            SetKNeighbor(conn.neighbor, n + rel[1], bk.bulkTypeAIM, r[n]);
+    iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        auto&       rb = recv_buffer[iter];
+
+        for (OCP_USI n = 0; n < rb.size(); n++) {
+            SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);
         }
     }
 
     MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
 
+
     // Check Consistency
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        vector<OCP_INT>&       r   = recv_buffer[i];
-        r.resize(rel[2] - rel[1]);
-        MPI_Irecv(&r[0], rel[2] - rel[1], OCPMPI_INT, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        auto&       rb = recv_buffer[iter];
+        rb.resize(rv[1] - rv[0]);
+        MPI_Irecv(&rb[0], rb.size(), OCPMPI_INT, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_INT>&       s   = send_buffer[i];
-        s.resize(sel.size());
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            s[j] = bk.bulkTypeAIM.GetBulkType(sel[j]);
+    iter = 0;
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.clear();
+        sb.reserve(sv.size());
+        for (const auto& sv1 : sv) {
+            sb.push_back(bk.bulkTypeAIM.GetBulkType(sv1));
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_INT, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_INT, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
 
     MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
      
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        vector<OCP_INT>&       r   = recv_buffer[i];
-        for (OCP_USI n = 0; n < rel[2] - rel[1]; n++) {
-            bk.bulkTypeAIM.SetBulkType(n + rel[1], r[n]);     // Maybe not a good idea
+    iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        auto&       rb = recv_buffer[iter];
+
+        for (OCP_USI n = 0; n < rb.size(); n++) {
+            SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);  // Maybe not a good idea
         }
     }
 
@@ -2035,23 +2061,27 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
     }
 
     // Exchange Solution for ghost grid
-    for (USI i = 0; i < domain.numRecvProc; i++) {
-        const vector<OCP_USI>& rel = domain.recv_element_loc[i];
-        MPI_Irecv(&u[rel[1] * col], (rel[2] - rel[1]) * col, OCPMPI_DBL, rel[0], 0, domain.global_comm, &domain.recv_request[i]);
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+        const auto& rv = r.second;
+        MPI_Irecv(&u[rv[0] * col], (rv[1] - rv[0]) * col, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
 
+    iter = 0;
     vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
-    for (USI i = 0; i < domain.numSendProc; i++) {
-        const vector<OCP_USI>& sel = domain.send_element_loc[i];
-        vector<OCP_DBL>&       s   = send_buffer[i];
-        s.resize(1 + (sel.size() - 1) * col);
-        s[0] = sel[0];
-        for (USI j = 1; j < sel.size(); j++) {
-            const OCP_DBL* bId = u.data() + sel[j] * col;
-            copy(bId, bId + col, &s[1 + (j - 1) * col]);
+    for (const auto& s : domain.send_element_loc) {
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * col);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = u.data() + sv1 * col;
+            sb.insert(sb.end(), bId, bId + col);
         }
-        MPI_Isend(s.data() + 1, s.size() - 1, OCPMPI_DBL, s[0], 0, domain.global_comm, &domain.send_request[i]);
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
     }
+
 
     // Bulk
     const OCP_DBL dSmaxlim = ctrlNR.DSmax();

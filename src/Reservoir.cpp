@@ -293,7 +293,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         vector<BulkConnPair>* dst = &conn.iteratorConn;
         domain.neighborNum.reserve(domain.numGridInterior);
         const auto  global_well_start = domain.numElementTotal - domain.numWellTotal;
-        const auto& init2local = domain.init_global_to_local;
+        const auto& init2local        = domain.init_global_to_local;
         OCP_USI           bId, eId;
 
         for (OCP_USI n = 0; n < bulk.vs.nbI; n++) {
@@ -465,7 +465,6 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 
     // Free memory
     map<OCP_INT, vector<idx_t>>().swap(domain.elementCSR);
-
 
 
 #ifdef WITH_GMSH
