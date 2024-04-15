@@ -262,7 +262,7 @@ void Partition::SetDistribution()
 	/// Also, process of them are needed.
 	/// Setup elements those will be sent to corresponding process
 	//  target process; num of elements, num of edges, global index of elements, xadj, adjncy, adjproc
-	vector<vector<idx_t>>  send_buffer;
+	map<OCP_INT, vector<idx_t>> send_buffer;
 	auto& recv_buffer = elementCSR;
 	recv_buffer[myrank] = vector<idx_t>{ 0,0 };
 
@@ -273,75 +273,68 @@ void Partition::SetDistribution()
 			recv_buffer[myrank][1] += (xadj[i + 1] - xadj[i]);
 		}
 		else {
-			idx_t k;
-			for (k = 0; k < send_buffer.size(); k++) {
-				if (part[i] == send_buffer[k][0]) {
-					// existing process
-					send_buffer[k][1] ++;
-					send_buffer[k][2] += (xadj[i + 1] - xadj[i]);
-					break;
-				}
+			auto it = send_buffer.find(part[i]);
+			if (it == send_buffer.end()) {
+				send_buffer[part[i]] = vector<idx_t>{ 1, xadj[i + 1] - xadj[i] };
 			}
-			if (k == send_buffer.size()) {
-				// new process
-				send_buffer.push_back(vector<idx_t>{part[i], 1, xadj[i + 1] - xadj[i]});
+			else {
+				send_buffer[part[i]][0]++;
+				send_buffer[part[i]][1] += xadj[i + 1] - xadj[i];
 			}
 		}
 	}
 
 	// Allocate send_buffer and its pointer
-	vector<idx_t> send_buffer_ptr(send_buffer.size() * 4);
-	idx_t         pIter = 0;
+	// global index of elements, xadj, adjncy, adjproc
+	map<OCP_INT, vector<idx_t>> send_buffer_ptr;
 	for (auto& s : send_buffer) {
-		s.resize(4 + 2 * (s[1] + s[2]));
-		send_buffer_ptr[pIter++] = 3;
-		send_buffer_ptr[pIter++] = 3 + s[1];
-		send_buffer_ptr[pIter++] = 4 + s[1] + s[1];
-		send_buffer_ptr[pIter++] = 4 + s[1] + s[1] + s[2];
+		auto& sb = s.second;
+		sb.resize(2 + sb[0] + (sb[0] + 1) + sb[1] + sb[1]);
+		send_buffer_ptr[s.first].push_back(2);
+		send_buffer_ptr[s.first].push_back(2 + sb[0]);
+		send_buffer_ptr[s.first].push_back(2 + sb[0] + (sb[0] + 1));
+		send_buffer_ptr[s.first].push_back(2 + sb[0] + (sb[0] + 1) + sb[1]);
 	}
 	// Allocate recv_buffer for self and its pointer
 	// global index of elements, xadj, adjncy, adjproc
 	vector<idx_t> recv_buffer_ptr(4);
-	pIter = 0;
-	auto& rv = recv_buffer[myrank];
-	rv.resize(2 + rv[0] + (rv[0] + 1) + rv[1] + rv[1]);
-	recv_buffer_ptr[pIter++] = 2;
-	recv_buffer_ptr[pIter++] = 2 + rv[0];
-	recv_buffer_ptr[pIter++] = 2 + rv[0] + (rv[0] + 1);
-	recv_buffer_ptr[pIter++] = 2 + rv[0] + (rv[0] + 1) + rv[1];
+	auto& rb = recv_buffer[myrank];
+	rb.resize(2 + rb[0] + (rb[0] + 1) + rb[1] + rb[1]);
+	recv_buffer_ptr[0] = 2;
+	recv_buffer_ptr[1] = 2 + rb[0];
+	recv_buffer_ptr[2] = 2 + rb[0] + (rb[0] + 1);
+	recv_buffer_ptr[3] = 2 + rb[0] + (rb[0] + 1) + rb[1];
 
 	// Setup send_buffer and recv_buffer
 	for (idx_t i = 0; i < numElementLocal; i++) {
 
 		if (part[i] == myrank) {
-			recv_buffer[myrank][recv_buffer_ptr[0]++] = i + vtxdist[myrank];
-			recv_buffer[myrank][recv_buffer_ptr[1]]   = recv_buffer[myrank][recv_buffer_ptr[1]++]
-				                                      + xadj[i + 1] - xadj[i];
+			auto& rb = recv_buffer[part[i]];
 
-			copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &recv_buffer[myrank][recv_buffer_ptr[2]]);
-			copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &recv_buffer[myrank][recv_buffer_ptr[3]]);
+			rb[recv_buffer_ptr[0]++] = i + vtxdist[myrank];
+			rb[recv_buffer_ptr[1]]   = rb[recv_buffer_ptr[1]++] + xadj[i + 1] - xadj[i];
+
+			copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &rb[recv_buffer_ptr[2]]);
+			copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &rb[recv_buffer_ptr[3]]);
 			recv_buffer_ptr[2] += xadj[i + 1] - xadj[i];
 			recv_buffer_ptr[3] += xadj[i + 1] - xadj[i];
 		}
 		else {
-			for (idx_t s = 0; s < send_buffer.size(); s++) {
-				if (part[i] == send_buffer[s][0]) {
-					send_buffer[s][send_buffer_ptr[s * 4 + 0]++] = i + vtxdist[myrank];
-					send_buffer[s][send_buffer_ptr[s * 4 + 1]] = send_buffer[s][send_buffer_ptr[s * 4 + 1]++]
-						+ xadj[i + 1] - xadj[i];
+			auto& sb  = send_buffer[part[i]];
+			auto& sbp = send_buffer_ptr[part[i]];
 
-					copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &send_buffer[s][send_buffer_ptr[s * 4 + 2]]);
-					copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &send_buffer[s][send_buffer_ptr[s * 4 + 3]]);
-					send_buffer_ptr[s * 4 + 2] += xadj[i + 1] - xadj[i];
-					send_buffer_ptr[s * 4 + 3] += xadj[i + 1] - xadj[i];
-					break;
-				}
-			}
+			sb[sbp[0]++] = i + vtxdist[myrank];
+			sb[sbp[1]]   = sb[sbp[1]++] + xadj[i + 1] - xadj[i];
+
+			copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &sb[sbp[2]]);
+			copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &sb[sbp[3]]);
+			sbp[2] += xadj[i + 1] - xadj[i];
+			sbp[3] += xadj[i + 1] - xadj[i];
 		}
 	}
 
 	// Free Memory
-	vector<idx_t>().swap(send_buffer_ptr);
+	map<OCP_INT, vector<idx_t>>().swap(send_buffer_ptr);
 	vector<idx_t>().swap(recv_buffer_ptr);
 	delete[] xadj;
 	delete[] vtxdist;
@@ -352,7 +345,7 @@ void Partition::SetDistribution()
 	vector<idx_t> send_size(numproc, 0);
 	vector<idx_t> recv_size(numproc, 0);
 	for (const auto& s : send_buffer) {
-		send_size[s[0]] = s.size() - 1;
+		send_size[s.first] = s.second.size();
 	}
 
 	MPI_Alltoall(&send_size[0], 1, IDX_T, &recv_size[0], 1, IDX_T, myComm);
@@ -372,7 +365,7 @@ void Partition::SetDistribution()
 	// Communicate for buffer
 	for (auto& s : send_buffer) {
 		// cout << "Second stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
-		MPI_Isend(s.data() + 1, s.size() - 1, IDX_T, s[0], 0, myComm, &request);
+		MPI_Isend(s.second.data(), s.second.size(), IDX_T, s.first, 0, myComm, &request);
 	}
 	for (auto& r : recv_buffer) {
 		if (r.first == myrank)  continue;
