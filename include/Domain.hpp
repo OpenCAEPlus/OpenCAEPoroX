@@ -23,7 +23,7 @@
 
 #include <parmetis.h>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -97,7 +97,7 @@ protected:
 	/// num of all neighbor of grids: well-included, self-included
 	vector<USI>             neighborNum; 
 	/// initial global index -> local index (interior grid & ghost grid)
-	map<OCP_ULL, OCP_USI>   init_global_to_local;
+	unordered_map<OCP_ULL, OCP_USI>   init_global_to_local;
 
 
 	////////////////////////////////////////
