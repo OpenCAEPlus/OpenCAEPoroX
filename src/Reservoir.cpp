@@ -351,7 +351,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         numIgridEdge[0] = domain.numGridLocal;
         numIgridEdge[1] = domain.numGridInterior;
         for (const auto& e : domain.elementCSR) {
-            numIgridEdge[2] += e[2];    // well may be included
+            numIgridEdge[2] += e.second[1];    // well may be included
         }
 
         MPI_Gather(numIgridEdge, 3, OCPMPI_INT, 0, 3, OCPMPI_INT, MASTER_PROCESS, myComm);
@@ -416,63 +416,55 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         const auto& init2local = domain.init_global_to_local;
         OCP_USI           bId, eId;
         // Traverse elementCSR in ascending order of process number
-        set<OCP_USI> recv_proc;
-        for (const auto& e : domain.elementCSR) {
-            recv_proc.insert(e[0]);
-        }
-        for (const auto& s : recv_proc) {
-            for (const auto& e : domain.elementCSR) {
-                if (e[0] == s) {
-                    const idx_t* my_vtx  = &e[3];
-                    const idx_t* my_xadj = &e[3 + e[1]];
-                    const idx_t* my_edge = &e[3 + e[1] + e[1] + 1];
-                    for (USI i = 0; i < e[1]; i++) {
-                        if (my_vtx[i] >= global_well_start) {                   
-                            continue;  // well is excluded
-                        }
-                        domain.neighborNum.push_back(my_xadj[i + 1] - my_xadj[i] + 1);
-                        bId = init2local.at(my_vtx[i]);
-                        for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
-                            const auto& iter = init2local.find(my_edge[j]);
-                            if (iter != init2local.end()) {
-                                // bulk connection
-                                eId = iter->second;
-                                if (eId > bId) {
-                                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2], conn_ptr[3]));
-                                }
-                            }
-                            else {
-                                // well connection
-                                const USI wIndex = my_edge[j] - global_well_start;
-                                const USI len    = domain.wellWPB.size();
-                                USI w = 0;
-                                for (w = 0; w < len; w++) {
-                                    if (wIndex == domain.wellWPB[w][0]) {
-                                        domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[1]));
-                                        domain.wellWPB[w].push_back(bId);
-                                        break;
-                                    }
-                                }
-                                if (w == len) {
-                                    domain.wellWPB.push_back(vector<OCP_USI>{
-                                        wIndex,
-                                        static_cast<OCP_USI>(conn_ptr[1]), bId});
-                                }
-                            }
-                            conn_ptr += varNumEdge;
-                        }
-                    }
-                }
-            }
-        }
+		for (const auto& e : domain.elementCSR) {
+            const auto&  ev      = e.second;
+			const idx_t* my_vtx  = &ev[2];
+			const idx_t* my_xadj = &ev[2 + ev[0]];
+			const idx_t* my_edge = &ev[2 + ev[0] + ev[0] + 1];
+			for (USI i = 0; i < ev[0]; i++) {
+				if (my_vtx[i] >= global_well_start) {
+					continue;  // well is excluded
+				}
+				domain.neighborNum.push_back(my_xadj[i + 1] - my_xadj[i] + 1);
+				bId = init2local.at(my_vtx[i]);
+				for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
+					const auto& iter = init2local.find(my_edge[j]);
+					if (iter != init2local.end()) {
+						// bulk connection
+						eId = iter->second;
+						if (eId > bId) {
+							dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2], conn_ptr[3]));
+						}
+					}
+					else {
+						// well connection
+						const USI wIndex = my_edge[j] - global_well_start;
+						const USI len = domain.wellWPB.size();
+						USI w = 0;
+						for (w = 0; w < len; w++) {
+							if (wIndex == domain.wellWPB[w][0]) {
+								domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[1]));
+								domain.wellWPB[w].push_back(bId);
+								break;
+							}
+						}
+						if (w == len) {
+							domain.wellWPB.push_back(vector<OCP_USI>{
+								wIndex,
+									static_cast<OCP_USI>(conn_ptr[1]), bId});
+						}
+					}
+					conn_ptr += varNumEdge;
+				}
+			}
+		}
         conn.numConn = conn.iteratorConn.size();
-        set<OCP_USI>().swap(recv_proc);
 
         delete[] recv_buffer;
     }
 
     // Free memory
-    vector<vector<idx_t>>().swap(domain.elementCSR);
+    map<OCP_INT, vector<idx_t>>().swap(domain.elementCSR);
 
 
 

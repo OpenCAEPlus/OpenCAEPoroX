@@ -261,16 +261,16 @@ void Partition::SetDistribution()
 	/// Get elements and their neighbors belonging to current process,
 	/// Also, process of them are needed.
 	/// Setup elements those will be sent to corresponding process
-	//  target process, num of elements, num of edges, global index of elements, xadj, adjncy, adjproc
+	//  target process; num of elements, num of edges, global index of elements, xadj, adjncy, adjproc
 	vector<vector<idx_t>>  send_buffer;
-	vector<vector<idx_t>>& recv_buffer = elementCSR;
-	recv_buffer.push_back(vector<idx_t> {myrank, 0, 0});
+	auto& recv_buffer = elementCSR;
+	recv_buffer[myrank] = vector<idx_t>{ 0,0 };
 
 	// Calculate necessary memory first
 	for (idx_t i = 0; i < numElementLocal; i++) {
 		if (part[i] == myrank) {
-			recv_buffer[0][1] ++;
-			recv_buffer[0][2] += (xadj[i + 1] - xadj[i]);
+			recv_buffer[myrank][0]++;
+			recv_buffer[myrank][1] += (xadj[i + 1] - xadj[i]);
 		}
 		else {
 			idx_t k;
@@ -300,27 +300,26 @@ void Partition::SetDistribution()
 		send_buffer_ptr[pIter++] = 4 + s[1] + s[1] + s[2];
 	}
 	// Allocate recv_buffer for self and its pointer
-	// size is at most one now
-	vector<idx_t> recv_buffer_ptr(recv_buffer.size() * 4);
+	// global index of elements, xadj, adjncy, adjproc
+	vector<idx_t> recv_buffer_ptr(4);
 	pIter = 0;
-	for (auto& r : recv_buffer) {
-		r.resize(4 + 2 * (r[1] + r[2]));
-		recv_buffer_ptr[pIter++] = 3;
-		recv_buffer_ptr[pIter++] = 3 + r[1];
-		recv_buffer_ptr[pIter++] = 4 + r[1] + r[1];
-		recv_buffer_ptr[pIter++] = 4 + r[1] + r[1] + r[2];
-	}
+	auto& rv = recv_buffer[myrank];
+	rv.resize(2 + rv[0] + (rv[0] + 1) + rv[1] + rv[1]);
+	recv_buffer_ptr[pIter++] = 2;
+	recv_buffer_ptr[pIter++] = 2 + rv[0];
+	recv_buffer_ptr[pIter++] = 2 + rv[0] + (rv[0] + 1);
+	recv_buffer_ptr[pIter++] = 2 + rv[0] + (rv[0] + 1) + rv[1];
 
 	// Setup send_buffer and recv_buffer
 	for (idx_t i = 0; i < numElementLocal; i++) {
 
 		if (part[i] == myrank) {
-			recv_buffer[0][recv_buffer_ptr[0]++] = i + vtxdist[myrank];
-			recv_buffer[0][recv_buffer_ptr[1]] = recv_buffer[0][recv_buffer_ptr[1]++]
-				+ xadj[i + 1] - xadj[i];
+			recv_buffer[myrank][recv_buffer_ptr[0]++] = i + vtxdist[myrank];
+			recv_buffer[myrank][recv_buffer_ptr[1]]   = recv_buffer[myrank][recv_buffer_ptr[1]++]
+				                                      + xadj[i + 1] - xadj[i];
 
-			copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &recv_buffer[0][recv_buffer_ptr[2]]);
-			copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &recv_buffer[0][recv_buffer_ptr[3]]);
+			copy(&adjncy[xadj[i]], &adjncy[xadj[i + 1]], &recv_buffer[myrank][recv_buffer_ptr[2]]);
+			copy(&adjproc[xadj[i]], &adjproc[xadj[i + 1]], &recv_buffer[myrank][recv_buffer_ptr[3]]);
 			recv_buffer_ptr[2] += xadj[i + 1] - xadj[i];
 			recv_buffer_ptr[3] += xadj[i + 1] - xadj[i];
 		}
@@ -353,7 +352,7 @@ void Partition::SetDistribution()
 	vector<idx_t> send_size(numproc, 0);
 	vector<idx_t> recv_size(numproc, 0);
 	for (const auto& s : send_buffer) {
-		send_size[s[0]] = s.size();
+		send_size[s[0]] = s.size() - 1;
 	}
 
 	MPI_Alltoall(&send_size[0], 1, IDX_T, &recv_size[0], 1, IDX_T, myComm);
@@ -361,7 +360,7 @@ void Partition::SetDistribution()
 	// Allocate for recv_buffer
 	for (OCP_INT i = 0; i < numproc; i++) {
 		if (recv_size[i] > 0) {
-			recv_buffer.push_back(vector<idx_t>(recv_size[i], i));
+			recv_buffer[i].resize(recv_size[i]);
 		}
 	}
 
@@ -376,9 +375,9 @@ void Partition::SetDistribution()
 		MPI_Isend(s.data() + 1, s.size() - 1, IDX_T, s[0], 0, myComm, &request);
 	}
 	for (auto& r : recv_buffer) {
-		if (r[0] == myrank)  continue;
+		if (r.first == myrank)  continue;
 		// cout << "Second stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
-		MPI_Recv(r.data() + 1, r.size() - 1, IDX_T, r[0], 0, myComm, &status);
+		MPI_Recv(r.second.data(), r.second.size(), IDX_T, r.first, 0, myComm, &status);
 	}
 
 	MPI_Barrier(myComm);

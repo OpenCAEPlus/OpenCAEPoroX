@@ -52,10 +52,9 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	numElementTotal = part.numElementTotal;
 	numWellTotal    = part.numWellTotal;
 	numElementLocal = 0;
-	set<OCP_USI> recv_proc;
+
 	for (const auto& e : elementCSR) {
-		recv_proc.insert(e[0]);
-		numElementLocal += e[1];
+		numElementLocal += e.second[0];
 	}
 
 	// Traverse elementCSR in ascending order of process number
@@ -63,44 +62,40 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	OCP_USI  localIndex        = 0;
 	vector<set<OCP_ULL>> ghostElement;
 	grid.reserve(numElementLocal * 1.5); // preserved space
-	for (const auto& s : recv_proc) {
-		for (const auto& e : elementCSR) {
-			if (e[0] == s) {
-				const idx_t* my_vtx  = &e[3];
-				const idx_t* my_xadj = &e[3 + e[1]];
-				const idx_t* my_edge = &e[3 + e[1] + e[1] + 1];
-				const idx_t* my_edge_proc = &e[3 + e[1] + e[1] + 1 + e[2]];
-				for (USI i = 0; i < e[1]; i++) {
-					if (my_vtx[i] >= global_well_start) {
-						// well
-						well.push_back(my_vtx[i] - global_well_start);
-						continue;
-					}
-					grid.push_back(my_vtx[i]);
-					init_global_to_local.insert(make_pair(static_cast<OCP_ULL>(my_vtx[i]), localIndex));
-					for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
-						if (my_edge_proc[j] != myrank) {
-							// current interior grid is also ghost grid of other process
-							USI s = 0;
-							for (s = 0; s < send_element_loc.size(); s++) {
-								if (my_edge_proc[j] == send_element_loc[s][0]) {
-									if (localIndex != send_element_loc[s].back()) {
-										send_element_loc[s].push_back(localIndex);
-									}
-									ghostElement[s].insert(static_cast<OCP_ULL>(my_edge[j]));
-									break;
-								}
+	for (const auto& e : elementCSR) {
+		const auto&  ev           = e.second;
+		const idx_t* my_vtx       = &ev[2];
+		const idx_t* my_xadj      = &ev[2 + ev[0]];
+		const idx_t* my_edge      = &ev[2 + ev[0] + (ev[0] + 1)];
+		const idx_t* my_edge_proc = &ev[2 + ev[0] + (ev[0] + 1) + ev[1]];
+		for (USI i = 0; i < ev[0]; i++) {
+			if (my_vtx[i] >= global_well_start) {
+				// well
+				well.push_back(my_vtx[i] - global_well_start);
+				continue;
+			}
+			grid.push_back(my_vtx[i]);
+			init_global_to_local.insert(make_pair(static_cast<OCP_ULL>(my_vtx[i]), localIndex));
+			for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
+				if (my_edge_proc[j] != myrank) {
+					// current interior grid is also ghost grid of other process
+					USI s = 0;
+					for (s = 0; s < send_element_loc.size(); s++) {
+						if (my_edge_proc[j] == send_element_loc[s][0]) {
+							if (localIndex != send_element_loc[s].back()) {
+								send_element_loc[s].push_back(localIndex);
 							}
-							if (s == send_element_loc.size()) {
-								send_element_loc.push_back(vector<OCP_USI>{static_cast<OCP_USI>(my_edge_proc[j]), localIndex});
-								ghostElement.push_back(set<OCP_ULL>{static_cast<OCP_ULL>(my_edge[j])});
-							}
+							ghostElement[s].insert(static_cast<OCP_ULL>(my_edge[j]));
+							break;
 						}
 					}
-					localIndex++;
+					if (s == send_element_loc.size()) {
+						send_element_loc.push_back(vector<OCP_USI>{static_cast<OCP_USI>(my_edge_proc[j]), localIndex});
+						ghostElement.push_back(set<OCP_ULL>{static_cast<OCP_ULL>(my_edge[j])});
+					}
 				}
-				break;
 			}
+			localIndex++;
 		}
 	}
 
@@ -147,31 +142,32 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		myFile.tie(0);
 
 		for (const auto& e : elementCSR) {
-			// num grid, num edges
-			myFile << setw(8) << e[0] << setw(8) << e[1] << setw(8) << e[2] << endl;
-			const idx_t* my_vtx = &e[3];
-			const idx_t* my_xadj = &e[3 + e[1]];
-			const idx_t* my_edge = &e[3 + e[1] + e[1] + 1];
-			const idx_t* my_edge_proc = &e[3 + e[1] + e[1] + 1 + e[2]];
-
-			for (int i = 0; i < e[1]; i++) {
+			const auto& ev = e.second;
+			// process, num grid, num edges
+			myFile << setw(8) << e.first << setw(8) << ev[0] << setw(8) << ev[1] << endl;
+			const idx_t* my_vtx       = &ev[2];
+			const idx_t* my_xadj      = &ev[2 + ev[0]];
+			const idx_t* my_edge      = &ev[2 + ev[0] + ev[0] + 1];
+			const idx_t* my_edge_proc = &ev[2 + ev[0] + ev[0] + 1 + ev[1]];
+			// vertex
+			for (int i = 0; i < ev[0]; i++) {
 				myFile << setw(8) << my_vtx[i];
 			}
 			myFile << endl;
 			// vertex
-			for (int i = 0; i < e[1]; i++) {
+			for (int i = 0; i < ev[0]; i++) {
 				for (int j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
 					myFile << setw(8) << my_vtx[i];
 				}
 			}
 			myFile << endl;
 			// edges
-			for (int i = 0; i < e[2]; i++) {
+			for (int i = 0; i < ev[1]; i++) {
 				myFile << setw(8) << my_edge[i];
 			}
 			myFile << endl;
 			// process
-			for (int i = 0; i < e[2]; i++) {
+			for (int i = 0; i < ev[1]; i++) {
 				myFile << setw(8) << my_edge_proc[i];
 			}
 			myFile << endl << endl << endl;

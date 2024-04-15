@@ -86,11 +86,11 @@ protected:
 	USI     numWellLocal;    
 
 	/// elements received from other process in CSR
-	vector<vector<idx_t>>   elementCSR;  
+	map<OCP_INT, vector<idx_t>> elementCSR;
 	/// initial global index of interior grid & ghost grid
-	vector<OCP_ULL>         grid;
+	vector<OCP_ULL>             grid;
 	/// well's global index(index starts from zero)
-	vector<OCP_USI>         well; 
+	vector<OCP_USI>             well; 
 
 	/// Well's global index(start from zero), perfortions' index(start from zero) and location(bulks' local index) of perforation
 	vector<vector<OCP_USI>> wellWPB;
@@ -114,6 +114,7 @@ public:
 	USI numSendProc, numRecvProc;
 
 	vector<vector<OCP_USI>> send_element_loc;
+	// unordered_map<OCP_USI, vector<OCP_USI>> send_element_loc;
 	// vector<vector<OCP_CHAR>> send_buffer;
 	vector<vector<OCP_USI>> recv_element_loc;
 	// vector<vector<OCP_CHAR>> recv_buffer;

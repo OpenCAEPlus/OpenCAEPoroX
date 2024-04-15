@@ -29,6 +29,7 @@
 // standard
 #include <algorithm>
 #include <set>
+#include <map>
 
 using namespace std;
 
@@ -81,7 +82,8 @@ protected:
 	idx_t*     part;
 
 
-	mutable vector<vector<idx_t>> elementCSR;
+	// mutable vector<vector<idx_t>> elementCSR;
+	mutable map<OCP_INT, vector<idx_t>> elementCSR;
 
 	// Auxiliary vars
 	struct NeighborP
