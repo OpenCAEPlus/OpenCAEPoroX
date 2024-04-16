@@ -56,6 +56,9 @@ public:
 	auto GetWell() const { return well; }
 	const auto& GetGrid() const { return grid; }
 
+protected:
+	void InitComm(const Partition& part);
+
 	// for global communication
 public:
 	MPI_Comm  global_comm;
@@ -64,11 +67,13 @@ public:
 
 	// for local communication(used in some methods like ddm)
 	void SetLocalComm(const vector<OCP_USI>& bIds);
-protected:
 
-	MPI_Group     loc_group;
-	MPI_Comm      loc_comm;
-	set<OCP_INT>  loc_group_rank;
+public:
+	MPI_Comm      local_comm;
+	MPI_Group     local_group;
+	OCP_INT       local_numproc;
+	OCP_INT       local_rank;
+	set<OCP_INT>  local_group_rank;
 
 protected:
 	/// Num of Total Elements(grids + wells)

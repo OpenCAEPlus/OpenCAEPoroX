@@ -31,7 +31,7 @@ class PreProcess
 
 public:
 
-	PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm);
+	PreProcess(const string& myFile);
 
 protected:
 

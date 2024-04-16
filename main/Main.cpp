@@ -26,16 +26,13 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-    OCP_INT myRank, commSize;
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-    MPI_Comm_size(MPI_COMM_WORLD, &commSize);
-    CURRENT_RANK = myRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &CURRENT_RANK);
 
     OpenCAEPoroX simulator;
 
     // Step 0. Print simulator version information.   
-    if (myRank == MASTER_PROCESS) {
+    if (CURRENT_RANK == MASTER_PROCESS) {
         if (argc < 2) {
             simulator.PrintUsage(argv[0]);
             return OCP_ERROR_NUM_INPUT; // Need at least one parameter
@@ -51,10 +48,10 @@ int main(int argc, char* argv[])
 
     {
         // Step 1. Input and generate Grid infomation and partition
-        PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD);
+        PreProcess preProcess(argv[1]);
 
         // Step 2. Input reservoir information and distribute
-        simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
+        simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess);
     }
 
     // Step 3. Setup solver

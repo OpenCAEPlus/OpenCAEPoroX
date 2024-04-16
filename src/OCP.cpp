@@ -12,7 +12,7 @@
 #include "OCP.hpp"
 
 /// Read Param from input file
-void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank)
+void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro)
 {
 
     GetWallTime timer;

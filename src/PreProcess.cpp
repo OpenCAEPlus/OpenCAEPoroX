@@ -12,19 +12,19 @@
 #include "PreProcess.hpp"
 
 
-PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm)
+PreProcess::PreProcess(const string& myFile)
 {  
     GetWallTime timer;
     timer.Start();
 
-    if (myRank == MASTER_PROCESS) {   
+    if (CURRENT_RANK == MASTER_PROCESS) {   
         GetFile(myFile);
         preParamGridWell.InputFile(filename, workdir);
         preParamGridWell.Setup();
     }
 
-    MPI_Barrier(comm);
-    partition.InitMPI(comm);
+    MPI_Barrier(MPI_COMM_WORLD);
+    partition.InitMPI(MPI_COMM_WORLD);
     partition.SetPartition(preParamGridWell);
     partition.SetDistribution();
     domain.Setup(partition, preParamGridWell);
