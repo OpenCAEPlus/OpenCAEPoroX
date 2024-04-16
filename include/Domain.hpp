@@ -66,15 +66,18 @@ public:
 	OCP_INT   global_rank;
 	MPI_Group global_group;
 
-	// for local communication(used in some methods like ddm)
-	void SetLocalComm(const vector<OCP_USI>& bIds);
 
 public:
-	MPI_Comm      local_comm;
-	MPI_Group     local_group;
-	OCP_INT       local_numproc;
-	OCP_INT       local_rank;
-	set<OCP_INT>  local_group_global_rank;
+	// for linear solver communication
+	void SetLSComm(const vector<OCP_USI>& bIds);
+	OCP_BOOL IfInLSCommGroup(const OCP_INT& p) const;
+
+public:
+	MPI_Comm      ls_comm;
+	MPI_Group     ls_group;
+	OCP_INT       ls_numproc;
+	OCP_INT       ls_rank;
+	set<OCP_INT>  ls_group_global_rank;
 
 protected:
 	/// Num of Total Elements(grids + wells)
@@ -121,10 +124,7 @@ public:
 	USI numSendProc, numRecvProc;
 
 	map<OCP_INT, set<OCP_USI>>    send_element_loc;
-	// unordered_map<OCP_USI, vector<OCP_USI>> send_element_loc;
-	// vector<vector<OCP_CHAR>> send_buffer;
 	map<OCP_INT, vector<OCP_USI>> recv_element_loc;
-	// vector<vector<OCP_CHAR>> recv_buffer;
 
 	mutable vector<MPI_Request>  send_request;
 	mutable vector<MPI_Request>  recv_request;

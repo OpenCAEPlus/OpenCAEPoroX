@@ -212,30 +212,30 @@ void Domain::InitComm(const Partition& part)
 	MPI_Comm_group(global_comm, &global_group);
 
 
-	local_comm    = global_comm;
-	local_group   = global_group;
-	local_numproc = global_numproc;
-	local_rank    = global_rank;
-	local_group_global_rank.clear();
+	ls_comm    = global_comm;
+	ls_group   = global_group;
+	ls_numproc = global_numproc;
+	ls_rank    = global_rank;
+	ls_group_global_rank.clear();
 	for (OCP_USI n = 0; n < global_numproc; n++) {
-		local_group_global_rank.insert(n);
+		ls_group_global_rank.insert(n);
 	}
 }
 
 
-void Domain::SetLocalComm(const vector<OCP_USI>& bIds)
+void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 {
-	//if (MPI_GROUP_NULL != local_group) MPI_Group_free(&local_group);
-	//if (MPI_COMM_NULL != local_comm) MPI_Comm_free(&local_comm);
+	//if (MPI_GROUP_NULL != ls_group) MPI_Group_free(&ls_group);
+	//if (MPI_COMM_NULL != ls_comm) MPI_Comm_free(&ls_comm);
 
-	local_group_global_rank.clear();
-	local_group_global_rank.insert(CURRENT_RANK);
+	ls_group_global_rank.clear();
+	ls_group_global_rank.insert(CURRENT_RANK);
 	for (const auto& b : bIds) {
 		if (b < numGridInterior) {
 			for (const auto& s : send_element_loc) {
 				const auto& sv = s.second;
-				if (sv.find(b) != sv.end()) {
-					local_group_global_rank.insert(s.first);
+				if (sv.count(b)) {
+					ls_group_global_rank.insert(s.first);
 				}
 			}
 		}
@@ -243,18 +243,32 @@ void Domain::SetLocalComm(const vector<OCP_USI>& bIds)
 			for (const auto& r : recv_element_loc) {
 				const auto& rv = r.second;
 				if (b >= rv[0] && b < rv[1]) {
-					local_group_global_rank.insert(r.first);
+					ls_group_global_rank.insert(r.first);
 					break;
 				}
 			}
 		}
 	}
-	vector<INT> tmp_rank(local_group_global_rank.begin(), local_group_global_rank.end());
-	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &local_group);
-	MPI_Comm_create(MPI_COMM_WORLD, local_group, &local_comm);
+	vector<INT> tmp_rank(ls_group_global_rank.begin(), ls_group_global_rank.end());
+	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &ls_group);
+	MPI_Comm_create(MPI_COMM_WORLD, ls_group, &ls_comm);
 
-	MPI_Comm_size(local_comm, &local_numproc);
-	MPI_Comm_rank(local_comm, &local_rank);
+	MPI_Comm_size(ls_comm, &ls_numproc);
+	MPI_Comm_rank(ls_comm, &ls_rank);
+}
+
+
+OCP_BOOL Domain::IfInLSCommGroup(const OCP_INT& p) const
+{
+	if (ls_numproc == global_numproc) {
+		return OCP_TRUE;
+	}
+	else if (ls_group_global_rank.count(p)) {
+		return OCP_TRUE;
+	}
+	else {
+		return OCP_FALSE;
+	}
 }
 
 
@@ -295,7 +309,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	GetWallTime timer;
 	timer.Start();
 
-	MPI_Scan(&numElementLoc, &global_end, 1, OCPMPI_ULL, MPI_SUM, local_comm);
+	MPI_Scan(&numElementLoc, &global_end, 1, OCPMPI_ULL, MPI_SUM, ls_comm);
 
 	OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
@@ -312,8 +326,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	USI iter = 0;
 	for (const auto& r : recv_element_loc) {
 
-		if (local_numproc != global_numproc &&
-			local_group_global_rank.find(r.first) == local_group_global_rank.end())  continue;
+		if (!IfInLSCommGroup(r.first))  continue;
 
 		const auto& rv = r.second;
 		const auto  bId = rv[0] + numActWellLocal;
@@ -325,8 +338,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	vector<vector<OCP_ULL>> send_buffer(numSendProc);
 	for (const auto& s : send_element_loc) {
 
-		if (local_numproc != global_numproc &&
-			local_group_global_rank.find(s.first) == local_group_global_rank.end())  continue;
+		if (!IfInLSCommGroup(s.first))  continue;
 
 		const auto& sv = s.second;
 		auto&       sb = send_buffer[iter];

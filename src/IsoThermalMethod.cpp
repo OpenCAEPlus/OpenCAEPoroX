@@ -2473,6 +2473,35 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
     timerT.Start();
 
 
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+
+        if (!domain.IfInLSCommGroup(r.first))  continue;
+
+        const auto& rv = r.second;
+        MPI_Irecv(&u[rv[0] * col], (rv[1] - rv[0]) * col, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
+    }
+
+    iter = 0;
+    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    for (const auto& s : domain.send_element_loc) {
+
+        if (!domain.IfInLSCommGroup(s.first))  continue;
+
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * col);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = u.data() + sv1 * col;
+            sb.insert(sb.end(), bId, bId + col);
+        }
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
+    }
+
+
+
     // Bulk
     const OCP_DBL dSmaxlim = ctrlNR.DSmax();
     const OCP_DBL dPmaxlim = ctrlNR.DPmax();

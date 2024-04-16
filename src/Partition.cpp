@@ -273,8 +273,7 @@ void Partition::SetDistribution()
 			recv_buffer[myrank][1] += (xadj[i + 1] - xadj[i]);
 		}
 		else {
-			auto it = send_buffer.find(part[i]);
-			if (it == send_buffer.end()) {
+			if (!send_buffer.count(part[i])) {
 				send_buffer[part[i]] = vector<idx_t>{ 1, xadj[i + 1] - xadj[i] };
 			}
 			else {
