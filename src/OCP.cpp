@@ -214,7 +214,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
 {
     // Record information of each process
     const Domain& domain = reservoir.GetDomain();
-    if (domain.numproc > 1) {
+    if (domain.global_numproc > 1) {
      
         const vector<OCP_DBL> record_local{ 
             static_cast<OCP_DBL>(reservoir.GetInteriorBulkNum()),
@@ -262,7 +262,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
 
             OCP_ASSERT(record_var_num == staVar.size(), "wrong staVar");
 
-            record_total.resize(record_var_num * domain.numproc);
+            record_total.resize(record_var_num * domain.global_numproc);
             MPI_Gather(record_local.data(), record_var_num, OCPMPI_DBL, record_total.data(), record_var_num, OCPMPI_DBL, MASTER_PROCESS, domain.global_comm);
 
             // Calculate average, max, min
@@ -271,7 +271,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
                 staVar[n].val[3] = record_local[n];
             }
 
-            for (OCP_USI p = 0; p < domain.numproc; p++) {
+            for (OCP_USI p = 0; p < domain.global_numproc; p++) {
                 for (USI n = 0; n < record_var_num; n++) {
                     const OCP_DBL tmp = record_total[p * record_var_num + n];
                     staVar[n].val[0] += tmp;
@@ -281,17 +281,17 @@ void OpenCAEPoroX::OutputTimeProcess() const
             }
 
             for (USI n = 0; n < record_var_num; n++) {
-                staVar[n].val[0] /= domain.numproc;
+                staVar[n].val[0] /= domain.global_numproc;
             }
 
             // Calculate standard variance
-            for (OCP_USI p = 0; p < domain.numproc; p++) {
+            for (OCP_USI p = 0; p < domain.global_numproc; p++) {
                 for (USI n = 0; n < record_var_num; n++) {
                     staVar[n].val[1] += pow((record_total[p * record_var_num + n] - staVar[n].val[0]), static_cast<OCP_DBL>(2));
                 }
             }
             for (USI n = 0; n < record_var_num; n++) {
-                staVar[n].val[1] = pow(staVar[n].val[1] / domain.numproc, static_cast<OCP_DBL>(0.5));
+                staVar[n].val[1] = pow(staVar[n].val[1] / domain.global_numproc, static_cast<OCP_DBL>(0.5));
             }
 
             // output general information to screen
@@ -321,7 +321,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
                     myFile << setw(staVar[i].clens) << staVar[i].itemName;
                 }
                 myFile << "\n";                   
-                for (OCP_USI p = 0; p < domain.numproc; p++) {
+                for (OCP_USI p = 0; p < domain.global_numproc; p++) {
                     myFile << setw(6) << p;
                     for (USI i = 0; i < record_var_num; i++) {
                         myFile << setprecision(staVar[i].precision) << setw(staVar[i].clens) << record_total[p * record_var_num + i];

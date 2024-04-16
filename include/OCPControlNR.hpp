@@ -61,8 +61,8 @@ public:
     /// Setup communicator
     void SetupComm(const Domain& domain) {
         myComm = domain.global_comm;
-        numproc = domain.numproc;
-        myrank = domain.myrank;
+        numproc = domain.global_numproc;
+        myrank = domain.global_rank;
     }
     /// Set param for next TSTEP
     void SetNextTSTEP(const USI& i) { wp = &ps[i]; }

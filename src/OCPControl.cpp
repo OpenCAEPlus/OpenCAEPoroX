@@ -51,8 +51,8 @@ void OCPControl::Setup(const USI& argc, const char* argv[], const ParamControl& 
 void OCPControl::SetupComm(const Domain& domain) 
 {
     myComm  = domain.global_comm;
-    numproc = domain.numproc;
-    myrank  = domain.myrank;
+    numproc = domain.global_numproc;
+    myrank  = domain.global_rank;
 
     time.SetupComm(domain);
     NR.SetupComm(domain);

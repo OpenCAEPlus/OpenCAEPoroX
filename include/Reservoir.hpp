@@ -136,7 +136,7 @@ protected:
 
 public:
     void    PrintSolFIM(const string& outfile) const;
-    void    OutInfoFinal() const { if (domain.numproc == 1) bulk.OutMixtureIters(); }
+    void    OutInfoFinal() const { if (domain.global_numproc == 1) bulk.OutMixtureIters(); }
 };
 
 #endif /* end if __RESERVOIR_HEADER__ */

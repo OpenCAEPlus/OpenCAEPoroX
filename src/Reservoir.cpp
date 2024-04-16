@@ -131,8 +131,8 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     bulk.vs.nbI   = domain.numGridInterior;
 
     MPI_Comm      myComm  = domain.global_comm;
-    const OCP_INT numproc = domain.numproc;
-    const OCP_INT myrank  = domain.myrank;
+    const OCP_INT numproc = domain.global_numproc;
+    const OCP_INT myrank  = domain.global_rank;
 
     // numGridLocal, numGridInterior, num edge
     OCP_INT numIgridEdge[3] = { 0,0,0 };
@@ -387,7 +387,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         OCP_CHAR* recv_buffer = new OCP_CHAR[recv_size]();
 
         MPI_Recv((void*)recv_buffer, recv_size, OCPMPI_BYTE, MASTER_PROCESS, 0, myComm, &status);
-        // cout << "Third stage : " << myrank <<  " receives " << recv_size << "b from 0" << endl;
+        // cout << "Third stage : " << global_rank <<  " receives " << recv_size << "b from 0" << endl;
              
         // dbl
         OCP_DBL* dbl_ptr = (OCP_DBL*)recv_buffer;

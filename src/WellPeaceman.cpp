@@ -48,7 +48,7 @@ void PeacemanWell::InputPerfo(const WellParam& well, const Domain& domain, const
         pp++;
     }
     if (pp != numPerf) {
-        OCP_ABORT(to_string(numPerf) + "  " + to_string(pp) +  " -- Wrong Perf Setup! Rank : " + to_string(domain.myrank));
+        OCP_ABORT(to_string(numPerf) + "  " + to_string(pp) +  " -- Wrong Perf Setup! Rank : " + to_string(domain.global_rank));
     }  
 }
 

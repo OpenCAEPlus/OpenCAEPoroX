@@ -17,7 +17,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 {
 	InitComm(part);
 
-	if (numproc == 1) {
+	if (global_numproc == 1) {
 		numElementTotal = part.numElementTotal;
 		numElementLocal = numElementTotal;
 		numWellTotal    = part.numWellTotal;
@@ -75,7 +75,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 			init_global_to_local.insert(make_pair(static_cast<OCP_ULL>(my_vtx[i]), localIndex));
 			for (USI j = my_xadj[i]; j < my_xadj[i + 1]; j++) {
 				const OCP_INT proc = my_edge_proc[j];
-				if (proc != myrank) {
+				if (proc != global_rank) {
 					// current interior grid is also ghost grid of other process
 					send_element_loc[proc].insert(localIndex);
 					ghostElement[proc].insert(my_edge[j]);
@@ -116,7 +116,7 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 
 	if (false) {
 		ofstream myFile;
-		myFile.open("test/process" + to_string(myrank) + ".txt");
+		myFile.open("test/process" + to_string(global_rank) + ".txt");
 		ios::sync_with_stdio(false);
 		myFile.tie(0);
 
@@ -207,17 +207,17 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 void Domain::InitComm(const Partition& part)
 {
 	global_comm = part.myComm;
-	numproc     = part.numproc;
-	myrank      = part.myrank;
+	global_numproc     = part.numproc;
+	global_rank      = part.myrank;
 	MPI_Comm_group(global_comm, &global_group);
 
 
 	local_comm    = global_comm;
 	local_group   = global_group;
-	local_numproc = numproc;
-	local_rank    = myrank;
+	local_numproc = global_numproc;
+	local_rank    = global_rank;
 	local_group_rank.clear();
-	for (OCP_USI n = 0; n < numproc; n++) {
+	for (OCP_USI n = 0; n < global_numproc; n++) {
 		local_group_rank.insert(n);
 	}
 }
@@ -312,7 +312,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	USI iter = 0;
 	for (const auto& r : recv_element_loc) {
 
-		if (local_group_rank.size() != numproc && 
+		if (local_group_rank.size() != global_numproc && 
 			local_group_rank.find(r.first) == local_group_rank.end())  continue;
 
 		const auto& rv = r.second;
@@ -325,7 +325,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	vector<vector<OCP_ULL>> send_buffer(numSendProc);
 	for (const auto& s : send_element_loc) {
 
-		if (local_group_rank.size() != numproc &&
+		if (local_group_rank.size() != global_numproc &&
 			local_group_rank.find(s.first) == local_group_rank.end())  continue;
 
 		const auto& sv = s.second;

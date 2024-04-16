@@ -1363,8 +1363,8 @@ void Out4VTK::Initialize(const string& dir, const Reservoir& rs)
 
     // output the gloabl index of grids belonging to current domain
     const Domain& doman = rs.domain;
-    if (doman.numproc > 1) {
-        myFile = dir + "proc" + to_string(doman.myrank) + "_vtktmp.out";
+    if (doman.global_numproc > 1) {
+        myFile = dir + "proc" + to_string(doman.global_rank) + "_vtktmp.out";
         ofstream outF(myFile, ios::out | ios::binary);
         if (!outF.is_open()) {
             OCP_WARNING("Can not open " + myFile);
@@ -1772,8 +1772,8 @@ void OCPOutput::Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, co
 void OCPOutput::SetupComm(const Domain& domain)
 {
     myComm  = domain.global_comm;
-    numproc = domain.numproc;
-    myrank  = domain.myrank;
+    numproc = domain.global_numproc;
+    myrank  = domain.global_rank;
 }
 
 

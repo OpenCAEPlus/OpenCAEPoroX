@@ -79,8 +79,8 @@ public:
     /// Setup communicator
     void SetupComm(const Domain& domain) {
         myComm = domain.global_comm;
-        numproc = domain.numproc;
-        myrank = domain.myrank;
+        numproc = domain.global_numproc;
+        myrank = domain.global_rank;
     }
     /// Setup control param
     void SetCtrlParam(const TuningPair& src, const vector<OCP_DBL>& Tstep, const USI& i) {

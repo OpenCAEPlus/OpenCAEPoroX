@@ -62,7 +62,7 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
 #endif // WITH_SAMG
 #if WITH_FASP
     else if (lsMethod == "fasp") {
-        // if (domain->numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
+        // if (domain->global_numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
         if (mat.nb > 1)    LS.push_back(new VectorFaspSolver(solveDir, lsFile, mat));
         else               LS.push_back(new ScalarFaspSolver(solveDir, lsFile, mat));
         LStype.push_back(OCPLStype::fasp);

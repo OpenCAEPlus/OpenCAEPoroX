@@ -173,7 +173,7 @@ OCP_BOOL IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContr
     NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
-    //OCP_INT myrank = rs.domain.myrank;
+    //OCP_INT myrank = rs.domain.global_rank;
     //ls.OutputLinearSystem("proc" + to_string(myrank) + "_testA_IMPEC.out", 
     //                      "proc" + to_string(myrank) + "_testb_IMPEC.out");
     //ls.OutputSolution("proc" + to_string(myrank) + "_testx_IMPEC.out");
@@ -1568,7 +1568,7 @@ OCP_BOOL IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContro
     NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
-    //OCP_INT myrank = rs.domain.myrank;
+    //OCP_INT global_rank = rs.domain.global_rank;
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_AIMc.out",
     //                      "proc" + to_string(CURRENT_RANK) + "_testb_AIMc.out");
     //MPI_Barrier(rs.domain.global_comm);

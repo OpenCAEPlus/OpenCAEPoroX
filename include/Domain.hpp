@@ -62,7 +62,8 @@ protected:
 	// for global communication
 public:
 	MPI_Comm  global_comm;
-	OCP_INT   numproc, myrank;
+	OCP_INT   global_numproc;
+	OCP_INT   global_rank;
 	MPI_Group global_group;
 
 	// for local communication(used in some methods like ddm)

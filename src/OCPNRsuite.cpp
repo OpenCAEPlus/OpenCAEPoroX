@@ -20,8 +20,8 @@
 void OCPNRsuite::Setup(const OCP_BOOL& ifthermal, const BulkVarSet& bvs, const OCP_USI& nw, const Domain& domain)
 {
     myComm  = domain.global_comm;
-    numproc = domain.numproc;
-    myrank  = domain.myrank;
+    numproc = domain.global_numproc;
+    myrank  = domain.global_rank;
 
     nb        = bvs.nbI;
     np        = bvs.np;
@@ -56,8 +56,8 @@ void OCPNRsuite::Setup(const BulkVarSet& bvs, const Domain& domain)
     ifUseNR = OCP_FALSE;
 
     myComm  = domain.global_comm;
-    numproc = domain.numproc;
-    myrank  = domain.myrank;
+    numproc = domain.global_numproc;
+    myrank  = domain.global_rank;
 
     nb = bvs.nbI;
     np = bvs.np;

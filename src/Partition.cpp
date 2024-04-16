@@ -202,7 +202,7 @@ void Partition::SetDistribution()
 				if (adjncy[j] >= vtxdist[p]) {
 					while (adjncy[j] >= vtxdist[p + 1]) { p++; }
 				}
-				// adjncy[j] is in proc p now (p != myrank)
+				// adjncy[j] is in proc p now (p != global_rank)
 				idx_t k = 0;
 				for (k = 0; k < right_neighbor.size(); k++) {
 					// indentify storage location
@@ -238,11 +238,11 @@ void Partition::SetDistribution()
 	MPI_Status  status;
 	// Communicate to get neighbor elements' process
 	for (auto& s : left_neighbor_proc) {
-		// cout << "First stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
+		// cout << "First stage:  " << global_rank << " send " << s.size() - 1 << "s to " << s[0] << endl;
 		MPI_Isend(s.data() + 1, s.size() - 1, IDX_T, s[0], 0, myComm, &request);
 	}
 	for (auto& r : right_neighbor_proc) {
-		// cout << "First stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
+		// cout << "First stage:  " << global_rank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
 		MPI_Recv(r.data() + 1, r.size() - 1, IDX_T, r[0], 0, myComm, &status);
 	}
 
@@ -364,12 +364,12 @@ void Partition::SetDistribution()
 
 	// Communicate for buffer
 	for (auto& s : send_buffer) {
-		// cout << "Second stage:  " << myrank << " send " << s.size() - 1 << "s to " << s[0] << endl;
+		// cout << "Second stage:  " << global_rank << " send " << s.size() - 1 << "s to " << s[0] << endl;
 		MPI_Isend(s.second.data(), s.second.size(), IDX_T, s.first, 0, myComm, &request);
 	}
 	for (auto& r : recv_buffer) {
 		if (r.first == myrank)  continue;
-		// cout << "Second stage:  " << myrank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
+		// cout << "Second stage:  " << global_rank << " recv " << r.size() - 1 << "s from " << r[0] << endl;
 		MPI_Recv(r.second.data(), r.second.size(), IDX_T, r.first, 0, myComm, &status);
 	}
 
