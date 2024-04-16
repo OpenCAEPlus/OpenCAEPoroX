@@ -74,7 +74,7 @@ public:
 	MPI_Group     local_group;
 	OCP_INT       local_numproc;
 	OCP_INT       local_rank;
-	set<OCP_INT>  local_group_rank;
+	set<OCP_INT>  local_group_global_rank;
 
 protected:
 	/// Num of Total Elements(grids + wells)

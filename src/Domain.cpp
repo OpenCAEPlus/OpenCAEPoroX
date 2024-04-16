@@ -216,9 +216,9 @@ void Domain::InitComm(const Partition& part)
 	local_group   = global_group;
 	local_numproc = global_numproc;
 	local_rank    = global_rank;
-	local_group_rank.clear();
+	local_group_global_rank.clear();
 	for (OCP_USI n = 0; n < global_numproc; n++) {
-		local_group_rank.insert(n);
+		local_group_global_rank.insert(n);
 	}
 }
 
@@ -228,14 +228,14 @@ void Domain::SetLocalComm(const vector<OCP_USI>& bIds)
 	//if (MPI_GROUP_NULL != local_group) MPI_Group_free(&local_group);
 	//if (MPI_COMM_NULL != local_comm) MPI_Comm_free(&local_comm);
 
-	local_group_rank.clear();
-	local_group_rank.insert(CURRENT_RANK);
+	local_group_global_rank.clear();
+	local_group_global_rank.insert(CURRENT_RANK);
 	for (const auto& b : bIds) {
 		if (b < numGridInterior) {
 			for (const auto& s : send_element_loc) {
 				const auto& sv = s.second;
 				if (sv.find(b) != sv.end()) {
-					local_group_rank.insert(s.first);
+					local_group_global_rank.insert(s.first);
 				}
 			}
 		}
@@ -243,13 +243,13 @@ void Domain::SetLocalComm(const vector<OCP_USI>& bIds)
 			for (const auto& r : recv_element_loc) {
 				const auto& rv = r.second;
 				if (b >= rv[0] && b < rv[1]) {
-					local_group_rank.insert(r.first);
+					local_group_global_rank.insert(r.first);
 					break;
 				}
 			}
 		}
 	}
-	vector<INT> tmp_rank(local_group_rank.begin(), local_group_rank.end());
+	vector<INT> tmp_rank(local_group_global_rank.begin(), local_group_global_rank.end());
 	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &local_group);
 	MPI_Comm_create(MPI_COMM_WORLD, local_group, &local_comm);
 
@@ -312,8 +312,8 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	USI iter = 0;
 	for (const auto& r : recv_element_loc) {
 
-		if (local_group_rank.size() != global_numproc && 
-			local_group_rank.find(r.first) == local_group_rank.end())  continue;
+		if (local_numproc != global_numproc &&
+			local_group_global_rank.find(r.first) == local_group_global_rank.end())  continue;
 
 		const auto& rv = r.second;
 		const auto  bId = rv[0] + numActWellLocal;
@@ -325,8 +325,8 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	vector<vector<OCP_ULL>> send_buffer(numSendProc);
 	for (const auto& s : send_element_loc) {
 
-		if (local_group_rank.size() != global_numproc &&
-			local_group_rank.find(s.first) == local_group_rank.end())  continue;
+		if (local_numproc != global_numproc &&
+			local_group_global_rank.find(s.first) == local_group_global_rank.end())  continue;
 
 		const auto& sv = s.second;
 		auto&       sb = send_buffer[iter];

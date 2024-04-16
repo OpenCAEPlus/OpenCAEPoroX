@@ -96,7 +96,7 @@ protected:
     double*          x = nullptr;
 
     // conmunication
-    int              myComm = MPI_Comm_c2f(MPI_COMM_WORLD);
+    int              myComm;
     const vector<OCP_ULL>* global_index;
 };
 
