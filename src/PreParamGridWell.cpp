@@ -8,16 +8,22 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
+#include <algorithm>
 
 #include "PreParamGridWell.hpp"
 
 
-void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
+void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, int type)
 {
     OCP_INFO("Input Grid File -- begin");
 
     workdir = myWorkdir;
-    Input(myFile);
+    if (type == 0)
+        Input(myFile);
+    else if (type == 1)
+        InputHISIM(myFile);
+    else
+        OCP_ABORT("Wrong input type!");
     CheckInput();
     PostProcessInput();
 
@@ -147,6 +153,644 @@ void PreParamGridWell::Input(const string& myFilename)
     }
 
     ifs.close();
+}
+
+void PreParamGridWell::InputHISIM(const string& myFilename)
+{
+    ifstream input(workdir + myFilename, ios::in);
+    if (!input) {
+        OCP_MESSAGE("Trying to open file: " << (workdir + myFilename));
+        OCP_ABORT("Failed to open the input file!");
+    }
+    else {
+        cout << "Reading file: " << (workdir + myFilename) << endl;
+    }
+
+    /// Read input data
+    std::vector<std::string> words;
+    string buff;
+    std::vector<std::vector<std::string>> input_data;
+    while (GetLineSkipComments(input, buff))
+    {
+        words = strip_split(buff);
+        if (!words.empty())
+            input_data.push_back(words);
+    }
+    input.close();
+
+    /// Compute section starts
+    int GRID_start = -1;
+    int WELL_start = -1;
+    int PROPS_start = -1;
+    int SOLUTION_start = -1;
+    int SCHEDULE_start = -1;
+    int TUNE_start = -1;
+    assert(input_data[0][0] == "MODELTYPE");
+    int MODEL_start = 0;
+    for (int i=1; i<input_data.size(); ++i)
+    {
+        if (input_data[i][0] == "GRID")
+            GRID_start = i;
+        else if (input_data[i][0] == "WELL" && input_data[i].size() == 1)
+            WELL_start = i;
+        else if (input_data[i][0] == "PROPS")
+            PROPS_start = i;
+        else if (input_data[i][0] == "SCHEDULE")
+            SCHEDULE_start = i;
+        else if (input_data[i][0] == "SOLUTION")
+            SOLUTION_start = i;
+        else if (input_data[i][0] == "TUNE")
+            TUNE_start = i;
+    }
+
+    /// Compute section ends
+    std::vector<int> all_starts;
+    all_starts.push_back(MODEL_start);
+    if (GRID_start > -1) all_starts.push_back(GRID_start);
+    if (WELL_start > -1) all_starts.push_back(WELL_start);
+    if (PROPS_start > -1) all_starts.push_back(PROPS_start);
+    if (SOLUTION_start > -1) all_starts.push_back(SOLUTION_start);
+    if (SCHEDULE_start > -1) all_starts.push_back(SCHEDULE_start);
+    if (TUNE_start > -1) all_starts.push_back(TUNE_start);
+    //
+    std::sort(all_starts.begin(), all_starts.end());
+    //
+    int MODEL_end = all_starts[1];
+    //
+    int GRID_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > GRID_start)
+        {
+            GRID_end = itm;
+            break;
+        }
+    //
+    int WELL_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > WELL_start)
+        {
+            WELL_end = itm;
+            break;
+        }
+    //
+    int PROPS_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > PROPS_start)
+        {
+            PROPS_end = itm;
+            break;
+        }
+    //
+    int SOLUTION_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > SOLUTION_start)
+        {
+            SOLUTION_end = itm;
+            break;
+        }
+    //
+    int SCHEDULE_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > SCHEDULE_start)
+        {
+            SCHEDULE_end = itm;
+            break;
+        }
+    //
+    int TUNE_end = input_data.size();
+    for (auto itm: all_starts)
+        if (itm > TUNE_start)
+        {
+            TUNE_end = itm;
+            break;
+        }
+
+    /// MODEL section
+    for (int i=MODEL_start; i<MODEL_end; ++i)
+    {
+        words = input_data[i];
+        if (words[0] == "MODELTYPE")
+        {
+            string model_type = words[1]; // GASWATER, OILWATER, BLACKOIL, COMP
+            model = OCPModel::isothermal; /// fff HiSim only have isothermal?
+        }
+        else if (words[0] == "SOLNT")
+        {
+            int omp = std::stoi(words[1]);
+            cout << "并行线程数: " << omp << endl;
+        }
+        else if (words[0] == "FIELD")
+        {
+            cout << "单位制: " << words[0] << endl;
+        }
+        else
+        {
+            OCP_MESSAGE("Found not supported keywords: " << buff);
+            OCP_ABORT("Wrong keywords!");
+        }
+    }
+
+    /// GRID section
+    for (int i=GRID_start+1; i<GRID_end; ++i)
+    {
+        words = input_data[i];
+        if (words[0] == "DIMENS")
+        {
+            if (words.size() > 1)
+            {
+                nx = stoi(words[1]);
+                ny = stoi(words[2]);
+                nz = stoi(words[3]);
+            }
+            else
+            {
+                i += 1;
+                words = input_data[i];
+                nx = stoi(words[0]);
+                ny = stoi(words[1]);
+                nz = stoi(words[2]);
+            }
+
+            numGridM = nx * ny * nz;
+            if (DUALPORO) numGridF = numGridM; /// fff how to set DUALPORO
+
+            numGrid = numGridM + numGridF;
+        }
+        else if (words[0] == "DXV")
+        {
+            if (words.size() > 1)
+            {
+                cout << "DXV: " << words[1] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "DXV: " << words[0] << endl;
+            }
+        }
+        else if (words[0] == "DYV")
+        {
+            if (words.size() > 1)
+            {
+                cout << "DYV: " << words[1] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "DYV: " << words[0] << endl;
+            }
+        }
+        else if (words[0] == "DZV")
+        {
+            if (words.size() > 1)
+                cout << "DZV: " << words[1] << ", " << words[2] << ", " << words[3] << endl;
+            else
+            {
+                i += 1;
+                words = input_data[i];
+                cout << "DZV, " << words[0] << ", " << words[1] << ", " << words[2] << endl;
+            }
+        }
+        else if (words[0] == "TOPS")
+        {
+            if (words.size() > 1)
+            {
+                cout << "TOPS: " << words[1] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "TOPS: " << words[0] << endl;
+            }
+        }
+        else if (words[0] == "PORO")
+        {
+            if (words.size() > 1)
+            {
+                cout << "PORO: " << words[1] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "PORO: " << words[0] << endl;
+            }
+        }
+        else if (words[0] == "PERMX")
+        {
+            if (words.size() > 1)
+            {
+                cout << "PERMX: " << words[1] << " " << words[2] << " " << words[3] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "PERMX: " << words[0] << " " << words[1] << " " << words[2] << endl;
+            }
+        }
+        else if (words[0] == "PERMY")
+        {
+            if (words.size() > 1)
+            {
+                cout << "PERMY: " << words[1] << " " << words[2] << " " << words[3] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "PERMY: " << words[0] << " " << words[1] << " " << words[2] << endl;
+            }
+        }
+        else if (words[0] == "PERMZ")
+        {
+            if (words.size() > 1)
+            {
+                cout << "PERMZ: " << words[1] << " " << words[2] << " " << words[3] << endl;
+            }
+            else
+            {
+                i++;
+                words = input_data[i];
+                cout << "PERMZ: " << words[0] << " " << words[1] << " " << words[2] << endl;
+            }
+        }
+        else
+        {
+            OCP_ABORT("Not support keywords!");
+        }
+    }
+
+    /// WELL section
+    for (int i=WELL_start+1; i<WELL_end; ++i)
+    {
+        words = input_data[i];
+        if (words[0] == "TEMPLATE")
+        {
+            do {
+                i++;
+                words = input_data[i];
+                if (words[words.size() - 1] == "/")
+                    break;
+            } while (input_data[i+1][0].find('\'') == 0);
+        }
+        else if (words[0] == "WELSPECS")
+        {
+            do {
+                i++;
+                words = input_data[i];
+                i++;
+                words = input_data[i];
+            } while (input_data[i+1][0] == "NAME");
+        }
+        else
+        {
+            OCP_ABORT("Not support keywords!");
+        }
+    }
+
+    /// PROPS section
+    for (int i=PROPS_start+1; i<PROPS_end; ++i)
+    {
+        words = input_data[i];
+        if (words[0] == "STCOND")
+        {
+            cout << "STCOND: " << buff << endl;
+        }
+        else if (words[0] == "NCOMPS")
+        {
+            cout << "NCOMPS: " << words[1] << endl;
+        }
+        else if (words[0] == "EOS")
+        {
+            cout << "EOS: " << words[1] << endl;
+        }
+        else if (words[0] == "PRCORR")
+        {
+            cout << "PRCORR" << endl;
+        }
+        else if (words[0] == "CNAMES")
+        {
+            cout << "cnames: " << buff << endl;
+        }
+        else if (words[0] == "EOSCOEF")
+        {
+            continue;
+        }
+        else if (words[0] == "RTEMP")
+        {
+            cout << "rtemp: " << buff << endl;
+        }
+        else if (words[0] == "TCRIT")
+        {
+            cout << "TCRIT: " << buff << endl;
+        }
+        else if (words[0] == "PCRIT")
+        {
+            cout << "PCRIT: " << buff << endl;
+        }
+        else if (words[0] == "ZCRIT")
+        {
+            cout << "ZCRIT: " << buff << endl;
+        }
+        else if (words[0] == "MW")
+        {
+            cout << "MW: " << buff << endl;
+        }
+        else if (words[0] == "ACF")
+        {
+            cout << "ACF: " << buff << endl;
+        }
+        else if (words[0] == "BIC")
+        {
+            vector<vector<string>> bic;  /// TODO not string, is double
+            int NCOMPS = 6;
+            for (int i=0; i<NCOMPS-1; ++i)
+            {
+                words = strip_split(buff);
+                bic.push_back(words);
+            }
+        }
+        else if (words[0] == "STONE2")
+        {
+            continue;
+        }
+        else if (words[0] == "SWOF")
+        {
+            vector<vector<string>> swof; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    swof.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "SGOF")
+        {
+            vector<vector<string>> sgof; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    sgof.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "PVDG")
+        {
+            vector<vector<string>> pvdg; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    pvdg.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "PVCO")
+        {
+            vector<vector<string>> pvco; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    pvco.push_back(words);
+                }
+                else
+                {
+                    if (words[0] != "/")
+                        i--;
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "PVTW")
+        {
+            vector<vector<string>> pvtw; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    pvtw.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "ROCK")
+        {
+            vector<vector<string>> rock; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    rock.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
+
+        else if (words[0] == "ROCKTAB")
+        {
+            std::streampos cur_pos;
+            vector<vector<string>> rocktab; /// TODO not string, double
+            while (GetLineSkipComments(input, buff, cur_pos))
+            {
+                words = strip_split(buff);
+                if (!isRegularString(words[0]))
+                {
+                    rocktab.push_back(words);
+                    cur_pos = input.tellg();
+                }
+                else
+                {
+                    input.seekg(cur_pos);
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "WATERTAB")
+        {
+            std::streampos cur_pos;
+            vector<vector<string>> watertab; /// TODO not string, double
+            while (GetLineSkipComments(input, buff, cur_pos))
+            {
+                words = strip_split(buff);
+                if (!isRegularString(words[0]))
+                {
+                    watertab.push_back(words);
+                    cur_pos = input.tellg();
+                }
+                else
+                {
+                    input.seekg(cur_pos);
+                    break;
+                }
+            }
+        }
+        else if (words[0] == "DENSITY")
+        {
+            i++;
+            words = input_data[i];
+            cout << "density: " << words[0] << ", " << words[1] << ", " << words[2] << endl;
+        }
+        else
+        {
+            OCP_ABORT("Not support keywords!");
+        }
+    }
+
+    /// SOLUTION section
+    for (int i=SOLUTION_start+1; i<SOLUTION_end; ++i)
+    {
+        words = input_data[i];
+
+        if (words[0] == "EQUILPAR")
+        {
+            vector<vector<string>> equilpar; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    equilpar.push_back(words);
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+            cout << "EQUILPAR: " << equilpar[0][0] << endl;
+        }
+        else if (words[0] == "PBVD")
+        {
+            vector<vector<string>> pbvd; /// TODO not string, double
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    pbvd.push_back(words);
+                }
+                else
+                {
+                    if (words[0] != "/")
+                        i--;
+                    break;
+                }
+            }
+            cout << "EQUILPAR: " << pbvd[1][1] << endl;
+        }
+        else if (words[0] == "ZMFVD")
+        {
+            std::streampos cur_pos;
+            vector<vector<string>> zmfvd; /// TODO not string, double
+            while (GetLineSkipComments(input, buff, cur_pos))
+            {
+                words = strip_split(buff);
+                if (!isRegularString(words[0]))
+                {
+                    zmfvd.push_back(words);
+                    cur_pos = input.tellg();
+                }
+                else
+                {
+                    input.seekg(cur_pos);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            OCP_ABORT("Not support keywords!");
+        }
+    }
+
+    /// TUNE section
+    for (int i=TUNE_start+1; i<TUNE_end; ++i)
+    {
+        do {
+            words = input_data[i];
+            cout << words[0] << endl;
+            i++;
+        } while (i < TUNE_end);
+    }
+
+    /// SCHEDULE section
+    for (int i=SCHEDULE_start+1; i<SCHEDULE_end; ++i)
+    {
+        words = input_data[i];
+
+        if (words[0] == "USEENDTIME")
+            continue;
+        else if (words[0] == "USESTARTTIME")
+            continue;
+        else if (words[0] == "RPTSCHED")
+            continue;
+        else if (words[0] == "RECURRENT")
+            continue;
+        else if (words[0] == "BASIC")
+            continue;
+        else if (words[0] == "TIME")
+        {
+            cout << "time step: " << words[1] << endl;
+            while (input_data[i+1][0] == "WELL")
+            {
+                words = input_data[i+1];
+                cout << "well name: " << words[1] << endl;
+                i++;
+            }
+        }
+        else
+        {
+            OCP_MESSAGE("Found not supported keywords: " << words[0]);
+            OCP_ABORT("Wrong keywords!");
+        }
+
+    }
+
+    cout << "Good" << endl;
 }
 
 

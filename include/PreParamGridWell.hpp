@@ -153,10 +153,13 @@ class PreParamGridWell
 
 public:
     /// Input params files
-    void InputFile(const string& myFile, const string& myWorkdir);
+    void InputFile(const string& myFile, const string& myWorkdir, int type=0);
 
 protected:
+    /// Read OCP input file
     void Input(const string& myFilename);
+    /// Read HiSim input file
+    void InputHISIM(const string& myFilename);
     /// Check Input
     void CheckInput();
     /// Post-process input param 

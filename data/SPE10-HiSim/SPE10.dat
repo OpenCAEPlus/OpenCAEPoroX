@@ -1,0 +1,115 @@
+# UNCONG Simulator Benchmark
+# Created by LiXiang, 2013/2/1
+# SPE10 full grid dead oil version
+# Up to 2.0Gb memory required
+
+FIELD
+MODELTYPE  OILWATER
+ 
+GRID
+##################################################
+DIMENS #NX=60 NY=220 NZ=85, 20ft*10ft*2ft
+ 60  220  85
+
+INCLUDE
+ spe_phi
+INCLUDE
+ spe_permxy
+INCLUDE
+ spe_permz
+TOPS   #ft
+ 13200*12000
+
+DXV
+ 60*20.0 
+DYV
+ 220*10.0 
+DZV
+  85*2.00
+##################################################
+
+WELL
+##################################################
+TEMPLATE
+'MARKER' 'I' 'J' 'K1' 'K2' 'OUTLET' 'WI' 'OS' 'SATMAP' 'HX' 'HY' 'HZ' 'REQ' 'SKIN' 'LENGTH' 'RW' 'DEV' 'ROUGH' 'DCJ' 'DCN' 'XNJ' 'YNJ' /
+WELSPECS
+NAME 'W1'
+''  1  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+
+NAME 'W2'
+''  60  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+
+NAME 'W3'
+''  60  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+
+NAME 'W4'
+''  1  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+
+NAME 'W5'
+''  30  110  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA 
+
+##################################################
+
+PROPS
+##################################################
+SWOF
+# Sw     Krw     Kro      Pc
+0.200	0.0000	1.0000   0.0000
+0.250	0.0069	0.8403   0.0000
+0.300	0.0278	0.6944   0.0000
+0.350	0.0625	0.5625   0.0000
+0.400	0.1111	0.4444   0.0000
+0.450	0.1736	0.3403   0.0000
+0.500	0.2500	0.2500   0.0000
+0.550	0.3403	0.1736   0.0000
+0.600	0.4444	0.1111   0.0000
+0.650	0.5625	0.0625   0.0000
+0.700	0.6944	0.0278   0.0000
+0.750	0.8403	0.0069   0.0000
+0.800	1.0000	0.0000   0.0000
+
+PVDO
+# Pres(psi)  Bo    Vis(cp)
+   300      1.05   2.85 
+   800      1.02   2.99 
+  8000      1.01   3.00 
+ 
+PVTW
+# Pref     refBw     Cw     refVisw    Cvisw
+  6000     1.01     3.1E-6     0.3      0.0
+  
+DENSITY
+ 53  64  53
+ 
+ROCK 
+ 6000  1.0E-6
+
+##################################################
+ 
+SOLUTION
+EQUILPAR
+#refD     RefP    OWC    pcow    dh
+ 12000    6000   12200    0.0    0.5
+ 
+TUNE
+TSTART 0  STEPCUT  1.0   
+MINDT  0.01  MAXDT 50   DTINC  3.0  DTCUT  0.5  NCHECKDX  
+MAXDP  0  MAXDS  0.15    MAXDC  0   MBEPC  1E-3  MBEAVG  1E-6   
+SOLVER  3064 INISTOL 1E-3
+
+SCHEDULE
+RECURRENT
+TIME 20*100.0
+ WELL  'W1'     BHP     4000     100.0
+ WELL  'W2'     BHP     4000     100.0
+ WELL  'W3'     BHP     4000     100.0
+ WELL  'W4'     BHP     4000     100.0
+ WELL  'W5'     WIR     5000     10000   
+ 
+RPTSCHED
+ BASIC TECPLOT  /
+  
+RPTSUM
+ FWIP /
+ FOIP /
+ /

@@ -3,6 +3,13 @@
  *  \author  Shizhe Li
  *  \date    Feb/15/2023
  *
+ * Sample run
+ * ./testOpenCAEPoro ../../data/spe1a/spe1a.data
+ * ./testOpenCAEPoro ../../data/spe1a/spe1a.data -ocp
+ * ./testOpenCAEPoro ../../data/SPE5-HiSim/SPE5.dat -hisim
+ * ./testOpenCAEPoro ../../data/SPE9-HiSim/SPE9.dat -hisim
+ * ./testOpenCAEPoro ../../data/SPE10-HiSim/SPE10.dat -hisim
+ *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
@@ -50,11 +57,22 @@ int main(int argc, char* argv[])
     }
 
     {
-        // Step 1. Input and generate Grid infomation and partition
-        PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD);
+        if (argc == 2 || (argc == 3 && strcmp(argv[2], "-ocp") == 0))
+        {
+            // Step 1. Input and generate Grid infomation and partition
+            PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD, PreProcess::InputType::OCP);
 
-        // Step 2. Input reservoir information and distribute
-        simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
+            // Step 2. Input reservoir information and distribute
+            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
+        }
+        else if (argc == 3 && strcmp(argv[2], "-hisim") == 0)
+        {
+            // Step 1. Input and generate Grid infomation and partition
+            PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD, PreProcess::InputType::HISIM);
+
+            // Step 2. Input reservoir information and distribute
+            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
+        }
     }
 
     // Step 3. Setup solver

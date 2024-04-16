@@ -12,14 +12,14 @@
 #include "PreProcess.hpp"
 
 
-PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm)
+PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm, InputType type)
 {  
     GetWallTime timer;
     timer.Start();
 
     if (myRank == MASTER_PROCESS) {   
         GetFile(myFile);
-        preParamGridWell.InputFile(filename, workdir);
+        preParamGridWell.InputFile(filename, workdir, type);
         preParamGridWell.Setup();
     }
 

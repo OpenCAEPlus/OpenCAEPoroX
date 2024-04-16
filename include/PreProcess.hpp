@@ -27,21 +27,22 @@ class PreProcess
 {
 	friend class OpenCAEPoroX;
 	friend class Reservoir;
-	
 
 public:
 
-	PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm);
+    enum InputType { OCP=0, HISIM=1, NumInputTypes=2 };
+
+	PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm comm, InputType type=OCP);
 
 protected:
 
 	void GetFile(const string& myFile);
 
 protected:
-
 	string inputFile;    ///< Input file with its path (absolute or relative).
 	string workdir;      ///< Current work directory.
 	string filename;     ///< File name of input file.
+    InputType input_type;   ///< Type of input file: OCP (default, 0), HiSim (1).
 
 	PreParamGridWell preParamGridWell; ///< Param of grids and wells
 

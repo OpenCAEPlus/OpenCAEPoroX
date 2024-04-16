@@ -8,7 +8,6 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
-
 #include "UtilInput.hpp"
 
 OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slash)
@@ -74,6 +73,7 @@ void DealDefault(vector<string>& result)
     }
     swap(result, tmp);
 }
+
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

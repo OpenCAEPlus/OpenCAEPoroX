@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
@@ -72,6 +73,76 @@ void DealData(const vector<string>& vbuf, vector<OCP_USI>& obj, vector<T>& regio
         }
     }
 }
+
+/// Check if the stream starts with @a comment_char. If so skip it.
+inline void skip_comment_lines(std::istream &is, const char comment_char)
+{
+    while (1)
+    {
+        is >> std::ws;
+        if (is.peek() != comment_char)
+        {
+            break;
+        }
+        is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+}
+
+/// Erase white-space characters in a string
+inline std::vector<std::string> strip_split(std::string& str)
+{
+    // 去除首部空白字符
+    size_t start = str.find_first_not_of(" \t\n\r");
+    if (start != std::string::npos)
+        str.erase(0, start);
+    else
+        str.clear(); // 如果字符串全是空白字符，则清空字符串
+
+    // 去除尾部空白字符
+    size_t end = str.find_last_not_of(" \t\n\r");
+    if (end != std::string::npos)
+        str.erase(end + 1);
+
+    // 使用 std::istringstream 按空格分割字符串
+    std::istringstream iss(str);
+    std::vector<std::string> words;
+    std::string tmp;
+    while (iss >> tmp)
+        words.push_back(tmp);
+
+    // Erase comments
+    int pos;
+    for (pos=0; pos<words.size(); ++pos)
+    {
+        if (words[pos].find('#') == 0 || words[pos].find("--") == 0)
+            break;
+    }
+    words.erase(words.begin() + pos, words.end());
+
+    return words;
+}
+
+/// Save the current file pointer and get a line.
+inline std::istream& GetLineSkipComments(std::istream& is, std::string& buff, const char comment_char = '#')
+{
+    skip_comment_lines(is, '#');
+    return std::getline(is, buff);
+}
+
+inline bool isRegularString(const std::string& str)
+{
+    std::istringstream iss(str);
+    double num;
+    iss >> std::noskipws >> num;
+
+    // 如果转换成功，说明是double类型
+    if (!iss.fail() && iss.eof()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 
 #endif /* end if __UTILINPUT_HEADER__ */
 

@@ -34,7 +34,7 @@ public:
         string            tmp;
         string            key;
         string            value;
-        for (USI n = 2; n < argc; n++) {
+        for (USI n = 3; n < argc; n++) {
             buffer << optset[n];
             buffer >> tmp;
 
