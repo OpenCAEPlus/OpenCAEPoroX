@@ -166,7 +166,7 @@ void PardisoSolver::CalCommTerm(const Domain* domain)
     GetWallTime timer;
     timer.Start();
 
-    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_global_rank.rbegin(), domain->ls_comm);
+    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_local_rank.rbegin(), domain->ls_comm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop();
 }
@@ -251,7 +251,7 @@ void VectorPardisoSolver::CalCommTerm(const Domain* domain)
     GetWallTime timer;
     timer.Start();
 
-    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_global_rank.rbegin(), domain->ls_comm);
+    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_local_rank.rbegin(), domain->ls_comm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop();
 }

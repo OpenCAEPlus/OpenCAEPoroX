@@ -44,7 +44,7 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -56,8 +56,8 @@ void IsothermalMethod::ExchangeSolutionP(Reservoir& rs) const
         iter++;
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
-    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
 
@@ -76,7 +76,7 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -89,8 +89,8 @@ void IsothermalMethod::ExchangeSolutionNi(Reservoir& rs) const
         iter++;
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
-    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
 
@@ -564,7 +564,7 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -592,13 +592,13 @@ void IsoT_IMPEC::GetSolution(Reservoir& rs, vector<OCP_DBL>& u)
         if (p == 0) {
             bId = eId;
             eId = nb;
-            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+            MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
         else {
             break;
         }
     }
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 
@@ -809,7 +809,6 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
 OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
-
     if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" }, ctrl.time.GetCurrentDt())) {
         ctrl.time.CutDt(NR);
         ResetToLastTimeStep(rs, ctrl);
@@ -1272,7 +1271,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -1359,14 +1358,14 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
         if (p == 0) {
             bId = eId;
             eId = nb;
-            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+            MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
         else {
             break;
         }        
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 
     OCPTIME_COMM_P2P += (timerT.Stop() - time_cal);
     OCPTIME_NRSTEPC  += time_cal;
@@ -1724,7 +1723,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
 
     USI iter = 0;
-    vector<vector<OCP_INT>> recv_buffer(domain.numRecvProc);
+    vector<vector<OCP_INT>> recv_buffer(domain.recv_element_loc.size());
     for (const auto& r : domain.recv_element_loc) {
         const auto& rv = r.second;
         auto&       rb = recv_buffer[iter];
@@ -1734,7 +1733,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     }
 
     iter = 0;
-    vector<vector<OCP_INT>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_INT>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -1747,7 +1746,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     }
 
 
-    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 
     iter = 0;
     for (const auto& r : domain.recv_element_loc) {
@@ -1757,9 +1756,11 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         for (OCP_USI n = 0; n < rb.size(); n++) {
             SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);
         }
+
+        iter++;
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 
 
     // Check Consistency
@@ -1785,7 +1786,7 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         iter++;
     }
 
-    MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
      
     iter = 0;
     for (const auto& r : domain.recv_element_loc) {
@@ -1795,9 +1796,10 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
         for (OCP_USI n = 0; n < rb.size(); n++) {
             SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);  // Maybe not a good idea
         }
+        iter++;
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 
     if (OCP_TRUE) {
         cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bvs.nb * 100 << "% " << endl;
@@ -2069,7 +2071,7 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -2166,14 +2168,14 @@ void IsoT_AIMc::GetSolution(Reservoir&       rs,
         if (p == 0) {
             bId = eId;
             eId = nb;
-            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+            MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
         else {
             break;
         }
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 void IsoT_AIMc::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
@@ -2204,6 +2206,42 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
 ////////////////////////////////////////////
 
 
+void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
+{
+    // Calculate well property at the beginning of next time step
+    rs.allWells.PrepareWell(rs.bulk);
+    // Calculate initial residual
+    CalRes(rs, dt, OCP_TRUE);
+    NR.InitStep(rs.bulk.GetVarSet());
+    NR.InitIter();
+    rs.domain.SetLSComm(starBulkSet);
+    CalRankSet(rs.domain);
+}
+
+
+OCP_BOOL IsoT_FIMddm::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
+{
+    if (!NR.CheckPhysical(rs, { "BulkNi", "BulkP" }, ctrl.time.GetCurrentDt())) {
+        ctrl.time.CutDt(NR);
+        ResetToLastTimeStep(rs, ctrl);
+        return OCP_FALSE;
+    }
+
+    // Update fluid property
+    CalFlash(rs.bulk, rankSetInLS, rs.domain);
+    CalKrPc(rs.bulk, rankSetInLS, rs.domain);
+    // Update rock property
+    CalRock(rs.bulk, rankSetInLS, rs.domain);
+    // Update well property
+    rs.allWells.CalFlux(rs.bulk);
+
+    // Update residual
+    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+
+    return OCP_TRUE;
+}
+
+
 OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     if (preM) {
@@ -2219,8 +2257,8 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
             }
             else {
                 // exchange solution
-                ExchangeSolutionP(rs);
-                ExchangeSolutionNi(rs);
+                ExchangePBoundary(rs);
+                ExchangeNiBoundary(rs);
                 UpdatePropertyBoundary(rs, ctrl);
                 return OCP_TRUE;
             }
@@ -2237,8 +2275,8 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
     else {
         // check residual for global nonlinear equations
         // exchange solution
-        ExchangeSolutionP(rs);
-        ExchangeSolutionNi(rs);
+        ExchangePBoundary(rs);
+        ExchangeNiBoundary(rs);
         UpdatePropertyBoundary(rs, ctrl);
 
         NR.res.maxRelRes0_V = global_res0;
@@ -2266,6 +2304,141 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
         else {
             return OCP_FALSE;
+        }
+    }
+}
+
+
+void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
+{
+    rs.CalIPRT(ctrl.time.GetCurrentDt());
+    NR.CalMaxChangeTime(rs);
+    ctrl.CalNextTimeStep(NR, { "dP", "dS", "iter" });
+    SetStarBulkSet(rs.bulk, rs.domain);
+
+    UpdateLastTimeStep(rs);
+}
+
+
+void IsoT_FIMddm::SetStarBulkSet(const Bulk& bulk, const Domain& domain)
+{
+    starBulkSet.clear();
+
+    const auto& bvs = bulk.vs;
+    for (OCP_USI n = 0; n < bvs.nb; n++) {
+
+        // dS
+        for (USI j = 0; j < bvs.np; j++) {
+            const OCP_USI n_np_j = n * bvs.np + j;
+            if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > 0.001) {
+                starBulkSet.push_back(n);
+                break;
+            }
+        }
+    }
+}
+
+
+void IsoT_FIMddm::CalRankSet(const Domain& domain)
+{
+    rankSetInLS = domain.ls_group_global_rank;
+    rankSetOutLS.clear();
+
+	for (const auto& r : domain.recv_element_loc) {
+		if (!rankSetInLS.count(r.first)) {
+            rankSetOutLS.insert(r.first);
+		}
+	}
+
+    if (OCP_TRUE) {
+        cout << "rank" << CURRENT_RANK << "  ";
+        for (const auto& s : rankSetInLS) {
+            cout << s << "   ";
+        }
+        cout << endl;
+    }
+}
+
+
+void IsoT_FIMddm::CalFlash(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain)
+{
+    const BulkVarSet& bvs = bk.vs;
+    OCP_USI bId, eId;
+
+    for (const auto& p : rankSet) {
+
+        if (p == CURRENT_RANK) {
+            bId = 0;
+            eId = bvs.nbI;
+        }
+        else {
+            bId = domain.recv_element_loc.at(p)[0];
+            eId = domain.recv_element_loc.at(p)[1];
+        }
+
+        for (OCP_USI n = bId; n < eId; n++) {
+            bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
+            PassFlashValue(bk, n);
+        }
+    }
+}
+
+
+void IsoT_FIMddm::CalKrPc(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain)
+{
+    BulkVarSet& bvs = bk.vs;
+    const USI&  np  = bvs.np;
+    OCP_USI     bId, eId;
+
+	for (const auto& p : rankSet) {
+
+		if (p == CURRENT_RANK) {
+			bId = 0;
+			eId = bvs.nbI;
+		}
+		else {
+			bId = domain.recv_element_loc.at(p)[0];
+			eId = domain.recv_element_loc.at(p)[1];
+		}
+
+		for (OCP_USI n = bId; n < eId; n++) {
+			auto SAT = bk.SATm.GetSAT(n);
+
+			const OCP_USI n_np = n * np;
+			SAT->CalKrPcFIM(n, &bvs.S[n_np]);
+			copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[n_np]);
+			copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[n_np]);
+			copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[n_np * np]);
+			copy(SAT->GetdPcdS().begin(), SAT->GetdPcdS().end(), &bvs.dPcdS[n_np * np]);
+			for (USI j = 0; j < np; j++) bvs.Pj[n_np + j] = bvs.P[n] + bvs.Pc[n_np + j];
+		}
+	}
+}
+
+
+void IsoT_FIMddm::CalRock(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain)
+{
+    BulkVarSet& bvs = bk.vs;
+    OCP_USI     bId, eId;
+
+    for (const auto& p : rankSet) {
+
+        if (p == CURRENT_RANK) {
+            bId = 0;
+            eId = bvs.nbI;
+        }
+        else {
+            bId = domain.recv_element_loc.at(p)[0];
+            eId = domain.recv_element_loc.at(p)[1];
+        }
+
+        for (OCP_USI n = bId; n < eId; n++) {
+            auto ROCK = bk.ROCKm.GetROCK(n);
+
+            ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], BulkContent::rf);
+            bvs.poro[n] = ROCK->GetPoro();
+            bvs.poroP[n] = ROCK->GetdPorodP();
+            bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
         }
     }
 }
@@ -2426,19 +2599,28 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
         }
 #endif
 
+
+        // End
         if (eId < nbI) {
-            // End
+            // process Interior grid
             bmat = Flux->GetdFdXpE();
             DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
                 bmat.data());
             Dscalar(bsize, dt, bmat.data());
-
-            // Interior grid
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId, bmat);
             // End - End -- add
             Dscalar(bsize, -1, bmat.data());
             ls.AddDiag(eId, bmat);
+        }
+        else if (IfBulkInLS(eId, rs.domain)) {
+            // group Interior grid
+            bmat = Flux->GetdFdXpE();
+            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+                bmat.data());
+            Dscalar(bsize, dt, bmat.data());
+            // Begin - End -- insert
+            ls.NewOffDiag(bId, eId + numWell, bmat);
         }
 
 #ifdef OCP_NANCHECK
@@ -2472,11 +2654,11 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
     OCP_DBL     time_cal = 0;   ///< calculation time
     timerT.Start();
 
-
+    
     USI iter = 0;
     for (const auto& r : domain.recv_element_loc) {
 
-        if (!domain.IfInLSCommGroup(r.first))  continue;
+        if (!domain.IfIRankInLSCommGroup(r.first))  continue; 
 
         const auto& rv = r.second;
         MPI_Irecv(&u[rv[0] * col], (rv[1] - rv[0]) * col, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
@@ -2484,10 +2666,10 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
 
-        if (!domain.IfInLSCommGroup(s.first))  continue;
+        if (!domain.IfIRankInLSCommGroup(s.first))  continue; 
 
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -2500,8 +2682,6 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
         iter++;
     }
 
-
-
     // Bulk
     const OCP_DBL dSmaxlim = ctrlNR.DSmax();
     const OCP_DBL dPmaxlim = ctrlNR.DPmax();
@@ -2510,116 +2690,183 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
     OCP_DBL         chopmin = 1;
     OCP_DBL         choptmp = 0;
 
-    OCP_USI bId = 0;
-    OCP_USI eId = bvs.nbI;
+    OCP_USI bId, eId;
+   
+    iter = 0;
+    for (const auto& p : rankSetInLS) {
 
-    // interior only
-    timerC.Start();
-    
-    for (OCP_USI n = bId; n < eId; n++) {
-        // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
-    
-        chopmin = 1;
-        // compute the chop
-        fill(dtmp.begin(), dtmp.end(), 0.0);
-    
-        OCP_aAxpby(row, col, static_cast<OCP_DBL>(1.0), &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, static_cast<OCP_DBL>(1.0), dtmp.data());
-    
-        for (USI j = 0; j < np; j++) {
-            choptmp = 1;
-            if (fabs(dtmp[j]) > dSmaxlim) {
-                choptmp = dSmaxlim / fabs(dtmp[j]);
+        if (p == CURRENT_RANK) {
+            bId = 0;
+            eId = bvs.nbI;
+        }
+        else {
+            bId = domain.recv_element_loc.at(p)[0];
+            eId = domain.recv_element_loc.at(p)[1];
+
+            MPI_Wait(&domain.recv_request[iter], MPI_STATUS_IGNORE);
+            iter++;
+        }
+
+        timerC.Start();
+
+        for (OCP_USI n = bId; n < eId; n++) {
+            // const vector<OCP_DBL>& scm = satcm[SATNUM[n]];
+
+            chopmin = 1;
+            // compute the chop
+            fill(dtmp.begin(), dtmp.end(), 0.0);
+
+            OCP_aAxpby(row, col, static_cast<OCP_DBL>(1.0), &bvs.dSec_dPri[n * bvs.lendSdP], u.data() + n * col, static_cast<OCP_DBL>(1.0), dtmp.data());
+
+            for (USI j = 0; j < np; j++) {
+                choptmp = 1;
+                if (fabs(dtmp[j]) > dSmaxlim) {
+                    choptmp = dSmaxlim / fabs(dtmp[j]);
+                }
+                else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
+                    choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
+                }
+                // if (fabs(S[n_np_j] - scm[j]) > TINY &&
+                //     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
+                //     choptmp *= min(1.0, -((S[n_np_j] - scm[j]) / (choptmp * dtmp[js])));
+                chopmin = min(chopmin, choptmp);
             }
-            else if (bvs.S[n * np + j] + dtmp[j] < 0.0) {
-                choptmp = 0.9 * bvs.S[n * np + j] / fabs(dtmp[j]);
+
+            // dS
+            for (USI j = 0; j < np; j++) {
+                bvs.S[n * np + j] += chopmin * dtmp[j];
             }
-            // if (fabs(S[n_np_j] - scm[j]) > TINY &&
-            //     (S[n_np_j] - scm[j]) / (choptmp * dtmp[js]) < 0)
-            //     choptmp *= min(1.0, -((S[n_np_j] - scm[j]) / (choptmp * dtmp[js])));
-            chopmin = min(chopmin, choptmp);
-        }
-    
-        // dS
-        for (USI j = 0; j < np; j++) {
-            bvs.S[n * np + j] += chopmin * dtmp[j];
-        }
-    
-        // dxij
-        USI js = np;
-        for (USI j = 0; j < np; j++) {
-            for (USI i = 0; i < bvs.nc; i++) {
-                bvs.xij[(n * np + j) * nc + i] += chopmin * dtmp[js];
-                js++;
+
+            // dxij
+            USI js = np;
+            for (USI j = 0; j < np; j++) {
+                for (USI i = 0; i < bvs.nc; i++) {
+                    bvs.xij[(n * np + j) * nc + i] += chopmin * dtmp[js];
+                    js++;
+                }
+            }
+
+            // dP
+            //choptmp = dPmaxlim / fabs(u[n * col]);
+            //chopmin = min(chopmin, choptmp);
+            bvs.P[n] += u[n * col]; // seems better
+
+            // dNi
+            for (USI i = 0; i < nc; i++) {
+                bvs.Ni[n * nc + i] += chopmin * u[n * col + 1 + i];
+
+                // if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
+                //     bvs.Ni[n * nc + i] = 1E-20;
+                // }
             }
         }
+
+        time_cal += timerC.Stop();
+    }
     
-        // dP
-        //choptmp = dPmaxlim / fabs(u[n * col]);
-        //chopmin = min(chopmin, choptmp);
-        bvs.P[n] += u[n * col]; // seems better
-    
-        // dNi
-        for (USI i = 0; i < nc; i++) {
-            bvs.Ni[n * nc + i] += chopmin * u[n * col + 1 + i];
-    
-            // if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
-            //     bvs.Ni[n * nc + i] = 1E-20;
-            // }
-        }
-    } 
-    time_cal += timerC.Stop();
+
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
+
+    OCPTIME_COMM_P2P += (timerT.Stop() - time_cal);
+    OCPTIME_NRSTEPC  += time_cal;
 }
 
 
 void IsoT_FIMddm::UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl)
 {
-    CalFlashBoundary(rs.bulk);
-    CalKrPcBoundary(rs.bulk);
-    CalRockBoundary(rs.bulk);
+    CalFlash(rs.bulk, rankSetOutLS, rs.domain);
+    CalKrPc(rs.bulk, rankSetOutLS, rs.domain);
+    CalRock(rs.bulk, rankSetOutLS, rs.domain);
 }
 
 
-void IsoT_FIMddm::CalFlashBoundary(Bulk& bk)
+void IsoT_FIMddm::ExchangePBoundary(Reservoir& rs) const
 {
-    const BulkVarSet& bvs = bk.vs;
+    // Exchange Ghost P
+    const Domain& domain = rs.domain;
+    BulkVarSet&   bvs    = rs.bulk.vs;
 
-    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
 
-        bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
-        PassFlashValue(bk, n);
+        if (domain.IfIRankInLSCommGroup(r.first))  continue;
+
+        const auto& rv = r.second;
+        MPI_Irecv(&bvs.P[rv[0]], rv[1] - rv[0], OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
+
+    iter = 0;
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
+    for (const auto& s : domain.send_element_loc) {
+
+        if (domain.IfIRankInLSCommGroup(s.first)) continue; 
+
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size());
+        for (const auto& sv1 : sv) {
+            sb.push_back(bvs.P[sv1]);
+        }
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
+    }
+
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
 
-void IsoT_FIMddm::CalKrPcBoundary(Bulk& bk) const
+void IsoT_FIMddm::ExchangeNiBoundary(Reservoir& rs) const
 {
-    BulkVarSet& bvs = bk.vs;
-    const USI& np = bvs.np;
-    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
-        auto SAT = bk.SATm.GetSAT(n);
+    // Exchange Ghost Ni
+    const Domain& domain = rs.domain;
+    BulkVarSet&   bvs = rs.bulk.vs;
+    const USI     nc = bvs.nc;
 
-        const OCP_USI bId = n * np;
-        SAT->CalKrPcFIM(n, &bvs.S[bId]);
-        copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
-        copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
-        copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
-        copy(SAT->GetdPcdS().begin(), SAT->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
-        for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
+    USI iter = 0;
+    for (const auto& r : domain.recv_element_loc) {
+
+        if (domain.IfIRankInLSCommGroup(r.first))  continue; 
+
+        const auto& rv = r.second;
+        MPI_Irecv(&bvs.Ni[rv[0] * nc], (rv[1] - rv[0]) * nc, OCPMPI_DBL, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
+        iter++;
     }
+
+    iter = 0;
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
+    for (const auto& s : domain.send_element_loc) {
+
+        if (domain.IfIRankInLSCommGroup(s.first))  continue; 
+
+        const auto& sv = s.second;
+        auto&       sb = send_buffer[iter];
+        sb.reserve(sv.size() * nc);
+        for (const auto& sv1 : sv) {
+            const OCP_DBL* bId = &bvs.Ni[0] + sv1 * nc;
+            sb.insert(sb.end(), bId, bId + nc);
+        }
+        MPI_Isend(sb.data(), sb.size(), OCPMPI_DBL, s.first, 0, domain.global_comm, &domain.send_request[iter]);
+        iter++;
+    }
+
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 }
 
 
-void IsoT_FIMddm::CalRockBoundary(Bulk& bk) const
+OCP_BOOL IsoT_FIMddm::IfBulkInLS(const USI& bId, const Domain& domain) const
 {
-    auto& bvs = bk.vs;
-    for (OCP_USI n = bvs.nbI; n < bvs.nb; n++) {
-        auto ROCK = bk.ROCKm.GetROCK(n);
-
-        ROCK->CalPoro(bvs.P[n], bvs.T[n], bvs.poroInit[n], BulkContent::rf);
-        bvs.poro[n] = ROCK->GetPoro();
-        bvs.poroP[n] = ROCK->GetdPorodP();
-        bvs.rockVp[n] = bvs.v[n] * bvs.poro[n];
+    for (const auto& p : rankSetInLS) {
+        if (p == CURRENT_RANK)  continue;
+        if (bId >= domain.recv_element_loc.at(p)[0] &&
+            bId <  domain.recv_element_loc.at(p)[1]) {
+            return OCP_TRUE;
+        }
     }
+
+    return OCP_FALSE;
 }
 
 

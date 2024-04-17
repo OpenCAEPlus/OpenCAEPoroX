@@ -811,7 +811,7 @@ void T_FIM::GetSolution(Reservoir&       rs,
     }
 
     iter = 0;
-    vector<vector<OCP_DBL>> send_buffer(domain.numSendProc);
+    vector<vector<OCP_DBL>> send_buffer(domain.send_element_loc.size());
     for (const auto& s : domain.send_element_loc) {
         const auto& sv = s.second;
         auto&       sb = send_buffer[iter];
@@ -882,14 +882,14 @@ void T_FIM::GetSolution(Reservoir&       rs,
         if (p == 0) {
             bId = eId;
             eId = nb;
-            MPI_Waitall(domain.numRecvProc, domain.recv_request.data(), MPI_STATUS_IGNORE);
+            MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
         }
         else {
             break;
         }
     }
 
-    MPI_Waitall(domain.numSendProc, domain.send_request.data(), MPI_STATUS_IGNORE);
+    MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 }
 
 /*----------------------------------------------------------------------------*/

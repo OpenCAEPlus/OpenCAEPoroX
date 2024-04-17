@@ -203,12 +203,23 @@ protected:
 class IsoT_FIMddm : public IsoT_FIM
 {
 public:
+    /// Prepare for Assembling matrix.
+    void Prepare(Reservoir& rs, const OCP_DBL& dt);
+    /// Update properties of fluids.
+    OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish a Newton-Raphson iteration.
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
+    /// Finish a time step.
+    void FinishStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
     /// Calculate residual
+    void CalRankSet(const Domain& domain);
+    void CalFlash(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
+    void CalKrPc(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
+    void CalRock(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0) override;
+    
 
 protected:
     /// Assemble linear system for bulks
@@ -217,13 +228,16 @@ protected:
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
     /// Update property for ghost grid
     void UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl);
-    void CalFlashBoundary(Bulk& bk);
-    void CalKrPcBoundary(Bulk& bk) const;
-    void CalRockBoundary(Bulk& bk) const;
-
+    void ExchangePBoundary(Reservoir& rs) const;
+    void ExchangeNiBoundary(Reservoir& rs) const;
+    OCP_BOOL IfBulkInLS(const USI& bId, const Domain& domain) const;
+    void SetStarBulkSet(const Bulk& bulk, const Domain& domain);
 
 protected:
-    OCP_DBL global_res0;
+    OCP_DBL         global_res0;
+    set<OCP_INT>    rankSetInLS;
+    set<OCP_INT>    rankSetOutLS;
+    vector<OCP_USI> starBulkSet{};
 };
 
 

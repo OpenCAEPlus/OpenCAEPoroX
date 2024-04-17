@@ -43,6 +43,7 @@ class Domain
 	// Method(tmp)
 	friend class IsoT_IMPEC;
 	friend class IsoT_FIM;
+	friend class IsoT_FIMddm;
 	friend class IsoT_AIMc;
 	friend class T_FIM;
 
@@ -70,7 +71,7 @@ public:
 public:
 	// for linear solver communication
 	void SetLSComm(const vector<OCP_USI>& bIds);
-	OCP_BOOL IfInLSCommGroup(const OCP_INT& p) const;
+	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 
 public:
 	MPI_Comm      ls_comm;
@@ -78,6 +79,7 @@ public:
 	OCP_INT       ls_numproc;
 	OCP_INT       ls_rank;
 	set<OCP_INT>  ls_group_global_rank;
+	set<OCP_INT>  ls_group_local_rank;
 
 protected:
 	/// Num of Total Elements(grids + wells)
@@ -120,8 +122,6 @@ public:
 	////////////////////////////////////////
 	// Tacit Communication (Prefered, Local Index)
 	////////////////////////////////////////
-
-	USI numSendProc, numRecvProc;
 
 	map<OCP_INT, set<OCP_USI>>    send_element_loc;
 	map<OCP_INT, vector<OCP_USI>> recv_element_loc;

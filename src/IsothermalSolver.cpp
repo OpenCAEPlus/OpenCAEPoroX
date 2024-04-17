@@ -112,7 +112,7 @@ void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
             aimc.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
         case OCPNLMethod::FIMddm:
-            fim_ddm.IsoT_FIM::Prepare(rs, ctrl.time.GetCurrentDt());
+            fim_ddm.Prepare(rs, ctrl.time.GetCurrentDt());
             break;
         default:
             OCP_ABORT("Wrong method type!");
@@ -194,7 +194,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
             flag = aimc.UpdateProperty(rs, ctrl);
             break;
         case OCPNLMethod::FIMddm:
-            flag = fim_ddm.IsoT_FIM::UpdateProperty(rs, ctrl);
+            flag = fim_ddm.UpdateProperty(rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong method type!");
@@ -258,7 +258,7 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
             aimc.FinishStep(rs, ctrl);
             break;
         case OCPNLMethod::FIMddm:
-            fim_ddm.IsoT_FIM::FinishStep(rs, ctrl);
+            fim_ddm.FinishStep(rs, ctrl);
             break;
         default:
             OCP_ABORT("Wrong method type!");

@@ -25,8 +25,6 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 		numGridGhost    = 0;
 		numGridLocal    = numGridInterior;
 
-		numSendProc     = 0;
-		numRecvProc     = 0;
 		grid.resize(numGridInterior);
 		for (OCP_USI n = 0; n < numGridInterior; n++) {
 			grid[n] = n;
@@ -104,10 +102,8 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 	}
 
 	numGridLocal = numGridInterior + numGridGhost;
-	numSendProc  = send_element_loc.size();
-	numRecvProc  = recv_element_loc.size();
-	send_request.resize(numSendProc);
-	recv_request.resize(numRecvProc);
+	send_request.resize(send_element_loc.size());
+	recv_request.resize(recv_element_loc.size());
 	grid.shrink_to_fit();
 
 	//////////////////////////////////////////////////////////////
@@ -220,6 +216,7 @@ void Domain::InitComm(const Partition& part)
 	for (OCP_USI n = 0; n < global_numproc; n++) {
 		ls_group_global_rank.insert(n);
 	}
+	ls_group_local_rank = ls_group_global_rank;
 }
 
 
@@ -250,15 +247,27 @@ void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 		}
 	}
 	vector<INT> tmp_rank(ls_group_global_rank.begin(), ls_group_global_rank.end());
+
+	// Synchronize ranks
+
+
+
+
+
 	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &ls_group);
 	MPI_Comm_create(MPI_COMM_WORLD, ls_group, &ls_comm);
 
 	MPI_Comm_size(ls_comm, &ls_numproc);
 	MPI_Comm_rank(ls_comm, &ls_rank);
+
+	ls_group_local_rank.clear();
+	for (OCP_USI n = 0; n < ls_numproc; n++) {
+		ls_group_local_rank.insert(n);
+	}
 }
 
 
-OCP_BOOL Domain::IfInLSCommGroup(const OCP_INT& p) const
+OCP_BOOL Domain::IfIRankInLSCommGroup(const OCP_INT& p) const
 {
 	if (ls_numproc == global_numproc) {
 		return OCP_TRUE;
@@ -326,7 +335,7 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	USI iter = 0;
 	for (const auto& r : recv_element_loc) {
 
-		if (!IfInLSCommGroup(r.first))  continue;
+		if (!IfIRankInLSCommGroup(r.first))  continue;
 
 		const auto& rv = r.second;
 		const auto  bId = rv[0] + numActWellLocal;
@@ -335,10 +344,10 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	}
 
 	iter = 0;
-	vector<vector<OCP_ULL>> send_buffer(numSendProc);
+	vector<vector<OCP_ULL>> send_buffer(send_element_loc.size());
 	for (const auto& s : send_element_loc) {
 
-		if (!IfInLSCommGroup(s.first))  continue;
+		if (!IfIRankInLSCommGroup(s.first))  continue;
 
 		const auto& sv = s.second;
 		auto&       sb = send_buffer[iter];
@@ -351,8 +360,8 @@ const vector<OCP_ULL>* Domain::CalGlobalIndex() const
 	}
 
 
-	MPI_Waitall(numRecvProc, recv_request.data(), MPI_STATUS_IGNORE);
-	MPI_Waitall(numSendProc, send_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
 
 	OCPTIME_COMM_P2P += timer.Stop();
 
