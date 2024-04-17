@@ -220,13 +220,30 @@ void Domain::InitComm(const Partition& part)
 }
 
 
+void Domain::SetNumNprocNproc()
+{
+	// calculate nproc_nproc
+	USI iter = 0;
+	for (const auto& r : recv_element_loc) {
+		num_nproc_nproc[r.first] = 0;
+		MPI_Irecv(&num_nproc_nproc[r.first], 1, OCPMPI_USI, r.first, 0, global_comm, &recv_request[iter++]);
+	}
+	iter = 0;
+	USI nnproc = send_element_loc.size();
+	for (const auto& s : send_element_loc) {
+		MPI_Isend(&nnproc, 1, OCPMPI_USI, s.first, 0, global_comm, &send_request[iter++]);
+	}
+	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+}
+
+
 void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 {
 	//if (MPI_GROUP_NULL != ls_group) MPI_Group_free(&ls_group);
 	//if (MPI_COMM_NULL != ls_comm) MPI_Comm_free(&ls_comm);
 
 	ls_group_global_rank.clear();
-	ls_group_global_rank.insert(CURRENT_RANK);
 	for (const auto& b : bIds) {
 		if (b < numGridInterior) {
 			for (const auto& s : send_element_loc) {
@@ -246,15 +263,37 @@ void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 			}
 		}
 	}
-	vector<INT> tmp_rank(ls_group_global_rank.begin(), ls_group_global_rank.end());
-
-	// Synchronize ranks
 
 
+	// Synchronize local process group
+	vector<vector<OCP_INT>> recv_buffer(ls_group_global_rank.size());
+	USI iter = 0;
+	for (const auto& r : ls_group_global_rank) {
+		recv_buffer[iter].resize(num_nproc_nproc[r]);
+		MPI_Irecv(recv_buffer[iter].data(), num_nproc_nproc[r], OCPMPI_INT, r, 0, global_comm, &recv_request[iter]);
+		iter++;
+	}
 
+	vector<INT> group_rank(ls_group_global_rank.begin(), ls_group_global_rank.end());
+	group_rank.resize(send_element_loc.size(), -1);
+	iter = 0;
+	for (const auto& s : ls_group_global_rank) {
+		MPI_Isend(group_rank.data(), group_rank.size(), OCPMPI_INT, s, 0, global_comm, &send_request[iter]);
+		iter++;
+	}
+	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
 
+	
+	ls_group_global_rank.insert(CURRENT_RANK);
+	for (const auto& r : recv_buffer) {
+		ls_group_global_rank.insert(r.begin(), r.end());
+	}
+	ls_group_global_rank.erase(-1);
 
-	MPI_Group_incl(global_group, tmp_rank.size(), tmp_rank.data(), &ls_group);
+	group_rank.assign(ls_group_global_rank.begin(), ls_group_global_rank.end());
+
+	MPI_Group_incl(global_group, group_rank.size(), group_rank.data(), &ls_group);
 	MPI_Comm_create(MPI_COMM_WORLD, ls_group, &ls_comm);
 
 	MPI_Comm_size(ls_comm, &ls_numproc);

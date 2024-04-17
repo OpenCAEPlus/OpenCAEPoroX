@@ -31,7 +31,7 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
             aimc.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1), i);
             break;
         case OCPNLMethod::FIMddm:
-            fim_ddm.IsoT_FIM::Setup(rs, ctrl);
+            fim_ddm.Setup(rs, ctrl);
             fim_ddm.SetWorkLS(LSolver.Setup(ctrl.SM.GetModel(), ctrl.SM.GetWorkDir(), ctrl.SM.GetLsFile(i), rs.GetDomain(), rs.GetComNum() + 1), i);
             break;
         default:

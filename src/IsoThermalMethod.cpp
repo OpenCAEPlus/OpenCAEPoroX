@@ -2206,6 +2206,14 @@ void IsoT_AIMc::UpdateLastTimeStep(Reservoir& rs) const
 ////////////////////////////////////////////
 
 
+void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
+{
+    // Allocate memory for reservoir
+    AllocateReservoir(rs);
+    rs.domain.SetNumNprocNproc();
+}
+
+
 void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
     // Calculate well property at the beginning of next time step
@@ -2350,13 +2358,13 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
 		}
 	}
 
-    if (OCP_TRUE) {
-        cout << "rank" << CURRENT_RANK << "  ";
-        for (const auto& s : rankSetInLS) {
-            cout << s << "   ";
-        }
-        cout << endl;
-    }
+    //if (OCP_TRUE) {
+    //    cout << "rank" << CURRENT_RANK << "  ";
+    //    for (const auto& s : rankSetInLS) {
+    //        cout << s << "   ";
+    //    }
+    //    cout << endl;
+    //}
 }
 
 

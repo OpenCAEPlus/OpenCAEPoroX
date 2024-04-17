@@ -71,15 +71,19 @@ public:
 public:
 	// for linear solver communication
 	void SetLSComm(const vector<OCP_USI>& bIds);
+	/// Calculate residual
+	void SetNumNprocNproc();
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 
 public:
-	MPI_Comm      ls_comm;
-	MPI_Group     ls_group;
-	OCP_INT       ls_numproc;
-	OCP_INT       ls_rank;
-	set<OCP_INT>  ls_group_global_rank;
-	set<OCP_INT>  ls_group_local_rank;
+	MPI_Comm          ls_comm;
+	MPI_Group         ls_group;
+	OCP_INT           ls_numproc;
+	OCP_INT           ls_rank;
+	set<OCP_INT>      ls_group_global_rank;
+	set<OCP_INT>      ls_group_local_rank;
+	/// number of neighbor process of neighbor process
+	map<OCP_INT, USI> num_nproc_nproc;
 
 protected:
 	/// Num of Total Elements(grids + wells)

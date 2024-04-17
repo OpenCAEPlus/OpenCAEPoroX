@@ -203,6 +203,8 @@ protected:
 class IsoT_FIMddm : public IsoT_FIM
 {
 public:
+    /// Setup FIM
+    void Setup(Reservoir& rs, const OCPControl& ctrl);
     /// Prepare for Assembling matrix.
     void Prepare(Reservoir& rs, const OCP_DBL& dt);
     /// Update properties of fluids.
@@ -213,7 +215,6 @@ public:
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
-    /// Calculate residual
     void CalRankSet(const Domain& domain);
     void CalFlash(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalKrPc(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
