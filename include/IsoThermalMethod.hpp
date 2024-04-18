@@ -116,7 +116,9 @@ public:
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
     /// Calculate initial residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_TRUE); }
+    void CalInitRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_TRUE); }
+    /// Calculate residual
+    void CalRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_FALSE); }
 
 protected:
     /// Allocate memory for reservoir
@@ -220,11 +222,15 @@ protected:
     void CalKrPc(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalRock(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0) override;
+    void CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
+    void CalResConstV(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     
 
 protected:
     /// Assemble linear system for bulks
     void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const override;
+    void AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
     /// Update property for ghost grid
@@ -239,6 +245,12 @@ protected:
     set<OCP_INT>    rankSetInLS;
     set<OCP_INT>    rankSetOutLS;
     vector<OCP_USI> starBulkSet{};
+    /// constant pressure for boundary
+    const USI       constP = 0;
+    /// constant velocity for boundary
+    const USI       constV = 1;
+    USI             boundCondition{ constP };
+    OCP_DBL         dSlim = 100;
 };
 
 

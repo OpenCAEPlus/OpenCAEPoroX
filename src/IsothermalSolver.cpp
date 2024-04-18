@@ -234,7 +234,7 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
         curMethod = ctrl.SM.SwitchMethod();
         if (curMethod == OCPNLMethod::FIM) {
-            fim.CalRes(rs, ctrl.time.GetCurrentDt());
+            fim.CalInitRes(rs, ctrl.time.GetCurrentDt());
         }
         return OCP_FALSE;
     }

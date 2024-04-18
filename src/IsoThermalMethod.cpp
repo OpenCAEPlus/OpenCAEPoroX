@@ -735,7 +735,7 @@ void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
-    CalRes(rs, dt, OCP_TRUE);
+    CalInitRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
 }
@@ -824,7 +824,7 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(rs.bulk);
 
     // Update residual
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     return OCP_TRUE;
 }
@@ -1418,7 +1418,7 @@ void IsoT_FIM::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
     rs.conn.optMs.ResetToLastTimeStep();
 
     // Residual
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
+    CalInitRes(rs, ctrl.time.GetCurrentDt());
 
     NR.InitStep(rs.bulk.GetVarSet());
     NR.ResetIter();
@@ -1520,7 +1520,7 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
     rs.allWells.PrepareWell(rs.bulk);
-    CalRes(rs, dt, OCP_TRUE);
+    CalInitRes(rs, dt);
 
     // Set FIM Bulk
     NR.CalCFL(rs, dt, OCP_FALSE);
@@ -1599,7 +1599,7 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     rs.allWells.CalFlux(rs.bulk);
 
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
     return OCP_TRUE;
 }
 
@@ -2288,7 +2288,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         UpdatePropertyBoundary(rs, ctrl);
 
         NR.res.maxRelRes0_V = global_res0;
-        IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+        IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt());
         
         // cout << scientific << setprecision(3);
         // cout << CURRENT_RANK << "   " << global_res0 << "   " << NR.res.maxRelRes_V << endl;
@@ -2338,7 +2338,7 @@ void IsoT_FIMddm::SetStarBulkSet(const Bulk& bulk, const Domain& domain)
         // dS
         for (USI j = 0; j < bvs.np; j++) {
             const OCP_USI n_np_j = n * bvs.np + j;
-            if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > 0.001) {
+            if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim) {
                 starBulkSet.push_back(n);
                 break;
             }
@@ -2453,11 +2453,25 @@ void IsoT_FIMddm::CalRock(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& d
 
 
 /// Calculate residual
-/// 1. Use Dirichlet boundary with fixed pressure at last time setp(now)
-/// 2. Use Dirichlet boundary with fixed flow rate at last time setp(to do)
 void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 {
-    const Bulk&       bk  = rs.bulk;
+    if (boundCondition == constP) {
+        CalResConstP(rs, dt, initRes0);
+    }
+    else if (boundCondition == constV) {
+        CalResConstV(rs, dt, initRes0);
+    }
+    else {
+        OCP_ABORT("Not Used!");
+    }
+}
+
+
+/// Use Dirichlet boundary with fixed pressure at last time setp
+void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
+
+{
+    const Bulk&       bk = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
 
     const USI nb  = bvs.nbI;
@@ -2481,8 +2495,8 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
     BulkConnVarSet& bcvs = conn.vs;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        bId       = conn.iteratorConn[c].BId();
-        eId       = conn.iteratorConn[c].EId();
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
         auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->CalFlux(conn.iteratorConn[c], bk);
@@ -2538,7 +2552,7 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
 
     if (initRes0) {
         res.maxRelRes0_V = res.maxRelRes_V;
-    
+
         GetWallTime timer;
         timer.Start();
         MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
@@ -2546,11 +2560,30 @@ void IsoT_FIMddm::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initR
     }
 }
 
+/// Use Dirichlet boundary with fixed flow rate at last time setp
+void IsoT_FIMddm::CalResConstV(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
+{
+
+}
+
 
 /// Assemble linear system for bulks
-/// 1. Use Dirichlet boundary with fixed pressure at last time setp(now)
-/// 2. Use Dirichlet boundary with fixed flow rate at last time setp(to do)
 void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
+{
+    if (boundCondition == constP) {
+        AssembleMatBulksConstP(ls ,rs, dt);
+    }
+    else if (boundCondition == constV) {
+        AssembleMatBulksConstV(ls, rs, dt);
+    }
+    else {
+        OCP_ABORT("Not Used!");
+    }
+}
+
+
+/// Use Dirichlet boundary with fixed pressure at last time setp
+void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
 {
     const Bulk&       bk  = rs.bulk;
     const BulkVarSet& bvs = bk.vs;
@@ -2576,12 +2609,11 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
     }
 
     // flux term
-
     OCP_USI  bId, eId;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
-        bId       = conn.iteratorConn[c].BId();
-        eId       = conn.iteratorConn[c].EId();
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
         auto Flux = conn.FLUXm.GetFlux(c);
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
@@ -2638,6 +2670,15 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
 #endif
     }
 }
+
+
+
+/// Use Dirichlet boundary with fixed flow rate at last time setp
+void IsoT_FIMddm::AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
+{
+
+}
+
 
 /// Only get local solution
 void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR)
