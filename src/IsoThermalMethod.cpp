@@ -964,7 +964,6 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     conn.vs.flux_vj.resize(conn.numConn* np);
     conn.vs.flux_ni.resize(conn.numConn* nc);
 
-
     // Allocate Residual
     NR.Setup(OCP_FALSE, bvs, rs.allWells.numWell, rs.domain);
 }
@@ -2278,7 +2277,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
                 // exchange solution
                 ExchangePBoundary(rs);
                 ExchangeNiBoundary(rs);
-                UpdatePropertyBoundary(rs, ctrl);
+                UpdatePropertyBoundary(rs);
                 return OCP_TRUE;
             }
         }
@@ -2296,20 +2295,17 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         // exchange solution
         ExchangePBoundary(rs);
         ExchangeNiBoundary(rs);
-        UpdatePropertyBoundary(rs, ctrl);
+        UpdatePropertyBoundary(rs);
 
         NR.res.maxRelRes0_V = global_res0;
         IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt());
         
-        // cout << scientific << setprecision(3);
-        // cout << CURRENT_RANK << "   " << global_res0 << "   " << NR.res.maxRelRes_V << endl;
-
         NR.CalMaxChangeNR(rs);
         const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
                 ctrl.time.CutDt(NR);
-                ResetToLastTimeStep(rs, ctrl);
+                ResetToLastTimeStep(rs, ctrl);             
                 return OCP_FALSE;
             }
             else {
@@ -2322,6 +2318,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_FALSE;
         }
         else {
+            ResetBoundary(rs);
             return OCP_FALSE;
         }
     }
@@ -2336,6 +2333,61 @@ void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
     SetStarBulkSet(rs.bulk, rs.domain);
 
     UpdateLastTimeStep(rs);
+}
+
+
+void IsoT_FIMddm::AllocateReservoir(Reservoir& rs)
+{
+    IsoT_FIM::AllocateReservoir(rs);
+    if (boundCondition == constV) {
+        rs.conn.vs.lflux_ni.resize(rs.conn.vs.numConn * rs.bulk.vs.nc);
+    }
+}
+
+
+void IsoT_FIMddm::ResetBoundary(Reservoir& rs)
+{ 
+    if (boundCondition == constP) {
+        // P & Ni
+        auto&   bvs = rs.bulk.vs;
+        OCP_USI bId, eId;
+        for (const auto& p : rankSetOutLS) {
+            bId = rs.domain.recv_element_loc.at(p)[0];
+            eId = rs.domain.recv_element_loc.at(p)[1];
+            
+            copy(&bvs.lP[bId], &bvs.lP[eId], &bvs.P[bId]);
+            copy(&bvs.lNi[bId * bvs.nc], &bvs.lNi[eId * bvs.nc], &bvs.Ni[bId * bvs.nc]);
+        }      
+        UpdatePropertyBoundary(rs);
+    }
+    else if (boundCondition == constV) {
+        // flux_ni
+        BulkVarSet&     bvs  = rs.bulk.vs;
+        BulkConn&       conn = rs.conn;
+        BulkConnVarSet& bcvs = conn.vs;
+
+        for (OCP_USI c = 0; c < conn.numConn; c++) {
+            if (!IfBulkInLS(conn.iteratorConn[c].EId(), rs.domain)) {
+                copy(&bcvs.lflux_ni[c * bvs.nc], &bcvs.lflux_ni[c * bvs.nc] + bvs.nc, &bcvs.flux_ni[c * bvs.nc]);
+            }
+        }
+    }
+}
+
+
+/// Reset variables to last time step
+void IsoT_FIMddm::ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl)
+{
+    IsoT_FIM::ResetToLastTimeStep(rs, ctrl);
+    rs.conn.vs.flux_ni = rs.conn.vs.lflux_ni;
+}
+
+
+/// Update values of last step for AIMc.
+void IsoT_FIMddm::UpdateLastTimeStep(Reservoir& rs) const
+{
+    IsoT_FIM::UpdateLastTimeStep(rs);
+    rs.conn.vs.lflux_ni = rs.conn.vs.flux_ni;
 }
 
 
@@ -3010,45 +3062,11 @@ void IsoT_FIMddm::GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR
 }
 
 
-void IsoT_FIMddm::UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl)
+void IsoT_FIMddm::UpdatePropertyBoundary(Reservoir& rs)
 {
     CalFlash(rs.bulk, rankSetOutLS, rs.domain);
     CalKrPc(rs.bulk, rankSetOutLS, rs.domain);
     CalRock(rs.bulk, rankSetOutLS, rs.domain);
-    // CalFluxBoundary(rs);
-}
-
-
-void IsoT_FIMddm::CalFluxBoundary(Reservoir& rs)
-{
-    if (boundCondition == constV) {
-
-        const Bulk&       bk   = rs.bulk;
-        const BulkVarSet& bvs  = bk.vs;
-        BulkConn&         conn = rs.conn;
-        BulkConnVarSet&   bcvs = conn.vs;
-
-        const USI nb  = bvs.nbI;
-        const USI np  = bvs.np;
-        const USI nc  = bvs.nc;
-
-        OCP_USI bId, eId;
-
-        for (OCP_USI c = 0; c < conn.numConn; c++) {
-
-            bId = conn.iteratorConn[c].BId();
-            eId = conn.iteratorConn[c].EId();
-
-            if (!IfBulkInLS(eId, rs.domain)) {
-                auto Flux = conn.FLUXm.GetFlux(c);
-                Flux->CalFlux(conn.iteratorConn[c], bk);
-                copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
-                copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
-                copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
-                copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
-            }
-        }
-    }
 }
 
 

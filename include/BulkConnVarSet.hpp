@@ -100,6 +100,10 @@ public:
     vector<OCP_USI> lupblock;
     /// last dP
     vector<OCP_DBL> ldP;     
+    /// Volume flow rate of phase from upblock
+    vector<OCP_DBL> lflux_vj;
+    /// mole flow rate of components 
+    vector<OCP_DBL> lflux_ni;
 
 };
 

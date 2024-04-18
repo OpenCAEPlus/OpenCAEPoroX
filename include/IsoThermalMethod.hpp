@@ -220,6 +220,8 @@ public:
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
+    /// Allocate memory for reservoir
+    void AllocateReservoir(Reservoir& rs);
     /// Calculate initial residual
     void CalInitRes(Reservoir& rs, const OCP_DBL& dt) override { CalRes(rs, dt, OCP_TRUE); }
     /// Calculate residual
@@ -241,12 +243,16 @@ protected:
     /// Update P, Ni, BHP after linear system is solved
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
     /// Update property for ghost grid
-    void UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl);
-    void CalFluxBoundary(Reservoir& rs);
+    void UpdatePropertyBoundary(Reservoir& rs);
     void ExchangePBoundary(Reservoir& rs) const;
     void ExchangeNiBoundary(Reservoir& rs) const;
     OCP_BOOL IfBulkInLS(const USI& bId, const Domain& domain) const;
     void SetStarBulkSet(const Bulk& bulk, const Domain& domain);
+    void ResetBoundary(Reservoir& rs);
+    /// Reset variables to last time step
+    void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
+    /// Update values of last step for AIMc.
+    void UpdateLastTimeStep(Reservoir& rs) const;
 
 protected:
     set<OCP_INT>    rankSetInLS;
@@ -258,7 +264,7 @@ protected:
     const USI       constP = 0;
     /// constant velocity for boundary
     const USI       constV = 1;
-    USI             boundCondition{ constV };
+    USI             boundCondition{ constP };
     OCP_DBL         dSlim = 1E+2;
 };
 
