@@ -962,6 +962,7 @@ void IsoT_FIM::AllocateReservoir(Reservoir& rs)
     conn.vs.upblock.resize(conn.numConn* np);
     conn.vs.dP.resize(conn.numConn* np);
     conn.vs.flux_vj.resize(conn.numConn* np);
+    conn.vs.flux_ni.resize(conn.numConn* nc);
 
 
     // Allocate Residual
@@ -1092,6 +1093,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
         copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
+        copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
                
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {               
@@ -2500,7 +2502,7 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
 
     // Flux Term
     OCP_USI         bId, eId;
-    BulkConn& conn = rs.conn;
+    BulkConn&       conn = rs.conn;
     BulkConnVarSet& bcvs = conn.vs;
     for (OCP_USI c = 0; c < conn.numConn; c++) {
 
@@ -2512,6 +2514,7 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
         copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
         copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
         copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
+        copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
 
         if (eId < nb) {
             for (USI i = 0; i < nc; i++) {
@@ -2577,7 +2580,103 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
 /// Use Dirichlet boundary with fixed flow rate at last time setp
 void IsoT_FIMddm::CalResConstV(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0)
 {
+    const Bulk&       bk  = rs.bulk;
+    const BulkVarSet& bvs = bk.vs;
 
+    const USI nb = bvs.nbI;
+    const USI np = bvs.np;
+    const USI nc = bvs.nc;
+    const USI len = nc + 1;
+
+    OCPNRresidual& res = NR.res;
+
+    res.SetZero();
+
+    // Accumalation Term
+    for (OCP_USI n = 0; n < nb; n++) {
+        const vector<OCP_DBL>& r = bk.ACCm.GetAccumuTerm()->CalResFIM(n, bvs, dt);
+        copy(r.begin(), r.end(), &res.resAbs[n * len]);
+    }
+
+    // Flux Term
+    OCP_USI         bId, eId;
+    BulkConn&       conn = rs.conn;
+    BulkConnVarSet& bcvs = conn.vs;
+    for (OCP_USI c = 0; c < conn.numConn; c++) {
+
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
+
+        if (IfBulkInLS(eId, rs.domain)) {
+            auto Flux = conn.FLUXm.GetFlux(c);
+            Flux->CalFlux(conn.iteratorConn[c], bk);
+            copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+            copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+            copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
+            copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
+        }
+
+        if (eId < nb) {
+            for (USI i = 0; i < nc; i++) {
+                res.resAbs[bId * len + 1 + i] += dt * bcvs.flux_ni[c * nc + i];
+                res.resAbs[eId * len + 1 + i] -= dt * bcvs.flux_ni[c * nc + i];
+            }
+        }
+        else {
+            for (USI i = 0; i < nc; i++) {
+                res.resAbs[bId * len + 1 + i] += dt * bcvs.flux_ni[c * nc + i];
+            }
+        }
+    }
+
+    // Well to Bulk, Well
+    USI wId = nb * len;
+    for (const auto& wl : rs.allWells.wells) {
+        wl->CalResFIM(wId, res, bk, dt);
+    }
+
+    // Calculate RelRes
+    OCP_DBL tmp;
+    for (OCP_USI n = 0; n < nb; n++) {
+
+        for (USI i = 0; i < len; i++) {
+            tmp = fabs(res.resAbs[n * len + i] / bvs.rockVp[n]);
+            if (res.maxRelRes_V < tmp) {
+                res.maxRelRes_V = tmp;
+                res.maxId_V     = n;
+            }
+            res.resRelV[n] += tmp * tmp;
+        }
+        res.resRelV[n] = sqrt(res.resRelV[n]);
+
+        for (USI i = 1; i < len; i++) {
+            tmp = fabs(res.resAbs[n * len + i] / bvs.Nt[n]);
+            if (res.maxRelRes_N < tmp) {
+                res.maxRelRes_N = tmp;
+                res.maxId_N = n;
+            }
+            res.resRelN[n] += tmp * tmp;
+        }
+        res.resRelN[n] = sqrt(res.resRelN[n]);
+    }
+
+    Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
+
+    if (initRes0) {
+        GetWallTime timer;
+        timer.Start();
+
+        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.ls_comm);
+
+        if (rs.domain.ls_numproc == rs.domain.global_numproc) {
+            global_res0 = res.maxRelRes0_V;
+        }
+        else {
+            MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
+        }
+
+        OCPTIME_COMM_COLLECTIVE += timer.Stop();
+    }
 }
 
 
@@ -2599,22 +2698,20 @@ void IsoT_FIMddm::AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const 
 /// Use Dirichlet boundary with fixed pressure at last time setp
 void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
 {
-    const Bulk&       bk  = rs.bulk;
-    const BulkVarSet& bvs = bk.vs;
+    const Bulk&       bk      = rs.bulk;
+    const BulkVarSet& bvs     = bk.vs;
+    const BulkConn&   conn    = rs.conn;
 
-    const USI numWell = rs.GetNumOpenWell();
-
-    const BulkConn& conn   = rs.conn;
-    const OCP_USI   nbI    = bvs.nbI;
-    const USI       np     = bvs.np;
-    const USI       nc     = bvs.nc;
-    const USI       ncol   = nc + 1;
-    const USI       ncol2  = np * nc + np;
-    const USI       bsize  = ncol * ncol;
-    const USI       bsize2 = ncol * ncol2;
+    const OCP_USI     nbI     = bvs.nbI;
+    const USI         np      = bvs.np;
+    const USI         nc      = bvs.nc;
+    const USI         ncol    = nc + 1;
+    const USI         ncol2   = np * nc + np;
+    const USI         bsize   = ncol * ncol;
+    const USI         bsize2  = ncol * ncol2;
+    const USI         numWell = rs.GetNumOpenWell();
 
     ls.AddDim(nbI);
-
 
     // Accumulation term
     vector<OCP_DBL> bmat(bsize, 0);
@@ -2690,7 +2787,85 @@ void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, 
 /// Use Dirichlet boundary with fixed flow rate at last time setp
 void IsoT_FIMddm::AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
 {
+    const Bulk&       bk      = rs.bulk;
+    const BulkVarSet& bvs     = bk.vs;
+    const BulkConn&   conn    = rs.conn;
 
+    const OCP_USI     nbI     = bvs.nbI;
+    const USI         np      = bvs.np;
+    const USI         nc      = bvs.nc;
+    const USI         ncol    = nc + 1;
+    const USI         ncol2   = np * nc + np;
+    const USI         bsize   = ncol * ncol;
+    const USI         bsize2  = ncol * ncol2;
+    const USI         numWell = rs.GetNumOpenWell();
+
+    ls.AddDim(nbI);
+
+    // Accumulation term
+    vector<OCP_DBL> bmat(bsize, 0);
+    for (OCP_USI n = 0; n < nbI; n++) {
+        ls.NewDiag(n, bk.ACCm.GetAccumuTerm()->CaldFdXpFIM(n, bvs, dt));
+    }
+
+    // flux term
+    OCP_USI  bId, eId;
+    for (OCP_USI c = 0; c < conn.numConn; c++) {
+
+        bId = conn.iteratorConn[c].BId();
+        eId = conn.iteratorConn[c].EId();
+        
+        if (!IfBulkInLS(eId, rs.domain))  continue;
+
+        auto Flux = conn.FLUXm.GetFlux(c);
+        Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
+
+        bmat = Flux->GetdFdXpB();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+            bmat.data());
+        Dscalar(bsize, dt, bmat.data());
+
+        // Assemble
+        // Begin - Begin -- add
+        ls.AddDiag(bId, bmat);
+        // End - Begin -- insert
+        if (eId < nbI) {
+            // Interior grid
+            Dscalar(bsize, -1, bmat.data());
+            ls.NewOffDiag(eId, bId, bmat);
+        }
+
+#ifdef OCP_NANCHECK
+        if (!CheckNan(bmat.size(), &bmat[0])) {
+            OCP_ABORT("INF or INF in bmat !");
+        }
+#endif
+
+        bmat = Flux->GetdFdXpE();
+        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+            bmat.data());
+        Dscalar(bsize, dt, bmat.data());
+        // End
+        if (eId < nbI) {
+            // process Interior grid
+            // Begin - End -- insert
+            ls.NewOffDiag(bId, eId, bmat);
+            // End - End -- add
+            Dscalar(bsize, -1, bmat.data());
+            ls.AddDiag(eId, bmat);
+        }
+        else {
+            // group Interior grid
+            // Begin - End -- insert
+            ls.NewOffDiag(bId, eId + numWell, bmat);
+        }
+
+#ifdef OCP_NANCHECK
+        if (!CheckNan(bmat.size(), &bmat[0])) {
+            OCP_ABORT("INF or INF in bmat !");
+        }
+#endif
+    }
 }
 
 
@@ -2840,6 +3015,40 @@ void IsoT_FIMddm::UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl)
     CalFlash(rs.bulk, rankSetOutLS, rs.domain);
     CalKrPc(rs.bulk, rankSetOutLS, rs.domain);
     CalRock(rs.bulk, rankSetOutLS, rs.domain);
+    // CalFluxBoundary(rs);
+}
+
+
+void IsoT_FIMddm::CalFluxBoundary(Reservoir& rs)
+{
+    if (boundCondition == constV) {
+
+        const Bulk&       bk   = rs.bulk;
+        const BulkVarSet& bvs  = bk.vs;
+        BulkConn&         conn = rs.conn;
+        BulkConnVarSet&   bcvs = conn.vs;
+
+        const USI nb  = bvs.nbI;
+        const USI np  = bvs.np;
+        const USI nc  = bvs.nc;
+
+        OCP_USI bId, eId;
+
+        for (OCP_USI c = 0; c < conn.numConn; c++) {
+
+            bId = conn.iteratorConn[c].BId();
+            eId = conn.iteratorConn[c].EId();
+
+            if (!IfBulkInLS(eId, rs.domain)) {
+                auto Flux = conn.FLUXm.GetFlux(c);
+                Flux->CalFlux(conn.iteratorConn[c], bk);
+                copy(Flux->GetConvectUpblock().begin(), Flux->GetConvectUpblock().end(), &bcvs.upblock[c * np]);
+                copy(Flux->GetConvectDP().begin(), Flux->GetConvectDP().end(), &bcvs.dP[c * np]);
+                copy(Flux->GetConvectVj().begin(), Flux->GetConvectVj().end(), &bcvs.flux_vj[c * np]);
+                copy(Flux->GetFluxNi().begin(), Flux->GetFluxNi().end(), &bcvs.flux_ni[c * nc]);
+            }
+        }
+    }
 }
 
 
@@ -2921,6 +3130,8 @@ void IsoT_FIMddm::ExchangeNiBoundary(Reservoir& rs) const
 
 OCP_BOOL IsoT_FIMddm::IfBulkInLS(const USI& bId, const Domain& domain) const
 {
+    if (bId < domain.numGridInterior)  return OCP_TRUE;
+
     for (const auto& p : rankSetInLS) {
         if (p == CURRENT_RANK)  continue;
         if (bId >= domain.recv_element_loc.at(p)[0] &&

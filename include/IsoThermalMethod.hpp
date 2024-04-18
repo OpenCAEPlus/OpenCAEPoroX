@@ -242,6 +242,7 @@ protected:
     void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
     /// Update property for ghost grid
     void UpdatePropertyBoundary(Reservoir& rs, OCPControl& ctrl);
+    void CalFluxBoundary(Reservoir& rs);
     void ExchangePBoundary(Reservoir& rs) const;
     void ExchangeNiBoundary(Reservoir& rs) const;
     OCP_BOOL IfBulkInLS(const USI& bId, const Domain& domain) const;
@@ -257,8 +258,8 @@ protected:
     const USI       constP = 0;
     /// constant velocity for boundary
     const USI       constV = 1;
-    USI             boundCondition{ constP };
-    OCP_DBL         dSlim = 100;
+    USI             boundCondition{ constV };
+    OCP_DBL         dSlim = 1E+2;
 };
 
 

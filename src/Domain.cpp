@@ -207,7 +207,6 @@ void Domain::InitComm(const Partition& part)
 	global_rank    = part.myrank;
 	MPI_Comm_group(global_comm, &global_group);
 
-
 	InitLSComm();
 }
 
@@ -232,8 +231,9 @@ void Domain::SetNumNprocNproc()
 
 void Domain::InitLSComm()
 {
-	ls_comm    = global_comm;
-	ls_group   = global_group;
+	MPI_Comm_dup(global_comm, &ls_comm);
+	MPI_Comm_group(ls_comm, &ls_group);
+
 	ls_numproc = global_numproc;
 	ls_rank    = global_rank;
 	ls_group_global_rank.clear();
@@ -246,9 +246,6 @@ void Domain::InitLSComm()
 
 void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 {
-	//if (MPI_GROUP_NULL != ls_group) MPI_Group_free(&ls_group);
-	//if (MPI_COMM_NULL != ls_comm) MPI_Comm_free(&ls_comm);
-
 	ls_group_global_rank.clear();
 	for (const auto& b : bIds) {
 		if (b < numGridInterior) {
@@ -298,6 +295,9 @@ void Domain::SetLSComm(const vector<OCP_USI>& bIds)
 	ls_group_global_rank.erase(-1);
 
 	group_rank.assign(ls_group_global_rank.begin(), ls_group_global_rank.end());
+
+	if (MPI_GROUP_NULL != ls_group)  MPI_Group_free(&ls_group);
+	if (MPI_COMM_NULL  != ls_comm)   MPI_Comm_free(&ls_comm);
 
 	MPI_Group_incl(global_group, group_rank.size(), group_rank.data(), &ls_group);
 	MPI_Comm_create(MPI_COMM_WORLD, ls_group, &ls_comm);
