@@ -202,21 +202,13 @@ void Domain::Setup(const Partition& part, const PreParamGridWell& gridwell)
 
 void Domain::InitComm(const Partition& part)
 {
-	global_comm = part.myComm;
-	global_numproc     = part.numproc;
-	global_rank      = part.myrank;
+	global_comm    = part.myComm;
+	global_numproc = part.numproc;
+	global_rank    = part.myrank;
 	MPI_Comm_group(global_comm, &global_group);
 
 
-	ls_comm    = global_comm;
-	ls_group   = global_group;
-	ls_numproc = global_numproc;
-	ls_rank    = global_rank;
-	ls_group_global_rank.clear();
-	for (OCP_USI n = 0; n < global_numproc; n++) {
-		ls_group_global_rank.insert(n);
-	}
-	ls_group_local_rank = ls_group_global_rank;
+	InitLSComm();
 }
 
 
@@ -235,6 +227,20 @@ void Domain::SetNumNprocNproc()
 	}
 	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
 	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+}
+
+
+void Domain::InitLSComm()
+{
+	ls_comm    = global_comm;
+	ls_group   = global_group;
+	ls_numproc = global_numproc;
+	ls_rank    = global_rank;
+	ls_group_global_rank.clear();
+	for (OCP_USI n = 0; n < global_numproc; n++) {
+		ls_group_global_rank.insert(n);
+	}
+	ls_group_local_rank = ls_group_global_rank;
 }
 
 

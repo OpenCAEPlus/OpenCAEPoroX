@@ -115,12 +115,15 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
-    /// Calculate initial residual
-    void CalInitRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_TRUE); }
-    /// Calculate residual
-    void CalRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_FALSE); }
+    /// Transfer to FIM method
+    void TransferToFIM(Reservoir& rs, OCPControl& ctrl);
+
 
 protected:
+    /// Calculate initial residual
+    virtual void CalInitRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_TRUE); }
+    /// Calculate residual
+    virtual void CalRes(Reservoir& rs, const OCP_DBL& dt) { CalRes(rs, dt, OCP_FALSE); }
     /// Allocate memory for reservoir
     void AllocateReservoir(Reservoir& rs);
     /// Pass value needed for FIM from flash to bulk
@@ -128,7 +131,7 @@ protected:
     /// Calculate relative permeability and capillary pressure needed for FIM
     void CalKrPc(Bulk& bk) const;
     /// Calculate residual
-    virtual void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     /// Assemble linear system for wells
     void AssembleMatWells(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Reset variables to last time step
@@ -217,11 +220,15 @@ public:
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
 
 protected:
+    /// Calculate initial residual
+    void CalInitRes(Reservoir& rs, const OCP_DBL& dt) override { CalRes(rs, dt, OCP_TRUE); }
+    /// Calculate residual
+    void CalRes(Reservoir& rs, const OCP_DBL& dt) override { CalRes(rs, dt, OCP_FALSE); }
     void CalRankSet(const Domain& domain);
     void CalFlash(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalKrPc(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
     void CalRock(Bulk& bk, const set<OCP_INT>& rankSet, const Domain& domain);
-    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0) override;
+    void CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     void CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     void CalResConstV(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0);
     
@@ -241,10 +248,11 @@ protected:
     void SetStarBulkSet(const Bulk& bulk, const Domain& domain);
 
 protected:
-    OCP_DBL         global_res0;
     set<OCP_INT>    rankSetInLS;
     set<OCP_INT>    rankSetOutLS;
     vector<OCP_USI> starBulkSet{};
+    /// global initial residual
+    OCP_DBL         global_res0;
     /// constant pressure for boundary
     const USI       constP = 0;
     /// constant velocity for boundary

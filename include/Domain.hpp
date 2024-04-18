@@ -69,6 +69,8 @@ public:
 
 
 public:
+	// reset linear solver communication
+	void InitLSComm();
 	// for linear solver communication
 	void SetLSComm(const vector<OCP_USI>& bIds);
 	/// Calculate residual

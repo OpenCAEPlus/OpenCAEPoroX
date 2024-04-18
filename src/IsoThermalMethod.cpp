@@ -864,6 +864,15 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
     UpdateLastTimeStep(rs);
 }
 
+
+/// Transfer to FIM method
+void IsoT_FIM::TransferToFIM(Reservoir& rs, OCPControl& ctrl)
+{
+    CalInitRes(rs, ctrl.time.GetCurrentDt());
+    rs.domain.InitLSComm();
+}
+
+
 void IsoT_FIM::AllocateReservoir(Reservoir& rs)
 {
 
@@ -2216,14 +2225,14 @@ void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
 
 void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
+    rs.domain.SetLSComm(starBulkSet);
+    CalRankSet(rs.domain);
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
-    CalRes(rs, dt, OCP_TRUE);
+    CalInitRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
-    rs.domain.SetLSComm(starBulkSet);
-    CalRankSet(rs.domain);
 }
 
 
@@ -2244,7 +2253,7 @@ OCP_BOOL IsoT_FIMddm::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     rs.allWells.CalFlux(rs.bulk);
 
     // Update residual
-    CalRes(rs, ctrl.time.GetCurrentDt(), OCP_FALSE);
+    CalRes(rs, ctrl.time.GetCurrentDt());
 
     return OCP_TRUE;
 }
@@ -2551,11 +2560,16 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
     Dscalar(res.resAbs.size(), -1.0, res.resAbs.data());
 
     if (initRes0) {
-        res.maxRelRes0_V = res.maxRelRes_V;
-
         GetWallTime timer;
         timer.Start();
-        MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
+        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.ls_comm);
+
+        if (rs.domain.ls_numproc == rs.domain.global_numproc) {
+            global_res0 = res.maxRelRes0_V;
+        }
+        else {
+            MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
+        }
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 }
