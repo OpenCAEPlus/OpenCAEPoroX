@@ -31,6 +31,8 @@ using namespace std;
 /// Top-level data structure for the OpenCAEPoroX simulator.
 class OpenCAEPoroX
 {
+    enum InputType { OCP=0, HISIM=1, NumInputTypes=2 };
+
 public:
 
     /// Output OpenCAEPoroX version information.
@@ -75,7 +77,7 @@ public:
     }
 
     /// Read Param from an input file.
-    void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank);
+    void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank, int type=0);
 
     /// Setup reservoir based on an internal structure.
     void SetupSolver();

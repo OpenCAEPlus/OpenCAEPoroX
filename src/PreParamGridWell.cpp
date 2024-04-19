@@ -458,7 +458,9 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         words = input_data[i];
         if (words[0] == "STCOND")
         {
-            cout << "STCOND: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "STCOND: " << words[0] << ", " << words[1] << endl;
         }
         else if (words[0] == "NCOMPS")
         {
@@ -474,7 +476,9 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         }
         else if (words[0] == "CNAMES")
         {
-            cout << "cnames: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "cnames: " << words[0] << ", " << words[5] << endl;
         }
         else if (words[0] == "EOSCOEF")
         {
@@ -482,35 +486,49 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         }
         else if (words[0] == "RTEMP")
         {
-            cout << "rtemp: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "rtemp: " << words[0] << endl;
         }
         else if (words[0] == "TCRIT")
         {
-            cout << "TCRIT: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "TCRIT: " << words[0] << endl;
         }
         else if (words[0] == "PCRIT")
         {
-            cout << "PCRIT: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "PCRIT: " << words[0] << endl;
         }
         else if (words[0] == "ZCRIT")
         {
-            cout << "ZCRIT: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "ZCRIT: " << words[0] << endl;
         }
         else if (words[0] == "MW")
         {
-            cout << "MW: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "MW: " << words[0] << endl;
         }
         else if (words[0] == "ACF")
         {
-            cout << "ACF: " << buff << endl;
+            i++;
+            words = input_data[i];
+            cout << "ACF: " << words[0] << endl;
         }
         else if (words[0] == "BIC")
         {
             vector<vector<string>> bic;  /// TODO not string, is double
             int NCOMPS = 6;
-            for (int i=0; i<NCOMPS-1; ++i)
+            for (int j=0; j<NCOMPS-1; ++j)
             {
-                words = strip_split(buff);
+                i++;
+                words = input_data[i];
+                cout << "bic: " << words[0] << endl;
                 bic.push_back(words);
             }
         }
@@ -527,6 +545,7 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "swof: " << words[0] << endl;
                     swof.push_back(words);
                 }
                 else
@@ -545,6 +564,7 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "sgof: " << words[0] << endl;
                     sgof.push_back(words);
                 }
                 else
@@ -563,6 +583,7 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "pvdg: " << words[0] << endl;
                     pvdg.push_back(words);
                 }
                 else
@@ -627,41 +648,40 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 }
             }
         }
-
         else if (words[0] == "ROCKTAB")
         {
-            std::streampos cur_pos;
             vector<vector<string>> rocktab; /// TODO not string, double
-            while (GetLineSkipComments(input, buff, cur_pos))
+            while (1)
             {
-                words = strip_split(buff);
+                i++;
+                words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "rocktab: " << words[0] << endl;
                     rocktab.push_back(words);
-                    cur_pos = input.tellg();
                 }
                 else
                 {
-                    input.seekg(cur_pos);
+                    i--;
                     break;
                 }
             }
         }
         else if (words[0] == "WATERTAB")
         {
-            std::streampos cur_pos;
             vector<vector<string>> watertab; /// TODO not string, double
-            while (GetLineSkipComments(input, buff, cur_pos))
+            while (1)
             {
-                words = strip_split(buff);
+                i++;
+                words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "watertab: " << words[0] << endl;
                     watertab.push_back(words);
-                    cur_pos = input.tellg();
                 }
                 else
                 {
-                    input.seekg(cur_pos);
+                    i--;
                     break;
                 }
             }
@@ -724,19 +744,19 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         }
         else if (words[0] == "ZMFVD")
         {
-            std::streampos cur_pos;
             vector<vector<string>> zmfvd; /// TODO not string, double
-            while (GetLineSkipComments(input, buff, cur_pos))
+            while (1)
             {
-                words = strip_split(buff);
+                i++;
+                words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
+                    cout << "zmfvd: " << words[0] << endl;
                     zmfvd.push_back(words);
-                    cur_pos = input.tellg();
                 }
                 else
                 {
-                    input.seekg(cur_pos);
+                    i--;
                     break;
                 }
             }

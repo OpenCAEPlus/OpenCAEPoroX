@@ -12,14 +12,14 @@
 #include "OCP.hpp"
 
 /// Read Param from input file
-void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank)
+void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myRank, int type)
 {
 
     GetWallTime timer;
     timer.Start();
 
     ParamRead rp;
-    rp.ReadInputFile(argv[1]);
+    rp.ReadInputFile(argv[1], type);
 
     reservoir.Setup(prepro, rp);
     control.Setup(argc, argv, rp.paramControl, reservoir.GetDomain());

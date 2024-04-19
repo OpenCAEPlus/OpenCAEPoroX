@@ -53,10 +53,11 @@ public:
     void Init();
 
     /// General interface for reading input data.
-    void ReadInputFile(const string& file);
+    void ReadInputFile(const string& file, int type=0);
 
     /// Read the input file.
     void ReadFile(const string& file);
+    void ReadFileHiSim(const string& file);
 
     /// Handle the INCLUDE keyword, which contains other input files.
     void ReadINCLUDE(ifstream& ifs);

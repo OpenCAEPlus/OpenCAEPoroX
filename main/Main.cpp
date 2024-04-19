@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
             PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD, PreProcess::InputType::OCP);
 
             // Step 2. Input reservoir information and distribute
-            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank);
+            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank, PreProcess::InputType::OCP);
         }
         else if (argc == 3 && strcmp(argv[2], "-hisim") == 0)
         {
