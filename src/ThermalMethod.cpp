@@ -724,10 +724,8 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
         bmat = Flux->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], dt,
             bmat.data());
-
-        Dscalar(bsize, dt, bmat.data());
         // Begin - Begin -- add
         ls.AddDiag(bId, bmat);
         // End - Begin -- insert
@@ -745,10 +743,8 @@ void T_FIM::AssembleMatBulks(LinearSystem&    ls,
 #endif
 
         bmat = Flux->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], dt,
             bmat.data());
-
-        Dscalar(bsize, dt, bmat.data());
 
         if (eId < nbI) {
             // Interior grid

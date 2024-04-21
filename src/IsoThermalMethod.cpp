@@ -1189,9 +1189,8 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
         bmat = Flux->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
 
         // Assemble
         // Begin - Begin -- add
@@ -1211,9 +1210,8 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
         // End
         bmat = Flux->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
         
         if (eId < nbI) {
             // Interior grid
@@ -2782,9 +2780,8 @@ void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
         bmat = Flux->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
 
         // Assemble
         // Begin - Begin -- add
@@ -2807,9 +2804,8 @@ void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, 
         if (eId < nbI) {
             // process Interior grid
             bmat = Flux->GetdFdXpE();
-            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+            DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], dt,
                 bmat.data());
-            Dscalar(bsize, dt, bmat.data());
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId, bmat);
             // End - End -- add
@@ -2819,9 +2815,8 @@ void IsoT_FIMddm::AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, 
         else if (IfBulkInLS(eId, rs.domain)) {
             // group Interior grid
             bmat = Flux->GetdFdXpE();
-            DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+            DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], dt,
                 bmat.data());
-            Dscalar(bsize, dt, bmat.data());
             // Begin - End -- insert
             ls.NewOffDiag(bId, eId + numWell, bmat);
         }
@@ -2873,9 +2868,8 @@ void IsoT_FIMddm::AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
 
         bmat = Flux->GetdFdXpB();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
 
         // Assemble
         // Begin - Begin -- add
@@ -2894,9 +2888,8 @@ void IsoT_FIMddm::AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, 
 #endif
 
         bmat = Flux->GetdFdXpE();
-        DaABpbC(ncol, ncol, ncol2, 1, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsE().data(), &bvs.dSec_dPri[eId * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
         // End
         if (eId < nbI) {
             // process Interior grid

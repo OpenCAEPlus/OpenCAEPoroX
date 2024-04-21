@@ -1306,9 +1306,8 @@ void PeacemanWellIsoT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const
 
         // Bulk to Well
         bmat = dQdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
 
         // Bulk - Bulk -- add
         ls.AddDiag(n, bmat);
@@ -1536,10 +1535,8 @@ void PeacemanWellIsoT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, cons
 
         // Bulk - Bulk -- add
         bmat = dQdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], dt,
             bmat.data());
-
-        Dscalar(bsize, dt, bmat.data());
         ls.AddDiag(n, bmat);
 
         // Bulk - Well -- insert
@@ -1949,9 +1946,8 @@ void PeacemanWellT::AssembleMatInjFIM(LinearSystem& ls, const Bulk& bk, const OC
 
         // Bulk to Well
         bmat = dQdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
         // Add
         ls.AddDiag(n, bmat);
 
@@ -2120,9 +2116,8 @@ void PeacemanWellT::AssembleMatProdFIM(LinearSystem& ls, const Bulk& bk, const O
 
         // Bulk to Well
         bmat = dQdXpB;
-        DaABpbC(ncol, ncol, ncol2, 1, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], 1,
+        DaABpbC(ncol, ncol, ncol2, dt, dQdXsB.data(), &bvs.dSec_dPri[n * bsize2], dt,
             bmat.data());
-        Dscalar(bsize, dt, bmat.data());
         // Add
         ls.AddDiag(n, bmat);
         // Insert
