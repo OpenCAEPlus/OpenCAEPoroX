@@ -173,6 +173,7 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
     while (GetLineSkipComments(input, buff))
     {
         words = strip_split(buff);
+        DealDefault(words);
         if (!words.empty())
             input_data.push_back(words);
     }
@@ -265,6 +266,12 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             break;
         }
 
+    /***************************************************************************
+     *
+     *                    Read and Set parameters.
+     *
+     ***************************************************************************/
+
     /// MODEL section
     for (int i=MODEL_start; i<MODEL_end; ++i)
     {
@@ -273,6 +280,9 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             string model_type = words[1]; // GASWATER, OILWATER, BLACKOIL, COMP
             model = OCPModel::isothermal; /// fff HiSim only have isothermal?
+            DUALPORO = OCP_TRUE; /// fff
+            DPGRID = OCP_TRUE; /// fff
+//            initR.type = ;
         }
         else if (words[0] == "SOLNT")
         {
@@ -312,111 +322,194 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             }
 
             numGridM = nx * ny * nz;
-            if (DUALPORO) numGridF = numGridM; /// fff how to set DUALPORO
+            if (DUALPORO) numGridF = numGridM;
 
             numGrid = numGridM + numGridF;
         }
         else if (words[0] == "DXV")
         {
+            dx.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "DXV: " << words[1] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "DXV: " << words[0] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+            for (int j=0; j<nz; ++j)
+            {
+                for (int k=0; k<ny; ++k)
+                {
+                    for (int l=0; l<nx; ++l) {
+                        dx[j * nx * ny + k * nx + l] = vals[l];
+                    }
+                }
             }
         }
         else if (words[0] == "DYV")
         {
+            dy.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "DYV: " << words[1] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "DYV: " << words[0] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+            for (int j=0; j<nz; ++j)
+            {
+                for (int k=0; k<ny; ++k)
+                {
+                    for (int l=0; l<nx; ++l)
+                        dx[j*nx*ny + k*nx + l] = vals[k];
+                }
             }
         }
         else if (words[0] == "DZV")
         {
+            dz.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
+            {
                 cout << "DZV: " << words[1] << ", " << words[2] << ", " << words[3] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
             else
             {
                 i += 1;
                 words = input_data[i];
                 cout << "DZV, " << words[0] << ", " << words[1] << ", " << words[2] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+            for (int j=0; j<nz; ++j)
+            {
+                for (int k=0; k<ny; ++k)
+                {
+                    for (int l=0; l<nx; ++l)
+                        dx[j*nx*ny + k*nx + l] = vals[j];
+                }
             }
         }
         else if (words[0] == "TOPS")
         {
+            tops.resize(nx * ny);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "TOPS: " << words[1] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "TOPS: " << words[0] << endl;
+                for (int j=0; j<words.size(); ++j) /// Hisim的SPE5的TOPs个数不对？
+                    vals.push_back(stod(words[j]));
             }
         }
         else if (words[0] == "PORO")
         {
+            poro.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "PORO: " << words[1] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "PORO: " << words[0] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
+            for (int j=0; j<numGrid; ++j)
+                poro[j] = vals[j];
         }
         else if (words[0] == "PERMX")
         {
+            kx.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "PERMX: " << words[1] << " " << words[2] << " " << words[3] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "PERMX: " << words[0] << " " << words[1] << " " << words[2] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
+            for (int j=0; j<numGrid; ++j)
+                kx[j] = vals[j];
         }
         else if (words[0] == "PERMY")
         {
+            ky.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "PERMY: " << words[1] << " " << words[2] << " " << words[3] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "PERMY: " << words[0] << " " << words[1] << " " << words[2] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
+            for (int j=0; j<numGrid; ++j)
+                ky[j] = vals[j];
         }
         else if (words[0] == "PERMZ")
         {
+            kz.resize(numGrid);
+            vector<double> vals;
             if (words.size() > 1)
             {
                 cout << "PERMZ: " << words[1] << " " << words[2] << " " << words[3] << endl;
+                for (int j=1; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
             else
             {
                 i++;
                 words = input_data[i];
                 cout << "PERMZ: " << words[0] << " " << words[1] << " " << words[2] << endl;
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
             }
+            for (int j=0; j<numGrid; ++j)
+                kz[j] = vals[j];
         }
         else
         {
@@ -802,15 +895,48 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 i++;
             }
         }
+        else if (words[0] == "WELLSCHED")
+        {
+            cout << "wellsched: " << words[1] << endl;
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (words[0] == "TIME")
+                {
+                    string opt = words[1];
+                    cout << "TIME: " << opt << endl;
+                }
+                else if (words[0] == "LIMIT")
+                {
+                    string opt = words[1];
+                    cout << "LIMIT: " << opt << endl;
+                }
+                else if (words[0] == "PERF")
+                {
+                    string opt = words[1];
+                    cout << "PERF: " << opt << endl;
+                }
+                else if (words[0] == "STREAM")
+                {
+                    string opt = words[1];
+                    cout << "STREAM: " << opt << endl;
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+        }
         else
         {
             OCP_MESSAGE("Found not supported keywords: " << words[0]);
             OCP_ABORT("Wrong keywords!");
         }
-
     }
 
-    cout << "Good" << endl;
+    cout << "Good 1" << endl;
 }
 
 
