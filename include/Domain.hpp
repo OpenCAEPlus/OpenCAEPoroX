@@ -78,12 +78,12 @@ public:
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 
 public:
-	MPI_Comm          ls_comm;
-	MPI_Group         ls_group;
-	OCP_INT           ls_numproc;
-	OCP_INT           ls_rank;
-	set<OCP_INT>      ls_group_global_rank;
-	set<OCP_INT>      ls_group_local_rank;
+	MPI_Comm          cs_comm;
+	MPI_Group         cs_group;
+	OCP_INT           cs_numproc;
+	OCP_INT           cs_rank;
+	set<OCP_INT>      cs_group_global_rank;
+	set<OCP_INT>      cs_group_local_rank;
 	/// number of neighbor process of neighbor process
 	map<OCP_INT, USI> num_nproc_nproc;
 

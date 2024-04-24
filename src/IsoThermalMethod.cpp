@@ -2410,7 +2410,7 @@ void IsoT_FIMddm::SetStarBulkSet(const Bulk& bulk, const Domain& domain)
 
 void IsoT_FIMddm::CalRankSet(const Domain& domain)
 {
-    rankSetInLS = domain.ls_group_global_rank;
+    rankSetInLS = domain.cs_group_global_rank;
     rankSetOutLS.clear();
 
 	for (const auto& r : domain.recv_element_loc) {
@@ -2615,9 +2615,9 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
     if (initRes0) {
         GetWallTime timer;
         timer.Start();
-        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.ls_comm);
+        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.cs_comm);
 
-        if (rs.domain.ls_numproc == rs.domain.global_numproc) {
+        if (rs.domain.cs_numproc == rs.domain.global_numproc) {
             global_res0 = res.maxRelRes0_V;
         }
         else {
@@ -2716,9 +2716,9 @@ void IsoT_FIMddm::CalResConstV(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
         GetWallTime timer;
         timer.Start();
 
-        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.ls_comm);
+        MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.cs_comm);
 
-        if (rs.domain.ls_numproc == rs.domain.global_numproc) {
+        if (rs.domain.cs_numproc == rs.domain.global_numproc) {
             global_res0 = res.maxRelRes0_V;
         }
         else {

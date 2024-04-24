@@ -152,7 +152,7 @@ void PardisoSolver::CalCommTerm(const Domain* domain)
 {
 
     global_index = domain->CalGlobalIndex();
-    myComm       = MPI_Comm_c2f(domain->ls_comm);
+    myComm       = MPI_Comm_c2f(domain->cs_comm);
 
     const OCP_INT numElementLoc = domain->GetNumActElementForSolver();
     const OCP_INT global_end = global_index->at(numElementLoc - 1);
@@ -166,7 +166,7 @@ void PardisoSolver::CalCommTerm(const Domain* domain)
     GetWallTime timer;
     timer.Start();
 
-    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_local_rank.rbegin(), domain->ls_comm);
+    MPI_Bcast(&N, 1, MPI_INT, *domain->cs_group_local_rank.rbegin(), domain->cs_comm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop();
 }
@@ -237,7 +237,7 @@ void VectorPardisoSolver::Allocate(const OCPMatrix& mat)
 void VectorPardisoSolver::CalCommTerm(const Domain* domain)
 {
     global_index = domain->CalGlobalIndex();
-    myComm       = MPI_Comm_c2f(domain->ls_comm);
+    myComm       = MPI_Comm_c2f(domain->cs_comm);
 
     const OCP_INT numElementLoc = domain->GetNumActElementForSolver();
     const OCP_INT global_end = global_index->at(numElementLoc - 1);
@@ -251,7 +251,7 @@ void VectorPardisoSolver::CalCommTerm(const Domain* domain)
     GetWallTime timer;
     timer.Start();
 
-    MPI_Bcast(&N, 1, MPI_INT, *domain->ls_group_local_rank.rbegin(), domain->ls_comm);
+    MPI_Bcast(&N, 1, MPI_INT, *domain->cs_group_local_rank.rbegin(), domain->cs_comm);
 
     OCPTIME_COMM_COLLECTIVE += timer.Stop();
 }
