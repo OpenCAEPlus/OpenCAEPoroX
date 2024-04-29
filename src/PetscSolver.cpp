@@ -99,7 +99,7 @@ VectorPetscSolver::VectorPetscSolver(const string& dir, const string& file, cons
 
 OCP_INT VectorPetscSolver::Solve()
 {
-    return FIM_solver_p(nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x, myComm);
+    return FIM_solver_p(myComm, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
 #endif // WITH_PETSCSOLVER
