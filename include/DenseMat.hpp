@@ -26,17 +26,28 @@ using namespace std;
 
 extern "C" {
 
+/// interface functions for Intel MKL library
+#if __cplusplus
+#if __cplusplus > 199711L
+#define OCP_NOTHROW noexcept
+#else
+#define OCP_NOTHROW throw()
+#endif
+#else
+#define OCP_NOTHROW
+#endif /* __cplusplus */
+
 ////// BLAS functions
 
 /// Scales a vector by a constant.
-void dscal_(const int* n, const double* alpha, double* x, const int* incx);
+void dscal_(const int* n, const double* alpha, double* x, const int* incx) OCP_NOTHROW;
 
 /// Forms the dot product of two vectors.
-double ddot_(const int* n, double* a, const int* inca, double* b, const int* incb);
+double ddot_(const int* n, double* a, const int* inca, double* b, const int* incb) OCP_NOTHROW;
 
 /// Copies a vector, src, to a vector, dst.
 int dcopy_(
-    const int* n, const double* src, const int* incx, double* dst, const int* incy);
+    const int* n, const double* src, const int* incx, double* dst, const int* incy) OCP_NOTHROW;
 
 /// Constant times a vector plus a vector.
 int daxpy_(const int*    n,
@@ -44,16 +55,16 @@ int daxpy_(const int*    n,
            const double* x,
            const int*    incx,
            double*       y,
-           const int*    incy);
+           const int*    incy) OCP_NOTHROW;
 
 /// Computes the Euclidean norm of a vector.
-double dnrm2_(const int* n, double* x, const int* incx);
+double dnrm2_(const int* n, double* x, const int* incx) OCP_NOTHROW;
 
 /// Computes the sum of the absolute values of a vector.
-double dasum_(const int* n, double* x, const int* incx);
+double dasum_(const int* n, double* x, const int* incx) OCP_NOTHROW;
 
 /// Finds the index of element having max absolute value.
-int idamax_(const int* n, double* x, const int* incx);
+int idamax_(const int* n, double* x, const int* incx) OCP_NOTHROW;
 
 /// Performs matrix-matrix operations C : = alpha * op(A) * op(B) + beta * C.
 int dgemm_(const char*   transa,
@@ -68,7 +79,7 @@ int dgemm_(const char*   transa,
            const int*    ldb,
            const double* beta,
            double*       C,
-           const int*    ldc);
+           const int*    ldc) OCP_NOTHROW;
 
 ////// LAPACK functions
 
@@ -80,7 +91,7 @@ void dgesv_(const int* n,
     int* ipiv,
     double* b,
     const int* ldb,
-    int* info);
+    int* info) OCP_NOTHROW;
 
 /// Computes the solution to system of linear equations A * X = B for symm matrices.
 void dsysv_(const char* uplo,
@@ -93,7 +104,7 @@ void dsysv_(const char* uplo,
     const int* ldb,
     double* work,
     const int* lwork,
-    int* info);
+    int* info) OCP_NOTHROW;
 
 /// Computes the eigenvalues and, optionally, the leftand /or right eigenvectors for SY
 /// matrices
@@ -107,9 +118,9 @@ void ssyevd_(const char* jobz,
     const int* lwork,
     int* iwork,
     const int* liwork,
-    int* info);
-}
+    int* info) OCP_NOTHROW;
 
+}
 
 /// Computes L1-norm of a vector.
 OCP_DBL Dnorm1(const INT& N, OCP_DBL* x);
