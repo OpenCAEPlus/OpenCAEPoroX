@@ -55,8 +55,6 @@ protected:
 
     // Communication
     MPI_Comm                myComm;       ///< Communicator
-    OCP_INT                 numproc;      ///< num of process
-    OCP_INT                 myrank;       ///< current rank
     const vector<OCP_ULL>*  global_index; ///< global index
     vector<OCP_SLL>         allBegin;     ///< begin for all process(self-include) 
     vector<OCP_SLL>         allEnd;       ///< end for all process(self-include)

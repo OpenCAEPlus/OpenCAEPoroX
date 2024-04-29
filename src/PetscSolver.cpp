@@ -25,12 +25,10 @@ void PetscSolver::Allocate(const OCPMatrix& mat, const Domain* domain)
     iA.resize(mat.maxDim + 1);
     jA.resize(mat.max_nnz);
 
-    myComm  = domain->global_comm;
-    numproc = domain->global_numproc;
-    myrank  = domain->myrank;
-    allBegin.resize(numproc);
-    allEnd.resize(numproc);
-    allEle.resize(numproc);
+    // pre-allocation
+    allBegin.resize(domain->global_numproc);
+    allEnd.resize(domain->global_numproc);
+    allEle.resize(domain->global_numproc);
 }
 
 
@@ -38,7 +36,9 @@ void PetscSolver::Allocate(const OCPMatrix& mat, const Domain* domain)
 void PetscSolver::CalCommTerm(const Domain* domain)
 {
     global_index  = domain->CalGlobalIndex();
-    const OCP_INT numElementloc = domain->GetNumActElementForSolver();
+    myComm        = domain->cs_comm;
+
+    const OCP_INT numElementloc = domain->GetNumActElementForSolver(); 
 
     GetWallTime timer;
     timer.Start();
@@ -49,7 +49,7 @@ void PetscSolver::CalCommTerm(const Domain* domain)
     
     allBegin[0] = 0;
     allEnd[0]   = allEle[0] - 1;
-    for (OCP_USI p = 1; p < numproc; p++) {
+    for (OCP_USI p = 1; p < domain->cs_numproc; p++) {
         allBegin[p] = allEnd[p - 1] + 1;
         allEnd[p]   = allBegin[p] + allEle[p] - 1;
     }
@@ -60,6 +60,7 @@ void PetscSolver::CalCommTerm(const Domain* domain)
 void PetscSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
     CalCommTerm(domain);
+    nb = mat.nb;
 
     const USI blockSize = nb * nb;
     vector<OCP_SLL> tmpJ;
@@ -98,7 +99,7 @@ VectorPetscSolver::VectorPetscSolver(const string& dir, const string& file, cons
 
 OCP_INT VectorPetscSolver::Solve()
 {
-    return FIM_solver_p(myrank, numproc, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
+    return FIM_solver_p(nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x, myComm);
 }
 
 #endif // WITH_PETSCSOLVER

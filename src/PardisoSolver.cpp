@@ -28,6 +28,8 @@ void PardisoSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
     CalCommTerm(domain);
 
+    nb = mat.nb;
+
     const USI blockSize = nb * nb;
     vector<USI> tmp;  
     // Assemble iA, jA, A
@@ -183,6 +185,7 @@ VectorPardisoSolver::VectorPardisoSolver(const string& dir, const string& file, 
 void VectorPardisoSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
 {
     CalCommTerm(domain);
+    nb = mat.nb;
 
     const USI blockSize = nb * nb;
     vector<USI> tmp;
