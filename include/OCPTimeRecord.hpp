@@ -34,6 +34,7 @@ extern OCP_DBL OCPTIME_COMM_1ALLREDUCE;     ///< Time for Allreduce in OCP check
 extern OCP_DBL OCPTIME_COMM_P2P;            ///< Time for P2P Communication (Disposable calls will be ignored)
 extern OCP_DBL OCPTIME_COMM_TOTAL;          ///< Time for Communication (Disposable calls will be ignored)
 extern OCP_DBL OCPTIME_PARMETIS;            ///< Time for ParMetis
+extern OCP_DBL OCPTIME_GROUPPROCESS;        ///< Time for process grouping
 
 #endif
 

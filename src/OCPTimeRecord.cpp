@@ -30,7 +30,7 @@ OCP_DBL OCPTIME_COMM_COLLECTIVE     = 0;
 OCP_DBL OCPTIME_COMM_1ALLREDUCE     = 0;
 OCP_DBL OCPTIME_COMM_P2P            = 0;
 OCP_DBL OCPTIME_COMM_TOTAL          = 0;
-
+OCP_DBL OCPTIME_GROUPPROCESS        = 0;
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

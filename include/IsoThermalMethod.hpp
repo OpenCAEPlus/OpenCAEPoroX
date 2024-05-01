@@ -145,9 +145,9 @@ private:
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Assemble linear system for bulks
-    virtual void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
-    virtual void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
 };
 
 
@@ -208,10 +208,16 @@ protected:
 class IsoT_FIMddm : public IsoT_FIM
 {
 public:
-    /// Setup FIM
+    /// Setup FIMddm
     void Setup(Reservoir& rs, const OCPControl& ctrl);
+    /// Init
+    void InitReservoir(Reservoir& rs);
     /// Prepare for Assembling matrix.
     void Prepare(Reservoir& rs, const OCP_DBL& dt);
+    /// Assemble Matrix
+    void AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
+    /// Solve the linear system.
+    OCP_BOOL SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl);
     /// Update properties of fluids.
     OCP_BOOL UpdateProperty(Reservoir& rs, OCPControl& ctrl);
     /// Finish a Newton-Raphson iteration.
@@ -237,11 +243,11 @@ protected:
 
 protected:
     /// Assemble linear system for bulks
-    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const override;
+    void AssembleMatBulks(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     void AssembleMatBulksConstP(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     void AssembleMatBulksConstV(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const;
     /// Update P, Ni, BHP after linear system is solved
-    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR) override;
+    void GetSolution(Reservoir& rs, vector<OCP_DBL>& u, const ControlNR& ctrlNR);
     /// Update property for ghost grid
     void UpdatePropertyBoundary(Reservoir& rs);
     void ExchangePBoundary(Reservoir& rs) const;
@@ -265,7 +271,7 @@ protected:
     /// constant velocity for boundary
     const USI       constV = 1;
     USI             boundCondition{ constP };
-    OCP_DBL         dSlim = 1E-2;
+    OCP_DBL         dSlim = 1E+40;
 };
 
 

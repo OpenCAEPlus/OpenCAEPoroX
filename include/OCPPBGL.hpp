@@ -39,7 +39,7 @@
 // use parallel boost graph library to group processes
 void GroupProcess(std::set<int>& cs_proc_group, MPI_Comm& cs_comm);
 
-
+extern double TIME_PBGL;
 
 #endif
 

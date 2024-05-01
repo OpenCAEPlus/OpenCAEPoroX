@@ -216,7 +216,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
     const Domain& domain = reservoir.GetDomain();
     if (domain.global_numproc > 1) {
      
-        const vector<OCP_DBL> record_local{ 
+        const vector<OCP_DBL> record_local{
             static_cast<OCP_DBL>(reservoir.GetInteriorBulkNum()),
             OCPTIME_UPDATE_GRID,
             OCPTIME_ASSEMBLE_MAT,
@@ -224,7 +224,12 @@ void OpenCAEPoroX::OutputTimeProcess() const
             OCPTIME_COMM_P2P,
             OCPTIME_COMM_1ALLREDUCE,
             OCPTIME_NRSTEP,
-            OCPTIME_NRSTEPC};
+            OCPTIME_NRSTEPC,
+            OCPTIME_GROUPPROCESS,
+#ifdef  WITH_PBGL
+            TIME_PBGL,
+#endif //  
+        };
         vector<OCP_DBL> record_total;
         const OCP_INT record_var_num = record_local.size();
 
@@ -258,6 +263,10 @@ void OpenCAEPoroX::OutputTimeProcess() const
                 statisticsVar("1AllReduce(OCPCheck)(s)", len, 3),
                 statisticsVar("Newton Step(s)", len, 3),
                 statisticsVar("Newton Step(c)(s)", len, 3),
+                statisticsVar("Group Processes(c)(s)", len, 3),
+#ifdef  WITH_PBGL
+                statisticsVar("PBGL(c)(s)", len, 3),
+#endif //  
             };
 
             OCP_ASSERT(record_var_num == staVar.size(), "wrong staVar");

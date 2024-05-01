@@ -756,7 +756,6 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
                                  OCPControl&   ctrl)
 {
-
     GetWallTime timer;
     timer.Start();
     ls.AssembleMatLinearSolver();
@@ -2220,6 +2219,12 @@ void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
 }
 
 
+void IsoT_FIMddm::InitReservoir(Reservoir& rs)
+{
+    IsoT_FIM::InitReservoir(rs);
+}
+
+
 void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
     rs.domain.SetCSComm(starBulkSet);
@@ -2230,6 +2235,69 @@ void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
     CalInitRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
+}
+
+
+void IsoT_FIMddm::AssembleMat(LinearSystem& ls, const Reservoir& rs, const OCP_DBL& dt) const
+{
+    // Assemble matrix
+    AssembleMatBulks(ls, rs, dt);
+    IsoT_FIM::AssembleMatWells(ls, rs, dt);
+    // Assemble rhs -- from residual
+    ls.CopyRhs(NR.res.resAbs);
+    rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
+}
+
+
+OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& ctrl)
+{
+    GetWallTime timer;
+    timer.Start();
+    ls.AssembleMatLinearSolver();
+    OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
+
+    // Solve linear system
+    //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_A_ddm.out",
+    //    "proc" + to_string(CURRENT_RANK) + "_b_ddm.out");
+
+    timer.Start();
+    int status = ls.Solve();
+    // Record time, iterations
+    OCPTIME_LSOLVER += timer.Stop();
+
+    if (status < 0) {
+        ls.ClearData();
+        ctrl.time.CutDt(-1.0);
+        ResetToLastTimeStep(rs, ctrl);
+        return OCP_FALSE;
+    }
+
+    NR.UpdateIter(abs(status));
+
+    // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
+
+#ifdef DEBUG
+     //// Output A, b, x
+     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_testA_FIM.out",
+     //                      "proc" + to_string(CURRENT_RANK) + "_testb_FIM.out");
+     //MPI_Barrier(rs.domain.global_comm);
+
+     //ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_testx_FIM.out");
+     //OCP_ABORT("Stop");
+#endif // DEBUG
+
+
+    //MPI_Barrier(rs.domain.global_comm);
+    //OCP_ABORT("Stop");
+
+    // Get solution from linear system to Reservoir
+    timer.Start();
+    GetSolution(rs, ls.GetSolution(), ctrl.NR);
+    OCPTIME_NRSTEP += timer.Stop();
+    // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
+    ls.ClearData();
+
+    return OCP_TRUE;
 }
 
 

@@ -12,12 +12,16 @@
 #include "OCPPBGL.hpp"
 
 
+double TIME_PBGL = 0;
+
+
 void GroupProcess(std::set<int>& cs_proc_group, MPI_Comm& cs_comm)
 {
-
 #ifdef WITH_PBGL
 
     {
+        double start0 = MPI_Wtime();
+
         using namespace boost;
         using boost::graph::distributed::mpi_process_group;
 
@@ -38,18 +42,19 @@ void GroupProcess(std::set<int>& cs_proc_group, MPI_Comm& cs_comm)
         ComponentMap component(local_components_vec.begin(), get(vertex_index, g));
 
         int num_components;
-        // double start = MPI_Wtime();
+        double start = MPI_Wtime();
         if (false) {         
             num_components = connected_components_ps(g, component);
         }
         else {
             num_components = connected_components(g, component);
         }
-        //if (world_rank == 0) {
-        //    std::cout << num_components << " components have been found! -- "
-        //        << MPI_Wtime() - start << "s" << std::endl;
-        //}
+        if (world_rank == 0) {
+            std::cout << num_components << " components have been found! -- "
+                << MPI_Wtime() - start << "s" << std::endl;
+        }
 
+        TIME_PBGL += MPI_Wtime() - start0;
 
         if (cs_comm != MPI_COMM_NULL)   MPI_Comm_free(&cs_comm);
         MPI_Comm_split(MPI_COMM_WORLD, local_components_vec[0], world_rank, &cs_comm);
@@ -63,15 +68,15 @@ void GroupProcess(std::set<int>& cs_proc_group, MPI_Comm& cs_comm)
         cs_proc_group.insert(tmpR.begin(), tmpR.end());
     }
 
+
+
 #else
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     // every rank is a group
     cs_proc_group.clear();
     cs_proc_group.insert(world_rank);
-    if (cs_comm != MPI_COMM_NULL)   MPI_Comm_free(&cs_comm);
-    MPI_Comm_split(MPI_COMM_WORLD, world_rank, world_rank, &cs_comm);
-
+    cs_comm = MPI_COMM_SELF;
 #endif
 }
 

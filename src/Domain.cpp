@@ -226,6 +226,10 @@ void Domain::InitCSComm()
 
 void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 {
+
+	GetWallTime timer;
+	timer.Start();
+
 	SetCS01(bIds);
 	//SetCS02(bIds);
 
@@ -238,6 +242,8 @@ void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 	for (OCP_USI n = 0; n < cs_numproc; n++) {
 		cs_group_local_rank.insert(n);
 	}
+
+	OCPTIME_GROUPPROCESS += timer.Stop();
 }
 
 
