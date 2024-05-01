@@ -205,34 +205,14 @@ void Domain::InitComm(const Partition& part)
 	global_comm    = part.myComm;
 	global_numproc = part.numproc;
 	global_rank    = part.myrank;
-	MPI_Comm_group(global_comm, &global_group);
 
 	InitCSComm();
-}
-
-
-void Domain::SetNumNprocNproc()
-{
-	// calculate nproc_nproc
-	USI iter = 0;
-	for (const auto& r : recv_element_loc) {
-		num_nproc_nproc[r.first] = 0;
-		MPI_Irecv(&num_nproc_nproc[r.first], 1, OCPMPI_USI, r.first, 0, global_comm, &recv_request[iter++]);
-	}
-	iter = 0;
-	USI nnproc = send_element_loc.size();
-	for (const auto& s : send_element_loc) {
-		MPI_Isend(&nnproc, 1, OCPMPI_USI, s.first, 0, global_comm, &send_request[iter++]);
-	}
-	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
-	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
 }
 
 
 void Domain::InitCSComm()
 {
 	MPI_Comm_dup(global_comm, &cs_comm);
-	MPI_Comm_group(cs_comm, &cs_group);
 
 	cs_numproc = global_numproc;
 	cs_rank    = global_rank;
@@ -245,6 +225,23 @@ void Domain::InitCSComm()
 
 
 void Domain::SetCSComm(const vector<OCP_USI>& bIds)
+{
+	SetCS01(bIds);
+	//SetCS02(bIds);
+
+	GroupProcess(cs_group_global_rank, cs_comm);
+
+	MPI_Comm_size(cs_comm, &cs_numproc);
+	MPI_Comm_rank(cs_comm, &cs_rank);
+
+	cs_group_local_rank.clear();
+	for (OCP_USI n = 0; n < cs_numproc; n++) {
+		cs_group_local_rank.insert(n);
+	}
+}
+
+
+void Domain::SetCS01(const vector<OCP_USI>& bIds)
 {
 	cs_group_global_rank.clear();
 	for (const auto& b : bIds) {
@@ -266,48 +263,16 @@ void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 			}
 		}
 	}
+}
 
 
-	// Synchronize local process group
-	vector<vector<OCP_INT>> recv_buffer(cs_group_global_rank.size());
-	USI iter = 0;
-	for (const auto& r : cs_group_global_rank) {
-		recv_buffer[iter].resize(num_nproc_nproc[r]);
-		MPI_Irecv(recv_buffer[iter].data(), num_nproc_nproc[r], OCPMPI_INT, r, 0, global_comm, &recv_request[iter]);
-		iter++;
-	}
-
-	vector<INT> group_rank(cs_group_global_rank.begin(), cs_group_global_rank.end());
-	group_rank.resize(send_element_loc.size(), -1);
-	iter = 0;
-	for (const auto& s : cs_group_global_rank) {
-		MPI_Isend(group_rank.data(), group_rank.size(), OCPMPI_INT, s, 0, global_comm, &send_request[iter]);
-		iter++;
-	}
-	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
-	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
-
-	
-	cs_group_global_rank.insert(CURRENT_RANK);
-	for (const auto& r : recv_buffer) {
-		cs_group_global_rank.insert(r.begin(), r.end());
-	}
-	cs_group_global_rank.erase(-1);
-
-	group_rank.assign(cs_group_global_rank.begin(), cs_group_global_rank.end());
-
-	if (MPI_GROUP_NULL != cs_group)  MPI_Group_free(&cs_group);
-	if (MPI_COMM_NULL  != cs_comm)   MPI_Comm_free(&cs_comm);
-
-	MPI_Group_incl(global_group, group_rank.size(), group_rank.data(), &cs_group);
-	MPI_Comm_create(MPI_COMM_WORLD, cs_group, &cs_comm);
-
-	MPI_Comm_size(cs_comm, &cs_numproc);
-	MPI_Comm_rank(cs_comm, &cs_rank);
-
-	cs_group_local_rank.clear();
-	for (OCP_USI n = 0; n < cs_numproc; n++) {
-		cs_group_local_rank.insert(n);
+void Domain::SetCS02(const vector<OCP_USI>& bIds)
+{
+	cs_group_global_rank.clear();
+	if (bIds.size() > 0) {
+		for (const auto& r : recv_element_loc) {
+			cs_group_global_rank.insert(r.first);
+		}
 	}
 }
 

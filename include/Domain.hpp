@@ -20,6 +20,7 @@
 #include "Partition.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
+#include "OCPPBGL.hpp"
 
 #include <parmetis.h>
 #include <vector>
@@ -65,7 +66,6 @@ public:
 	MPI_Comm  global_comm;
 	OCP_INT   global_numproc;
 	OCP_INT   global_rank;
-	MPI_Group global_group;
 
 
 public:
@@ -73,19 +73,18 @@ public:
 	void InitCSComm();
 	// for linear solver communication
 	void SetCSComm(const vector<OCP_USI>& bIds);
-	/// Calculate residual
-	void SetNumNprocNproc();
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
+
+protected:
+	void SetCS01(const vector<OCP_USI>& bIds);
+	void SetCS02(const vector<OCP_USI>& bIds);
 
 public:
 	MPI_Comm          cs_comm;
-	MPI_Group         cs_group;
 	OCP_INT           cs_numproc;
 	OCP_INT           cs_rank;
 	set<OCP_INT>      cs_group_global_rank;
 	set<OCP_INT>      cs_group_local_rank;
-	/// number of neighbor process of neighbor process
-	map<OCP_INT, USI> num_nproc_nproc;
 
 protected:
 	/// Num of Total Elements(grids + wells)

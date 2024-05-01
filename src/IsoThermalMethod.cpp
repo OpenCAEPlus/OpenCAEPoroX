@@ -749,7 +749,6 @@ void IsoT_FIM::AssembleMat(LinearSystem&    ls,
     AssembleMatWells(ls, rs, dt);
     // Assemble rhs -- from residual
     ls.CopyRhs(NR.res.resAbs);
-
     rs.domain.SetNumActWellLocal(rs.GetNumOpenWell());
 }
 
@@ -757,11 +756,11 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
                                  Reservoir&    rs,
                                  OCPControl&   ctrl)
 {
+
     GetWallTime timer;
     timer.Start();
     ls.AssembleMatLinearSolver();
     OCPTIME_CONVERT_MAT_FOR_LS_IF += timer.Stop();
-
 
     // Solve linear system
     //ls.OutputLinearSystem("proc" + to_string(CURRENT_RANK) + "_A_ddm.out",
@@ -2218,7 +2217,6 @@ void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     // Allocate memory for reservoir
     AllocateReservoir(rs);
-    rs.domain.SetNumNprocNproc();
 }
 
 
@@ -2410,22 +2408,26 @@ void IsoT_FIMddm::SetStarBulkSet(const Bulk& bulk, const Domain& domain)
 
 void IsoT_FIMddm::CalRankSet(const Domain& domain)
 {
-    rankSetInLS = domain.cs_group_global_rank;
+    rankSetInLS.clear();
     rankSetOutLS.clear();
 
-	for (const auto& r : domain.recv_element_loc) {
-		if (!rankSetInLS.count(r.first)) {
+    rankSetInLS.insert(CURRENT_RANK);
+    for (const auto& r : domain.recv_element_loc) {
+        if (domain.cs_group_global_rank.count(r.first)) {
+            rankSetInLS.insert(r.first);
+        }
+        else {
             rankSetOutLS.insert(r.first);
-		}
-	}
+        }
+    }
 
-    //if (OCP_TRUE) {
-    //    cout << "rank" << CURRENT_RANK << "  ";
-    //    for (const auto& s : rankSetInLS) {
-    //        cout << s << "   ";
-    //    }
-    //    cout << endl;
-    //}
+    if (OCP_TRUE) {
+        cout << "rank" << CURRENT_RANK << "  ";
+        for (const auto& s : rankSetInLS) {
+            cout << s << "   ";
+        }
+        cout << endl;
+    }
 }
 
 
