@@ -70,9 +70,9 @@ public:
 
 public:
 	// reset linear solver communication
-	void InitLSComm();
+	void InitCSComm();
 	// for linear solver communication
-	void SetLSComm(const vector<OCP_USI>& bIds);
+	void SetCSComm(const vector<OCP_USI>& bIds);
 	/// Calculate residual
 	void SetNumNprocNproc();
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;

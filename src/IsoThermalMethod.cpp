@@ -869,7 +869,7 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 void IsoT_FIM::TransferToFIM(Reservoir& rs, OCPControl& ctrl)
 {
     CalInitRes(rs, ctrl.time.GetCurrentDt());
-    rs.domain.InitLSComm();
+    rs.domain.InitCSComm();
 }
 
 
@@ -2224,7 +2224,7 @@ void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
 
 void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
-    rs.domain.SetLSComm(starBulkSet);
+    rs.domain.SetCSComm(starBulkSet);
     CalRankSet(rs.domain);
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);

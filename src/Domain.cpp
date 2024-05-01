@@ -207,7 +207,7 @@ void Domain::InitComm(const Partition& part)
 	global_rank    = part.myrank;
 	MPI_Comm_group(global_comm, &global_group);
 
-	InitLSComm();
+	InitCSComm();
 }
 
 
@@ -229,7 +229,7 @@ void Domain::SetNumNprocNproc()
 }
 
 
-void Domain::InitLSComm()
+void Domain::InitCSComm()
 {
 	MPI_Comm_dup(global_comm, &cs_comm);
 	MPI_Comm_group(cs_comm, &cs_group);
@@ -244,7 +244,7 @@ void Domain::InitLSComm()
 }
 
 
-void Domain::SetLSComm(const vector<OCP_USI>& bIds)
+void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 {
 	cs_group_global_rank.clear();
 	for (const auto& b : bIds) {
