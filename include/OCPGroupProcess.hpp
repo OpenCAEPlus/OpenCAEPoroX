@@ -1,7 +1,7 @@
-/*! \file    OCPPBGL.hpp
- *  \brief   OCPPBGL class declaration
+/*! \file    OCPGroupProcess.hpp
+ *  \brief   OCPGroupProcess class declaration
  *  \author  Shizhe Li
- *  \date    May/01/2024
+ *  \date    May/02/2024
  *
  *  \note    The params used in OpenCAEPoroX is mostly compatible with Eclipse by SLB,
  *           but it has some own rules for easy to use. It is extensible and friendly.
@@ -13,8 +13,11 @@
  */
 
 
-#ifndef __OCPPBGL_HEADER__
-#define __OCPPBGL_HEADER__
+#ifndef __OCPGROUPPROCESS_HEADER__
+#define __OCPGROUPPROCESS_HEADER__
+
+#include "OCPConst.hpp"
+#include "OCPDataType.hpp"
 
 #include <vector>
 #include <iostream>
@@ -22,7 +25,6 @@
 #include <mpi.h>
 
 #ifdef WITH_PBGL
-
 #include <boost/filesystem.hpp>
 #include <boost/graph/use_mpi.hpp>
 #include <boost/graph/distributed/adjacency_list.hpp>
@@ -32,14 +34,16 @@
 #include <boost/graph/distributed/mpi_process_group.hpp>
 #include <boost/graph/parallel/distribution.hpp>
 #include <boost/graph/erdos_renyi_generator.hpp>
-
-
 #endif
 
-// use parallel boost graph library to group processes
-void GroupProcess(std::set<int>& cs_proc_group, MPI_Comm& cs_comm);
+#ifdef WITH_BGL
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
+#endif
 
-extern double TIME_PBGL;
+
+void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, MPI_Comm& cs_comm, const MPI_Comm& global_comm);
+
 
 #endif
 
@@ -50,5 +54,5 @@ extern double TIME_PBGL;
 /*----------------------------------------------------------------------------*/
 /*  Author              Date             Actions                              */
 /*----------------------------------------------------------------------------*/
-/*  Shizhe Li           May/01/2024      Create file                          */
+/*  Shizhe Li           May/02/2024      Create file                          */
 /*----------------------------------------------------------------------------*/

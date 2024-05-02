@@ -233,7 +233,7 @@ void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 	SetCS01(bIds);
 	//SetCS02(bIds);
 
-	GroupProcess(cs_group_global_rank, cs_comm);
+	GroupProcess(2, cs_group_global_rank, cs_comm, global_comm);
 
 	MPI_Comm_size(cs_comm, &cs_numproc);
 	MPI_Comm_rank(cs_comm, &cs_rank);

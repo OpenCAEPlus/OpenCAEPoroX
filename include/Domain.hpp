@@ -20,7 +20,7 @@
 #include "Partition.hpp"
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
-#include "OCPPBGL.hpp"
+#include "OCPGroupProcess.hpp"
 
 #include <parmetis.h>
 #include <vector>
