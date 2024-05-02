@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include <unordered_map>
 #include <mpi.h>
 
 #ifdef WITH_PBGL
@@ -42,7 +43,9 @@
 #endif
 
 
-void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, MPI_Comm& cs_comm, const MPI_Comm& global_comm);
+void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, 
+				  const unordered_map<OCP_INT, OCP_DBL>& proc_weight,
+				  MPI_Comm& cs_comm, const MPI_Comm& global_comm);
 
 
 #endif

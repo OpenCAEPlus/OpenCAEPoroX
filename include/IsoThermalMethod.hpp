@@ -20,6 +20,7 @@
 #include "UtilTiming.hpp"
 #include "OCPTimeRecord.hpp"
 #include "OCPNRsuite.hpp"
+#include <unordered_map>
 
 class IsothermalMethod
 {
@@ -263,7 +264,8 @@ protected:
 protected:
     set<OCP_INT>    rankSetInLS;
     set<OCP_INT>    rankSetOutLS;
-    vector<OCP_USI> starBulkSet{};
+    /// bulk id and properties weight
+    unordered_map<OCP_USI, OCP_DBL> starBulkSet;
     /// global initial residual
     OCP_DBL         global_res0;
     /// constant pressure for boundary

@@ -224,16 +224,18 @@ void Domain::InitCSComm()
 }
 
 
-void Domain::SetCSComm(const vector<OCP_USI>& bIds)
+void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 {
 
 	GetWallTime timer;
 	timer.Start();
 
-	SetCS01(bIds);
-	//SetCS02(bIds);
+	unordered_map<OCP_INT, OCP_DBL> proc_weight;
 
-	GroupProcess(2, cs_group_global_rank, cs_comm, global_comm);
+	SetCS01(bk_info, proc_weight);
+	//SetCS02(bk_info, proc_weight);
+
+	GroupProcess(2, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
 	MPI_Comm_size(cs_comm, &cs_numproc);
 	MPI_Comm_rank(cs_comm, &cs_rank);
@@ -247,23 +249,27 @@ void Domain::SetCSComm(const vector<OCP_USI>& bIds)
 }
 
 
-void Domain::SetCS01(const vector<OCP_USI>& bIds)
+void Domain::SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght)
 {
 	cs_group_global_rank.clear();
-	for (const auto& b : bIds) {
-		if (b < numGridInterior) {
+	for (const auto& b : bk_info) {
+		if (b.first < numGridInterior) {
 			for (const auto& s : send_element_loc) {
 				const auto& sv = s.second;
-				if (sv.count(b)) {
+				if (sv.count(b.first)) {
 					cs_group_global_rank.insert(s.first);
+					if (proc_wght.count(s.first))   proc_wght[s.first] += b.second;
+					else                            proc_wght[s.first] = b.second;
 				}
 			}
 		}
 		else {
 			for (const auto& r : recv_element_loc) {
 				const auto& rv = r.second;
-				if (b >= rv[0] && b < rv[1]) {
+				if (b.first >= rv[0] && b.first < rv[1]) {
 					cs_group_global_rank.insert(r.first);
+					if (proc_wght.count(r.first))   proc_wght[r.first] += b.second;
+					else                            proc_wght[r.first] = b.second;
 					break;
 				}
 			}
@@ -272,13 +278,18 @@ void Domain::SetCS01(const vector<OCP_USI>& bIds)
 }
 
 
-void Domain::SetCS02(const vector<OCP_USI>& bIds)
+void Domain::SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght)
 {
-	cs_group_global_rank.clear();
-	if (bIds.size() > 0) {
-		for (const auto& r : recv_element_loc) {
-			cs_group_global_rank.insert(r.first);
-		}
+	SetCS01(bk_info, proc_wght);
+
+	// then add all neighbors inexisted in proc_wght, with weight 0
+
+	for (const auto& r : recv_element_loc) {
+		cs_group_global_rank.insert(r.first);
+
+		if (!proc_wght.count(r.first)) {
+			proc_wght[r.first] = 0;
+		}			
 	}
 }
 

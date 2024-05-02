@@ -72,12 +72,12 @@ public:
 	// reset linear solver communication
 	void InitCSComm();
 	// for linear solver communication
-	void SetCSComm(const vector<OCP_USI>& bIds);
+	void SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info);
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 
 protected:
-	void SetCS01(const vector<OCP_USI>& bIds);
-	void SetCS02(const vector<OCP_USI>& bIds);
+	void SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght);
+	void SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght);
 
 public:
 	MPI_Comm          cs_comm;

@@ -277,7 +277,9 @@ static void GroupProcessSelf(std::set<int>& cs_proc_group, MPI_Comm& cs_comm, co
 
 
 
-void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, MPI_Comm& cs_comm, const MPI_Comm& global_comm)
+void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group,
+                  const unordered_map<OCP_INT, OCP_DBL>& proc_weight,
+                  MPI_Comm& cs_comm, const MPI_Comm& global_comm)
 {
     switch (flag)
     {
