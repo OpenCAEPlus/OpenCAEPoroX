@@ -33,6 +33,7 @@ target_sources(
 		  OCPFlowMethod.cpp
 		  OCPFuncPVT.cpp
 		  OCPFuncSAT.cpp
+		  OCPGroupProcess.cpp
 		  OCPMatrix.cpp
 		  OCPMiscible.cpp
 		  OCPMixture.cpp

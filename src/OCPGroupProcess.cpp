@@ -247,7 +247,9 @@ static void GroupProcessSeq(std::set<int>& cs_proc_group, MPI_Comm& cs_comm, con
         MPI_Scatter(local_components_vec.data(), 1, MPI_INT, &color, 1, MPI_INT, 0, global_comm);
 
 
-        if (cs_comm != MPI_COMM_NULL)   MPI_Comm_free(&cs_comm);
+        if (cs_comm != MPI_COMM_NULL && cs_comm != MPI_COMM_WORLD && cs_comm != MPI_COMM_SELF) {
+            MPI_Comm_free(&cs_comm);
+        }
         MPI_Comm_split(global_comm, color, world_rank, &cs_comm);
 
         int cs_numporc;

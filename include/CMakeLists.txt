@@ -46,6 +46,7 @@ target_sources(
 		 OCPFuncPVT.hpp
 		 OCPFuncSAT.hpp
 		 OCPFuncTable.hpp
+		 OCPGroupProcess.hpp
 		 OCPMatrix.hpp
 		 OCPMiscible.hpp
 		 OCPMixture.hpp
