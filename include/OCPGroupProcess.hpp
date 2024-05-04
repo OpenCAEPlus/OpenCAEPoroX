@@ -43,8 +43,22 @@
 #endif
 
 
+#ifdef WITH_PARMETIS
+#define rabs fabsf     // conflict with fasp
+#include <parmetis.h>
+#undef  rabs
+#endif
+
+
+#ifdef WITH_METIS
+#define rabs fabsf     // conflict with fasp
+#include <metis.h>
+#undef  rabs
+#endif
+
+
 void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, 
-				  const unordered_map<OCP_INT, OCP_DBL>& proc_weight,
+				  const std::unordered_map<OCP_INT, OCP_INT>& proc_weight,
 				  MPI_Comm& cs_comm, const MPI_Comm& global_comm);
 
 

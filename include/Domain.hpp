@@ -76,8 +76,9 @@ public:
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 
 protected:
-	void SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght);
-	void SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_DBL>& proc_wght);
+	void SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
+	void SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
+	void ProcWeight_f2i(const unordered_map<OCP_INT, OCP_DBL>& tmp_proc_wght, unordered_map<OCP_INT, OCP_INT>& proc_wght);
 
 public:
 	MPI_Comm          cs_comm;

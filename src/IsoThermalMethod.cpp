@@ -2466,8 +2466,8 @@ void IsoT_FIMddm::SetStarBulkSet(const Bulk& bulk, const Domain& domain)
         for (USI j = 0; j < bvs.np; j++) {
             const OCP_USI n_np_j = n * bvs.np + j;
             if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim) {
-                if (starBulkSet.count(n))  starBulkSet[n] += (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]));
-                else                       starBulkSet[n] = (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]));              
+                if (starBulkSet.count(n))  starBulkSet[n] += fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]);
+                else                       starBulkSet[n] = fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]);              
                 break;
             }
         }

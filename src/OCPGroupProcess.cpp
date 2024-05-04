@@ -148,14 +148,16 @@ static void GroupProcessPBGL02(std::set<int>& cs_proc_group, MPI_Comm& cs_comm, 
         std::vector<int> local_components_vec(num_vertices(g));
         typedef iterator_property_map<std::vector<int>::iterator, property_map<Graph, vertex_index_t>::type> ComponentMap;
         ComponentMap component(local_components_vec.begin(), get(vertex_index, g));
-
-        int num_components;
+       
         //double start = MPI_Wtime();
-        if (false) {
-            num_components = connected_components_ps(g, component);
-        }
-        else {
-            num_components = connected_components(g, component);
+        int num_components;
+        if (tmp_rank == 0) {
+            if (false) {
+                num_components = connected_components_ps(g, component);
+            }
+            else {
+                num_components = connected_components(g, component);
+            }
         }
         //if (world_rank == 0) {
         //    std::cout << num_components << " components have been found! -- "
@@ -278,7 +280,7 @@ static void GroupProcessSelf(std::set<int>& cs_proc_group, MPI_Comm& cs_comm, co
 
 
 void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group,
-                  const unordered_map<OCP_INT, OCP_DBL>& proc_weight,
+                  const std::unordered_map<OCP_INT, OCP_INT>& proc_weight,
                   MPI_Comm& cs_comm, const MPI_Comm& global_comm)
 {
     switch (flag)
