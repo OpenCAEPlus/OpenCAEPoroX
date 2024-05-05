@@ -586,8 +586,12 @@ static int GroupProcessMetis(const std::unordered_map<OCP_INT, OCP_INT>& proc_we
 			std::vector<idx_t> tmp_parts(work_numproc);
 			idx_t nparts = NPARTS;
 
-			MyMetis(xadj, adjncy, adjwgt, nparts, tmp_parts, METIS_PartGraphRecursive);
-			// MyMetis(xadj, adjncy, adjwgt, nparts, tmp_parts, METIS_PartGraphKway);
+			if (nparts > 8) {
+				MyMetis(xadj, adjncy, adjwgt, nparts, tmp_parts, METIS_PartGraphKway);
+			}
+			else {
+				MyMetis(xadj, adjncy, adjwgt, nparts, tmp_parts, METIS_PartGraphRecursive);
+			}
 
 			parts.assign(tmp_parts.begin(), tmp_parts.end());
 		}
