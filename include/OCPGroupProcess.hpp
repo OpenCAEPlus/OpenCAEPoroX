@@ -16,7 +16,7 @@
 #ifndef __OCPGROUPPROCESS_HEADER__
 #define __OCPGROUPPROCESS_HEADER__
 
-#include "OCPConst.hpp"
+
 #include "OCPDataType.hpp"
 
 #include <vector>
@@ -57,9 +57,22 @@
 #endif
 
 
-void GroupProcess(const OCP_INT& flag, std::set<OCP_INT>& cs_proc_group, 
-				  const std::unordered_map<OCP_INT, OCP_INT>& proc_weight,
-				  MPI_Comm& cs_comm, const MPI_Comm& global_comm);
+enum class GroupMethod
+{
+	PBGL,
+	PBGL_gather,
+	BGL,
+	ParMetis,
+	ParMetis_gather,
+	Metis,
+	Self
+};
+
+
+// each process must know all its neighbors
+void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
+	const std::unordered_map<OCP_INT, OCP_INT>& proc_weight,
+	MPI_Comm& cs_comm, const MPI_Comm& global_comm);
 
 
 #endif

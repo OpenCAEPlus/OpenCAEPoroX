@@ -235,7 +235,7 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	SetCS01(bk_info, proc_weight);
 	//SetCS02(bk_info, proc_weight);
 
-	GroupProcess(1, cs_group_global_rank, proc_weight, cs_comm, global_comm);
+	GroupProcess(GroupMethod::ParMetis_gather, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
 	MPI_Comm_size(cs_comm, &cs_numproc);
 	MPI_Comm_rank(cs_comm, &cs_rank);

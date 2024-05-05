@@ -2492,7 +2492,7 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
         }
     }
 
-    if (OCP_TRUE) {
+    if (OCP_FALSE) {
         cout << "rank" << CURRENT_RANK << "  ";
         for (const auto& s : rankSetInLS) {
             cout << s << "   ";
