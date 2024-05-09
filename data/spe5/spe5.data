@@ -45,7 +45,7 @@ WELLDIMS
 2 2 /
 
 START
-1 JAN 1990 /      £¡uppercase letter
+1 JAN 1990 /      ï¿½ï¿½uppercase letter
 
 GRID    ================================================================
 
@@ -202,7 +202,8 @@ COMPDAT
 
 WCONPROD
 --d
-'PROD*'   'OPEN'  'ORAT'  12000    1000    /
+--name    state    mode    maxRate    minBHP
+'PROD*'   'OPEN'  'ORAT'    12000      1000    /
 /
 
 --Start production only ----------------------------------------------
@@ -230,8 +231,8 @@ I 2* 1 1  1* 0.5 3* /
 
 WCONINJE
 --d
---name type   openflag  mode  surface_rate       BHP
-I     WATER   OPEN    RATE      12000         10000 /
+--name fluidType   state    mode    maxRate     maxBHP
+I        WATER      OPEN    RATE     12000      10000 /
 /
 
 TSTEP

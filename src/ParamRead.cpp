@@ -10,8 +10,66 @@
  */
 
 #include <algorithm>
+#include <cmath>
+#include <map>
+#include <sstream>
 
 #include "ParamRead.hpp"
+
+
+void ParamRead::Print(std::ostream &out)
+{
+    char indent = ' ';
+
+    //
+    out << paramRs.unitType << indent;
+
+    //
+    out << paramRs.blackOil << indent;
+
+    // InputCOMPS
+    out << paramRs.comps << indent
+        << paramRs.numCom << indent
+        << paramRs.comsParam.numCom << indent;
+    for (auto val: paramRs.comsParam.LBCcoef)
+        out << val << indent;
+    for (auto val: paramRs.comsParam.SSMparamSTA)
+        out << val << indent;
+    for (auto val: paramRs.comsParam.NRparamSTA)
+        out << val << indent;
+    for (auto val: paramRs.comsParam.SSMparamSP)
+        out << val << indent;
+    for (auto val: paramRs.comsParam.NRparamSP)
+        out << val << indent;
+    for (auto val: paramRs.comsParam.RRparam)
+        out << val << indent;
+
+    // THERMAL
+    out << paramRs.thermal << indent
+        << paramWell.thermal << indent
+        << indent;
+    //
+    out << paramRs.oil << indent
+        << paramRs.gas <<indent
+        << paramRs.water << indent
+        << paramRs.disGas << indent
+        << paramRs.GRAVDR << indent
+        << paramRs.initType << indent
+        << paramRs.initType << indent
+        << '\n';
+
+    // RTEMP
+    out << paramRs.rsTemp << '\n';
+
+    // InputTABLE
+    
+
+
+    for (auto val: dx)
+        out << val << indent;
+
+}
+
 
 /// Initialize paramRs, paramWell, and paramControl.
 void ParamRead::Init()
@@ -492,194 +550,94 @@ void ParamRead::ReadFileHiSim(const string& filename)
             break;
         }
 
+
+    /***************************************************************************
+     *
+     *                    Read and Set parameters.
+     *
+     ***************************************************************************/
+
     /// MODEL section
     for (int i=MODEL_start; i<MODEL_end; ++i)
     {
         words = input_data[i];
-        if (words[0] == "MODELTYPE")
+        if (words[0] == "MODELTYPE" || words[0] == "SOLNT")
         {
-            string model_type = words[1]; // GASWATER, OILWATER, BLACKOIL, COMP
-//            model = OCPModel::isothermal; /// fff HiSim only have isothermal?
-            continue;
-        }
-        else if (words[0] == "SOLNT")
-        {
-            int omp = std::stoi(words[1]);
-            cout << "并行线程数: " << omp << endl;
         }
         else if (words[0] == "FIELD")
         {
-            cout << "单位制: " << words[0] << endl;
+            paramRs.unitType = words[0];
         }
         else
         {
-            OCP_MESSAGE("Found not supported keywords: " << buff);
+            OCP_MESSAGE("Found not supported keywords in MODEL section: " << buff);
             OCP_ABORT("Wrong keywords!");
         }
     }
 
-    /// GRID section
-    for (int i=GRID_start+1; i<GRID_end; ++i)
-    {
-        words = input_data[i];
-        if (words[0] == "DIMENS")
-        {
-//            if (words.size() > 1)
-//            {
-//                nx = stoi(words[1]);
-//                ny = stoi(words[2]);
-//                nz = stoi(words[3]);
-//            }
-//            else
-//            {
-//                i += 1;
-//                words = input_data[i];
-//                nx = stoi(words[0]);
-//                ny = stoi(words[1]);
-//                nz = stoi(words[2]);
-//            }
-//
-//            numGridM = nx * ny * nz;
-//            if (DUALPORO) numGridF = numGridM; /// fff how to set DUALPORO
-//
-//            numGrid = numGridM + numGridF;
-            continue;
-        }
-        else if (words[0] == "DXV")
-        {
-            if (words.size() > 1)
-            {
-                cout << "DXV: " << words[1] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "DXV: " << words[0] << endl;
-            }
-        }
-        else if (words[0] == "DYV")
-        {
-            if (words.size() > 1)
-            {
-                cout << "DYV: " << words[1] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "DYV: " << words[0] << endl;
-            }
-        }
-        else if (words[0] == "DZV")
-        {
-            if (words.size() > 1)
-                cout << "DZV: " << words[1] << ", " << words[2] << ", " << words[3] << endl;
-            else
-            {
-                i += 1;
-                words = input_data[i];
-                cout << "DZV, " << words[0] << ", " << words[1] << ", " << words[2] << endl;
-            }
-        }
-        else if (words[0] == "TOPS")
-        {
-            if (words.size() > 1)
-            {
-                cout << "TOPS: " << words[1] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "TOPS: " << words[0] << endl;
-            }
-        }
-        else if (words[0] == "PORO")
-        {
-            if (words.size() > 1)
-            {
-                cout << "PORO: " << words[1] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "PORO: " << words[0] << endl;
-            }
-        }
-        else if (words[0] == "PERMX")
-        {
-            if (words.size() > 1)
-            {
-                cout << "PERMX: " << words[1] << " " << words[2] << " " << words[3] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "PERMX: " << words[0] << " " << words[1] << " " << words[2] << endl;
-            }
-        }
-        else if (words[0] == "PERMY")
-        {
-            if (words.size() > 1)
-            {
-                cout << "PERMY: " << words[1] << " " << words[2] << " " << words[3] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "PERMY: " << words[0] << " " << words[1] << " " << words[2] << endl;
-            }
-        }
-        else if (words[0] == "PERMZ")
-        {
-            if (words.size() > 1)
-            {
-                cout << "PERMZ: " << words[1] << " " << words[2] << " " << words[3] << endl;
-            }
-            else
-            {
-                i++;
-                words = input_data[i];
-                cout << "PERMZ: " << words[0] << " " << words[1] << " " << words[2] << endl;
-            }
-        }
-        else
-        {
-            OCP_ABORT("Not support keywords!");
-        }
-    }
 
     /// WELL section
+    std::vector<std::string> markers;
+    std::vector<std::vector<std::string>> wells_data;
     for (int i=WELL_start+1; i<WELL_end; ++i)
     {
         words = input_data[i];
         if (words[0] == "TEMPLATE")
         {
+            markers.push_back("NAME");
             do {
                 i++;
                 words = input_data[i];
+                for (int j=0; j<words.size()-1; ++j)
+                    markers.push_back(words[j]);
+
                 if (words[words.size() - 1] == "/")
                     break;
+
+                markers.push_back(words[words.size() - 1]);
             } while (input_data[i+1][0].find('\'') == 0);
         }
         else if (words[0] == "WELSPECS")
         {
             do {
+                std::vector<std::string> each_well;
                 i++;
-                words = input_data[i];
+                each_well.push_back(input_data[i][1]); // name
                 i++;
-                words = input_data[i];
+                each_well.insert(each_well.end(), input_data[i].begin(), input_data[i].end()); // parameters
+                wells_data.push_back(each_well);
             } while (input_data[i+1][0] == "NAME");
         }
         else
         {
-            OCP_ABORT("Not support keywords!");
+            OCP_MESSAGE("Found not supported keywords in WELL section: " << buff);
+            OCP_ABORT("Wrong keywords!");
         }
     }
+    // Construct wells using markers and wells_data
+    std::map<std::string, std::vector<std::string>> well_data_map;
+    for (int i=0; i<markers.size(); ++i)
+    {
+        for (int j=0; j<wells_data.size(); ++j)
+            well_data_map[markers[i]].push_back(wells_data[j][i]);
+    }
+//    if (gridType == GridType::structured || gridType == GridType::orthogonal) /// fff
+    {
+        for (int i=0; i<wells_data.size(); ++i) // loop over all wells
+        {
+            string name = well_data_map["NAME"][i];
+            int I = stoi(well_data_map["'I'"][i]);
+            int J = stoi(well_data_map["'J'"][i]);
+            paramWell.well.push_back(WellParam(name, I, J));
+
+            double diam = stod(well_data_map["'DIAM'"][i]);
+            int k1 = stoi(well_data_map["'K1'"][i]);
+            int k2 = stoi(well_data_map["'K2'"][i]);
+            for (int k=k1; k<=k2; ++k)
+                paramWell.well[paramWell.well.size()-1].SetWellParams(I, J, k, diam);
+        }
+    }
+
 
     /// PROPS section
     for (int i=PROPS_start+1; i<PROPS_end; ++i)
@@ -689,25 +647,30 @@ void ParamRead::ReadFileHiSim(const string& filename)
         {
             i++;
             words = input_data[i];
-            cout << "STCOND: " << words[0] << ", " << words[1] << endl;
+
+            paramWell.Psurf = stod(words[0]);
+            paramRs.Psurf = paramWell.Psurf;
+
+            paramRs.Tsurf = stod(words[1]);
+            paramRs.Tsurf = paramWell.Tsurf;
         }
         else if (words[0] == "NCOMPS")
         {
-            cout << "NCOMPS: " << words[1] << endl;
+            paramRs.SetCOMPS(stoi(words[1]));
         }
         else if (words[0] == "EOS")
         {
-            cout << "EOS: " << words[1] << endl;
+
         }
         else if (words[0] == "PRCORR")
         {
-            cout << "PRCORR" << endl;
+
         }
         else if (words[0] == "CNAMES")
         {
             i++;
             words = input_data[i];
-            cout << "cnames: " << words[0] << ", " << words[5] << endl;
+            paramRs.SetCNAMES(words);
         }
         else if (words[0] == "EOSCOEF")
         {
@@ -717,49 +680,50 @@ void ParamRead::ReadFileHiSim(const string& filename)
         {
             i++;
             words = input_data[i];
+            paramRs.rsTemp = stod(words[0]);
             cout << "rtemp: " << words[0] << endl;
         }
         else if (words[0] == "TCRIT")
         {
             i++;
             words = input_data[i];
-            cout << "TCRIT: " << words[0] << endl;
+            paramRs.InputCOMPONENTS("TCRIT", words);
         }
         else if (words[0] == "PCRIT")
         {
             i++;
             words = input_data[i];
-            cout << "PCRIT: " << words[0] << endl;
+            paramRs.InputCOMPONENTS("PCRIT", words);
         }
         else if (words[0] == "ZCRIT")
         {
             i++;
             words = input_data[i];
-            cout << "ZCRIT: " << words[0] << endl;
+            paramRs.InputCOMPONENTS("ZCRIT", words);
         }
         else if (words[0] == "MW")
         {
             i++;
             words = input_data[i];
-            cout << "MW: " << words[0] << endl;
+            paramRs.InputCOMPONENTS("MW", words);
         }
         else if (words[0] == "ACF")
         {
             i++;
             words = input_data[i];
-            cout << "ACF: " << words[0] << endl;
+            paramRs.InputCOMPONENTS("ACF", words);
         }
         else if (words[0] == "BIC")
         {
-            vector<vector<string>> bic;  /// TODO not string, is double
-            int NCOMPS = 6;
-            for (int j=0; j<NCOMPS-1; ++j)
+            vector<double> bic;
+            for (int j=0; j<paramRs.numCom-1; ++j)
             {
                 i++;
                 words = input_data[i];
-                cout << "bic: " << words[0] << endl;
-                bic.push_back(words);
+                for (auto& itm: words)
+                    bic.push_back(stod(itm));
             }
+            paramRs.SetBIC(bic);
         }
         else if (words[0] == "STONE2")
         {
@@ -767,53 +731,57 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "SWOF")
         {
-            vector<vector<string>> swof; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("SWOF");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> swof(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
-                {
-                    cout << "swof: " << words[0] << endl;
-                    swof.push_back(words);
-                }
+                    for (int l=0; l<num_cols; ++l)
+                        swof[l].push_back(stod(words[l]));
                 else
                 {
                     i--;
                     break;
                 }
             }
+            obj->data.push_back(swof);
         }
         else if (words[0] == "SGOF")
         {
-            vector<vector<string>> sgof; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("SGOF");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> sgof(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
-                {
-                    cout << "sgof: " << words[0] << endl;
-                    sgof.push_back(words);
-                }
+                    for (int l=0; l<num_cols; ++l)
+                        sgof[l].push_back(stod(words[l]));
                 else
                 {
                     i--;
                     break;
                 }
             }
+            obj->data.push_back(sgof);
         }
         else if (words[0] == "PVDG")
         {
-            vector<vector<string>> pvdg; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("PVDG");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> pvdg(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    cout << "pvdg: " << words[0] << endl;
-                    pvdg.push_back(words);
+                    for (int l=0; l<num_cols; ++l)
+                        pvdg[l].push_back(stod(words[l]));
                 }
                 else
                 {
@@ -821,17 +789,21 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
+            obj->data.push_back(pvdg);
         }
         else if (words[0] == "PVCO")
         {
-            vector<vector<string>> pvco; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("PVCO");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> pvco(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    pvco.push_back(words);
+                    for (int l=0; l<num_cols; ++l)
+                        pvco[l].push_back(stod(words[l]));
                 }
                 else
                 {
@@ -840,17 +812,21 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
+            obj->data.push_back(pvco);
         }
         else if (words[0] == "PVTW")
         {
-            vector<vector<string>> pvtw; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("PVCO");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> pvtw(num_cols); /// TODO not string, double
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    pvtw.push_back(words);
+                    for (int l=0; l<num_cols; ++l)
+                        pvtw[l].push_back(stod(words[l]));
                 }
                 else
                 {
@@ -858,6 +834,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
+            obj->data.push_back(pvtw);
         }
         else if (words[0] == "ROCK")
         {
@@ -879,34 +856,43 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "ROCKTAB")
         {
-            vector<vector<string>> rocktab; /// TODO not string, double
+            int num_cols = 5; // 五列数据: 流体压力或有效应力, 孔隙度乘数, X,Y,Z方向渗透率乘数
+            vector<vector<double>> rocktab(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    cout << "rocktab: " << words[0] << endl;
-                    rocktab.push_back(words);
+                    for (int j=0; j<num_cols; ++j)
+                        rocktab[j].push_back(stod(words[j]));
                 }
                 else
                 {
                     i--;
                     break;
                 }
+            }
+
+//            for (int j=0; j<rocktab[0].size()-1; ++j)
+            for (int j=0; j<1; ++j) /// fff
+            {
+                double pref = rocktab[0][j];
+                double cp1 = (rocktab[1][j+1] - rocktab[1][j]) / (rocktab[0][j+1] - rocktab[0][j]);
+                paramRs.SetROCK(pref, cp1);
             }
         }
         else if (words[0] == "WATERTAB")
         {
-            vector<vector<string>> watertab; /// TODO not string, double
+            vector<vector<double>> params(3); // 三列数据: 压力 p, 水的体积系数 Bw, 水的粘度
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    cout << "watertab: " << words[0] << endl;
-                    watertab.push_back(words);
+                    for (int j=0; j<3; ++j)
+                        params[j].push_back(stod(words[j]));
                 }
                 else
                 {
@@ -914,12 +900,21 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
+
+            vector<vector<double>> pvtw(5); // fff
+            pvtw[0].push_back(14.7);
+            pvtw[1].push_back(1.0);
+            pvtw[2].push_back(-1.0 * (params[1][1] - params[1][0]) / (params[0][1] - params[0][0]));
+            pvtw[3].push_back(params[2][0]);
+            pvtw[4].push_back(0.0);
+
+            paramRs.SetPVTW(pvtw);
         }
         else if (words[0] == "DENSITY")
         {
             i++;
             words = input_data[i];
-            cout << "density: " << words[0] << ", " << words[1] << ", " << words[2] << endl;
+            paramRs.SetDENSITY(words);
         }
         else
         {
@@ -932,16 +927,17 @@ void ParamRead::ReadFileHiSim(const string& filename)
     {
         words = input_data[i];
 
-        if (words[0] == "EQUILPAR")
+        if (words[0] == "EQUILPAR") /// fff EQUIL
         {
-            vector<vector<string>> equilpar; /// TODO not string, double
+            vector<string> equilpar; /// TODO not string, double
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    equilpar.push_back(words);
+                    for (int j=0; j<6; ++j) /// 暂时支持6个参数
+                        equilpar.push_back(words[j]);
                 }
                 else
                 {
@@ -949,7 +945,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
-            cout << "EQUILPAR: " << equilpar[0][0] << endl;
+
+            paramRs.SetEQUIL(equilpar);
         }
         else if (words[0] == "PBVD")
         {
@@ -973,15 +970,21 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "ZMFVD")
         {
-            vector<vector<string>> zmfvd; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("ZMFVD");
+            const int num_cols = obj->colNum;
+
+            vector<vector<OCP_DBL>> zmfvd(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    cout << "zmfvd: " << words[0] << endl;
-                    zmfvd.push_back(words);
+                    for (int j=0; j<num_cols; ++j)
+                    {
+                        zmfvd[j].push_back(std::stod(words[j]));
+                    }
+                    cout << endl;
                 }
                 else
                 {
@@ -989,6 +992,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
+
+            obj->data.push_back(zmfvd);
         }
         else
         {
@@ -1011,10 +1016,13 @@ void ParamRead::ReadFileHiSim(const string& filename)
     {
         words = input_data[i];
 
-        if (words[0] == "USEENDTIME")
-            continue;
-        else if (words[0] == "USESTARTTIME")
-            continue;
+        if (words[0] == "USEENDTIME" || words[0] == "USESTARTTIME")
+        {
+            if (words[0] == "USEENDTIME")
+                recurrent_type = 1;
+            else
+                recurrent_type = 0; // same with OCP
+        }
         else if (words[0] == "RPTSCHED")
             continue;
         else if (words[0] == "RECURRENT")
@@ -1033,22 +1041,71 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "WELLSCHED")
         {
-            cout << "wellsched: " << words[1] << endl;
+            double now = 0.0;
+
+            string well_name = words[1];
+            cout << "wellsched: " << well_name << endl;
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (words[0] == "TIME")
                 {
-                    string opt = words[1];
-                    cout << "TIME: " << opt << endl;
+                    vector<vector<string>> tmp = ExpandWellOptions(words);
+
+                    if (tmp.size() == 1)
+                    {
+                        /// 生成一个WellOptParam对象
+                        now += stod(words[1]); /// time
+
+                        string state = "OPEN";
+                        string mode = words[2];
+                        string max_rate = words[3];
+                        double min_bhp;
+                        if (words[4] == "BHP")
+                            min_bhp = stoi(words[5]);
+                        else
+                            cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
+                        WellOptParam opt(state, mode, max_rate, min_bhp);
+
+                        paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
+                                                                                    well_name,
+                                                                                    "PROD", /// fff怎么知道是注入还是生产?
+                                                                                    opt));
+                    }
+                    else
+                    {
+                        for (auto words: tmp)
+                        {
+                            if (std::find(words.begin(), words.end(), "SHUT") != words.end())
+                                continue;
+
+                            /// 生成一个WellOptParam对象
+                            now += stod(words[1]);
+
+                            string state = "OPEN";
+                            string mode = words[2];
+                            string max_rate = words[3];
+                            double min_bhp;
+                            if (words[4] == "BHP")
+                                min_bhp = stoi(words[5]);
+                            else
+                                cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
+                            WellOptParam opt(state, mode, max_rate, min_bhp);
+
+                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
+                                                                                        well_name,
+                                                                                        "PROD", /// fff怎么知道是注入还是生产?
+                                                                                        opt));
+                        }
+                    }
                 }
-                else if (words[0] == "LIMIT")
+                else if (words[0] == "LIMIT") /// fff
                 {
                     string opt = words[1];
                     cout << "LIMIT: " << opt << endl;
                 }
-                else if (words[0] == "PERF")
+                else if (words[0] == "PERF") /// fff
                 {
                     string opt = words[1];
                     cout << "PERF: " << opt << endl;
@@ -1057,6 +1114,15 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 {
                     string opt = words[1];
                     cout << "STREAM: " << opt << endl;
+                    vector<double> ratios;
+                    for (int l=0; l<paramRs.numCom; ++l)
+                    {
+                        if (l < words.size()-1)
+                            ratios.push_back(stod(words[l+1]));
+                        else
+                            ratios.push_back(0.0);
+                    }
+                    paramWell.SetSTREAM(ratios);
                 }
                 else
                 {
@@ -1067,9 +1133,51 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else
         {
-            OCP_MESSAGE("Found not supported keywords: " << words[0]);
+            OCP_MESSAGE("Found not supported keywords in SCHEDULE section: " << words[0]);
             OCP_ABORT("Wrong keywords!");
         }
+    }
+
+    /// Establish Time and Well Operations
+    vector<double> all_tsteps;
+    for (int i=0; i<paramWell.well_oper_list.size(); ++i)
+    {
+        ParamWell::WellOperation opt = paramWell.well_oper_list[i];
+        all_tsteps.push_back(opt.tstep);
+    }
+    /// Sort and unique
+    std::sort(all_tsteps.begin(), all_tsteps.end());
+    all_tsteps.erase(std::unique(all_tsteps.begin(), all_tsteps.end()), all_tsteps.end());
+    /// construct criticalTime
+    if (std::abs(all_tsteps[0] - 0.0) > 1.0E-10)
+        paramWell.criticalTime.push_back(all_tsteps[0]);
+    for (int i=1; i<all_tsteps.size(); ++i)
+    {
+        paramWell.criticalTime.push_back(all_tsteps[i]);
+    }
+    /// construct
+    for (int i=0; i<paramWell.well_oper_list.size(); ++i)
+    {
+        ParamWell::WellOperation opt = paramWell.well_oper_list[i];
+
+        double t = opt.tstep;
+        vector<double>::iterator iter = std::find(paramWell.criticalTime.begin(),
+                                                  paramWell.criticalTime.end(), t);
+        if (iter == paramWell.criticalTime.end())
+            OCP_ABORT("Wrong time step!");
+        int idx_criticalTime = std::distance(paramWell.criticalTime.begin(), iter);
+
+        int idx_well = -1;
+        string name = opt.name;
+        for (int j=0; j<paramWell.well.size(); ++j)
+        {
+            if (paramWell.well[j].name == name)
+                idx_well = j;
+        }
+        if (idx_well == -1)
+            OCP_ABORT("Wrong well name!");
+
+        paramWell.well[idx_well].optParam.push_back(WellOptPair(idx_criticalTime, opt.opt));
     }
 
     cout << "Good 2" << endl;

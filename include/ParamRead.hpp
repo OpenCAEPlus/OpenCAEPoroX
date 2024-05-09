@@ -39,8 +39,10 @@ public:
     // Main workloads for ParamRead: read reservoir params, read well params,
     // read control params, and read output param. These workloads are assigned
     // to the following classes, respectively.
+    int recurrent_type;
     ParamReservoir paramRs;      ///< Read the reservoir params.
     ParamWell      paramWell;    ///< Read the well params.
+
     ParamControl   paramControl; ///< Read the control params.
     ParamOutput    paramOutput;  ///< Read the output params.
 
@@ -58,6 +60,7 @@ public:
     /// Read the input file.
     void ReadFile(const string& file);
     void ReadFileHiSim(const string& file);
+    void Print(std::ostream &out = std::cout);
 
     /// Handle the INCLUDE keyword, which contains other input files.
     void ReadINCLUDE(ifstream& ifs);

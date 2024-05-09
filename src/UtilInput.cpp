@@ -74,6 +74,33 @@ void DealDefault(vector<string>& result)
     swap(result, tmp);
 }
 
+vector<vector<string>> ExpandWellOptions(const vector<string>& result)
+{
+    vector<vector<string>> tmp;
+    vector<string> new_ = result;
+
+    string tstep_str = result[1];
+    size_t pos = tstep_str.find('*');
+    int num;
+    if (pos == string::npos)
+    {
+        tmp.push_back(new_);
+        return tmp;
+    }
+    else
+    {
+        num = stoi(tstep_str.substr(0, pos));
+        string tstep = tstep_str.substr(pos+1, tstep_str.size() - (pos+1));
+        new_[1] = tstep;
+    }
+
+    for (int i=0; i<num; ++i)
+        tmp.push_back(new_);
+
+    return tmp;
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

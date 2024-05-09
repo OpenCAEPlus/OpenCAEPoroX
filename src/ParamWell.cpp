@@ -11,6 +11,8 @@
 
 #include "ParamWell.hpp"
 
+std::vector<std::string> WellParam::Templates;
+
 WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
 {
     type = intype;
@@ -46,6 +48,57 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
     }
 }
 
+WellOptParam::WellOptParam(string fluid_type, string state_, string mode_, string max_rate, OCP_DBL max_bhp)
+{
+    type = "INJ";
+    fluidType = fluid_type;
+    state = state_;
+    mode = mode_;
+
+    if (max_rate == "DEFAULT")
+    {
+        if (mode == "BHP")
+            maxRate = 1.0E+10;
+        else
+            cout << "### ERROR: Inj Rate is missing in WCONINJE!" << endl;
+    }
+    else
+        maxRate = stod(max_rate);
+
+    maxBHP = max_bhp;
+}
+
+WellOptParam::WellOptParam(string state_, string mode_, string max_rate, OCP_DBL min_bhp)
+{
+    type = "PROD";
+    state = state_;
+    mode = mode_;
+
+    if (max_rate == "DEFAULT")
+    {
+        if (mode == "BHP")
+            maxRate = 1.0E+10;
+        else
+            cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
+    }
+    else
+        maxRate = stod(max_rate);
+
+    minBHP = min_bhp;
+}
+
+WellOptParam::WellOptParam(const WellOptParam &opt)
+{
+    type = opt.type;
+    fluidType = opt.fluidType;
+    state = opt.state;
+    mode = opt.mode;
+    maxRate = opt.maxRate;
+    maxBHP = opt.maxBHP;
+    minBHP = opt.minBHP;
+    injTemp = opt.injTemp;
+}
+
 
 WellParam::WellParam(vector<string>& info)
 {
@@ -66,6 +119,26 @@ WellParam::WellParam(vector<string>& info, const string& unstructured)
     X = stod(info[2]);
     Y = stod(info[3]);
     Z = stod(info[4]);
+}
+
+WellParam::WellParam(string name_, USI i, USI j, OCP_DBL depth_)
+{
+    gridType = GridType::structured;
+    name = name_;
+    group = "DEFAULT";
+    I = i;
+    J = j;
+    depth = depth_;
+}
+
+WellParam::WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z)
+{
+    gridType = GridType::unstructured;
+    name = name_;
+    group = "DEFAULT";
+    X = x;
+    Y = y;
+    Z = z;
 }
 
 
@@ -126,6 +199,19 @@ void WellParam::InputCOMPDATS(vector<string>& vbuf)
     }
 }
 
+void WellParam::SetWellParams(USI i, USI j, USI k, OCP_DBL diam)
+{
+    I_perf.push_back(i);
+    J_perf.push_back(j);
+    K_perf.push_back(k);
+    diameter.push_back(diam);
+
+    /// default for now
+    WI.push_back(-1.0);
+    kh.push_back(-1.0);
+    skinFactor.push_back(0.0);
+    direction.push_back("z");
+}
 
 void WellParam::InputCOMPDATUS(vector<string>& vbuf)
 {
@@ -161,6 +247,21 @@ Solvent::Solvent(const vector<string>& vbuf)
         comRatio.push_back(stod(vbuf[i + 1]));
     }
 }
+
+Solvent::Solvent(const string &name_, const vector<double> &ratios)
+{
+    name = name_;
+    for (int i=0; i<ratios.size(); ++i)
+        comRatio.push_back(ratios[i]);
+}
+
+
+int ParamWell::ConstructNewWell(string name_, USI i, USI j)
+{
+    well.push_back(WellParam(name_, i, j));
+    return well.size() - 1;
+}
+
 
 
 void ParamWell::Init() 
@@ -463,6 +564,18 @@ void ParamWell::InputWELLSTRE(ifstream& ifs)
     }
     // cout << "WELLSTRE" << endl;
 }
+
+void ParamWell::SetSTREAM(const vector<double>& ratios)
+{
+    Solvent solv("solvent", ratios); /// 这个名字 solvent 是随便取的 fff
+    solSet.push_back(solv);
+}
+
+void ParamWell::AddWellOpts(int idx, const WellOptPair &opt)
+{
+    well[idx].optParam.push_back(opt);
+}
+
 
 void ParamWell::InputPSURF(ifstream& ifs)
 {

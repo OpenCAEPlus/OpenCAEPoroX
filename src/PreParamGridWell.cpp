@@ -9,8 +9,174 @@
  *-----------------------------------------------------------------------------------
  */
 #include <algorithm>
+#include <map>
 
 #include "PreParamGridWell.hpp"
+
+
+/// Print out all parameters read from input file
+void PreParamGridWell::Print(std::ostream &out)
+{
+    char indent = ' ';
+
+    // MODEL
+    if (model == OCPModel::none)
+        out << "none";
+    else if (model == OCPModel::isothermal)
+        out << "isothermal";
+    else if (model == OCPModel::thermal)
+        out << "thermal";
+    else
+        OCP_ABORT("Wrong OCPModel!");
+    out << '\n';
+
+    // DUALPORO
+    out << DUALPORO << '\n';
+
+    // DPGRID
+    out << DPGRID << '\n';
+
+    // DIMENS
+    out << nx << indent
+        << ny << indent
+        << nz << indent
+        << numGridM << indent
+        << numGridF << indent
+        << numGrid
+        << '\n';
+
+    // EQUALS
+    // FindPtr(double)
+    for (auto val: dx)
+        out << val << indent;
+    for (auto val: dy)
+        out << val << indent;
+    for (auto val: dz)
+        out << val << indent;
+    for (auto val: tops)
+        out << val << indent;
+    out << '\n';
+    //
+    if (gridType == GridType::structured)
+        out << "structured" << indent;
+    else if (gridType == GridType::orthogonal)
+        out << "orthogonal" << indent;
+    else if (gridType == GridType::corner)
+        out << "corner" << indent;
+    else if (gridType == GridType::unstructured)
+        out << "unstructured" << indent;
+    else if (gridType == GridType::gmsh)
+        out << "gmsh" << indent;
+    out << '\n';
+    //
+    for (auto val: coord)
+        out << val << indent;
+    out << '\n';
+    for (auto val: zcorn)
+        out << val << indent;
+    out << '\n';
+    //
+    for (auto val: poro)
+        out << val << indent;
+    for (auto val: ntg)
+        out << val << indent;
+    for (auto val: kx)
+        out << val << indent;
+    for (auto val: ky)
+        out << val << indent;
+    for (auto val: kz)
+        out << val << indent;
+    for (auto val: sigma)
+        out << val << indent;
+    for (auto val: multZ)
+        out << val << indent;
+    for (auto val: dzMtrx)
+        out << val << indent;
+    for (auto val: initR.swat)
+        out << val << indent;
+    for (auto val: initR.swatInit)
+        out << val << indent;
+    out << initR.scalePcow << indent;
+    for (auto val: initR.P)
+        out << val << indent;
+    for (auto val: initR.T)
+        out << val << indent;
+    //
+    for (auto vec: initR.Pj)
+    {
+        for (auto val: vec)
+            out << val << indent;
+        out << '\n';
+    }
+    for (auto vec: initR.Ni)
+    {
+        for (auto val: vec)
+            out << val << indent;
+        out << '\n';
+    }
+    // FindPtr(int)
+    for (auto val: actGC.ACTNUM)
+        out << val << indent;
+    for (auto val: SATNUM)
+        out << val << indent;
+    for (auto val: PVTNUM)
+        out << val << indent;
+    for (auto val: ROCKNUM)
+        out << val << indent;
+
+    // initR.type
+    out << initR.type << '\n';
+
+    // InputWELSPECS, InputCOMPDAT
+    for (auto wl: well)
+    {
+        if (wl.gridType == GridType::structured)
+        {
+            out << wl.name << ' ' << wl.group << ' ' << wl.I << ' ' << wl.J << ' ' << wl.depth << '\n';
+            for (auto val: wl.I_perf)
+                out << val << indent;
+            for (auto val: wl.J_perf)
+                out << val << indent;
+            for (auto val: wl.K_perf)
+                out << val << indent;
+            for (auto val: wl.WI)
+                out << val << indent;
+            for (auto val: wl.diameter)
+                out << val << indent;
+            for (auto val: wl.kh)
+                out << val << indent;
+            for (auto val: wl.skinFactor)
+                out << val << indent;
+            for (auto val: wl.direction)
+                out << val << indent;
+        }
+        else
+        {
+            assert(wl.gridType == GridType::unstructured);
+            out << wl.name << ' ' << wl.group << ' ' << wl.X << ' ' << wl.Y << ' ' << wl.Z << '\n';
+            for (auto val: wl.X_perf)
+                out << val << indent;
+            for (auto val: wl.Y_perf)
+                out << val << indent;
+            for (auto val: wl.Z_perf)
+                out << val << indent;
+            for (auto val: wl.WI)
+                out << val << indent;
+            for (auto val: wl.diameter)
+                out << val << indent;
+            for (auto val: wl.kh)
+                out << val << indent;
+            for (auto val: wl.skinFactor)
+                out << val << indent;
+            for (auto val: wl.direction)
+                out << val << indent;
+        }
+    }
+
+    // InputVTKSCHED
+    out << ifUseVtk
+        << endl;
+}
 
 
 void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, int type)
@@ -24,6 +190,13 @@ void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, 
         InputHISIM(myFile);
     else
         OCP_ABORT("Wrong input type!");
+
+    {
+        ofstream inputfile("./haha.txt");
+        Print(inputfile << "所有的输入参数\n");
+//        Print(std::cout << "所有的输入参数\n");
+    }
+
     CheckInput();
     PostProcessInput();
 
@@ -168,7 +341,7 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
 
     /// Read input data
     std::vector<std::string> words;
-    string buff;
+    std::string buff;
     std::vector<std::vector<std::string>> input_data;
     while (GetLineSkipComments(input, buff))
     {
@@ -180,14 +353,9 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
     input.close();
 
     /// Compute section starts
-    int GRID_start = -1;
-    int WELL_start = -1;
-    int PROPS_start = -1;
-    int SOLUTION_start = -1;
-    int SCHEDULE_start = -1;
-    int TUNE_start = -1;
     assert(input_data[0][0] == "MODELTYPE");
     int MODEL_start = 0;
+    int GRID_start=-1, WELL_start=-1, PROPS_start=-1, SOLUTION_start=-1, SCHEDULE_start=-1, TUNE_start=-1;
     for (int i=1; i<input_data.size(); ++i)
     {
         if (input_data[i][0] == "GRID")
@@ -279,23 +447,18 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         if (words[0] == "MODELTYPE")
         {
             string model_type = words[1]; // GASWATER, OILWATER, BLACKOIL, COMP
-            model = OCPModel::isothermal; /// fff HiSim only have isothermal?
-            DUALPORO = OCP_TRUE; /// fff
-            DPGRID = OCP_TRUE; /// fff
-//            initR.type = ;
+            model = OCPModel::isothermal; /// HiSim only have isothermal?
+            DUALPORO = OCP_FALSE;
+            DPGRID = OCP_FALSE;
+            initR.type = "EQUIL";
         }
-        else if (words[0] == "SOLNT")
+        else if (words[0] == "SOLNT" || words[0] == "FIELD")
         {
-            int omp = std::stoi(words[1]);
-            cout << "并行线程数: " << omp << endl;
-        }
-        else if (words[0] == "FIELD")
-        {
-            cout << "单位制: " << words[0] << endl;
+
         }
         else
         {
-            OCP_MESSAGE("Found not supported keywords: " << buff);
+            OCP_MESSAGE("Found not supported keywords in MODEL section: " << buff);
             OCP_ABORT("Wrong keywords!");
         }
     }
@@ -308,17 +471,25 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             if (words.size() > 1)
             {
-                nx = stoi(words[1]);
-                ny = stoi(words[2]);
-                nz = stoi(words[3]);
+                if (words.size() == 1+3 && isInteger(words[1]) && isInteger(words[2]) && isInteger(words[3]))
+                {
+                    gridType = GridType::orthogonal; /// fff orthogonal or structured?
+                    nx = stoi(words[1]);
+                    ny = stoi(words[2]);
+                    nz = stoi(words[3]);
+                }
             }
             else
             {
-                i += 1;
+                i++;
                 words = input_data[i];
-                nx = stoi(words[0]);
-                ny = stoi(words[1]);
-                nz = stoi(words[2]);
+                if (words.size() == 3 && isInteger(words[0]) && isInteger(words[1]) && isInteger(words[2]))
+                {
+                    gridType = GridType::orthogonal; /// fff orthogonal or structured?
+                    nx = stoi(words[0]);
+                    ny = stoi(words[1]);
+                    nz = stoi(words[2]);
+                }
             }
 
             numGridM = nx * ny * nz;
@@ -332,7 +503,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "DXV: " << words[1] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -340,10 +510,10 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "DXV: " << words[0] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+
             for (int j=0; j<nz; ++j)
             {
                 for (int k=0; k<ny; ++k)
@@ -360,7 +530,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "DYV: " << words[1] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -368,16 +537,16 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "DYV: " << words[0] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+
             for (int j=0; j<nz; ++j)
             {
                 for (int k=0; k<ny; ++k)
                 {
                     for (int l=0; l<nx; ++l)
-                        dx[j*nx*ny + k*nx + l] = vals[k];
+                        dy[j*nx*ny + k*nx + l] = vals[k];
                 }
             }
         }
@@ -387,7 +556,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "DZV: " << words[1] << ", " << words[2] << ", " << words[3] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -395,16 +563,16 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i += 1;
                 words = input_data[i];
-                cout << "DZV, " << words[0] << ", " << words[1] << ", " << words[2] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+
             for (int j=0; j<nz; ++j)
             {
                 for (int k=0; k<ny; ++k)
                 {
                     for (int l=0; l<nx; ++l)
-                        dx[j*nx*ny + k*nx + l] = vals[j];
+                        dz[j*nx*ny + k*nx + l] = vals[j];
                 }
             }
         }
@@ -414,7 +582,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "TOPS: " << words[1] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -422,10 +589,12 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "TOPS: " << words[0] << endl;
-                for (int j=0; j<words.size(); ++j) /// Hisim的SPE5的TOPs个数不对？
+                for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+
+            for (int k=0; k<nx*ny; ++k)
+                tops[k] = vals[k];
         }
         else if (words[0] == "PORO")
         {
@@ -433,7 +602,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "PORO: " << words[1] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -441,7 +609,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "PORO: " << words[0] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -454,7 +621,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "PERMX: " << words[1] << " " << words[2] << " " << words[3] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -462,7 +628,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "PERMX: " << words[0] << " " << words[1] << " " << words[2] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -475,7 +640,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "PERMY: " << words[1] << " " << words[2] << " " << words[3] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -483,7 +647,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "PERMY: " << words[0] << " " << words[1] << " " << words[2] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -496,7 +659,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             vector<double> vals;
             if (words.size() > 1)
             {
-                cout << "PERMZ: " << words[1] << " " << words[2] << " " << words[3] << endl;
                 for (int j=1; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -504,7 +666,6 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             {
                 i++;
                 words = input_data[i];
-                cout << "PERMZ: " << words[0] << " " << words[1] << " " << words[2] << endl;
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
@@ -513,428 +674,75 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         }
         else
         {
-            OCP_ABORT("Not support keywords!");
+            OCP_MESSAGE("Found not supported keywords in GRID section: " << buff);
+            OCP_ABORT("Wrong keywords!");
         }
     }
 
     /// WELL section
+    std::vector<std::string> markers;
+    std::vector<std::vector<std::string>> wells_data;
     for (int i=WELL_start+1; i<WELL_end; ++i)
     {
         words = input_data[i];
         if (words[0] == "TEMPLATE")
         {
+            markers.push_back("NAME");
             do {
                 i++;
                 words = input_data[i];
+                for (int j=0; j<words.size()-1; ++j)
+                    markers.push_back(words[j]);
+
                 if (words[words.size() - 1] == "/")
                     break;
+
+                markers.push_back(words[words.size() - 1]);
             } while (input_data[i+1][0].find('\'') == 0);
         }
         else if (words[0] == "WELSPECS")
         {
             do {
+                std::vector<std::string> each_well;
                 i++;
-                words = input_data[i];
+                each_well.push_back(input_data[i][1]); // name
                 i++;
-                words = input_data[i];
+                each_well.insert(each_well.end(), input_data[i].begin(), input_data[i].end()); // parameters
+                wells_data.push_back(each_well);
             } while (input_data[i+1][0] == "NAME");
         }
         else
         {
-            OCP_ABORT("Not support keywords!");
-        }
-    }
-
-    /// PROPS section
-    for (int i=PROPS_start+1; i<PROPS_end; ++i)
-    {
-        words = input_data[i];
-        if (words[0] == "STCOND")
-        {
-            i++;
-            words = input_data[i];
-            cout << "STCOND: " << words[0] << ", " << words[1] << endl;
-        }
-        else if (words[0] == "NCOMPS")
-        {
-            cout << "NCOMPS: " << words[1] << endl;
-        }
-        else if (words[0] == "EOS")
-        {
-            cout << "EOS: " << words[1] << endl;
-        }
-        else if (words[0] == "PRCORR")
-        {
-            cout << "PRCORR" << endl;
-        }
-        else if (words[0] == "CNAMES")
-        {
-            i++;
-            words = input_data[i];
-            cout << "cnames: " << words[0] << ", " << words[5] << endl;
-        }
-        else if (words[0] == "EOSCOEF")
-        {
-            continue;
-        }
-        else if (words[0] == "RTEMP")
-        {
-            i++;
-            words = input_data[i];
-            cout << "rtemp: " << words[0] << endl;
-        }
-        else if (words[0] == "TCRIT")
-        {
-            i++;
-            words = input_data[i];
-            cout << "TCRIT: " << words[0] << endl;
-        }
-        else if (words[0] == "PCRIT")
-        {
-            i++;
-            words = input_data[i];
-            cout << "PCRIT: " << words[0] << endl;
-        }
-        else if (words[0] == "ZCRIT")
-        {
-            i++;
-            words = input_data[i];
-            cout << "ZCRIT: " << words[0] << endl;
-        }
-        else if (words[0] == "MW")
-        {
-            i++;
-            words = input_data[i];
-            cout << "MW: " << words[0] << endl;
-        }
-        else if (words[0] == "ACF")
-        {
-            i++;
-            words = input_data[i];
-            cout << "ACF: " << words[0] << endl;
-        }
-        else if (words[0] == "BIC")
-        {
-            vector<vector<string>> bic;  /// TODO not string, is double
-            int NCOMPS = 6;
-            for (int j=0; j<NCOMPS-1; ++j)
-            {
-                i++;
-                words = input_data[i];
-                cout << "bic: " << words[0] << endl;
-                bic.push_back(words);
-            }
-        }
-        else if (words[0] == "STONE2")
-        {
-            continue;
-        }
-        else if (words[0] == "SWOF")
-        {
-            vector<vector<string>> swof; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "swof: " << words[0] << endl;
-                    swof.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "SGOF")
-        {
-            vector<vector<string>> sgof; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "sgof: " << words[0] << endl;
-                    sgof.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "PVDG")
-        {
-            vector<vector<string>> pvdg; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "pvdg: " << words[0] << endl;
-                    pvdg.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "PVCO")
-        {
-            vector<vector<string>> pvco; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    pvco.push_back(words);
-                }
-                else
-                {
-                    if (words[0] != "/")
-                        i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "PVTW")
-        {
-            vector<vector<string>> pvtw; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    pvtw.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "ROCK")
-        {
-            vector<vector<string>> rock; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    rock.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "ROCKTAB")
-        {
-            vector<vector<string>> rocktab; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "rocktab: " << words[0] << endl;
-                    rocktab.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "WATERTAB")
-        {
-            vector<vector<string>> watertab; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "watertab: " << words[0] << endl;
-                    watertab.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else if (words[0] == "DENSITY")
-        {
-            i++;
-            words = input_data[i];
-            cout << "density: " << words[0] << ", " << words[1] << ", " << words[2] << endl;
-        }
-        else
-        {
-            OCP_ABORT("Not support keywords!");
-        }
-    }
-
-    /// SOLUTION section
-    for (int i=SOLUTION_start+1; i<SOLUTION_end; ++i)
-    {
-        words = input_data[i];
-
-        if (words[0] == "EQUILPAR")
-        {
-            vector<vector<string>> equilpar; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    equilpar.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-            cout << "EQUILPAR: " << equilpar[0][0] << endl;
-        }
-        else if (words[0] == "PBVD")
-        {
-            vector<vector<string>> pbvd; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    pbvd.push_back(words);
-                }
-                else
-                {
-                    if (words[0] != "/")
-                        i--;
-                    break;
-                }
-            }
-            cout << "EQUILPAR: " << pbvd[1][1] << endl;
-        }
-        else if (words[0] == "ZMFVD")
-        {
-            vector<vector<string>> zmfvd; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    cout << "zmfvd: " << words[0] << endl;
-                    zmfvd.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            OCP_ABORT("Not support keywords!");
-        }
-    }
-
-    /// TUNE section
-    for (int i=TUNE_start+1; i<TUNE_end; ++i)
-    {
-        do {
-            words = input_data[i];
-            cout << words[0] << endl;
-            i++;
-        } while (i < TUNE_end);
-    }
-
-    /// SCHEDULE section
-    for (int i=SCHEDULE_start+1; i<SCHEDULE_end; ++i)
-    {
-        words = input_data[i];
-
-        if (words[0] == "USEENDTIME")
-            continue;
-        else if (words[0] == "USESTARTTIME")
-            continue;
-        else if (words[0] == "RPTSCHED")
-            continue;
-        else if (words[0] == "RECURRENT")
-            continue;
-        else if (words[0] == "BASIC")
-            continue;
-        else if (words[0] == "TIME")
-        {
-            cout << "time step: " << words[1] << endl;
-            while (input_data[i+1][0] == "WELL")
-            {
-                words = input_data[i+1];
-                cout << "well name: " << words[1] << endl;
-                i++;
-            }
-        }
-        else if (words[0] == "WELLSCHED")
-        {
-            cout << "wellsched: " << words[1] << endl;
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (words[0] == "TIME")
-                {
-                    string opt = words[1];
-                    cout << "TIME: " << opt << endl;
-                }
-                else if (words[0] == "LIMIT")
-                {
-                    string opt = words[1];
-                    cout << "LIMIT: " << opt << endl;
-                }
-                else if (words[0] == "PERF")
-                {
-                    string opt = words[1];
-                    cout << "PERF: " << opt << endl;
-                }
-                else if (words[0] == "STREAM")
-                {
-                    string opt = words[1];
-                    cout << "STREAM: " << opt << endl;
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            OCP_MESSAGE("Found not supported keywords: " << words[0]);
+            OCP_MESSAGE("Found not supported keywords in WELL section: " << buff);
             OCP_ABORT("Wrong keywords!");
         }
     }
+    // Construct wells using markers and wells_data
+    std::map<std::string, std::vector<std::string>> well_data_map;
+    for (int i=0; i<markers.size(); ++i)
+    {
+        for (int j=0; j<wells_data.size(); ++j)
+            well_data_map[markers[i]].push_back(wells_data[j][i]);
+    }
+    if (gridType == GridType::structured || gridType == GridType::orthogonal)
+    {
+        for (int i=0; i<wells_data.size(); ++i) // loop over all wells
+        {
+            string name = well_data_map["NAME"][i];
+            int I = stoi(well_data_map["'I'"][i]);
+            int J = stoi(well_data_map["'J'"][i]);
+            well.push_back(WellParam(name, I, J));
+
+            double diam = stod(well_data_map["'DIAM'"][i]);
+            int k1 = stoi(well_data_map["'K1'"][i]);
+            int k2 = stoi(well_data_map["'K2'"][i]);
+            for (int k=k1; k<=k2; ++k)
+                well[well.size()-1].SetWellParams(I, J, k, diam);
+        }
+    }
+
+    /// PROPS section: no need
+    /// SOLUTION section: no need
 
     cout << "Good 1" << endl;
 }

@@ -132,6 +132,11 @@ void ParamReservoir::Init()
     density.data[2] = 0.062428;  // The density of gas at surface conditions: lb/ft3
 
     rsTemp = 60.0;
+
+    //
+    NTROOC = 1; /// fff 参考 ParamReservoir::InputTABDIMS()
+    NTPVT = 1;
+    NTSFUN = 1;
 }
 
 /// Initialize tables.
@@ -183,6 +188,13 @@ void ParamReservoir::InputCOMPS(ifstream& ifs)
         cout << numCom << endl;
     }
 }
+void ParamReservoir::SetCOMPS(int num_comps)
+{
+    comps = OCP_TRUE;
+    numCom = num_comps;
+    comsParam.numCom = numCom;
+    comsParam.Init();
+}
 
 
 /// TODO: Add Doxygen
@@ -225,6 +237,20 @@ void ParamReservoir::InputTABLE(ifstream& ifs, const string& tabName)
 
     if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         obj->DisplayTable();
+}
+
+void ParamReservoir::SetPVTW(const vector<vector<OCP_DBL>> &tab)
+{
+    PVTW_T.data.push_back(tab);
+}
+
+void ParamReservoir::SetSGOF(const vector<vector<OCP_DBL>>& tab)
+{
+    SGOF_T.data.push_back(tab);
+}
+void ParamReservoir::SetSWOF(const vector<vector<OCP_DBL>>& tab)
+{
+    SWOF_T.data.push_back(tab);
 }
 
 
@@ -288,6 +314,15 @@ void ParamReservoir::InputROCK(ifstream& ifs)
                 << rock.cp2 << endl;
     }
 }
+
+void ParamReservoir::SetROCK(OCP_DBL pref, OCP_DBL cp1)
+{
+    RockParam rock;
+    rock.Pref = pref;
+    rock.cp1 = cp1;
+    rockSet.push_back(rock);
+}
+
 
 /// Read data from the ROCK keyword.
 void ParamReservoir::InputROCKT(ifstream& ifs)
@@ -511,6 +546,18 @@ void ParamReservoir::InputDENSITY(ifstream& ifs)
     }
 }
 
+void ParamReservoir::SetDENSITY(const std::vector<std::string> &params)
+{
+    for (USI i = 0; i < 3; i++)
+    {
+        if (params[i] != "NA")
+        {
+            density.activity = OCP_TRUE;
+            density.data[i]  = stod(params[i]);
+        }
+    }
+}
+
 /// Read data from the THCONO, THCONG, THCONW, THCONR
 void ParamReservoir::InputTHCON(ifstream& ifs, const string& keyword)
 {
@@ -560,6 +607,19 @@ void ParamReservoir::InputEQUIL(ifstream& ifs)
         for (USI i = 0; i < 6; i++) cout << tmpEQUIL.data[i] << "  ";
         cout << endl;
     }
+}
+
+void ParamReservoir::SetEQUIL(const std::vector<std::string> &params)
+{
+    EQUILParam tmpEQUIL;
+    tmpEQUIL.data.resize(6, 0);
+    for (USI i = 0; i < 6; i++)
+    {
+        if (params[i] != "NA")
+            tmpEQUIL.data[i] = stod(params[i]);
+    }
+
+    EQUIL.push_back(tmpEQUIL);
 }
 
 /// Read data from the TABDIMS keyword.
@@ -710,6 +770,18 @@ void ComponentParam::Init()
     LBCcoef[2] = 0.058533;
     LBCcoef[3] = -0.040758;
     LBCcoef[4] = 0.0093324;
+
+    /// fff
+    // Successive substitution for stability analysis: maxit, tolerance, eYt(relaxation factor)
+    SSMparamSTA = {"100", "1.0E-12", "1.0E-8"};
+    // 相稳定性分析中 Newton 法的求解参数: 最⼤迭代步数, 残差控制
+    NRparamSTA = {"55", "1.0E-12"};
+    // 相分裂计算中 SSM 的求解参数: 最⼤迭代步数, 残差控制
+    SSMparamSP = {"100", "1.0E-6"};
+    // 相分裂计算中 Newton 法的求解参数: 最⼤迭代步数, 残差控制
+    NRparamSP = {"55", "1.0E-12"};
+    // 相分裂计算中⽤ Newton 法求解 Rachford-Rice ⽅程的求解参数: 最⼤迭代步数, 残差控制
+    RRparam = {"30", "1.0E-12"};
 }
 
 Type_A_r<vector<OCP_DBL>>* ComponentParam::FindPtr01(const string& varName)
@@ -949,6 +1021,27 @@ void ComponentParam::InputCOMPONENTS(ifstream& ifs, const string& keyword)
     }
 }
 
+void ComponentParam::InputCOMPONENTS(const string& keyword, const std::vector<std::string>& params)
+{
+    OCP_ASSERT((numCom > 0) && (NTPVT > 0), "number of components has not been input!");
+
+    Type_A_r<vector<OCP_DBL>>* objPtr = nullptr;
+    objPtr                            = FindPtr01(keyword);
+    if (objPtr == nullptr) {
+        OCP_ABORT("Unknown keyword!");
+    }
+    objPtr->activity = OCP_TRUE;
+
+    vector<OCP_DBL> tmp;
+    for (auto& v : params) {
+        if (v != "/") {
+            tmp.push_back(stod(v));
+        }
+    }
+    objPtr->data.push_back(tmp);
+}
+
+
 void ComponentParam::InputCNAMES(ifstream& ifs)
 {
     OCP_ASSERT(numCom > 0, "numCom has not been set!");
@@ -972,6 +1065,12 @@ void ComponentParam::InputCNAMES(ifstream& ifs)
         }
         cout << endl << endl;
     }
+}
+
+void ComponentParam::SetCNAMES(const std::vector<std::string>& cnames)
+{
+    for (int i=0; i<cnames.size(); ++i)
+        Cname.push_back(cnames[i]);
 }
 
 void ComponentParam::InputLBCCOEF(ifstream& ifs)
@@ -1023,6 +1122,15 @@ void ComponentParam::InputBIC(ifstream& ifs)
             if (nReg >= NTPVT) break;
         }
     }
+}
+
+void ComponentParam::SetBIC(const std::vector<double> &params)
+{
+    OCP_ASSERT(NTPVT == 1, "Only support NTPVT = 1");
+    BIC.resize(1);
+
+    for (auto& itm: params)
+        BIC[0].push_back(itm);
 }
 
 

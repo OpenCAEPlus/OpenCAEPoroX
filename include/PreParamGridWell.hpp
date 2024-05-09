@@ -154,6 +154,7 @@ class PreParamGridWell
 public:
     /// Input params files
     void InputFile(const string& myFile, const string& myWorkdir, int type=0);
+    void Print(std::ostream &out = std::cout);
 
 protected:
     /// Read OCP input file

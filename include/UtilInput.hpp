@@ -55,6 +55,14 @@ OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slas
 /// m*n  -> <n,...,n> size m ,  m* -> <DEFAULT,..., DEFAULT> size m.
 void DealDefault(vector<string>& result);
 
+/// Expand below
+///     TIME 3*36.525 WIR  12000  BHP  12000
+/// to
+///     TIME 36.525 WIR  12000  BHP  12000
+///     TIME 36.525 WIR  12000  BHP  12000
+///     TIME 36.525 WIR  12000  BHP  12000
+vector<vector<string>> ExpandWellOptions(const vector<string>& result);
+
 /// DealData change a series of product of integers into two arrays.
 /// For example, 8*1  16*2  8*3  16*4  -> obj <8, 16, 8, 16> & val <1, 2, 3, 4>.
 template <typename T>
@@ -129,6 +137,7 @@ inline std::istream& GetLineSkipComments(std::istream& is, std::string& buff, co
     return std::getline(is, buff);
 }
 
+/// Judge the str is a double or string
 inline bool isRegularString(const std::string& str)
 {
     std::istringstream iss(str);
@@ -141,6 +150,17 @@ inline bool isRegularString(const std::string& str)
     } else {
         return true;
     }
+}
+
+inline bool isInteger(const std::string& s)
+{
+    if(s.empty() || ( (!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')) )
+        return false;
+
+    char* p;
+    strtol(s.c_str(), &p, 10);
+
+    return (*p == 0);
 }
 
 

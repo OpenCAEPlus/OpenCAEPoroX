@@ -30,6 +30,13 @@ class WellOptParam
 {
 public:
     WellOptParam(string intype, vector<string>& vbuf);
+    /// INJE well
+    WellOptParam(string fluid_type, string state_, string mode_, string max_rate, OCP_DBL max_bhp);
+    /// PROD well
+    WellOptParam(string state_, string mode_, string max_rate, OCP_DBL min_bhp);
+    /// 拷贝构造函数
+    WellOptParam(const WellOptParam& opt);
+
     // WCONINJE & WCONPROD
     string type;         ///< Type of well, injection or production
     string fluidType;    ///< Type of fluid into the injection well. (injection well only)
@@ -51,6 +58,8 @@ public:
     WellOptPair(USI i, string type, vector<string>& vbuf)
         : d(i)
         , opt(type, vbuf){};
+    WellOptPair(USI i, WellOptParam opt_): d(i), opt(opt_) {}
+
     USI          d;
     WellOptParam opt;
 };
@@ -63,6 +72,8 @@ public:
     WellParam(vector<string>& info);
     /// Input well in unstructured grid
     WellParam(vector<string>& info, const string& unstructured);
+    WellParam(string name_, USI i, USI j, OCP_DBL depth_=1.0);
+    WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z);
     /// Input perforations
     void InputCOMPDAT(vector<string>& vbuf);
     /// Input perforations in structured grid
@@ -122,6 +133,9 @@ public:
     OCP_DBL initP{ -1 }; 
     // dynamic infomation
     vector<WellOptPair> optParam;
+    void SetWellParams(USI i, USI j, USI k, OCP_DBL diam);
+
+    static std::vector<std::string> Templates; /// Only for HiSim
 };
 
 /// Describe the molar fraction of components of fluid injected to reservoir from INJ.
@@ -130,6 +144,7 @@ class Solvent
 public:
     Solvent() = default;
     Solvent(const vector<string>& vbuf);
+    Solvent(const string& name_, const vector<double>& ratios);
     string          name;
     vector<OCP_DBL> comRatio;
 };
@@ -152,7 +167,23 @@ public:
     /// Pressure in surface condition.
     OCP_DBL           Psurf; 
     /// Temperature in surface condition.
-    OCP_DBL           Tsurf; 
+    OCP_DBL           Tsurf;
+
+    /// Construct a new well for HiSim, return the index of the newly constructed well
+    struct WellOperation
+    {
+        double tstep;
+        string name;
+        string type; /// PROD, INJE
+        WellOptParam opt;
+
+        WellOperation(double ts, string name_, string type_, WellOptParam opt_)
+                    : tstep(ts), name(name_), type(type_), opt(opt_) {}
+    }; /// 从HiSim中读取的数据
+    int ConstructNewWell(string name_, USI i, USI j);
+    void SetSTREAM(const vector<double>& ratios);
+    void AddWellOpts(int idx, const WellOptPair& opt);
+    vector<WellOperation> well_oper_list;
 
     /// Initialize the inputting the params of wells.
     void Init();

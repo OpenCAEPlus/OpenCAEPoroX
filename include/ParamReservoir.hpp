@@ -161,6 +161,8 @@ public:
     void Init();
     /// Input the information of hydrocarbon components
     void InputCOMPONENTS(ifstream& ifs, const string& keyword);
+    void InputCOMPONENTS(const string& keyword, const std::vector<std::string>& params);
+
     /// Find corresponding variable according to the name of variable.
     /// It is used for the basic properties of hydrocarbon components such as TCRIT
     Type_A_r<vector<OCP_DBL>>* FindPtr01(const string& varName);
@@ -170,10 +172,12 @@ public:
     vector<OCP_DBL>* FindPtr02(const string& varName);
     /// Input the names of hydrocarbon components
     void InputCNAMES(ifstream& ifs);
+    void SetCNAMES(const std::vector<std::string>& cnames);
     /// Input LBC coefficients for viscosity calculation
     void InputLBCCOEF(ifstream& ifs);
     /// Input the Binary interaction of components
     void InputBIC(ifstream& ifs);
+    void SetBIC(const std::vector<double>& params);
     // Method params
     void InputSSMSTA(ifstream& ifs);
     void InputNRSTA(ifstream& ifs);
@@ -402,6 +406,7 @@ public:
     /// Input the keyword: COMPS. COMPS is used in compositional model, which gives the
     /// num of components.
     void InputCOMPS(ifstream& ifs);
+    void SetCOMPS(int num_comps);
 
     /// Input the keyword: RTEMP. RTEMP gives the temperature of reservoir.
     void InputRTEMP(ifstream& ifs);
@@ -410,6 +415,10 @@ public:
     void InputTABLE(ifstream& ifs, const string& tabName);
     /// Input Table2, for example, VISCTAB
     void InputTABLE2(ifstream& ifs, const string& tabName);
+
+    void SetSGOF(const vector<vector<OCP_DBL>>& tab);
+    void SetSWOF(const vector<vector<OCP_DBL>>& tab);
+    void SetPVTW(const vector<vector<OCP_DBL>>& tab);
 
     /// Input the keyword: ROCK. ROCK contains the compressibility factor and reference
     /// pressure at initial porosity.
@@ -420,6 +429,7 @@ public:
     void InputHLOSS(ifstream& ifs);
     /// Input params for Brooks-Corey model
     void InputBrooksCorey(ifstream& ifs);
+    void SetROCK(OCP_DBL pref, OCP_DBL cp1);
 
     /// Input the Miscibility information
     void InputMISCSTR(ifstream& ifs);
@@ -429,12 +439,14 @@ public:
 
     /// Input the reference density of oil, water, and air in standard condition.
     void InputDENSITY(ifstream& ifs);
+    void SetDENSITY(const std::vector<std::string>& params);
 
     /// Input the phase ifThermal conductivity
     void InputTHCON(ifstream& ifs, const string& keyword);
 
     /// EQUIL contains initial information of reservoir; see ParamEQUIL.
     void InputEQUIL(ifstream& ifs);
+    void SetEQUIL(const std::vector<std::string>& params);
 
     // SATNUM & PVTNUM  -- Region
     /// TABDIMS contains the num of saturation region and PVT region.
@@ -449,12 +461,27 @@ public:
         numCom           = comsParam.numCom;
     }
     void InputCNAMES(ifstream& ifs) { comsParam.InputCNAMES(ifs); };
+    void SetCNAMES(const std::vector<std::string>& cnames) { comsParam.SetCNAMES(cnames); }
+
     void InputCOMPONENTS(ifstream& ifs, const string& keyword)
     {
         comsParam.InputCOMPONENTS(ifs, keyword);
     }
+
+    void InputCOMPONENTS(const string& keyword, const std::vector<std::string>& params)
+    {
+        comsParam.InputCOMPONENTS(keyword, params);
+    }
+
+
     void InputLBCCOEF(ifstream& ifs) { comsParam.InputLBCCOEF(ifs); }
     void InputBIC(ifstream& ifs) { comsParam.InputBIC(ifs); };
+    void SetBIC(const std::vector<double>& params)
+    {
+        comsParam.NTPVT = NTPVT;
+        comsParam.SetBIC(params);
+    }
+
     void InputRefPR(ifstream& ifs, const string& keyword)
     {
         comsParam.InputRefPR(ifs, keyword);
