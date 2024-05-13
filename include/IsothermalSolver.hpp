@@ -40,12 +40,14 @@ protected:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish the current time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
+    void FinishStepComb(Reservoir& rs, OCPControl& ctrl);
     /// GetNRsuite
     const OCPNRsuite& GetNRsuite() const;
 
 private:
     /// current method
     OCPNLMethod  curMethod{ OCPNLMethod::none };
+    OCPNLMethod  preMethod{ OCPNLMethod::none };
     OCPNLMethod  mainMethod{ OCPNLMethod::none };
     LinearSystem LSolver;
     IsoT_IMPEC   impec;

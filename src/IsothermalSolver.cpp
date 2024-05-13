@@ -40,7 +40,8 @@ void IsothermalSolver::SetupMethod(Reservoir& rs, const OCPControl& ctrl)
     }
 
     mainMethod = methods[0];
-    curMethod  = ctrl.SM.InitMethod();
+    preMethod  = ctrl.SM.InitMethod();
+    curMethod  = preMethod;
 }
 
 
@@ -101,22 +102,23 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
-    switch (curMethod) {
-        case OCPNLMethod::IMPEC:
-            impec.Prepare(rs, ctrl);
-            break;
-        case OCPNLMethod::FIM:
-            fim.Prepare(rs, ctrl.time.GetCurrentDt());
-            break;
-        case OCPNLMethod::AIMc:
-            aimc.Prepare(rs, ctrl.time.GetCurrentDt());
-            break;
-        case OCPNLMethod::FIMddm:
-            fim_ddm.Prepare(rs, ctrl.time.GetCurrentDt());
-            break;
-        default:
-            OCP_ABORT("Wrong method type!");
-    }
+    curMethod = preMethod;
+	switch (curMethod) {
+	case OCPNLMethod::IMPEC:
+		impec.Prepare(rs, ctrl);
+		break;
+	case OCPNLMethod::FIM:
+		fim.Prepare(rs, ctrl.time.GetCurrentDt());
+		break;
+	case OCPNLMethod::AIMc:
+		aimc.Prepare(rs, ctrl.time.GetCurrentDt());
+		break;
+	case OCPNLMethod::FIMddm:
+		fim_ddm.Prepare(rs, ctrl.time.GetCurrentDt());
+		break;
+	default:
+		OCP_ABORT("Wrong method type!");
+	}
 }
 
 
@@ -232,11 +234,18 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
         if (curMethod == mainMethod) {
             return OCP_TRUE;
         }
-        curMethod = ctrl.SM.SwitchMethod();
+        curMethod = mainMethod;
         if (curMethod == OCPNLMethod::FIM) {
-            fim.TransferToFIM(rs, ctrl);
+            if (CURRENT_RANK == 0)
+                cout << "FIMddm iters = " << fim_ddm.NR.GetIterNR() << "  " << endl;
+            if (fim.TransferToFIM(fim_ddm.global_res0, rs, ctrl) == OCP_TRUE) {
+                return OCP_FALSE;
+            }
+            else {
+                return OCP_TRUE;
+            }
         }
-        return OCP_FALSE;
+        return OCP_TRUE;
     }
     else {
         return OCP_FALSE;
@@ -247,7 +256,8 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
 /// Finish up time step for IMPEC and FIM.
 void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 {
-    switch (curMethod) {
+    if (ctrl.SM.GetMethod().size() == 1) {
+        switch (curMethod) {
         case OCPNLMethod::IMPEC:
             impec.FinishStep(rs, ctrl);
             break;
@@ -262,6 +272,23 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
             break;
         default:
             OCP_ABORT("Wrong method type!");
+        }
+    }
+    else {
+        FinishStepComb(rs, ctrl);
+    }
+}
+
+void IsothermalSolver::FinishStepComb(Reservoir& rs, OCPControl& ctrl)
+{
+    if (mainMethod == OCPNLMethod::FIM && preMethod == OCPNLMethod::FIMddm) {
+        rs.CalIPRT(ctrl.time.GetCurrentDt());
+
+        fim.NR.CalMaxChangeTime(rs);
+        ctrl.CalNextTimeStep(fim.NR, { "dP", "dS", "iter" });
+
+        fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain());
+        fim_ddm.UpdateLastTimeStep(rs);
     }
 }
 

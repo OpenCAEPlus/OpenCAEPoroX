@@ -864,10 +864,20 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 
 
 /// Transfer to FIM method
-void IsoT_FIM::TransferToFIM(Reservoir& rs, OCPControl& ctrl)
+OCP_BOOL IsoT_FIM::TransferToFIM(const OCP_DBL& global_res0, Reservoir& rs, OCPControl& ctrl)
 {
     CalInitRes(rs, ctrl.time.GetCurrentDt());
+    NR.res.maxRelRes0_V = global_res0;
+    const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res"});
+    if (conflag == OCPNRStateC::converge) {
+        return OCP_FALSE;
+    }
+
     rs.domain.InitCSComm();
+    NR.InitStep(rs.bulk.GetVarSet());
+    NR.InitIter();
+
+    return OCP_TRUE;
 }
 
 
@@ -1145,6 +1155,10 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         MPI_Allreduce(&res.maxRelRes_V, &res.maxRelRes0_V, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
+
+        if (CURRENT_RANK == 0) {
+            cout << "FIM : globalres0 : " << res.maxRelRes0_V << endl;
+        }
     }
 
 }
@@ -2326,10 +2340,10 @@ OCP_BOOL IsoT_FIMddm::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
 OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    if (preM) {
+    if (preM && OCP_TRUE) {
         // check residual for each local nonlinear equations
         NR.CalMaxChangeNR(rs);
-        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E0);
 
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
@@ -2365,7 +2379,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
         IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt());
         
         NR.CalMaxChangeNR(rs);
-        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E0);
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
                 ctrl.time.CutDt(NR);
@@ -2403,9 +2417,7 @@ void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
 void IsoT_FIMddm::AllocateReservoir(Reservoir& rs)
 {
     IsoT_FIM::AllocateReservoir(rs);
-    if (boundCondition == constV) {
-        rs.conn.vs.lflux_ni.resize(rs.conn.vs.numConn * rs.bulk.vs.nc);
-    }
+    rs.conn.vs.lflux_ni.resize(rs.conn.vs.numConn * rs.bulk.vs.nc);
 }
 
 
@@ -2492,7 +2504,7 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
         }
     }
 
-    if (OCP_FALSE) {
+    if (OCP_TRUE) {
         cout << "rank" << CURRENT_RANK << "  ";
         for (const auto& s : domain.cs_group_global_rank) {
             cout << s << "   ";
@@ -2696,6 +2708,11 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
         else {
             MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
         }
+
+        if (CURRENT_RANK == 0) {
+            cout << "FIMddm : globalres0 : " << global_res0 << endl;
+        }
+
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }
 }

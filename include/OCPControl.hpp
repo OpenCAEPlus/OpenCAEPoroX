@@ -35,8 +35,8 @@ public:
     /// Apply control for time step i.
     INT ApplyControl();
     /// Check if converge
-    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) {
-        return NR.CheckConverge(NRs, il);
+    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il, const OCP_DBL& tmpfac = 1.0) {
+        return NR.CheckConverge(NRs, il, tmpfac);
     }
     // Calculate next time step
     void CalNextTimeStep(const OCPNRsuite& NRs, const initializer_list<string>& il) {

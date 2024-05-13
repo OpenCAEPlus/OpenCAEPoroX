@@ -63,15 +63,16 @@ protected:
 
 	// for global communication
 public:
-	MPI_Comm  global_comm;
-	OCP_INT   global_numproc;
-	OCP_INT   global_rank;
-
+	MPI_Comm      global_comm;
+	OCP_INT       global_numproc;
+	OCP_INT       global_rank;
+	set<OCP_INT>  global_group_rank;
 
 public:
 	// reset linear solver communication
 	void InitCSComm();
 	// for linear solver communication
+	void SetCSComm();
 	void SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info);
 	OCP_BOOL IfIRankInLSCommGroup(const OCP_INT& p) const;
 

@@ -55,7 +55,8 @@ protected:
     OCPModel            model{ OCPModel::none };
     /// Index of working method
     mutable USI         wIndex;
-    /// main method is placed in the front following by the preconditioner method sequentially
+    /// main method is placed in the front following by the preconditioner method sequentially,
+    /// only at most two methods' cooperation is supported now
     vector<OCPNLMethod> method;
     /// File name of linear Solver
     vector<string>      lsFile;

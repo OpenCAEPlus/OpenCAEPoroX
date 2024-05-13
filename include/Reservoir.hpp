@@ -84,6 +84,7 @@ class Reservoir
 public:
     void Setup(PreProcess& prepro, ParamRead& rsparam);
     const Domain& GetDomain() const { return domain; }
+    const Bulk& GetBulk() const { return bulk; }
 
 protected:
     /// Setup Domain

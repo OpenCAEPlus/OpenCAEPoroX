@@ -71,7 +71,7 @@ public:
     /// Get dPmax
     auto DPmax() const { return wp->dPmax; }
     /// If NR iterations converge
-    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const;
+    OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il, const OCP_DBL& tmpfac) const;
 
 protected:
     MPI_Comm         myComm;

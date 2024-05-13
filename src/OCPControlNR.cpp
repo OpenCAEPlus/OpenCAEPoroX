@@ -24,15 +24,15 @@ ControlNRParam::ControlNRParam(const vector<OCP_DBL>& src)
 }
 
 
-OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il) const
+OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il, const OCP_DBL& tmpfac) const
 {
     OCPNRStateC conflag_loc = OCPNRStateC::not_converge;
     for (auto& s : il) {
         if (s == "res") {
-            if ((NRs.res.maxRelRes_V <= NRs.res.maxRelRes0_V * wp->tol ||
-                NRs.res.maxRelRes_V <= wp->tol ||
-                NRs.res.maxRelRes_N <= wp->tol) &&
-                NRs.res.maxWellRelRes_mol <= wp->tol) {
+            if ((NRs.res.maxRelRes_V <= NRs.res.maxRelRes0_V * wp->tol * tmpfac ||
+                NRs.res.maxRelRes_V <= wp->tol * tmpfac ||
+                NRs.res.maxRelRes_N <= wp->tol * tmpfac) &&
+                NRs.res.maxWellRelRes_mol <= wp->tol * tmpfac) {
                 conflag_loc = OCPNRStateC::converge;
             }
         }

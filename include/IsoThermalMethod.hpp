@@ -99,6 +99,8 @@ private:
 /// IsoT_FIM is FIM (Fully Implicit Method).
 class IsoT_FIM : virtual public IsothermalMethod
 {
+    friend class IsothermalSolver;
+
 public:
     /// Setup FIM
     void Setup(Reservoir& rs, const OCPControl& ctrl);
@@ -117,7 +119,7 @@ public:
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
     /// Transfer to FIM method
-    void TransferToFIM(Reservoir& rs, OCPControl& ctrl);
+    OCP_BOOL TransferToFIM(const OCP_DBL& global_res0, Reservoir& rs, OCPControl& ctrl);
 
 
 protected:
@@ -173,8 +175,6 @@ public:
     OCP_BOOL FinishNR(Reservoir& rs, OCPControl& ctrl);
     /// Finish a time step.
     void FinishStep(Reservoir& rs, OCPControl& ctrl);
-    /// Get NRsuite
-    const OCPNRsuite& GetNRsuite() const { return NR; }
 
 protected:
     /// Allocate memory for reservoir
@@ -208,6 +208,7 @@ protected:
 
 class IsoT_FIMddm : public IsoT_FIM
 {
+    friend class IsothermalSolver;
 public:
     /// Setup FIMddm
     void Setup(Reservoir& rs, const OCPControl& ctrl);

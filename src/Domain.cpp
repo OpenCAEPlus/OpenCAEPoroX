@@ -205,6 +205,10 @@ void Domain::InitComm(const Partition& part)
 	global_comm    = part.myComm;
 	global_numproc = part.numproc;
 	global_rank    = part.myrank;
+	global_group_rank.clear();
+	for (OCP_USI n = 0; n < global_numproc; n++) {
+		global_group_rank.insert(n);
+	}
 
 	InitCSComm();
 }
@@ -214,13 +218,16 @@ void Domain::InitCSComm()
 {
 	MPI_Comm_dup(global_comm, &cs_comm);
 
-	cs_numproc = global_numproc;
-	cs_rank    = global_rank;
-	cs_group_global_rank.clear();
-	for (OCP_USI n = 0; n < global_numproc; n++) {
-		cs_group_global_rank.insert(n);
-	}
-	cs_group_local_rank = cs_group_global_rank;
+	cs_numproc           = global_numproc;
+	cs_rank              = global_rank;
+	cs_group_global_rank = global_group_rank;
+	cs_group_local_rank  = cs_group_global_rank;
+}
+
+
+void Domain::SetCSComm()
+{
+	MPI_Comm_dup(global_comm, &cs_comm);
 }
 
 

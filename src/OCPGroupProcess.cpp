@@ -288,25 +288,25 @@ static int GroupProcessParMetis01(const std::unordered_map<OCP_INT, OCP_INT>& pr
 		}
 
 		// print for check
-		if (false)
-		{
-			for (int i = 0; i < work_numproc; i++) {
-				if (i == work_rank) {
-					std::this_thread::sleep_for(std::chrono::milliseconds(i * 500));
-				}
-			}
+		//if (false)
+		//{
+		//	for (int i = 0; i < work_numproc; i++) {
+		//		if (i == work_rank) {
+		//			std::this_thread::sleep_for(std::chrono::milliseconds(i * 500));
+		//		}
+		//	}
 
-			std::cout << "****Rank " << work_rank << std::endl;
-			for (int i = 0; i < 2; i++) {
-				std::cout << xadj[i] << "   ";
-			}
-			std::cout << std::endl;
+		//	std::cout << "****Rank " << work_rank << std::endl;
+		//	for (int i = 0; i < 2; i++) {
+		//		std::cout << xadj[i] << "   ";
+		//	}
+		//	std::cout << std::endl;
 
-			for (int j = xadj[0]; j < xadj[1]; j++) {
-				std::cout << "( " << adjncy[j] << ", " << adjwgt[j] << " )  ";
-			}
-			std::cout << std::endl;
-		}
+		//	for (int j = xadj[0]; j < xadj[1]; j++) {
+		//		std::cout << "( " << adjncy[j] << ", " << adjwgt[j] << " )  ";
+		//	}
+		//	std::cout << std::endl;
+		//}
 
 		idx_t nparts = NPARTS;
 		std::vector<idx_t> parts(1);
@@ -425,32 +425,32 @@ static int GroupProcessParMetis02(const std::unordered_map<OCP_INT, OCP_INT>& pr
 		vtxdist[num_use_process] = work_numproc;
 
 		// print for check
-		if (false)
-		{
-			int cp_rank, cp_numproc;;
-			MPI_Comm_rank(cp_comm, &cp_rank);
-			MPI_Comm_size(cp_comm, &cp_numproc);
+		//if (false)
+		//{
+		//	int cp_rank, cp_numproc;;
+		//	MPI_Comm_rank(cp_comm, &cp_rank);
+		//	MPI_Comm_size(cp_comm, &cp_numproc);
 
-			for (int i = 0; i < cp_numproc; i++) {
-				if (i == cp_rank) {
-					std::this_thread::sleep_for(std::chrono::milliseconds(i * 500));
-				}
-			}
+		//	for (int i = 0; i < cp_numproc; i++) {
+		//		if (i == cp_rank) {
+		//			std::this_thread::sleep_for(std::chrono::milliseconds(i * 500));
+		//		}
+		//	}
 
-			std::cout << "****Rank " << cp_rank << std::endl;
+		//	std::cout << "****Rank " << cp_rank << std::endl;
 
-			for (int i = 0; i < tmp_numproc + 1; i++) {
-				std::cout << xadj[i] << "   ";
-			}
-			std::cout << std::endl;
+		//	for (int i = 0; i < tmp_numproc + 1; i++) {
+		//		std::cout << xadj[i] << "   ";
+		//	}
+		//	std::cout << std::endl;
 
-			for (int i = 0; i < tmp_numproc; i++) {
-				for (int j = xadj[i]; j < xadj[i + 1]; j++) {
-					std::cout << "( " << adjncy[j] << ", " << adjwgt[j] << " )  ";
-				}
-				std::cout << std::endl;
-			}
-		}
+		//	for (int i = 0; i < tmp_numproc; i++) {
+		//		for (int j = xadj[i]; j < xadj[i + 1]; j++) {
+		//			std::cout << "( " << adjncy[j] << ", " << adjwgt[j] << " )  ";
+		//		}
+		//		std::cout << std::endl;
+		//	}
+		//}
 
 		idx_t nparts = NPARTS;
 		std::vector<idx_t> tmp_parts(tmp_numproc);
