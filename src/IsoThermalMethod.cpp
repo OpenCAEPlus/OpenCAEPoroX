@@ -2494,7 +2494,7 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
 
     if (OCP_FALSE) {
         cout << "rank" << CURRENT_RANK << "  ";
-        for (const auto& s : rankSetInLS) {
+        for (const auto& s : domain.cs_group_global_rank) {
             cout << s << "   ";
         }
         cout << endl;

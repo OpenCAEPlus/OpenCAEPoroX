@@ -233,7 +233,7 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	unordered_map<OCP_INT, OCP_INT> proc_weight;
 
 	SetCS01(bk_info, proc_weight);
-	//SetCS02(bk_info, proc_weight);
+	// SetCS02(bk_info, proc_weight);
 
 	GroupProcess(GroupMethod::ParMetis_gather, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
@@ -313,16 +313,56 @@ void Domain::SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_m
 		}
 	}
 
-	selfW = 0; // think more
-
+	// add selfW to tmp_proc_wght
 	for (const auto& r : recv_element_loc) {
 		cs_group_global_rank.insert(r.first);
 
 		if (tmp_proc_wght.count(r.first))  tmp_proc_wght[r.first] += selfW;
 		else                               tmp_proc_wght[r.first] = selfW;
 	}
+	// receive other process' selfW
+	vector<OCP_DBL> otherW(recv_element_loc.size());
+
+	GetWallTime timer;
+	timer.Start();
+	// Get Ghost grid's global index by communication
+	USI iter = 0;
+	for (const auto& r : recv_element_loc) {
+
+		MPI_Irecv(&otherW[iter], 1, OCPMPI_DBL, r.first, 0, global_comm, &recv_request[iter]);
+		iter++;
+	}
+
+	iter = 0;
+	for (const auto& s : send_element_loc) {
+
+		MPI_Isend(&selfW, 1, OCPMPI_DBL, s.first, 0, global_comm, &send_request[iter]);
+		iter++;
+	}
+
+
+	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+
+	OCPTIME_COMM_P2P += timer.Stop();
+
+	iter = 0;
+	for (const auto& r : recv_element_loc) {
+		tmp_proc_wght[r.first] += otherW[iter++];
+	}
 
 	ProcWeight_f2i(tmp_proc_wght, proc_wght);
+
+	//if (OCP_FALSE)
+	//{
+	//	MPI_Barrier(global_comm);
+	//	std::this_thread::sleep_for(std::chrono::milliseconds(CURRENT_RANK * 200));
+	//	cout << "Rank: " << CURRENT_RANK << endl;
+	//	for (const auto& p : tmp_proc_wght) {
+	//		cout << CURRENT_RANK << " - " << p.first << "  : "
+	//			 << fixed << setprecision(12) << p.second << endl;
+	//	}
+	//}
 }
 
 
@@ -337,7 +377,7 @@ void Domain::ProcWeight_f2i(const unordered_map<OCP_INT, OCP_DBL>& tmp_proc_wght
 	}
 
 	for (const auto& w : tmp_proc_wght) {
-		proc_wght[w.first] = w.second / minW + 1;
+		proc_wght[w.first] = w.second / (minW + 1) + 1;
 	}
 }
 
