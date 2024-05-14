@@ -226,6 +226,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
             OCPTIME_NRSTEP,
             OCPTIME_NRSTEPC,
             OCPTIME_GROUPPROCESS,
+            OCPTIME_LSOLVER
         };
         vector<OCP_DBL> record_total;
         const OCP_INT record_var_num = record_local.size();
@@ -261,6 +262,7 @@ void OpenCAEPoroX::OutputTimeProcess() const
                 statisticsVar("Newton Step(s)", len, 3),
                 statisticsVar("Newton Step(c)(s)", len, 3),
                 statisticsVar("Group Processes(c)(s)", len, 3),
+                statisticsVar("Linear Solver(s)", len, 3),
             };
 
             OCP_ASSERT(record_var_num == staVar.size(), "wrong staVar");

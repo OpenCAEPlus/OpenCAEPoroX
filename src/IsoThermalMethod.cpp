@@ -773,7 +773,7 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
-        ResetToLastTimeStep(rs, ctrl);     
+        ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
     }
 
@@ -2275,9 +2275,12 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
     //    "proc" + to_string(CURRENT_RANK) + "_b_ddm.out");
 
     timer.Start();
-    int status = ls.Solve();
+    int iter = ls.Solve();
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
+
+    int status = 0;
+    MPI_Allreduce(&iter, &status, 1, OCPMPI_INT, MPI_MIN, rs.domain.global_comm);
 
     if (status < 0) {
         ls.ClearData();
@@ -2286,7 +2289,7 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
         return OCP_FALSE;
     }
 
-    NR.UpdateIter(abs(status));
+    NR.UpdateIter(abs(iter));
 
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
 
@@ -2310,6 +2313,8 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
     OCPTIME_NRSTEP += timer.Stop();
     // rs.PrintSolFIM(ctrl.workDir + "testPNi.out");
     ls.ClearData();
+
+    MPI_Barrier(rs.domain.global_comm);
 
     return OCP_TRUE;
 }

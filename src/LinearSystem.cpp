@@ -93,10 +93,14 @@ void LinearSystem::AssembleMatLinearSolver()
 OCP_INT LinearSystem::Solve()
 {
     OCP_INT iters = LS[wIndex]->Solve();
-    if (LStype[wIndex] == OCPLStype::fasp) {
-        if (iters < 0) {
+    if (iters < 0)
+    {
+        if (LStype[wIndex] == OCPLStype::fasp) {
             iters = -LS[wIndex]->GetNumIters();
-            OCP_WARNING("FASP failed! -- " + to_string(iters));
+        }
+        if (domain->cs_rank == 0){
+            OCP_WARNING(to_string(CURRENT_RANK) + " : " +
+                to_string(domain->cs_numproc) + "   linear solver failed! -- " + to_string(iters));
         }
     }
 
