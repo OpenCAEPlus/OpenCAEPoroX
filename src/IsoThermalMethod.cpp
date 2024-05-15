@@ -2510,11 +2510,15 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
     }
 
     if (OCP_TRUE) {
-        cout << "rank" << CURRENT_RANK << "  ";
-        for (const auto& s : domain.cs_group_global_rank) {
-            cout << s << "   ";
+        if (domain.cs_group_global_rank.size() > 1) {
+            if (domain.cs_rank == 0) {
+                cout << "rank" << CURRENT_RANK << "  ";
+                for (const auto& s : domain.cs_group_global_rank) {
+                    cout << s << "   ";
+                }
+                cout << endl;
+            }
         }
-        cout << endl;
     }
 }
 

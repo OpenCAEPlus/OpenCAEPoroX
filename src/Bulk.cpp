@@ -195,7 +195,7 @@ ReservoirState Bulk::CheckNi()
                 lNiStringSci << std::scientific << vs.lNi[n];
                 std::ostringstream NtStringSci;
                 NtStringSci << std::scientific << vs.Nt[bId];
-                OCP_WARNING("Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
+                OCP_WARNING("Rank " + to_string(CURRENT_RANK) + " : Negative Ni: Ni[" + std::to_string(cId) + "] in Bulk[" +
                     std::to_string(bId) + "] = " + NiStringSci.str()
                     + ", lNi = " + lNiStringSci.str() + ", Nt = " + NtStringSci.str() 
                     + "  " + to_string(SATm.GetSATNUM(bId)));
@@ -210,7 +210,7 @@ ReservoirState Bulk::CheckNi()
 
 ReservoirState Bulk::CheckNi(const OCP_DBL& dt)
 {
-    if (dt > 5E-2 + TINY || OCP_TRUE) {
+    if (OCP_TRUE) {
         return CheckNi();
     }
     else {
