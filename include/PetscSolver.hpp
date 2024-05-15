@@ -54,11 +54,11 @@ protected:
     OCP_DBL*                x;          ///< solution
 
     // Communication
-    MPI_Comm                myComm;       ///< Communicator
-    const vector<OCP_ULL>*  global_index; ///< global index
-    vector<OCP_SLL>         allBegin;     ///< begin for all process(self-include) 
-    vector<OCP_SLL>         allEnd;       ///< end for all process(self-include)
-    vector<OCP_INT>         allEle;       ///< num of elements for each proc
+    MPI_Comm                myComm{ MPI_COMM_NULL };  ///< Communicator
+    const vector<OCP_ULL>*  global_index;             ///< global index
+    vector<OCP_SLL>         allBegin;                 ///< begin for all process(self-include) 
+    vector<OCP_SLL>         allEnd;                   ///< end for all process(self-include)
+    vector<OCP_INT>         allEle;                   ///< num of elements for each proc
 };
 
 

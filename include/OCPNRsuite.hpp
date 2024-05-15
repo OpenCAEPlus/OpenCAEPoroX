@@ -56,7 +56,7 @@ public:
 
 protected:
     /// Communicator
-    MPI_Comm        myComm;
+    MPI_Comm        myComm{ MPI_COMM_NULL };
     OCP_INT         numproc, myrank;
     /// if use NR
     OCP_BOOL        ifUseNR{ OCP_FALSE };

@@ -216,18 +216,13 @@ void Domain::InitComm(const Partition& part)
 
 void Domain::InitCSComm()
 {
+	if (cs_comm != MPI_COMM_NULL)  MPI_Comm_free(&cs_comm);
 	MPI_Comm_dup(global_comm, &cs_comm);
 
 	cs_numproc           = global_numproc;
 	cs_rank              = global_rank;
 	cs_group_global_rank = global_group_rank;
 	cs_group_local_rank  = cs_group_global_rank;
-}
-
-
-void Domain::SetCSComm()
-{
-	MPI_Comm_dup(global_comm, &cs_comm);
 }
 
 

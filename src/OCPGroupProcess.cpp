@@ -322,7 +322,7 @@ static int GroupProcessParMetis01(const std::unordered_map<OCP_INT, OCP_INT>& pr
 		real_t ubvec = 1.05;
 		std::vector<idx_t> options(3, 0);
 
-		MPI_Comm tmp_comm;
+		MPI_Comm tmp_comm{ MPI_COMM_NULL };
 		MPI_Comm_dup(work_comm, &tmp_comm);
 
 		ParMETIS_V3_PartKway(vtxdist.data(), xadj.data(), adjncy.data(), vwgt, adjwgt.data(), &wgtflag, &numflag, &ncon,
@@ -614,16 +614,16 @@ static void GroupProcessSelf(std::set<int>& cs_proc_group, MPI_Comm& cs_comm, co
 	// every rank is a group
 	cs_proc_group.clear();
 	cs_proc_group.insert(global_rank);
-	cs_comm = MPI_COMM_SELF;
+
+	if (cs_comm != MPI_COMM_NULL)  MPI_Comm_free(&cs_comm);
+	MPI_Comm_dup(MPI_COMM_SELF, &cs_comm);
 }
 
 
 static void CalCommGroup(const int& color, const int& global_rank, const MPI_Comm& work_comm, std::set<int>& cs_proc_group, MPI_Comm& cs_comm)
 {
 
-	if (cs_comm != MPI_COMM_NULL && cs_comm != MPI_COMM_WORLD && cs_comm != MPI_COMM_SELF) {
-		MPI_Comm_free(&cs_comm);
-	}
+	if (cs_comm != MPI_COMM_NULL)  MPI_Comm_free(&cs_comm);
 	MPI_Comm_split(work_comm, color, global_rank, &cs_comm);
 
 	int cs_numporc;

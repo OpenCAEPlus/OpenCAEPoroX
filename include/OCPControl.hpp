@@ -48,7 +48,7 @@ protected:
     void SetupComm(const Domain& domain);
 
 public:
-    MPI_Comm         myComm;
+    MPI_Comm         myComm{ MPI_COMM_NULL };
     OCP_INT          numproc, myrank;
 
 public:
