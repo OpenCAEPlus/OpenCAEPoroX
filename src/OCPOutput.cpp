@@ -1006,6 +1006,8 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
     PERMX  = param.PERMX;
     PERMY  = param.PERMY;
     PERMZ  = param.PERMZ;
+    DSATP  = param.DSATP;
+    CSFLAG = param.CSFLAG;
 
     nc = bk.GetComNum();
     np = bk.GetPhaseNum();
@@ -1060,6 +1062,8 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
     if (CO2)      bgpnum++;
     if (SATNUM)   bgpnum++;
     if (PERMX)    bgpnum++;
+    if (DSATP)    bgpnum += np;
+    if (CSFLAG)    bgpnum++;
     //if (PERMY)    bgpnum++;
     //if (PERMZ)    bgpnum++;
 }
@@ -1464,6 +1468,21 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
             tmpV[n] = bvs.rockKx[n];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
+    if (bgp.DSATP) {
+        for (USI j = 0; j < np; j++) {
+            for (OCP_USI n = 0; n < nb; n++)
+                tmpV[n] = fabs(bvs.S[n * np + j] - bvs.lS[n * np + j]);
+            outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+        }
+    }
+    if (bgp.CSFLAG) {
+        OCP_DBL flag = -1.0;
+        if (rs.domain.cs_numproc > 1) {
+            flag = static_cast<OCP_DBL>(*rs.domain.cs_group_global_rank.begin());
+        }
+        fill(tmpV.begin(), tmpV.end(), flag);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
          
     outF.close();
 }
@@ -1586,6 +1605,22 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                     workPtr += numGrid;
                     tmpVal_ptr += numGridLoc;
                 }
+                if (bgp.DSATP) {
+                    for (USI j = 0; j < bgp.np; j++) {
+                        for (OCP_USI n = 0; n < numGridLoc; n++) {
+                            workPtr[global_index[n]] = tmpVal_ptr[n];
+                        }
+                        workPtr += numGrid;
+                        tmpVal_ptr += numGridLoc;
+                    }
+                }
+                if (bgp.CSFLAG) {
+                    for (OCP_USI n = 0; n < numGridLoc; n++) {
+                        workPtr[global_index[n]] = tmpVal_ptr[n];
+                    }
+                    workPtr += numGrid;
+                    tmpVal_ptr += numGridLoc;
+                }
 
                 index++;
             }
@@ -1656,6 +1691,16 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             }
             if (bgp.PERMX) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
+                bId += numGrid;
+            }
+            if (bgp.DSATP) {
+                for (USI j = 0; j < bgp.np; j++) {
+                    out4vtk.OutputCELL_DATA_SCALARS(dest, "DS-" + to_string(j), VTK_FLOAT, gridVal[t], bId, numGrid, 3);
+                    bId += numGrid;
+                }
+            }
+            if (bgp.CSFLAG) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "CSFLAG", VTK_INT, gridVal[t], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1733,6 +1778,16 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
         if (bgp.PERMX) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.DSATP) {
+            for (USI j = 0; j < bgp.np; j++) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "DS-" + to_string(j), VTK_FLOAT, tmpVal, bId, numGrid, 3);
+                bId += numGrid;
+            }
+        }
+        if (bgp.CSFLAG) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "CSFLAG", VTK_INT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
 

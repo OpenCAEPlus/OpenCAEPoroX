@@ -124,13 +124,13 @@ void IsoT_IMPEC::InitReservoir(Reservoir& rs) const
     rs.conn.CalFluxCoeff(rs.bulk);
     CalBulkFlux(rs);
 
-    rs.allWells.InitBHP(rs.bulk);
-
-    UpdateLastTimeStep(rs);
+    rs.allWells.InitBHP(rs.bulk); 
 }
 
 void IsoT_IMPEC::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
+    UpdateLastTimeStep(rs);
+
     rs.allWells.PrepareWell(rs.bulk);
     NR.CalCFL(rs, ctrl.time.GetCurrentDt(), OCP_TRUE);
     if (!NR.CheckPhysical(rs, { "CFL" }, ctrl.time.GetCurrentDt())) {
@@ -237,7 +237,6 @@ void IsoT_IMPEC::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     NR.CalMaxChangeTime(rs);
     ctrl.CalNextTimeStep(NR, {"dP", "dN", "dS", "eV"});
-    UpdateLastTimeStep(rs);
 }
 
 void IsoT_IMPEC::AllocateReservoir(Reservoir& rs)
@@ -726,18 +725,17 @@ void IsoT_FIM::InitReservoir(Reservoir& rs)
     rs.conn.CalFluxCoeff(rs.bulk);
     // Initialize well pressure
     rs.allWells.InitBHP(rs.bulk);
-    // Update variables at last time step
-    UpdateLastTimeStep(rs);
 }
 
 void IsoT_FIM::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
+    UpdateLastTimeStep(rs);
     // Calculate well property at the beginning of next time step
     rs.allWells.PrepareWell(rs.bulk);
     // Calculate initial residual
     CalInitRes(rs, dt);
     NR.InitStep(rs.bulk.GetVarSet());
-    NR.InitIter();
+    NR.InitIter(); 
 }
 
 void IsoT_FIM::AssembleMat(LinearSystem&    ls,
@@ -859,7 +857,6 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     NR.CalMaxChangeTime(rs);
     ctrl.CalNextTimeStep(NR, {"dP", "dS", "iter"});
-    UpdateLastTimeStep(rs);
 }
 
 
@@ -1533,12 +1530,12 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
     IsoT_IMPEC::CalKrPc(rs.bulk);
     rs.conn.CalFluxCoeff(rs.bulk);
     rs.allWells.InitBHP(rs.bulk);
-
-    UpdateLastTimeStep(rs);
 }
 
 void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
+    UpdateLastTimeStep(rs);
+
     rs.allWells.PrepareWell(rs.bulk);
     CalInitRes(rs, dt);
 
@@ -1654,7 +1651,6 @@ void IsoT_AIMc::FinishStep(Reservoir& rs, OCPControl& ctrl)
     rs.CalIPRT(ctrl.time.GetCurrentDt());
     NR.CalMaxChangeTime(rs);
     ctrl.CalNextTimeStep(NR, {"dP", "dS", "iter"});
-    UpdateLastTimeStep(rs);
 }
 
 /// Allocate memory for reservoir
@@ -2241,6 +2237,8 @@ void IsoT_FIMddm::InitReservoir(Reservoir& rs)
 
 void IsoT_FIMddm::Prepare(Reservoir& rs, const OCP_DBL& dt)
 {
+    UpdateLastTimeStep(rs);
+
     rs.domain.SetCSComm(starBulkSet);
     CalRankSet(rs.domain);
     // Calculate well property at the beginning of next time step
@@ -2348,7 +2346,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
     if (preM && OCP_TRUE) {
         // check residual for each local nonlinear equations
         NR.CalMaxChangeNR(rs);
-        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E0);
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E2);
 
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
@@ -2414,8 +2412,6 @@ void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
     NR.CalMaxChangeTime(rs);
     ctrl.CalNextTimeStep(NR, { "dP", "dS", "iter" });
     SetStarBulkSet(rs.bulk, rs.domain);
-
-    UpdateLastTimeStep(rs);
 }
 
 

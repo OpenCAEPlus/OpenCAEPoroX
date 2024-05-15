@@ -282,13 +282,12 @@ void IsothermalSolver::FinishStep(Reservoir& rs, OCPControl& ctrl)
 void IsothermalSolver::FinishStepComb(Reservoir& rs, OCPControl& ctrl)
 {
     if (mainMethod == OCPNLMethod::FIM && preMethod == OCPNLMethod::FIMddm) {
-        rs.CalIPRT(ctrl.time.GetCurrentDt());
 
+        rs.CalIPRT(ctrl.time.GetCurrentDt());
         fim.NR.CalMaxChangeTime(rs);
         ctrl.CalNextTimeStep(fim.NR, { "dP", "dS", "iter" });
 
         fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain());
-        fim_ddm.UpdateLastTimeStep(rs);
     }
 }
 

@@ -268,6 +268,8 @@ protected:
     OCP_BOOL PERMX{ OCP_FALSE };  ///< permeability of rock in x-direction
     OCP_BOOL PERMY{ OCP_FALSE };  ///< permeability of rock in y-direction
     OCP_BOOL PERMZ{ OCP_FALSE };  ///< permeability of rock in z-direction
+    OCP_BOOL DSATP{ OCP_FALSE };  ///< saturation change of phases
+    OCP_BOOL CSFLAG{ OCP_FALSE }; ///< flag of the process group of coupled solution
 
     USI      bgpnum;              ///< num of Basic grid information to be printed
 };

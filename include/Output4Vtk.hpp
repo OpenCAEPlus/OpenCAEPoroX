@@ -47,10 +47,11 @@ const VTK_USI VTK_QUAD       = 9;
 const VTK_USI VTK_HEXAHEDRON = 12;
 
 
-const string VTK_FLOAT     = "byinput";
-const string VTK_SIN       = "float";
-const string VTK_DBL       = "double";
+const string VTK_FLOAT        = "byinput";
+const string VTK_SIN          = "float";
+const string VTK_DBL          = "double";
 const string VTK_UNSIGNED_INT = "unsigned_int";
+const string VTK_INT          = "int";
 
 
 template <typename T>
@@ -138,6 +139,13 @@ void Output4Vtk::OutputCELL_DATA_SCALARS(ofstream&        outVtk,
         USI* wptr = reinterpret_cast<USI*>(mptr);
         for (OCP_ULL n = 0; n < nb; n++) {
             wptr[n] = static_cast<USI>(tmpV[bId + n]);
+        }
+        OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
+    }
+    else if (dataType == VTK_INT) {
+        INT* wptr = reinterpret_cast<INT*>(mptr);
+        for (OCP_ULL n = 0; n < nb; n++) {
+            wptr[n] = static_cast<INT>(tmpV[bId + n]);
         }
         OutputCellValue(outVtk, dataName, dataType, wptr, nb, digits);
     }
