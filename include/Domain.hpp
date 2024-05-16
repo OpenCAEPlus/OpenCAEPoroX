@@ -87,6 +87,9 @@ public:
 	set<OCP_INT>      cs_group_global_rank;
 	set<OCP_INT>      cs_group_local_rank;
 
+public:
+	set<OCP_INT>      cs_group_global_rank_for_output;
+
 protected:
 	/// Num of Total Elements(grids + wells)
 	OCP_ULL numElementTotal; 

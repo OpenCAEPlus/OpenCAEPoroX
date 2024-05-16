@@ -1490,8 +1490,8 @@ void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
     }
     if (bgp.CSFLAG) {
         OCP_DBL flag = -1.0;
-        if (rs.domain.cs_numproc > 1) {
-            flag = static_cast<OCP_DBL>(*rs.domain.cs_group_global_rank.begin());
+        if (rs.domain.cs_group_global_rank_for_output.size() > 1) {
+            flag = static_cast<OCP_DBL>(*rs.domain.cs_group_global_rank_for_output.begin());
         }
         fill(tmpV.begin(), tmpV.end(), flag);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));

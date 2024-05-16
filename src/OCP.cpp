@@ -108,8 +108,11 @@ void OpenCAEPoroX::RunSimulation()
             output.SetValAtTimeStep(reservoir, control, NR);
             if (control.printLevel >= PRINT_ALL) {
                 // Print Summary and critical information at every time step
-                output.PrintAtTimeStep();
+                output.PrintAtTimeStep();           
             }
+            // temp
+            if (reservoir.GetDomain().cs_group_global_rank_for_output.size() > 1)
+                output.PrintInfoSched(reservoir, control, timer.Stop());
 
             if (control.simTime.IfStop())  control.StopSim = OCP_TRUE;
             if (control.StopSim)  break;

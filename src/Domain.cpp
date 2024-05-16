@@ -248,6 +248,9 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	}
 
 	OCPTIME_GROUPPROCESS += timer.Stop();
+
+
+	cs_group_global_rank_for_output = cs_group_local_rank;
 }
 
 
