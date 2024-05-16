@@ -299,7 +299,7 @@ public:
     /// Input Params about vtk output
     void Setup(const OutputVTKParam& VTKParam, const string& dir, const Reservoir& rs);
     /// Output info with the vtk format
-    void PrintVTK(const Reservoir& rs) const;
+    void PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const;
     /// Combine all files into 1 by Master process
     void PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const;
 
@@ -314,6 +314,8 @@ protected:
     Output4Vtk        out4vtk;           ///< Output for vtk
     string            myFile;            ///< output file name
     mutable USI       countPrint{ 0 };   ///< record the count printed
+    
+    mutable OCP_CHAR* timeInfo;
 
     /// total number of grids
     mutable OCP_ULL   numGrid;

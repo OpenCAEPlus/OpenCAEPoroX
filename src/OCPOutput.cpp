@@ -1349,6 +1349,8 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
 //}
 
 
+static const INT timeInfoLen = 256;
+
 void Out4VTK::Setup(const OutputVTKParam& VTKParam, const string& dir, const Reservoir& rs)
 {
     useVTK = VTKParam.useVTK;
@@ -1364,6 +1366,8 @@ void Out4VTK::Setup(const OutputVTKParam& VTKParam, const string& dir, const Res
 void Out4VTK::Initialize(const string& dir, const Reservoir& rs)
 {
     if (!useVTK) return;
+
+    timeInfo = new OCP_CHAR[timeInfoLen];
 
     // output the gloabl index of grids belonging to current domain
     const Domain& doman = rs.domain;
@@ -1386,19 +1390,13 @@ void Out4VTK::Initialize(const string& dir, const Reservoir& rs)
             OCP_WARNING("Can not open " + myFile);
         }
         outF.close();
-        if (bgp.bgpnum == 0) {
-            if (remove(myFile.c_str()) != 0) {
-                OCP_WARNING("Fail to delete " + myFile);
-            }
-        }
     }    
 }
 
 
-void Out4VTK::PrintVTK(const Reservoir& rs) const
+void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
 {
     if (!useVTK)         return;
-    if (bgp.bgpnum == 0) return;
 
     countPrint++;
 
@@ -1414,6 +1412,21 @@ void Out4VTK::PrintVTK(const Reservoir& rs) const
     ofstream outF(myFile, ios::app | ios::binary);
     vector<OCP_DBL> tmpV(nb);
     // output    
+    // output time info
+    {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(3) << ctrl.GetOCPFile() << ctrl.time.GetCurrentTime();
+        std::string str = oss.str() + TIMEUNIT + "_";
+        strncpy(timeInfo, str.c_str(), timeInfoLen);
+        outF.write(timeInfo, timeInfoLen);
+    }
+
+    if (bgp.bgpnum == 0) {
+        outF.close();
+        return;
+    }
+
+    // output physical variables
     if (bgp.PRE) {
         for (OCP_USI n = 0; n < nb; n++)
             tmpV[n] = bvs.P[n];
@@ -1511,6 +1524,8 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
     vector<OCP_DBL>         tmpVal;
     
 
+    vector<string>          timeSeries;
+
     for (USI p = 0; p < numproc; p++) {
         const string myfile = dir + "proc" + to_string(p) + "_vtktmp.out";
         ifstream inV(myfile, ios::in | ios::binary);
@@ -1526,105 +1541,114 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
         for (OCP_USI n = 0; n < numGridLoc; n++)
             mypart[global_index[n]] = p;
 
-        if (bgp.bgpnum > 0) {
-            tmpVal.resize(numGridLoc * bgp.bgpnum);
-            USI index = 0;
-            while (index < countPrint) {
-                if (index >= gridVal.size()) {
-                    gridVal.push_back(vector<OCP_DBL>());
-                    gridVal.back().resize(bgp.bgpnum * numGrid);
-                }
-                workPtr = &gridVal[index][0];
-                inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
-                const OCP_DBL* tmpVal_ptr = &tmpVal[0];
 
-                if (bgp.PRE) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr    += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.COMPM) {
-                    for (USI i = 0; i < bgp.nc; i++) {
-                        for (OCP_USI n = 0; n < numGridLoc; n++) {
-                            workPtr[global_index[n]] = tmpVal_ptr[n];
-                        }
-                        workPtr += numGrid;
-                        tmpVal_ptr += numGridLoc;
-                    }
-                }
-                if (bgp.PHASEP) {
-                    for (USI j = 0; j < bgp.np; j++) {
-                        for (OCP_USI n = 0; n < numGridLoc; n++) {
-                            workPtr[global_index[n]] = tmpVal_ptr[n];
-                        }
-                        workPtr += numGrid;
-                        tmpVal_ptr += numGridLoc;
-                    }
-                }
-                if (bgp.SOIL) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr    += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.SGAS) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr    += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.SWAT) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr    += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.CO2) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr    += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.SATNUM) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.PERMX) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
-                if (bgp.DSATP) {
-                    for (USI j = 0; j < bgp.np; j++) {
-                        for (OCP_USI n = 0; n < numGridLoc; n++) {
-                            workPtr[global_index[n]] = tmpVal_ptr[n];
-                        }
-                        workPtr += numGrid;
-                        tmpVal_ptr += numGridLoc;
-                    }
-                }
-                if (bgp.CSFLAG) {
-                    for (OCP_USI n = 0; n < numGridLoc; n++) {
-                        workPtr[global_index[n]] = tmpVal_ptr[n];
-                    }
-                    workPtr += numGrid;
-                    tmpVal_ptr += numGridLoc;
-                }
+		USI index = 0;
+		while (index < countPrint) {
+			// input time info
+			inV.read(timeInfo, timeInfoLen);
+			if (p == 0) {
+				timeSeries.push_back(string(timeInfo));
+			}
 
-                index++;
-            }
-        }
+			// input grid info
+			if (bgp.bgpnum == 0)  continue;
+
+			tmpVal.resize(numGridLoc * bgp.bgpnum);
+
+			if (index >= gridVal.size()) {
+				gridVal.push_back(vector<OCP_DBL>());
+				gridVal.back().resize(bgp.bgpnum * numGrid);
+			}
+			workPtr = &gridVal[index][0];
+			inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
+			const OCP_DBL* tmpVal_ptr = &tmpVal[0];
+
+			if (bgp.PRE) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.COMPM) {
+				for (USI i = 0; i < bgp.nc; i++) {
+					for (OCP_USI n = 0; n < numGridLoc; n++) {
+						workPtr[global_index[n]] = tmpVal_ptr[n];
+					}
+					workPtr += numGrid;
+					tmpVal_ptr += numGridLoc;
+				}
+			}
+			if (bgp.PHASEP) {
+				for (USI j = 0; j < bgp.np; j++) {
+					for (OCP_USI n = 0; n < numGridLoc; n++) {
+						workPtr[global_index[n]] = tmpVal_ptr[n];
+					}
+					workPtr += numGrid;
+					tmpVal_ptr += numGridLoc;
+				}
+			}
+			if (bgp.SOIL) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.SGAS) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.SWAT) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.CO2) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.SATNUM) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.PERMX) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+			if (bgp.DSATP) {
+				for (USI j = 0; j < bgp.np; j++) {
+					for (OCP_USI n = 0; n < numGridLoc; n++) {
+						workPtr[global_index[n]] = tmpVal_ptr[n];
+					}
+					workPtr += numGrid;
+					tmpVal_ptr += numGridLoc;
+				}
+			}
+			if (bgp.CSFLAG) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
+
+			index++;
+		}
         inV.close();
 		if (remove(myfile.c_str()) != 0) {
 			OCP_WARNING("Failed to delete " + myfile);
@@ -1632,7 +1656,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
     }
 
     // OutPut
-    USI numTstep = gridVal.size();
+
+    USI numTstep = timeSeries.size();
+    if (numTstep != gridVal.size()) {
+        cout << numTstep << "   " << gridVal.size() << endl;
+        OCP_ABORT("Something Wrong int the temporary files");
+    }
+
     if (numTstep == 0) {
         ofstream source(srcFile, ios::app);
         source << "\n" << VTK_CELL_DATA << " " << numGrid;
@@ -1642,7 +1672,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
     }
     else {
         for (USI t = 0; t < numTstep; t++) {
-            const string dstFile = dir + "TSTEP" + to_string(t) + ".vtk";
+            const string dstFile = dir + timeSeries[t] + to_string(t) + ".vtk";
             ifstream source(srcFile, ios::binary);
             ofstream dest(dstFile, ios::binary);
             dest << source.rdbuf();
@@ -1719,20 +1749,26 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
 
     const string srcFile = dir + "TSTEP.vtk";
     numGrid = out4vtk.Init(dir, srcFile, "RUN of " + dir + filename);
- 
-    // Input cell values
-    if (bgp.bgpnum == 0) return;
-    vector<OCP_DBL> tmpVal(bgp.bgpnum * numGrid);
+    
     ifstream inV(myFile, ios::in | ios::binary);
     if (!inV.is_open()) {
         OCP_WARNING("Can not open " + myFile);
     }   
-    USI index = 0;
+
+    vector<OCP_DBL> tmpVal;
+    USI             index = 0; 
     while (index < countPrint) {
+        // input time info
+        inV.read(timeInfo, timeInfoLen);
+        string tmpS(timeInfo);
+
+        // input grid info
+        if (bgp.bgpnum == 0)  continue;
+        tmpVal.resize(bgp.bgpnum * numGrid);
 
         inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
 
-        const string dstFile = dir + "TSTEP" + to_string(index++) + ".vtk";
+        const string dstFile = dir + tmpS + to_string(index++) + ".vtk";
         ifstream source(srcFile, ios::binary);
         ofstream dest(dstFile, ios::binary);
         dest << source.rdbuf();
@@ -1802,6 +1838,8 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
     if (remove(myFile.c_str()) != 0) {
         OCP_WARNING("Failed to delete " + myFile);
     }
+
+    free(timeInfo);
 }
 
 
@@ -1857,22 +1895,22 @@ void OCPOutput::PrintAtTimeStep() const
 
 void OCPOutput::PrintInfoSched(const Reservoir&  rs,
                                const OCPControl& ctrl,
-                               const OCP_DBL&    time) const
+                               const OCP_DBL&    runtime) const
 {
-    OCP_DBL days = ctrl.time.GetCurrentTime();
+    OCP_DBL time = ctrl.time.GetCurrentTime();
 
     // print timing info on the screen
     if (ctrl.printLevel >= PRINT_MIN && myrank == MASTER_PROCESS) {
         cout << "Timestep " << setw(6) << left << iters.GetNumTimeStep() << ": " << fixed
-             << setw(10) << setprecision(3) << right << days << TIMEUNIT
-             << "    Wall time: " << time << " Sec" << endl;
+             << setw(10) << setprecision(3) << right << time << " " << TIMEUNIT
+             << "    Wall time: " << runtime << " Sec" << endl;
     }
 
     // print to output file
     GetWallTime timer;
     timer.Start();
     //out4RPT.PrintRPT(workDir, rs, days);
-    out4VTK.PrintVTK(rs);
+    out4VTK.PrintVTK(rs, ctrl);
     OCPTIME_OUTPUT += timer.Stop();
 }
 
@@ -1899,9 +1937,9 @@ void OCPOutput::PrintCurrentTimeIter(const OCPControl& ctrl) const
 {
     if (ctrl.printLevel >= PRINT_SOME && CURRENT_RANK == MASTER_PROCESS) {
         cout << "### DEBUG: " << setprecision(3) << scientific << ctrl.time.GetCurrentTime()
-            << TIMEUNIT;
+            << " " << TIMEUNIT;
         cout << ",  NR: " << iters.GetNRt() << ",  LS: " << iters.GetLSt()
-            << ",  Last dt: " << ctrl.time.GetLastDt() << TIMEUNIT << endl;
+            << ",  Last dt: " << ctrl.time.GetLastDt() << " " << TIMEUNIT << endl;
     }
 }
 

@@ -69,7 +69,7 @@ const OCP_DBL FIELD_PRESSURE_STD    = 14.7;
 /// Standard temperature ([F])
 const OCP_DBL FIELD_TEMPERATURE_STD = 60;       
 /// Time unit
-const string  FIELD_TIME            = " Day ";
+const string  FIELD_TIME            = "Day";
 
 
 ////////////////////////////////////////////////
@@ -100,7 +100,7 @@ const OCP_DBL METRIC_PRESSURE_STD    = 1.01325;
 /// Standard temperature ([C])
 const OCP_DBL METRIC_TEMPERATURE_STD = 20;
 /// Time unit
-const string  METRIC_TIME           = " Day ";
+const string  METRIC_TIME           = "Day";
 
 ////////////////////////////////////////////////
 // Units for SPE11A (pa,g, 1 bar = 1E5 pa)
@@ -129,7 +129,7 @@ const OCP_DBL SPE11A_PRESSURE_STD    = 1.01325 * 1E5;
 /// Standard temperature ([C])
 const OCP_DBL SPE11A_TEMPERATURE_STD = 20;
 /// Time unit  (REQUIRED)
-const string  SPE11A_TIME            = " Sec ";
+const string  SPE11A_TIME            = "Sec";
 
 
 ////////////////////////////////////////////////
@@ -159,7 +159,7 @@ const OCP_DBL SPE11Amg_PRESSURE_STD = 1.01325 * 1E5;
 /// Standard temperature ([C])
 const OCP_DBL SPE11Amg_TEMPERATURE_STD = 20;
 /// Time unit  (REQUIRED)
-const string  SPE11Amg_TIME = " Sec ";
+const string  SPE11Amg_TIME = "Sec";
 
 
 
