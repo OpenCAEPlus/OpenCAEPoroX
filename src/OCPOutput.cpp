@@ -68,6 +68,7 @@ void Summary::Setup(const OutputSummary& summary_param, const Reservoir& rs)
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("NRiter", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("LSiter", "-", "-", "int", maxRowNum));
+    Sumdata.push_back(SumItem("LS/NR", "-", "-", "float", maxRowNum));
     if (FPR) Sumdata.push_back(SumItem("FPR", "-", "PSIA", "float", maxRowNum));
     if (FPR) Sumdata.push_back(SumItem("Volume", "Hydrocarbon", "Ft3", "float", maxRowNum));
     if (FTR) Sumdata.push_back(SumItem("FTR", "-", "F", "float", maxRowNum));
@@ -431,6 +432,9 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInf
     Sumdata[n++].val.push_back(iters.GetNRt());
     // LSiter
     Sumdata[n++].val.push_back(iters.GetLSt());
+    // LSiter / NRiter
+    Sumdata[n++].val.push_back(1.0 * Sumdata[2].val.back() / Sumdata[1].val.back());
+
 
     OCP_DBL  tmpV = 0;
     if (FPR) Sumdata[n++].val.push_back(bulk.CalFPR(tmpV));
