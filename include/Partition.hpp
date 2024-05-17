@@ -49,6 +49,12 @@ public:
 	void SetDistribution();
 	
 protected:
+	void CalPartition(const PreParamGridWell& grid);
+	/// Conduct orthogonal partitioning of the structural reservoir grid in the x-y plane, 
+	/// ensuring that the wells are vertical.
+	void CalPartition2D(const PreParamGridWell& grid);
+	/// using parMetis
+	void CalPartitionParMetis();
 	void InitParam();
 
 	MPI_Comm    myComm{ MPI_COMM_NULL };

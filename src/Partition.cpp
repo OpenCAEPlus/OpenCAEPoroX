@@ -125,24 +125,129 @@ void Partition::SetPartition(const PreParamGridWell& grid)
 
 	if (CURRENT_RANK == MASTER_PROCESS) {
 		OCP_INFO("Set Initial Partition -- end");
-		OCP_INFO("ParMetis Partition -- begin");
 	}	
+	
+	CalPartition(grid);
+}
 
+
+void Partition::CalPartition(const PreParamGridWell& grid)
+{
 	GetWallTime timer;
 	timer.Start();
-	
+
+	if (OCP_FALSE) {
+		CalPartitionParMetis();
+	}
+	else {
+		CalPartition2D(grid);
+	}
+
+	OCPTIME_PARMETIS += timer.Stop();
+}
+
+
+void Partition::CalPartition2D(const PreParamGridWell& grid)
+{
+
+	vector<idx_t> tmpPart;
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("2D Partition -- begin");
+
+
+		if (grid.gridType >= GridType::unstructured) {
+			OCP_ABORT("This type of grid can not be partitioned!");
+		}
+
+		const USI nx = grid.nx;
+		const USI ny = grid.ny;
+		const USI nz = grid.nz;
+
+		if ((nx * ny) % numproc != 0) {
+			OCP_ABORT("The number of processes must be divisible by nx*ny !");
+		}
+
+		USI nPx, nPy;
+		{
+			OCP_DBL minDiff = 1E20;
+			for (USI i = 1; i <= std::sqrt(numproc); i++) {
+				if (numproc % i == 0) {
+					USI p1 = i;
+					USI p2 = numproc / i;
+
+					for (USI j = 0; j < 2; j++) {
+						USI px = j == 0 ? p1 : p2;
+						USI py = j == 0 ? p2 : p1;
+
+						if (nx % px == 0 && ny % py == 0) {
+							OCP_DBL diff = fabs(nx * 1.0 / px - ny * 1.0 / py);
+
+							if (diff < minDiff) {
+								minDiff = diff;
+								nPx = px;
+								nPy = py;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		tmpPart.resize(numElementTotal);
+		// for grid
+		for (idx_t n = 0; n < numElementTotal - numWellTotal; n++) {
+
+			const OCP_USI tmpID = ((grid.actGC.map_Act2All[n] % (nx * ny * nz)) % (nx * ny));
+
+			const USI pI = (tmpID % nx) / (nx / nPx);
+			const USI pJ = (tmpID / nx) / (ny / nPy);
+			tmpPart[n] = pJ * nPx + pI;
+		}
+		// for well
+		for (idx_t w = 0; w < numWellTotal; w++){
+			// for well
+			const OCP_USI tmpID = ((grid.actGC.map_Act2All[grid.connWellGrid[w][0]] % (nx * ny * nz)) % (nx * ny));
+		    
+		    const USI pI = (tmpID % nx) / (nx / nPx);
+		    const USI pJ = (tmpID / nx) / (ny / nPy);
+			tmpPart[w + numElementTotal - numWellTotal] = pJ * nPx + pI;
+		}	
+	}
+
+	vector<OCP_INT> send_counts;
+	vector<OCP_INT> displs;
+	if (CURRENT_RANK == MASTER_PROCESS) {
+
+		displs.resize(numproc + 1);
+		copy(vtxdist, vtxdist + numproc + 1, displs.begin());
+		send_counts.resize(numproc);
+		for (OCP_USI p = 0; p < numproc; p++) {
+			send_counts[p] = displs[p + 1] - displs[p];
+		}
+	}
+
+	part = new idx_t[numElementLocal]();
+	MPI_Scatterv(tmpPart.data(), send_counts.data(), displs.data(), IDX_T,
+		         part, numElementLocal, IDX_T, MASTER_PROCESS, myComm);
+
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("2D Partition -- end");
+	}
+}
+
+
+void Partition::CalPartitionParMetis()
+{
+	if (CURRENT_RANK == MASTER_PROCESS) {
+		OCP_INFO("ParMetis Partition -- begin");
+	}
+
 	InitParam();
 	ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt, &wgtflag, &numflag, &ncon,
 		&nparts, tpwgts, &ubvec, options, &edgecut, part, &myComm);
 
-	OCPTIME_PARMETIS += timer.Stop();
-
-	//////////////////////////////////////////////////////
-	// Free Memory
 	delete[] tpwgts;
 	delete[] options;
-	// Free Memory
-	//////////////////////////////////////////////////////
 
 	if (CURRENT_RANK == MASTER_PROCESS) {
 		OCP_INFO("ParMetis Partition -- end");
