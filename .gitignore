@@ -78,3 +78,5 @@ cmake/
 /log.txt
 /data/ddmtest/case1
 /data/spe1a/example.pvd
+/data/spe1a/rename_files.bat
+/data/spe1a/nametable.txt

@@ -89,6 +89,7 @@ public:
 
 public:
 	set<OCP_INT>      cs_group_global_rank_for_output;
+	USI               if_output_for_cs_group{ 0 };
 
 protected:
 	/// Num of Total Elements(grids + wells)

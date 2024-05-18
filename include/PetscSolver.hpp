@@ -18,8 +18,14 @@
 #define __PETSCSOLVER_HEADER__
 
 #include "LinearSolver.hpp"
-#include "PETScBSolverPS.h"
 #include <vector>
+
+#if WITH_AS
+#include "as.h"
+#else
+#include "PETScBSolverPS.h"
+#endif
+
 
 using namespace std;
 

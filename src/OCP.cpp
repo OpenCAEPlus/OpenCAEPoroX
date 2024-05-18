@@ -111,9 +111,7 @@ void OpenCAEPoroX::RunSimulation()
                 output.PrintAtTimeStep();           
             }
             // temp
-            const auto& domain = reservoir.GetDomain();
-            if (domain.cs_group_global_rank_for_output.size() > 1 &&
-                domain.cs_group_global_rank_for_output.size() < domain.global_numproc)
+            if (reservoir.GetDomain().if_output_for_cs_group && !control.time.IfEndTSTEP())
                 output.PrintInfoSched(reservoir, control, timer.Stop());
 
             if (control.simTime.IfStop())  control.StopSim = OCP_TRUE;

@@ -250,7 +250,15 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	OCPTIME_GROUPPROCESS += timer.Stop();
 
 
-	cs_group_global_rank_for_output = cs_group_local_rank;
+	{
+		cs_group_global_rank_for_output = cs_group_local_rank;
+		USI tmp = 0;
+		if (cs_group_global_rank_for_output.size() > 1 &&
+			cs_group_global_rank_for_output.size() < global_numproc) {
+			tmp = 1;
+		}
+		MPI_Allreduce(&tmp, &if_output_for_cs_group, 1, OCPMPI_USI, MPI_MAX, global_comm);
+	}
 }
 
 
