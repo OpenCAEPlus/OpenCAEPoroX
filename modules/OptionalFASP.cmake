@@ -17,6 +17,10 @@ if(USE_FASP)
       TARGET fasp 
       PROPERTY IMPORTED_LOCATION ${FASP_LIBRARIES})
     set_property(
+        TARGET fasp
+        APPEND
+        PROPERTY INTERFACE_COMPILE_DEFINITIONS "WITH_FASP=1")      
+    set_property(
       TARGET fasp 
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${FASP_INCLUDE_DIRS})
       target_link_libraries(${LIBNAME} PUBLIC fasp)
@@ -29,5 +33,6 @@ if(USE_FASP)
   endif(FASP_FOUND)
 
 endif(USE_FASP)
+
 
 

@@ -17,6 +17,10 @@ if(USE_METIS)
       TARGET metis 
       PROPERTY IMPORTED_LOCATION ${METIS_LIBRARIES})
     set_property(
+        TARGET metis
+        APPEND
+        PROPERTY INTERFACE_COMPILE_DEFINITIONS "WITH_METIS=1")        
+    set_property(
       TARGET metis 
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${METIS_INCLUDE_DIRS})
       target_link_libraries(${LIBNAME} PUBLIC metis)

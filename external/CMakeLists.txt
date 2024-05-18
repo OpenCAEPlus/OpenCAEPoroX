@@ -12,13 +12,14 @@ endif()
 # Find required dependencies 
 include(RequiredBLAS)
 include(RequiredLAPACK)
-include(RequiredFASP)
+# include(RequiredFASP)
 
 # Find optional dependencies
 include(OptionalOPENMP)
 include(OptionalFASPCPR)
 include(OptionalFASP4BLKOIL)
 include(OptionalFASP4CUDA)
+include(OptionalFASP) # optional for FASP
 include(OptionalMUMPS)
 include(OptionalPARDISO)
 include(OptionalSUPERLU)
@@ -31,6 +32,9 @@ include(OptionalMETIS)
 include(OptionalSAMGPINTERFACE)
 include(OptionalSAMGP)
 include(OptionalPETSCSOLVER)
+include(OptionalPETSC)
+include(OptionalAS)  # optional for Adaptive Solver
+include(OptionalBOOST)
 
 # For future, if we have external source to be included, we can put it under
 # external and add_subdirectory()

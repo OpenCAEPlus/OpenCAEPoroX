@@ -17,6 +17,10 @@ if(USE_PARMETIS)
       TARGET parmetis 
       PROPERTY IMPORTED_LOCATION ${PARMETIS_LIBRARIES})
     set_property(
+        TARGET parmetis
+        APPEND
+        PROPERTY INTERFACE_COMPILE_DEFINITIONS "WITH_PARMETIS=1")      
+    set_property(
       TARGET parmetis 
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PARMETIS_INCLUDE_DIRS})
       target_link_libraries(${LIBNAME} PUBLIC parmetis)
