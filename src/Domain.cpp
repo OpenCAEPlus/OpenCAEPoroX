@@ -251,7 +251,7 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 
 
 	{
-		cs_group_global_rank_for_output = cs_group_local_rank;
+		cs_group_global_rank_for_output = cs_group_global_rank;
 		USI tmp = 0;
 		if (cs_group_global_rank_for_output.size() > 1 &&
 			cs_group_global_rank_for_output.size() < global_numproc) {
