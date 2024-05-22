@@ -176,8 +176,14 @@ if (MKL_USE_STATIC_LIBS)
 
     list(APPEND _MKL_LIBRARIES intel_thread)
     list(APPEND _MKL_LIBRARIES core)
+    list(APPEND _MKL_LIBRARIES blacs_intelmpi_ilp64) # libmkl_blacs_intelmpi_ilp64.a is added by ZhaoLi
 else()
     set(_MKL_LIBRARIES rt)
+
+    list(APPEND _MKL_LIBRARIES intel_thread)
+    list(APPEND _MKL_LIBRARIES core)
+    # libmkl_blacs_intelmpi_ilp64.a is added by ZhaoLi for "Intel MKL FATAL ERROR: Cannot load symbol MKLMPI_Get_wrappers"
+    list(APPEND _MKL_LIBRARIES blacs_intelmpi_ilp64) 
 endif()
 
 set(_MKL_MISSING_LIBRARIES "")
@@ -233,6 +239,7 @@ if (NOT WIN32)
     find_library(PTHREAD_LIBRARY pthread DOC "Path to POSIX threads library")
 endif()
 
+# iomp5
 set(_IOMP5_LIB iomp5)
 if (WIN32)
   if (MKL_USE_STATIC_LIBS)

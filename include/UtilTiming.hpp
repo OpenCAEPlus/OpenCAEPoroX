@@ -54,7 +54,7 @@ public:
     __inline__ double Stop() const
     {
         auto elapsedTime = std::chrono::steady_clock::now() - timeStamp;
-        return std::chrono::duration<double, std::milli>(elapsedTime).count();
+        return std::chrono::duration<double, std::milli>(elapsedTime).count() / 1000.0;
     }
 #endif
     /// Stop the timer and print out duration time

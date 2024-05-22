@@ -63,6 +63,13 @@ void DealDefault(vector<string>& result);
 ///     TIME 36.525 WIR  12000  BHP  12000
 vector<vector<string>> ExpandWellOptions(const vector<string>& result);
 
+// 0: like 1990-01-01
+// 1: a double
+int WhichDateFormat(const std::string& str);
+
+int NumDaysBetweenDates(const string& str1, const string& str2);
+
+
 /// DealData change a series of product of integers into two arrays.
 /// For example, 8*1  16*2  8*3  16*4  -> obj <8, 16, 8, 16> & val <1, 2, 3, 4>.
 template <typename T>

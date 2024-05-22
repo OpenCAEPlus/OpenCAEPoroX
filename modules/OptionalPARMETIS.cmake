@@ -1,7 +1,7 @@
 # ##############################################################################
 # For PARMETISSOLVER
 # ##############################################################################
-option(USE_PARMETIS "Use PARMETIS" ON)
+option(USE_PARMETIS "Use PARMETIS" OFF)
 
 if(USE_PARMETIS)
 
@@ -16,6 +16,10 @@ if(USE_PARMETIS)
     set_property(
       TARGET parmetis 
       PROPERTY IMPORTED_LOCATION ${PARMETIS_LIBRARIES})
+    set_property(
+        TARGET parmetis
+        APPEND
+        PROPERTY INTERFACE_COMPILE_DEFINITIONS "WITH_PARMETIS=1")      
     set_property(
       TARGET parmetis 
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PARMETIS_INCLUDE_DIRS})

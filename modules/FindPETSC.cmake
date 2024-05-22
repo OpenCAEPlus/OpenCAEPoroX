@@ -4,7 +4,6 @@
 
 
 set(PETSC_DIR "${PETSC_DIR}")
-message("====== petsc_dir: ${PETSC_DIR}")
 
 # Check for header file
 find_path(PETSC_INCLUDE_DIRS petsc.h
@@ -14,7 +13,7 @@ mark_as_advanced(PETSC_INCLUDE_DIRS)
 
 # Check for PETSC library
 find_library(PETSC_LIBRARIES petsc
-    HINTS ${PETSC_DIR}/lib $ENV{PETSC_DIR}/arch-linux-c-debug/lib ${PROJECT_SOURCE_DIR}/PETSC/lib
+    HINTS ${PETSC_DIR}/lib $ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/lib ${PROJECT_SOURCE_DIR}/PETSC/lib
     DOC "The PETSC library")
 mark_as_advanced(PETSC_LIBRARIES)
 
@@ -23,7 +22,6 @@ set(PETSC_LIBRARIES ${PETSC_LIBRARIES})
 
 # Standard package handling
 include(FindPackageHandleStandardArgs)
-message("====== petsc_dir: ${PETSC_DIR}")
 find_package_handle_standard_args(PETSC
     "PETSC could not be found. Check PETSC_DIR."
     PETSC_LIBRARIES PETSC_INCLUDE_DIRS)

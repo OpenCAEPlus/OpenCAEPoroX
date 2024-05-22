@@ -488,7 +488,7 @@ void ParamReservoir::InputMISCSTR(ifstream& ifs)
         cout << "\n---------------------" << endl
             << "MISCSTR"
             << "\n---------------------" << endl;
-        cout << miscstr.surTenRef << "   "
+        cout<< miscstr.surTenRef << "   "
             << miscstr.surTenEpt << "   "
             << miscstr.surTenPc << "   "
             << miscstr.surTenExp << endl;
@@ -773,15 +773,15 @@ void ComponentParam::Init()
 
     /// fff
     // Successive substitution for stability analysis: maxit, tolerance, eYt(relaxation factor)
-    SSMparamSTA = {"100", "1.0E-12", "1.0E-8"};
+    SSMparamSTA = {"100", "1e-12", "1e-8"};
     // 相稳定性分析中 Newton 法的求解参数: 最⼤迭代步数, 残差控制
-    NRparamSTA = {"55", "1.0E-12"};
+    NRparamSTA = {"55", "1e-12"};
     // 相分裂计算中 SSM 的求解参数: 最⼤迭代步数, 残差控制
-    SSMparamSP = {"100", "1.0E-6"};
+    SSMparamSP = {"100", "1E-6"};
     // 相分裂计算中 Newton 法的求解参数: 最⼤迭代步数, 残差控制
-    NRparamSP = {"55", "1.0E-12"};
+    NRparamSP = {"55", "1e-12"};
     // 相分裂计算中⽤ Newton 法求解 Rachford-Rice ⽅程的求解参数: 最⼤迭代步数, 残差控制
-    RRparam = {"30", "1.0E-12"};
+    RRparam = {"30", "1e-12"};
 }
 
 Type_A_r<vector<OCP_DBL>>* ComponentParam::FindPtr01(const string& varName)
@@ -1137,6 +1137,8 @@ void ComponentParam::SetBIC(const std::vector<double> &params)
 /// TODO: Add Doxygen
 void ComponentParam::InputSSMSTA(ifstream& ifs)
 {
+    SSMparamSTA.clear();
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     int len = vbuf.size();
@@ -1155,6 +1157,8 @@ void ComponentParam::InputSSMSTA(ifstream& ifs)
 /// TODO: Add Doxygen
 void ComponentParam::InputNRSTA(ifstream& ifs)
 {
+    NRparamSTA.clear();
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     for (int i = 0; i < 2; i++) {
@@ -1172,6 +1176,8 @@ void ComponentParam::InputNRSTA(ifstream& ifs)
 /// TODO: Add Doxygen
 void ComponentParam::InputSSMSP(ifstream& ifs)
 {
+    SSMparamSP.clear();
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     for (USI i = 0; i < 2; i++) {
@@ -1189,6 +1195,8 @@ void ComponentParam::InputSSMSP(ifstream& ifs)
 /// TODO: Add Doxygen
 void ComponentParam::InputNRSP(ifstream& ifs)
 {
+    NRparamSP.clear();
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     for (USI i = 0; i < 2; i++) {
@@ -1206,6 +1214,8 @@ void ComponentParam::InputNRSP(ifstream& ifs)
 /// TODO: Add Doxygen
 void ComponentParam::InputRR(ifstream& ifs)
 {
+    RRparam.clear();
+
     vector<string> vbuf;
     ReadLine(ifs, vbuf);
     for (USI i = 0; i < 2; i++) {

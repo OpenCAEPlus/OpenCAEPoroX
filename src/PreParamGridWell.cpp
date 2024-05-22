@@ -20,6 +20,7 @@ void PreParamGridWell::Print(std::ostream &out)
     char indent = ' ';
 
     // MODEL
+    out << "MODEL\n";
     if (model == OCPModel::none)
         out << "none";
     else if (model == OCPModel::isothermal)
@@ -37,6 +38,7 @@ void PreParamGridWell::Print(std::ostream &out)
     out << DPGRID << '\n';
 
     // DIMENS
+    out << "DIMENS\n";
     out << nx << indent
         << ny << indent
         << nz << indent
@@ -47,12 +49,16 @@ void PreParamGridWell::Print(std::ostream &out)
 
     // EQUALS
     // FindPtr(double)
+    out << "\ndx\n";
     for (auto val: dx)
         out << val << indent;
+    out << "\ndy\n";
     for (auto val: dy)
         out << val << indent;
+    out << "\ndz\n";
     for (auto val: dz)
         out << val << indent;
+    out << "\ntops\n";
     for (auto val: tops)
         out << val << indent;
     out << '\n';
@@ -69,45 +75,59 @@ void PreParamGridWell::Print(std::ostream &out)
         out << "gmsh" << indent;
     out << '\n';
     //
+    out << "\ncoord:\n";
     for (auto val: coord)
         out << val << indent;
-    out << '\n';
+    out << '\nzcorn:\n';
     for (auto val: zcorn)
         out << val << indent;
     out << '\n';
     //
+    out << "\nporo:\n";
     for (auto val: poro)
         out << val << indent;
+    out << "\nntg:\n";
     for (auto val: ntg)
         out << val << indent;
+    out << "\nkx:\n";
     for (auto val: kx)
         out << val << indent;
+    out << "\nky:\n";
     for (auto val: ky)
         out << val << indent;
+    out << "\nkz:\n";
     for (auto val: kz)
         out << val << indent;
+    out << "\nsigma:\n";
     for (auto val: sigma)
         out << val << indent;
+    out << "\nmultZ:\n";
     for (auto val: multZ)
         out << val << indent;
+    out << "\ndzMtrx:\n";
     for (auto val: dzMtrx)
         out << val << indent;
+    out << "\ninitR.swat:\n";
     for (auto val: initR.swat)
         out << val << indent;
+    out << "\ninitR.swatInit:\n";
     for (auto val: initR.swatInit)
         out << val << indent;
-    out << initR.scalePcow << indent;
+    out << "\ninitR.scalePcom:\n" << initR.scalePcow << indent;
     for (auto val: initR.P)
         out << val << indent;
+    out << "\ninitR.T:\n";
     for (auto val: initR.T)
         out << val << indent;
     //
+    out << "\ninitR.Pj:\n";
     for (auto vec: initR.Pj)
     {
         for (auto val: vec)
             out << val << indent;
         out << '\n';
     }
+    out << "\ninitR.Ni:\n";
     for (auto vec: initR.Ni)
     {
         for (auto val: vec)
@@ -115,12 +135,16 @@ void PreParamGridWell::Print(std::ostream &out)
         out << '\n';
     }
     // FindPtr(int)
+    out << "\nactGC.ACTNUM: \n";
     for (auto val: actGC.ACTNUM)
         out << val << indent;
+    out << "\nSATNUM: \n";
     for (auto val: SATNUM)
         out << val << indent;
+    out << "\nPVTNUM: \n";
     for (auto val: PVTNUM)
         out << val << indent;
+    out << "\nROCKNUM: \n";
     for (auto val: ROCKNUM)
         out << val << indent;
 
@@ -128,25 +152,34 @@ void PreParamGridWell::Print(std::ostream &out)
     out << initR.type << '\n';
 
     // InputWELSPECS, InputCOMPDAT
+    out << "InputWELSPECS, InputCOMPDAT\n";
     for (auto wl: well)
     {
         if (wl.gridType == GridType::structured)
         {
-            out << wl.name << ' ' << wl.group << ' ' << wl.I << ' ' << wl.J << ' ' << wl.depth << '\n';
+            out << "\nwell name: " << wl.name << ", group: " << wl.group << ", I: " << wl.I << ", J: " << wl.J << ", depth: " << wl.depth << '\n';
+            out << "\nI_perf:\n";
             for (auto val: wl.I_perf)
                 out << val << indent;
+            out << "\nJ_perf:\n";
             for (auto val: wl.J_perf)
                 out << val << indent;
+            out << "\nK_perf:\n";
             for (auto val: wl.K_perf)
                 out << val << indent;
+            out << "\nWI:\n";
             for (auto val: wl.WI)
                 out << val << indent;
+            out << "\ndiameter:\n";
             for (auto val: wl.diameter)
                 out << val << indent;
+            out << "\nkh:\n";
             for (auto val: wl.kh)
                 out << val << indent;
+            out << "\nskinFactor:\n";
             for (auto val: wl.skinFactor)
                 out << val << indent;
+            out << "\ndirection:\n";
             for (auto val: wl.direction)
                 out << val << indent;
         }
@@ -168,13 +201,15 @@ void PreParamGridWell::Print(std::ostream &out)
                 out << val << indent;
             for (auto val: wl.skinFactor)
                 out << val << indent;
+            out << "\ndirection ";
             for (auto val: wl.direction)
                 out << val << indent;
         }
+        out << '\n';
     }
 
     // InputVTKSCHED
-    out << ifUseVtk
+    out << "ifUseVtk: " << ifUseVtk
         << endl;
 }
 
@@ -192,9 +227,9 @@ void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, 
         OCP_ABORT("Wrong input type!");
 
     {
-        ofstream inputfile("./haha.txt");
-        Print(inputfile << "所有的输入参数\n");
-//        Print(std::cout << "所有的输入参数\n");
+        ofstream inputfile("./inputfile1");
+        Print(inputfile);
+        inputfile.close();
     }
 
     CheckInput();
@@ -342,18 +377,64 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
     /// Read input data
     std::vector<std::string> words;
     std::string buff;
-    std::vector<std::vector<std::string>> input_data;
+    std::vector<std::vector<std::string>> main_data;
+    vector<int> include_file_pos;
     while (GetLineSkipComments(input, buff))
     {
         words = strip_split(buff);
-        DealDefault(words);
-        if (!words.empty())
-            input_data.push_back(words);
+        if (words[0] == "INCLUDE")
+        {
+            include_file_pos.push_back(main_data.size());
+        }
+        else
+        {
+            DealDefault(words);
+            if (!words.empty())
+                main_data.push_back(words);
+        }
     }
     input.close();
+    /// Read include files
+    vector<vector<vector<string>>> include_data;
+    for (int i=0; i<include_file_pos.size(); ++i)
+    {
+        ifstream include(workdir + main_data[include_file_pos[i]][0] + ".dat", ios::in);
+        if (!include)
+        {
+            OCP_MESSAGE("Trying to open file: " << (workdir + main_data[include_file_pos[i]][0] + ".dat"));
+            OCP_ABORT("Failed to open the input file!");
+        }
+
+        vector<vector<string>> each_include;
+        while (GetLineSkipComments(include, buff))
+        {
+            words = strip_split(buff);
+            DealDefault(words); // assume no include in include files
+            if (!words.empty())
+                each_include.push_back(words);
+        }
+        include.close();
+
+        include_data.push_back(each_include);
+    }
+    /// Insert include data into main input data
+    vector<vector<string>> input_data;
+    int pos_idx = 0;
+    for (int i=0; i<main_data.size(); ++i)
+    {
+        if (include_file_pos.size() > pos_idx && i == include_file_pos[pos_idx])
+        {
+            for (auto itm: include_data[pos_idx])
+                input_data.push_back(itm);
+            pos_idx++;
+        }
+        else
+        {
+            input_data.push_back(main_data[i]);
+        }
+    }
 
     /// Compute section starts
-    assert(input_data[0][0] == "MODELTYPE");
     int MODEL_start = 0;
     int GRID_start=-1, WELL_start=-1, PROPS_start=-1, SOLUTION_start=-1, SCHEDULE_start=-1, TUNE_start=-1;
     for (int i=1; i<input_data.size(); ++i)
@@ -528,6 +609,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             dy.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -535,6 +618,19 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             }
             else
             {
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
                 i++;
                 words = input_data[i];
                 for (int j=0; j<words.size(); ++j)
@@ -554,6 +650,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             dz.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -561,7 +659,20 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             }
             else
             {
-                i += 1;
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
+                i++;
                 words = input_data[i];
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
@@ -600,6 +711,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             poro.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -612,13 +725,34 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+
             for (int j=0; j<numGrid; ++j)
-                poro[j] = vals[j];
+            {
+                if (vals.size() == 1)
+                    poro[j] = vals[0];
+                else
+                    poro[j] = vals[j];
+            }
         }
         else if (words[0] == "PERMX")
         {
             kx.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -631,6 +765,20 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+
             for (int j=0; j<numGrid; ++j)
                 kx[j] = vals[j];
         }
@@ -638,6 +786,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             ky.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -650,6 +800,20 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+
             for (int j=0; j<numGrid; ++j)
                 ky[j] = vals[j];
         }
@@ -657,6 +821,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         {
             kz.resize(numGrid);
             vector<double> vals;
+
+            // Read first line
             if (words.size() > 1)
             {
                 for (int j=1; j<words.size(); ++j)
@@ -669,8 +835,182 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
                 for (int j=0; j<words.size(); ++j)
                     vals.push_back(stod(words[j]));
             }
+            //
+            // Read the rest lines
+            while (1)
+            {
+                // check finish reading
+                if (isRegularString(input_data[i+1][0]))
+                    break;
+
+                i++;
+                words = input_data[i];
+                for (int j=0; j<words.size(); ++j)
+                    vals.push_back(stod(words[j]));
+            }
+
             for (int j=0; j<numGrid; ++j)
                 kz[j] = vals[j];
+        }
+        else if (words[0] == "COPY")
+        {
+            string src_name = words[1];
+            string dst_name = words[2];
+            vector<USI> index(6, 0);
+            index[0] = 0, index[1] = nx - 1;
+            index[2] = 0, index[3] = ny - 1;
+            index[4] = 0, index[5] = nz - 1;
+            for (USI n = 3; n < 9; n++)
+                if (words[n] != "NA")
+                    index[n - 3] = stoi(words[n]) - 1;
+
+            // Data type: double
+            {
+                auto srcPtr = FindPtr(src_name, (OCP_DBL) 0);
+                auto dstPtr = FindPtr(dst_name, (OCP_DBL) 0);
+                if (srcPtr != nullptr && dstPtr != nullptr)
+                {
+                    dstPtr->resize(srcPtr->size());
+                    CopyVal(*dstPtr, *srcPtr, index);
+                    continue;
+                }
+            }
+
+            // Data type: int
+            {
+                auto srcPtr = FindPtr(src_name, (USI) 0);
+                auto dstPtr = FindPtr(dst_name, (USI) 0);
+                if (srcPtr != nullptr && dstPtr != nullptr)
+                {
+                    dstPtr->resize(srcPtr->size());
+                    CopyVal(*dstPtr, *srcPtr, index);
+                    continue;
+                }
+            }
+
+        }
+        else if (words[0] == "BOX")
+        {
+            string var_name = words[1];
+            //
+            vector<USI> index(6, 0);
+            index[0] = 0, index[1] = nx - 1;
+            index[2] = 0, index[3] = ny - 1;
+            index[4] = 0, index[5] = nz - 1;
+            for (USI n = 2; n < 8; n++)
+                if (words[n] != "NA")
+                    index[n - 2] = stoi(words[n]) - 1;
+            //
+            string oper = words[8];
+            double val = stod(words[9]);
+            //
+            if (oper == "'*'")
+            {
+                // double
+                {
+                    auto obj = FindPtr(var_name, (OCP_DBL) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] *= val;
+                                }
+                        continue;
+                    }
+                }
+
+                // int
+                {
+                    auto obj = FindPtr(var_name, (USI) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] *= val;
+                                }
+                        continue;
+                    }
+                }
+            }
+            else if (oper == "'='")
+            {
+                // double
+                {
+                    auto obj = FindPtr(var_name, (OCP_DBL) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] = val;
+                                }
+                        continue;
+                    }
+                }
+
+                // int
+                {
+                    auto obj = FindPtr(var_name, (USI) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] = val;
+                                }
+                        continue;
+                    }
+                }
+            }
+            else if (oper == "'+'")
+            {
+                // double
+                {
+                    auto obj = FindPtr(var_name, (OCP_DBL) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] += val;
+                                }
+                        continue;
+                    }
+                }
+
+                // int
+                {
+                    auto obj = FindPtr(var_name, (USI) 0);
+                    if (obj != nullptr)
+                    {
+                        for (int k = index[4]; k <= index[5]; k++)
+                            for (int j = index[2]; j <= index[3]; j++)
+                                for (int l = index[0]; l <= index[1]; l++)
+                                {
+                                    int id = k * nx*ny + j * nx + l;
+                                    (*obj)[id] += val;
+                                }
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                OCP_MESSAGE("Not support operation in BOX: " << oper);
+                OCP_ABORT("Wrong keywords!");
+            }
         }
         else
         {
@@ -703,13 +1043,22 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
         else if (words[0] == "WELSPECS")
         {
             do {
-                std::vector<std::string> each_well;
                 i++;
-                each_well.push_back(input_data[i][1]); // name
-                i++;
-                each_well.insert(each_well.end(), input_data[i].begin(), input_data[i].end()); // parameters
-                wells_data.push_back(each_well);
+                string well_name = input_data[i][1];
+                do {
+                    vector<string> each_perf;
+                    each_perf.push_back(well_name);
+                    i++;
+                    each_perf.insert(each_perf.end(), input_data[i].begin(),
+                                     input_data[i].end()); // parameters
+                    wells_data.push_back(each_perf);
+                } while (input_data[i+1][0] != "NAME" && input_data[i+1].size() == markers.size()-1);
             } while (input_data[i+1][0] == "NAME");
+        }
+        else if (words[0] == "MSWOPT")
+        {
+            i++;
+            cout << input_data[i][0] << endl;
         }
         else
         {
@@ -728,16 +1077,34 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
     {
         for (int i=0; i<wells_data.size(); ++i) // loop over all wells
         {
+            // set well header
             string name = well_data_map["NAME"][i];
             int I = stoi(well_data_map["'I'"][i]);
             int J = stoi(well_data_map["'J'"][i]);
-            well.push_back(WellParam(name, I, J));
 
-            double diam = stod(well_data_map["'DIAM'"][i]);
+            // find if the well exists
+            bool found_well = false;
+            int idx = well.size();
+            for (int j=0; j<well.size(); ++j)
+            {
+                auto& wl = well[j];
+                if (wl.name == name)
+                {
+                    found_well = true;
+                    idx = j;
+                    break;
+                }
+            }
+            if (!found_well)
+                well.push_back(WellParam(name, I, J));
+
+            double diam = 1.0; // default
+            if (well_data_map.find("'DIAM'") != well_data_map.end())
+                diam = stod(well_data_map["'DIAM'"][i]);
             int k1 = stoi(well_data_map["'K1'"][i]);
             int k2 = stoi(well_data_map["'K2'"][i]);
             for (int k=k1; k<=k2; ++k)
-                well[well.size()-1].SetWellParams(I, J, k, diam);
+                well[idx].SetWellParams(I, J, k, diam);
         }
     }
 
@@ -868,6 +1235,7 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
     while (ReadLine(ifs, vbuf)) {
         if (vbuf[0] == "/") break;
 
+        // 需要赋值的索引默认值
         index[0] = 0, index[1] = nx - 1;
         index[2] = 0, index[3] = ny - 1;
         index[4] = 0, index[5] = nzTmp - 1;
@@ -877,6 +1245,7 @@ void PreParamGridWell::InputEQUALS(ifstream& ifs)
 
         DealDefault(vbuf);
 
+        // 读取需要赋值的索引
         for (USI n = 2; n < 8; n++) {
             if (vbuf[n] != "DEFAULT") index[n - 2] = stoi(vbuf[n]) - 1;
         }
@@ -1214,7 +1583,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         break;
 
     case Map_Str2Int("TOPS", 4):
-        tops.reserve(nx * ny);
+        tops.resize(nx * ny);
         myPtr = &tops;
         break;
 

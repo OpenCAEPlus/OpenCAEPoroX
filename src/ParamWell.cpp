@@ -567,7 +567,9 @@ void ParamWell::InputWELLSTRE(ifstream& ifs)
 
 void ParamWell::SetSTREAM(const vector<double>& ratios)
 {
-    Solvent solv("solvent", ratios); /// 这个名字 solvent 是随便取的 fff
+    int size = solSet.size();
+    string name = "solvent" + std::to_string(size);
+    Solvent solv(name, ratios);
     solSet.push_back(solv);
 }
 

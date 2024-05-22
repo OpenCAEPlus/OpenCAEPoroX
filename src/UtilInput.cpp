@@ -8,6 +8,9 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
+#include <regex>
+#include <ctime>
+
 #include "UtilInput.hpp"
 
 OCP_BOOL ReadLine(ifstream& ifs, vector<string>& result, const OCP_BOOL& no_slash)
@@ -98,6 +101,43 @@ vector<vector<string>> ExpandWellOptions(const vector<string>& result)
         tmp.push_back(new_);
 
     return tmp;
+}
+
+
+int WhichDateFormat(const std::string& str)
+{
+    std::regex dateRegex("\\d{4}-\\d{2}-\\d{2}");
+    if (std::regex_match(str, dateRegex))
+        return 0;
+    else
+    {
+        try
+        {
+            double num = std::stod(str);
+            return 1;
+        }
+        catch (...)
+        {
+            OCP_ABORT("Wrong TIME format!");
+        }
+    }
+}
+
+int NumDaysBetweenDates(const string& begin, const string& end)
+{
+    std::tm tm1 = {};
+    std::stringstream ss1(begin);
+    ss1 >> std::get_time(&tm1, "%Y-%m-%d");
+
+    std::tm tm2 = {};
+    std::stringstream ss2(end);
+    ss2 >> std::get_time(&tm2, "%Y-%m-%d");
+
+    std::time_t time1 = std::mktime(&tm1);
+    std::time_t time2 = std::mktime(&tm2);
+
+    double diffSeconds = std::difftime(time2, time1);
+    return diffSeconds / (60 * 60 * 24);
 }
 
 

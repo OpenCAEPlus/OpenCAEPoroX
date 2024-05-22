@@ -16,6 +16,7 @@
 #include <cassert>
 #include <fstream>
 #include <vector>
+#include <map>
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
@@ -37,6 +38,13 @@ public:
     /// 拷贝构造函数
     WellOptParam(const WellOptParam& opt);
 
+    enum Type
+    {
+        INVALID=0,
+        PROD,
+        INJ,
+    };
+
     // WCONINJE & WCONPROD
     string type;         ///< Type of well, injection or production
     string fluidType;    ///< Type of fluid into the injection well. (injection well only)
@@ -45,8 +53,24 @@ public:
 
     OCP_DBL maxRate;     ///< Maximum allowable flow rate into/out the well.
     OCP_DBL maxBHP;      ///< Maximum allowable pressure in the injection well.
-    OCP_DBL minBHP;      ///< Minimum allowable pressure in the production well.
+    OCP_DBL minBHP{0.0};      ///< Minimum allowable pressure in the production well.
     OCP_DBL injTemp;     ///< Temperature of injected fluid.
+};
+
+static std::map<std::string, WellOptParam::Type> TypeMap = {
+        {"WIR", WellOptParam::INJ},
+        {"GIR", WellOptParam::INJ},
+        {"WIBHP", WellOptParam::INJ},
+        {"GIBHP", WellOptParam::INJ},
+        {"WITHP", WellOptParam::INJ},
+        {"GITHP", WellOptParam::INJ},
+        //
+        {"ORAT", WellOptParam::PROD},
+        {"GRAT", WellOptParam::PROD},
+        {"WRAT", WellOptParam::PROD},
+        {"LRAT", WellOptParam::PROD},
+        {"BHP", WellOptParam::PROD},
+        {"THP", WellOptParam::PROD},
 };
 
 /// WellOptPair contains two parts, one is the operation mode of well, the other is the
@@ -72,7 +96,7 @@ public:
     WellParam(vector<string>& info);
     /// Input well in unstructured grid
     WellParam(vector<string>& info, const string& unstructured);
-    WellParam(string name_, USI i, USI j, OCP_DBL depth_=1.0);
+    WellParam(string name_, USI i, USI j, OCP_DBL depth_=-1.0);
     WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z);
     /// Input perforations
     void InputCOMPDAT(vector<string>& vbuf);

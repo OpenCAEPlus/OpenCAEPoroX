@@ -22,39 +22,53 @@ void ParamRead::Print(std::ostream &out)
     char indent = ' ';
 
     //
-    out << paramRs.unitType << indent;
+    out << "unitType: " << paramRs.unitType << '\n';
 
     //
-    out << paramRs.blackOil << indent;
+    out << "blockOil? " << paramRs.blackOil << '\n';
 
     // InputCOMPS
-    out << paramRs.comps << indent
-        << paramRs.numCom << indent
-        << paramRs.comsParam.numCom << indent;
+    out << "\nInputCOMPS\n";
+    out << "comps: " << paramRs.comps << '\n'
+        << "numCom: " << paramRs.numCom << '\n'
+        << "comsParam.numCom: " << paramRs.comsParam.numCom << '\n';
+
+    out << "\nLBCcoef\n";
     for (auto val: paramRs.comsParam.LBCcoef)
         out << val << indent;
+
+    out << "\nSSMparamSTA\n";
     for (auto val: paramRs.comsParam.SSMparamSTA)
         out << val << indent;
+
+    out << "\nNRparamSTA\n";
     for (auto val: paramRs.comsParam.NRparamSTA)
         out << val << indent;
+
+    out << "\nSSMparamSP\n";
     for (auto val: paramRs.comsParam.SSMparamSP)
         out << val << indent;
+
+    out << "\nNRparamSP\n";
     for (auto val: paramRs.comsParam.NRparamSP)
         out << val << indent;
+
+    out << "\nRRparam\n";
     for (auto val: paramRs.comsParam.RRparam)
         out << val << indent;
 
     // THERMAL
+    out << "\nTHERMAL\n";
     out << paramRs.thermal << indent
         << paramWell.thermal << indent
         << indent;
     //
+    out << "\noil, gas, water, disGas\n";
     out << paramRs.oil << indent
         << paramRs.gas <<indent
         << paramRs.water << indent
         << paramRs.disGas << indent
         << paramRs.GRAVDR << indent
-        << paramRs.initType << indent
         << paramRs.initType << indent
         << '\n';
 
@@ -62,12 +76,720 @@ void ParamRead::Print(std::ostream &out)
     out << paramRs.rsTemp << '\n';
 
     // InputTABLE
-    
+    out << "\nInputTABLE\n";
+    out << "SWFN_T: " << paramRs.SWFN_T.name << '\n';
+    for (auto first: paramRs.SWFN_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "SWOF_T: " << paramRs.SWOF_T.name << '\n';
+    for (auto first: paramRs.SWOF_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "SGFN_T: " << paramRs.SGFN_T.name << '\n';
+    for (auto first: paramRs.SGFN_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "SGOF_T " << paramRs.SGOF_T.name << '\n';
+    for (auto first: paramRs.SGOF_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "SOF3_T " << paramRs.SOF3_T.name << '\n';
+    for (auto first: paramRs.SOF3_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "PBVD_T " << paramRs.PBVD_T.name << '\n';
+    for (auto first: paramRs.PBVD_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << "PVCO_T " << paramRs.PVCO_T.name << '\n';
+    for (auto first: paramRs.PVCO_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVDO_T.name << '\n';
+    for (auto first: paramRs.PVDO_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVCDO_T.name << '\n';
+    for (auto first: paramRs.PVCDO_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVDG_T.name << '\n';
+    for (auto first: paramRs.PVDG_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVTW_T.name << '\n';
+    for (auto first: paramRs.PVTW_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.ZMFVD_T.name << '\n';
+    for (auto first: paramRs.ZMFVD_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.TEMPVD_T.name << '\n';
+    for (auto first: paramRs.TEMPVD_T.data)
+    {
+        for (auto second: first)
+        {
+            for (auto third: second)
+                out << third << indent;
+            out << '\n';
+        }
+        out << '\n';
+    }
+
+    // InputTABLE2
+    out << "\nInputTABLE2\n";
+    out << paramRs.comsParam.viscTab.name << '\n';
+    for (auto first: paramRs.comsParam.viscTab.data)
+    {
+        for (auto second: first.data)
+        {
+            for (auto third: second)
+            {
+                for (auto forth: third)
+                    out << forth << indent;
+                out << '\n';
+            }
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVTH2O.name << '\n';
+    for (auto first: paramRs.PVTH2O.data)
+    {
+        for (auto second: first.data)
+        {
+            for (auto third: second)
+            {
+                for (auto forth: third)
+                    out << forth << indent;
+                out << '\n';
+            }
+            out << '\n';
+        }
+        out << '\n';
+    }
+    //
+    out << paramRs.PVTCO2.name << '\n';
+    for (auto first: paramRs.PVTCO2.data)
+    {
+        for (auto second: first.data)
+        {
+            for (auto third: second)
+            {
+                for (auto forth: third)
+                    out << forth << indent;
+                out << '\n';
+            }
+            out << '\n';
+        }
+        out << '\n';
+    }
 
 
-    for (auto val: dx)
+    // GARCIAW...
+    out << "GARCIAW\n";
+    out << paramRs.GARCIAW << indent << "\n";
+
+    // InputROCK
+    out << "\nInputROCK";
+    for (auto rock: paramRs.rockSet)
+        out << "\ntype: " << rock.type << ", Pref: " << rock.Pref << ", cp1: " << rock.cp1 << ", cp2: " << rock.cp2 << indent;
+
+    // InputROCKT
+    out << "\nInputROCKT";
+    for (auto rock: paramRs.rockSet)
+        out << "\ntype: " << rock.type << ", Pref: " << rock.Pref << ", Tref: "
+            << rock.Tref << ", cp1: " << rock.cp1 << ' ' << rock.ct << ' ' << rock.cpt << ' '
+            << rock.HCP1 << ' ' << rock.HCP2 << indent;
+
+    // InputBrooksCorey
+    out << "\nInputBrooksCorey\n";
+    for (auto bc: paramRs.BCparam)
+    {
+        out << bc.sw_imm << ' ' << bc.sn_imm << ' ' << bc.Pentry << ' ' << bc.Pcmax << ' ' << bc.Cw_kr << ' '
+            << bc.Cn_kr << ' ' << bc.C_pc << indent;
+    }
+
+    // InputHLOSS
+    out << "\nInputHLOSS\n";
+    out << paramRs.hLoss.ifHLoss << ' '
+        << paramRs.hLoss.obUse << ' '
+        << paramRs.hLoss.obC << ' '
+        << paramRs.hLoss.obK << ' '
+        << indent;
+
+    // InputMISCSTR
+    out << "\nInputMISCSTR\n";
+    out << paramRs.miscstr.ifMiscible << ' '
+        << paramRs.miscstr.surTenRef << ' '
+        << paramRs.miscstr.surTenEpt << ' '
+        << paramRs.miscstr.surTenPc << ' '
+        << paramRs.miscstr.surTenExp << indent;
+
+    // InputGRAVITY
+    out << "\nInputGRAVITY\n";
+    out << paramRs.gravity.activity << ' '
+        << paramRs.gravity.data[0] << ' ' << paramRs.gravity.data[1] << ' ' << paramRs.gravity.data[2] << indent;
+
+    // InputDENSITY
+    out << "\nInputDENSITY\n";
+    out << paramRs.density.activity << ' '
+        << paramRs.density.data[0] << ' ' << paramRs.density.data[1] << ' ' << paramRs.density.data[2] << indent;
+
+    // InputTHCON
+    out << "\nInputTHCON\n";
+    out << paramRs.ifThcon << ' '
+        << paramRs.thcono << ' ' << paramRs.thcong << ' ' << paramRs.thconw << ' ' << paramRs.thconr << indent;
+
+    // InputEQUIL
+    out << "\nInputEQUIL\n";
+    for (auto equil: paramRs.EQUIL)
+    {
+        for (auto val: equil.data)
+            out << val << ' ';
+    }
+
+    // InputTABDIMS
+    out << "InputTABDIMS\n";
+    out << paramRs.NTSFUN << ' ' << paramRs.NTPVT << ' ' << paramRs.NTROOC << ' '
+        << paramRs.comsParam.NTPVT << indent;
+
+    // InputMETHOD
+    out << "\nInputMETHOD\n";
+    for (auto val: paramControl.method)
+        out << val << indent;
+    for (auto val: paramControl.lsFile)
         out << val << indent;
 
+    // InputTUNING
+    out << "\nInputTUNING\n";
+    for (auto pair: paramControl.tuning_T)
+    {
+        out << pair.d << indent;
+        for (auto first: pair.Tuning)
+            for (auto second: first)
+                out << second << indent;
+        out << '\n';
+    }
+
+    // InputWELSPECS, InputCOMPDAT
+    out << "\nInputWELSPECS, InputCOMPDAT\n";
+    for (auto wl: paramWell.well)
+    {
+        if (wl.gridType == GridType::unstructured)
+        {
+            out << "well grid type: unstructured\n" << wl.name << ' ' << wl.group << ' '
+                << wl.X << ' ' << wl.Y << ' ' << wl.Z << indent;
+            //
+            out << "\nX_perf:\n";
+            for (auto val: wl.X_perf)
+                out << val << indent;
+            out << "\nY_perf:\n";
+            for (auto val: wl.Y_perf)
+                out << val << indent;
+            out << "\nZ_perf:\n";
+            for (auto val: wl.Z_perf)
+                out << val << indent;
+            out << "\nWI:\n";
+            for (auto val: wl.WI)
+                out << val << indent;
+            out << "\ndiameter:\n";
+            for (auto val: wl.diameter)
+                out << val << indent;
+            out << "\nkh:\n";
+            for (auto val: wl.kh)
+                out << val << indent;
+            out << "\nskinFactor:\n";
+            for (auto val: wl.skinFactor)
+                out << val << indent;
+            out << "\ndirection:\n";
+            for (auto val: wl.direction)
+                out << val << indent;
+            //
+        }
+        else if (wl.gridType == GridType::structured)
+        {
+            out << "well grid type: structured\nwell name: " << wl.name << ", group: " << wl.group << ", I: "
+                << wl.I << ", J: " << wl.J << ", depth: " << wl.depth << indent;
+            //
+            out << "\nI_perf:\n";
+            for (auto val: wl.I_perf)
+                out << val << indent;
+            out << "\nJ_perf:\n";
+            for (auto val: wl.J_perf)
+                out << val << indent;
+            out << "\nK_perf:\n";
+            for (auto val: wl.K_perf)
+                out << val << indent;
+            out << "\nWI:\n";
+            for (auto val: wl.WI)
+                out << val << indent;
+            out << "\ndiameter:\n";
+            for (auto val: wl.diameter)
+                out << val << indent;
+            out << "\nkh:\n";
+            for (auto val: wl.kh)
+                out << val << indent;
+            out << "\nskinFactor:\n";
+            for (auto val: wl.skinFactor)
+                out << val << indent;
+            out << "\ndirection:\n";
+            for (auto val: wl.direction)
+                out << val << indent;
+            //
+        }
+        else
+            OCP_ABORT("Wrong well grid type!");
+
+        out << '\n';
+    }
+
+    // InputWCONINJE, InputWCONPROD, InputUNWEIGHT
+    out << "\nInputWCONINJE, InputWCONPROD, InputUNWEIGHT\n";
+    for (auto wl: paramWell.well)
+    {
+        out << "ifUseUnweight: " << wl.ifUseUnweight << indent;
+        for (auto opt: wl.optParam)
+            out << "\nwell name: " << wl.name << ", well operations, time: " << opt.d
+                << ", type: " << opt.opt.type << ' ' << opt.opt.fluidType << ", state: " << opt.opt.state << ", mode: "
+                << opt.opt.mode << ", maxRate: " << opt.opt.maxRate << ", maxBHP: " << opt.opt.maxBHP << ", minBHP: "
+                << opt.opt.minBHP << ", injTemp: " << opt.opt.injTemp
+                << indent;
+
+        out << '\n';
+    }
+
+    // InputTSTEP
+    out << "\nInputTSTEP\n";
+    out << "paramWell.criticalTime:\n";
+    int i=0;
+    for (auto val: paramWell.criticalTime)
+    {
+        out << "idx: " << i << ", " << val << '\n';
+        ++i;
+    }
+    out << "paramControl.criticalTime:\n";
+    for (auto val: paramControl.criticalTime)
+        out << val << ' ';
+
+    // InputWELTARG
+    // InputWTEMP
+
+    // InputWELLSTRE
+    out << "\nInputWELLSTRE\n";
+    for (auto sol: paramWell.solSet)
+    {
+        out << "\nsolSet name: " << sol.name << indent;
+        for (auto val: sol.comRatio)
+            out << val << indent;
+    }
+
+    // InputPSURF
+    out << "\nPsurf: " << paramWell.Psurf << ' ' << paramRs.Psurf << indent;
+
+    // InputTSURF
+    out << "\nTsurf: " << paramWell.Tsurf << ' ' << paramRs.Tsurf << indent;
+
+    // InputWELINITP
+    out << "\nInputWELINITP:\n";
+    for (auto wl: paramWell.well)
+        out << wl.name << ' ' << wl.initP << "\n";
+
+    // InputSUMMARY fff
+    out << "\nInputSUMMARY:\n";
+    out << paramOutput.summary.FPR << ' '
+        << paramOutput.summary.FTR << ' '
+        << paramOutput.summary.FOPR << ' '
+        << paramOutput.summary.FOPT << ' '
+        << paramOutput.summary.FGPR << ' '
+        << paramOutput.summary.FGPt << ' '
+        << paramOutput.summary.FWPR << ' '
+        << paramOutput.summary.FWPT << ' '
+        << paramOutput.summary.FGIR << ' '
+        << paramOutput.summary.FGIT << ' '
+        << paramOutput.summary.FWIR << ' '
+        << paramOutput.summary.FWIT << ' '
+        << indent;
+
+    // InputRPTSCHED fff
+
+    // InputNCOMPS
+    out << paramRs.comsParam.numCom << ' ' << paramRs.numCom << indent;
+
+    // InputCNAMES
+    out << "\nInputCNAMES:\n";
+    for (auto val: paramRs.comsParam.Cname)
+        out << val << ' ';
+
+    // InputCOMPONENTS
+    out << "\nInputCOMPONENTS\n";
+    out << paramRs.comsParam.Tc.activity << indent;
+    for (auto comp: paramRs.comsParam.Tc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Pc.activity << indent;
+    for (auto comp: paramRs.comsParam.Pc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Vc.activity << indent;
+    for (auto comp: paramRs.comsParam.Vc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Zc.activity << indent;
+    for (auto comp: paramRs.comsParam.Zc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.MW.activity << indent;
+    for (auto comp: paramRs.comsParam.MW.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Acf.activity << indent;
+    for (auto comp: paramRs.comsParam.Acf.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.OmegaA.activity << indent;
+    for (auto comp: paramRs.comsParam.OmegaA.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.OmegaB.activity << indent;
+    for (auto comp: paramRs.comsParam.OmegaB.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Vshift.activity << indent;
+    for (auto comp: paramRs.comsParam.Vshift.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.parachor.activity << indent;
+    for (auto comp: paramRs.comsParam.parachor.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Vcvis.activity << indent;
+    for (auto comp: paramRs.comsParam.Vcvis.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.Zcvis.activity << indent;
+    for (auto comp: paramRs.comsParam.Zcvis.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.molden.activity << indent;
+    for (auto comp: paramRs.comsParam.molden.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cp.activity << indent;
+    for (auto comp: paramRs.comsParam.cp.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.ct1.activity << indent;
+    for (auto comp: paramRs.comsParam.ct1.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.ct2.activity << indent;
+    for (auto comp: paramRs.comsParam.ct2.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpt.activity << indent;
+    for (auto comp: paramRs.comsParam.cpt.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpl1.activity << indent;
+    for (auto comp: paramRs.comsParam.cpl1.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpl2.activity << indent;
+    for (auto comp: paramRs.comsParam.cpl2.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpl3.activity << indent;
+    for (auto comp: paramRs.comsParam.cpl3.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpl4.activity << indent;
+    for (auto comp: paramRs.comsParam.cpl4.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpg1.activity << indent;
+    for (auto comp: paramRs.comsParam.cpg1.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpg2.activity << indent;
+    for (auto comp: paramRs.comsParam.cpg2.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpg3.activity << indent;
+    for (auto comp: paramRs.comsParam.cpg3.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.cpg4.activity << indent;
+    for (auto comp: paramRs.comsParam.cpg4.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.hvapr.activity << indent;
+    for (auto comp: paramRs.comsParam.hvapr.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.hvr.activity << indent;
+    for (auto comp: paramRs.comsParam.hvr.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.ev.activity << indent;
+    for (auto comp: paramRs.comsParam.ev.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.avisc.activity << indent;
+    for (auto comp: paramRs.comsParam.avisc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.bvisc.activity << indent;
+    for (auto comp: paramRs.comsParam.bvisc.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.avg.activity << indent;
+    for (auto comp: paramRs.comsParam.avg.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+    out << paramRs.comsParam.bvg.activity << indent;
+    for (auto comp: paramRs.comsParam.bvg.data)
+    {
+        for (auto& v: comp)
+            out << v << ' ';
+        out << indent;
+    }
+
+    // InputRefPR
+    for (auto val: paramRs.comsParam.Pref)
+        out << val << ' ';
+    for (auto val: paramRs.comsParam.Tref)
+        out << val << ' ';
+
+    // InputLBCCOEF
+    cout << paramRs.comsParam.NTPVT << indent;
+    for (auto val: paramRs.comsParam.LBCcoef)
+        out << val << ' ';
+
+    // InputBIC
+    for (auto first: paramRs.comsParam.BIC)
+    {
+        for (auto val: first)
+            out << val << ' ';
+        out << indent;
+    }
+
+    // InputSSMSTA
+    for (auto val: paramRs.comsParam.SSMparamSTA)
+        out << val << ' ';
+    // InputSSMSP
+    for (auto val: paramRs.comsParam.SSMparamSP)
+        out << val << ' ';
+    // InputNRSTA
+    for (auto val: paramRs.comsParam.NRparamSTA)
+        out << val << ' ';
+    // InputNRSP
+    for (auto val: paramRs.comsParam.NRparamSP)
+        out << val << ' ';
+    // InputRR
+    for (auto val: paramRs.comsParam.RRparam)
+        out << val << ' ';
+
+    // InputBoundary
+    for (auto bd: paramRs.BDparam)
+        out << bd.name << ' ' << bd.constP << ' ' << bd.P << indent;
+
+    // InpuCurTime
+    out << paramControl.curTime << indent;
+
+    // InpuMaxSimTime
+    out << paramControl.MaxSimTime << indent;
 }
 
 
@@ -108,8 +830,16 @@ void ParamRead::ReadInputFile(const string& filename, int type)
     if (type == 0)
         ReadFile(inputFile);
     else
+    {
         ReadFileHiSim(inputFile);
-    CheckParam();  
+        ReadRestFile(inputFile);
+    }
+    {
+        ofstream inputfile("./inputfile2");
+        Print(inputfile);
+        inputfile.close();
+    }
+    CheckParam();
     SetUnit(paramRs.unitType);
 
     if (CURRENT_RANK == MASTER_PROCESS) {
@@ -453,15 +1183,63 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
     /// Read input data
     std::vector<std::string> words;
-    string buff;
-    std::vector<std::vector<std::string>> input_data;
+    std::string buff;
+    std::vector<std::vector<std::string>> main_data;
+    vector<int> include_file_pos;
     while (GetLineSkipComments(input, buff))
     {
         words = strip_split(buff);
-        if (!words.empty())
-            input_data.push_back(words);
+        if (words[0] == "INCLUDE")
+        {
+            include_file_pos.push_back(main_data.size());
+        }
+        else
+        {
+            DealDefault(words);
+            if (!words.empty())
+                main_data.push_back(words);
+        }
     }
     input.close();
+    /// Read include files
+    vector<vector<vector<string>>> include_data;
+    for (int i=0; i<include_file_pos.size(); ++i)
+    {
+        ifstream include(workDir + main_data[include_file_pos[i]][0] + ".dat", ios::in);
+        if (!include)
+        {
+            OCP_MESSAGE("Trying to open file: " << (workDir + main_data[include_file_pos[i]][0] + ".dat"));
+            OCP_ABORT("Failed to open the input file!");
+        }
+
+        vector<vector<string>> each_include;
+        while (GetLineSkipComments(include, buff))
+        {
+            words = strip_split(buff);
+            DealDefault(words); // assume no include in include files
+            if (!words.empty())
+                each_include.push_back(words);
+        }
+        include.close();
+
+        include_data.push_back(each_include);
+    }
+    /// Insert include data into main input data
+    vector<vector<string>> input_data;
+    int pos_idx = 0;
+    for (int i=0; i<main_data.size(); ++i)
+    {
+        if (include_file_pos.size() > pos_idx && i == include_file_pos[pos_idx])
+        {
+            for (auto itm: include_data[pos_idx])
+                input_data.push_back(itm);
+            pos_idx++;
+        }
+        else
+        {
+            input_data.push_back(main_data[i]);
+        }
+    }
 
     /// Compute section starts
     int GRID_start = -1;
@@ -470,7 +1248,6 @@ void ParamRead::ReadFileHiSim(const string& filename)
     int SOLUTION_start = -1;
     int SCHEDULE_start = -1;
     int TUNE_start = -1;
-    assert(input_data[0][0] == "MODELTYPE");
     int MODEL_start = 0;
     for (int i=1; i<input_data.size(); ++i)
     {
@@ -561,7 +1338,12 @@ void ParamRead::ReadFileHiSim(const string& filename)
     for (int i=MODEL_start; i<MODEL_end; ++i)
     {
         words = input_data[i];
-        if (words[0] == "MODELTYPE" || words[0] == "SOLNT")
+        if (words[0] == "MODELTYPE")
+        {
+            if (words[1] == "BlackOil" || words[1] == "BLACKOIL")
+                paramRs.blackOil = OCP_TRUE;
+        }
+        else if (words[0] == "SOLNT")
         {
         }
         else if (words[0] == "FIELD")
@@ -600,13 +1382,23 @@ void ParamRead::ReadFileHiSim(const string& filename)
         else if (words[0] == "WELSPECS")
         {
             do {
-                std::vector<std::string> each_well;
                 i++;
-                each_well.push_back(input_data[i][1]); // name
-                i++;
-                each_well.insert(each_well.end(), input_data[i].begin(), input_data[i].end()); // parameters
-                wells_data.push_back(each_well);
+                string well_name = input_data[i][1]; // well name
+                // set perforations of the well above
+                do {
+                    vector<string> each_perf;
+                    each_perf.push_back(well_name);
+                    i++;
+                    each_perf.insert(each_perf.end(), input_data[i].begin(),
+                                     input_data[i].end()); // parameters
+                    wells_data.push_back(each_perf);
+                } while (input_data[i+1][0] != "NAME" && input_data[i+1].size() == markers.size()-1);
             } while (input_data[i+1][0] == "NAME");
+        }
+        else if (words[0] == "MSWOPT")
+        {
+            i++;
+            cout << input_data[i][0] << endl;
         }
         else
         {
@@ -625,16 +1417,34 @@ void ParamRead::ReadFileHiSim(const string& filename)
     {
         for (int i=0; i<wells_data.size(); ++i) // loop over all wells
         {
+            // set well header
             string name = well_data_map["NAME"][i];
             int I = stoi(well_data_map["'I'"][i]);
             int J = stoi(well_data_map["'J'"][i]);
-            paramWell.well.push_back(WellParam(name, I, J));
+            // find if the well exists
+            bool found_well = false;
+            int idx = paramWell.well.size();
+            for (int j=0; j<paramWell.well.size(); ++j)
+            {
+                auto& wl = paramWell.well[j];
+                if (wl.name == name)
+                {
+                    found_well = true;
+                    idx = j;
+                    break;
+                }
+            }
+            if (!found_well)
+                paramWell.well.push_back(WellParam(name, I, J));
 
-            double diam = stod(well_data_map["'DIAM'"][i]);
+            // set perforations of well
+            double diam = 1.0; // default
+            if (well_data_map.find("'DIAM'") != well_data_map.end())
+                diam = stod(well_data_map["'DIAM'"][i]);
             int k1 = stoi(well_data_map["'K1'"][i]);
             int k2 = stoi(well_data_map["'K2'"][i]);
             for (int k=k1; k<=k2; ++k)
-                paramWell.well[paramWell.well.size()-1].SetWellParams(I, J, k, diam);
+                paramWell.well[idx].SetWellParams(I, J, k, diam);
         }
     }
 
@@ -816,7 +1626,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "PVTW")
         {
-            TableSet* obj = paramRs.FindPtrTable("PVCO");
+            TableSet* obj = paramRs.FindPtrTable("PVTW");
             const int num_cols = obj->colNum;
             vector<vector<OCP_DBL>> pvtw(num_cols); /// TODO not string, double
             while (1)
@@ -838,21 +1648,11 @@ void ParamRead::ReadFileHiSim(const string& filename)
         }
         else if (words[0] == "ROCK")
         {
-            vector<vector<string>> rock; /// TODO not string, double
-            while (1)
-            {
-                i++;
-                words = input_data[i];
-                if (!isRegularString(words[0]))
-                {
-                    rock.push_back(words);
-                }
-                else
-                {
-                    i--;
-                    break;
-                }
-            }
+            i++;
+            words = input_data[i];
+            double p_ref = stod(words[0]);
+            double cp1 = stod(words[1]);
+            paramRs.SetROCK(p_ref, cp1);
         }
         else if (words[0] == "ROCKTAB")
         {
@@ -916,11 +1716,76 @@ void ParamRead::ReadFileHiSim(const string& filename)
             words = input_data[i];
             paramRs.SetDENSITY(words);
         }
+        else if (words[0] == "PVTO")
+        {
+            OCP_WARNING("Not support keyword: PVTO!");
+//            TableSet* obj = paramRs.FindPtrTable("PVDG");
+//            const int num_cols = obj->colNum;
+            const int num_cols = 4;
+            vector<vector<OCP_DBL>> pvto(num_cols);
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    for (int l=0; l<num_cols; ++l)
+                    {
+                        double val;
+                        try {
+                            val = stod(words[l]);
+                        }
+                        catch (std::exception)
+                        {
+                            val = 0.0;
+                        }
+                        pvto[l].push_back(val);
+                    }
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+//            obj->data.push_back(pvdg);
+        }
+        else if (words[0] == "PVDO")
+        {
+            TableSet* obj = paramRs.FindPtrTable("PVDO");
+            const int num_cols = obj->colNum;
+            vector<vector<OCP_DBL>> pvdo(num_cols);
+            while (1)
+            {
+                i++;
+                words = input_data[i];
+                if (!isRegularString(words[0]))
+                {
+                    for (int l=0; l<num_cols; ++l)
+                        pvdo[l].push_back(stod(words[l]));
+                }
+                else
+                {
+                    i--;
+                    break;
+                }
+            }
+            obj->data.push_back(pvdo);
+        }
+        else if (words[0] == "STONEII")
+            OCP_WARNING("Not support keyword: STONEII!");
+        else if (words[0] == "/")
+            continue;
         else
         {
             OCP_ABORT("Not support keywords!");
         }
     }
+    // tabdims fff
+    paramRs.NTSFUN = 1;
+    paramRs.NTPVT = 1;
+    paramRs.NTROOC = 1;
+    paramRs.comsParam.NTPVT = 1;
 
     /// SOLUTION section
     for (int i=SOLUTION_start+1; i<SOLUTION_end; ++i)
@@ -936,8 +1801,12 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    for (int j=0; j<6; ++j) /// 暂时支持6个参数
+                    for (int j=0; j<words.size(); ++j)
+                    {
+                        if (j == 4) // 跳过: 初始化时的深度步长 dh
+                            continue;
                         equilpar.push_back(words[j]);
+                    }
                 }
                 else
                 {
@@ -946,18 +1815,36 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 }
             }
 
-            paramRs.SetEQUIL(equilpar);
+            vector<string> tmp_equilpar;
+            if (equilpar.size() >= 6)
+                tmp_equilpar.assign(equilpar.begin(), equilpar.begin()+6); /// 暂时支持6个参数
+            else
+            {
+                int rest = 6 - equilpar.size();
+                tmp_equilpar.assign(equilpar.begin(), equilpar.end());
+                for (int j=0; j<rest; ++j)
+                    tmp_equilpar.push_back("NA");
+            }
+            paramRs.SetEQUIL(tmp_equilpar);
+            paramRs.initType = "EQUIL";
         }
         else if (words[0] == "PBVD")
         {
-            vector<vector<string>> pbvd; /// TODO not string, double
+            TableSet* obj = paramRs.FindPtrTable("PBVD");
+            const int num_cols = obj->colNum;
+
+            vector<vector<OCP_DBL>> pbvd(num_cols);
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (!isRegularString(words[0]))
                 {
-                    pbvd.push_back(words);
+                    for (int j=0; j<num_cols; ++j)
+                    {
+                        pbvd[j].push_back(std::stod(words[j]));
+                    }
+                    cout << endl;
                 }
                 else
                 {
@@ -966,7 +1853,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     break;
                 }
             }
-            cout << "EQUILPAR: " << pbvd[1][1] << endl;
+
+            obj->data.push_back(pbvd);
         }
         else if (words[0] == "ZMFVD")
         {
@@ -995,23 +1883,72 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             obj->data.push_back(zmfvd);
         }
+        else if (words[0] == "METHOD")
+        {
+            i++;
+            words = input_data[i];
+            paramControl.method.clear();
+            paramControl.lsFile.clear();
+            paramControl.method.push_back(words[0]);
+            paramControl.lsFile.push_back(words[1]);
+        }
+        else if (words[0] == "SUMMARY")
+        {
+            do {
+                i++;
+                words = input_data[i];
+//                if (words[0] == "FPR")
+//                    paramOutput.summary.FPR = OCP_TRUE;
+//                else if (words[0] == "FOPR")
+//                    paramOutput.summary.FOPR = OCP_TRUE;
+//                else if (words[0] == "FOPT")
+//                    paramOutput.summary.FOPT = OCP_TRUE;
+//                else if (words[0] == "FGPR")
+//                    paramOutput.summary.FGPR = OCP_TRUE;
+//                else if (words[0] == "FGPT")
+//                    paramOutput.summary.FGPt = OCP_TRUE;
+//                else if (words[0] == "FWPR")
+//                    paramOutput.summary.FWPR = OCP_TRUE;
+//                else if (words[0] == "FWPT")
+//                    paramOutput.summary.FWPT = OCP_TRUE;
+//                else if (words[0] == "FGIR")
+//                    paramOutput.summary.FGIR = OCP_TRUE;
+//                else if (words[0] == "FGIT")
+//                    paramOutput.summary.FGIT = OCP_TRUE;
+//                else if (words[0] == "FWIR")
+//                    paramOutput.summary.FWIR = OCP_TRUE;
+//                else if (words[0] == "FWIT")
+//                    paramOutput.summary.FWIT = OCP_TRUE;
+//                else if (words[0] == "FWPT")
+//                    paramOutput.summary.FWPT = OCP_TRUE;
+//                else
+//                    OCP_ABORT("Wrong summary keyword");
+            } while (input_data[i+1][0] != "/");
+        }
+        else if (words[0] == "/")
+            break;
         else
         {
             OCP_ABORT("Not support keywords!");
         }
     }
 
-    /// TUNE section
+    /// TUNE section fff
     for (int i=TUNE_start+1; i<TUNE_end; ++i)
     {
+        vector<vector<OCP_DBL>> tmp(paramControl.tuning);
         do {
             words = input_data[i];
-            cout << words[0] << endl;
             i++;
         } while (i < TUNE_end);
+//        paramControl.tuning_T.push_back(TuningPair(0, tmp)); // fff
     }
 
     /// SCHEDULE section
+    double now = 0.0;
+    double is_first_date = true;
+    string first_date;
+    vector<double> all_tsteps;
     for (int i=SCHEDULE_start+1; i<SCHEDULE_end; ++i)
     {
         words = input_data[i];
@@ -1031,73 +1968,231 @@ void ParamRead::ReadFileHiSim(const string& filename)
             continue;
         else if (words[0] == "TIME")
         {
-            cout << "time step: " << words[1] << endl;
+            vector<double> tsteps;
+            if (is_first_date)
+            {
+                first_date = words[1];
+                is_first_date = false;
+                tsteps.push_back(0);
+                all_tsteps.push_back(0.0);
+            }
+            else
+            {
+                if (words.size() == 1)
+                    OCP_WARNING("Not support this time format!");
+                else
+                {
+                    for (int j=1; j<words.size(); ++j)
+                    {
+                        if (WhichDateFormat(words[j]) == 1)
+                        {
+                            now += stod(words[j]);
+                            tsteps.push_back(now);
+                            all_tsteps.push_back(now);
+                        }
+                        else
+                        {
+                            int days = NumDaysBetweenDates(first_date, words[j]);
+                            now = days;
+                            tsteps.push_back(days);
+                            all_tsteps.push_back(now);
+                        }
+                    }
+                }
+
+            }
+
             while (input_data[i+1][0] == "WELL")
             {
                 words = input_data[i+1];
-                cout << "well name: " << words[1] << endl;
+                string well_name = words[1];
+                string state = "OPEN"; /// fff
+                string mode = words[2];
+                string max_rate = words[3];
+
+                if (TypeMap[mode] == WellOptParam::PROD)
+                {
+                    double min_bhp = stod(words[4]);
+                    WellOptParam opt(state, mode, max_rate, min_bhp);
+                    paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
+                                                                                well_name,
+                                                                                "PROD",
+                                                                                opt));
+                }
+                else if (TypeMap[mode] == WellOptParam::INJ)
+                {
+                    string fluidType;
+                    if (words[2] == "WIR")
+                        fluidType = "WATER";
+                    else if (words[2] == "GIR")
+                    {
+                        // fff
+                        fluidType = "solvent" + std::to_string(paramWell.solSet.size());
+                    }
+                    else
+                        OCP_ABORT("Not support fluidType!");
+
+                    if (paramRs.blackOil)
+                        fluidType = "GAS";
+
+                    double max_bhp = stod(words[4]);
+
+                    if (mode == "WIR" || mode == "GIR")
+                        mode = "RATE";
+
+                    WellOptParam opt(fluidType, state, mode, max_rate, max_bhp); /// fff stream
+                    paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
+                                                                                well_name,
+                                                                                "INJ",
+                                                                                opt));
+                }
+                else
+                    OCP_ABORT("Wrong well operation type!");
                 i++;
             }
         }
         else if (words[0] == "WELLSCHED")
         {
-            double now = 0.0;
+            double now_tmp = 0.0;
+            double start_tmp=0.0;
 
             string well_name = words[1];
-            cout << "wellsched: " << well_name << endl;
+            cout << "well name: " << well_name << endl;
             while (1)
             {
                 i++;
                 words = input_data[i];
                 if (words[0] == "TIME")
                 {
-                    vector<vector<string>> tmp = ExpandWellOptions(words);
+                    int num_times=1;
+                    start_tmp += stod(words[1]);
+                    all_tsteps.push_back(start_tmp);
+                    if (words.size() > 2)
+                    {
+                        for (int l=2; l<words.size(); ++l)
+                        {
+                            if (words[l] == words[1])
+                            {
+                                num_times++;
+                                start_tmp += stod(words[l]);
+                                all_tsteps.push_back(start_tmp);
+                            }
+                            else
+                                break;
+                        }
+                    }
 
-                    if (tmp.size() == 1)
+                    if (num_times == 1)
                     {
                         /// 生成一个WellOptParam对象
-                        now += stod(words[1]); /// time
+                        now_tmp += stod(words[1]); /// time
 
                         string state = "OPEN";
                         string mode = words[2];
                         string max_rate = words[3];
-                        double min_bhp;
-                        if (words[4] == "BHP")
-                            min_bhp = stoi(words[5]);
-                        else
-                            cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
-                        WellOptParam opt(state, mode, max_rate, min_bhp);
 
-                        paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
-                                                                                    well_name,
-                                                                                    "PROD", /// fff怎么知道是注入还是生产?
-                                                                                    opt));
+                        if (TypeMap[mode] == WellOptParam::PROD)
+                        {
+                            double min_bhp;
+                            if (words[4] == "BHP")
+                                min_bhp = stod(words[5]);
+                            else
+                                min_bhp = stod(words[4]);
+                            WellOptParam opt(state, mode, max_rate, min_bhp);
+                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now_tmp,
+                                                                                        well_name,
+                                                                                        "PROD",
+                                                                                        opt));
+                        }
+                        else if (TypeMap[mode] == WellOptParam::INJ)
+                        {
+                            string fluidType;
+                            if (words[2] == "WIR")
+                                fluidType = "WATER";
+                            else if (words[2] == "GIR")
+                            {
+                                // fff
+                                if (paramWell.solSet.size() <= 1)
+                                    fluidType = "solvent" + std::to_string(0);
+                                else
+                                    fluidType = "solvent" + std::to_string(paramWell.solSet.size());
+                            }
+                            else
+                                OCP_ABORT("Not support fluidType!");
+
+                            if (paramRs.blackOil)
+                                fluidType = "GAS";
+
+                            if (mode == "GIR" || mode == "WIR")
+                                mode = "RATE";
+
+                            double max_bhp;
+                            if (words[4] == "BHP")
+                                max_bhp = stod(words[5]);
+                            else
+                                max_bhp = stod(words[4]);
+                            WellOptParam opt(fluidType, state, mode, max_rate, max_bhp);
+                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now_tmp,
+                                                                                        well_name,
+                                                                                        "INJ",
+                                                                                        opt));
+                        }
+                        else
+                            OCP_ABORT("Wrong well operation type!");
                     }
                     else
                     {
-                        for (auto words: tmp)
+                        for (int k=1; k<num_times; ++k)
+                            now_tmp += stod(words[1]);
+
+                        if (std::find(words.begin(), words.end(), "SHUT") != words.end())
+                            continue;
+
+                        /// 生成一个WellOptParam对象
+                        string state = "OPEN";
+                        string mode = words[num_times+1];
+                        string max_rate = words[num_times+2];
+                        double min_bhp;
+                        if (words[num_times+3] == "BHP")
+                            min_bhp = stoi(words[num_times+4]);
+                        else
+                            cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
+
+                        if (TypeMap[mode] == WellOptParam::PROD)
                         {
-                            if (std::find(words.begin(), words.end(), "SHUT") != words.end())
-                                continue;
-
-                            /// 生成一个WellOptParam对象
-                            now += stod(words[1]);
-
-                            string state = "OPEN";
-                            string mode = words[2];
-                            string max_rate = words[3];
-                            double min_bhp;
-                            if (words[4] == "BHP")
-                                min_bhp = stoi(words[5]);
-                            else
-                                cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
                             WellOptParam opt(state, mode, max_rate, min_bhp);
-
-                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now,
+                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now_tmp,
                                                                                         well_name,
-                                                                                        "PROD", /// fff怎么知道是注入还是生产?
+                                                                                        "PROD",
                                                                                         opt));
                         }
+                        else if (TypeMap[mode] == WellOptParam::INJ)
+                        {
+                            string fluidType;
+                            if (words[2] == "WIR")
+                                fluidType = "WATER";
+                            else if (words[2] == "GIR")
+                            {
+                                // fff
+                                fluidType = "solvent" + std::to_string(paramWell.solSet.size());
+                            }
+                            else
+                                OCP_ABORT("Not support fluidType!");
+
+                            if (paramRs.blackOil)
+                                fluidType = "GAS";
+
+                            if (mode == "GIR" || mode == "WIR")
+                                mode = "RATE";
+
+                            WellOptParam opt(fluidType, state, mode, max_rate, min_bhp);
+                            paramWell.well_oper_list.push_back(ParamWell::WellOperation(now_tmp,
+                                                                                        well_name,
+                                                                                        "INJ",
+                                                                                        opt));
+                        }
+                        else
+                            OCP_ABORT("Wrong well operation type!");
                     }
                 }
                 else if (words[0] == "LIMIT") /// fff
@@ -1131,6 +2226,22 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 }
             }
         }
+        else if (words[0] == "RESTART")
+        {
+
+        }
+        else if (words[0] == "RPTSUM")
+        {
+            do {
+                i++;
+                string var = input_data[i][0];
+                cout << "var: " << var << endl;
+            } while (input_data[i+1][0] != "/");
+        }
+        else if (words[0] == "/")
+            break;
+        else if (words[0] == "BINOUT" || words[0] == "POIL") // fff
+            continue;
         else
         {
             OCP_MESSAGE("Found not supported keywords in SCHEDULE section: " << words[0]);
@@ -1139,22 +2250,19 @@ void ParamRead::ReadFileHiSim(const string& filename)
     }
 
     /// Establish Time and Well Operations
-    vector<double> all_tsteps;
-    for (int i=0; i<paramWell.well_oper_list.size(); ++i)
-    {
-        ParamWell::WellOperation opt = paramWell.well_oper_list[i];
-        all_tsteps.push_back(opt.tstep);
-    }
     /// Sort and unique
     std::sort(all_tsteps.begin(), all_tsteps.end());
     all_tsteps.erase(std::unique(all_tsteps.begin(), all_tsteps.end()), all_tsteps.end());
     /// construct criticalTime
     if (std::abs(all_tsteps[0] - 0.0) > 1.0E-10)
         paramWell.criticalTime.push_back(all_tsteps[0]);
+    //
     for (int i=1; i<all_tsteps.size(); ++i)
     {
         paramWell.criticalTime.push_back(all_tsteps[i]);
     }
+    //
+    paramControl.criticalTime = paramWell.criticalTime;
     /// construct
     for (int i=0; i<paramWell.well_oper_list.size(); ++i)
     {
@@ -1180,7 +2288,45 @@ void ParamRead::ReadFileHiSim(const string& filename)
         paramWell.well[idx_well].optParam.push_back(WellOptPair(idx_criticalTime, opt.opt));
     }
 
+
     cout << "Good 2" << endl;
+}
+
+void ParamRead::ReadRestFile(const string& filename)
+{
+    ifstream ifs(filename, ios::in);
+    if (!ifs) {
+        OCP_MESSAGE("Trying to open file: " << (filename));
+        OCP_ABORT("Failed to open the input file!");
+    }
+
+    /// TODO 第二处关键字读取
+    while (!ifs.eof()) {
+        vector<string> vbuf;
+        if (!ReadLine(ifs, vbuf)) break;
+        string keyword = vbuf[0];
+
+        std::cout << "第3阶段 关键字: " << keyword << std::endl;
+        switch (Map_Str2Int(&keyword[0], keyword.size()))
+        {
+            case Map_Str2Int("METHOD", 6):
+                paramControl.InputMETHOD(ifs);
+                break;
+
+            case Map_Str2Int("TUNING", 6):
+                paramControl.InputTUNING(ifs);
+                break;
+
+            case Map_Str2Int("SUMMARY", 7):
+                paramOutput.InputSUMMARY(ifs);
+                break;
+
+            default: // skip non-keywords
+                break;
+        }
+    }
+
+    ifs.close();
 }
 
 

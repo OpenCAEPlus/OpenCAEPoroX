@@ -7,6 +7,9 @@
  * ./testOpenCAEPoro ../../data/spe1a/spe1a.data
  * ./testOpenCAEPoro ../../data/spe1a/spe1a.data -ocp
  * ./testOpenCAEPoro ../../data/spe5/spe5.data
+ * ./testOpenCAEPoro ../../data/spe9/spe9_FIM.data
+ * ./testOpenCAEPoro ../../data/spe10/spe10.data
+ * ./testOpenCAEPoro ../../data/SPE1a-HiSim/SPE1.dat -hisim
  * ./testOpenCAEPoro ../../data/SPE5-HiSim/SPE5.dat -hisim
  * ./testOpenCAEPoro ../../data/SPE9-HiSim/SPE9.dat -hisim
  * ./testOpenCAEPoro ../../data/SPE10-HiSim/SPE10.dat -hisim

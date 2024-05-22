@@ -1,7 +1,7 @@
 # ##############################################################################
 # For METISSOLVER
 # ##############################################################################
-option(USE_METIS "Use METIS" ON)
+option(USE_METIS "Use METIS" OFF)
 
 if(USE_METIS)
 
@@ -16,6 +16,10 @@ if(USE_METIS)
     set_property(
       TARGET metis 
       PROPERTY IMPORTED_LOCATION ${METIS_LIBRARIES})
+    set_property(
+        TARGET metis
+        APPEND
+        PROPERTY INTERFACE_COMPILE_DEFINITIONS "WITH_METIS=1")        
     set_property(
       TARGET metis 
       PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${METIS_INCLUDE_DIRS})

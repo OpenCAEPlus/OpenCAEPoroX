@@ -60,6 +60,7 @@ public:
     /// Read the input file.
     void ReadFile(const string& file);
     void ReadFileHiSim(const string& file);
+    void ReadRestFile(const string& file);
     void Print(std::ostream &out = std::cout);
 
     /// Handle the INCLUDE keyword, which contains other input files.

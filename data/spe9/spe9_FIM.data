@@ -2480,7 +2480,7 @@ PVDG
 
 PVTW
 --Depth  Bw      Comp   Vw    Cv
-  3600 1.0034  0.0E-6  0.96  0.0 
+  3600 1.0034  1.0E-6  0.96  0.0
 /
 
 ROCK
@@ -2620,8 +2620,8 @@ COMPDAT
 
 WCONINJE
 --                                                 Max        BHP
---                                                 Rate       limit
- 'INJE1' 'WATER' 'OPEN' 'RATE'  5000    4000   /
+--       fluidType  state  mode   maxRate  maxBHP    Rate       limit
+ 'INJE1'  'WATER'   'OPEN' 'RATE'  5000    4000   /
 /
 
 WCONPROD
@@ -2641,6 +2641,7 @@ TUNING
 
 METHOD
 FIM  bsr.fasp
+--FIM  petsc
 /
 
 

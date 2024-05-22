@@ -171,7 +171,8 @@ void ParamControl::InputTUNING(ifstream& ifs)
         if (row == 3) break;
     }
 
-    tuning_T.push_back(TuningPair(d, tmp));
+//    tuning_T.push_back(TuningPair(d, tmp)); //
+    tuning_T.push_back(TuningPair(0, tmp)); //
 
     if (CURRENT_RANK == MASTER_PROCESS && PRINTINPUT)
         DisplayTuning();
