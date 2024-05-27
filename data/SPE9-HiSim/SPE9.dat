@@ -2218,6 +2218,42 @@ TUNING
        10    1E-2   2000    2    1      0.01    0.01  /
 /
 
+SUMMARY   ======================================================================
+FPR
+FOPR
+FOPT
+FGPR
+FGPT
+FWPR
+FWPT
+FGIR
+FGIT
+FWIR
+FWIT
+WOPR
+/
+WOPT
+/
+WGPR
+/
+WGPT
+/
+WWPR
+/
+WWPT
+/
+WGIR
+/
+WGIT
+/
+WWIR
+/
+WWIT
+/
+WBHP
+/
+/
+
 SCHEDULE
 USESTARTTIME  # All date is the start time of the operation
 RECURRENT

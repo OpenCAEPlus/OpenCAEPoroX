@@ -72,6 +72,7 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
     Prepare(rs, ctrl);
 
     // Time marching with adaptive time stepsize
+    int idx = 0;
     while (OCP_TRUE) {
         if (ctrl.time.GetCurrentDt() < MIN_TIME_CURSTEP) {
             if (CURRENT_RANK == MASTER_PROCESS)
@@ -88,6 +89,10 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
         if (!UpdateProperty(rs, ctrl)) {
             continue;
         }
+
+        idx++;
+        cout << "idx: " << idx << endl;
+
         if (FinishNR(rs, ctrl)) break;
     }
 

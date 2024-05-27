@@ -799,6 +799,9 @@ void ParamRead::Init()
     paramRs.Init();
     paramWell.Init();
     paramControl.Init(workDir, fileName);
+
+    // For HiSim input
+    recurrent_type = 1;
 }
 
 /// Get workDir and fileName from inputFile.
@@ -856,13 +859,11 @@ void ParamRead::ReadFile(const string& filename)
         OCP_ABORT("Failed to open the input file!");
     }
 
-    /// TODO 第二处关键字读取
     while (!ifs.eof()) {
         vector<string> vbuf;
         if (!ReadLine(ifs, vbuf)) break;
         string keyword = vbuf[0];
 
-        std::cout << "第二阶段 关键字: " << keyword << std::endl;
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
 
             case Map_Str2Int("FIELD", 5):
@@ -1441,6 +1442,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
             double diam = 1.0; // default
             if (well_data_map.find("'DIAM'") != well_data_map.end())
                 diam = stod(well_data_map["'DIAM'"][i]);
+            else if (well_data_map.find("'RW'") != well_data_map.end())
+                diam = stod(well_data_map["'RW'"][i]) * 2.0;
             int k1 = stoi(well_data_map["'K1'"][i]);
             int k2 = stoi(well_data_map["'K2'"][i]);
             for (int k=k1; k<=k2; ++k)
@@ -1458,11 +1461,11 @@ void ParamRead::ReadFileHiSim(const string& filename)
             i++;
             words = input_data[i];
 
-            paramWell.Psurf = stod(words[0]);
-            paramRs.Psurf = paramWell.Psurf;
-
-            paramRs.Tsurf = stod(words[1]);
+            paramRs.Tsurf = stod(words[0]);
             paramRs.Tsurf = paramWell.Tsurf;
+
+            paramWell.Psurf = stod(words[1]);
+            paramRs.Psurf = paramWell.Psurf;
         }
         else if (words[0] == "NCOMPS")
         {
@@ -1892,37 +1895,11 @@ void ParamRead::ReadFileHiSim(const string& filename)
             paramControl.method.push_back(words[0]);
             paramControl.lsFile.push_back(words[1]);
         }
-        else if (words[0] == "SUMMARY")
+        else if (words[0] == "SUMMARY") // read in ReadRestFile()
         {
             do {
                 i++;
                 words = input_data[i];
-//                if (words[0] == "FPR")
-//                    paramOutput.summary.FPR = OCP_TRUE;
-//                else if (words[0] == "FOPR")
-//                    paramOutput.summary.FOPR = OCP_TRUE;
-//                else if (words[0] == "FOPT")
-//                    paramOutput.summary.FOPT = OCP_TRUE;
-//                else if (words[0] == "FGPR")
-//                    paramOutput.summary.FGPR = OCP_TRUE;
-//                else if (words[0] == "FGPT")
-//                    paramOutput.summary.FGPt = OCP_TRUE;
-//                else if (words[0] == "FWPR")
-//                    paramOutput.summary.FWPR = OCP_TRUE;
-//                else if (words[0] == "FWPT")
-//                    paramOutput.summary.FWPT = OCP_TRUE;
-//                else if (words[0] == "FGIR")
-//                    paramOutput.summary.FGIR = OCP_TRUE;
-//                else if (words[0] == "FGIT")
-//                    paramOutput.summary.FGIT = OCP_TRUE;
-//                else if (words[0] == "FWIR")
-//                    paramOutput.summary.FWIR = OCP_TRUE;
-//                else if (words[0] == "FWIT")
-//                    paramOutput.summary.FWIT = OCP_TRUE;
-//                else if (words[0] == "FWPT")
-//                    paramOutput.summary.FWPT = OCP_TRUE;
-//                else
-//                    OCP_ABORT("Wrong summary keyword");
             } while (input_data[i+1][0] != "/");
         }
         else if (words[0] == "/")
@@ -1975,6 +1952,20 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 is_first_date = false;
                 tsteps.push_back(0);
                 all_tsteps.push_back(0.0);
+
+                if (WhichDateFormat(words[1]) == 1)
+                {
+                    for (int j=1; j<words.size(); ++j)
+                    {
+                        now += stod(words[j]);
+                        tsteps.push_back(now);
+                        all_tsteps.push_back(now);
+                    }
+                }
+                else
+                {
+                    OCP_ABORT("Not support this time format!");
+                }
             }
             else
             {
@@ -2057,7 +2048,6 @@ void ParamRead::ReadFileHiSim(const string& filename)
             double start_tmp=0.0;
 
             string well_name = words[1];
-            cout << "well name: " << well_name << endl;
             while (1)
             {
                 i++;
@@ -2198,17 +2188,14 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 else if (words[0] == "LIMIT") /// fff
                 {
                     string opt = words[1];
-                    cout << "LIMIT: " << opt << endl;
                 }
                 else if (words[0] == "PERF") /// fff
                 {
                     string opt = words[1];
-                    cout << "PERF: " << opt << endl;
                 }
                 else if (words[0] == "STREAM")
                 {
                     string opt = words[1];
-                    cout << "STREAM: " << opt << endl;
                     vector<double> ratios;
                     for (int l=0; l<paramRs.numCom; ++l)
                     {
@@ -2235,7 +2222,6 @@ void ParamRead::ReadFileHiSim(const string& filename)
             do {
                 i++;
                 string var = input_data[i][0];
-                cout << "var: " << var << endl;
             } while (input_data[i+1][0] != "/");
         }
         else if (words[0] == "/")
@@ -2287,9 +2273,6 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
         paramWell.well[idx_well].optParam.push_back(WellOptPair(idx_criticalTime, opt.opt));
     }
-
-
-    cout << "Good 2" << endl;
 }
 
 void ParamRead::ReadRestFile(const string& filename)
@@ -2300,13 +2283,11 @@ void ParamRead::ReadRestFile(const string& filename)
         OCP_ABORT("Failed to open the input file!");
     }
 
-    /// TODO 第二处关键字读取
     while (!ifs.eof()) {
         vector<string> vbuf;
         if (!ReadLine(ifs, vbuf)) break;
         string keyword = vbuf[0];
 
-        std::cout << "第3阶段 关键字: " << keyword << std::endl;
         switch (Map_Str2Int(&keyword[0], keyword.size()))
         {
             case Map_Str2Int("METHOD", 6):

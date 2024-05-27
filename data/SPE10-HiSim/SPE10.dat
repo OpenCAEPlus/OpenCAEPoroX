@@ -34,19 +34,19 @@ TEMPLATE
 'MARKER' 'I' 'J' 'K1' 'K2' 'OUTLET' 'WI' 'OS' 'SATMAP' 'HX' 'HY' 'HZ' 'REQ' 'SKIN' 'LENGTH' 'RW' 'DEV' 'ROUGH' 'DCJ' 'DCN' 'XNJ' 'YNJ' /
 WELSPECS
 NAME 'W1'
-''  1  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+''  1  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.25  NA  0  NA  NA  NA  NA
 
 NAME 'W2'
-''  60  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+''  60  1  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.25  NA  0  NA  NA  NA  NA
 
 NAME 'W3'
-''  60  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+''  60  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.25  NA  0  NA  NA  NA  NA
 
 NAME 'W4'
-''  1  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA  
+''  1  220  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.25  NA  0  NA  NA  NA  NA
 
 NAME 'W5'
-''  30  110  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.5  NA  0  NA  NA  NA  NA 
+''  30  110  1  85  NA  NA  OPEN  NA  0  0  DZ  NA  0  NA  0.25  NA  0  NA  NA  NA  NA
 
 ##################################################
 

@@ -293,7 +293,6 @@ OCP_BOOL OCPNRsuite::CheckPhysical(Reservoir& rs, const initializer_list<string>
     OCPNRStateP     workState_loc = OCPNRStateP::continueSol;
     ReservoirState rsState;
     for (auto& s : il) {
-
         if (s == "BulkP")        rsState = rs.bulk.CheckP(dt);
         else if (s == "BulkT")   rsState = rs.bulk.CheckT();
         else if (s == "BulkNi")  rsState = rs.bulk.CheckNi(dt);

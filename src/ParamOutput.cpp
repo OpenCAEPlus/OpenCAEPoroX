@@ -18,7 +18,6 @@ void ParamOutput::InputSUMMARY(ifstream& ifs)
         if (vbuf[0] == "/") break;
         string keyword = vbuf[0];
 
-        std::cout << "summary中的关键字: " << keyword << std::endl;
         switch (Map_Str2Int(&keyword[0], keyword.size())) {
             case Map_Str2Int("FPR", 3):
                 summary.FPR = OCP_TRUE;
