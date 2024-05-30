@@ -58,7 +58,7 @@ INCLUDE
 SOLUTION
 
 EQUIL
-  12000   6000   15000   0    2370    0   0   0   0  /
+  12000   6000   15000   0    0    0   0   0   0  /
 
 
 SUMMARY
@@ -104,11 +104,11 @@ FIM  bsr.fasp
 
 
 WELSPECS
-I1  G  30  110  12000   WAT  /
 P1  G   1    1  12000   OIL  /
 P2  G  60    1  12000   OIL  /
 P3  G  60  220  12000   OIL  /
 P4  G   1  220  12000   OIL  /
+I1  G  30  110  12000   WAT  /
 /
 
 COMPDAT

@@ -76,10 +76,10 @@ PVDO
  
 PVTW
 # Pref     refBw     Cw     refVisw    Cvisw
-  6000     1.01     3.1E-6     0.3      0.0
+  6000     1.01     3.0E-6     0.3      0.0
   
 DENSITY
- 53  64  53
+ 53  64  0.01078
  
 ROCK 
  6000  1.0E-6
@@ -89,23 +89,61 @@ ROCK
 SOLUTION
 EQUILPAR
 #refD     RefP    OWC    pcow    dh
- 12000    6000   12200    0.0    0.5
- 
+ 12000    6000   15000    0.0   2370
+
+METHOD
+FIM  bsr.fasp
+
+SUMMARY
+EXCEL
+FPR
+FOPR
+FOPT
+FGPR
+FGPT
+FWPR
+FWPT
+FGIR
+FGIT
+FWIR
+FWIT
+FWCT
+FWPT
+WOPR
+/
+WGPR
+/
+WWPR
+/
+WBHP
+/
+/
+
 TUNE
 TSTART 0  STEPCUT  1.0   
 MINDT  0.01  MAXDT 50   DTINC  3.0  DTCUT  0.5  NCHECKDX  
 MAXDP  0  MAXDS  0.15    MAXDC  0   MBEPC  1E-3  MBEAVG  1E-6   
 SOLVER  3064 INISTOL 1E-3
 
+TUNING
+-- Init     max    min   incre   chop    cut
+     0.01   120    0.01      3    0.15    0.3 /
+--  dPlim  dSlim   dNlim   dVerrlim
+     300     0.5    1      0.001           /
+-- itNRmax  NRtol  dPmax  dSmax  dPmin   dSmin   dVerrmax
+       10    5E-3   200    .1    1      0.01    0.01  /
+/
+
 SCHEDULE
 RECURRENT
+TIME 0
+ WELL  'W1'     BHP    100000000  4000
+ WELL  'W2'     BHP    100000000  4000
+ WELL  'W3'     BHP    100000000  4000
+ WELL  'W4'     BHP    100000000  4000
+ WELL  'W5'     WIR     5000     10000
 TIME 20*100.0
- WELL  'W1'     BHP     4000     100.0
- WELL  'W2'     BHP     4000     100.0
- WELL  'W3'     BHP     4000     100.0
- WELL  'W4'     BHP     4000     100.0
- WELL  'W5'     WIR     5000     10000   
- 
+
 RPTSCHED
  BASIC TECPLOT  /
   

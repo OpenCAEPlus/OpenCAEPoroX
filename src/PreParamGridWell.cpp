@@ -1099,6 +1099,8 @@ void PreParamGridWell::InputHISIM(const string& myFilename)
             double diam = 1.0; // default
             if (well_data_map.find("'DIAM'") != well_data_map.end())
                 diam = stod(well_data_map["'DIAM'"][i]);
+            else if (well_data_map.find("'RW'") != well_data_map.end())
+                diam = stod(well_data_map["'RW'"][i]) * 2.0;
             int k1 = stoi(well_data_map["'K1'"][i]);
             int k2 = stoi(well_data_map["'K2'"][i]);
             for (int k=k1; k<=k2; ++k)

@@ -51,7 +51,6 @@ WellOpt::WellOpt(const WellOptParam& optParam)
         mode = WellOptMode::bhp;
     } else if (optParam.mode == "WIR" || optParam.mode == "GIR")
     {
-        cout << "fff" << endl;
     }
     else {
         OCP_ABORT("Wrong well option mode!");

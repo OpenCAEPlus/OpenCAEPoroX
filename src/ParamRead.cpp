@@ -197,7 +197,7 @@ void ParamRead::Print(std::ostream &out)
         out << '\n';
     }
     //
-    out << paramRs.PVTW_T.name << '\n';
+    out << "pvtw: " << paramRs.PVTW_T.name << '\n';
     for (auto first: paramRs.PVTW_T.data)
     {
         for (auto second: first)
@@ -1631,7 +1631,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
         {
             TableSet* obj = paramRs.FindPtrTable("PVTW");
             const int num_cols = obj->colNum;
-            vector<vector<OCP_DBL>> pvtw(num_cols); /// TODO not string, double
+            vector<vector<OCP_DBL>> pvtw(num_cols);
             while (1)
             {
                 i++;
@@ -1953,7 +1953,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 tsteps.push_back(0);
                 all_tsteps.push_back(0.0);
 
-                if (WhichDateFormat(words[1]) == 1)
+                if (WhichDateFormat(words[1]) == 1) // double tstep
                 {
                     for (int j=1; j<words.size(); ++j)
                     {
@@ -1961,6 +1961,12 @@ void ParamRead::ReadFileHiSim(const string& filename)
                         tsteps.push_back(now);
                         all_tsteps.push_back(now);
                     }
+                }
+                else if (WhichDateFormat(words[1]) == 0) // year-mm-dd tstep
+                {
+                    now = 0;
+                    tsteps.push_back(now);
+                    all_tsteps.push_back(now);
                 }
                 else
                 {
@@ -2017,14 +2023,12 @@ void ParamRead::ReadFileHiSim(const string& filename)
                         fluidType = "WATER";
                     else if (words[2] == "GIR")
                     {
-                        // fff
                         fluidType = "solvent" + std::to_string(paramWell.solSet.size());
+                        if (paramRs.blackOil)
+                            fluidType = "GAS";
                     }
                     else
                         OCP_ABORT("Not support fluidType!");
-
-                    if (paramRs.blackOil)
-                        fluidType = "GAS";
 
                     double max_bhp = stod(words[4]);
 
