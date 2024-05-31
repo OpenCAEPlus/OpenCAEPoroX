@@ -1422,6 +1422,9 @@ void ParamRead::ReadFileHiSim(const string& filename)
             string name = well_data_map["NAME"][i];
             int I = stoi(well_data_map["'I'"][i]);
             int J = stoi(well_data_map["'J'"][i]);
+            double depth = -1;
+            if (well_data_map.find("'DEPTH'") != well_data_map.end())
+                depth = stod(well_data_map["'DEPTH'"][i]);
             // find if the well exists
             bool found_well = false;
             int idx = paramWell.well.size();
@@ -1436,7 +1439,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 }
             }
             if (!found_well)
-                paramWell.well.push_back(WellParam(name, I, J));
+                paramWell.well.push_back(WellParam(name, I, J, depth));
 
             // set perforations of well
             double diam = 1.0; // default

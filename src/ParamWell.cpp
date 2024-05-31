@@ -131,15 +131,15 @@ WellParam::WellParam(string name_, USI i, USI j, OCP_DBL depth_)
     depth = depth_;
 }
 
-WellParam::WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z)
-{
-    gridType = GridType::unstructured;
-    name = name_;
-    group = "DEFAULT";
-    X = x;
-    Y = y;
-    Z = z;
-}
+//WellParam::WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z)
+//{
+//    gridType = GridType::unstructured;
+//    name = name_;
+//    group = "DEFAULT";
+//    X = x;
+//    Y = y;
+//    Z = z;
+//}
 
 
 void WellParam::InputCOMPDAT(vector<string>& vbuf)

@@ -97,7 +97,7 @@ public:
     /// Input well in unstructured grid
     WellParam(vector<string>& info, const string& unstructured);
     WellParam(string name_, USI i, USI j, OCP_DBL depth_=-1.0); /// fff
-    WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z);
+//    WellParam(string name_, OCP_DBL x, OCP_DBL y, OCP_DBL z);
     /// Input perforations
     void InputCOMPDAT(vector<string>& vbuf);
     /// Input perforations in structured grid
