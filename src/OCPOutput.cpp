@@ -8,6 +8,7 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
+#include <string.h>
 
 #include "OCPOutput.hpp"
 
