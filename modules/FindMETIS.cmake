@@ -24,7 +24,7 @@ mark_as_advanced(METIS_INCLUDE_DIRS)
 
 # Check for METIS library
 find_library(METIS_LIB metis
-  HINTS ${METIS_DIR} ${METIS_DIR}/METIS ${METIS_DIR}/lib ${METIS_DIR}/METIS/lib $ENV{METIS_BUILD_DIR}/libmetis $ENV{METIS_DIR}/METIS/lib
+  HINTS ${METIS_DIR} ${METIS_DIR}/METIS ${METIS_DIR}/lib ${METIS_DIR}/METIS/lib $ENV{METIS_BUILD_DIR}/libmetis $ENV{METIS_DIR}/METIS/lib $ENV{METIS_DIR}/lib
   DOC "The METIS library"
   )
 
