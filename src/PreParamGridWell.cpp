@@ -12,12 +12,18 @@
 #include "PreParamGridWell.hpp"
 
 
-void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir)
+void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, int type)
 {
     OCP_INFO("Input Grid File -- begin");
 
     workdir = myWorkdir;
-    Input(myFile);
+    if (type == 0)
+        Input(myFile);
+    else if (type == 1)
+        InputHiSim(myFile);
+    else
+        OCP_ABORT("Wrong input type in PreParamGridWell::InputFile()!");
+
     CheckInput();
     PostProcessInput();
 
@@ -127,6 +133,129 @@ void PreParamGridWell::Input(const string& myFilename)
                 break;
 #ifdef WITH_GMSH
             case Map_Str2Int("GMSH", 4):
+                InputGMSH(ifs);
+                break;
+
+            case Map_Str2Int("GMSHPRO", 7):
+                InputGMSHPRO(ifs);
+                break;
+#endif
+
+            case Map_Str2Int("WELSPECS", 8):
+                InputWELSPECS(ifs);
+                break;
+
+            case Map_Str2Int("COMPDAT", 7):
+                InputCOMPDAT(ifs);
+                break;
+
+            case Map_Str2Int("VTKSCHED", 8):
+                InputVTKSCHED(ifs);
+                break;
+
+            default: // skip non-keywords
+                break;
+        }
+    }
+
+    ifs.close();
+}
+
+
+void PreParamGridWell::InputHiSim(const string& myFilename)
+{
+    ifstream ifs(workdir + myFilename, ios::in);
+    if (!ifs) {
+        OCP_MESSAGE("Trying to open file: " << (workdir + myFilename));
+        OCP_ABORT("Failed to open the input file!");
+    }
+    else {
+        cout << "Reading file: " << (workdir + myFilename) << endl;
+    }
+
+    while (!ifs.eof()) {
+        vector<string> vbuf;
+        if (!ReadLine(ifs, vbuf)) break;
+        string keyword = vbuf[0];
+
+        switch (Map_Str2Int(&keyword[0], keyword.size()))
+        {
+            case Map_Str2Int("MODEL", 5):
+                InputMODEL(ifs);
+                break;
+
+            case Map_Str2Int("DUALPORO", 8):
+                InputDUALPORO();
+                break;
+
+            case Map_Str2Int("DPGRID", 6):
+                InputDPGRID();
+                break;
+
+            case Map_Str2Int("DIMENS", 6):
+                InputDIMENS(ifs);
+                break;
+
+            case Map_Str2Int("EQUALS", 6):
+                InputEQUALS(ifs);
+                break;
+
+            case Map_Str2Int("COPY", 4):
+                InputCOPY(ifs);
+                break;
+
+            case Map_Str2Int("MULTIPLY", 8):
+                InputMULTIPLY(ifs);
+                break;
+
+            case Map_Str2Int("INITPTN0", 8):
+            case Map_Str2Int("INITPTN1", 8):
+                initR.type = keyword;
+                break;
+
+            case Map_Str2Int("DX", 2):
+            case Map_Str2Int("DY", 2):
+            case Map_Str2Int("DZ", 2):
+            case Map_Str2Int("TOPS", 4):
+            case Map_Str2Int("COORD", 5):
+            case Map_Str2Int("ZCORN", 5):
+            case Map_Str2Int("NTG", 3):
+            case Map_Str2Int("PORO", 4):
+            case Map_Str2Int("PERMX", 5):
+            case Map_Str2Int("PERMY", 5):
+            case Map_Str2Int("PERMZ", 5):
+            case Map_Str2Int("ACTNUM", 6):
+            case Map_Str2Int("SATNUM", 6):
+            case Map_Str2Int("PVTNUM", 6):
+            case Map_Str2Int("ROCKNUM", 7):
+            case Map_Str2Int("SWAT", 4):
+            case Map_Str2Int("SWATINIT", 8):
+            case Map_Str2Int("SIGMAV", 6):
+            case Map_Str2Int("MULTZ", 5):
+            case Map_Str2Int("DZMTRXV", 7):
+            case Map_Str2Int("PRESSURE", 8):
+            case Map_Str2Int("TEMPER", 6):
+            case Map_Str2Int("PHASEP-0", 8):
+            case Map_Str2Int("PHASEP-1", 8):
+            case Map_Str2Int("PHASEP-2", 8):
+            case Map_Str2Int("COMPM-0", 7):
+            case Map_Str2Int("COMPM-1", 7):
+            case Map_Str2Int("COMPM-2", 7):
+            case Map_Str2Int("COMPM-3", 7):
+            case Map_Str2Int("COMPM-4", 7):
+            case Map_Str2Int("COMPM-5", 7):
+            case Map_Str2Int("COMPM-6", 7):
+            case Map_Str2Int("COMPM-7", 7):
+            case Map_Str2Int("COMPM-8", 7):
+            case Map_Str2Int("COMPM-9", 7):
+                InputGridParam(ifs, keyword);
+                break;
+
+            case Map_Str2Int("INCLUDE", 7):
+                InputINCLUDE(ifs);
+                break;
+#ifdef WITH_GMSH
+                case Map_Str2Int("GMSH", 4):
                 InputGMSH(ifs);
                 break;
 

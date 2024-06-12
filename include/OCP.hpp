@@ -75,7 +75,7 @@ public:
     }
 
     /// Read Param from an input file.
-    void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro);
+    void SetupDistParam(const USI& argc, const char* argv[], PreProcess& prepro, const OCP_INT& myrank, int type);
 
     /// Setup reservoir based on an internal structure.
     void SetupSolver();
