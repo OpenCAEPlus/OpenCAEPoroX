@@ -153,10 +153,11 @@ class PreParamGridWell
 
 public:
     /// Input params files
-    void InputFile(const string& myFile, const string& myWorkdir);
+    void InputFile(const string& myFile, const string& myWorkdir, int type=0);
 
 protected:
     void Input(const string& myFilename);
+    void InputHiSim(const string& myFilename);
     /// Check Input
     void CheckInput();
     /// Post-process input param 

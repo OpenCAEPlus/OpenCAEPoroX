@@ -45,7 +45,7 @@ WELLDIMS
 2 2 /
 
 START
-1 JAN 1990 /      £¡uppercase letter
+1 JAN 1990 /      ï¿½ï¿½uppercase letter
 
 GRID    ================================================================
 
@@ -183,7 +183,8 @@ TUNING
 
 
 METHOD
-FIM  pardiso
+--FIM  pardiso
+FIM bsr.fasp
 /
 
 
