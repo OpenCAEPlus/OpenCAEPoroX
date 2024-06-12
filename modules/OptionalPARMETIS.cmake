@@ -1,7 +1,7 @@
 # ##############################################################################
 # For PARMETISSOLVER
 # ##############################################################################
-option(USE_PARMETIS "Use PARMETIS" ON)
+option(USE_PARMETIS "Use PARMETIS" OFF)
 
 if(USE_PARMETIS)
 

@@ -3,6 +3,13 @@
  *  \author  Shizhe Li
  *  \date    Feb/15/2023
  *
+ * ./testOpenCAEPoro ../../data/spe1a/spe1a.data
+ * ./testOpenCAEPoro ../../data/spe1a/spe1a.data -ocp
+ * ./testOpenCAEPoro ../../data/spe5/spe5.data
+ * ./testOpenCAEPoro ../../data/spe9/spe9_FIM.data
+ * ./testOpenCAEPoro ../../data/spe10/spe10.data
+ * ./testOpenCAEPoro /home/fanronghong/work/ocp_input/HiSim-shijianli/4-FJW/Template_HiSim4.0.dat -hisim
+ *
  *-----------------------------------------------------------------------------------
  *  Copyright (C) 2021--present by the OpenCAEPoroX team. All rights reserved.
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
@@ -25,14 +32,16 @@ using namespace std;
 /// The main() function performs dynamic simulation in five steps.
 int main(int argc, char* argv[])
 {
-
+    OCP_INT myRank, commSize;
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &CURRENT_RANK);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &commSize);
+    CURRENT_RANK = myRank;
 
     OpenCAEPoroX simulator;
 
-    // Step 0. Print simulator version information.   
-    if (CURRENT_RANK == MASTER_PROCESS) {
+    // Step 0. Print simulator version information.
+    if (myRank == MASTER_PROCESS) {
         if (argc < 2) {
             simulator.PrintUsage(argv[0]);
             return OCP_ERROR_NUM_INPUT; // Need at least one parameter
@@ -47,11 +56,22 @@ int main(int argc, char* argv[])
     }
 
     {
-        // Step 1. Input and generate Grid infomation and partition
-        PreProcess preProcess(argv[1]);
+        if (argc == 2 || (argc == 3 && strcmp(argv[2], "-ocp") == 0))
+        {
+            // Step 1. Input and generate Grid infomation and partition
+            PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD, PreProcess::InputType::OCP);
 
-        // Step 2. Input reservoir information and distribute
-        simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess);
+            // Step 2. Input reservoir information and distribute
+            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank, PreProcess::InputType::OCP);
+        }
+        else if (argc == 3 && strcmp(argv[2], "-hisim") == 0)
+        {
+            // Step 1. Input and generate Grid infomation and partition
+            PreProcess preProcess(argv[1], myRank, MPI_COMM_WORLD, PreProcess::InputType::HISIM);
+
+            // Step 2. Input reservoir information and distribute
+            simulator.SetupDistParam(argc, const_cast<const char**>(argv), preProcess, myRank, PreProcess::InputType::HISIM);
+        }
     }
 
     // Step 3. Setup solver
