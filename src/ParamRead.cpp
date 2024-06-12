@@ -46,7 +46,10 @@ void ParamRead::ReadInputFile(const string& filename, int type)
     GetDirAndName();
     Init();
 
+<<<<<<< HEAD
     cout << "------> 第二阶段关键字" << endl;
+=======
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
     if (type == 0)
         ReadFile(inputFile);
     else if (type == 1)
@@ -432,7 +435,10 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("BLACKOIL", 8):
                 paramRs.blackOil = OCP_TRUE;
+<<<<<<< HEAD
                 paramWell.blackOil = OCP_TRUE;
+=======
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("COMPS", 5):
@@ -467,6 +473,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("INITPTN0", 8):
             case Map_Str2Int("INITPTN1", 8):
+<<<<<<< HEAD
                 paramRs.initType = InitType::PTN;
                 break;
 
@@ -476,6 +483,13 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("EQUILWAT", 8):
                 paramRs.initType = InitType::WAT;
+=======
+                paramRs.initType = "INITPTN";
+                break;
+
+            case Map_Str2Int("EQUILWAT", 8):
+                paramRs.initType = "EQUILWAT";
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("RTEMP", 5):
@@ -484,7 +498,10 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("SWFN", 4):
             case Map_Str2Int("SWOF", 4):
+<<<<<<< HEAD
             case Map_Str2Int("SWGF", 4):
+=======
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
             case Map_Str2Int("SGFN", 4):
             case Map_Str2Int("SGOF", 4):
             case Map_Str2Int("SOF3", 4):
@@ -553,7 +570,11 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 break;
 
             case Map_Str2Int("INCLUDE", 7):
+<<<<<<< HEAD
                 ReadINCLUDE(ifs, 1);
+=======
+                ReadINCLUDE(ifs);
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("METHOD", 6):
@@ -564,12 +585,17 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 paramControl.InputTUNING(ifs);
                 break;
 
+<<<<<<< HEAD
             case Map_Str2Int("TEMPLATE", 8):
                 paramWell.InputTEMPLATE(ifs);
                 break;
 
             case Map_Str2Int("WELSPECS", 8):
                 paramWell.InputWELSPECS(ifs, 1);
+=======
+            case Map_Str2Int("WELSPECS", 8):
+                paramWell.InputWELSPECS(ifs);
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("COMPDAT", 7):
@@ -593,6 +619,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 paramControl.criticalTime = paramWell.criticalTime;
                 break;
 
+<<<<<<< HEAD
             case Map_Str2Int("TIME", 4):
                 paramWell.InputTIME(vbuf);
                 paramControl.criticalTime = paramWell.criticalTime;
@@ -603,6 +630,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
                     paramWell.InputWELLOperations(vbuf, ifs);
                 break;
 
+=======
+>>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
             case Map_Str2Int("WELTARG", 7):
             case Map_Str2Int("WELLTARG", 8):
                 paramWell.InputWELTARG(ifs);
