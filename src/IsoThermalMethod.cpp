@@ -768,14 +768,14 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
 
+    NR.UpdateIter(abs(status));
+
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
     }
-
-    NR.UpdateIter(abs(status));
 
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
 
@@ -1153,9 +1153,9 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
-        if (CURRENT_RANK == 0) {
-            cout << "FIM : globalres0 : " << res.maxRelRes0_V << endl;
-        }
+        //if (CURRENT_RANK == 0) {
+        //    cout << "FIM : globalres0 : " << res.maxRelRes0_V << endl;
+        //}
     }
 
 }
@@ -2505,7 +2505,7 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
         }
     }
 
-    if (OCP_TRUE) {
+    if (OCP_FALSE) {
         if (domain.cs_group_global_rank.size() > 1) {
             if (domain.cs_rank == 0) {
                 cout << "rank" << CURRENT_RANK << "  ";
@@ -2714,9 +2714,9 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
             MPI_Allreduce(&res.maxRelRes_V, &global_res0, 1, OCPMPI_DBL, MPI_MIN, rs.domain.global_comm);
         }
 
-        if (CURRENT_RANK == 0) {
-            cout << "FIMddm : globalres0 : " << global_res0 << endl;
-        }
+        //if (CURRENT_RANK == 0) {
+        //    cout << "FIMddm : globalres0 : " << global_res0 << endl;
+        //}
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
     }

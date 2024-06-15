@@ -220,7 +220,7 @@ TUNING
 
 
 METHOD
-FIM  pardiso  FIMddm  pardiso
+FIM  pardiso
 / 
 
 

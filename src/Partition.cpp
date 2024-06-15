@@ -136,7 +136,7 @@ void Partition::CalPartition(const PreParamGridWell& grid)
 	GetWallTime timer;
 	timer.Start();
 
-	if (OCP_FALSE) {
+	if (OCP_TRUE) {
 		CalPartitionParMetis();
 	}
 	else {

@@ -149,7 +149,7 @@ public:
     void Setup(const OutputSummary& summary_param, const Reservoir& reservoir);
 
     /// Set value for vars
-    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const ItersInfo& iters);
+    void SetVal(const Reservoir& reservoir, const OCPControl& ctrl, const ItersInfo& iters, GetWallTime& timer);
 
     /// Write output information to a file.
     void PrintInfo(const string& dir, const string& filename, const OCP_INT& rank) const;
@@ -335,7 +335,7 @@ public:
     /// Input Params about output
     void Setup(const ParamOutput& paramOutput, const OCPControl& ctrl, const Reservoir& rs);
     /// Assign values to be output in PrintAtTimeStep()
-    void SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR);
+    void SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR, GetWallTime& timer_total);
     /// Output info which is each time step based
     void PrintAtTimeStep() const;
     /// Output info which is Keyword TSTEP based

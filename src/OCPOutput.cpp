@@ -69,6 +69,7 @@ void Summary::Setup(const OutputSummary& summary_param, const Reservoir& rs)
     Sumdata.push_back(SumItem("NRiter", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("LSiter", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("LS/NR", "-", "-", "float", maxRowNum));
+    Sumdata.push_back(SumItem("Runtime", "-", "s", "float", maxRowNum));
     if (FPR) Sumdata.push_back(SumItem("FPR", "-", "PSIA", "float", maxRowNum));
     if (FPR) Sumdata.push_back(SumItem("Volume", "Hydrocarbon", "Ft3", "float", maxRowNum));
     if (FTR) Sumdata.push_back(SumItem("FTR", "-", "F", "float", maxRowNum));
@@ -419,7 +420,7 @@ void Summary::Setup(const OutputSummary& summary_param, const Reservoir& rs)
 
 }
 
-void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInfo& iters)
+void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInfo& iters, GetWallTime& timer)
 {
     const Bulk&     bulk  = rs.bulk;
     const AllWells& wells = rs.allWells;
@@ -434,7 +435,8 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInf
     Sumdata[n++].val.push_back(iters.GetLSt());
     // LSiter / NRiter
     Sumdata[n++].val.push_back(1.0 * Sumdata[2].val.back() / Sumdata[1].val.back());
-
+    // runtime
+    Sumdata[n++].val.push_back(timer.Stop());
 
     OCP_DBL  tmpV = 0;
     if (FPR) Sumdata[n++].val.push_back(bulk.CalFPR(tmpV));
@@ -1555,7 +1557,10 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 			}
 
 			// input grid info
-			if (bgp.bgpnum == 0)  continue;
+            if (bgp.bgpnum == 0) {
+                index++;
+                continue;
+            }
 
 			tmpVal.resize(numGridLoc * bgp.bgpnum);
 
@@ -1664,7 +1669,7 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
     USI numTstep = timeSeries.size();
     if (numTstep != gridVal.size()) {
         cout << numTstep << "   " << gridVal.size() << endl;
-        OCP_ABORT("Something Wrong int the temporary files");
+        OCP_ABORT("Something Wrong in the temporary files");
     }
 
     if (numTstep == 0) {
@@ -1767,7 +1772,11 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         string tmpS(timeInfo);
 
         // input grid info
-        if (bgp.bgpnum == 0)  continue;
+        if (bgp.bgpnum == 0) {
+            index++;
+            continue;
+        }
+
         tmpVal.resize(bgp.bgpnum * numGrid);
 
         inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
@@ -1874,13 +1883,13 @@ void OCPOutput::SetupComm(const Domain& domain)
 }
 
 
-void OCPOutput::SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR)
+void OCPOutput::SetValAtTimeStep(const Reservoir& rs, const OCPControl& ctrl, const OCPNRsuite& NR, GetWallTime& timer_total)
 {
     GetWallTime timer;
     timer.Start();
 
     iters.Update(NR);
-    summary.SetVal(rs, ctrl, iters);
+    summary.SetVal(rs, ctrl, iters, timer_total);
     crtInfo.SetVal(ctrl, NR);
 
     OCPTIME_OUTPUT += timer.Stop();

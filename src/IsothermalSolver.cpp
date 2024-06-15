@@ -236,8 +236,8 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
         curMethod = mainMethod;
         if (curMethod == OCPNLMethod::FIM) {
-            if (CURRENT_RANK == 0)
-                cout << "FIMddm iters = " << fim_ddm.NR.GetIterNR() << "  " << endl;
+            //if (CURRENT_RANK == 0)
+            //    cout << "FIMddm iters = " << fim_ddm.NR.GetIterNR() << "  " << endl;
             if (fim.TransferToFIM(fim_ddm.global_res0, rs, ctrl) == OCP_TRUE) {
                 return OCP_FALSE;
             }
