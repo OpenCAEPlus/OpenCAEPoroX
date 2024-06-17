@@ -162,6 +162,9 @@ OCP_BOOL IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContr
     int status = ls.Solve();
     OCPTIME_LSOLVER += timer.Stop();
 
+
+    NR.UpdateIter(abs(status));
+
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
@@ -169,8 +172,6 @@ OCP_BOOL IsoT_IMPEC::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContr
         return OCP_FALSE;
     }
 
-
-    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     //OCP_INT myrank = rs.domain.global_rank;
@@ -1574,6 +1575,8 @@ OCP_BOOL IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContro
     int status = ls.Solve();
     OCPTIME_LSOLVER += timer.Stop();
 
+    NR.UpdateIter(abs(status));
+
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
@@ -1581,7 +1584,6 @@ OCP_BOOL IsoT_AIMc::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPContro
         return OCP_FALSE;
     }
 
-    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     //OCP_INT global_rank = rs.domain.global_rank;
@@ -2280,6 +2282,8 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
     int status = 0;
     MPI_Allreduce(&iter, &status, 1, OCPMPI_INT, MPI_MIN, rs.domain.global_comm);
 
+    NR.UpdateIter(abs(iter));
+
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
@@ -2287,7 +2291,6 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
         return OCP_FALSE;
     }
 
-    NR.UpdateIter(abs(iter));
 
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
 

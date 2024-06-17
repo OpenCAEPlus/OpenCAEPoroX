@@ -73,6 +73,8 @@ OCP_BOOL T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
 
+    NR.UpdateIter(abs(status));
+
     if (status < 0) {
         ls.ClearData();
         ctrl.time.CutDt(-1.0);
@@ -80,7 +82,6 @@ OCP_BOOL T_FIM::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPControl& c
         return OCP_FALSE;
     }
 
-    NR.UpdateIter(abs(status));
 
 #ifdef DEBUG
     // Output A, b, x
