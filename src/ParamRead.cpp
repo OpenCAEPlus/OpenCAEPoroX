@@ -46,6 +46,7 @@ void ParamRead::ReadInputFile(const string& filename, int type)
     GetDirAndName();
     Init();
 
+    cout << "------> 第二阶段关键字" << endl;
     if (type == 0)
         ReadFile(inputFile);
     else if (type == 1)
@@ -546,7 +547,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 break;
 
             case Map_Str2Int("INCLUDE", 7):
-                ReadINCLUDE(ifs);
+                ReadINCLUDE(ifs, 1);
                 break;
 
             case Map_Str2Int("METHOD", 6):
@@ -557,8 +558,12 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 paramControl.InputTUNING(ifs);
                 break;
 
+            case Map_Str2Int("TEMPLATE", 8):
+                paramWell.InputTEMPLATE(ifs);
+                break;
+
             case Map_Str2Int("WELSPECS", 8):
-                paramWell.InputWELSPECS(ifs);
+                paramWell.InputWELSPECS(ifs, 1);
                 break;
 
             case Map_Str2Int("COMPDAT", 7):
@@ -580,6 +585,16 @@ void ParamRead::ReadFileHiSim(const string& filename)
             case Map_Str2Int("TSTEP", 5):
                 paramWell.InputTSTEP(ifs);
                 paramControl.criticalTime = paramWell.criticalTime;
+                break;
+
+            case Map_Str2Int("TIME", 4):
+                paramWell.InputTIME(vbuf);
+                paramControl.criticalTime = paramWell.criticalTime;
+                break;
+
+            case Map_Str2Int("WELL", 4):
+                if (vbuf.size() >= 2)
+                    paramWell.InputWELLOperations(vbuf, ifs);
                 break;
 
             case Map_Str2Int("WELTARG", 7):
@@ -706,6 +721,8 @@ void ParamRead::ReadFileHiSim(const string& filename)
                 break;
 
             default: // skip non-keywords
+                if (isRegularString(keyword) and keyword.find('*') == std::string::npos)
+                    std::cout << "======> ParamRead::ReadFileHiSim() skip keyword: " << keyword << std::endl;
                 break;
         }
     }
@@ -724,6 +741,20 @@ void ParamRead::ReadINCLUDE(ifstream& ifs)
     if (CURRENT_RANK == MASTER_PROCESS)
         cout << "begin to read " + workDir + vbuf[0] << endl;
     ReadFile(workDir + vbuf[0]);
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "finish reading " + workDir + vbuf[0] << endl;
+}
+
+void ParamRead::ReadINCLUDE(ifstream& ifs, int type)
+{
+    assert(type == 1);
+    vector<string> vbuf;
+    ReadLine(ifs, vbuf);
+    DealDefault(vbuf);
+
+    if (CURRENT_RANK == MASTER_PROCESS)
+        cout << "begin to read " + workDir + vbuf[0] << endl;
+    ReadFileHiSim(workDir + vbuf[0]);
     if (CURRENT_RANK == MASTER_PROCESS)
         cout << "finish reading " + workDir + vbuf[0] << endl;
 }

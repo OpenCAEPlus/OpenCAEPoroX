@@ -73,6 +73,27 @@ void DealData(const vector<string>& vbuf, vector<OCP_USI>& obj, vector<T>& regio
     }
 }
 
+/// Judge the str is a double or string
+inline bool isRegularString(const std::string& str)
+{
+    std::istringstream iss(str);
+    double num;
+    iss >> std::noskipws >> num;
+
+    // 如果转换成功，说明是double类型
+    if (!iss.fail() && iss.eof()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// 0: like 1990-01-01
+// 1: a double
+int WhichDateFormat(const std::string& str);
+
+int NumDaysBetweenDates(const string& str1, const string& str2);
+
 #endif /* end if __UTILINPUT_HEADER__ */
 
 /*----------------------------------------------------------------------------*/

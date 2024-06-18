@@ -19,6 +19,7 @@ PreProcess::PreProcess(const string& myFile, const OCP_INT& myRank, MPI_Comm com
 
     if (myRank == MASTER_PROCESS) {
         GetFile(myFile);
+        cout << "------> 第一阶段关键字" << endl;
         preParamGridWell.InputFile(filename, workdir, type);
         preParamGridWell.Setup();
     }
