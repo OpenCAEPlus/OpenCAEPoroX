@@ -8,6 +8,7 @@
  *  Released under the terms of the GNU Lesser General Public License 3.0 or later.
  *-----------------------------------------------------------------------------------
  */
+#include <algorithm>
 
 #include "ParamWell.hpp"
 
@@ -55,6 +56,12 @@ WellParam::WellParam(vector<string>& info)
     I = stoi(info[2]);
     J = stoi(info[3]);
     if (info[4] != "DEFAULT") depth = stod(info[4]);
+}
+
+WellParam::WellParam(const std::string& name_)
+{
+    gridType = GridType::structured;
+    name = name_;
 }
 
 
@@ -162,6 +169,17 @@ Solvent::Solvent(const vector<string>& vbuf)
     }
 }
 
+int ParamWell::FindWellByName(const string& name)
+{
+    for (int i=0; i<well.size(); ++i)
+    {
+        if (well[i].name == name)
+            return i;
+    }
+
+    OCP_ABORT("Not found well!");
+}
+
 
 void ParamWell::Init() 
 { 
@@ -171,6 +189,29 @@ void ParamWell::Init()
     InitTime(); 
 };
 
+void ParamWell::InputTEMPLATE(ifstream &ifs)
+{
+    vector<string> vbuf;
+    int index = 0;
+    do {
+        ReadLine(ifs, vbuf);
+
+        int size = vbuf.size();
+        for (int i=0; i<size-1; ++i)
+        {
+            templates.insert(std::pair<std::string, int>(vbuf[i], index));
+            index++;
+        }
+
+        if (vbuf[size-1] != "/")
+        {
+            templates.insert(std::pair<std::string, int> (vbuf[size-1], index));
+        }
+        else
+            break;
+
+    } while (true);
+}
 
 void ParamWell::InputWELSPECS(ifstream& ifs)
 {
@@ -189,6 +230,66 @@ void ParamWell::InputWELSPECS(ifstream& ifs)
         }
     }
 }
+
+void ParamWell::InputWELSPECS(ifstream& ifs, int type)
+{
+    assert(type == 1);
+    vector<string> vbuf;
+
+    ReadLine(ifs, vbuf);
+    assert(vbuf[0] == "NAME");
+    int well_index = well.size();
+    well.push_back(WellParam(vbuf[1]));
+
+    bool first_perf = true;
+    int i_, j_, k_;
+    std::map<std::string, int>::iterator iter;
+    int pos = ifs.tellg();
+    while (ReadLine(ifs, vbuf))
+    {
+        if (isRegularString(vbuf[0]))
+        {
+            ifs.seekg(pos);
+            break;
+        }
+
+        pos = ifs.tellg();
+
+        DealDefault(vbuf);
+        const USI len = vbuf.size();
+
+        /// Obtain perforations data
+        int i = stoi(vbuf[templates["I"]]);
+        int j = stoi(vbuf[templates["J"]]);
+        if (first_perf)
+        {
+            i_ = i;
+            j_ = j;
+            first_perf = false;
+        }
+        else
+        { /// 一口井只有一个井头fff: (i,j)定义一个井头
+//            assert(i == i_);
+//            assert(j == j_);
+        }
+        int k1 = stoi(vbuf[templates["K1"]]);
+        int k2 = stoi(vbuf[templates["K2"]]);
+        double diam = stod(vbuf[templates["RW"]]) * 2;
+
+        for (int k=k1; k<=k2; ++k)
+        {
+            well[well_index].I_perf.push_back(i);
+            well[well_index].J_perf.push_back(j);
+            well[well_index].K_perf.push_back(k);
+            well[well_index].diameter.push_back(diam);
+            well[well_index].skinFactor.push_back(0.0);
+            well[well_index].kh.push_back(-1.0);
+            well[well_index].WI.push_back(-1.0); // fff
+            well[well_index].direction.push_back("z");
+        }
+    }
+}
+
 
 void ParamWell::InputCOMPDAT(ifstream& ifs)
 {
@@ -303,6 +404,84 @@ void ParamWell::InputTSTEP(ifstream& ifs)
             OCP_DBL t = criticalTime.back() + stod(vbuf.back());
             criticalTime.push_back(t);
         }
+    }
+}
+
+void ParamWell::InputTIME(const std::vector<std::string>& vbuf)
+{
+    assert(criticalTime.size() > 0);
+    assert(vbuf[0] == "TIME");
+
+    if (WhichDateFormat(vbuf[1]) == 0)
+    {
+        if (is_first_time)
+        {
+            first_time = vbuf[1];
+            is_first_time = OCP_FALSE;
+
+            criticalTime.push_back(0.0);
+        }
+        else
+        {
+            int days = NumDaysBetweenDates(first_time, vbuf[1]);
+            criticalTime.push_back(days);
+        }
+    }
+    else
+        OCP_ABORT("Not support double time format now!");
+}
+
+void ParamWell::InputWELLOperations(vector<string> str, ifstream &ifs)
+{
+    string well_name = str[1];
+    int well_index = FindWellByName(well_name);
+    string well_state = "OPEN";
+    string mode = "";
+
+    if (str.size() > 2)
+        OCP_ABORT("Not support now!");
+
+//    if (well_name == "YA002-2")
+//        cout << "Goog" << endl;
+
+    const USI time_index = criticalTime.size() - 1;
+
+    vector<string> vbuf;
+    int pos = ifs.tellg();
+    while (ReadLine(ifs, vbuf) && (vbuf[0] != "WELL" || vbuf[0] != "TIME"))
+    {
+        if (vbuf[0] == "WELL" || vbuf[0] == "TIME")
+        {
+            ifs.seekg(pos);
+            break;
+        }
+        pos = ifs.tellg(); // save position
+
+        if (std::find(vbuf.begin(), vbuf.end(), "SHUT") != vbuf.end())
+        {
+            well_state = "SHUT";
+
+        }
+        else if (std::find(vbuf.begin(), vbuf.end(), "GRAT") != vbuf.end())
+        {
+            int index = std::distance(vbuf.begin(), std::find(vbuf.begin(), vbuf.end(), "GRAT"));
+            // 生产井
+
+        }
+        else if (vbuf[0] == "PERF")
+        {
+            continue;
+        }
+        else if (vbuf[0] == "/")
+        {
+            break;
+        }
+        else
+        {
+            string msg = "Not support WELL opertion: " + vbuf[0];
+            OCP_ABORT(msg);
+        }
+
     }
 }
 

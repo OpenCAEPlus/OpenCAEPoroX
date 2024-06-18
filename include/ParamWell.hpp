@@ -16,6 +16,7 @@
 #include <cassert>
 #include <fstream>
 #include <vector>
+#include <map>
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
@@ -40,7 +41,33 @@ public:
     OCP_DBL maxBHP;      ///< Maximum allowable pressure in the injection well.
     OCP_DBL minBHP;      ///< Minimum allowable pressure in the production well.
     OCP_DBL injTemp;     ///< Temperature of injected fluid.
+
+    enum Type
+    {
+        INVALID=0,
+        PROD,
+        INJ,
+    };
+
 };
+
+
+static std::map<std::string, WellOptParam::Type> TypeMap = {
+        {"WIR", WellOptParam::INJ},
+        {"GIR", WellOptParam::INJ},
+        {"WIBHP", WellOptParam::INJ},
+        {"GIBHP", WellOptParam::INJ},
+        {"WITHP", WellOptParam::INJ},
+        {"GITHP", WellOptParam::INJ},
+        //
+        {"ORAT", WellOptParam::PROD},
+        {"GRAT", WellOptParam::PROD},
+        {"WRAT", WellOptParam::PROD},
+        {"LRAT", WellOptParam::PROD},
+        {"BHP", WellOptParam::PROD},
+        {"THP", WellOptParam::PROD},
+};
+
 
 /// WellOptPair contains two parts, one is the operation mode of well, the other is the
 /// beginning time at which the operation is applied. The beginning time is represented
@@ -61,6 +88,7 @@ class WellParam
 public:
     /// Input well in structured grid
     WellParam(vector<string>& info);
+    WellParam(const std::string& name_);
     /// Input well in unstructured grid
     WellParam(vector<string>& info, const string& unstructured);
     /// Input perforations
@@ -144,15 +172,20 @@ public:
     /// if thermal model is used
     OCP_BOOL          thermal{ OCP_FALSE };
     /// Contains all the information of wells.
-    vector<WellParam> well;    
+    std::map<std::string, int> templates;
+    vector<WellParam> well;
     /// Records the critical time given by users.
+    bool is_first_time {OCP_TRUE};
+    std::string first_time;
     vector<OCP_DBL>   criticalTime; 
     /// Sets of Solvent.
     vector<Solvent>   solSet;
     /// Pressure in surface condition.
     OCP_DBL           Psurf; 
     /// Temperature in surface condition.
-    OCP_DBL           Tsurf; 
+    OCP_DBL           Tsurf;
+
+    int FindWellByName(const string& name);
 
     /// Initialize the inputting the params of wells.
     void Init();
@@ -160,7 +193,9 @@ public:
     void InitTime() { criticalTime.push_back(0); };
     /// Input the well keyword WELSPECS. WELSPECS defines wells including well name,
     /// well location, well depth and son on.
+    void InputTEMPLATE(ifstream& ifs);
     void InputWELSPECS(ifstream& ifs);
+    void InputWELSPECS(ifstream& ifs, int type);
     /// Input the well keyword COMPDAT. COMPDAT contains the information of perforations
     /// of wells, for example the location, the trans or directions.
     void InputCOMPDAT(ifstream& ifs);
@@ -175,6 +210,8 @@ public:
     /// well will change. So the params of solving equations could be adjusted
     /// correspondingly.
     void InputTSTEP(ifstream& ifs);
+    void InputTIME(const std::vector<std::string>& vbuf);
+    void InputWELLOperations(vector<string> vbuf, ifstream& ifs);
     /// Input the well keyword: WELTARG. WELTARG is used to change the operation mode of
     /// well anytime. For example, the oil production rate is changed from 1000 stb/day
     /// to 1500 stb/day at the 100th day.
