@@ -61,6 +61,7 @@ public:
 
     /// Handle the INCLUDE keyword, which contains other input files.
     void ReadINCLUDE(ifstream& ifs);
+    void ReadINCLUDE(ifstream& ifs, int type);
 
     /// Check whether the params contain error.
     void CheckParam();

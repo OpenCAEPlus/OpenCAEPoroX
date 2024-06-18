@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <map>
 
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
@@ -164,22 +165,27 @@ protected:
     void PostProcessInput();
     /// Input the problem model: isothermal or thermal
     void InputMODEL(ifstream& ifs);
+    void InputMODEL(const std::vector<std::string>& vbuf);
     /// Input DUALPORO
     void InputDUALPORO() { DUALPORO = OCP_TRUE; }
     /// Input DPGRID
     void InputDPGRID() { DPGRID = OCP_TRUE; }
     /// Input dimensions
     void InputDIMENS(ifstream& ifs);
+    void InputDIMENS(const std::vector<std::string>& vbuf);
     /// Input EQUALS
     void InputEQUALS(ifstream& ifs);
     /// Input COPY
     void InputCOPY(ifstream& ifs);
     /// Input MULTIPLY
     void InputMULTIPLY(ifstream& ifs);
+    void InputBOX(const std::vector<std::string>& vbuf);
     /// Input grid property
     void InputGridParam(ifstream& ifs, string& keyword);
     /// Input WELSPECS
+    void InputTEMPLATE(ifstream& ifs);
     void InputWELSPECS(ifstream& ifs);
+    void InputWELSPECS(ifstream& ifs, int type);
     /// Input COMPDAT
     void InputCOMPDAT(ifstream& ifs);
     /// Input INCLUDE
@@ -209,6 +215,7 @@ protected:
 
 
 protected:
+    int type; // OCP, HiSim format
 
     /// current work directory
     string          workdir;
@@ -283,6 +290,7 @@ protected:
     ActiveGridCheck  actGC;
 
     // Well
+    std::map<std::string, int> templates;
     vector<WellParam> well;
 
 

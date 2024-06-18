@@ -19,7 +19,7 @@ void OpenCAEPoroX::SetupDistParam(const USI& argc, const char* argv[], PreProces
     timer.Start();
 
     ParamRead rp;
-    rp.ReadInputFile(argv[1]);
+    rp.ReadInputFile(argv[1], type);
 
     reservoir.Setup(prepro, rp);
     control.Setup(argc, argv, rp.paramControl, reservoir.GetDomain());
