@@ -34,7 +34,10 @@ OCPFlow::OCPFlow(const ParamReservoir& rs_param, const USI& i)
 	else if (rs_param.SGOF_T.data.size() > 0) {
 		pfMethod = new OCPFlowMethod_OG01(rs_param.SGOF_T.data[i], vs);
 	}
-	else if (rs_param.BCparam.size() > 0) {
+    else if (rs_param.SWGF_T.data.size() > 0) {
+        pfMethod = new OCPFlowMethod_WG01(rs_param.SWGF_T.data[i], vs);
+    }
+    else if (rs_param.BCparam.size() > 0) {
 		pfMethod = new OCPFlowMethod_GW01(rs_param.BCparam[i], vs);
 	}
 	else {

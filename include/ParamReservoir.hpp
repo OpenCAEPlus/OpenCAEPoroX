@@ -357,6 +357,7 @@ public:
     TableSet SWOF_T; ///< Table set of SWOF.
     TableSet SGFN_T; ///< Table set of SGFN.
     TableSet SGOF_T; ///< Table set of SGOF.
+    TableSet SWGF_T; ///< Table set of SWGF.
     TableSet SOF3_T; ///< Table set of SOF3.
     TableSet PBVD_T; ///< Table set of PBVD.
     // initial zi vs depth

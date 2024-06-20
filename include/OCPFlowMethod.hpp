@@ -227,6 +227,44 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// OCPFlowMethod_WG01
+/////////////////////////////////////////////////////
+
+
+/// Use SWGF to calculate phase flow properties in gas-water situation
+class OCPFlowMethod_WG01 : public OCPFlowMethod
+{
+public:
+    OCPFlowMethod_WG01(const vector<vector<OCP_DBL>>& SWGFin, OCPFlowVarSet& vs)
+    {
+
+    }
+    /// calculate relative permeability and capillary pressure
+    virtual void CalKrPc(OCPFlowVarSet& vs) {};
+    /// calculate relative permeability and capillary pressure and derivatives
+    virtual void CalKrPcDer(OCPFlowVarSet& vs) {};
+    /// get saturation of connate water
+    virtual OCP_DBL GetSwco() const {};
+    /// get maximum capillary pressure between water and oil (Po - Pw)
+    virtual OCP_DBL GetMaxPcow() const {};
+    /// get minimum capillary pressure between water and oil (Po - Pw)
+    virtual OCP_DBL GetMinPcow() const {};
+    /// calculate Pcow by Sw
+    virtual OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const {};
+    /// calculate Sw by Pcow
+    virtual OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const {};
+    /// calculate Pcgo by Sg
+    virtual OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const {};
+    /// calculate Sg by Pcgo
+    virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const {};
+    /// calculate Sw by Pcgw
+    virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const {};
+    /// calculate Krg and ders by Sg
+    virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const {};
+};
+
+
 #endif /* end if __OCPFLOWMETHOD_HEADER__ */
 
 /*----------------------------------------------------------------------------*/
