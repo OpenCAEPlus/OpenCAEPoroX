@@ -44,10 +44,14 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # Add the automatically determined parts of the RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# LIBNAME is used in the external dependencies, to make it easier if we 
+# LIBNAME is used in the external dependencies, to make it easier if we
 # decide to change the name in the future
 set(LIBNAME OpenCAEPoroX CACHE INTERNAL "The library name")
 add_library(OpenCAEPoroX STATIC)
+
+find_package(MPI)
+target_include_directories(${PROJECT_NAME} PUBLIC "${MPI_CXX_INCLUDE_PATH}")
+target_link_libraries(${LIBNAME} PUBLIC MPI::MPI_CXX)
 
 ###############################################################################
 ## External dependencies
