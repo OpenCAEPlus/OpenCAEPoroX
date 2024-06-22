@@ -181,7 +181,6 @@ SCHEDULE  =======================================
 'VWAT=1' /
 
 VTKSCHED
-*DOUBLE
 *PRES
 *PHASEP
 *SOIL *SGAS *SWAT
@@ -189,6 +188,9 @@ VTKSCHED
 *SATNUM
 *DSATP
 *CSFLAG
+*ITNRDDM
+*ITLSDDM
+*TMLSDDM
 /
 
 WELSPECS
@@ -220,7 +222,7 @@ TUNING
 
 
 METHOD
-FIM  petsc
+FIM  pardiso  FIMddm  pardiso
 / 
 
 

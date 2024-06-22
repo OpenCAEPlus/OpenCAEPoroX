@@ -35,6 +35,9 @@ extern OCP_DBL OCPTIME_COMM_P2P;            ///< Time for P2P Communication (Dis
 extern OCP_DBL OCPTIME_COMM_TOTAL;          ///< Time for Communication (Disposable calls will be ignored)
 extern OCP_DBL OCPTIME_PARMETIS;            ///< Time for ParMetis
 extern OCP_DBL OCPTIME_GROUPPROCESS;        ///< Time for process grouping
+extern OCP_DBL OCPTIME_LSOLVER_DDM;         ///< Time for Linear Solver of DDM
+extern OCP_DBL OCPITER_NR_DDM;              ///< Total iters for NR of DDM
+extern OCP_DBL OCPITER_LS_DDM;              ///< Total iters for LS of DDM
 
 #endif
 

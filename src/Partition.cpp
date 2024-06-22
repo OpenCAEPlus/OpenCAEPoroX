@@ -265,7 +265,7 @@ void Partition::InitParam()
 	tpwgts  = new real_t[ncon * numproc]();
 	for (idx_t i = 0; i < ncon * numproc; i++)
 		tpwgts[i] = 1.0 / numproc;
-	ubvec   = 1.05;
+	ubvec   = 1.005;
 	options = new idx_t[3]();
 	part    = new idx_t[numElementLocal]();
 }

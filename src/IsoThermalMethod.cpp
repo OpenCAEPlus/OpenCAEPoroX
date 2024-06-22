@@ -2278,6 +2278,7 @@ OCP_BOOL IsoT_FIMddm::SolveLinearSystem(LinearSystem& ls, Reservoir& rs, OCPCont
     int iter = ls.Solve();
     // Record time, iterations
     OCPTIME_LSOLVER += timer.Stop();
+    OCPTIME_LSOLVER_DDM += timer.Stop();
 
     int status = 0;
     MPI_Allreduce(&iter, &status, 1, OCPMPI_INT, MPI_MIN, rs.domain.global_comm);
@@ -2415,6 +2416,9 @@ void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
     NR.CalMaxChangeTime(rs);
     ctrl.CalNextTimeStep(NR, { "dP", "dS", "iter" });
     SetStarBulkSet(rs.bulk, rs.domain);
+
+    OCPITER_NR_DDM += NR.GetIterNR();
+    OCPITER_LS_DDM += NR.GetIterLS();
 }
 
 
@@ -2511,11 +2515,7 @@ void IsoT_FIMddm::CalRankSet(const Domain& domain)
     if (OCP_FALSE) {
         if (domain.cs_group_global_rank.size() > 1) {
             if (domain.cs_rank == 0) {
-                cout << "rank" << CURRENT_RANK << "  ";
-                for (const auto& s : domain.cs_group_global_rank) {
-                    cout << s << "   ";
-                }
-                cout << endl;
+                cout << "rank" << CURRENT_RANK << "  " << domain.cs_numproc << endl;
             }
         }
     }

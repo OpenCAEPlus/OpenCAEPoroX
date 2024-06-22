@@ -11,6 +11,9 @@
 
 #include "OCPGroupProcess.hpp"
 
+/// Average number of processes per process group when partitioning with METIS
+const int METIS_AVNP = 2;
+
 #ifdef WITH_PBGL
 
  // each process with one vertex
@@ -265,7 +268,7 @@ static int GroupProcessParMetis01(const std::unordered_map<OCP_INT, OCP_INT>& pr
 	MPI_Comm_rank(work_comm, &work_rank);
 	MPI_Comm_size(work_comm, &work_numproc);
 
-	const int NPARTS = (work_numproc - 1) / 10 + 1;
+	const int NPARTS = (work_numproc - 1) / METIS_AVNP + 1;
 
 	int color = 0;
 	{
@@ -347,7 +350,7 @@ static int GroupProcessParMetis02(const std::unordered_map<OCP_INT, OCP_INT>& pr
 	MPI_Comm_rank(work_comm, &work_rank);
 	MPI_Comm_size(work_comm, &work_numproc);
 
-	const int NPARTS = (work_numproc - 1) / 10 + 1;
+	const int NPARTS = (work_numproc - 1) / METIS_AVNP + 1;
 
 
 	MPI_Comm tmp_comm = MPI_COMM_NULL;
@@ -512,7 +515,7 @@ static int GroupProcessMetis(const std::unordered_map<OCP_INT, OCP_INT>& proc_we
 	MPI_Comm_rank(work_comm, &work_rank);
 	MPI_Comm_size(work_comm, &work_numproc);
 
-	const int NPARTS = (work_numproc - 1) / 10 + 1;
+	const int NPARTS = (work_numproc - 1) / METIS_AVNP + 1;
 
 	std::vector<int> all_num_neighbors;
 	std::vector<int> all_neighbors;

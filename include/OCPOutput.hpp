@@ -270,6 +270,9 @@ protected:
     OCP_BOOL PERMZ{ OCP_FALSE };  ///< permeability of rock in z-direction
     OCP_BOOL DSATP{ OCP_FALSE };  ///< saturation change of phases
     OCP_BOOL CSFLAG{ OCP_FALSE }; ///< flag of the process group of coupled solution
+    OCP_BOOL ITERNRDDM{ OCP_FALSE }; ///< Accumulated iters for NR of DDM
+    OCP_BOOL ITERLSDDM{ OCP_FALSE }; ///< Accumulated iters for LS of DDM
+    OCP_BOOL TIMELSDDM{ OCP_FALSE }; ///< Accumulated time for LS of DDM
 
     USI      bgpnum;              ///< num of Basic grid information to be printed
 };

@@ -288,6 +288,9 @@ void IsothermalSolver::FinishStepComb(Reservoir& rs, OCPControl& ctrl)
         ctrl.CalNextTimeStep(fim.NR, { "dP", "dS", "iter" });
 
         fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain());
+
+        OCPITER_NR_DDM += fim_ddm.NR.GetIterNR();
+        OCPITER_LS_DDM += fim_ddm.NR.GetIterLS();
     }
 }
 

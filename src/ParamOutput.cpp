@@ -298,6 +298,15 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("*CSFLAG", 7):
                     tmpBgpp->CSFLAG = OCP_TRUE;
                     break;
+                case Map_Str2Int("*ITNRDDM", 8):
+                    tmpBgpp->ITERNRDDM = OCP_TRUE;
+                    break;
+                case Map_Str2Int("*ITLSDDM", 8):
+                    tmpBgpp->ITERLSDDM = OCP_TRUE;
+                    break;
+                case Map_Str2Int("*TMLSDDM", 8):
+                    tmpBgpp->TIMELSDDM = OCP_TRUE;
+                    break;
                 default:
                     break;
             }

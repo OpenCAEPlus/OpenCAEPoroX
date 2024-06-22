@@ -986,34 +986,37 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 
 void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
 {
-    PRE    = param.PRE;
-    PHASEP = param.PHASEP;
-    COMPM  = param.COMPM;
-    SOIL   = param.SOIL;
-    SGAS   = param.SGAS;
-    SWAT   = param.SWAT;
-    DENO   = param.DENO;
-    DENG   = param.DENG;
-    DENW   = param.DENW;
-    KRO    = param.KRO;
-    KRG    = param.KRG;
-    KRW    = param.KRW;
-    BOIL   = param.BOIL;
-    BGAS   = param.BGAS;
-    BWAT   = param.BWAT;
-    VOIL   = param.VOIL;
-    VGAS   = param.VGAS;
-    VWAT   = param.VWAT;
-    XMF    = param.XMF;
-    YMF    = param.YMF;
-    PCW    = param.PCW;
-    CO2    = param.CO2;
-    SATNUM = param.SATNUM;
-    PERMX  = param.PERMX;
-    PERMY  = param.PERMY;
-    PERMZ  = param.PERMZ;
-    DSATP  = param.DSATP;
-    CSFLAG = param.CSFLAG;
+    PRE       = param.PRE;
+    PHASEP    = param.PHASEP;
+    COMPM     = param.COMPM;
+    SOIL      = param.SOIL;
+    SGAS      = param.SGAS;
+    SWAT      = param.SWAT;
+    DENO      = param.DENO;
+    DENG      = param.DENG;
+    DENW      = param.DENW;
+    KRO       = param.KRO;
+    KRG       = param.KRG;
+    KRW       = param.KRW;
+    BOIL      = param.BOIL;
+    BGAS      = param.BGAS;
+    BWAT      = param.BWAT;
+    VOIL      = param.VOIL;
+    VGAS      = param.VGAS;
+    VWAT      = param.VWAT;
+    XMF       = param.XMF;
+    YMF       = param.YMF;
+    PCW       = param.PCW;
+    CO2       = param.CO2;
+    SATNUM    = param.SATNUM;
+    PERMX     = param.PERMX;
+    PERMY     = param.PERMY;
+    PERMZ     = param.PERMZ;
+    DSATP     = param.DSATP;
+    CSFLAG    = param.CSFLAG;
+    ITERNRDDM = param.ITERNRDDM;
+    ITERLSDDM = param.ITERLSDDM;
+    TIMELSDDM = param.TIMELSDDM;
 
     nc = bk.GetComNum();
     np = bk.GetPhaseNum();
@@ -1065,11 +1068,14 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
     //if (XMF)      bgpnum++;
     //if (YMF)      bgpnum++;
     //if (PCW)      bgpnum++;
-    if (CO2)      bgpnum++;
-    if (SATNUM)   bgpnum++;
-    if (PERMX)    bgpnum++;
-    if (DSATP)    bgpnum += np;
+    if (CO2)       bgpnum++;
+    if (SATNUM)    bgpnum++;
+    if (PERMX)     bgpnum++;
+    if (DSATP)     bgpnum += np;
     if (CSFLAG)    bgpnum++;
+    if (ITERNRDDM) bgpnum++;
+    if (ITERLSDDM) bgpnum++;
+    if (TIMELSDDM) bgpnum++;
     //if (PERMY)    bgpnum++;
     //if (PERMZ)    bgpnum++;
 }
@@ -1502,6 +1508,18 @@ void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
         fill(tmpV.begin(), tmpV.end(), flag);
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
+    if (bgp.ITERNRDDM) {
+        fill(tmpV.begin(), tmpV.end(), OCPITER_NR_DDM);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
+    if (bgp.ITERLSDDM) {
+        fill(tmpV.begin(), tmpV.end(), OCPITER_LS_DDM);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
+    if (bgp.TIMELSDDM) {
+        fill(tmpV.begin(), tmpV.end(), OCPTIME_LSOLVER_DDM);
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
          
     outF.close();
 }
@@ -1655,6 +1673,27 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 				workPtr += numGrid;
 				tmpVal_ptr += numGridLoc;
 			}
+            if (bgp.ITERNRDDM) {
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal_ptr[n];
+                }
+                workPtr += numGrid;
+                tmpVal_ptr += numGridLoc;
+            }
+            if (bgp.ITERLSDDM) {
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal_ptr[n];
+                }
+                workPtr += numGrid;
+                tmpVal_ptr += numGridLoc;
+            }
+            if (bgp.TIMELSDDM) {
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal_ptr[n];
+                }
+                workPtr += numGrid;
+                tmpVal_ptr += numGridLoc;
+            }
 
 			index++;
 		}
@@ -1740,6 +1779,18 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             }
             if (bgp.CSFLAG) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "CSFLAG", VTK_INT, gridVal[t], bId, numGrid, 0);
+                bId += numGrid;
+            }
+            if (bgp.ITERNRDDM) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "ITERNRDDM", VTK_INT, gridVal[t], bId, numGrid, 0);
+                bId += numGrid;
+            }
+            if (bgp.ITERLSDDM) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "ITERLSDDM", VTK_INT, gridVal[t], bId, numGrid, 0);
+                bId += numGrid;
+            }
+            if (bgp.TIMELSDDM) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "TIMELSDDM", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
                 bId += numGrid;
             }
 
@@ -1837,6 +1888,18 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
         if (bgp.CSFLAG) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "CSFLAG", VTK_INT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.ITERNRDDM) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "ITERNRDDM", VTK_INT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.ITERLSDDM) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "ITERLSDDM", VTK_INT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.TIMELSDDM) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "TIMELSDDM", VTK_FLOAT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
 
