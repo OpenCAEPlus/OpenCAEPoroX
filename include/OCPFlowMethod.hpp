@@ -227,6 +227,37 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// OCPFlowMethod_GW02
+/////////////////////////////////////////////////////
+
+
+/// Use SWGF to calculate phase flow properties in gas-water situation
+class OCPFlowMethod_GW02 : public OCPFlowMethod
+{
+public:
+    OCPFlowMethod_GW02(const vector<vector<OCP_DBL>>& SWGFin, OCPFlowVarSet& vs) {
+        vs.Init(OCPFlowType::GW, 2, 2);
+        SWGF.Setup(SWGFin);
+    }
+    void CalKrPc(OCPFlowVarSet& vs) override;
+    void CalKrPcDer(OCPFlowVarSet& vs) override;
+    OCP_DBL GetSwco() const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL GetMaxPcow() const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL GetMinPcow() const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalPcowBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalSwByPcow(const OCP_DBL& Pcow) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
+
+protected:
+    /// table SWGF
+    OCP_SWGF            SWGF;
+};
+
+
 #endif /* end if __OCPFLOWMETHOD_HEADER__ */
 
 /*----------------------------------------------------------------------------*/

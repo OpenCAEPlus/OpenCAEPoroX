@@ -230,6 +230,25 @@ void OCPFlowMethod_GW01::CalKrPcDer(OCPFlowVarSet& vs)
 }
 
 
+/////////////////////////////////////////////////////
+// OCPFlowMethod_GW02
+/////////////////////////////////////////////////////
+
+void OCPFlowMethod_GW02::CalKrPc(OCPFlowVarSet& vs)
+{
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+	SWGF.CalKrwKrgPcgw(vs.S[w], vs.kr[w], vs.kr[g], vs.Pc[g]);
+}
+
+
+void OCPFlowMethod_GW02::CalKrPcDer(OCPFlowVarSet& vs)
+{
+	const INT& g = vs.g;
+	const INT& w = vs.w;
+	SWGF.CalKrwKrgPcgwDer(vs.S[w], vs.kr[w], vs.kr[g], vs.Pc[g], vs.dKrdS[vs.ww], vs.dKrdS[vs.gw], vs.dPcdS[vs.gw]);
+}
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/

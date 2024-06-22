@@ -355,6 +355,7 @@ public:
     // Saturation tables & bubble point pressure
     TableSet SWFN_T; ///< Table set of SWFN.
     TableSet SWOF_T; ///< Table set of SWOF.
+    TableSet SWGF_T; ///< Table set of SWGF.
     TableSet SGFN_T; ///< Table set of SGFN.
     TableSet SGOF_T; ///< Table set of SGOF.
     TableSet SOF3_T; ///< Table set of SOF3.

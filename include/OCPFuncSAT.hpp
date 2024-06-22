@@ -78,6 +78,59 @@ public:
 
 
 /////////////////////////////////////////////////////
+// SWGF
+/////////////////////////////////////////////////////
+
+/// Saturation table function SWGF, used to calculate oil and water's permeability and capillary
+class OCP_SWGF : public OCPFuncTable
+{
+	/// 0th column: The water saturation (Sw)
+	/// 1th column: The corresponding water relative permeability (Krw)
+	/// 2th column: The corresponding gas relative permeability (Krg)
+	/// 3th column: The corresponding water-gas capillary pressure (Pcgw = Pg - Pw) (bars (METRIC), psi (FIELD))
+	///             Values should be level or decreasing down the column.
+
+public:
+	/// default constructor
+	OCP_SWGF() = default;
+	/// Return the connate saturation
+	OCP_DBL  GetSwco() const { return table.GetCol(0)[0]; }
+	/// Return maximum capillary pressure Pcgw: Pg - Pw
+	OCP_DBL  GetMaxPc() const { return table.GetCol(3).front(); }
+	/// Return minimum capillary pressure Pcgw: Pg - Pw
+	OCP_DBL  GetMinPc() const { return table.GetCol(3).back(); }
+	/// Return Sw
+	const vector<OCP_DBL>& GetSw() const { return table.GetCol(0); }
+	/// Return Pcgw
+	const vector<OCP_DBL>& GetPcgw() const { return table.GetCol(3); }
+	/// Return corresponding Sw with Pcgw
+	OCP_DBL  CalSw(const OCP_DBL& Pcgw) const { return table.Eval_Inv(3, Pcgw, 0); }
+	/// Return corresponding Pcgw with Sw
+	OCP_DBL  CalPcgw(const OCP_DBL& Sw) const { return table.Eval(0, Sw, 3); }
+
+	/// Return corresponding Krw, Krow, Pcwo with Sw
+	void     CalKrwKrgPcgw(const OCP_DBL& Sw, OCP_DBL& krw, OCP_DBL& krg, OCP_DBL& Pcgw) const {
+		table.Eval_All(0, Sw, data);
+		krw  = data[1];
+		krg  = data[2];
+		Pcgw = data[3];
+	}
+	/// Return corresponding Krw, Krow, Pcwo and derivatives with Sw 
+	void     CalKrwKrgPcgwDer(const OCP_DBL& Sw,
+		OCP_DBL& krw, OCP_DBL& krg, OCP_DBL& Pcgw,
+		OCP_DBL& dkrwdSw, OCP_DBL& dkrgdSw, OCP_DBL& dPcgwdSw) const {
+		table.Eval_All(0, Sw, data, cdata);
+		krw      = data[1];
+		krg      = data[2];
+		Pcgw     = data[3];
+		dkrwdSw  = cdata[1];
+		dkrgdSw  = cdata[2];
+		dPcgwdSw = cdata[3];
+	}
+};
+
+
+/////////////////////////////////////////////////////
 // SGOF
 /////////////////////////////////////////////////////
 

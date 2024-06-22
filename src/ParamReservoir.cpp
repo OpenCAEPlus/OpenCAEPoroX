@@ -26,6 +26,10 @@ TableSet* ParamReservoir::FindPtrTable(const string& varName)
             myPtr = &SWOF_T;
             break;
 
+        case Map_Str2Int("SWGF", 4):
+            myPtr = &SWGF_T;
+            break;
+
         case Map_Str2Int("SGFN", 4):
             myPtr = &SGFN_T;
             break;
@@ -141,6 +145,8 @@ void ParamReservoir::InitTable()
     SWFN_T.colNum   = 3;
     SWOF_T.name     = "SWOF";
     SWOF_T.colNum   = 4;
+    SWGF_T.name     = "SWGF";
+    SWGF_T.colNum   = 4;
     SGFN_T.name     = "SGFN";
     SGFN_T.colNum   = 3;
     SGOF_T.name     = "SGOF";
