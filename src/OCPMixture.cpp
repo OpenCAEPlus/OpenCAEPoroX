@@ -52,6 +52,9 @@ OCPMixtureK::OCPMixtureK(const ParamReservoir& rs_param, const USI& i, BulkOptio
     else if (rs_param.PVTCO2.data.size() > 0 && rs_param.PVTH2O.data.size() > 0) {
         pmMethod = new OCPMixtureMethodK_GW01(rs_param, i, vs);
     }
+    else if (rs_param.PVDG_T.data.size() > 0 && rs_param.PVTW_T.data.size() > 0) {
+        pmMethod = new OCPMixtureMethodK_GW02(rs_param, i, vs);
+    }
     else if (rs_param.thermal) {
         pmMethod = new OCPMixtureMethodK_OW01T(rs_param.comsParam, i, vs);
     }

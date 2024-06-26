@@ -2364,7 +2364,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
     if (preM && OCP_TRUE) {
         // check residual for each local nonlinear equations
         NR.CalMaxChangeNR(rs);
-        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E0);
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E2);
 
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {

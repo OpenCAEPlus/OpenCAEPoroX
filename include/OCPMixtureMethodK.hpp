@@ -255,6 +255,48 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////
+// OCPMixtureMethodK_GW02
+/////////////////////////////////////////////////////
+
+
+/// Use PVTW and PVDG to calculate gas-water mixture property
+class OCPMixtureMethodK_GW02 : public OCPMixtureMethodK
+{
+public:
+    OCPMixtureMethodK_GW02(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs);
+    void SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const override;
+    void SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const override;
+    void InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void Flash(OCPMixtureVarSet& vs) override;
+    void InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs) override;
+    void FlashDer(OCPMixtureVarSet& vs) override;
+    void CalVStd(OCPMixtureVarSet& vs) override;
+    OCP_DBL CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_DBL CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt) override;
+    OCP_BOOL IfWellFriend() const override { return OCP_FALSE; }
+    OCP_DBL CalEnthalpy(const OCP_DBL& T, const OCP_DBL* zi) const override { OCP_ABORT("Not Used!"); }
+
+protected:
+    void CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs);
+    OCP_DBL CalXiG(const OCP_DBL& P) { return PVDG.CalXiG(P); }
+    OCP_DBL CalXiW(const OCP_DBL& P) { return PVTW.CalXiW(P); }
+    OCP_DBL CalRhoG(const OCP_DBL& P) { return PVDG.CalRhoG(P); }
+    OCP_DBL CalRhoW(const OCP_DBL& P) { return PVTW.CalRhoW(P); }
+
+protected:
+    /// PVT table for gas phase
+    OCP_PVDG      PVDG;
+    /// PVT table for water phase
+    OCP_PVTW      PVTW;
+    /// molar volume of gas phase in standard conditions
+    const OCP_DBL   stdVg{ 1 };
+    /// molar volume of water phase in standard conditions
+    const OCP_DBL   stdVw{ 1 };
+};
+
+
 #endif /* end if __OCPMIXTUREKMETHOD_HEADER__ */
 
 /*----------------------------------------------------------------------------*/

@@ -1075,6 +1075,162 @@ void OCPMixtureMethodK_GW01::CalVStd(OCPMixtureVarSet& vs)
 }
 
 
+/////////////////////////////////////////////////////
+// OCPMixtureMethodK_GW02
+/////////////////////////////////////////////////////
+
+
+OCPMixtureMethodK_GW02::OCPMixtureMethodK_GW02(const ParamReservoir& rs_param, const USI& i, OCPMixtureVarSet& vs)
+{
+	vs.Init(OCPMixtureType::BO_GW, 2, 2);
+
+	OCP_DBL stdRhoW, stdRhoG;
+	if (rs_param.density.activity) {
+		stdRhoW = rs_param.density.data[1];
+		stdRhoG = rs_param.density.data[2];
+	}
+	else {
+		stdRhoW = RHOW_STD * rs_param.gravity.data[1];
+		stdRhoG = RHOAIR_STD * rs_param.gravity.data[2];
+	}
+
+	PVDG.Setup(rs_param.PVDG_T.data[i], stdRhoG, stdVg);
+	PVTW.Setup(rs_param.PVTW_T.data[i], stdRhoW, stdVw);
+
+	const USI g  = vs.g;
+	const USI w  = vs.w;
+	const USI nc = vs.nc;
+
+	vs.phaseExist[g] = OCP_TRUE;
+	vs.phaseExist[w] = OCP_TRUE;
+
+	vs.x[w * nc + w] = 1.0;
+	vs.x[w * nc + g] = 0.0;
+	vs.x[g * nc + w] = 0.0;
+	vs.x[g * nc + g] = 1.0;
+}
+
+
+void OCPMixtureMethodK_GW02::SetVarSet(const OCP_USI& bId, const BulkVarSet& bvs, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = bvs.P[bId];
+	mvs.T = bvs.T[bId];
+	copy(&bvs.Ni[bId * bvs.nc], &bvs.Ni[bId * bvs.nc] + bvs.nc, mvs.Ni.begin());
+	copy(&bvs.S[bId * bvs.np], &bvs.S[bId * bvs.np] + bvs.np, mvs.S.begin());
+}
+
+
+void OCPMixtureMethodK_GW02::SetVarSet(const OCP_DBL& P, const OCP_DBL& T, const OCP_DBL* Ni, OCPMixtureVarSet& mvs) const
+{
+	mvs.P = P;
+	mvs.T = T;
+	copy(Ni, Ni + mvs.nc, mvs.Ni.begin());
+}
+
+
+void OCPMixtureMethodK_GW02::CalNi(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+{
+	const USI g = vs.g;
+	const USI w = vs.w;
+
+	vs.Ni[w] = Vp * vs.S[w] * PVTW.CalXiW(vs.P);
+	vs.Ni[g] = Vp * vs.S[g] * PVDG.CalXiG(vs.P);
+}
+
+
+void OCPMixtureMethodK_GW02::InitFlash(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+{
+	CalNi(Vp, vs);
+	Flash(vs);
+}
+
+
+void OCPMixtureMethodK_GW02::Flash(OCPMixtureVarSet& vs)
+{
+	const USI g = vs.g;
+	const USI w = vs.w;
+
+	// Gas Properties
+	PVDG.CalRhoXiMuDer(vs.P, vs.rho[g], vs.xi[g], vs.mu[g], vs.rhoP[g], vs.xiP[g], vs.muP[g]);
+	// Water Properties
+	PVTW.CalRhoXiMuDer(vs.P, vs.rho[w], vs.xi[w], vs.mu[w], vs.rhoP[w], vs.xiP[w], vs.muP[w]);
+
+	vs.Nt        = vs.Ni[g] + vs.Ni[w];
+	vs.vj[g]     = vs.Ni[g] / vs.xi[g];
+	vs.vj[w]     = vs.Ni[w] / vs.xi[w];
+	vs.Vf        = vs.vj[g] + vs.vj[w];
+	vs.S[g]      = vs.vj[g] / vs.Vf;
+	vs.S[w]      = vs.vj[w] / vs.Vf;
+
+	vs.vji[g][g] = 1 / vs.xi[g];
+	vs.vji[w][w] = 1 / vs.xi[w];
+	vs.vjP[g]    = -vs.Ni[g] * vs.xiP[g] / (vs.xi[g] * vs.xi[g]);
+	vs.vjP[w]    = -vs.Ni[w] * vs.xiP[w] / (vs.xi[w] * vs.xi[w]);
+
+	vs.vfi[g]    = vs.vji[g][g];
+	vs.vfi[w]    = vs.vji[w][w];
+	vs.vfP       = vs.vjP[g] + vs.vjP[g];
+}
+
+
+void OCPMixtureMethodK_GW02::InitFlashDer(const OCP_DBL& Vp, OCPMixtureVarSet& vs)
+{
+	CalNi(Vp, vs);
+	FlashDer(vs);
+}
+
+
+void OCPMixtureMethodK_GW02::FlashDer(OCPMixtureVarSet& vs)
+{
+	const USI g = vs.g;
+	const USI w = vs.w;
+
+	Flash(vs);
+	vs.dXsdXp[0] = (vs.vjP[w] - vs.S[w] * vs.vfP) / vs.Vf;        // dSw / dP
+	vs.dXsdXp[1] = (vs.vji[w][w] - vs.S[w] * vs.vfi[w]) / vs.Vf;  // dSw / dNw
+	vs.dXsdXp[2] = -vs.S[w] * vs.vfi[g] / vs.Vf;                  // dSw / dNg
+
+	vs.dXsdXp[3] = -vs.dXsdXp[0];                                 // dSg / dP
+	vs.dXsdXp[4] = -vs.dXsdXp[1];                                 // dSg / dNw
+	vs.dXsdXp[5] = -vs.dXsdXp[2];                                 // dSg / dNg
+}
+
+
+OCP_DBL OCPMixtureMethodK_GW02::CalXi(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+{
+	if (pt == PhaseType::gas)         return CalXiG(P);
+	else if (pt == PhaseType::wat)    return CalXiW(P);
+	else                              OCP_ABORT("WRONG PHASE TYPE");
+}
+
+
+OCP_DBL OCPMixtureMethodK_GW02::CalRho(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+{
+	if (pt == PhaseType::gas)         return CalRhoG(P);
+	else if (pt == PhaseType::wat)    return CalRhoW(P);
+	else                              OCP_ABORT("WRONG PHASE TYPE");
+}
+
+
+
+OCP_DBL OCPMixtureMethodK_GW02::CalVmStd(const OCP_DBL& P, const OCP_DBL& Pb, const OCP_DBL& T, const OCP_DBL* z, const PhaseType& pt)
+{
+	if (pt == PhaseType::gas)       return (stdVg * CONV2);
+	else if (pt == PhaseType::wat)  return (stdVw * CONV1);
+	else                            OCP_ABORT("Wrong Phase Type!");
+}
+
+
+void OCPMixtureMethodK_GW02::CalVStd(OCPMixtureVarSet& vs)
+{
+	const USI g = vs.g;
+	const USI w = vs.w;
+
+	vs.vj[g] = vs.Ni[g] * stdVg * CONV2;
+	vs.vj[w] = vs.Ni[w] * stdVw * CONV1;
+}
+
+
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
 /*----------------------------------------------------------------------------*/
