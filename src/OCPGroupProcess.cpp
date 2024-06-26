@@ -12,7 +12,8 @@
 #include "OCPGroupProcess.hpp"
 
 /// Average number of processes per process group when partitioning with METIS
-const int METIS_AVNP = 2;
+static const int METIS_AVNP = 50;
+static real_t ubvec = 1.01;
 
 #ifdef WITH_PBGL
 
@@ -322,7 +323,6 @@ static int GroupProcessParMetis01(const std::unordered_map<OCP_INT, OCP_INT>& pr
 		std::vector<real_t> tpwgts(ncon * nparts, 0);
 		for (idx_t i = 0; i < ncon * nparts; i++)
 			tpwgts[i] = 1.0 / nparts;
-		real_t ubvec = 1.05;
 		std::vector<idx_t> options(3, 0);
 
 		MPI_Comm tmp_comm{ MPI_COMM_NULL };
@@ -466,7 +466,6 @@ static int GroupProcessParMetis02(const std::unordered_map<OCP_INT, OCP_INT>& pr
 		real_t* tpwgts = new real_t[ncon * nparts]();
 		for (idx_t i = 0; i < ncon * nparts; i++)
 			tpwgts[i] = 1.0 / nparts;
-		real_t ubvec = 1.05;
 		idx_t* options = new idx_t[3]();
 
 		ParMETIS_V3_PartKway(vtxdist.data(), xadj.data(), adjncy.data(), vwgt, adjwgt.data(), &wgtflag, &numflag, &ncon,
@@ -497,7 +496,6 @@ void MyMetis(std::vector<idx_t>& xadj, std::vector<idx_t>& adjncy, std::vector<i
 	// idx_t nEdges    = adjncy.size() / 2;
 	idx_t nWeights = 1;
 	idx_t objval;
-	real_t ubvec = 1.05;
 
 	int ret = METIS_PartGraphFunc(&nVertices, &nWeights, xadj.data(), adjncy.data(),
 		NULL, NULL, adjwgt.data(), &nParts, NULL, &ubvec, NULL, &objval, part.data());
@@ -514,6 +512,8 @@ static int GroupProcessMetis(const std::unordered_map<OCP_INT, OCP_INT>& proc_we
 	int work_rank, work_numproc;
 	MPI_Comm_rank(work_comm, &work_rank);
 	MPI_Comm_size(work_comm, &work_numproc);
+
+	//if (work_rank == 0) std::cout << "work_numproc: " << work_numproc << std::endl;
 
 	const int NPARTS = (work_numproc - 1) / METIS_AVNP + 1;
 
@@ -589,7 +589,7 @@ static int GroupProcessMetis(const std::unordered_map<OCP_INT, OCP_INT>& proc_we
 			std::vector<idx_t> tmp_parts(work_numproc);
 			idx_t nparts = NPARTS;
 
-			if (nparts > 8) {
+			if (nparts > 8 || true) {
 				MyMetis(xadj, adjncy, adjwgt, nparts, tmp_parts, METIS_PartGraphKway);
 			}
 			else {

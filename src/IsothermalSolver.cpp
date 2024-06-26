@@ -236,8 +236,8 @@ OCP_BOOL IsothermalSolver::FinishNR(Reservoir& rs, OCPControl& ctrl)
         }
         curMethod = mainMethod;
         if (curMethod == OCPNLMethod::FIM) {
-            //if (CURRENT_RANK == 0)
-            //    cout << "FIMddm iters = " << fim_ddm.NR.GetIterNR() << "  " << endl;
+            if (CURRENT_RANK == 0)
+                cout << "FIMddm iters = " << fim_ddm.NR.GetIterNR() << "  " << endl;
             if (fim.TransferToFIM(fim_ddm.global_res0, rs, ctrl) == OCP_TRUE) {
                 return OCP_FALSE;
             }
@@ -289,8 +289,9 @@ void IsothermalSolver::FinishStepComb(Reservoir& rs, OCPControl& ctrl)
 
         fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain());
 
-        OCPITER_NR_DDM += fim_ddm.NR.GetIterNR();
-        OCPITER_LS_DDM += fim_ddm.NR.GetIterLS();
+        OCPITER_NR_DDM  += fim_ddm.NR.GetIterNR();
+        OCPITER_NRW_DDM += fim_ddm.NR.GetIterNRw();
+        OCPITER_LS_DDM  += fim_ddm.NR.GetIterLS();
     }
 }
 

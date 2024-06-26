@@ -32,8 +32,9 @@ OCP_DBL OCPTIME_COMM_P2P              = 0;
 OCP_DBL OCPTIME_COMM_TOTAL            = 0;
 OCP_DBL OCPTIME_GROUPPROCESS          = 0;
 OCP_DBL OCPTIME_LSOLVER_DDM           = 0;
-OCP_DBL OCPITER_NR_DDM                = 0;
-OCP_DBL OCPITER_LS_DDM                = 0;
+OCP_USI OCPITER_NR_DDM                = 0;
+OCP_USI OCPITER_NRW_DDM               = 0;
+OCP_USI OCPITER_LS_DDM                = 0;
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

@@ -66,7 +66,11 @@ void Summary::Setup(const OutputSummary& summary_param, const Reservoir& rs)
     const USI maxRowNum = 1000;
 
     Sumdata.push_back(SumItem("TIME", "-", "DAY", "fixed", maxRowNum));
+    Sumdata.push_back(SumItem("TimeStep", "-", "DAY", "fixed", maxRowNum));
     Sumdata.push_back(SumItem("NRiter", "-", "-", "int", maxRowNum));
+    Sumdata.push_back(SumItem("NRiterW", "-", "-", "int", maxRowNum));
+    Sumdata.push_back(SumItem("NRiter(DDM)", "-", "-", "int", maxRowNum));
+    Sumdata.push_back(SumItem("NRiterW(DDM)", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("LSiter", "-", "-", "int", maxRowNum));
     Sumdata.push_back(SumItem("LS/NR", "-", "-", "float", maxRowNum));
     Sumdata.push_back(SumItem("Runtime", "-", "s", "float", maxRowNum));
@@ -429,12 +433,20 @@ void Summary::SetVal(const Reservoir& rs, const OCPControl& ctrl, const ItersInf
 
     // TIME
     Sumdata[n++].val.push_back(ctrl.time.GetCurrentTime());
+    // TimeStep
+    Sumdata[n++].val.push_back(ctrl.time.GetLastDt());
     // NRiter
     Sumdata[n++].val.push_back(iters.GetNRt());
+    // NRiter(waste)
+    Sumdata[n++].val.push_back(iters.GetNRwt());
+    // NRiter(DDM)
+    Sumdata[n++].val.push_back(static_cast<OCP_DBL>(OCPITER_NR_DDM));
+    // NRiter(DDM)(waste)
+    Sumdata[n++].val.push_back(static_cast<OCP_DBL>(OCPITER_NRW_DDM));
     // LSiter
     Sumdata[n++].val.push_back(iters.GetLSt());
     // LSiter / NRiter
-    Sumdata[n++].val.push_back(1.0 * Sumdata[2].val.back() / Sumdata[1].val.back());
+    Sumdata[n++].val.push_back(Sumdata[2].val.back() == 0 ? 0 : 1.0 * Sumdata[6].val.back() / Sumdata[2].val.back());
     // runtime
     Sumdata[n++].val.push_back(timer.Stop());
 
@@ -1509,11 +1521,11 @@ void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.ITERNRDDM) {
-        fill(tmpV.begin(), tmpV.end(), OCPITER_NR_DDM);
+        fill(tmpV.begin(), tmpV.end(), static_cast<OCP_DBL>(OCPITER_NR_DDM));
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.ITERLSDDM) {
-        fill(tmpV.begin(), tmpV.end(), OCPITER_LS_DDM);
+        fill(tmpV.begin(), tmpV.end(), static_cast<OCP_DBL>(OCPITER_LS_DDM));
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
     if (bgp.TIMELSDDM) {

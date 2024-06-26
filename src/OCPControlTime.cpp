@@ -89,7 +89,7 @@ INT ControlTime::SetNextTSTEP()
 { 
     USI d = 0;
     for (d = 0; d < ps.size(); d++) {
-        if (current_time > ps[d].begin_time - TINY && current_time < ps[d].end_time) {
+        if (current_time > ps[d].begin_time - TINY && current_time < ps[d].end_time - TINY) {
             wp = &ps[d];
             return d;
         }

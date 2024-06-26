@@ -234,9 +234,11 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 
 	// SetCS01(bk_info, proc_weight);
 	SetCS02(bk_info, proc_weight);
-	// SetCS03(bk_info, proc_weight);
-
 	GroupProcess(GroupMethod::BGL, cs_group_global_rank, proc_weight, cs_comm, global_comm);
+
+
+	// SetCS03(bk_info, proc_weight);
+	// GroupProcess(GroupMethod::Metis, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
 
 	MPI_Comm_size(cs_comm, &cs_numproc);
@@ -463,16 +465,20 @@ void Domain::SetCS03(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_m
 
 void Domain::ProcWeight_f2i(const unordered_map<OCP_INT, OCP_DBL>& tmp_proc_wght, unordered_map<OCP_INT, OCP_INT>& proc_wght)
 {
-	OCP_DBL minW = 1E20;
-	OCP_DBL maxW = 0.0;
+	//OCP_DBL minW = 1E20;
+	//OCP_DBL maxW = 0.0;
+
+	//for (const auto& w : tmp_proc_wght) {
+	//	minW = min(w.second, minW);
+	//	maxW = max(w.second, maxW);
+	//}
+
+	OCP_DBL tmpW;
 
 	for (const auto& w : tmp_proc_wght) {
-		minW = min(w.second, minW);
-		maxW = max(w.second, maxW);
-	}
-
-	for (const auto& w : tmp_proc_wght) {
-		proc_wght[w.first] = w.second / (minW + 1) + 1;
+		tmpW = w.second * 1E7 + 1;
+		if (tmpW > 1E9)  tmpW = 1E9;
+		proc_wght[w.first] = static_cast<OCP_INT>(tmpW);
 	}
 }
 

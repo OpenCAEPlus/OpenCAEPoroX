@@ -829,9 +829,9 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 OCP_BOOL IsoT_FIM::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
 
-    if (ctrl.time.GetCurrentDt() < 5E-2 + TINY) {
-        return OCP_TRUE;
-    }
+    //if (ctrl.time.GetCurrentDt() < 5E-2 + TINY) {
+    //    return OCP_TRUE;
+    //}
 
     NR.CalMaxChangeNR(rs);
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
@@ -864,9 +864,23 @@ void IsoT_FIM::FinishStep(Reservoir& rs, OCPControl& ctrl)
 /// Transfer to FIM method
 OCP_BOOL IsoT_FIM::TransferToFIM(const OCP_DBL& global_res0, Reservoir& rs, OCPControl& ctrl)
 {
-    CalInitRes(rs, ctrl.time.GetCurrentDt());
+    CalRes(rs, ctrl.time.GetCurrentDt());
     NR.res.maxRelRes0_V = global_res0;
+
+    //{
+    //    OCP_DBL tmp;
+    //    MPI_Allreduce(&NR.res.maxRelRes_V, &tmp, 1, OCPMPI_DBL, MPI_MAX, rs.domain.global_comm);
+    //    if (CURRENT_RANK == 0) {
+    //        cout << "max Res = " << tmp << endl;
+    //    }
+    //}
+
     const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res"});
+
+    //if (rs.GetWellNum() > 0) {
+    //    cout << CURRENT_RANK << "   " << NR.res.maxWellRelRes_mol << endl;
+    //}
+
     if (conflag == OCPNRStateC::converge) {
         return OCP_FALSE;
     }
@@ -2417,8 +2431,9 @@ void IsoT_FIMddm::FinishStep(Reservoir& rs, OCPControl& ctrl)
     ctrl.CalNextTimeStep(NR, { "dP", "dS", "iter" });
     SetStarBulkSet(rs.bulk, rs.domain);
 
-    OCPITER_NR_DDM += NR.GetIterNR();
-    OCPITER_LS_DDM += NR.GetIterLS();
+    OCPITER_NR_DDM  += NR.GetIterNR();
+    OCPITER_NRW_DDM += NR.GetIterNRw();
+    OCPITER_LS_DDM  += NR.GetIterLS();
 }
 
 
