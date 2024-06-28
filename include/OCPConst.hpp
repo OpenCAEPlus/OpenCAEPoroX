@@ -137,6 +137,17 @@ enum class ReservoirState : USI
     well_crossflow
 };
 
+/// Initialization type
+enum class InitType : USI
+{
+    EQUIL,  // Hydraulic Balance Initialization
+    WAT,    // all grids are full of water initially
+    PTN,    // given pressure, moles numbers
+    PTN0,   // given pressure, moles numbers of all grids
+    PTN1,   // given pressure, moles numbers of active grids
+    PGSW,   // given gas pressure, water saturation of all grids
+};
+
 
 // Parallel Module
 const USI MASTER_PROCESS  = 0; ///< master process

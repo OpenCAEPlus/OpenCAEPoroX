@@ -40,10 +40,10 @@ void MixtureUnit::Flash(const OCP_DBL& Pin, const OCP_DBL& Tin, const OCP_DBL* N
 
 void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
-	if (bvs.initType == "INITPTN") {
+	if (bvs.initType == InitType::PTN) {
 		mix->Flash(bId, bvs);
 	}
-	else if (bvs.initType == "EQUIL" || bvs.initType == "EQUILWAT") {
+	else if (bvs.initType == InitType::EQUIL || bvs.initType == InitType::WAT) {
 		mix->InitFlash(bId, bvs);
 	}
 	else {
@@ -57,10 +57,10 @@ void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) cons
 
 void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const
 {
-	if (bvs.initType == "INITPTN") {
+	if (bvs.initType == InitType::PTN) {
 		mix->FlashDer(bId, bvs);
 	}
-	else if (bvs.initType == "EQUIL" || bvs.initType == "EQUILWAT") {
+	else if (bvs.initType == InitType::EQUIL || bvs.initType == InitType::WAT) {
 		mix->InitFlashDer(bId, bvs);
 	}
 	else {

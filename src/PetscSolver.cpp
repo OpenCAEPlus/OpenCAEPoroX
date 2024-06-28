@@ -12,6 +12,7 @@
  */
 
 
+
 #ifdef WITH_PETSCSOLVER
 
 #include "PetscSolver.hpp"
@@ -79,7 +80,7 @@ void PetscSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
         copy(mat.val[i - 1].begin(), mat.val[i - 1].end(), &A[(iA[i - 1]) * blockSize]);
     }
 
-
+    // fill(mat.u.begin(), mat.u.end(), 0.0);
     b = mat.b.data();
     x = mat.u.data();
 }

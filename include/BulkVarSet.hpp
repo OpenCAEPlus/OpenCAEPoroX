@@ -288,7 +288,7 @@ public:
     /// content type of bulk, all rock, rock and fluid
     vector<BulkContent> cType;
     /// initialization type
-    string  initType;
+    InitType            initType;
     /// Initial temperature
     vector<OCP_DBL>     initT;
 };

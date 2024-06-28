@@ -17,7 +17,7 @@ void BulkInitializer::Setup(const ParamReservoir& rs_param, const OCPMixtureType
 	initType = rs_param.initType;
 	rsTemp   = rs_param.rsTemp;
 	// for hydrostatic equilibrium
-	if (initType == "EQUIL") {
+	if (initType == InitType::EQUIL) {
 
 		Equil tmpEquil;
 
@@ -78,10 +78,10 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 {
 	bvs.initType = initType;
 	// for hydrostatic equilibrium
-	if (initType == "EQUIL") {
+	if (initType == InitType::EQUIL) {
 		InitHydroEquil(bvs, pvtm, satm, domain);
 	}
-	else if (initType == "INITPTN") {
+	else if (initType == InitType::PTN) {
 		InitPTNi(bvs);
 	}
 	else {

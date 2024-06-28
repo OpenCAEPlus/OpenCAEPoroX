@@ -72,8 +72,11 @@ void PreParamGridWell::Input(const string& myFilename)
                 break;
 
             case Map_Str2Int("INITPTN0", 8):
+                initR.type = InitType::PTN0;
+                break;
+
             case Map_Str2Int("INITPTN1", 8):
-                initR.type = keyword;
+                initR.type = InitType::PTN1;
                 break;
 
             case Map_Str2Int("DX", 2):
@@ -682,7 +685,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         break;
 
     case Map_Str2Int("PRESSURE", 8):
-        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+        if (initR.type != InitType::PTN0 && initR.type != InitType::PTN1) {
             OCP_ABORT("INITPTN0 or INITPTN1 is not defined before PRESSURE!");
         }
         initR.P.reserve(numGrid);
@@ -690,7 +693,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         break;
 
     case Map_Str2Int("TEMPER", 6):
-        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+        if (initR.type != InitType::PTN0 && initR.type != InitType::PTN1) {
             OCP_ABORT("INITPTN0 or INITPTN1 is not defined before TEMPER!");
         }
         initR.T.reserve(numGrid);
@@ -700,7 +703,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
     case Map_Str2Int("PHASEP-0", 8):
     case Map_Str2Int("PHASEP-1", 8):
     case Map_Str2Int("PHASEP-2", 8):
-        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+        if (initR.type != InitType::PTN0 && initR.type != InitType::PTN1) {
             OCP_ABORT("INITPTN0 or INITPTN1 is not defined before COMP-*!");
         }
         initR.Pj.push_back(vector<OCP_DBL>{});
@@ -718,7 +721,7 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
     case Map_Str2Int("COMPM-7", 7):
     case Map_Str2Int("COMPM-8", 7):
     case Map_Str2Int("COMPM-9", 7):
-        if (initR.type != "INITPTN0" && initR.type != "INITPTN1") {
+        if (initR.type != InitType::PTN0 && initR.type != InitType::PTN1) {
             OCP_ABORT("INITPTN0 or INITPTN1 is not defined before COMP-*!");
         }
         initR.Ni.push_back(vector<OCP_DBL>{});
@@ -898,7 +901,7 @@ void ActiveGridCheck::FreeSomeMemory()
 
 void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
 {
-    if (type == "INITPTN0" || type == "INITPTN1") {
+    if (type == InitType::PTN0 || type == InitType::PTN1) {
         if (P.empty()) {
             OCP_ABORT("PRESSURE is not given!");
         }
@@ -906,7 +909,7 @@ void InitialReservoir::PostProcess(const ActiveGridCheck& agc)
             OCP_ABORT("COMPM-* is not given!");
         }
 
-        if (type == "INITPTN0") {
+        if (type == InitType::PTN0) {
             // all grids' var are given, nothing to do
         }
         else {

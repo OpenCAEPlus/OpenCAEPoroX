@@ -130,11 +130,11 @@ void ParamRead::ReadFile(const string& filename)
 
             case Map_Str2Int("INITPTN0", 8):
             case Map_Str2Int("INITPTN1", 8):
-                paramRs.initType = "INITPTN";
+                paramRs.initType = InitType::PTN;
                 break;
 
             case Map_Str2Int("EQUILWAT", 8):
-                paramRs.initType = "EQUILWAT";
+                paramRs.initType = InitType::WAT;
                 break;
 
             case Map_Str2Int("RTEMP", 5):

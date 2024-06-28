@@ -1169,7 +1169,7 @@ void IsoT_FIM::CalRes(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL& initRes0
         OCPTIME_COMM_COLLECTIVE += timer.Stop();
 
         //if (CURRENT_RANK == 0) {
-        //    cout << "FIM : globalres0 : " << res.maxRelRes0_V << endl;
+        //    cout << "FIM : globalres0 : " << scientific << setprecision(12) << res.maxRelRes0_V << endl;
         //}
     }
 
@@ -2733,7 +2733,7 @@ void IsoT_FIMddm::CalResConstP(Reservoir& rs, const OCP_DBL& dt, const OCP_BOOL&
         }
 
         //if (CURRENT_RANK == 0) {
-        //    cout << "FIMddm : globalres0 : " << global_res0 << endl;
+        //    cout << "FIMddm : globalres0 : " << scientific << setprecision(12) << global_res0 << endl;
         //}
 
         OCPTIME_COMM_COLLECTIVE += timer.Stop();

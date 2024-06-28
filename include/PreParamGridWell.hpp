@@ -119,7 +119,7 @@ public:
     void PostProcess(const ActiveGridCheck& agc);
 
 protected:
-    string          type{ "EQUIL" };
+    InitType        type{ InitType::EQUIL };
     /// Initial water saturation
     vector<OCP_DBL> swat;
     /// Initial water saturation in each grid and use saturation end point scaling

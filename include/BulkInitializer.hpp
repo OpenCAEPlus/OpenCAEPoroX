@@ -68,7 +68,7 @@ protected:
     void InitHydroEquilW(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const BulkOptionalModules& optMs, const Domain& domain);
 
 protected:
-    string                   initType{"EQUIL"};
+    InitType                 initType{InitType::EQUIL};
     /// Equilibration data specification
     vector<Equil>            EQUIL;
     /// Initial mole ratio of components vs. depth, table set

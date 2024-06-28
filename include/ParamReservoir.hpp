@@ -361,7 +361,7 @@ public:
     TableSet SOF3_T; ///< Table set of SOF3.
     TableSet PBVD_T; ///< Table set of PBVD.
     // initial zi vs depth
-    string             initType{"EQUIL"};
+    InitType           initType{InitType::EQUIL};
     TableSet           ZMFVD_T;  ///< Table set of ZMFVD
     TableSet           TEMPVD_T; ///< Table set of TEMPVD
     vector<EQUILParam> EQUIL;    ///< See ParamEQUIL.
