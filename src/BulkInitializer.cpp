@@ -78,14 +78,24 @@ void BulkInitializer::Initialize(BulkVarSet& bvs, const PVTModule& pvtm, const S
 {
 	bvs.initType = initType;
 	// for hydrostatic equilibrium
-	if (initType == InitType::EQUIL) {
+
+	switch (initType)
+	{
+	case InitType::EQUIL:
 		InitHydroEquil(bvs, pvtm, satm, domain);
-	}
-	else if (initType == InitType::PTN) {
-		InitPTNi(bvs);
-	}
-	else {
+		break;
+	case InitType::WAT:
 		InitHydroEquilW(bvs, pvtm, satm, optMs, domain);
+		break;
+	case InitType::PTN:
+		InitPTNi(bvs);
+		break;
+	case InitType::PGSW:
+		InitPGSW(bvs, satm);
+		break;
+	default:
+		OCP_ABORT("Wrong initType!");
+		break;
 	}
 }
 
@@ -131,6 +141,25 @@ void BulkInitializer::InitPTNi(BulkVarSet& bvs)
 	}
 
 	fill(bvs.phaseExist.begin(), bvs.phaseExist.end(), OCP_FALSE);
+}
+
+
+void BulkInitializer::InitPGSW(BulkVarSet& bvs, const SATModule& SATm)
+{
+	const OCP_USI nb = bvs.nb;
+	const OCP_USI np = bvs.np;
+	const USI     g  = bvs.g;
+	const USI     w  = bvs.w;
+
+	for (OCP_USI n = 0; n < nb; n++) {
+		const auto SAT = SATm.GetSAT(n);
+
+		bvs.Pj[n * np + g] = Pg[n];
+		bvs.S[n * np + w]  = swat[n];
+		bvs.S[n * np + g]  = 1 - swat[n];
+		bvs.Pj[n * np + w] = bvs.Pj[n * np + g] - SAT->CalPcgwBySw(bvs.S[n * np + w]);
+		bvs.P[n]           = bvs.Pj[n * np + w];
+	}
 }
 
 

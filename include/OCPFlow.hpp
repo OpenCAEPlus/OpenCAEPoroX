@@ -47,6 +47,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return pfMethod->CalPcgoBySg(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return pfMethod->CalSgByPcgo(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const { return pfMethod->CalSwByPcgw(Pcgw); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const { return pfMethod->CalPcgwBySw(Sw); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const  { return pfMethod->CalKrg(Sg, dKrgdSg); }
 
 protected:

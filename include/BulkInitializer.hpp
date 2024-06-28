@@ -58,10 +58,13 @@ public:
     auto& GetT() { return T; }
     auto& GetNi() { return Ni; }
     auto& GetPj() { return Pj; }
+    auto& GetPg() { return Pg; }
 
 protected:
     /// initialize reservoir with given P,T,Ni
     void InitPTNi(BulkVarSet& bvs);
+    /// initialize reservoir with given gas pressure and water saturation
+    void InitPGSW(BulkVarSet& bvs, const SATModule& SATm);
     /// initialize reservoir with hydrostatic equilibrium only
     void InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, const SATModule& SATm, const Domain& domain);
     /// initialize reservoir with water and hydrostatic equilibrium
@@ -80,6 +83,8 @@ protected:
     /// reservoir temperature(for constant initialization)
     OCP_DBL                  rsTemp{-1E10};
 
+    /// inital gas pressure
+    vector<OCP_DBL>          Pg;
     /// initial reservoir water saturation
     vector<OCP_DBL>          swat;
     /// initial pressure
@@ -89,7 +94,7 @@ protected:
     /// initial moles(mass) of components
     vector<vector<OCP_DBL>>  Ni;
     /// phase pressure
-    vector<vector<OCP_DBL>> Pj;
+    vector<vector<OCP_DBL>>  Pj;
 };
 
 

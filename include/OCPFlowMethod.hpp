@@ -45,6 +45,8 @@ public:
     virtual OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const = 0;
     /// calculate Sw by Pcgw
     virtual OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const = 0;
+    /// calculate Pcgw by Sw
+    virtual OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const = 0;
     /// calculate Krg and ders by Sg
     virtual OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const = 0;
 };
@@ -72,6 +74,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGOF.CalPcgo(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGOF.CalSg(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { return SWPCGW.Eval_Inv(1, Pcgw, 0); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
@@ -117,6 +120,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGFN.CalPcgo(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGFN.CalSg(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { return SWPCGW.Eval_Inv(1, Pcgw, 0); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGFN.CalKrg(Sg, dKrgdSg); }
 
 protected:
@@ -160,6 +164,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const  override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
 
 protected:
@@ -188,6 +193,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { return SGOF.CalPcgo(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { return SGOF.CalSg(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { return SGOF.CalKrg(Sg, dKrgdSg); }
 
 protected:
@@ -219,6 +225,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { OCP_ABORT("Inavailable!"); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
 
 protected:
@@ -250,6 +257,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const override { OCP_ABORT("Inavailable!"); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw) const override { return SWGF.CalSw(Pcgw); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const override { return SWGF.CalPcgw(Sw); }
     OCP_DBL CalKrg(const OCP_DBL& Sg, OCP_DBL& dKrgdSg) const override { OCP_ABORT("Inavailable!"); }
 
 protected:

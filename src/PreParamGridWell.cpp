@@ -79,6 +79,10 @@ void PreParamGridWell::Input(const string& myFilename)
                 initR.type = InitType::PTN1;
                 break;
 
+            case Map_Str2Int("INITPGSW", 8):
+                initR.type = InitType::PGSW;
+                break;
+
             case Map_Str2Int("DX", 2):
             case Map_Str2Int("DY", 2):
             case Map_Str2Int("DZ", 2):
@@ -100,6 +104,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("MULTZ", 5):
             case Map_Str2Int("DZMTRXV", 7):
             case Map_Str2Int("PRESSURE", 8):
+            case Map_Str2Int("PGAS", 4):
             case Map_Str2Int("TEMPER", 6):
             case Map_Str2Int("PHASEP-0", 8):
             case Map_Str2Int("PHASEP-1", 8):
@@ -682,6 +687,14 @@ vector<OCP_DBL>* PreParamGridWell::FindPtr(const string& varName, const OCP_DBL&
         initR.swatInit.reserve(numGrid);
         myPtr = &initR.swatInit;
         initR.scalePcow = OCP_TRUE;
+        break;
+
+    case Map_Str2Int("PGAS", 4):
+        if (initR.type != InitType::PGSW) {
+            OCP_ABORT("INITPGSW is not defined before PGAS!");
+        }
+        initR.Pg.reserve(numGrid);
+        myPtr = &initR.Pg;
         break;
 
     case Map_Str2Int("PRESSURE", 8):

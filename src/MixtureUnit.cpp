@@ -43,7 +43,9 @@ void MixtureUnit::InitFlashIMPEC(const OCP_USI& bId, const BulkVarSet& bvs) cons
 	if (bvs.initType == InitType::PTN) {
 		mix->Flash(bId, bvs);
 	}
-	else if (bvs.initType == InitType::EQUIL || bvs.initType == InitType::WAT) {
+	else if (bvs.initType == InitType::EQUIL || 
+			 bvs.initType == InitType::WAT   ||
+		     bvs.initType == InitType::PGSW) {
 		mix->InitFlash(bId, bvs);
 	}
 	else {
@@ -60,8 +62,10 @@ void MixtureUnit::InitFlashFIM(const OCP_USI& bId, const BulkVarSet& bvs) const
 	if (bvs.initType == InitType::PTN) {
 		mix->FlashDer(bId, bvs);
 	}
-	else if (bvs.initType == InitType::EQUIL || bvs.initType == InitType::WAT) {
-		mix->InitFlashDer(bId, bvs);
+	else if (bvs.initType == InitType::EQUIL ||
+		     bvs.initType == InitType::WAT ||
+		     bvs.initType == InitType::PGSW) {
+		 mix->InitFlashDer(bId, bvs);
 	}
 	else {
 		OCP_ABORT("No matched initialization!");

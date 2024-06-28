@@ -35,6 +35,7 @@ public:
     OCP_DBL CalPcgoBySg(const OCP_DBL& Sg) const { return flow->CalPcgoBySg(Sg); }
     OCP_DBL CalSgByPcgo(const OCP_DBL& Pcgo) const { return flow->CalSgByPcgo(Pcgo); }
     OCP_DBL CalSwByPcgw(const OCP_DBL& Pcgw)  const { return flow->CalSwByPcgw(Pcgw); }
+    OCP_DBL CalPcgwBySw(const OCP_DBL& Sw) const { return flow->CalPcgwBySw(Sw); }
     const vector<OCP_DBL>& GetKr() const { return vs->kr; }
     const vector<OCP_DBL>& GetPc() const { return vs->Pc; }
     const vector<OCP_DBL>& GetdKrdS() const { return vs->dKrdS; }

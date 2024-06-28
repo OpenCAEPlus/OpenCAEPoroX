@@ -133,6 +133,10 @@ void ParamRead::ReadFile(const string& filename)
                 paramRs.initType = InitType::PTN;
                 break;
 
+            case Map_Str2Int("INITPGSW", 8):
+                paramRs.initType = InitType::PGSW;
+                break;
+
             case Map_Str2Int("EQUILWAT", 8):
                 paramRs.initType = InitType::WAT;
                 break;
