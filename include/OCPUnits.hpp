@@ -89,8 +89,8 @@ const OCP_DBL METRIC_GAS_CONSTANT    = 0.083143;
 /// Gravity constant ([m2]，[bars]/[kg])
 const OCP_DBL METRIC_GRAVITY_FACTOR  = 0.0000980665;
 /// Darcy constant  (([m3/day]，[cP])/([md]，[m]，[bars]))
-// const OCP_DBL METRIC_DARCY           = 0.008527;
-const OCP_DBL METRIC_DARCY           = 1.0;
+const OCP_DBL METRIC_DARCY           = 0.008527;
+// const OCP_DBL METRIC_DARCY           = 1.0;
 /// Density of water at standard condition ([kg]/[m3]) 
 const OCP_DBL METRIC_RHOW_STD        = 999.014;
 /// Density of air at standard condition ([kg]/[m3]) 
@@ -118,7 +118,7 @@ const OCP_DBL SPE11A_CONV4           = 0.001;
 const OCP_DBL SPE11A_GAS_CONSTANT    = 0.083143 * 1E5;
 /// Gravity constant ([cm2]，[pa]/[g])  (REQUIRED)
 const OCP_DBL SPE11A_GRAVITY_FACTOR  = 0.0000980665 * 1E5 *1E1;
-/// Darcy constant (s，([cm2]/[cm2])/(pa，s)，pa), thus  (REQUIRED)
+/// Darcy constant ([cm2]*[cm2])/([pa]，[s])，([pa]/[cm])), thus  (REQUIRED)
 const OCP_DBL SPE11A_DARCY           = 1;
 /// Density of water at standard condition ([g]/[cm3]) 
 const OCP_DBL SPE11A_RHOW_STD        = 999.014 * 1E-3;

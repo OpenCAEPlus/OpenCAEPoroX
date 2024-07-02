@@ -130,17 +130,17 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     dSmaxNR.push_back(dSmaxTmp);
     eVmaxNR.push_back(eVmaxTmp);
 
-    // for well   -- wrong now
-    dPmaxTmp = 0;
+    // for well
+    // dPmaxTmp = 0;
     const auto& wells = rs.allWells.wells;
     for (const auto& w : wells) {
         const OCP_DBL dPw = w->CalMaxChangeNR();
         if (fabs(dPmaxTmp) < fabs(dPw)) {
             dPmaxTmp = dPw;
         }
+        // cout << w->GetName() << " : " << w->PerfLocation(0) << endl;
     }
     dPWmaxNR.push_back(dPmaxTmp);
-
 
     //cout << scientific << setprecision(6) << res.maxRelRes0_V << "   " << res.maxRelRes_V << "   "
     //    << res.maxRelRes_N << "   " << res.maxWellRelRes_mol << "   " << dPmaxTmp << "   " << dSmaxTmp << endl;

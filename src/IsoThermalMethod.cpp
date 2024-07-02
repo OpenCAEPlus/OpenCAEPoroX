@@ -1287,6 +1287,7 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
     USI wId = bvs.nbI * col;
     for (auto& wl : rs.allWells.wells) {
         wl->GetSolutionFIM(u, wId);
+        // cout << wl->GetName() << "   " << wl->PerfLocation(0) << endl;
     }
 
     GetWallTime timerT;         ///< total timer
@@ -1382,6 +1383,10 @@ void IsoT_FIM::GetSolution(Reservoir&        rs,
 				// if (bvs.Ni[n * nc + i] < 0 && bvs.Ni[n * nc + i] > -1E-3) {
 				//     bvs.Ni[n * nc + i] = 1E-20;
 				// }
+
+                //if (bvs.Ni[n * nc + i] < 0) {
+                //    cout << "get it" << endl;
+                //}
 			}
 		}
 

@@ -463,6 +463,94 @@ void Domain::SetCS03(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_m
 }
 
 
+// add well-coulpled based on SetCS02
+void Domain::SetCS04(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght)
+{
+	unordered_map<OCP_INT, OCP_DBL> tmp_proc_wght;
+
+	OCP_DBL selfW = 0;
+
+	cs_group_global_rank.clear();
+	for (const auto& b : bk_info) {
+		if (b.first < numGridInterior) {
+			for (const auto& s : send_element_loc) {
+				const auto& sv = s.second;
+				if (sv.count(b.first)) {
+					cs_group_global_rank.insert(s.first);
+					if (tmp_proc_wght.count(s.first))   tmp_proc_wght[s.first] += b.second;
+					else                                tmp_proc_wght[s.first] = b.second;
+				}
+			}
+			selfW += b.second;
+		}
+		else {
+			for (const auto& r : recv_element_loc) {
+				const auto& rv = r.second;
+				if (b.first >= rv[0] && b.first < rv[1]) {
+					cs_group_global_rank.insert(r.first);
+					if (tmp_proc_wght.count(r.first))   tmp_proc_wght[r.first] += b.second;
+					else                                tmp_proc_wght[r.first] = b.second;
+					break;
+				}
+			}
+		}
+	}
+
+	// add well coupled
+	if (well.size() > 0) {
+		selfW += 1E6;
+	}
+
+	// add selfW to tmp_proc_wght
+	if (selfW > 0) {
+		for (const auto& r : recv_element_loc) {
+			cs_group_global_rank.insert(r.first);
+
+			if (tmp_proc_wght.count(r.first))  tmp_proc_wght[r.first] += selfW;
+			else                               tmp_proc_wght[r.first] = selfW;
+		}
+	}
+
+	// receive other process' selfW
+	vector<OCP_DBL> otherW(recv_element_loc.size());
+
+	GetWallTime timer;
+	timer.Start();
+	// Get Ghost grid's global index by communication
+	USI iter = 0;
+	for (const auto& r : recv_element_loc) {
+
+		MPI_Irecv(&otherW[iter], 1, OCPMPI_DBL, r.first, 0, global_comm, &recv_request[iter]);
+		iter++;
+	}
+
+	iter = 0;
+	for (const auto& s : send_element_loc) {
+
+		MPI_Isend(&selfW, 1, OCPMPI_DBL, s.first, 0, global_comm, &send_request[iter]);
+		iter++;
+	}
+
+
+	MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+	MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+
+	OCPTIME_COMM_P2P += timer.Stop();
+
+	iter = 0;
+	for (const auto& r : recv_element_loc) {
+		if (otherW[iter] > 0) {
+			cs_group_global_rank.insert(r.first);
+			if (tmp_proc_wght.count(r.first))   tmp_proc_wght[r.first] += otherW[iter];
+			else                                tmp_proc_wght[r.first] = otherW[iter];
+		}
+		iter++;
+	}
+
+	ProcWeight_f2i(tmp_proc_wght, proc_wght);
+}
+
+
 void Domain::ProcWeight_f2i(const unordered_map<OCP_INT, OCP_DBL>& tmp_proc_wght, unordered_map<OCP_INT, OCP_INT>& proc_wght)
 {
 	//OCP_DBL minW = 1E20;

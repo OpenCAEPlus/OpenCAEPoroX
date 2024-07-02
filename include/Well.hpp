@@ -103,6 +103,8 @@ public:
     OCP_DBL  PerfQi_lbmol(const USI& p, const USI& i) const { return perf[p].qi_lbmol[i]; }
     /// Return volume flow rate of component i from perforation j 
     OCP_DBL  PerfProdQj_ft3(const USI& p, const USI& j) const { return perf[p].qj_ft3[j]; }
+    /// Return well's name
+    auto GetName() const { return name; }
 
 protected:
     /// well name

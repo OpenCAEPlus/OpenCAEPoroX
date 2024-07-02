@@ -56,10 +56,22 @@ USI OCPTable::Eval_All(const USI&       j,
         }
         bId = 0;
     }
-    for (USI k = 0; k < nCol; k++) {
-        slope[k] = 0;
-        outdata[k] = data[k][bId];
+
+    if (data[0].size() == 1) {
+        for (USI k = 0; k < nCol; k++) {
+            slope[k]   = 0;
+            outdata[k] = data[k][bId];
+        }
     }
+    else {
+        const USI exId = bId == 0 ? bId + 1 : bId - 1;
+        for (USI k = 0; k < nCol; k++) {
+            slope[k]   = (data[k][exId] - data[k][bId]) / (data[j][exId] - data[j][bId]);
+            outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
+        }
+    }
+
+
     return bId;
 }
 

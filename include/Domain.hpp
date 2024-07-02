@@ -79,6 +79,7 @@ protected:
 	void SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
 	void SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
 	void SetCS03(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
+	void SetCS04(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_map<OCP_INT, OCP_INT>& proc_wght);
 	void ProcWeight_f2i(const unordered_map<OCP_INT, OCP_DBL>& tmp_proc_wght, unordered_map<OCP_INT, OCP_INT>& proc_wght);
 
 public:
