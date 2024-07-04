@@ -268,7 +268,8 @@ protected:
     OCP_BOOL PERMX{ OCP_FALSE };  ///< permeability of rock in x-direction
     OCP_BOOL PERMY{ OCP_FALSE };  ///< permeability of rock in y-direction
     OCP_BOOL PERMZ{ OCP_FALSE };  ///< permeability of rock in z-direction
-    OCP_BOOL DSATP{ OCP_FALSE };  ///< saturation change of phases
+    OCP_BOOL DSAT{ OCP_FALSE };   ///< saturation change of phases
+    OCP_BOOL DP{ OCP_FALSE };    ///< pressure change of phases
     OCP_BOOL CSFLAG{ OCP_FALSE }; ///< flag of the process group of coupled solution
     OCP_BOOL ITERNRDDM{ OCP_FALSE }; ///< Accumulated iters for NR of DDM
     OCP_BOOL ITERLSDDM{ OCP_FALSE }; ///< Accumulated iters for LS of DDM

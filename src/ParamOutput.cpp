@@ -292,8 +292,11 @@ void ParamOutput::InputRPTSCHED(ifstream& ifs, const string& keyword)
                 case Map_Str2Int("*PERMZ", 6):
                     tmpBgpp->PERMZ = OCP_TRUE;
                     break;
-                case Map_Str2Int("*DSATP", 6):
-                    tmpBgpp->DSATP = OCP_TRUE;
+                case Map_Str2Int("*DSAT", 5):
+                    tmpBgpp->DSAT = OCP_TRUE;
+                    break;
+                case Map_Str2Int("*DP", 3):
+                    tmpBgpp->DP = OCP_TRUE;
                     break;
                 case Map_Str2Int("*CSFLAG", 7):
                     tmpBgpp->CSFLAG = OCP_TRUE;
