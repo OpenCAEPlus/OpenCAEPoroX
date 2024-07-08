@@ -47,6 +47,57 @@ WellOptParam::WellOptParam(string intype, vector<string>& vbuf)
     }
 }
 
+WellOptParam::WellOptParam(string fluid_type, string state_, string mode_, string max_rate, OCP_DBL max_bhp)
+{
+    type = "INJ";
+    fluidType = fluid_type;
+    state = state_;
+    mode = mode_;
+
+    if (max_rate == "DEFAULT")
+    {
+        if (mode == "BHP")
+            maxRate = 1.0E+10;
+        else
+            cout << "### ERROR: Inj Rate is missing in WCONINJE!" << endl;
+    }
+    else
+        maxRate = stod(max_rate);
+
+    maxBHP = max_bhp;
+}
+
+WellOptParam::WellOptParam(string state_, string mode_, string max_rate, OCP_DBL min_bhp)
+{
+    type = "PROD";
+    state = state_;
+    mode = mode_;
+
+    if (max_rate == "DEFAULT")
+    {
+        if (mode == "BHP")
+            maxRate = 1.0E+10;
+        else
+            cout << "### ERROR: Prod Rate is missing in WCONINJE!" << endl;
+    }
+    else
+        maxRate = stod(max_rate);
+
+    minBHP = min_bhp;
+}
+
+WellOptParam::WellOptParam(const WellOptParam &opt)
+{
+    type = opt.type;
+    fluidType = opt.fluidType;
+    state = opt.state;
+    mode = opt.mode;
+    maxRate = opt.maxRate;
+    maxBHP = opt.maxBHP;
+    minBHP = opt.minBHP;
+    injTemp = opt.injTemp;
+}
+
 
 WellParam::WellParam(vector<string>& info)
 {
@@ -416,6 +467,9 @@ void ParamWell::InputTIME(const std::vector<std::string>& vbuf)
     {
         if (is_first_time)
         {
+            assert(criticalTime.size() == 1);
+            criticalTime.pop_back();
+
             first_time = vbuf[1];
             is_first_time = OCP_FALSE;
 
@@ -433,56 +487,90 @@ void ParamWell::InputTIME(const std::vector<std::string>& vbuf)
 
 void ParamWell::InputWELLOperations(vector<string> str, ifstream &ifs)
 {
+    int idx_criticalTime = criticalTime.size() - 1;
+
     string well_name = str[1];
     int well_index = FindWellByName(well_name);
     string well_state = "OPEN";
     string mode = "";
 
     if (str.size() > 2)
-        OCP_ABORT("Not support now!");
-
-//    if (well_name == "YA002-2")
-//        cout << "Goog" << endl;
-
-    const USI time_index = criticalTime.size() - 1;
-
-    vector<string> vbuf;
-    int pos = ifs.tellg();
-    while (ReadLine(ifs, vbuf) && (vbuf[0] != "WELL" || vbuf[0] != "TIME"))
     {
-        if (vbuf[0] == "WELL" || vbuf[0] == "TIME")
+        string mode = str[2];
+        string max_rate = str[3];
+        if (TypeMap[mode] == WellOptParam::PROD)
         {
-            ifs.seekg(pos);
-            break;
+            double min_bhp = stod(str[4]);
+            WellOptParam opt(well_state, mode, max_rate, min_bhp);
+            well[well_index].optParam.push_back(WellOptPair(idx_criticalTime, opt));
         }
-        pos = ifs.tellg(); // save position
+        else if (TypeMap[mode] == WellOptParam::INJ)
+        {
+            string fluidType;
+            if (str[2] == "WIR")
+                fluidType = "WATER";
+            else if (str[2] == "GIR")
+            {
+                fluidType = "solvent" + std::to_string(solSet.size());
+                if (blackOil)
+                    fluidType = "GAS";
+            }
+            else
+                OCP_ABORT("Not support fluidType!");
 
-        if (std::find(vbuf.begin(), vbuf.end(), "SHUT") != vbuf.end())
-        {
-            well_state = "SHUT";
+            double max_bhp = stod(str[4]);
 
-        }
-        else if (std::find(vbuf.begin(), vbuf.end(), "GRAT") != vbuf.end())
-        {
-            int index = std::distance(vbuf.begin(), std::find(vbuf.begin(), vbuf.end(), "GRAT"));
-            // 生产井
+            if (mode == "WIR" || mode == "GIR")
+                mode = "RATE";
 
-        }
-        else if (vbuf[0] == "PERF")
-        {
-            continue;
-        }
-        else if (vbuf[0] == "/")
-        {
-            break;
+            WellOptParam opt(fluidType, well_state, mode, max_rate, max_bhp);
+            well[well_index].optParam.push_back(WellOptPair(idx_criticalTime, opt));
         }
         else
-        {
-            string msg = "Not support WELL opertion: " + vbuf[0];
-            OCP_ABORT(msg);
-        }
-
+            OCP_ABORT("Wrong well operation type!");
     }
+
+    if (well_name == "YA11")
+        cout << "Goog" << endl;
+
+
+//    vector<string> vbuf;
+//    int pos = ifs.tellg();
+//    while (ReadLine(ifs, vbuf) && (vbuf[0] != "WELL" || vbuf[0] != "TIME"))
+//    {
+//        if (vbuf[0] == "WELL" || vbuf[0] == "TIME")
+//        {
+//            ifs.seekg(pos);
+//            break;
+//        }
+//        pos = ifs.tellg(); // save position
+//
+//        if (std::find(vbuf.begin(), vbuf.end(), "SHUT") != vbuf.end())
+//        {
+//            well_state = "SHUT";
+//
+//        }
+//        else if (std::find(vbuf.begin(), vbuf.end(), "GRAT") != vbuf.end())
+//        {
+//            int index = std::distance(vbuf.begin(), std::find(vbuf.begin(), vbuf.end(), "GRAT"));
+//            // 生产井
+//
+//        }
+//        else if (vbuf[0] == "PERF")
+//        {
+//            continue;
+//        }
+//        else if (vbuf[0] == "/")
+//        {
+//            break;
+//        }
+//        else
+//        {
+//            string msg = "Not support WELL opertion: " + vbuf[0];
+//            OCP_ABORT(msg);
+//        }
+//
+//    }
 }
 
 void ParamWell::InputWELTARG(ifstream& ifs)

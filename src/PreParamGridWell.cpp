@@ -225,8 +225,15 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
                 break;
 
             case Map_Str2Int("INITPTN0", 8):
+                initR.type = InitType::PTN0;
+                break;
+
             case Map_Str2Int("INITPTN1", 8):
-                initR.type = keyword;
+                initR.type = InitType::PTN1;
+                break;
+
+            case Map_Str2Int("INITPGSW", 8):
+                initR.type = InitType::PGSW;
                 break;
 
             case Map_Str2Int("DX", 2):
@@ -250,6 +257,7 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
             case Map_Str2Int("MULTZ", 5):
             case Map_Str2Int("DZMTRXV", 7):
             case Map_Str2Int("PRESSURE", 8):
+            case Map_Str2Int("PGAS", 4):
             case Map_Str2Int("TEMPER", 6):
             case Map_Str2Int("PHASEP-0", 8):
             case Map_Str2Int("PHASEP-1", 8):
