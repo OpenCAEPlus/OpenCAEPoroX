@@ -31,6 +31,12 @@ class WellOptParam
 {
 public:
     WellOptParam(string intype, vector<string>& vbuf);
+    /// INJE well
+    WellOptParam(string fluid_type, string state_, string mode_, string max_rate, OCP_DBL max_bhp);
+    /// PROD well
+    WellOptParam(string state_, string mode_, string max_rate, OCP_DBL min_bhp);
+    /// 拷贝构造函数
+    WellOptParam(const WellOptParam& opt);
     // WCONINJE & WCONPROD
     string type;         ///< Type of well, injection or production
     string fluidType;    ///< Type of fluid into the injection well. (injection well only)
@@ -78,6 +84,7 @@ public:
     WellOptPair(USI i, string type, vector<string>& vbuf)
         : d(i)
         , opt(type, vbuf){};
+    WellOptPair(USI i, WellOptParam opt_): d(i), opt(opt_) {}
     USI          d;
     WellOptParam opt;
 };
@@ -171,6 +178,7 @@ class ParamWell
 public:
     /// if thermal model is used
     OCP_BOOL          thermal{ OCP_FALSE };
+    OCP_BOOL blackOil{OCP_FALSE}; ///< If ture, blackoil model will be used.
     /// Contains all the information of wells.
     std::map<std::string, int> templates;
     vector<WellParam> well;

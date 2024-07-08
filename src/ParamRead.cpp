@@ -432,6 +432,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("BLACKOIL", 8):
                 paramRs.blackOil = OCP_TRUE;
+                paramWell.blackOil = OCP_TRUE;
                 break;
 
             case Map_Str2Int("COMPS", 5):
@@ -466,11 +467,15 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("INITPTN0", 8):
             case Map_Str2Int("INITPTN1", 8):
-                paramRs.initType = "INITPTN";
+                paramRs.initType = InitType::PTN;
+                break;
+
+            case Map_Str2Int("INITPGSW", 8):
+                paramRs.initType = InitType::PGSW;
                 break;
 
             case Map_Str2Int("EQUILWAT", 8):
-                paramRs.initType = "EQUILWAT";
+                paramRs.initType = InitType::WAT;
                 break;
 
             case Map_Str2Int("RTEMP", 5):
@@ -479,6 +484,7 @@ void ParamRead::ReadFileHiSim(const string& filename)
 
             case Map_Str2Int("SWFN", 4):
             case Map_Str2Int("SWOF", 4):
+            case Map_Str2Int("SWGF", 4):
             case Map_Str2Int("SGFN", 4):
             case Map_Str2Int("SGOF", 4):
             case Map_Str2Int("SOF3", 4):
