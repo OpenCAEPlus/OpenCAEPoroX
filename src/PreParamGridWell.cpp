@@ -12,19 +12,12 @@
 #include "PreParamGridWell.hpp"
 
 
-<<<<<<< HEAD
 void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, int _type)
-=======
-void PreParamGridWell::InputFile(const string& myFile, const string& myWorkdir, int type)
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
 {
     OCP_INFO("Input Grid File -- begin");
 
     workdir = myWorkdir;
-<<<<<<< HEAD
     type = _type;
-=======
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
     if (type == 0)
         Input(myFile);
     else if (type == 1)
@@ -186,15 +179,12 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
         if (!ReadLine(ifs, vbuf)) break;
         string keyword = vbuf[0];
 
-<<<<<<< HEAD
         if (keyword == "MODELTYPE")
         {
             model = OCPModel::isothermal;
             continue;
         }
 
-=======
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
         switch (Map_Str2Int(&keyword[0], keyword.size()))
         {
             case Map_Str2Int("MODEL", 5):
@@ -210,16 +200,12 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
                 break;
 
             case Map_Str2Int("DIMENS", 6):
-<<<<<<< HEAD
                 if (vbuf.size() == 1)
                     InputDIMENS(ifs);
                 else if (vbuf.size() == 4)
                     InputDIMENS(vbuf);
                 else
                     OCP_ABORT("Wrong DIMENS format!");
-=======
-                InputDIMENS(ifs);
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("EQUALS", 6):
@@ -234,7 +220,6 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
                 InputMULTIPLY(ifs);
                 break;
 
-<<<<<<< HEAD
             case Map_Str2Int("BOX", 3):
                 InputBOX(vbuf);
                 break;
@@ -249,11 +234,6 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
 
             case Map_Str2Int("INITPGSW", 8):
                 initR.type = InitType::PGSW;
-=======
-            case Map_Str2Int("INITPTN0", 8):
-            case Map_Str2Int("INITPTN1", 8):
-                initR.type = keyword;
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
                 break;
 
             case Map_Str2Int("DX", 2):
@@ -277,10 +257,7 @@ void PreParamGridWell::InputHiSim(const string& myFilename)
             case Map_Str2Int("MULTZ", 5):
             case Map_Str2Int("DZMTRXV", 7):
             case Map_Str2Int("PRESSURE", 8):
-<<<<<<< HEAD
             case Map_Str2Int("PGAS", 4):
-=======
->>>>>>> 113a6e5 (config fasp, fasp4blkoil successfully)
             case Map_Str2Int("TEMPER", 6):
             case Map_Str2Int("PHASEP-0", 8):
             case Map_Str2Int("PHASEP-1", 8):
