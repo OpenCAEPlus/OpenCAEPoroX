@@ -48,11 +48,11 @@ const vector<OCP_DBL>& BulkAccumuTerm01::CaldFdXpFIM(const OCP_USI& bId, const B
 {
     fill(dFdXp.begin(), dFdXp.end(), 0.0);
 
-	dFdXp[0] = bvs.v[bId] * bvs.poroP[bId] - bvs.vfP[bId];
-	for (USI i = 0; i < bvs.nc; i++) {
+	dFdXp[0] = bvs.v[bId] * bvs.poroP[bId] - bvs.vfP[bId]; /// (3.9)中的 [1, 1]块
+	for (USI i = 0; i < bvs.nc; i++) { /// (3.9)中的 [1, 2]块
 		dFdXp[i + 1] = -bvs.vfi[bId * bvs.nc + i];
 	}
-	for (USI i = 1; i < dim; i++) {
+	for (USI i = 1; i < dim; i++) { /// (3.9)中的 [2, 2]块
 		dFdXp[i * dim + i] = 1;
 	}
 

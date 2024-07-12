@@ -1212,9 +1212,9 @@ void IsoT_FIM::AssembleMatBulks(LinearSystem&    ls,
 
         Flux->AssembleMatFIM(conn.iteratorConn[c], c, conn.vs, bk);
         
-        bmat = Flux->GetdFdXpB();
+        bmat = Flux->GetdFdXpB(); /// 计算(3.8)的每一项
         DaABpbC(ncol, ncol, ncol2, dt, Flux->GetdFdXsB().data(), &bvs.dSec_dPri[bId * bsize2], dt,
-            bmat.data());
+            bmat.data()); /// 计算整个(3.8)
 
         // Assemble
         // Begin - Begin -- add

@@ -127,7 +127,7 @@ public:
         fill(flux_ni.begin(), flux_ni.end(), 0.0);
     }
     void SetZeroFIM() {
-        fill(dFdXpB.begin(), dFdXpB.end(), 0.0);
+        fill(dFdXpB.begin(), dFdXpB.end(), 0.0); /// 重点计算下面4个子块
         fill(dFdXpE.begin(), dFdXpE.end(), 0.0);
         fill(dFdXsB.begin(), dFdXsB.end(), 0.0);
         fill(dFdXsE.begin(), dFdXsE.end(), 0.0);
