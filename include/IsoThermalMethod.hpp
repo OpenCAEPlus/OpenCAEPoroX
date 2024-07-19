@@ -255,7 +255,9 @@ protected:
     void ExchangePBoundary(Reservoir& rs) const;
     void ExchangeNiBoundary(Reservoir& rs) const;
     OCP_BOOL IfBulkInLS(const USI& bId, const Domain& domain) const;
-    void SetStarBulkSet(const Bulk& bulk, const Domain& domain);
+    void SetStarBulkSet(const Bulk& bulk, const Domain& domain, const ControlTime& ctrlTime);
+    void SetStarBulkSet01(const Bulk& bulk, const Domain& domain, const ControlTime& ctrlTime);
+    void SetStarBulkSet02(const Bulk& bulk, const Domain& domain, const ControlTime& ctrlTime);
     void ResetBoundary(Reservoir& rs);
     /// Reset variables to last time step
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);

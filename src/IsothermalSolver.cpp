@@ -287,7 +287,7 @@ void IsothermalSolver::FinishStepComb(Reservoir& rs, OCPControl& ctrl)
         fim.NR.CalMaxChangeTime(rs);
         ctrl.CalNextTimeStep(fim.NR, { "dP", "dS", "iter" });
 
-        fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain());
+        fim_ddm.SetStarBulkSet(rs.GetBulk(), rs.GetDomain(), ctrl.time);
 
         OCPITER_NR_DDM  += fim_ddm.NR.GetIterNR();
         OCPITER_NRW_DDM += fim_ddm.NR.GetIterNRw();

@@ -164,10 +164,8 @@ WPI
 /
 
 VTKSCHED
-*DOUBLE
 *PRES
 *SOIL *SGAS *SWAT
-*COMPM
 /
 
 SCHEDULE    ==========================================================

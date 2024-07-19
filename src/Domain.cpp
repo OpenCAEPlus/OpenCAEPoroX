@@ -236,7 +236,6 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	SetCS02(bk_info, proc_weight);
 	GroupProcess(GroupMethod::BGL, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
-
 	// SetCS03(bk_info, proc_weight);
 	// GroupProcess(GroupMethod::Metis, cs_group_global_rank, proc_weight, cs_comm, global_comm);
 
@@ -252,6 +251,7 @@ void Domain::SetCSComm(const unordered_map<OCP_USI, OCP_DBL>& bk_info)
 	OCPTIME_GROUPPROCESS += timer.Stop();
 
 
+	if (OCP_FALSE)
 	{
 		cs_group_global_rank_for_output = cs_group_global_rank;
 		USI tmp = 0;
@@ -293,6 +293,51 @@ void Domain::SetCS01(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_m
 		}
 	}
 
+
+	// tell its neighbor
+	if (OCP_FALSE) {
+		
+		vector<INT> otherF(recv_element_loc.size());
+
+		GetWallTime timer;
+		timer.Start();
+
+		USI iter = 0;
+		for (const auto& r : recv_element_loc) {
+			MPI_Irecv(&otherF[iter], 1, OCPMPI_INT, r.first, 0, global_comm, &recv_request[iter]);
+			iter++;
+		}
+
+		INT flag = 0;
+		iter = 0;
+		for (const auto& s : send_element_loc) {
+
+			if (cs_group_global_rank.count(s.first)) flag = 1;
+			else                                     flag = 0;
+
+			MPI_Isend(&flag, 1, OCPMPI_INT, s.first, 0, global_comm, &send_request[iter]);
+			iter++;
+		}
+
+
+		MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+		MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+
+		OCPTIME_COMM_P2P += timer.Stop();
+
+		iter = 0;
+		for (const auto& r : recv_element_loc) {
+			if (otherF[iter] > 0) {
+				cs_group_global_rank.insert(r.first);
+
+				if (tmp_proc_wght.count(r.first))  tmp_proc_wght[r.first] += 1.0;
+				else                               tmp_proc_wght[r.first] = 1.0; // tmp
+			}
+			iter++;
+		}
+	}
+
+
 	ProcWeight_f2i(tmp_proc_wght, proc_wght);
 }
 
@@ -315,17 +360,6 @@ void Domain::SetCS02(const unordered_map<OCP_USI, OCP_DBL>& bk_info, unordered_m
 				}
 			}
 			selfW += b.second;
-		}
-		else {
-			for (const auto& r : recv_element_loc) {
-				const auto& rv = r.second;
-				if (b.first >= rv[0] && b.first < rv[1]) {
-					cs_group_global_rank.insert(r.first);
-					if (tmp_proc_wght.count(r.first))   tmp_proc_wght[r.first] += b.second;
-					else                                tmp_proc_wght[r.first] = b.second;
-					break;
-				}
-			}
 		}
 	}
 

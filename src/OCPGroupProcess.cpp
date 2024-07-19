@@ -669,23 +669,56 @@ void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
 	int work_rank;
 	MPI_Comm_rank(work_comm, &work_rank);
 	// recalulate index of points on each process
-	MPI_Request work_request;
-	MPI_Status  work_status;
 
 	std::set<OCP_INT>                    work_cs_proc_group;
 	std::unordered_map<OCP_INT, OCP_INT> work_proc_weight;
 
-	for (const auto& s : cs_proc_group) {
-		MPI_Isend(&work_rank, 1, MPI_INT, s, 0, global_comm, &work_request);
-	}
-	for (const auto& r : cs_proc_group) {
-		OCP_INT buffer = 0;
-		MPI_Recv(&buffer, 1, MPI_INT, r, 0, global_comm, &work_status);
 
-		work_cs_proc_group.insert(buffer);
-		work_proc_weight[buffer] = proc_weight.at(r);
-	}
+	if (false) {
 
+		MPI_Request work_request;
+		MPI_Status  work_status;
+
+		for (const auto& s : cs_proc_group) {
+			MPI_Isend(&work_rank, 1, MPI_INT, s, 0, global_comm, &work_request);
+		}
+		for (const auto& r : cs_proc_group) {
+			OCP_INT buffer = 0;
+			MPI_Recv(&buffer, 1, MPI_INT, r, 0, global_comm, &work_status);
+
+			work_cs_proc_group.insert(buffer);
+			work_proc_weight[buffer] = proc_weight.at(r);
+		}
+	}
+	else {
+
+		const USI len = cs_proc_group.size();
+		std::vector<MPI_Request>  send_request(len);
+		std::vector<MPI_Request>  recv_request(len);
+		std::vector<OCP_INT>      buffer(len);
+
+		USI iter = 0;
+		for (const auto& r : cs_proc_group) {
+			MPI_Irecv(&buffer[iter], 1, MPI_INT, r, 0, global_comm, &recv_request[iter]);
+			iter++;
+		}
+
+		iter = 0;
+		for (const auto& s : cs_proc_group) {
+			MPI_Isend(&work_rank, 1, MPI_INT, s, 0, global_comm, &send_request[iter]);
+			iter++;
+		}
+
+		MPI_Waitall(iter, recv_request.data(), MPI_STATUS_IGNORE);
+		MPI_Waitall(iter, send_request.data(), MPI_STATUS_IGNORE);
+
+		iter = 0;
+		for (const auto& r : cs_proc_group) {
+			work_cs_proc_group.insert(buffer[iter]);
+			work_proc_weight[buffer[iter]] = proc_weight.at(r);
+			iter++;
+		}
+	}
 
 	color = 0;
 

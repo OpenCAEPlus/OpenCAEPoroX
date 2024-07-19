@@ -119,6 +119,8 @@ public:
     auto GetLastDt() const { return last_dt; }
     /// Determine whether the critical time point has been reached.
     auto IfEndTSTEP() { return ((wp->end_time - current_time) < TINY); }
+    /// Return max timestep
+    auto GetMaxTime() const { return wp->timeMax; }
 
 protected:
     /// control param set

@@ -1084,6 +1084,7 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
     if (CO2)       bgpnum++;
     if (SATNUM)    bgpnum++;
     if (PERMX)     bgpnum++;
+    if (PERMY)     bgpnum++;
     if (DSAT)      bgpnum += np;
     if (DP)        bgpnum += np;
     if (CSFLAG)    bgpnum++;
@@ -1507,6 +1508,16 @@ void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
             tmpV[n] = bvs.rockKx[n];
         outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
     }
+
+    if (bgp.PERMY) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = bvs.rockKy[n];
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
+
+    OCP_DBL dt = ctrl.time.GetLastDt();
+    dt = dt < 1E-8 ? 1 : dt;
+
     if (bgp.DSAT) {
         for (USI j = 0; j < np; j++) {
             for (OCP_USI n = 0; n < nb; n++)
@@ -1678,6 +1689,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 				workPtr += numGrid;
 				tmpVal_ptr += numGridLoc;
 			}
+            if (bgp.PERMY) {
+                for (OCP_USI n = 0; n < numGridLoc; n++) {
+                    workPtr[global_index[n]] = tmpVal_ptr[n];
+                }
+                workPtr += numGrid;
+                tmpVal_ptr += numGridLoc;
+            }
 			if (bgp.DSAT) {
 				for (USI j = 0; j < bgp.np; j++) {
 					for (OCP_USI n = 0; n < numGridLoc; n++) {
@@ -1801,6 +1819,10 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
                 bId += numGrid;
             }
+            if (bgp.PERMY) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMY", VTK_FLOAT, gridVal[t], bId, numGrid, 0);
+                bId += numGrid;
+            }
             if (bgp.DSAT) {
                 for (USI j = 0; j < bgp.np; j++) {
                     out4vtk.OutputCELL_DATA_SCALARS(dest, "DS-" + to_string(j), VTK_FLOAT, gridVal[t], bId, numGrid, 3);
@@ -1914,6 +1936,10 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
         }
         if (bgp.PERMX) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMX", VTK_FLOAT, tmpVal, bId, numGrid, 0);
+            bId += numGrid;
+        }
+        if (bgp.PERMY) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "PERMY", VTK_FLOAT, tmpVal, bId, numGrid, 0);
             bId += numGrid;
         }
         if (bgp.DSAT) {
