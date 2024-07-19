@@ -12,6 +12,10 @@
 #include "OCPOutput.hpp"
 
 
+OCP_INT  file_myrank;
+MPI_Comm file_myComm;
+
+
 void ItersInfo::Update(const OCPNRsuite& NRs)
 {
     numTstep++;
@@ -639,135 +643,267 @@ void Summary::PrintInfo(const string& dir, const string& filename, const OCP_INT
 }
 
 
+// By files
+//void Summary::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
+//{
+//    vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
+//    sumdata->clear();
+//
+//    OCP_INT         bId = 0;
+//    USI             varlen = 0;
+//    OCP_USI         rowNum;
+//
+//    vector<SumItem> mySum;
+//    vector<string>  buffer;
+//    OCP_BOOL        flag = OCP_FALSE;
+//
+//    for (USI p = 0; p < numproc; p++) {
+//        const string myFile = dir + "proc_" + to_string(p) + "_SUMMARY.out";
+//        ifstream ifs(myFile, ios::in);
+//
+//        if (!ifs) {
+//            OCP_MESSAGE("Trying to open file: " << (myFile));
+//            OCP_ABORT("Failed to open the input file!");
+//        }
+//
+//        // Get time steps
+//        ReadLine(ifs, buffer, OCP_FALSE);
+//        for (USI i = 0; i < buffer.size(); i++) {
+//            if (buffer[i] == "--") {
+//                rowNum = stoi(buffer[i + 1]);
+//                break;
+//            }
+//        }
+//
+//        while (!ifs.eof()) {
+//            if (buffer[0] == "TIME") {
+//                // begin to input title of data
+//                flag = OCP_TRUE;
+//                bId += varlen;
+//                varlen = buffer.size();
+//                for (const auto& v : buffer) {
+//                    mySum.push_back(SumItem(v, rowNum));
+//                }
+//                ReadLine(ifs, buffer, OCP_FALSE);
+//                OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
+//                for (USI i = 0; i < varlen; i++) {
+//                    mySum[bId + i].Unit = buffer[i];
+//                }
+//                ReadLine(ifs, buffer, OCP_FALSE);
+//                OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
+//                for (USI i = 0; i < varlen; i++) {
+//                    mySum[bId + i].Obj = buffer[i];
+//                }
+//            }
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            if (flag && buffer.size() == varlen && buffer[0] != "Row") {
+//                // begin to input value of data               
+//                for (USI i = 0; i < varlen; i++) {
+//                    mySum[bId + i].val.push_back(stod(buffer[i]));
+//                }
+//            }
+//            else {
+//                flag = OCP_FALSE;
+//            }
+//        }
+//
+//        ifs.close();
+//        if (remove(myFile.c_str()) != 0) {
+//            OCP_WARNING("Failed to delete " + myFile);
+//        }
+//    }
+//
+//    // post process
+//    // combine some values
+//    vector<SumItem> tmpdata;
+//    for (const auto& s : mySum) {
+//        USI n = 0;
+//        for (; n < tmpdata.size(); n++) {
+//            if (tmpdata[n] == s) {
+//                if (s.Item == "FOPR" || s.Item == "FGPR" || s.Item == "FWPR" ||
+//                    s.Item == "FOPT" || s.Item == "FGPT" || s.Item == "FWPT" ||
+//                    s.Item == "FGIR" || s.Item == "FGIT" || s.Item == "FWIR" ||
+//                    s.Item == "FWIT") {
+//                    for (USI i = 0; i < rowNum; i++) {
+//                        sumdata->at(n).val[i] += s.val[i];
+//                    }
+//                }
+//                else if (s.Item == "FPR" || s.Item == "FTR") {
+//                    for (USI i = 0; i < rowNum; i++) {
+//                        sumdata->at(n).val[i] += s.val[i] * (&s + 1)->val[i];
+//                        sumdata->at(n + 1).val[i] += (&s + 1)->val[i];
+//                    }
+//                }
+//                break;
+//            }
+//        }
+//        if (n == sumdata->size()) {
+//            sumdata->push_back(s);
+//            tmpdata.push_back(SumItem(s.Item, s.Obj));
+//            // prepare for calculating for FPR or FPT
+//            if (s.Item == "Volume") {
+//                for (USI i = 0; i < rowNum; i++) {
+//                    sumdata->at(n - 1).val[i] *= sumdata->at(n).val[i];
+//                }
+//            }
+//        }
+//    }
+//    // set output precision
+//    for (USI n = 0; n < sumdata->size(); n++) {
+//        if (sumdata->at(n).Item == "FPR" || sumdata->at(n).Item == "FTR") {
+//            for (USI i = 0; i < rowNum; i++) {
+//                sumdata->at(n).val[i] /= sumdata->at(n + 1).val[i];
+//            }
+//            sumdata->at(n).Type = "float";
+//            continue;
+//        }
+//        if (sumdata->at(n).Item == "TIME") {
+//            sumdata->at(n).Type = "fixed";
+//            continue;
+//        }
+//        if (sumdata->at(n).Item == "NRiter" || sumdata->at(n).Item == "LSiter") {
+//            sumdata->at(n).Type = "int";
+//            continue;
+//        }
+//        else {
+//            sumdata->at(n).Type = "float";
+//            continue;
+//        }
+//    }
+//
+//    PrintInfo(dir, filename, -1);
+//}
+
+
+// By communication
 void Summary::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc) const
 {
     vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
-    sumdata->clear();
-
-    OCP_INT         bId = 0;
-    USI             varlen = 0;
-    OCP_USI         rowNum;
-
-    vector<SumItem> mySum;
-    vector<string>  buffer;
-    OCP_BOOL        flag = OCP_FALSE;
-
-    for (USI p = 0; p < numproc; p++) {
-        const string myFile = dir + "proc_" + to_string(p) + "_SUMMARY.out";
-        ifstream ifs(myFile, ios::in);
-
-        if (!ifs) {
-            OCP_MESSAGE("Trying to open file: " << (myFile));
-            OCP_ABORT("Failed to open the input file!");
-        }
-
-        // Get time steps
-        ReadLine(ifs, buffer, OCP_FALSE);
-        for (USI i = 0; i < buffer.size(); i++) {
-            if (buffer[i] == "--") {
-                rowNum = stoi(buffer[i + 1]);
-                break;
-            }
-        }
-
-        while (!ifs.eof()) {
-            if (buffer[0] == "TIME") {
-                // begin to input title of data
-                flag = OCP_TRUE;
-                bId += varlen;
-                varlen = buffer.size();
-                for (const auto& v : buffer) {
-                    mySum.push_back(SumItem(v, rowNum));
-                }
-                ReadLine(ifs, buffer, OCP_FALSE);
-                OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
-                for (USI i = 0; i < varlen; i++) {
-                    mySum[bId + i].Unit = buffer[i];
-                }
-                ReadLine(ifs, buffer, OCP_FALSE);
-                OCP_ASSERT(varlen == buffer.size(), "Mismatch Value");
-                for (USI i = 0; i < varlen; i++) {
-                    mySum[bId + i].Obj = buffer[i];
-                }
-            }
-            ReadLine(ifs, buffer, OCP_FALSE);
-            if (flag && buffer.size() == varlen && buffer[0] != "Row") {
-                // begin to input value of data               
-                for (USI i = 0; i < varlen; i++) {
-                    mySum[bId + i].val.push_back(stod(buffer[i]));
-                }
-            }
-            else {
-                flag = OCP_FALSE;
-            }
-        }
-
-        ifs.close();
-        if (remove(myFile.c_str()) != 0) {
-            OCP_WARNING("Failed to delete " + myFile);
-        }
-    }
+    OCP_USI         rowNum = Sumdata[0].val.size();
+    double* buffer = new double[rowNum];
 
     // post process
     // combine some values
-    vector<SumItem> tmpdata;
-    for (const auto& s : mySum) {
-        USI n = 0;
-        for (; n < tmpdata.size(); n++) {
-            if (tmpdata[n] == s) {
-                if (s.Item == "FOPR" || s.Item == "FGPR" || s.Item == "FWPR" ||
-                    s.Item == "FOPT" || s.Item == "FGPT" || s.Item == "FWPT" ||
-                    s.Item == "FGIR" || s.Item == "FGIT" || s.Item == "FWIR" ||
-                    s.Item == "FWIT") {
-                    for (USI i = 0; i < rowNum; i++) {
-                        sumdata->at(n).val[i] += s.val[i];
-                    }
-                }
-                else if (s.Item == "FPR" || s.Item == "FTR") {
-                    for (USI i = 0; i < rowNum; i++) {
-                        sumdata->at(n).val[i] += s.val[i] * (&s + 1)->val[i];
-                        sumdata->at(n + 1).val[i] += (&s + 1)->val[i];
-                    }
-                }
-                break;
+    for (USI n = 0; n < sumdata->size(); n++) {
+        auto& s = sumdata->at(n);
+        if (s.Item == "FOPR" || s.Item == "FGPR" || s.Item == "FWPR" ||
+            s.Item == "FOPT" || s.Item == "FGPT" || s.Item == "FWPT" ||
+            s.Item == "FGIR" || s.Item == "FGIT" || s.Item == "FWIR" ||
+            s.Item == "FWIT") {
+            MPI_Reduce(s.val.data(), buffer, rowNum, MPI_DOUBLE, MPI_SUM, MASTER_PROCESS, file_myComm);
+            memcpy(s.val.data(), buffer, sizeof(double) * rowNum);
+
+        }
+        else if (s.Item == "FPR" || s.Item == "FTR") {
+            for (USI i = 0; i < rowNum; i++) {
+                s.val[i] = s.val[i] * (&s + 1)->val[i];
+            }
+            MPI_Reduce((&s + 1)->val.data(), buffer, rowNum, MPI_DOUBLE, MPI_SUM, MASTER_PROCESS, file_myComm);
+            memcpy((&s + 1)->val.data(), buffer, sizeof(double) * rowNum);
+            MPI_Reduce(s.val.data(), buffer, rowNum, MPI_DOUBLE, MPI_SUM, MASTER_PROCESS, file_myComm);
+            for (USI i = 0; i < rowNum; i++) {
+                sumdata->at(n).val[i] = buffer[i] / sumdata->at(n + 1).val[i];
             }
         }
-        if (n == sumdata->size()) {
-            sumdata->push_back(s);
-            tmpdata.push_back(SumItem(s.Item, s.Obj));
-            // prepare for calculating for FPR or FPT
-            if (s.Item == "Volume") {
-                for (USI i = 0; i < rowNum; i++) {
-                    sumdata->at(n - 1).val[i] *= sumdata->at(n).val[i];
+    }
+    // gather extra column
+    int* extra_column_count = new int[numproc];
+    int local_extra_column_count = 0;
+    int ItemStringLenPresum[4];
+
+    for (USI n = 0; n < sumdata->size(); n++) {
+        auto& s = sumdata->at(n);
+        if (s.Item == "FOPR" || s.Item == "FGPR" || s.Item == "FWPR" ||
+            s.Item == "FOPT" || s.Item == "FGPT" || s.Item == "FWPT" ||
+            s.Item == "FGIR" || s.Item == "FGIT" || s.Item == "FWIR" ||
+            s.Item == "FWIT" || s.Item == "FPR" || s.Item == "FTR" ||
+            s.Item == "Volume" || s.Item == "TIME" || s.Item == "TimeStep" ||
+            s.Item == "NRiter" || s.Item == "NRiterW" || s.Item == "NRiter(DDM)" ||
+            s.Item == "NRiterW(DDM)" || s.Item == "LSiter" || s.Item == "LS/NR" ||
+            s.Item == "Runtime") {
+            continue;
+        }
+        local_extra_column_count++;
+    }
+    MPI_Gather(&local_extra_column_count, 1, MPI_INT, extra_column_count, 1, MPI_INT, MASTER_PROCESS, file_myComm);
+
+    if (file_myrank == MASTER_PROCESS) {
+        char ItemStringBuffer[256];
+        for (USI proc = 0; proc < numproc; proc++) {
+            if (proc != MASTER_PROCESS) {
+                for (USI i = 0; i < extra_column_count[proc]; i++) {
+                    MPI_Recv(ItemStringLenPresum, 4, MPI_INT, proc, 0, file_myComm, MPI_STATUS_IGNORE);
+                    MPI_Recv(ItemStringBuffer, ItemStringLenPresum[3], MPI_CHAR, proc, 1, file_myComm, MPI_STATUS_IGNORE);
+                    MPI_Recv(buffer, rowNum, MPI_DOUBLE, proc, 2, file_myComm, MPI_STATUS_IGNORE);
+                    string Item(ItemStringBuffer, ItemStringLenPresum[0]);
+                    string Obj(ItemStringBuffer + ItemStringLenPresum[0], ItemStringLenPresum[1] - ItemStringLenPresum[0]);
+                    string Unit(ItemStringBuffer + ItemStringLenPresum[1], ItemStringLenPresum[2] - ItemStringLenPresum[1]);
+                    string Type(ItemStringBuffer + ItemStringLenPresum[2], ItemStringLenPresum[3] - ItemStringLenPresum[2]);
+                    SumItem column(Item, Obj);
+                    bool flag = false;
+                    for (USI n = 0; n < sumdata->size(); n++) {
+                        if (sumdata->at(n) == column) {
+                            flag = true;
+                        }
+                    }
+                    if (flag) {
+                        continue;
+                    }
+                    sumdata->emplace_back(Item, Obj, Unit, Type, rowNum);
+                    for (USI i = 0; i < rowNum; i++)
+                        sumdata->rbegin()->val.push_back(buffer[i]);
                 }
             }
         }
     }
-    // set output precision
-    for (USI n = 0; n < sumdata->size(); n++) {
-        if (sumdata->at(n).Item == "FPR" || sumdata->at(n).Item == "FTR") {
-            for (USI i = 0; i < rowNum; i++) {
-                sumdata->at(n).val[i] /= sumdata->at(n + 1).val[i];
+    else {
+        string ItemStringBuffer;
+        for (USI n = 0; n < sumdata->size(); n++) {
+            auto& s = sumdata->at(n);
+            if (s.Item == "FOPR" || s.Item == "FGPR" || s.Item == "FWPR" ||
+                s.Item == "FOPT" || s.Item == "FGPT" || s.Item == "FWPT" ||
+                s.Item == "FGIR" || s.Item == "FGIT" || s.Item == "FWIR" ||
+                s.Item == "FWIT" || s.Item == "FPR" || s.Item == "FTR" ||
+                s.Item == "Volume" || s.Item == "TIME" || s.Item == "TimeStep" ||
+                s.Item == "NRiter" || s.Item == "NRiterW" || s.Item == "NRiter(DDM)" ||
+                s.Item == "NRiterW(DDM)" || s.Item == "LSiter" || s.Item == "LS/NR" ||
+                s.Item == "Runtime") {
+                continue;
             }
-            sumdata->at(n).Type = "float";
-            continue;
-        }
-        if (sumdata->at(n).Item == "TIME") {
-            sumdata->at(n).Type = "fixed";
-            continue;
-        }
-        if (sumdata->at(n).Item == "NRiter" || sumdata->at(n).Item == "LSiter") {
-            sumdata->at(n).Type = "int";
-            continue;
-        }
-        else {
-            sumdata->at(n).Type = "float";
-            continue;
+            ItemStringLenPresum[0] = s.Item.length();
+            ItemStringLenPresum[1] = ItemStringLenPresum[0] + s.Obj.length();
+            ItemStringLenPresum[2] = ItemStringLenPresum[1] + s.Unit.length();
+            ItemStringLenPresum[3] = ItemStringLenPresum[2] + s.Type.length();
+            ItemStringBuffer = s.Item + s.Obj + s.Unit + s.Type;
+            MPI_Send(ItemStringLenPresum, 4, MPI_INT, MASTER_PROCESS, 0, file_myComm);
+            MPI_Send(ItemStringBuffer.c_str(), ItemStringLenPresum[3], MPI_CHAR, MASTER_PROCESS, 1, file_myComm);
+            MPI_Send(s.val.data(), rowNum, MPI_DOUBLE, MASTER_PROCESS, 2, file_myComm);
         }
     }
 
-    PrintInfo(dir, filename, -1);
+    delete[]extra_column_count;
+    delete[]buffer;
+    // set output precision
+    if (file_myrank == MASTER_PROCESS) {
+        for (USI n = 0; n < sumdata->size(); n++) {
+            if (sumdata->at(n).Item == "TIME") {
+                sumdata->at(n).Type = "fixed";
+                continue;
+            }
+            if (sumdata->at(n).Item == "NRiter" || sumdata->at(n).Item == "LSiter") {
+                sumdata->at(n).Type = "int";
+                continue;
+            }
+            else {
+                sumdata->at(n).Type = "float";
+                continue;
+            }
+        }
+
+        PrintInfo(dir, filename, -1);
+    }
 }
+
 
 
 void CriticalInfo::Setup()
@@ -918,82 +1054,116 @@ void CriticalInfo::PrintFastReview(const string& dir, const string& filename, co
 
 
 /// Combine all files into 1 by Master process
+//void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc, const ItersInfo& iters) const
+//{
+//
+//    vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
+//    sumdata->clear();
+//
+//    OCP_USI         rowNum = 0;
+//    vector<string>  buffer;
+//
+//    for (USI p = 0; p < numproc; p++) {
+//        const string myFile = dir + "proc_" + to_string(p) + "_FastReview.out";
+//        ifstream ifs(myFile, ios::in);
+//
+//        if (!ifs) {
+//            OCP_MESSAGE("Trying to open file: " << (myFile));
+//            OCP_ABORT("Failed to open the input file!");
+//        }
+//
+//        if (p == 0) {
+//            // Get time steps
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            for (USI i = 0; i < buffer.size(); i++) {
+//                if (buffer[i] == "--") {
+//                    rowNum += stoi(buffer[i + 1]);
+//                    continue;
+//                }
+//            }
+//            // Get Item
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            for (USI i = 0; i < buffer.size(); i++) {
+//                sumdata->push_back(SumItem(buffer[i], rowNum));
+//            }
+//            // Get Unit
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            for (USI i = 0; i < buffer.size(); i++) {
+//                sumdata->at(i).Unit = buffer[i];
+//            }
+//            // Get val
+//            for (OCP_USI n = 0; n < rowNum; n++) {
+//                ReadLine(ifs, buffer, OCP_FALSE);
+//                for (USI i = 0; i < buffer.size(); i++) {
+//                    sumdata->at(i).val.push_back(stod(buffer[i]));
+//                }
+//            }
+//        }
+//        else {
+//            // skip first three lines
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            ReadLine(ifs, buffer, OCP_FALSE);
+//            // Get val
+//            for (OCP_USI n = 0; n < rowNum; n++) {
+//                ReadLine(ifs, buffer, OCP_FALSE);
+//                for (USI i = 2; i < buffer.size(); i++) {
+//                    sumdata->at(i).val[n] = max(sumdata->at(i).val[n], static_cast<OCP_DBL>(stod(buffer[i])));
+//                }
+//            }
+//        }
+//        ifs.close();
+//        if (remove(myFile.c_str()) != 0) {
+//            OCP_WARNING("Failed to delete " + myFile);
+//        }
+//    }
+//    for (auto& v : *sumdata) {
+//        if (v.Item == "TIME" || v.Item == "dt") {
+//            v.Type = "fixed";
+//        }
+//        else if (v.Item == "LS") {
+//            v.Type = "int";
+//        }
+//        else {
+//            v.Type = "float";
+//        }
+//    }
+//    PrintFastReview(dir, filename, -1, iters);
+//}
+
+
+// By Communication
 void CriticalInfo::PostProcess(const string& dir, const string& filename, const OCP_INT& numproc, const ItersInfo& iters) const
 {
 
     vector<SumItem>* sumdata = const_cast<vector<SumItem>*>(&Sumdata);
-    sumdata->clear();
 
-    OCP_USI         rowNum = 0;
-    vector<string>  buffer;
-
-    for (USI p = 0; p < numproc; p++) {
-        const string myFile = dir + "proc_" + to_string(p) + "_FastReview.out";
-        ifstream ifs(myFile, ios::in);
-
-        if (!ifs) {
-            OCP_MESSAGE("Trying to open file: " << (myFile));
-            OCP_ABORT("Failed to open the input file!");
-        }
-
-        if (p == 0) {
-            // Get time steps
-            ReadLine(ifs, buffer, OCP_FALSE);
-            for (USI i = 0; i < buffer.size(); i++) {
-                if (buffer[i] == "--") {
-                    rowNum += stoi(buffer[i + 1]);
-                    continue;
-                }
-            }
-            // Get Item
-            ReadLine(ifs, buffer, OCP_FALSE);
-            for (USI i = 0; i < buffer.size(); i++) {
-                sumdata->push_back(SumItem(buffer[i], rowNum));
-            }
-            // Get Unit
-            ReadLine(ifs, buffer, OCP_FALSE);
-            for (USI i = 0; i < buffer.size(); i++) {
-                sumdata->at(i).Unit = buffer[i];
-            }
-            // Get val
-            for (OCP_USI n = 0; n < rowNum; n++) {
-                ReadLine(ifs, buffer, OCP_FALSE);
-                for (USI i = 0; i < buffer.size(); i++) {
-                    sumdata->at(i).val.push_back(stod(buffer[i]));
-                }
-            }
-        }
-        else {
-            // skip first three lines
-            ReadLine(ifs, buffer, OCP_FALSE);
-            ReadLine(ifs, buffer, OCP_FALSE);
-            ReadLine(ifs, buffer, OCP_FALSE);
-            // Get val
-            for (OCP_USI n = 0; n < rowNum; n++) {
-                ReadLine(ifs, buffer, OCP_FALSE);
-                for (USI i = 2; i < buffer.size(); i++) {
-                    sumdata->at(i).val[n] = max(sumdata->at(i).val[n], static_cast<OCP_DBL>(stod(buffer[i])));
-                }
-            }
-        }
-        ifs.close();
-        if (remove(myFile.c_str()) != 0) {
-            OCP_WARNING("Failed to delete " + myFile);
+    OCP_USI         rowNum = Sumdata[0].val.size();
+    double* buffer = new double[rowNum];
+    for (OCP_USI i = 2; i < sumdata->size(); i++) {
+        MPI_Reduce(sumdata->at(i).val.data(), buffer, rowNum, MPI_DOUBLE, MPI_MAX, MASTER_PROCESS, file_myComm);
+        if (file_myrank == MASTER_PROCESS) {
+            memcpy(sumdata->at(i).val.data(), buffer, sizeof(double) * rowNum);
         }
     }
-    for (auto& v : *sumdata) {
-        if (v.Item == "TIME" || v.Item == "dt") {
-            v.Type = "fixed";
+    delete[]buffer;
+
+    if (file_myrank == MASTER_PROCESS) {
+        for (auto& v : *sumdata) {
+            if (v.Item == "TIME" || v.Item == "dt") {
+                v.Type = "fixed";
+            }
+            else if (v.Item == "LS") {
+                v.Type = "int";
+            }
+            else {
+                v.Type = "float";
+            }
         }
-        else if (v.Item == "LS") {
-            v.Type = "int";
-        }
-        else {
-            v.Type = "float";
-        }
+        PrintFastReview(dir, filename, -1, iters);
     }
-    PrintFastReview(dir, filename, -1, iters);
 }
+
 
 
 void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
@@ -2059,20 +2229,39 @@ void OCPOutput::PrintInfoSched(const Reservoir&  rs,
 }
 
 
+// By file
+//void OCPOutput::PostProcess() const
+//{
+//    MPI_Barrier(myComm);
+//    GetWallTime timer;
+//    timer.Start();
+//    if (numproc > 1 && myrank == MASTER_PROCESS) {
+//        summary.PostProcess(workDir, fileName, numproc);
+//        crtInfo.PostProcess(workDir, fileName, numproc, iters);           
+//    }
+//    if (myrank == MASTER_PROCESS) {
+//        out4VTK.PostProcess(workDir, fileName, numproc);
+//    }
+//    
+//    
+//    OCPTIME_OUTPUT += timer.Stop();
+//}
+
+
+// By communication
 void OCPOutput::PostProcess() const
 {
-    MPI_Barrier(myComm);
     GetWallTime timer;
     timer.Start();
-    if (numproc > 1 && myrank == MASTER_PROCESS) {
-        summary.PostProcess(workDir, fileName, numproc);
-        crtInfo.PostProcess(workDir, fileName, numproc, iters);           
-    }
+    file_myComm = myComm;
+    file_myrank = myrank;
+    summary.PostProcess(workDir, fileName, numproc);
+    crtInfo.PostProcess(workDir, fileName, numproc, iters);
     if (myrank == MASTER_PROCESS) {
         out4VTK.PostProcess(workDir, fileName, numproc);
     }
-    
-    
+
+
     OCPTIME_OUTPUT += timer.Stop();
 }
 

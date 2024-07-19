@@ -125,12 +125,26 @@ void OpenCAEPoroX::RunSimulation()
     OCPTIME_TOTAL += timer.Stop();
 }
 
-/// Print summary information on screen and SUMMARY.out file.
+/// Print summary information on screen and SUMMARY.out file.  By File
+//void OpenCAEPoroX::OutputResults() const
+//{
+//    GetWallTime timer;
+//    timer.Start();
+//    output.PrintAtTimeStep();
+//    output.PostProcess();
+//    OCPTIME_TOTAL += timer.Stop();
+//      
+//    OutputTimeMain(cout.rdbuf());
+//    OutputTimeProcess();
+//    reservoir.OutInfoFinal();
+//}
+
+
+// Print summary information on screen and SUMMARY.out file.  By Communication
 void OpenCAEPoroX::OutputResults() const
 {
     GetWallTime timer;
     timer.Start();
-    output.PrintAtTimeStep();
     output.PostProcess();
     OCPTIME_TOTAL += timer.Stop();
       
