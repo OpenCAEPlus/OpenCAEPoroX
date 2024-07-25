@@ -89,15 +89,19 @@ void BulkConnDiffuMethod01::CalDiffu(BulkConnPair& bp, const Bulk& bk)
     case ConnDirect::x:
     case ConnDirect::xp:
     case ConnDirect::xm:
-        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
-        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        //T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        //T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        T1 = bcv.poro[bId] * areaB;
+        T2 = bcv.poro[eId] * areaE;
         bp.diffu = 1 / (1 / T1 + 1 / T2);
         break;
     case ConnDirect::y:
     case ConnDirect::yp:
     case ConnDirect::ym:
-        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
-        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        //T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        //T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        T1 = bcv.poro[bId] * areaB;
+        T2 = bcv.poro[eId] * areaE;
         bp.diffu = 1 / (1 / T1 + 1 / T2);
         break;
     case ConnDirect::z:
@@ -113,8 +117,10 @@ void BulkConnDiffuMethod01::CalDiffu(BulkConnPair& bp, const Bulk& bk)
         break;
     case ConnDirect::usg:
         // homogeneous now
-        T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
-        T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        //T1 = bcv.ntg[bId] * bcv.poro[bId] * areaB;
+        //T2 = bcv.ntg[eId] * bcv.poro[eId] * areaE;
+        T1 = bcv.poro[bId] * areaB;
+        T2 = bcv.poro[eId] * areaE;
         bp.diffu = 1 / (1 / T1 + 1 / T2);
         break;
     default:
