@@ -72,6 +72,8 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 
     if (CURRENT_RANK == MASTER_PROCESS) {
         OCP_INFO("Master Process Distribute Grid Params -- begin");
+
+        cout << "Memory Usuage: " << scientific << setprecision(3) << OCPGetCurrentRSS() << " GB" << endl;
     }
 
     const PreParamGridWell& grid = mygrid;
@@ -166,8 +168,6 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     const OCP_DBL areaY = 2 * dzC * dxC / dyC;
     const OCP_DBL areaZ = 2 * dxC * dyC / dzC;
 
-    
-    cout << CURRENT_RANK << "  " << bulk.vs.nb << "  " << dxC << "  " << dyC << "  " << dzC << endl;
 #endif // OCPGRID_NORMAL   
     
     if (myrank == MASTER_PROCESS) {

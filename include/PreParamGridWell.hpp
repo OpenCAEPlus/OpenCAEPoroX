@@ -23,6 +23,7 @@
 // OpenCAEPoroX header files
 #include "OCPConst.hpp"
 #include "UtilInput.hpp"
+#include "UtilMemory.hpp"
 #include "ParamWell.hpp"
 #include "CornerGrid.hpp"
 #include "GmshGrid.hpp"
@@ -31,7 +32,7 @@
 using namespace std;
 
 
-#define OCPGRID_DXDYDZ  1
+#define OCPGRID_DXDYDZ  0
 
 
 #if OCPGRID_DXDYDZ 

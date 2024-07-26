@@ -16,7 +16,7 @@
 
 #include "GmshGrid.hpp"
 
-Polygon::Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index)
+OCP_Polygon::OCP_Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index)
 {
 	p        = pIndex;
 	tag      = tag_in;
@@ -25,7 +25,7 @@ Polygon::Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const str
 }
 
 
-void Polygon::CalCenter(const vector<OCP_DBL>& points) 
+void OCP_Polygon::CalCenter(const vector<OCP_DBL>& points) 
 {
 	const USI np = p.size();
 	center.Reset();
@@ -38,7 +38,7 @@ void Polygon::CalCenter(const vector<OCP_DBL>& points)
 }
 
 
-void Polygon::CalArea(const vector<OCP_DBL>& points) 
+void OCP_Polygon::CalArea(const vector<OCP_DBL>& points) 
 {
 	if (p.size() == 3) {
 		const OCP_DBL* p0 = &points[3 * p[0]];
@@ -61,7 +61,7 @@ void Polygon::CalArea(const vector<OCP_DBL>& points)
 }
 
 
-OCP_BOOL Polygon::IfPointInElement(const Point3D& objP, const vector<OCP_DBL>& points)
+OCP_BOOL OCP_Polygon::IfPointInElement(const Point3D& objP, const vector<OCP_DBL>& points)
 {
 	OCP_DBL   tmpArea = 0;
 	const USI numP    = p.size();
@@ -232,7 +232,7 @@ void GMSHGrid::InputGrid2D(const string& file)
 						indexPoints.push_back(elemNodeTags[t][np * l + i] - 1);
 					}
 					faceIndex++;
-					elements.push_back(Polygon(indexPoints, elemTags[t][l], physicalName, physicalIndex));
+					elements.push_back(OCP_Polygon(indexPoints, elemTags[t][l], physicalName, physicalIndex));
 					
 					//cout << "------------------------------------" << endl;
 					//for (USI i = 0; i < np; i++) {
@@ -272,7 +272,7 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 
 		if (e.faceIndex.size() == 2) {
 			// boundary
-			Polygon& element = elements[e.faceIndex[0]];
+			OCP_Polygon& element = elements[e.faceIndex[0]];
 			element.boundary   += (e.physical) + " & ";
 			element.boundIndex += e.phyIndex;
 			// Calculate effective area
@@ -289,7 +289,7 @@ void GMSHGrid::SetupConnAreaAndBoundary2D()
 		else {
 			// internal edge
 			for (USI i = 0; i < 2; i++) {
-				const Polygon& element = elements[e.faceIndex[2 * i]];
+				const OCP_Polygon& element = elements[e.faceIndex[2 * i]];
 				// Calculate effective area
 				const OCP_ULL   bId       = element.p[e.faceIndex[2 * i + 1]];
 				const OCP_ULL   eId       = element.p[(e.faceIndex[2 * i + 1] + 1) % (element.p.size())];

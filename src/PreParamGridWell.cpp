@@ -1041,6 +1041,8 @@ void PreParamGridWell::SetupOrthogonalGrid()
     OutputPointsOrthogonalGrid();
 
     OCP_INFO("Setup Orthogonal Grid -- end");
+
+    cout << "Memory Usuage: " << scientific << setprecision(6) << OCPGetCurrentRSS() << " GB" << endl;
 }
 
 void PreParamGridWell::CalDepthVOrthogonalGrid()

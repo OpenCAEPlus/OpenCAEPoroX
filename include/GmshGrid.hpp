@@ -77,11 +77,11 @@ public:
 };
 
 
-class Polygon
+class OCP_Polygon
 {
 public:
     /// constructor
-    Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index);
+    OCP_Polygon(const vector<OCP_ULL>& pIndex, const OCP_ULL& tag_in, const string& phyinfo, const OCP_USI& index);
     /// Calculate the center
     void CalCenter(const vector<OCP_DBL>& points);
     /// Calculate the area
@@ -165,7 +165,7 @@ public:
     /// edges (for 2d now)
     set<Edge>              edges;
     /// elements (for 2d now)
-    vector<Polygon>        elements;
+    vector<OCP_Polygon>        elements;
     /// Facies
     vector<Facies>         facies;
     /// physical name set
