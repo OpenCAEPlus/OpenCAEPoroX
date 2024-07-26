@@ -2506,8 +2506,9 @@ void IsoT_FIMddm::SetStarBulkSet01(const Bulk& bulk, const Domain& domain, const
 {
     starBulkSet.clear();
 
-    const OCP_DBL dt = ctrlTime.GetLastDt();
-    
+    // const OCP_DBL dt1 = ctrlTime.GetLastDt(); // C
+    // const OCP_DBL dt2 = ctrlTime.GetLastDt() / ctrlTime.GetCurrentDt(); // D
+    const OCP_DBL dt3 = ctrlTime.GetLastDt() / ctrlTime.GetMaxTime(); // E
 
     const auto& bvs = bulk.vs;
     for (OCP_USI n = 0; n < bvs.nb; n++) {
@@ -2515,10 +2516,17 @@ void IsoT_FIMddm::SetStarBulkSet01(const Bulk& bulk, const Domain& domain, const
         // dS
         for (USI j = 0; j < bvs.np; j++) {
             const OCP_USI n_np_j = n * bvs.np + j;
-            /*if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) / dt > dSlim) {*/
-            if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim) {
+            // lsz-now
+            // if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim * dt1 / 10)
+            // {
+            // if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim * dt2)
+            // {
+            // if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim * dt3)
+            // {
+            if (fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]) > dSlim)
+            {
                 if (starBulkSet.count(n))  starBulkSet[n] += fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]);
-                else                       starBulkSet[n] = fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]);              
+                else                       starBulkSet[n] = fabs(bvs.S[n_np_j] - bvs.lS[n_np_j]);
                 break;
             }
         }
@@ -2536,13 +2544,15 @@ void IsoT_FIMddm::SetStarBulkSet02(const Bulk& bulk, const Domain& domain, const
     OCP_DBL maxDP = 0;
 
     const auto& bvs = bulk.vs;
-    for (OCP_USI n = 0; n < bvs.nb * bvs.np; n++) {
+    for (OCP_USI n = 0; n < bvs.nb * bvs.np; n++)
+    {
         const OCP_DBL dP = fabs(bvs.Pj[n] - bvs.lPj[n]);
         minDP = minDP < dP ? minDP : dP;
         maxDP = maxDP > dP ? maxDP : dP;
     }
 
-    if (maxDP > 1E-8 && (maxDP - minDP) / maxDP > 1E-2) {
+    if (maxDP > 1E-8 && (maxDP - minDP) / maxDP > dPlim)
+    {
         starBulkSet[0] = (maxDP - minDP) / maxDP;
     }
 }

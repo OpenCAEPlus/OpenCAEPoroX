@@ -275,8 +275,12 @@ protected:
     const USI       constP = 0;
     /// constant velocity for boundary
     const USI       constV = 1;
-    USI             boundCondition{ constP };
-    OCP_DBL         dSlim = 5E-3;
+    USI             boundCondition{ constV };
+    OCP_DBL         dSlim = 5E-3;  // A
+    // OCP_DBL         dSlim = 1E-3;     // B
+    // OCP_DBL         dPlim = 1E-2;
+    OCP_DBL         dPlim = 5E-3;
+    // OCP_DBL         dPlim = 1E-3;
 };
 
 

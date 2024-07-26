@@ -86,6 +86,7 @@ target_sources(
 		 UtilInput.hpp
 		 UtilMath.hpp
 		 UtilMesh.hpp
+		 UtilMemory.hpp
 		 UtilOutput.hpp
 		 UtilTiming.hpp
 		 Well.hpp

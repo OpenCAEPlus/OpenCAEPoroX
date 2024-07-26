@@ -102,6 +102,14 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
+    //if (ctrl.time.GetCurrentTime() > 10 - 1E-8) {
+    //    curMethod = preMethod;
+    //}
+    //else {
+    //    curMethod = mainMethod;
+    //}
+
+
     curMethod = preMethod;
 	switch (curMethod) {
 	case OCPNLMethod::IMPEC:

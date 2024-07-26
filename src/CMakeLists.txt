@@ -68,6 +68,7 @@ target_sources(
 		  UtilInput.cpp
 		  UtilMath.cpp
 		  UtilMesh.cpp
+		  UtilMemory.cpp
 		  UtilOutput.cpp
 		  UtilTiming.cpp
 		  Well.cpp
