@@ -31,13 +31,37 @@
 using namespace std;
 
 
+#define OCPGRID_DXDYDZ  1
+
+
+#if OCPGRID_DXDYDZ 
+
+#define OCPGRID_NORMAL  0
+
+#else
+
+#define OCPGRID_NORMAL  1
+
+#endif
+
+
+#if OCPGRID_NORMAL
+
+#undef  OCPGRID_DXDYDZ
+#define OCPGRID_DXDYDZ  0
+
+#endif // OCPGRID_NORMAL
+
+
+
+
 class ActiveGridCheck
 {
 public:
     OCP_ULL CheckActivity(const OCPModel& Model, const OCP_DBL& ev, const OCP_DBL& ep,
                           const vector<OCP_DBL>& v, const vector<OCP_DBL>& poro);
     OCP_BOOL IfFluid(const OCP_ULL& n, const OCP_DBL& poro);
-    void FreeSomeMemory();
+    void FreeAll2Act();
 
 public:
     /// if ACTNUM is all 1
@@ -74,23 +98,68 @@ class ConnPair
 {
 public:
     ConnPair() = default;
+    const auto& ID() const { return id; }
+    const auto& WGT() const { return wgt; }
+    const auto& Direct() const { return direction; }
+
+#if OCPGRID_DXDYDZ
     ConnPair(const OCP_ULL& Id,
-        const OCP_INT&      Wgt,
-        const ConnDirect&   direct,
-        const OCP_DBL&      AreaB,
-        const OCP_DBL&      AreaE)
+        const OCP_INT& Wgt,
+        const ConnDirect& direct)
+        : id(Id)
+        , wgt(Wgt)
+        , direction(static_cast<USI>(direct)) {};
+    ConnPair(const OCP_ULL& Id,
+        const OCP_INT& Wgt,
+        const USI& direct)
+        : id(Id)
+        , wgt(Wgt)
+        , direction(direct) {};
+    ConnPair(const OCP_ULL& Id,
+        const OCP_INT& Wgt,
+        const ConnDirect& direct,
+        const OCP_DBL& AreaB,
+        const OCP_DBL& AreaE)
+        : id(Id)
+        , wgt(Wgt)
+        , direction(static_cast<USI>(direct)){};
+    ConnPair(const OCP_ULL& Id,
+        const OCP_INT& Wgt,
+        const USI& direct,
+        const OCP_DBL& AreaB,
+        const OCP_DBL& AreaE)
+        : id(Id)
+        , wgt(Wgt)
+        , direction(direct) {};
+    void SetTransMult(const OCP_DBL& var) { }
+#endif
+
+#if OCPGRID_NORMAL
+    ConnPair(const OCP_ULL& Id,
+        const OCP_INT& Wgt,
+        const ConnDirect& direct,
+        const OCP_DBL& AreaB,
+        const OCP_DBL& AreaE)
+        : id(Id)
+        , wgt(Wgt)
+        , direction(static_cast<USI>(direct))
+        , areaB(AreaB)
+        , areaE(AreaE) {};
+    ConnPair(const OCP_ULL& Id,
+        const OCP_INT& Wgt,
+        const USI& direct,
+        const OCP_DBL& AreaB,
+        const OCP_DBL& AreaE)
         : id(Id)
         , wgt(Wgt)
         , direction(direct)
         , areaB(AreaB)
         , areaE(AreaE) {};
-    const auto& ID() const { return id; }
-    const auto& WGT() const { return wgt; }
-    const auto& Direct() const { return direction; }
     const auto& AreaB() const { return areaB; }
     const auto& AreaE() const { return areaE; }
     void SetTransMult(const OCP_DBL& var) { transMult *= var; }
     const auto& TransMult() const { return transMult; }
+#endif
 
 protected:
     /// index of a neighboring cell
@@ -98,13 +167,16 @@ protected:
     /// weight of edge
     OCP_INT    wgt;   
     /// direction of connection
-    ConnDirect direction;
+    USI        direction;
+
+#if OCPGRID_NORMAL
     /// Effective intersection area between this cell and the neighbor, self
     OCP_DBL    areaB; 
     /// Effective intersection area between this cell and the neighbor, neighbor
     OCP_DBL    areaE; 
     /// Transmissibility multipliers,
     OCP_DBL    transMult{ 1.0 };
+#endif
 };
 
 
@@ -239,6 +311,12 @@ protected:
     vector<OCP_DBL> dz; 
     /// Depth of the top surface of the uppermost grids.
     vector<OCP_DBL> tops;  
+
+#if OCPGRID_DXDYDZ
+    OCP_DBL         dxC;
+    OCP_DBL         dyC;
+    OCP_DBL         dzC;
+#endif
 
     // Corner point grid
     /// Lines of a corner-point grid.   

@@ -902,7 +902,7 @@ OCP_BOOL ActiveGridCheck::IfFluid(const OCP_ULL& n, const OCP_DBL& poro)
 }
 
 
-void ActiveGridCheck::FreeSomeMemory() 
+void ActiveGridCheck::FreeAll2Act()
 {
     vector<OCP_SLL>().swap(map_All2Act);
 }
@@ -972,9 +972,9 @@ void PreParamGridWell::Setup()
     OCP_INFO("Setup Grid and Well -- begin");
     SetupGrid();
     SetupConnWellGrid();
+    actGC.FreeAll2Act();
     initR.PostProcess(actGC);
-    actGC.FreeSomeMemory();
-
+    
     OCP_INFO("Setup Grid and Well -- end");
 }
 
@@ -983,12 +983,20 @@ void PreParamGridWell::SetupGrid()
 {
     OCP_INFO("Setup Grid -- begin");
 
+#if OCPGRID_DXDYDZ
+    if (gridType == GridType::corner || gridType == GridType::gmsh) {
+        OCP_ABORT("OCPGRID_DXDYDZ mode is not available");
+    }
+#endif // OCPGRID_DXDYDZ
+
     switch (gridType) 
     {
     case GridType::orthogonal:
-        SetupOrthogonalGrid();    
+        SetupOrthogonalGrid();
+#if OCPGRID_NORMAL
         OutputBaiscInfo();
         SetLocationStructral();
+#endif
         break;
     case GridType::corner:
         SetupCornerGrid();
@@ -1017,6 +1025,17 @@ void PreParamGridWell::SetupOrthogonalGrid()
     // x -> y -> z
     CalDepthVOrthogonalGrid();
     CalActiveGrid(1E-6, 1E-6);
+
+#if OCPGRID_DXDYDZ
+    dxC = dx[0];
+    dyC = dy[0];
+    dzC = dz[0];
+    vector<OCP_DBL>().swap(dx);
+    vector<OCP_DBL>().swap(dy);
+    vector<OCP_DBL>().swap(dz);
+    vector<OCP_DBL>().swap(v);
+#endif // OCPGRID_DXDYDZ
+
     SetupActiveConnOrthogonalGrid();
 
     OutputPointsOrthogonalGrid();
@@ -1104,10 +1123,16 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridSM()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
-					areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
+                    areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm));
+
+#endif
                 }
                 // front  --  y-direction
                 if (j < ny - 1) {
@@ -1115,10 +1140,15 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridSM()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
-					areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
+                    areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym));
+#endif
                 }
                 // down --   z-direction
                 if (k < nz - 1) {
@@ -1126,10 +1156,15 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridSM()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
-					areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
+                    areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm));
+#endif
                 }
             }
         }
@@ -1167,10 +1202,15 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
-					areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dy[bIdg] * dz[bIdg] / dx[bIdg];
+                    areaE = 2 * dy[eIdg] * dz[eIdg] / dx[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::xp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::xm));
+#endif
                 }
                 // front  --  y-direction
                 if (j < ny - 1) {
@@ -1178,10 +1218,15 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
-					areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dz[bIdg] * dx[bIdg] / dy[bIdg];
+                    areaE = 2 * dz[eIdg] * dx[eIdg] / dy[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::yp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::ym));
+#endif
                 }
                 // down --   z-direction
                 if (k < 2*nz - 1) {
@@ -1189,10 +1234,15 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
                     eIdb = actGC.map_All2Act[eIdg];
                     if (eIdb < 0)  continue;
 
-					areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
-					areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
-					gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
-					gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
+#if OCPGRID_NORMAL
+                    areaB = 2 * dx[bIdg] * dy[bIdg] / dz[bIdg];
+                    areaE = 2 * dx[eIdg] * dy[eIdg] / dz[eIdg];
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp, areaB, areaE));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm, areaE, areaB));
+#elif OCPGRID_DXDYDZ
+                    gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::zp));
+                    gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::zm));
+#endif
                 }
             }
         }
@@ -1207,8 +1257,13 @@ void PreParamGridWell::SetupActiveConnOrthogonalGridDP()
         eIdb = actGC.map_All2Act[eIdg];
         if (eIdb < 0)  continue;
     
-		gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
-		gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
+#if OCPGRID_NORMAL
+        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::mf, 0.0, 0.0));
+        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm, 0.0, 0.0));
+#elif OCPGRID_DXDYDZ
+        gNeighbor[bIdb].push_back(ConnPair(eIdb, WEIGHT_GG, ConnDirect::mf));
+        gNeighbor[eIdb].push_back(ConnPair(bIdb, WEIGHT_GG, ConnDirect::fm));
+#endif
     }
 }
 
@@ -1253,9 +1308,14 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 
                 points_xyz.push_back(tmpX);
                 points_xyz.push_back(tmpY);
-                points_xyz.push_back(depth[gId] + s * dz[gId]);
 
+#if OCPGRID_NORMAL
+                points_xyz.push_back(depth[gId] + s * dz[gId]);
                 tmpX += dx[gId];
+#elif OCPGRID_DXDYDZ
+                points_xyz.push_back(depth[gId] + s * dzC);
+                tmpX += dxC;
+#endif
 
                 // set cells
                 if (k == nz || j == ny || i == nx) {
@@ -1274,7 +1334,11 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
                     cell_points.push_back(pId + 1 + (nx + 1) - 1);
                 }
             }
+#if OCPGRID_NORMAL
             tmpY += dy[gId];
+#elif OCPGRID_DXDYDZ
+            tmpX += dyC;
+#endif
         }
     }
 
@@ -1639,7 +1703,7 @@ void PreParamGridWell::SetupTransMult()
         for (OCP_ULL n = 0; n < numGrid; n++) {
             for (auto& c : gNeighbor[n]) {
                 if (c.ID() < n) continue;
-                if (c.Direct() == ConnDirect::zp) {
+                if (c.Direct() == static_cast<USI>(ConnDirect::zp)) {
                     c.SetTransMult(multZ[n]);
                     for (auto& c1 : gNeighbor[c.ID()]) {
                         if (c1.ID() == n) {
@@ -1673,7 +1737,7 @@ void PreParamGridWell::SetupConnWellGrid()
             if (actGC.IfFluid(pId, poro[pId])) {
                 connWellGrid[w].push_back(actGC.map_All2Act[pId]);
                 // for well-connection, areaB and areaE contains its active perforation index and trans if necessary
-                gNeighbor[actGC.map_All2Act[pId]].push_back(ConnPair(w + activeGridNum, WEIGHT_GW, ConnDirect::n, p, 0));
+                gNeighbor[actGC.map_All2Act[pId]].push_back(ConnPair(w + activeGridNum, WEIGHT_GW, p, 0, 0));
             }
         }
         if (connWellGrid[w].empty()) {

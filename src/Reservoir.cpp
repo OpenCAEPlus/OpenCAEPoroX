@@ -143,6 +143,32 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     /////////////////////////////////////////////////////////////////////
     // Grid-Based && Conn-Based
     /////////////////////////////////////////////////////////////////////
+
+#if OCPGRID_NORMAL
+    const USI varNumEdge = 4;
+#elif OCPGRID_DXDYDZ
+    const USI varNumEdge = 1;
+
+    // send dx,dy,dz to other process
+    vector<OCP_DBL> buffer{ grid.dxC, grid.dyC, grid.dzC };
+    MPI_Bcast(buffer.data(), 3, MPI_DOUBLE, MASTER_PROCESS, myComm);
+
+    const OCP_DBL dxC = buffer[0];
+    const OCP_DBL dyC = buffer[1];
+    const OCP_DBL dzC = buffer[2];
+
+    bulk.vs.dx.resize(bulk.vs.nb, dxC);
+    bulk.vs.dy.resize(bulk.vs.nb, dyC);
+    bulk.vs.dz.resize(bulk.vs.nb, dzC);
+    bulk.vs.v.resize(bulk.vs.nb, dxC * dyC * dzC);
+
+    const OCP_DBL areaX = 2 * dyC * dzC / dxC;
+    const OCP_DBL areaY = 2 * dzC * dxC / dyC;
+    const OCP_DBL areaZ = 2 * dxC * dyC / dzC;
+
+    
+    cout << CURRENT_RANK << "  " << bulk.vs.nb << "  " << dxC << "  " << dyC << "  " << dzC << endl;
+#endif // OCPGRID_NORMAL   
     
     if (myrank == MASTER_PROCESS) {
         
@@ -168,7 +194,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         // Send vars and conns to other process      
         vector<vector<OCP_CHAR>> send_buffer(1);
         // send_var_value, send_edge(direction, areaB, areaE, transmult)
-        const USI varNumEdge = 4;
+
         OCP_USI maxSendSize = maxNumElement * send_var.numByte_total + maxNumEdge * varNumEdge * sizeof(OCP_DBL);
 
         send_buffer[0].resize(maxSendSize);
@@ -237,9 +263,11 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
             for (OCP_USI n = 0; n < numIgridEdgeproc[3 * p + 1]; n++) {
                 for (const auto& gn : grid.gNeighbor[gridIndex[n]]) {
                     conn_ptr[conn_size++] = static_cast<OCP_DBL>(gn.Direct());
+#if OCPGRID_NORMAL
                     conn_ptr[conn_size++] = gn.AreaB();
                     conn_ptr[conn_size++] = gn.AreaE();
                     conn_ptr[conn_size++] = gn.TransMult();
+#endif
                 }
             }        
             send_size += conn_size * sizeof(OCP_DBL);        
@@ -308,7 +336,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
                     USI w = 0;
                     for (w = 0; w < len; w++) {
                         if (wIndex == domain.wellWPB[w][0]) {
-                            domain.wellWPB[w].push_back(static_cast<OCP_USI>(gn.AreaB()));
+                            domain.wellWPB[w].push_back(static_cast<USI>(gn.Direct()));
                             domain.wellWPB[w].push_back(bId);
                             break;
                         }
@@ -316,27 +344,42 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
                     if (w == len) {
                         domain.wellWPB.push_back(vector<OCP_USI>{
                             wIndex,
-                            static_cast<OCP_USI>(gn.AreaB()), bId});
+                            static_cast<OCP_USI>(gn.Direct()), bId});
                     }
                     continue; 
                 }
                 eId = init2local.at(gn.ID());
-                if (eId > bId)
-                    dst->push_back(BulkConnPair(bId, eId, gn.Direct(), gn.AreaB(), gn.AreaE(), gn.TransMult()));
+                if (eId > bId) {
+#if OCPGRID_NORMAL
+                    dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(gn.Direct()), gn.AreaB(), gn.AreaE(), gn.TransMult()));
+#elif OCPGRID_DXDYDZ
+                    const ConnDirect direct = static_cast<ConnDirect>(gn.Direct());
+                    switch (direct)
+                    {
+                    case ConnDirect::xp:
+                    case ConnDirect::xm:
+                        dst->push_back(BulkConnPair(bId, eId, direct, areaX, areaX, 1.0));
+                        break;
+                    case ConnDirect::yp:
+                    case ConnDirect::ym:
+                        dst->push_back(BulkConnPair(bId, eId, direct, areaY, areaY, 1.0));
+                        break;
+                    case ConnDirect::zp:
+                    case ConnDirect::zm:
+                        dst->push_back(BulkConnPair(bId, eId, direct, areaZ, areaZ, 1.0));
+                        break;
+                    case ConnDirect::mf:
+                    case ConnDirect::fm:
+                        break;
+                    default: 
+                        OCP_ABORT("Wrong direction!");
+                        break;
+                    }                   
+#endif
+                }
             }
         }
         conn.numConn = conn.iteratorConn.size();
-
-        if (myrank == 1) {
-            //for (OCP_USI n = 0; n < bulk.numBulk; n++) {
-            //    cout << domain.grid[n] << "  " << bulk.poroInit[n] - 1 << endl;
-            //}
-            for (const auto& c : conn.iteratorConn) {
-                cout << domain.grid[c.BId()] << "   " << domain.grid[c.EId()] << "   " << static_cast<USI>(c.Direction()) << "   "
-                    << c.AreaB() << "   " << c.AreaE() << endl;
-            }
-            cout << conn.numConn << endl;
-        }
 
         // Free grid Memory
         mygrid.FreeMemory();
@@ -382,7 +425,6 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         }
         recv_var.CalNumByte();
 
-        const USI varNumEdge = 4;
         MPI_Status status;
         OCP_USI   recv_size   = numIgridEdge[0] * recv_var.numByte_total + numIgridEdge[2] * varNumEdge * sizeof(OCP_DBL);
         OCP_CHAR* recv_buffer = new OCP_CHAR[recv_size]();
@@ -434,7 +476,32 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 						// bulk connection
 						eId = iter->second;
 						if (eId > bId) {
+#if OCPGRID_NORMAL
 							dst->push_back(BulkConnPair(bId, eId, static_cast<ConnDirect>(conn_ptr[0]), conn_ptr[1], conn_ptr[2], conn_ptr[3]));
+#elif OCPGRID_DXDYDZ
+                            const ConnDirect direct = static_cast<ConnDirect>(conn_ptr[0]);
+                            switch (direct)
+                            {
+                            case ConnDirect::xp:
+                            case ConnDirect::xm:
+                                dst->push_back(BulkConnPair(bId, eId, direct, areaX, areaX, 1.0));
+                                break;
+                            case ConnDirect::yp:
+                            case ConnDirect::ym:
+                                dst->push_back(BulkConnPair(bId, eId, direct, areaY, areaY, 1.0));
+                                break;
+                            case ConnDirect::zp:
+                            case ConnDirect::zm:
+                                dst->push_back(BulkConnPair(bId, eId, direct, areaZ, areaZ, 1.0));
+                                break;
+                            case ConnDirect::mf:
+                            case ConnDirect::fm:
+                                break;
+                            default:
+                                OCP_ABORT("Wrong direction!");
+                                break;
+                            }
+#endif
 						}
 					}
 					else {
@@ -444,7 +511,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 						USI w = 0;
 						for (w = 0; w < len; w++) {
 							if (wIndex == domain.wellWPB[w][0]) {
-								domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[1]));
+								domain.wellWPB[w].push_back(static_cast<OCP_USI>(conn_ptr[0]));
 								domain.wellWPB[w].push_back(bId);
 								break;
 							}
@@ -452,7 +519,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
 						if (w == len) {
 							domain.wellWPB.push_back(vector<OCP_USI>{
 								wIndex,
-									static_cast<OCP_USI>(conn_ptr[1]), bId});
+									static_cast<OCP_USI>(conn_ptr[0]), bId});
 						}
 					}
 					conn_ptr += varNumEdge;
