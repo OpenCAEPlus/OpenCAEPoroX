@@ -11,6 +11,8 @@
 
 #include "OCPOutput.hpp"
 
+#include <cstring>
+
 
 OCP_INT  file_myrank;
 MPI_Comm file_myComm;

@@ -55,6 +55,10 @@ add_library(OpenCAEPoroX STATIC)
 
 add_subdirectory(external)
 
+#find_package(MPI)
+#target_include_directories(${PROJECT_NAME} PUBLIC "${MPI_CXX_INCLUDE_PATH}")
+#target_link_libraries(${LIBNAME} PUBLIC MPI::MPI_CXX)
+
 ###############################################################################
 ## Set configuration types and default compiler flags
 ###############################################################################
