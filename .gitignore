@@ -82,3 +82,4 @@ cmake/
 /data/spe1a/nametable.txt
 
 .idea/
+config/user.cmake

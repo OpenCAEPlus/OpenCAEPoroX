@@ -9,10 +9,9 @@
  *-----------------------------------------------------------------------------------
  */
 
+#include "../config/config.hpp"
 
-#if WITH_FASP
-
-
+#ifdef OCP_USE_FASP
 
 
 #include "DenseMat.hpp"
@@ -488,7 +487,7 @@ void VectorFaspSolver::Decoupling(dBSRmat* Absr,
 }
 
 
-#endif // WITH_FASP
+#endif // OCP_USE_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

@@ -9,7 +9,10 @@
  *-----------------------------------------------------------------------------------
  */
 
-#if WITH_FASP
+#include "../config/config.hpp"
+
+
+#ifdef OCP_USE_FASP
 
 #include <math.h>
 
@@ -322,7 +325,7 @@ OCP_INT VectorFaspSolver::Solve()
     const OCP_INT precond_type = inParam.precond_type;
     const OCP_INT output_type = inParam.output_type;
 
-#if WITH_FASP4BLKOIL || WITH_FASPCPR // Currently, only fasp4blkoil requires decoupling
+#ifdef OCP_USE_FASP4BLKOIL || WITH_FASPCPR // Currently, only fasp4blkoil requires decoupling
     const OCP_INT decoup_type = inParam.decoup_type;
 #endif
 
@@ -364,7 +367,7 @@ OCP_INT VectorFaspSolver::Solve()
             break;
 #endif
 
-#if WITH_FASP4BLKOIL
+#ifdef OCP_USE_FASP4BLKOIL
         case PC_FASP1:
             Decoupling(&A, &b, &Asc, &fsc, &order, Dmat.data(), decoup_type);
 #if WITH_FASP4CUDA // zhaoli 2022.04.04
@@ -576,7 +579,7 @@ void VectorFaspSolver::Allocate(const OCPMatrix& mat)
 
 
 
-#endif // WITH_FASP
+#endif // OCP_USE_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */

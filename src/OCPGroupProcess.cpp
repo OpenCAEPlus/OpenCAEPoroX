@@ -258,7 +258,7 @@ static int GroupProcessSeq(const std::set<int>& cs_proc_group, const MPI_Comm& w
 #endif
 
 
-#ifdef WITH_PARMETIS
+#ifdef OCP_USE_PARMETIS
 
 // each process with one vertex
 static int GroupProcessParMetis01(const std::unordered_map<OCP_INT, OCP_INT>& proc_weight,
@@ -487,7 +487,7 @@ static int GroupProcessParMetis02(const std::unordered_map<OCP_INT, OCP_INT>& pr
 #endif
 
 
-#ifdef WITH_METIS
+#ifdef OCP_USE_METIS
 
 void MyMetis(std::vector<idx_t>& xadj, std::vector<idx_t>& adjncy, std::vector<idx_t>& adjwgt,
 	idx_t& nParts, std::vector<idx_t>& part, decltype(METIS_PartGraphKway)* METIS_PartGraphFunc)
@@ -739,7 +739,7 @@ void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
 		break;
 #endif
 
-#ifdef WITH_PARMETIS
+#ifdef OCP_USE_PARMETIS
 	case GroupMethod::ParMetis:
 		color = GroupProcessParMetis01(work_proc_weight, work_comm);
 		break;
@@ -748,7 +748,7 @@ void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
 		break;
 #endif
 
-#ifdef WITH_METIS
+#ifdef OCP_USE_METIS
 	case GroupMethod::Metis:
 		color = GroupProcessMetis(work_proc_weight, work_comm);
 		break;
