@@ -61,7 +61,6 @@ x86/
 /data/spe11/spe11a/compreg.bat
 
 build/
-cmake/
 !install-*.sh
 !createdoc.sh
 /data/spe11/spe11a-OG

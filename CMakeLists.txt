@@ -1,20 +1,12 @@
-# Main CMakeLists file for OpenCAEPoroX
 #
-# Sample usages:
-#   cmake .                             // build in default configuration
-#   cmake -DCMAKE_BUILD_TYPE=Release .  // build in Release configuration
-#   cmake -DCMAKE_BUILD_TYPE=Debug .    // build in Debug configuration
-#   cmake -DCMAKE_CXX_COMPILER=g++ .    // build with GNU C++ compiler
-#   cmake -DCMAKE_VERBOSE_MAKEFILE=ON . // build with verbose on
-#   cmake -DUSE_FASPCPR=ON .            // build with FASPCPR support
-#   cmake -DUSE_FASP4BLKOIL=ON .        // build with FASP4BLKOIL support
-#   cmake -DUSE_FASP4CUDA=ON .          // build with FASP4CUDA support
-#   cmake -DUSE_UMFPACK=ON .            // build with UMFPACK support
-#   cmake -DUSE_OPENMP=ON .             // build with OpenMP support
+# 软件配置方法:
+# 1. 复制config/defaults.cmake为user.cmake(也保存在config/);
+# 2. 把需要使用的三方库开关打开, 并配置三方库的安装路径. 以配置FASP为例说明, 在config/user.cmake做如下修改
+#    (a) option(OCP_USE_FASP "Enable FASP usage" ON)
+#    (b) set(FASP_DIR "你的FASP的安装路径" CACHE PATH "Path to the FASP library.")
+# 3. 结束配置.
+#
 
-###############################################################################
-## General environment setting
-###############################################################################
 
 # Minimum cmake version needed
 cmake_minimum_required(VERSION 3.13)
@@ -31,9 +23,6 @@ project(OpenCAEPoroX C CXX)
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
-# Set module lookup path
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/cmake/modules)
-
 # Add math and stdc++ libraries if not included by default
 if (UNIX OR LINUX)
     set(ADD_STDLIBS m stdc++)
@@ -45,35 +34,26 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 # When building, don't use the install RPATH already
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
- 
 # Add the automatically determined parts of the RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# Set module lookup path
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/cmake/modules)
 
 if(OCP_ENABLE_TESTING)
     enable_testing()
 endif()
-
 
 # LIBNAME is used in the external dependencies, to make it easier if we 
 # decide to change the name in the future
 set(LIBNAME OpenCAEPoroX CACHE INTERNAL "The library name")
 add_library(OpenCAEPoroX STATIC)
 
-###############################################################################
-## External dependencies
-###############################################################################
-
-add_subdirectory(external)
-
-#find_package(MPI)
-#target_include_directories(${PROJECT_NAME} PUBLIC "${MPI_CXX_INCLUDE_PATH}")
-#target_link_libraries(${LIBNAME} PUBLIC MPI::MPI_CXX)
 
 ###############################################################################
 ## Set configuration types and default compiler flags
 ###############################################################################
 
-set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "Configs" FORCE)
 if (MSVC)
     # Compiler flags for Windows MSVC
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -86,9 +66,17 @@ else()
 endif()
 
 
+###############################################################################
+## External dependencies
+###############################################################################
+
 if (OCP_USE_MPI)
     find_package(MPI REQUIRED)
     set(MPI_CXX_INCLUDE_DIRS ${MPI_CXX_INCLUDE_PATH})
+endif()
+
+if (OCP_USE_OPENMP)
+    find_package(OpenMP)
 endif()
 
 if (OCP_USE_LAPACK)
@@ -102,6 +90,14 @@ endif()
 
 if (OCP_USE_PARMETIS)
     find_package(PARMETIS REQUIRED)
+endif()
+
+if (OCP_USE_PETSC)
+    find_package(PETSC REQUIRED)
+endif()
+
+if (OCP_USE_PETSCSOLVER)
+    find_package(PETSCSOLVER REQUIRED)
 endif()
 
 if (OCP_USE_FASP)

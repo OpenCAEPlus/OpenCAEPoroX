@@ -1,0 +1,22 @@
+#ifndef OCP_CONFIG_HEADER
+#define OCP_CONFIG_HEADER
+
+
+#cmakedefine OCP_DEBUG
+
+#cmakedefine OCP_USE_MPI
+
+#cmakedefine OCP_USE_METIS
+
+#cmakedefine OCP_USE_PARMETIS
+
+#cmakedefine OCP_USE_PETSC
+
+#cmakedefine OCP_USE_PETSCSOLVER
+
+#cmakedefine OCP_USE_FASP
+
+#cmakedefine OCP_USE_FASP4BLKOIL
+
+
+#endif // OCP_CONFIG_HEADER
