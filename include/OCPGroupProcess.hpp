@@ -16,7 +16,7 @@
 #ifndef __OCPGROUPPROCESS_HEADER__
 #define __OCPGROUPPROCESS_HEADER__
 
-
+#include "../config/config.hpp"
 #include "OCPDataType.hpp"
 
 #include <vector>
@@ -43,14 +43,14 @@
 #endif
 
 
-#ifdef WITH_PARMETIS
+#ifdef OCP_USE_PARMETIS
 #define rabs fabsf     // conflict with fasp
 #include <parmetis.h>
 #undef  rabs
 #endif
 
 
-#ifdef WITH_METIS
+#ifdef OCP_USE_METIS
 #define rabs fabsf     // conflict with fasp
 #include <metis.h>
 #undef  rabs

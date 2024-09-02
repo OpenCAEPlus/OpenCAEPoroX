@@ -61,7 +61,6 @@ x86/
 /data/spe11/spe11a/compreg.bat
 
 build/
-cmake/
 !install-*.sh
 !createdoc.sh
 /data/spe11/spe11a-OG
@@ -80,3 +79,6 @@ cmake/
 /data/spe1a/example.pvd
 /data/spe1a/rename_files.bat
 /data/spe1a/nametable.txt
+
+.idea/
+config/user.cmake

@@ -60,14 +60,14 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
         LStype.push_back(OCPLStype::samg);
     }
 #endif // WITH_SAMG
-#if WITH_FASP
+#ifdef OCP_USE_FASP
     else if (lsMethod == "fasp") {
         // if (domain->global_numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
         if (mat.nb > 1)    LS.push_back(new VectorFaspSolver(solveDir, lsFile, mat));
         else               LS.push_back(new ScalarFaspSolver(solveDir, lsFile, mat));
         LStype.push_back(OCPLStype::fasp);
     }
-#endif // WITH_FASP
+#endif // OCP_USE_FASP
 #ifdef WITH_PETSCSOLVER
     else if (lsMethod == "petsc") {
         if (mat.nb > 1)    LS.push_back(new VectorPetscSolver(solveDir, lsFile, mat, domain));

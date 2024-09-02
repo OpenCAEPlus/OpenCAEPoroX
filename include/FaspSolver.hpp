@@ -9,8 +9,10 @@
  *-----------------------------------------------------------------------------------
  */
 
+#include "../config/config.hpp"
 
-#if WITH_FASP
+
+#ifdef OCP_USE_FASP
 
 #ifndef __FASPSOLVER_HEADER__
 #define __FASPSOLVER_HEADER__
@@ -65,7 +67,7 @@ extern "C" {
 #endif
 
 // fasp4blkoil header files
-#if WITH_FASP4BLKOIL
+#ifdef OCP_USE_FASP4BLKOIL
 extern "C" {
 
 #if OCPFLOATTYPEWIDTH == 64
@@ -213,7 +215,7 @@ protected:
 
 #endif // __FASPSOLVER_HEADER__
 
-#endif // WITH_FASP
+#endif // OCP_USE_FASP
 
 /*----------------------------------------------------------------------------*/
 /*  Brief Change History of This File                                         */
