@@ -38,7 +38,7 @@ void ConnGrid::AddHalfConn(const OCP_ULL& n,
 
     if (!isfinite(areaE)) {
         if (d * d < TINY) {
-            OCP_WARNING("Hexahedron reduces to a face!");
+            //OCP_WARNING("Hexahedron reduces to a face!");
         }
         else {
             OCP_ABORT("Effective Area is NAN");

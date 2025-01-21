@@ -130,6 +130,8 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     dSmaxNR.push_back(dSmaxTmp);
     eVmaxNR.push_back(eVmaxTmp);
 
+    const OCP_DBL dPBmaxTmp = dPmaxTmp;
+
     // for well
     // dPmaxTmp = 0;
     const auto& wells = rs.allWells.wells;
@@ -142,8 +144,19 @@ void OCPNRsuite::CalMaxChangeNR(const Reservoir& rs)
     }
     dPWmaxNR.push_back(dPmaxTmp);
 
-    //cout << scientific << setprecision(6) << res.maxRelRes0_V << "   " << res.maxRelRes_V << "   "
-    //    << res.maxRelRes_N << "   " << res.maxWellRelRes_mol << "   " << dPmaxTmp << "   " << dSmaxTmp << endl;
+    if (OCP_FALSE)
+    {
+        vector<OCP_DBL> send_buffer{res.maxRelRes_V, res.maxRelRes_N, res.maxWellRelRes_mol, fabs(dPBmaxTmp), fabs(dSmaxTmp)};
+        vector<OCP_DBL> recv_buffer(send_buffer);
+
+        MPI_Allreduce(&send_buffer[0], &recv_buffer[0], send_buffer.size(), OCPMPI_DBL, MPI_MAX, rs.domain.global_comm);
+
+        if (CURRENT_RANK == MASTER_PROCESS)
+        {
+            cout << scientific << setprecision(6) << res.maxRelRes0_V << "   " << recv_buffer[0] << "   "
+                 << recv_buffer[1] << "   " << recv_buffer[2] << "   " << recv_buffer[3] << "   " << recv_buffer[4] << endl;
+        }
+    }
 }
 
 

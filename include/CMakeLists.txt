@@ -18,6 +18,7 @@ target_sources(
 		 Domain.hpp
 		 FLUXModule.hpp
 		 FaspSolver.hpp
+		 FaspxxSolver.hpp
 		 FlowUnit.hpp
 		 FluxUnit.hpp
 		 GmshGrid.hpp

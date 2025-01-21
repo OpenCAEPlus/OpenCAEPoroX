@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifdef WITH_PARDISO
+#ifdef OCP_USE_PARDISO
 
 #include "PardisoSolver.hpp"
 
@@ -261,7 +261,7 @@ void VectorPardisoSolver::CalCommTerm(const Domain* domain)
 
 
 #endif // OCPFLOATTYPEWIDTH == 64
-#endif // WITH_PARDISO
+#endif // OCP_USE_PARDISO
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

@@ -125,7 +125,7 @@ void PreParamGridWell::Input(const string& myFilename)
             case Map_Str2Int("INCLUDE", 7):
                 InputINCLUDE(ifs);
                 break;
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
             case Map_Str2Int("GMSH", 4):
                 InputGMSH(ifs);
                 break;
@@ -178,7 +178,7 @@ void PreParamGridWell::CheckInput()
         if (dz.size() != numGrid)          OCP_ABORT("WRONG DZ!");
         if (tops.size() != nx * ny)        OCP_ABORT("WRONG TOPS!");
     }
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     else if (gridType == GridType::gmsh) {
         if (gmshGrid.edges.empty())       OCP_ABORT("WRONG GMSH!");
         if (gmshGrid.elements.empty())    OCP_ABORT("WRONG GMSH!");
@@ -520,7 +520,7 @@ void PreParamGridWell::InputVTKSCHED(ifstream& ifs)
 }
 
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
 void PreParamGridWell::InputGMSH(ifstream& ifs)
 {
     gridType = GridType::gmsh;
@@ -854,6 +854,14 @@ OCP_ULL ActiveGridCheck::CheckActivity(const OCPModel& Model, const OCP_DBL& ev,
     cout << "  Number of inactive cells is " << (numGrid - activeGridNum) << " ("
         << (numGrid - activeGridNum) * 100.0 / numGrid << "%)" << endl;
 
+    //if (!ACTNUM.empty()){
+    //    OCP_USI naum = 0;
+    //    for (OCP_USI n = 0; n < numGrid; n++) {
+    //        naum += ACTNUM[n];
+    //    }
+    //    cout << "ACTNUM  " << naum << endl;
+    //}
+
     vector<USI>().swap(ACTNUM);
 
     return activeGridNum;
@@ -1003,7 +1011,7 @@ void PreParamGridWell::SetupGrid()
         OutputBaiscInfo();
         SetLocationStructral();
         break;
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     case GridType::gmsh:
         SetupGmshGrid();
         break;
@@ -1043,6 +1051,38 @@ void PreParamGridWell::SetupOrthogonalGrid()
     OCP_INFO("Setup Orthogonal Grid -- end");
 
     cout << "Memory Usuage: " << scientific << setprecision(6) << OCPGetCurrentRSS() << " GB" << endl;
+
+    if (OCP_FALSE) {
+        // output ACTNUM to file
+        const string myFile = workdir + "ACTNUM.dat";
+        ofstream outF(myFile, ios::out);
+        if (!outF.is_open()) {
+            OCP_ABORT("Can not open " + myFile);
+        }
+        outF << "ACTNUM\n";
+        USI flag = 0;
+        USI num = 0;
+        for (OCP_USI n = 0; n < numGrid; n++) {
+            if ((flag == 0 && actGC.map_All2Act[n] >= 0) ||
+                (flag == 1 && actGC.map_All2Act[n] < 0)) {
+                // change
+                if (num != 0) {
+                    outF << to_string(num) + "*" + to_string(flag);
+                    outF << "\n";
+                }
+                num = 1;
+                flag = actGC.map_All2Act[n] >= 0 ? 1 : 0;
+            }
+            else {
+                // the same
+                num++;
+            }
+        }
+        // last term
+        outF << to_string(num) + "*" + to_string(flag);
+        outF << "\n/\n";
+        outF.close();
+    }
 }
 
 void PreParamGridWell::CalDepthVOrthogonalGrid()
@@ -1339,7 +1379,7 @@ void PreParamGridWell::OutputPointsOrthogonalGrid()
 #if OCPGRID_NORMAL
             tmpY += dy[gId];
 #elif OCPGRID_DXDYDZ
-            tmpX += dyC;
+            tmpY += dyC;
 #endif
         }
     }
@@ -1357,6 +1397,18 @@ void PreParamGridWell::SetupCornerGrid()
     coordTmp.Allocate(nx, ny, nz);
     coordTmp.InputData(coord, zcorn);
     coordTmp.SetupCornerPoints();
+
+    if (OCP_FALSE) {
+        for (OCP_USI n = 0; n < numGrid; n++) {
+            if (poro[n] < 0.05) {
+                poro[n] = 0.05;
+            }
+            if (kx[n] < 1E-20 && ky[n] < 1E-20 && kz[n] < 1E-20) {
+                actGC.ACTNUM[n] = 0;
+            }
+        }
+    }
+
     SetupBasicCornerGrid(coordTmp);
     CalActiveGrid(1E-6, 1E-6);
     SetupActiveConnCornerGrid(coordTmp);
@@ -1365,6 +1417,38 @@ void PreParamGridWell::SetupCornerGrid()
 
     vector<OCP_DBL>().swap(coord);
     vector<OCP_DBL>().swap(zcorn);
+
+    if (OCP_FALSE) {
+        // output ACTNUM to file
+        const string myFile = workdir + "ACTNUM.dat";
+        ofstream outF(myFile, ios::out);
+        if (!outF.is_open()) {
+            OCP_ABORT("Can not open " + myFile);
+        }
+        outF << "ACTNUM\n";
+        USI flag = 0;
+        USI num = 0;
+        for (OCP_USI n = 0; n < numGrid; n++) {
+            if ((flag == 0 && actGC.map_All2Act[n] >= 0) ||
+                (flag == 1 && actGC.map_All2Act[n] < 0)) {
+                // change
+                if (num != 0) {
+                    outF << to_string(num) + "*" + to_string(flag);
+                    outF << "\n";
+                }
+                num = 1;
+                flag = actGC.map_All2Act[n] >= 0 ? 1 : 0;
+            }
+            else {
+                // the same
+                num++;
+            }
+        }
+        // last term
+        outF << to_string(num) + "*" + to_string(flag);
+        outF << "\n/\n";
+        outF.close();
+    }
 }
 
 void PreParamGridWell::SetupBasicCornerGrid(const OCP_COORD& CoTmp)
@@ -1546,7 +1630,7 @@ void PreParamGridWell::OutputPointsCornerGrid(const OCP_COORD& mycord)
 }
 
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
 void PreParamGridWell::SetupGmshGrid()
 {
     SetupBasicGmshGrid();
@@ -1767,7 +1851,7 @@ OCP_ULL PreParamGridWell::GetPerfLocation(const WellParam& well, const USI& p)
     if (gridType >= GridType::structured && gridType < GridType::unstructured) {
         return (well.K_perf[p] - 1) * (nx * ny) + (well.J_perf[p] - 1) * nx + (well.I_perf[p] - 1);
     }
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     else if (gridType >= GridType::unstructured) {
         // find the element whose center is closest to the perforation first
         OCP_DBL mindis = 1E8;

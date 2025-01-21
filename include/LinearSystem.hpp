@@ -28,6 +28,8 @@
 #include "FaspSolver.hpp"
 #include "PetscSolver.hpp"
 #include "LinearSolver.hpp"
+#include "FaspxxSolver.hpp" 
+
 
 using namespace std;
 

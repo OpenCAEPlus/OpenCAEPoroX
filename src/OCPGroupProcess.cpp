@@ -13,9 +13,9 @@
 
 /// Average number of processes per process group when partitioning with METIS
 static const int METIS_AVNP = 50;
-static real_t ubvec = 1.01;
+static real_t ubvec = 1.10;
 
-#ifdef WITH_PBGL
+#ifdef OCP_USE_PBGL
 
  // each process with one vertex
 static int GroupProcessPBGL01(const std::set<int>& cs_proc_group, const MPI_Comm& work_comm)
@@ -191,7 +191,7 @@ static int GroupProcessPBGL02(const std::set<int>& cs_proc_group, const MPI_Comm
 #endif
 
 
-#ifdef WITH_BGL
+#ifdef OCP_USE_BGL
 /// gather the graph to one process
 static int GroupProcessSeq(const std::set<int>& cs_proc_group, const MPI_Comm& work_comm)
 {
@@ -724,7 +724,7 @@ void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
 
 	switch (flag)
 	{
-#ifdef WITH_PBGL
+#ifdef OCP_USE_PBGL
 	case GroupMethod::PBGL:
 		color = GroupProcessPBGL01(work_cs_proc_group, work_comm);
 		break;
@@ -733,7 +733,7 @@ void GroupProcess(const GroupMethod& method, std::set<OCP_INT>& cs_proc_group,
 		break;
 #endif
 
-#ifdef WITH_BGL
+#ifdef OCP_USE_BGL
 	case GroupMethod::BGL:
 		color = GroupProcessSeq(work_cs_proc_group, work_comm);
 		break;

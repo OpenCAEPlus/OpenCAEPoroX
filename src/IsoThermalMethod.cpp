@@ -771,11 +771,15 @@ OCP_BOOL IsoT_FIM::SolveLinearSystem(LinearSystem& ls,
 
     NR.UpdateIter(abs(status));
 
-    if (status < 0) {
-        ls.ClearData();
-        ctrl.time.CutDt(-1.0);
-        ResetToLastTimeStep(rs, ctrl);
-        return OCP_FALSE;
+    if (ctrl.time.GetCurrentTime() > 10 - 1E-8 || OCP_TRUE)
+    {
+        if (status < 0)
+        {
+            ls.ClearData();
+            ctrl.time.CutDt(-1.0);
+            ResetToLastTimeStep(rs, ctrl);
+            return OCP_FALSE;
+        }
     }
 
     // ls.OutputSolution("proc" + to_string(CURRENT_RANK) + "_x_ddm.out");
@@ -812,6 +816,9 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
         return OCP_FALSE;
     }
 
+    GetWallTime timer;
+    timer.Start();
+
     // Update fluid property
     CalFlash(rs.bulk);
     CalKrPc(rs.bulk);
@@ -822,6 +829,8 @@ OCP_BOOL IsoT_FIM::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 
     // Update residual
     CalRes(rs, ctrl.time.GetCurrentDt());
+
+    OCPTIME_UPDATE_GRID += timer.Stop();
 
     return OCP_TRUE;
 }
@@ -1546,8 +1555,8 @@ void IsoT_AIMc::InitReservoir(Reservoir& rs)
     rs.bulk.Initialize(rs.domain);
     CalRock(rs.bulk);
 
-    IsoT_IMPEC::InitFlash(rs.bulk);
-    IsoT_IMPEC::CalKrPc(rs.bulk);
+    IsoT_FIM::InitFlash(rs.bulk);
+    IsoT_FIM::CalKrPc(rs.bulk);
     rs.conn.CalFluxCoeff(rs.bulk);
     rs.allWells.InitBHP(rs.bulk);
 }
@@ -1563,11 +1572,7 @@ void IsoT_AIMc::Prepare(Reservoir& rs, const OCP_DBL& dt)
     NR.CalCFL(rs, dt, OCP_FALSE);
     rs.allWells.SetupWellBulk(rs.bulk);
     SetFIMBulk(rs);
-    //  Calculate FIM Bulk properties
-    CalFlashI(rs.bulk);
-    CalKrPcI(rs.bulk);
 
-    UpdateLastTimeStep(rs);
     NR.InitStep(rs.bulk.GetVarSet());
     NR.InitIter();
 }
@@ -1629,39 +1634,60 @@ OCP_BOOL IsoT_AIMc::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
         return OCP_FALSE;
     }
 
-    CalFlashI(rs.bulk);
-    CalFlashEp(rs.bulk);
-    CalKrPcI(rs.bulk);
+    GetWallTime timer;
+    timer.Start();
 
+
+    CalFlashI(rs.bulk);
+    CalKrPcI(rs.bulk);
     CalRock(rs.bulk);
 
     rs.allWells.CalFlux(rs.bulk);
 
+    NR.CalMaxChangeNR(rs);
+
+    CalNtVf(rs.bulk);
+
     CalRes(rs, ctrl.time.GetCurrentDt());
+
+    OCPTIME_UPDATE_GRID += timer.Stop();
     return OCP_TRUE;
 }
 
 OCP_BOOL IsoT_AIMc::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
-    NR.CalMaxChangeNR(rs);
-    const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" });
+    // NR.CalMaxChangeNR(rs);
+    const OCPNRStateC conflag = ctrl.CheckConverge(NR, {"res", "d"});
 
-    if (conflag == OCPNRStateC::converge) {
-        if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
+    if (conflag == OCPNRStateC::converge)
+    {
+        if (!NR.CheckPhysical(rs, {"WellP"}, ctrl.time.GetCurrentDt()))
+        {
             ctrl.time.CutDt(NR);
             ResetToLastTimeStep(rs, ctrl);
             return OCP_FALSE;
-        } else {
-            CalFlashEa(rs.bulk);
+        }
+        else
+        {
+            GetWallTime timer;
+            timer.Start();
+
+            CalFlashE(rs.bulk);
             CalKrPcE(rs.bulk);
+
+            OCPTIME_UPDATE_GRID += timer.Stop();
+
             return OCP_TRUE;
         }
-
-    } else if (conflag == OCPNRStateC::not_converge) {
+    }
+    else if (conflag == OCPNRStateC::not_converge)
+    {
         ctrl.time.CutDt();
         ResetToLastTimeStep(rs, ctrl);
         return OCP_FALSE;
-    } else {
+    }
+    else
+    {
         return OCP_FALSE;
     }
 }
@@ -1690,54 +1716,67 @@ void IsoT_AIMc::AllocateReservoir(Reservoir& rs)
     bk.bulkTypeAIM.Setup(nb);
 }
 
+OCP_USI AIMcount = 0;
+OCP_DBL AIMratio = 0;
 void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 {
     // IMPORTANT: implicity of the same grid in different processes should be consistent
-    
-    const OCP_INT nlayers = 2;
+
+    const OCP_INT nlayersB = 1;
+    const OCP_INT nlayersW = 2;
 
     // We just consider at most 1 layer neighbor now
 
-    Bulk&           bk   = rs.bulk;
-    BulkVarSet&     bvs  = bk.vs;
-    const BulkConn& conn = rs.conn;
-    const OCP_USI   nb   = bvs.nbI;
-    const USI       np   = bvs.np;
-    const USI       nc   = bvs.nc;
+    Bulk &bk = rs.bulk;
+    BulkVarSet &bvs = bk.vs;
+    const BulkConn &conn = rs.conn;
+    const OCP_USI nb = bvs.nbI;
+    const USI np = bvs.np;
+    const USI nc = bvs.nc;
 
     // all impec
     bk.bulkTypeAIM.Init(-1);
 
-    OCP_USI  bIdc;
+    OCP_USI bIdc;
     OCP_BOOL flag;
 
-    for (OCP_USI n = 0; n < nb; n++) {
+    for (OCP_USI n = 0; n < nb; n++)
+    {
         bIdc = n * nc;
         flag = OCP_FALSE;
         // CFL
-        for (USI j = 0; j < np; j++) {
-            if (NR.GetCFL(n,j) > 0.8) {
+        for (USI j = 0; j < np; j++)
+        {
+            if (NR.GetCFL(n, j) > 1)
+            {
                 flag = OCP_TRUE;
                 break;
             }
         }
         // Volume error
-        if (!flag) {
-            if ((fabs(bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n]) > 1E-3) {
+        if (!flag)
+        {
+            if ((fabs(bvs.vf[n] - bvs.rockVp[n]) / bvs.rockVp[n]) > 1E-3)
+            {
                 flag = OCP_TRUE;
             }
         }
 
-        // NR Step
-        if (!flag && OCP_FALSE) {
+        // not NR, should be DP,DN,DS between time steps.
+        if (!flag && OCP_FALSE)
+        {
             // dP
-            if (fabs(NR.DP(n) / bvs.P[n]) > 1E-3) {
+            if (fabs(NR.DP(n) / bvs.P[n]) > 1E-3)
+            {
                 flag = OCP_TRUE;
             }
             // dNi
-            if (!flag) {
-                for (USI i = 0; i < bvs.nc; i++) {
-                    if (fabs(NR.DN(n,i) / bvs.Ni[bIdc + i]) > 1E-3) {
+            if (!flag)
+            {
+                for (USI i = 0; i < bvs.nc; i++)
+                {
+                    if (fabs(NR.DN(n, i) / bvs.Ni[bIdc + i]) > 1E-3)
+                    {
                         flag = OCP_TRUE;
                         break;
                     }
@@ -1745,25 +1784,27 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
             }
         }
 
-        if (flag) {
-            SetKNeighbor(conn.neighbor, n, bk.bulkTypeAIM, nlayers);
+        if (flag)
+        {
+            SetKNeighbor(conn.neighbor, n, bk.bulkTypeAIM, nlayersB);
         }
     }
 
     // add WellBulk's 1-neighbor as Implicit bulk
-    for (auto& p : bk.wellBulkId) {
-        SetKNeighbor(conn.neighbor, p, bk.bulkTypeAIM, nlayers);
+    for (auto &p : bk.wellBulkId)
+    {
+        SetKNeighbor(conn.neighbor, p, bk.bulkTypeAIM, nlayersW);
     }
 
     // exchange information of implicity of grid
-    const Domain& domain = rs.domain;
-
+    const Domain &domain = rs.domain;
 
     USI iter = 0;
     vector<vector<OCP_INT>> recv_buffer(domain.recv_element_loc.size());
-    for (const auto& r : domain.recv_element_loc) {
-        const auto& rv = r.second;
-        auto&       rb = recv_buffer[iter];
+    for (const auto &r : domain.recv_element_loc)
+    {
+        const auto &rv = r.second;
+        auto &rb = recv_buffer[iter];
         rb.resize(rv[1] - rv[0]);
         MPI_Irecv(&rb[0], rb.size(), OCPMPI_INT, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
         iter++;
@@ -1771,26 +1812,29 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
     iter = 0;
     vector<vector<OCP_INT>> send_buffer(domain.send_element_loc.size());
-    for (const auto& s : domain.send_element_loc) {
-        const auto& sv = s.second;
-        auto&       sb = send_buffer[iter];
+    for (const auto &s : domain.send_element_loc)
+    {
+        const auto &sv = s.second;
+        auto &sb = send_buffer[iter];
         sb.reserve(sv.size());
-        for (const auto& sv1 : sv) {
+        for (const auto &sv1 : sv)
+        {
             sb.push_back(bk.bulkTypeAIM.GetBulkType(sv1));
         }
         MPI_Isend(sb.data(), sb.size(), OCPMPI_INT, s.first, 0, domain.global_comm, &domain.send_request[iter]);
         iter++;
     }
 
-
     MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
 
     iter = 0;
-    for (const auto& r : domain.recv_element_loc) {
-        const auto& rv = r.second;
-        auto&       rb = recv_buffer[iter];
+    for (const auto &r : domain.recv_element_loc)
+    {
+        const auto &rv = r.second;
+        auto &rb = recv_buffer[iter];
 
-        for (OCP_USI n = 0; n < rb.size(); n++) {
+        for (OCP_USI n = 0; n < rb.size(); n++)
+        {
             SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);
         }
 
@@ -1799,24 +1843,26 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
 
     MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 
-
     // Check Consistency
     iter = 0;
-    for (const auto& r : domain.recv_element_loc) {
-        const auto& rv = r.second;
-        auto&       rb = recv_buffer[iter];
+    for (const auto &r : domain.recv_element_loc)
+    {
+        const auto &rv = r.second;
+        auto &rb = recv_buffer[iter];
         rb.resize(rv[1] - rv[0]);
         MPI_Irecv(&rb[0], rb.size(), OCPMPI_INT, r.first, 0, domain.global_comm, &domain.recv_request[iter]);
         iter++;
     }
 
     iter = 0;
-    for (const auto& s : domain.send_element_loc) {
-        const auto& sv = s.second;
-        auto&       sb = send_buffer[iter];
+    for (const auto &s : domain.send_element_loc)
+    {
+        const auto &sv = s.second;
+        auto &sb = send_buffer[iter];
         sb.clear();
         sb.reserve(sv.size());
-        for (const auto& sv1 : sv) {
+        for (const auto &sv1 : sv)
+        {
             sb.push_back(bk.bulkTypeAIM.GetBulkType(sv1));
         }
         MPI_Isend(sb.data(), sb.size(), OCPMPI_INT, s.first, 0, domain.global_comm, &domain.send_request[iter]);
@@ -1824,22 +1870,28 @@ void IsoT_AIMc::SetFIMBulk(Reservoir& rs)
     }
 
     MPI_Waitall(iter, domain.recv_request.data(), MPI_STATUS_IGNORE);
-     
-    iter = 0;
-    for (const auto& r : domain.recv_element_loc) {
-        const auto& rv = r.second;
-        auto&       rb = recv_buffer[iter];
 
-        for (OCP_USI n = 0; n < rb.size(); n++) {
-            SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]);  // Maybe not a good idea
+    iter = 0;
+    for (const auto &r : domain.recv_element_loc)
+    {
+        const auto &rv = r.second;
+        auto &rb = recv_buffer[iter];
+
+        for (OCP_USI n = 0; n < rb.size(); n++)
+        {
+            SetKNeighbor(conn.neighbor, n + rv[0], bk.bulkTypeAIM, rb[n]); // Maybe not a good idea
         }
         iter++;
     }
 
     MPI_Waitall(iter, domain.send_request.data(), MPI_STATUS_IGNORE);
 
-    if (OCP_TRUE) {
+    if (OCP_TRUE)
+    {
         cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bvs.nb * 100 << "% " << endl;
+        AIMcount++;
+        AIMratio += bk.bulkTypeAIM.GetNumFIMBulk() * 1.0 / bvs.nb;
+        cout << fixed << setprecision(2) << "Rank " << CURRENT_RANK << "  " << AIMratio / AIMcount * 100 << "% " << endl;
     }
 }
 
@@ -1856,35 +1908,58 @@ void IsoT_AIMc::SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_
 }
 
 
-void IsoT_AIMc::CalFlashEp(Bulk& bk)
+void IsoT_AIMc::CalNtVf(Bulk &bk)
 {
-    const BulkVarSet& bvs = bk.vs;
-    const OCP_USI&    nb  = bvs.nb;
+    BulkVarSet &bvs = bk.vs;
+    const OCP_USI &nb = bvs.nb;
+    const USI &nc = bvs.nc;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
+    for (OCP_USI n = 0; n < nb; n++)
+    {
+        if (bk.bulkTypeAIM.IfIMPECbulk(n))
+        {
             // Explicit bulk
 
-            bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
-            // bvs.PassFlashValueAIMcEp(n);
-            PassFlashValueEp(bk, n);
+            // cout << scientific << setprecision(6) << bvs.vf[n] << "    ";
+
+            // cal Nt and Vf
+            bvs.Nt[n] = 0;
+            bvs.vf[n] += bvs.vfP[n] * NR.DP(n);
+            for (OCP_USI i = 0; i < nc; i++)
+            {
+                bvs.Nt[n] += bvs.Ni[n * nc + i];
+                bvs.vf[n] += bvs.vfi[n * nc + i] * NR.DN(n, i);
+            }
+
+            // for (OCP_USI i = 0; i < nc; i++) {
+            //     bvs.vfi[n * nc + i] = bvs.lvf[n] / bvs.lNt[n] + bvs.Nt[n] * (bvs.vfi[n * nc + i] - bvs.lvf[n] / bvs.lNt[n]) / bvs.lNt[n];
+            // }
+
+            // cout << scientific << setprecision(6) << bvs.vf[n] << endl;
         }
     }
 }
 
-void IsoT_AIMc::CalFlashEa(Bulk& bk)
+void IsoT_AIMc::CalFlashE(Bulk &bk)
 {
-    const BulkVarSet& bvs = bk.vs;
-    const OCP_USI&    nb  = bvs.nb;
+    BulkVarSet &bvs = bk.vs;
+    const OCP_USI &nb = bvs.nb;
+    const USI &np = bvs.np;
 
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
+    for (OCP_USI n = 0; n < nb; n++)
+    {
+        if (bk.bulkTypeAIM.IfIMPECbulk(n))
+        {
             // Explicit bulk
 
-            bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
-            // bvs.PassFlashValueAIMcEa(n);
-
-            IsoT_IMPEC::PassFlashValue(bk, n);
+            bk.PVTm.GetPVT(n)->FlashFIM(n, bvs);
+            IsoT_FIM::PassFlashValue(bk, n);
+            for (USI j = 0; j < np; j++)
+            {
+                bvs.vj[n * np + j] = bvs.vf[n] * bvs.S[n * np + j];
+            }
+            // bk.PVTm.GetPVT(n)->FlashIMPEC(n, bvs);
+            // IsoT_IMPEC::PassFlashValue(bk, n);
         }
     }
 }
@@ -1908,52 +1983,27 @@ void IsoT_AIMc::CalFlashI(Bulk& bk)
     }
 }
 
-void IsoT_AIMc::PassFlashValueEp(Bulk& bk, const OCP_USI& n)
+
+void IsoT_AIMc::CalKrPcE(Bulk &bk)
 {
-    // only var about volume needs, some flash var also
-    OCP_FUNCNAME;
-    auto&         bvs  = bk.vs;
-    const auto    PVT  = bk.PVTm.GetPVT(n);
+    BulkVarSet &bvs = bk.vs;
+    const OCP_USI &nb = bvs.nb;
+    const USI &np = bvs.np;
 
-    const auto    np   = bvs.np;
-    const auto    nc   = bvs.nc;
-    const OCP_USI bIdp = n * np;
-
-    bvs.Nt[n]  = PVT->GetNt();
-    bvs.vf[n]  = PVT->GetVf();
-    bvs.vfP[n] = PVT->GetVfP();
-    for (USI i = 0; i < nc; i++) {
-        bvs.vfi[n * nc + i] = PVT->GetVfi(i);
-    }
-
-    for (USI j = 0; j < np; j++) {
-        if (PVT->GetPhaseExist(j)) {
-
-            // IMPORTANT -- need for next Flash
-            // But xij in nonlinear equations has been modified
-            for (USI i = 0; i < nc; i++) {
-                bvs.xij[bIdp * nc + j * nc + i] = PVT->GetXij(j, i);
-            }
-        }
-    }
-}
-
-void IsoT_AIMc::CalKrPcE(Bulk& bk)
-{
-    BulkVarSet&    bvs = bk.vs;
-    const OCP_USI& nb = bvs.nb;
-    const USI&     np = bvs.np;
-
-    for (OCP_USI n = 0; n < nb; n++) {
-        if (bk.bulkTypeAIM.IfIMPECbulk(n)) {
-
-            auto SAT = bk.SATm.GetSAT(n);
+    for (OCP_USI n = 0; n < nb; n++)
+    {
+        if (bk.bulkTypeAIM.IfIMPECbulk(n))
+        {
             // Explicit bulk
+            auto SAT = bk.SATm.GetSAT(n);
             const OCP_USI bId = n * np;
-            SAT->CalKrPc(n, &bvs.S[bId]);
+            SAT->CalKrPcFIM(n, &bvs.S[bId]);
             copy(SAT->GetKr().begin(), SAT->GetKr().end(), &bvs.kr[bId]);
             copy(SAT->GetPc().begin(), SAT->GetPc().end(), &bvs.Pc[bId]);
-            for (USI j = 0; j < np; j++) bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
+            copy(SAT->GetdKrdS().begin(), SAT->GetdKrdS().end(), &bvs.dKrdS[bId * np]);
+            copy(SAT->GetdPcdS().begin(), SAT->GetdPcdS().end(), &bvs.dPcdS[bId * np]);
+            for (USI j = 0; j < np; j++)
+                bvs.Pj[bId + j] = bvs.P[n] + bvs.Pc[bId + j];
         }
     }
 }
@@ -2247,6 +2297,9 @@ void IsoT_FIMddm::Setup(Reservoir& rs, const OCPControl& ctrl)
 {
     // Allocate memory for reservoir
     AllocateReservoir(rs);
+
+    if (CURRENT_RANK == 0)
+        cout << "FIMddm " << boundCondition << "   " << dSlim << endl;
 }
 
 
@@ -2357,16 +2410,15 @@ OCP_BOOL IsoT_FIMddm::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
     // Update well property
     rs.allWells.CalFlux(rs.bulk);
 
-    // Update residual
-    CalRes(rs, ctrl.time.GetCurrentDt());
-
     return OCP_TRUE;
 }
-
 
 OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
 {
     if (preM && OCP_TRUE) {
+        // Update residual
+        CalRes(rs, ctrl.time.GetCurrentDt());
+
         // check residual for each local nonlinear equations
         NR.CalMaxChangeNR(rs);
         const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E2);
@@ -2403,9 +2455,17 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
 
         NR.res.maxRelRes0_V = global_res0;
         IsoT_FIM::CalRes(rs, ctrl.time.GetCurrentDt());
-        
+
         NR.CalMaxChangeNR(rs);
-        const OCPNRStateC conflag = ctrl.CheckConverge(NR, { "res", "d" }, 1E0);
+
+        const auto tmpIter = ctrl.NR.GetMaxIter();
+        ctrl.NR.SetMaxIter(1 * tmpIter);
+
+        const OCPNRStateC conflag = ctrl.CheckConverge(NR, {"res", "d"}, 1E2);
+
+        ctrl.NR.SetMaxIter(tmpIter);
+
+
         if (conflag == OCPNRStateC::converge) {
             if (!NR.CheckPhysical(rs, { "WellP" }, ctrl.time.GetCurrentDt())) {
                 ctrl.time.CutDt(NR);
@@ -2422,7 +2482,7 @@ OCP_BOOL IsoT_FIMddm::FinishNR(Reservoir& rs, OCPControl& ctrl)
             return OCP_FALSE;
         }
         else {
-            ResetBoundary(rs);
+            //ResetBoundary(rs);
             return OCP_FALSE;
         }
     }

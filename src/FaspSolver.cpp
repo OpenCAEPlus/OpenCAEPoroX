@@ -169,7 +169,7 @@ OCP_INT ScalarFaspSolver::Solve()
     }
 #endif
 
-#ifdef WITH_PARDISO // use PARDISO directly
+#ifdef OCP_USE_PARDISO // use PARDISO directly
     else if (solver_type == SOLVER_PARDISO) {
         fasp_dcsr_sort(&A);
         status = fasp_solver_pardiso(&A, &b, &x, print_level);
@@ -468,7 +468,7 @@ OCP_INT VectorFaspSolver::Solve()
     }
 #endif
 
-#ifdef WITH_PARDISO // use PARDISO directly
+#ifdef OCP_USE_PARDISO // use PARDISO directly
     else if (solver_type == SOLVER_PARDISO) {
         dCSRmat Acsr = fasp_format_dbsr_dcsr(&A);
         fasp_dcsr_sort(&Acsr);

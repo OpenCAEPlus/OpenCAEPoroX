@@ -12,6 +12,7 @@ target_sources(
 		  DenseMat.cpp
 		  Domain.cpp
 		  FaspSolver.cpp
+		  FaspxxSolver.cpp
 		  FlowUnit.cpp
 		  GmshGrid.cpp
 		  HeatConduct.cpp

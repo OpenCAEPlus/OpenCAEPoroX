@@ -78,12 +78,26 @@ void PeacemanWell::Setup(const Bulk& bk, const vector<SolventINJ>& sols)
         perf[p].transj.resize(np);
         perf[p].qj_ft3.resize(np);
     }
+
+    CalWI(bk);
+    // check perforation
+    USI nWI = 0;
+    for (auto it = perf.begin(); it != perf.end(); ) {
+        if ((*it).WI < 1E-20 || isnan((*it).WI)) {
+            it = perf.erase(it);
+            nWI++;
+        } else {
+            ++it;
+        }
+    }
+    numPerf = perf.size();
+
     // dG
     dG.resize(numPerf, 0);
 
     if (depth < 0) depth = perf[0].depth;
 
-    CalWI(bk);
+    cout << name << " " << nWI << " perfs removed!" << endl;  
     // test
     // ShowPerfStatus(bvs);
 }
@@ -334,6 +348,8 @@ void PeacemanWell::CalWI(const Bulk& bk)
 
                 perf[p].WI = (2 * PI) * perf[p].kh /
                     (log(ro / perf[p].radius) + perf[p].skinFactor);
+
+                // cout << name << scientific << setprecision(3)  << " " << dx << " " << dy << " " << dz << " " << bvs.rockKx[Idb] << " " << bvs.rockKy[Idb] << endl;
             }
             else {
                 perf[p].WI = PI * perf[p].radius * perf[p].radius * bvs.rockKx[perf[p].location];
@@ -540,6 +556,9 @@ void PeacemanWell::CalProdQj(const Bulk& bvs, const OCP_DBL& dt)
     const auto o = mixture->OilIndex();
     const auto g = mixture->GasIndex();
     const auto w = mixture->WatIndex();
+
+    // cout << CURRENT_RANK << " " << name << " " 
+    //     << qi_lbmol[0] << " " << qi_lbmol[1] << " " << qi_lbmol[2] << endl;
 
     if (o >= 0) WOPR = UnitConvertR2S(o, mixture->GetVarSet().vj[o]);
     if (g >= 0) WGPR = UnitConvertR2S(g, mixture->GetVarSet().vj[g]);

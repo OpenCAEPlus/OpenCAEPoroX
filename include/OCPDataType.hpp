@@ -15,6 +15,7 @@
 
 #include <string>
 
+// #define OCPINT64 1  //! 64-bit
 
 #ifdef OCPINT64
 

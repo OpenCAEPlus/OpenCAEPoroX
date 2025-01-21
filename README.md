@@ -34,33 +34,20 @@ Key features of the simulator include:
 
 # Table of Contents
 
-- [Quickstart](#quickstart)
-  - [Requirements and Dependencies](#requirements-and-dependencies)
-  - [Build Dependencies](#build-dependencies)
-  - [Build OpenCAEPoro](#build-opencaeporox)
-  - [Running examples](#running-examples)
+- [Dependencies](#dependencies)
+- [Quickstart for Linux Systems](#Quickstart-linux)
+  - [Requirements](#requirements-linux)
+  - [Build Dependencies](#build-dependencies-linux)
+  - [Build OpenCAEPoro](#build-opencaeporox-linux)
+  - [Running examples](#running-examples-linux)
+- [Quickstart for Windows Systems](#quickstart-windows)
+  - [Requirements](#requirements-windows)
+  - [Build OpenCAEPoro](#build-opencaeporox-windows)
 - [License](#license)
 
 ---
 
-# Quickstart
-
-Welcome to the OpenCAEPoro installation guide. Here are the instructions on how to build OpenCAEPoro and run a benchmark case SPE1 provided by the Society of Petroleum Engineers.
-
----
-
-## Requirements and Dependencies
-
-### 1. Requirements
-
-Before beginning the installation, ensure your system meets the following requirements:
-
-- One of the following operating systems: Linux, Windows, or macOS.
-- C++ compiler (e.g., [GCC](https://gcc.gnu.org/) 7.3.0).
-- [CMake](https://cmake.org/) 3.17 or later.
-- MPI compiler (e.g., [OpenMPI](https://www.open-mpi.org/) for Linux or [MPICH](https://www.mpich.org/downloads/) for Windows) or Intel compiler (e.g., [oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html#base-kit)). The latter is recommended for optimal performance.
-
-### 2. Dependencies
+# Dependencies
 
 - **(required)** BLAS, LAPACK: e.g., [LAPACK-3.11](https://netlib.org/lapack/lapack-3.11.0.html) - necessary mathematical libraries.
 - **(required)** [ParMETIS](http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview) - parallel library for partitioning unstructured graphs and meshes, optimizing the performance of large-scale parallel computations.
@@ -73,17 +60,31 @@ Before beginning the installation, ensure your system meets the following requir
 - **(optional)** [METIS](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) - software package for partitioning unstructured graphs, finite element meshes, and producing fill-reducing orderings for sparse matrices.
 - **(optional)** [BGL](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) - comprehensive C++ library for graph data structures and algorithms, supporting efficient graph processing and manipulation.
 - **(optional)** [Gmsh](https://gmsh.info/) - 3D finite element mesh generator with a built-in CAD engine and post-processor.
+- **(optional)** [FASPXX](https://gitee.com/faspdevteam/faspxx) - package of fleXible and eXtensible solvers/preconditioners, capable of solving large-scale sparse linear systems using MPI and OpenMP.
 
-Ensure all necessary libraries are installed and accessible before proceeding with the installation of OpenCAEPoro.
 #### Remark
-- At least one linear solver must be installed: FASP is recommended for serial environments, while AdaptiveSolver is recommended for MPI parallel environments (requiring Hypre and PETSc).
-- If using the DDM strategy with adaptive coupling between subdomains, install BGL or METIS for adaptive inter-process grouping."
-- Currently, support is provided for reading 2D Gmsh format meshes. Please ensure the Gmsh package is installed.
+- At least one linear solver must be installed: FASP is recommended for serial environments, while AdaptiveSolver (requiring Hypre and PETSc) or FASPXX is recommended for MPI parallel environments.
+- If using the DDM strategy with adaptive coupling between subdomains, install BGL or METIS for adaptive inter-process grouping.
+
+
+# Quickstart for Linux Systems {#Quickstart-linux}
+
+Welcome to the OpenCAEPoro installation guide. Here are the instructions on how to build OpenCAEPoro and run a benchmark case SPE1 provided by the Society of Petroleum Engineers, on Linux systems.
+
+---
+
+## Requirements{#requirements-linux}
+
+Before beginning the installation, ensure your system meets the following requirements:
+
+- One of the following operating systems: Linux or macOS.
+- [CMake](https://cmake.org/) 3.17 or later.
+- MPI compiler (e.g., [OpenMPI](https://www.open-mpi.org/), or Intel compiler([oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html#base-kit)). The latter is recommended for optimal performance.)
 
 
 ---
 
-## Build Dependencies
+## Build Dependencies {#build-dependencies-linux}
 
 Below are some examples of package installations:
 
@@ -158,37 +159,24 @@ Please note that this is a general outline, and adjustments may be necessary bas
 
 ---
 
-## Build OpenCAEPoro
+## Build OpenCAEPoro {#build-opencaeporox-linux}
 
 After building the dependencies, navigate to the OpenCAEPoroX directory and compile the library:
 
 ```
-cd OpenCAEPoro
-# users specific compilers
-export CC=mpiicc
-export CXX=mpiicpc
-# users specific directory paths
-export PARMETIS_DIR=ROOT_DIR/parmetis-4.0.3
-export PARMETIS_BUILD_DIR=ROOT_DIR/parmetis-4.0.3/build/Linux-x86_64
-export METIS_DIR=ROOT_DIR/parmetis-4.0.3/metis
-export METIS_BUILD_DIR=ROOT_DIR/parmetis-4.0.3/build/Linux-x86_64
-export PETSC_DIR=ROOT_DIR/petsc-3.19.3
-export PETSC_ARCH=petsc_install
-export AS_DIR=ROOT_DIR/adaptive_solver
-export CPATH=ROOT_DIR/petsc-3.19.3/include/:$CPATH
-export CPATH=ROOT_DIR/petsc-3.19.3/petsc_install/include/:ROOT_DIR/parmetis-4.0.3/metis/include:ROOT_DIR/parmetis-4.0.3/include:$CPATH
-export CPATH=ROOT_DIR/lapack-3.11/CBLAS/include/:$CPATH
+cd ./config
+# Copy the 'defaults.cmake' file and rename the copy as 'user.cmake'. Then, add your custom configurations in this new file.
 
 mkdir build
 cd build
-cmake -DUSE_PARMETIS=ON -DUSE_METIS=ON -DUSE_AS=ON -DCMAKE_BUILD_TYPE=Release ..
+cmake ..
 make -j 16
 make install
 ```
 
 ---
 
-## Running examples
+## Running examples {#running-examples-linux}
 
 After installation, you can test the setup by running the following command in the terminal from the OpenCAEPoroX main directory:
 
@@ -199,6 +187,25 @@ mpirun -n p ./testOpenCAEPoro ./data/spe1a/spe1a.data
 Replace p with the number of processes you want to use. Check the output on the screen and the newly generated files in `./data/spe1a/`, such as `SUMMARY.out` and `FastReview.out`. If more than one process are used, `statistics.out` will also be generated.
 
 ---
+
+# Quickstart for Windows Systems {#quickstart-windows}
+
+Welcome to the OpenCAEPoro installation guide. Here are the instructions on how to build OpenCAEPoro and run a benchmark case SPE1 provided by the Society of Petroleum Engineers, on Windows systems.
+
+## Requirements {#requirements-windows}
+
+- Visual Studio (recommended version: 2019 or later)
+- OneAPI (Base Toolkit and HPC Toolkit, recommended version: 2022 or later)
+
+## Build OpenCAEPoro {#build-opencaeporox-windows}
+
+Open the 'vs/OpenCAEPoroX.sln' file, then modify the relevant library paths and macro definitions according to your configuration as follows:
+
+- C/C++ → Additional Include Directories
+- C/C++ → Preprocessor Definitions
+- Linker → Additional Dependencies
+- Linker → Additional Library Directories
+
 
 # License
 

@@ -212,21 +212,23 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
             MPI_Recv(iGridproc, numIgridEdgeproc[3 * p], OCPMPI_ULL, p, 0, myComm, &status);
 
             // get non-working buffer
-            OCP_USI ws;
-            for (ws = 0; ws < send_buffer.size(); ws++) {
-                if (!work_state[ws]) {
-                    work_buffer    = send_buffer[ws].data();
-                    work_state[ws] = OCP_TRUE;
-                    break;
-                }
-            }
-            if (ws == send_buffer.size()) {
-                send_buffer.push_back(send_buffer[0]);
-                work_buffer = send_buffer.back().data();
-                work_state.push_back(OCP_TRUE);
-            }
-            proc_buffer_c.push_back(p);
-            proc_buffer_c.push_back(ws);
+            // OCP_USI ws;
+            // for (ws = 0; ws < send_buffer.size(); ws++) {
+            //     if (!work_state[ws]) {
+            //         work_buffer    = send_buffer[ws].data();
+            //         work_state[ws] = OCP_TRUE;
+            //         break;
+            //     }
+            // }
+            // if (ws == send_buffer.size()) {
+            //     send_buffer.push_back(send_buffer[0]);
+            //     work_buffer = send_buffer.back().data();
+            //     work_state.push_back(OCP_TRUE);
+            // }
+            // proc_buffer_c.push_back(p);
+            // proc_buffer_c.push_back(ws);
+
+            work_buffer = send_buffer[0].data();
 
             // grid
             const OCP_USI  numGrid   = numIgridEdgeproc[3 * p];
@@ -272,23 +274,23 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
             }        
             send_size += conn_size * sizeof(OCP_DBL);        
             // send
-            MPI_Isend((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm, &request[p - 1]);
-            // MPI_Send((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, global_comm);
+            // MPI_Isend((void*)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm, &request[p - 1]);
+            MPI_Send((void *)work_buffer, send_size, OCPMPI_BYTE, p, 0, myComm);
             // cout << "Third stage : 0 sends " << send_size << "b to " << p << endl;
 
-            // update work_state(request)
-            for (USI i = 0; i < proc_buffer_c.size(); i+=2) {
+            // // update work_state(request)
+            // for (USI i = 0; i < proc_buffer_c.size(); i+=2) {
 
-                MPI_Test(&request[proc_buffer_c[i] - 1], &send_flag, MPI_STATUS_IGNORE);
-                if (send_flag) {
-                    work_state[proc_buffer_c[i + 1]] = OCP_FALSE;
-                }else{
-                    proc_buffer_l.push_back(proc_buffer_c[i]);
-                    proc_buffer_l.push_back(proc_buffer_c[i + 1]);
-                }
-            }
-            proc_buffer_c.swap(proc_buffer_l);
-            proc_buffer_l.clear();
+            //     MPI_Test(&request[proc_buffer_c[i] - 1], &send_flag, MPI_STATUS_IGNORE);
+            //     if (send_flag) {
+            //         work_state[proc_buffer_c[i + 1]] = OCP_FALSE;
+            //     }else{
+            //         proc_buffer_l.push_back(proc_buffer_c[i]);
+            //         proc_buffer_l.push_back(proc_buffer_c[i + 1]);
+            //     }
+            // }
+            // proc_buffer_c.swap(proc_buffer_l);
+            // proc_buffer_l.clear();
         }
 
         delete[] numIgridEdgeproc;
@@ -385,7 +387,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
         mygrid.FreeMemory();
 
         // wait   
-        MPI_Waitall(numproc - 1, request, MPI_STATUS_IGNORE);
+        // MPI_Waitall(numproc - 1, request, MPI_STATUS_IGNORE);
         delete[] request;
     }
     else {
@@ -535,7 +537,7 @@ void Reservoir::SetupDistParamGrid(PreParamGridWell& mygrid)
     map<OCP_INT, vector<idx_t>>().swap(domain.elementCSR);
 
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     /////////////////////////////////////////////////////////////////////////
     // Distribute Boundary Name (used in Gmsh grid now)
     /////////////////////////////////////////////////////////////////////////

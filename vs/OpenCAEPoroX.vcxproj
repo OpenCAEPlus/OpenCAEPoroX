@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{76560665-61e4-4656-96a4-54fad9b43994}</ProjectGuid>
+    <RootNamespace>OpenCAEPoroX</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Intel C++ Compiler 2025</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseIntelMPI>true</UseIntelMPI>
+    <UseInteloneMKL>Sequential</UseInteloneMKL>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Intel C++ Compiler 2025</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseIntelMPI>true</UseIntelMPI>
+    <UseInteloneMKL>Sequential</UseInteloneMKL>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>OCP_USE_FASP4BLKOIL;OCP_USE_GMSH;OCP_USE_PARMETIS;OCP_USE_METIS;OCP_USE_FASP;OCP_USE_PARDISO;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\..\ParMETIS\parmetis-4.0.3\include;..\..\ParMETIS\parmetis-4.0.3\metis\include;..\..\faspsolver\base\include;..\..\fasp4blkoil\include;..\..\Gmsh\gmsh-4.13.1-Windows64-sdk\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>gmsh.lib;faspbase.lib;fasp4blkoil_interface.lib;fasp4blkoil_lib.lib;metis.lib;parmetis.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\install\lib\x64;</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>OCP_USE_FASP4BLKOIL;OCP_USE_GMSH;OCP_USE_PARMETIS;OCP_USE_METIS;OCP_USE_FASP;OCP_USE_PARDISO;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\..\ParMETIS\parmetis-4.0.3\include;..\..\ParMETIS\parmetis-4.0.3\metis\include;..\..\faspsolver\base\include;..\..\fasp4blkoil\include;..\..\Gmsh\gmsh-4.13.1-Windows64-sdk\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>gmsh.lib;faspbase.lib;fasp4blkoil_interface.lib;fasp4blkoil_lib.lib;metis.lib;parmetis.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\install\lib\x64;</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\AcceleratePEC.hpp" />
+    <ClInclude Include="..\include\AllWells.hpp" />
+    <ClInclude Include="..\include\BoundaryFlow.hpp" />
+    <ClInclude Include="..\include\BOUNDARYModule.hpp" />
+    <ClInclude Include="..\include\Bulk.hpp" />
+    <ClInclude Include="..\include\BulkAccumuModule.hpp" />
+    <ClInclude Include="..\include\BulkConn.hpp" />
+    <ClInclude Include="..\include\BulkConnFunc.hpp" />
+    <ClInclude Include="..\include\BulkConnOptionalModules.hpp" />
+    <ClInclude Include="..\include\BulkConnVarSet.hpp" />
+    <ClInclude Include="..\include\BulkInitializer.hpp" />
+    <ClInclude Include="..\include\BulkOptionalModules.hpp" />
+    <ClInclude Include="..\include\BulkVarSet.hpp" />
+    <ClInclude Include="..\include\CornerGrid.hpp" />
+    <ClInclude Include="..\include\DenseMat.hpp" />
+    <ClInclude Include="..\include\Domain.hpp" />
+    <ClInclude Include="..\include\FaspSolver.hpp" />
+    <ClInclude Include="..\include\FaspxxSolver.hpp" />
+    <ClInclude Include="..\include\FlowUnit.hpp" />
+    <ClInclude Include="..\include\FLUXModule.hpp" />
+    <ClInclude Include="..\include\FluxUnit.hpp" />
+    <ClInclude Include="..\include\GmshGrid.hpp" />
+    <ClInclude Include="..\include\HeatConduct.hpp" />
+    <ClInclude Include="..\include\HeatLoss.hpp" />
+    <ClInclude Include="..\include\IsoThermalMethod.hpp" />
+    <ClInclude Include="..\include\IsoThermalSolver.hpp" />
+    <ClInclude Include="..\include\LinearSolver.hpp" />
+    <ClInclude Include="..\include\LinearSystem.hpp" />
+    <ClInclude Include="..\include\MixtureUnit.hpp" />
+    <ClInclude Include="..\include\OCP.hpp" />
+    <ClInclude Include="..\include\OCPConst.hpp" />
+    <ClInclude Include="..\include\OCPControl.hpp" />
+    <ClInclude Include="..\include\OCPControlFast.hpp" />
+    <ClInclude Include="..\include\OCPControlMethod.hpp" />
+    <ClInclude Include="..\include\OCPControlNR.hpp" />
+    <ClInclude Include="..\include\OCPControlSimTime.hpp" />
+    <ClInclude Include="..\include\OCPControlTime.hpp" />
+    <ClInclude Include="..\include\OCPConvection.hpp" />
+    <ClInclude Include="..\include\OCPDataType.hpp" />
+    <ClInclude Include="..\include\OCPDiffusion.hpp" />
+    <ClInclude Include="..\include\OCPEoS.hpp" />
+    <ClInclude Include="..\include\OCPFlow.hpp" />
+    <ClInclude Include="..\include\OCPFlowMethod.hpp" />
+    <ClInclude Include="..\include\OCPFlowVarSet.hpp" />
+    <ClInclude Include="..\include\OCPFuncPVT.hpp" />
+    <ClInclude Include="..\include\OCPFuncSAT.hpp" />
+    <ClInclude Include="..\include\OCPFuncTable.hpp" />
+    <ClInclude Include="..\include\OCPGroupProcess.hpp" />
+    <ClInclude Include="..\include\OCPMatrix.hpp" />
+    <ClInclude Include="..\include\OCPMiscible.hpp" />
+    <ClInclude Include="..\include\OCPMixture.hpp" />
+    <ClInclude Include="..\include\OCPMixtureMethodComp.hpp" />
+    <ClInclude Include="..\include\OCPMixtureMethodK.hpp" />
+    <ClInclude Include="..\include\OCPMixtureVarSet.hpp" />
+    <ClInclude Include="..\include\OCPNRresidual.hpp" />
+    <ClInclude Include="..\include\OCPNRsuite.hpp" />
+    <ClInclude Include="..\include\OCPOutput.hpp" />
+    <ClInclude Include="..\include\OCPPhaseEquilibrium.hpp" />
+    <ClInclude Include="..\include\OCPRock.hpp" />
+    <ClInclude Include="..\include\OCPScalePcow.hpp" />
+    <ClInclude Include="..\include\OCPSurfaceTension.hpp" />
+    <ClInclude Include="..\include\OCPTable.hpp" />
+    <ClInclude Include="..\include\OCPTimeRecord.hpp" />
+    <ClInclude Include="..\include\OCPUnits.hpp" />
+    <ClInclude Include="..\include\Output4Vtk.hpp" />
+    <ClInclude Include="..\include\ParamControl.hpp" />
+    <ClInclude Include="..\include\ParamOutput.hpp" />
+    <ClInclude Include="..\include\ParamRead.hpp" />
+    <ClInclude Include="..\include\ParamReservoir.hpp" />
+    <ClInclude Include="..\include\ParamWell.hpp" />
+    <ClInclude Include="..\include\PardisoSolver.hpp" />
+    <ClInclude Include="..\include\Partition.hpp" />
+    <ClInclude Include="..\include\PetscSolver.hpp" />
+    <ClInclude Include="..\include\PreParamGridWell.hpp" />
+    <ClInclude Include="..\include\PreProcess.hpp" />
+    <ClInclude Include="..\include\PVTModule.hpp" />
+    <ClInclude Include="..\include\Reservoir.hpp" />
+    <ClInclude Include="..\include\ROCKModule.hpp" />
+    <ClInclude Include="..\include\SamgSolver.hpp" />
+    <ClInclude Include="..\include\SATModule.hpp" />
+    <ClInclude Include="..\include\Solver.hpp" />
+    <ClInclude Include="..\include\ThermalMethod.hpp" />
+    <ClInclude Include="..\include\ThermalSolver.hpp" />
+    <ClInclude Include="..\include\UtilError.hpp" />
+    <ClInclude Include="..\include\UtilInput.hpp" />
+    <ClInclude Include="..\include\UtilMath.hpp" />
+    <ClInclude Include="..\include\UtilMemory.hpp" />
+    <ClInclude Include="..\include\UtilMesh.hpp" />
+    <ClInclude Include="..\include\UtilOutput.hpp" />
+    <ClInclude Include="..\include\UtilTiming.hpp" />
+    <ClInclude Include="..\include\Well.hpp" />
+    <ClInclude Include="..\include\WellOpt.hpp" />
+    <ClInclude Include="..\include\WellPeaceman.hpp" />
+    <ClInclude Include="..\include\WellPerf.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\main\Main.cpp" />
+    <ClCompile Include="..\src\AcceleratePEC.cpp" />
+    <ClCompile Include="..\src\AllWells.cpp" />
+    <ClCompile Include="..\src\BoundaryFlow.cpp" />
+    <ClCompile Include="..\src\Bulk.cpp" />
+    <ClCompile Include="..\src\BulkAccumuModule.cpp" />
+    <ClCompile Include="..\src\BulkConnFunc.cpp" />
+    <ClCompile Include="..\src\BulkInitializer.cpp" />
+    <ClCompile Include="..\src\CornerGrid.cpp" />
+    <ClCompile Include="..\src\Decoupling.cpp" />
+    <ClCompile Include="..\src\DenseMat.cpp" />
+    <ClCompile Include="..\src\Domain.cpp" />
+    <ClCompile Include="..\src\FaspSolver.cpp" />
+    <ClCompile Include="..\src\FaspxxSolver.cpp" />
+    <ClCompile Include="..\src\FlowUnit.cpp" />
+    <ClCompile Include="..\src\GmshGrid.cpp" />
+    <ClCompile Include="..\src\HeatConduct.cpp" />
+    <ClCompile Include="..\src\HeatLoss.cpp" />
+    <ClCompile Include="..\src\IsoThermalMethod.cpp" />
+    <ClCompile Include="..\src\IsoThermalSolver.cpp" />
+    <ClCompile Include="..\src\LinearSystem.cpp" />
+    <ClCompile Include="..\src\MixtureUnit.cpp" />
+    <ClCompile Include="..\src\OCP.cpp" />
+    <ClCompile Include="..\src\OCPControl.cpp" />
+    <ClCompile Include="..\src\OCPControlMethod.cpp" />
+    <ClCompile Include="..\src\OCPControlNR.cpp" />
+    <ClCompile Include="..\src\OCPControlSimTime.cpp" />
+    <ClCompile Include="..\src\OCPControlTime.cpp" />
+    <ClCompile Include="..\src\OCPConvection.cpp" />
+    <ClCompile Include="..\src\OCPDiffusion.cpp" />
+    <ClCompile Include="..\src\OCPEoS.cpp" />
+    <ClCompile Include="..\src\OCPFlow.cpp" />
+    <ClCompile Include="..\src\OCPFlowMethod.cpp" />
+    <ClCompile Include="..\src\OCPFuncPVT.cpp" />
+    <ClCompile Include="..\src\OCPFuncSAT.cpp" />
+    <ClCompile Include="..\src\OCPGroupProcess.cpp" />
+    <ClCompile Include="..\src\OCPMatrix.cpp" />
+    <ClCompile Include="..\src\OCPMiscible.cpp" />
+    <ClCompile Include="..\src\OCPMixture.cpp" />
+    <ClCompile Include="..\src\OCPMixtureMethodComp.cpp" />
+    <ClCompile Include="..\src\OCPMixtureMethodK.cpp" />
+    <ClCompile Include="..\src\OCPNRresidual.cpp" />
+    <ClCompile Include="..\src\OCPNRsuite.cpp" />
+    <ClCompile Include="..\src\OCPOutput.cpp" />
+    <ClCompile Include="..\src\OCPPhaseEquilibrium.cpp" />
+    <ClCompile Include="..\src\OCPRock.cpp" />
+    <ClCompile Include="..\src\OCPScalePcow.cpp" />
+    <ClCompile Include="..\src\OCPSurfaceTension.cpp" />
+    <ClCompile Include="..\src\OCPTable.cpp" />
+    <ClCompile Include="..\src\OCPTimeRecord.cpp" />
+    <ClCompile Include="..\src\OCPUnits.cpp" />
+    <ClCompile Include="..\src\Output4Vtk.cpp" />
+    <ClCompile Include="..\src\ParamControl.cpp" />
+    <ClCompile Include="..\src\ParamOutput.cpp" />
+    <ClCompile Include="..\src\ParamRead.cpp" />
+    <ClCompile Include="..\src\ParamReservoir.cpp" />
+    <ClCompile Include="..\src\ParamWell.cpp" />
+    <ClCompile Include="..\src\PardisoSolver.cpp" />
+    <ClCompile Include="..\src\Partition.cpp" />
+    <ClCompile Include="..\src\PetscSolver.cpp" />
+    <ClCompile Include="..\src\PreParamGridWell.cpp" />
+    <ClCompile Include="..\src\PreProcess.cpp" />
+    <ClCompile Include="..\src\Reservoir.cpp" />
+    <ClCompile Include="..\src\SamgSolver.cpp" />
+    <ClCompile Include="..\src\Solver.cpp" />
+    <ClCompile Include="..\src\ThermalMethod.cpp" />
+    <ClCompile Include="..\src\ThermalSolver.cpp" />
+    <ClCompile Include="..\src\UtilInput.cpp" />
+    <ClCompile Include="..\src\UtilMath.cpp" />
+    <ClCompile Include="..\src\UtilMemory.cpp" />
+    <ClCompile Include="..\src\UtilMesh.cpp" />
+    <ClCompile Include="..\src\UtilOutput.cpp" />
+    <ClCompile Include="..\src\UtilTiming.cpp" />
+    <ClCompile Include="..\src\Well.cpp" />
+    <ClCompile Include="..\src\WellOpt.cpp" />
+    <ClCompile Include="..\src\WellPeaceman.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

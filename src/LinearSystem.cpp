@@ -44,7 +44,7 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
     transform(lsMethod.begin(), lsMethod.end(), lsMethod.begin(), ::tolower);
 
     if (false) {}
-#ifdef WITH_PARDISO
+#ifdef OCP_USE_PARDISO
 #if    OCPFLOATTYPEWIDTH == 64
     else if (lsMethod == "pardiso") {
         if (mat.nb > 1)    LS.push_back(new VectorPardisoSolver(solveDir, lsFile, mat));
@@ -52,14 +52,14 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
         LStype.push_back(OCPLStype::pardiso);
     }
 #endif // OCPFLOATTYPEWIDTH == 64
-#endif // WITH_PARDISO
-#ifdef WITH_SAMG
+#endif // OCP_USE_PARDISO
+#ifdef OCP_USE_SAMG
     else if (lsMethod == "samg") {
         if (mat.nb > 1)    LS.push_back(new VectorSamgSolver(solveDir, lsFile, mat, model));
         else               LS.push_back(new ScalarSamgSolver(solveDir, lsFile, mat, model));
         LStype.push_back(OCPLStype::samg);
     }
-#endif // WITH_SAMG
+#endif // OCP_USE_SAMG
 #ifdef OCP_USE_FASP
     else if (lsMethod == "fasp") {
         // if (domain->global_numproc > 1)  OCP_ABORT("FASP is only available for single process now!");
@@ -68,13 +68,20 @@ void LinearSystem::SetupLinearSolver(const OCPModel& model,
         LStype.push_back(OCPLStype::fasp);
     }
 #endif // OCP_USE_FASP
-#ifdef WITH_PETSCSOLVER
+#if OCP_USE_FASPXX
+    else if (lsMethod == "faspxx") {
+        if (mat.nb > 1)    LS.push_back(new VectorFaspxxSolver(solveDir, lsFile, mat, domain));
+        else               LS.push_back(new ScalarFaspxxSolver(solveDir, lsFile, mat, domain));
+        LStype.push_back(OCPLStype::faspxx);
+}
+#endif // OCP_USE_FASPXX
+#ifdef OCP_USE_ASSOLVER
     else if (lsMethod == "petsc") {
         if (mat.nb > 1)    LS.push_back(new VectorPetscSolver(solveDir, lsFile, mat, domain));
         else               LS.push_back(new ScalarPetscSolver(solveDir, lsFile, mat, domain));
         LStype.push_back(OCPLStype::petsc);
     }
-#endif // WITH_PETSCSOLVER
+#endif // OCP_USE_ASSOLVER
     else {
         OCP_ABORT("Wrong Linear Solver Type " + lsMethod + " !");
     }

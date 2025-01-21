@@ -11,7 +11,7 @@
 
 
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
 
 
 #include "GmshGrid.hpp"

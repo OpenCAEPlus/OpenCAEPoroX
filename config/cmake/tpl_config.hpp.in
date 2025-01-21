@@ -12,11 +12,14 @@
 
 #cmakedefine OCP_USE_PETSC
 
-#cmakedefine OCP_USE_PETSCSOLVER
+#cmakedefine OCP_USE_ASSOLVER
 
 #cmakedefine OCP_USE_FASP
 
 #cmakedefine OCP_USE_FASP4BLKOIL
 
+#cmakedefine OCP_USE_GMSH
+
+#cmakedefine OCP_USE_PARDISO
 
 #endif // OCP_CONFIG_HEADER

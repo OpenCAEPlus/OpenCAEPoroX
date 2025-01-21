@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <mpi.h>
 
-#ifdef WITH_PBGL
+#ifdef OCP_USE_PBGL
 #include <boost/filesystem.hpp>
 #include <boost/graph/use_mpi.hpp>
 #include <boost/graph/distributed/adjacency_list.hpp>
@@ -37,7 +37,7 @@
 #include <boost/graph/erdos_renyi_generator.hpp>
 #endif
 
-#ifdef WITH_BGL
+#ifdef OCP_USE_BGL
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #endif

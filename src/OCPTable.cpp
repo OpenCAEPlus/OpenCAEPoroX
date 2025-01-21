@@ -23,11 +23,7 @@ void OCPTable::Setup(const std::vector<std::vector<OCP_DBL>>& src)
 }
 
 
-/// Careful: the memory outdata and slope have not be allocated before
-USI OCPTable::Eval_All(const USI&       j,
-                       const OCP_DBL&   val,
-                       vector<OCP_DBL>& outdata,
-                       vector<OCP_DBL>& slope) const
+USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata, vector<OCP_DBL>& slope) const
 {
     if (val >= data[j][bId]) {
         for (USI i = bId + 1; i < nRow; i++) {
@@ -35,45 +31,89 @@ USI OCPTable::Eval_All(const USI&       j,
                 bId = i - 1;
                 for (USI k = 0; k < nCol; k++) {
                     slope[k] = (data[k][bId + 1] - data[k][bId]) /
-                               (data[j][bId + 1] - data[j][bId]);
+                        (data[j][bId + 1] - data[j][bId]);
                     outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
                 }
                 return bId;
             }
         }
-        bId = nRow - 1;
-    } else {
+        for (USI k = 0; k < nCol; k++) {
+            slope[k] = 0;
+            outdata[k] = data[k].back();
+        }
+    }
+    else {
         for (OCP_INT i = bId - 1; i >= 0; i--) {
             if (val >= data[j][i]) {
                 bId = i;
                 for (USI k = 0; k < nCol; k++) {
                     slope[k] = (data[k][bId + 1] - data[k][bId]) /
-                               (data[j][bId + 1] - data[j][bId]);
+                        (data[j][bId + 1] - data[j][bId]);
                     outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
                 }
                 return bId;
             }
         }
-        bId = 0;
-    }
-
-    if (data[0].size() == 1) {
         for (USI k = 0; k < nCol; k++) {
-            slope[k]   = 0;
-            outdata[k] = data[k][bId];
+            slope[k] = 0;
+            outdata[k] = data[k].front();
         }
     }
-    else {
-        const USI exId = bId == 0 ? bId + 1 : bId - 1;
-        for (USI k = 0; k < nCol; k++) {
-            slope[k]   = (data[k][exId] - data[k][bId]) / (data[j][exId] - data[j][bId]);
-            outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
-        }
-    }
-
-
     return bId;
 }
+
+
+/// Careful: the memory outdata and slope have not be allocated before
+// USI OCPTable::Eval_All(const USI&       j,
+//                        const OCP_DBL&   val,
+//                        vector<OCP_DBL>& outdata,
+//                        vector<OCP_DBL>& slope) const
+// {
+//     if (val >= data[j][bId]) {
+//         for (USI i = bId + 1; i < nRow; i++) {
+//             if (val < data[j][i]) {
+//                 bId = i - 1;
+//                 for (USI k = 0; k < nCol; k++) {
+//                     slope[k] = (data[k][bId + 1] - data[k][bId]) /
+//                                (data[j][bId + 1] - data[j][bId]);
+//                     outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
+//                 }
+//                 return bId;
+//             }
+//         }
+//         bId = nRow - 1;
+//     } else {
+//         for (OCP_INT i = bId - 1; i >= 0; i--) {
+//             if (val >= data[j][i]) {
+//                 bId = i;
+//                 for (USI k = 0; k < nCol; k++) {
+//                     slope[k] = (data[k][bId + 1] - data[k][bId]) /
+//                                (data[j][bId + 1] - data[j][bId]);
+//                     outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
+//                 }
+//                 return bId;
+//             }
+//         }
+//         bId = 0;
+//     }
+
+//     if (data[0].size() == 1) {
+//         for (USI k = 0; k < nCol; k++) {
+//             slope[k]   = 0;
+//             outdata[k] = data[k][bId];
+//         }
+//     }
+//     else {
+//         const USI exId = bId == 0 ? bId + 1 : bId - 1;
+//         for (USI k = 0; k < nCol; k++) {
+//             slope[k]   = (data[k][exId] - data[k][bId]) / (data[j][exId] - data[j][bId]);
+//             outdata[k] = data[k][bId] + slope[k] * (val - data[j][bId]);
+//         }
+//     }
+
+
+//     return bId;
+// }
 
 USI OCPTable::Eval_All(const USI& j, const OCP_DBL& val, vector<OCP_DBL>& outdata) const
 {

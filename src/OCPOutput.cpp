@@ -11,8 +11,6 @@
 
 #include "OCPOutput.hpp"
 
-#include <cstring>
-
 
 OCP_INT  file_myrank;
 MPI_Comm file_myComm;
@@ -1170,6 +1168,7 @@ void CriticalInfo::PostProcess(const string& dir, const string& filename, const 
 
 void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
 {
+    DEPTH     = param.DEPTH;
     PRE       = param.PRE;
     PHASEP    = param.PHASEP;
     COMPM     = param.COMPM;
@@ -1232,6 +1231,7 @@ void OutGridVarSet::Setup(const OutGridParam& param, const Bulk& bk)
     }
 
     bgpnum = 0;
+    if (DEPTH)    bgpnum++;
     if (PRE)      bgpnum++;
     if (COMPM)    bgpnum += nc;
     if (PHASEP)   bgpnum += np;
@@ -1625,6 +1625,12 @@ void Out4VTK::PrintVTK(const Reservoir& rs, const OCPControl& ctrl) const
         return;
     }
 
+    // output depth 
+    if (bgp.DEPTH) {
+        for (OCP_USI n = 0; n < nb; n++)
+            tmpV[n] = bvs.depth[n];
+        outF.write((const OCP_CHAR*)&tmpV[0], nb * sizeof(tmpV[0]));
+    }
     // output physical variables
     if (bgp.PRE) {
         for (OCP_USI n = 0; n < nb; n++)
@@ -1794,6 +1800,13 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
 			inV.read((OCP_CHAR*)(&tmpVal[0]), sizeof(tmpVal[0]) * tmpVal.size());
 			const OCP_DBL* tmpVal_ptr = &tmpVal[0];
 
+            if (bgp.DEPTH) {
+				for (OCP_USI n = 0; n < numGridLoc; n++) {
+					workPtr[global_index[n]] = tmpVal_ptr[n];
+				}
+				workPtr += numGrid;
+				tmpVal_ptr += numGridLoc;
+			}
 			if (bgp.PRE) {
 				for (OCP_USI n = 0; n < numGridLoc; n++) {
 					workPtr[global_index[n]] = tmpVal_ptr[n];
@@ -1951,6 +1964,10 @@ void Out4VTK::PostProcessP(const string& dir, const string& filename, const OCP_
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PARTITION", VTK_UNSIGNED_INT, mypart, 0, numGrid, 0);
 
             OCP_ULL bId = 0;
+            if (bgp.DEPTH) {
+                out4vtk.OutputCELL_DATA_SCALARS(dest, "DEPTH", VTK_FLOAT, gridVal[t], bId, numGrid, 3);
+                bId += numGrid;
+            }
             if (bgp.PRE) {
                 out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, gridVal[t], bId, numGrid, 3);
                 bId += numGrid;
@@ -2070,6 +2087,10 @@ void Out4VTK::PostProcessS(const string& dir, const string& filename) const
 
         dest << "\n" << VTK_CELL_DATA << " " << numGrid;
         OCP_ULL bId = 0;
+        if (bgp.DEPTH) {
+            out4vtk.OutputCELL_DATA_SCALARS(dest, "DEPTH", VTK_FLOAT, tmpVal, bId, numGrid, 3);
+            bId += numGrid;
+        }
         if (bgp.PRE) {
             out4vtk.OutputCELL_DATA_SCALARS(dest, "PRESSURE", VTK_FLOAT, tmpVal, bId, numGrid, 3);
             bId += numGrid;

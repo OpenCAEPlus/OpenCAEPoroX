@@ -831,9 +831,48 @@ void BulkInitializer::InitHydroEquil(BulkVarSet& bvs, const PVTModule& PVTm, con
 			if (bvs.o >= 0) {
 				bvs.S[n * bvs.np + bvs.o] = 1 - Sg - swco;
 			}
-			continue;
 		}
 
+		// for JD
+		if (fabs(SAT->CalPcowBySw(0.0 - TINY)) < TINY &&
+			fabs(SAT->CalPcowBySw(1.0 + TINY) < TINY)) 
+		{
+			bvs.P[n] = max(data[1], data[3]);
+			if (bvs.o >= 0) {
+				bvs.Pj[n * bvs.np + bvs.o] = bvs.P[n];
+			}
+			if (bvs.g >= 0) {
+				bvs.Pj[n * bvs.np + bvs.g] = bvs.P[n];
+			}
+			if (bvs.w >= 0) {
+				bvs.Pj[n * bvs.np + bvs.w] = bvs.P[n];
+			}
+
+			const OCP_DBL Swmin = SAT->GetSwco();
+			const OCP_DBL Swmax = SAT->CalSwByPcow(-1.0);
+
+			if (bvs.depth[n] >= DOWC)
+			{
+				bvs.S[n * bvs.np + bvs.w] = Swmax;
+				if (bvs.g >= 0) {
+					bvs.S[n * bvs.np + bvs.g] = 0;
+				}
+				if (bvs.o >= 0) {
+					bvs.S[n * bvs.np + bvs.o] = 1 - Swmax;
+				}
+			}
+			else {
+				bvs.S[n * bvs.np + bvs.w] = Swmin;
+				if (bvs.g >= 0) {
+					bvs.S[n * bvs.np + bvs.g] = 0;
+				}
+				if (bvs.o >= 0) {
+					bvs.S[n * bvs.np + bvs.o] = 1 - Swmin;
+				}
+			}
+			continue;
+		}
+		
 		Sw = 0;
 		Sg = 0;
 		const USI ncut    = 10;

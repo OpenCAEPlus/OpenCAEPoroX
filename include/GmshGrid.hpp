@@ -9,7 +9,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
 
 #ifndef __GMSHGRID_HEADER__
 #define __GMSHGRID_HEADER__

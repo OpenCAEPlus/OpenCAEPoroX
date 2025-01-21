@@ -242,6 +242,7 @@ protected:
     USI      np;                  ///< num of phases
      
 protected:
+    OCP_BOOL DEPTH{OCP_FALSE};    ///< Depth
     OCP_BOOL PRE{OCP_FALSE};      ///< Pressure of grids.
     OCP_BOOL PHASEP{OCP_FALSE};   ///< Pressure of phases.
     OCP_BOOL COMPM{OCP_FALSE};    ///< Moles of components of grids.

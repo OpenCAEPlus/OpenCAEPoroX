@@ -72,7 +72,8 @@ public:
     auto DPmax() const { return wp->dPmax; }
     /// If NR iterations converge
     OCPNRStateC CheckConverge(const OCPNRsuite& NRs, const initializer_list<string>& il, const OCP_DBL& tmpfac) const;
-
+    void SetMaxIter(const USI& iter) { wp->maxIter = iter; }
+    auto GetMaxIter() const { return wp->maxIter; }
 protected:
     MPI_Comm         myComm{ MPI_COMM_NULL };
     OCP_INT          numproc, myrank;
@@ -81,7 +82,7 @@ protected:
     /// control param set
     vector<ControlNRParam> ps;
     /// current param
-    const ControlNRParam* wp;
+    ControlNRParam* wp;
 };
 
 #endif /* end if __OCPControlNR_HEADER__ */

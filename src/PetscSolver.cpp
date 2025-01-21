@@ -13,7 +13,7 @@
 
 
 
-#ifdef WITH_PETSCSOLVER
+#ifdef OCP_USE_ASSOLVER
 
 #include "PetscSolver.hpp"
 
@@ -103,7 +103,7 @@ OCP_INT VectorPetscSolver::Solve()
     return FIM_solver_p(myComm, nb, allBegin.data(), allEnd.data(), iA.data(), jA.data(), A.data(), b, x);
 }
 
-#endif // WITH_PETSCSOLVER
+#endif // OCP_USE_ASSOLVER
 
 
 

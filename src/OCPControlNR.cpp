@@ -44,7 +44,7 @@ OCPNRStateC ControlNR::CheckConverge(const OCPNRsuite& NRs, const initializer_li
                 conflag_loc = OCPNRStateC::converge;
             }
         }
-        else if (s == "d") {
+        else if (s == "d") {         
             if (fabs(NRs.DPBmaxNRc()) <= wp->dPmin && fabs(NRs.DSmaxNRc()) <= wp->dSmin) {
                 conflag_loc = OCPNRStateC::converge;
             }

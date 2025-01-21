@@ -102,15 +102,15 @@ const OCPNRsuite& IsothermalSolver::GoOneStep(Reservoir& rs, OCPControl& ctrl)
 /// Prepare solution methods, including IMPEC and FIM.
 void IsothermalSolver::Prepare(Reservoir& rs, OCPControl& ctrl)
 {
-    //if (ctrl.time.GetCurrentTime() > 10 - 1E-8) {
-    //    curMethod = preMethod;
-    //}
-    //else {
-    //    curMethod = mainMethod;
-    //}
+    if (ctrl.time.GetCurrentTime() > 10 - 1E-8 || OCP_TRUE) {
+        curMethod = preMethod;
+    }
+    else {
+        curMethod = mainMethod;
+    }
 
+    
 
-    curMethod = preMethod;
 	switch (curMethod) {
 	case OCPNLMethod::IMPEC:
 		impec.Prepare(rs, ctrl);
@@ -190,8 +190,8 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
 {
     OCP_BOOL flag;
 
-    GetWallTime timer;
-    timer.Start();
+    //GetWallTime timer;
+    //timer.Start();
 
     switch (curMethod) {
         case OCPNLMethod::IMPEC:
@@ -210,7 +210,7 @@ OCP_BOOL IsothermalSolver::UpdateProperty(Reservoir& rs, OCPControl& ctrl)
             OCP_ABORT("Wrong method type!");
     }
 
-    OCPTIME_UPDATE_GRID += timer.Stop();
+    // OCPTIME_UPDATE_GRID += timer.Stop();
 
     return flag;
 }

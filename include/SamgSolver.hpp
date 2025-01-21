@@ -12,7 +12,7 @@
  */
 
 
-#ifdef WITH_SAMG
+#ifdef OCP_USE_SAMG
 
 #ifndef __SAMGSOLVER_HEADER__
 #define __SAMGSOLVER_HEADER__
@@ -124,7 +124,7 @@ public:
 
 #endif 
 
-#endif // WITH_SAMG
+#endif // OCP_USE_SAMG
 
 
  /*----------------------------------------------------------------------------*/

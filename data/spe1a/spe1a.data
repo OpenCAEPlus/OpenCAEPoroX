@@ -223,7 +223,7 @@ TUNING
 
 
 METHOD
-FIM  pardiso
+FIM  bsr.fasp
 / 
 
 

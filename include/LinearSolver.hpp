@@ -28,6 +28,7 @@ enum class OCPLStype : USI
 {
     none,
     fasp,
+    faspxx,
     pardiso,
     petsc,
     samg

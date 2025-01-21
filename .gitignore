@@ -14,7 +14,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -37,9 +36,7 @@ x86/
 
 # Visual Studio
 .vs/
-*.vcxproj
 *.filters
-*.sln
 *.user
 *.zip
 /test

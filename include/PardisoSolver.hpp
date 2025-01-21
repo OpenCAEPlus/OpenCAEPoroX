@@ -12,7 +12,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifdef WITH_PARDISO
+#ifdef OCP_USE_PARDISO
 
 
 #ifndef __PARDISOSOLVER_HEADER__
@@ -120,7 +120,7 @@ protected:
 
 #endif // OCPFLOATTYPEWIDTH == 64
 #endif // __PARDISOSOLVER_HEADER__ 
-#endif // WITH_PARDISO
+#endif // OCP_USE_PARDISO
 
  /*----------------------------------------------------------------------------*/
  /*  Brief Change History of This File                                         */

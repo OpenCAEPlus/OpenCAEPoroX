@@ -32,7 +32,7 @@
 using namespace std;
 
 
-#define OCPGRID_DXDYDZ  0
+#define OCPGRID_DXDYDZ 0 
 
 
 #if OCPGRID_DXDYDZ 
@@ -261,7 +261,7 @@ protected:
     /// Try to skip this keyword
     void InputVTKSCHED(ifstream& ifs);
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     /// Input GMSH
     void InputGMSH(ifstream& ifs);
     /// Input Physical Property
@@ -326,7 +326,7 @@ protected:
     vector<OCP_DBL> zcorn; 
 
     // General grid
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     /// GMSH Grid
     GMSHGrid        gmshGrid;
 #endif
@@ -403,7 +403,7 @@ protected:
     /// Output grid points for corner-point grid.
     void OutputPointsCornerGrid(const OCP_COORD& mycord);
 
-#ifdef WITH_GMSH
+#ifdef OCP_USE_GMSH
     /// Setup gmsh grid.
     void SetupGmshGrid();
     /// Setup depth, v for a gmsh grid

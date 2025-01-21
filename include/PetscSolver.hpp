@@ -12,7 +12,7 @@
  */
 
 
-#ifdef WITH_PETSCSOLVER
+#ifdef OCP_USE_ASSOLVER
 
 #ifndef __PETSCSOLVER_HEADER__
 #define __PETSCSOLVER_HEADER__
@@ -87,7 +87,7 @@ public:
 
 #endif 
 
-#endif // WITH_PETSCSOLVER
+#endif // OCP_USE_ASSOLVER
 
 
 /*----------------------------------------------------------------------------*/

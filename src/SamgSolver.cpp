@@ -11,7 +11,7 @@
  *-----------------------------------------------------------------------------------
  */
 
-#ifdef WITH_SAMG
+#ifdef OCP_USE_SAMG
 
 #include "SamgSolver.hpp"
 
@@ -242,7 +242,7 @@ void VectorSamgSolver::AssembleMat(OCPMatrix& mat, const Domain* domain)
     nna = iA[nnu] - 1;
 }
 
-#endif // WITH_SAMG
+#endif // OCP_USE_SAMG
 
 
  /*----------------------------------------------------------------------------*/

@@ -141,10 +141,11 @@ protected:
     void ResetToLastTimeStep(Reservoir& rs, OCPControl& ctrl);
     /// Update values of last step for FIM.
     void UpdateLastTimeStep(Reservoir& rs) const;
-
-private:
     /// Perform Flash with Sj and calculate values needed for FIM
     void InitFlash(Bulk& bk);
+
+private:
+
     /// Perform Flash with Ni and calculate values needed for FIM
     void CalFlash(Bulk& bk);
     /// Assemble linear system for bulks
@@ -183,14 +184,12 @@ protected:
     void SetFIMBulk(Reservoir& rs);
     // Set K-neighbors
     void SetKNeighbor(const vector<vector<OCP_USI>>& neighbor, const OCP_USI& p, BulkTypeAIM& tar, OCP_INT k);
-    /// Perform flash calculation with Ni for Explicit bulk -- Update partial properties
-    void CalFlashEp(Bulk& bk);
+    /// Cal Vf and Nt
+    void CalNtVf(Bulk &bk);
     /// Perform flash calculation with Ni for Explicit bulk -- Update all properties
-    void CalFlashEa(Bulk& bk);
+    void CalFlashE(Bulk &bk);
     /// Perform flash calculation with Ni for Implicit bulk
     void CalFlashI(Bulk& bk);
-    /// Pass flash value needed for Explicit bulk -- Update partial properties
-    void PassFlashValueEp(Bulk& bk, const OCP_USI& n);
     /// Calculate relative permeability and capillary pressure for Explicit bulk
     void CalKrPcE(Bulk& bk);
     /// Calculate relative permeability and capillary pressure for Implicit bulk
