@@ -67,7 +67,7 @@ Key features of the simulator include:
 - If using the DDM strategy with adaptive coupling between subdomains, install BGL or METIS for adaptive inter-process grouping.
 
 
-# Quickstart for Linux Systems {#Quickstart-linux}
+# Quickstart for Linux Systems <a name="Quickstart-linux"></a>
 
 Welcome to the OpenCAEPoro installation guide. Here are the instructions on how to build OpenCAEPoro and run a benchmark case SPE1 provided by the Society of Petroleum Engineers, on Linux systems.
 
