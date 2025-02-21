@@ -36,6 +36,7 @@ set(METIS_DIR "" CACHE PATH "Path to the METIS library.")
 set(PARMETIS_DIR "" CACHE PATH "Path to the ParMETIS library.")
 
 set(PETSC_DIR "" CACHE PATH "Path to the PETSc library.")
+set(PETSC_ARCH "" CACHE STRING "Install arch to the PETSc library.")
 
 set(ASSOLVER_DIR "" CACHE PATH "Path to the as-solver library.")
 
