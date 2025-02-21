@@ -13,7 +13,7 @@ mark_as_advanced(PETSC_INCLUDE_DIRS)
 
 # Check for PETSC library
 find_library(PETSC_LIBRARIES petsc
-    HINTS ${PETSC_DIR}/lib $ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/lib ${PROJECT_SOURCE_DIR}/PETSC/lib
+    HINTS ${PETSC_DIR}/lib ${PETSC_DIR}/${PETSC_ARCH}/lib ${PROJECT_SOURCE_DIR}/PETSC/lib
     DOC "The PETSC library")
 mark_as_advanced(PETSC_LIBRARIES)
 

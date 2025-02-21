@@ -1169,7 +1169,7 @@ void OCPMixtureMethodK_GW02::Flash(OCPMixtureVarSet& vs)
 
 	vs.vfi[g]    = vs.vji[g][g];
 	vs.vfi[w]    = vs.vji[w][w];
-	vs.vfP       = vs.vjP[g] + vs.vjP[g];
+	vs.vfP       = vs.vjP[g] + vs.vjP[w];
 }
 
 
